@@ -81,7 +81,7 @@ angular.module('core-directives')
             //var p = $http.rpc('ws', 'list_objects', {workspaces: workspaces, includeMetadata: 1});
 
             scope.loading = true;
-            $http.get('../data/app/modelList.json', {cache:true})
+            $http.get('data/app/modelList.json', {cache:true})
                    .then(function(data) {
                     scope.loading = false;
 

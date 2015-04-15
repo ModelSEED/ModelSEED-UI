@@ -23,6 +23,7 @@
     "angular-smoothscroll": "~1.1.1",
     "datatables": "~1.10.5",
     "datatables-colreorder": "~1.1.2",
-    "angular-material": "~0.8.3"
+    "angular-material": "~0.8.3",
+    "angular-scroll": "~0.6.5"
   }
 }

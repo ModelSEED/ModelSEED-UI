@@ -1,4 +1,23 @@
+.login {
+    margin: 20px 0 0 0;
+}
 
+.login md-input-container.md-default-theme .md-input  {
+    color: #fff;
+    border-color: #fff;
+}
+
+.login md-input-container.md-default-theme label {
+    color: #fff;
+}
+
+.login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
+    color: #aaa;
+}
+
+.login .md-button {
+    text-transform: none;
+}
 
 .label-beta {
     font-size: 10px;
@@ -8,6 +27,7 @@
 .navbar-header .label-beta {
     margin-top: 10px;
 }
+
 
 :focus {
     outline: none !important;

@@ -1,5 +1,43 @@
 
 angular.module('ms-controllers', [])
+.controller('Login', ['$scope', '$state', 'authService', '$window',
+    function($scope, $state, auth, $window) {
+
+    $scope.loginUser = function(user, pass) {
+        $scope.loading = true;
+        auth.login(user, pass)
+            .success(function(data) {
+
+                // see https://github.com/angular-ui/ui-router/issues/582
+                $state.transitionTo('app.publicModels', {}, {reload: true, inherit: true, notify: false})
+                      .then(function() {
+                        setTimeout(function(){
+                            $window.location.reload();
+                        }, 0);
+                      });
+
+            }).error(function(e, status){
+                console.log('error', e)
+                $scope.loading = false;
+                if (status == 401) {
+                    $scope.inValid = true;
+                } else {
+                    $scope.failMsg = "Could not reach authentication service: "+e.error_msg;
+                }
+
+            })
+    }
+
+    $scope.logout = function() {
+        auth.logout();
+        $state.transitionTo('home', {}, { reload: true, inherit: true, notify: false })
+              .then(function() {
+                  $window.location.reload();
+              });
+    }
+}])
+
+
 .controller('Reconstruct',
 ['$scope', 'ModelViewer', 'Patric', '$q', '$timeout',
 function($scope, MV, Patric, $q, $timeout) {
@@ -75,6 +113,15 @@ function($scope, FBA) {
 }])
 
 
+.controller('ModelEditor',
+['$scope', 'FBA',
+function($scope, FBA) {
+
+
+
+
+}])
+
 
 .directive('ngTable', function() {
     return {
@@ -86,7 +133,7 @@ function($scope, FBA) {
             loading: '=tableLoading',
             placeholder: '@tablePlaceholder',
         },
-        templateUrl: 'views/biochem/table.html',
+        templateUrl: 'app/views/biochem/table.html',
         link: function(scope, elem, attrs) {
 
 

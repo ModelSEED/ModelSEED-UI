@@ -1,23 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html ng-app="ModelSEED" lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="The Core Model Viewer is a resource for the exploration, comparison, and analysis of central carbon core metabolic models.">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="description" content="The ModelSEED is a resource for the construction, exploration, comparison, and analysis of metabolic models.">
     <link rel="shortcut icon" href="/img/mv.ico?v=1.0">
-    <meta name="author" content="nconrad@anl.gov">
+    <meta name="author" content="nconrad">
 
     <title>ModelSEED</title>
 
+    <link rel="stylesheet" href="components/angular-material/angular-material.css">
     <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css">
-    <link href="splash/css/splash.css" rel="stylesheet">
+    <link rel="stylesheet" href="components/font-awesome/css/font-awesome.min.css">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
-    <link rel="stylesheet" type="text/css" href="components/font-awesome/css/font-awesome.min.css">
-    <link href="http://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <!-- build:css build/style.css -->
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/core.css">
+        <link rel="stylesheet" href="css/viz.css">
+        <link rel="stylesheet" href="css/tabs.css">
+        <link rel="stylesheet" href="lib/dd-filter/dd-filter.css">
+    <!-- endbuild -->
 
+    <!-- build:js build/site.js -->
+        <script src="components/jquery/dist/jquery.min.js"></script>
+        <script src="components/jquery-ui/jquery-ui.min.js"></script><!-- to be removed -->
+        <script src="components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="components/d3/d3.min.js"></script>
+
+
+        <script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
+        <script src="lib/datatables-bootstrap/dataTables.bootstrap.js"></script>
+
+        <script src="lib/ui-common/src/kbwidget.js"></script>
+        <script src="lib/ui-common/src/widgets/kbaseAuthenticatedWidget.js"></script>
+        <script src="lib/ui-common/src/widgets/maps/kbasePathway.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBModeling.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/kbaseTabTable.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/kbaseTabs.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBaseFBA.FBA.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBaseFBA.FBAModel.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/kbaseETCDiagram.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBaseBiochem.Media.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBasePhenotypes.PhenotypeSet.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBasePhenotypes.PhenotypeSimulationSet.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBaseSearch.GenomeSet.js"></script>
+        <script src="lib/ui-common/src/widgets/modeling/KBaseFBA.FBAModelSet.js"></script>
+        <script src="app/viz/modelSeedVizConfig.js"></script>
+
+        <script src="components/angular/angular.js"></script>
+        <script src="components/ui-router/release/angular-ui-router.js"></script>
+        <script src="components/angular-aria/angular-aria.js"></script>
+        <script src="components/angular-animate/angular-animate.js"></script>
+        <script src="components/angular-material/angular-material.js"></script>
+        <script src="components/angular-scroll/angular-scroll.js"></script>
+
+        <script src="config.js"></script>
+        <script src="app/app.js"></script>
+
+        <script src="app/services/auth.js"></script>
+        <script src="lib/kbase-rpc/kbase-rpc.js"></script>
+        <script src="lib/dd-filter/dd-filter.js"></script>
+        <script src="app/controllers/controllers.js"></script>
+        <script src="app/controllers/ms-controllers.js"></script>
+        <script src="app/controllers/splash.js"></script>
+        <script src="app/services/fba.js"></script>
+        <script src="app/services/mv.js"></script>
+        <script src="app/services/patric.js"></script>
+        <script src="app/directives.js"></script>
+    <!-- endbuild -->
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -26,299 +80,14 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
 </head>
 
-<body id="page-top" class="index">
+<body>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header page-scroll">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#page-top">ModelSEED</a>
-                <span class="label label-danger label-beta">beta</span>
-            </div>
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="hidden">
-                        <a href="#page-top"></a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#about">About</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#portfolio">Highlights</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#more">More Info</a>
-                    </li>
-                    <!--<li class="page-scroll">
-                        <a href="#contact">Contact</a>
-                    </li>-->
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container-fluid -->
-    </nav>
-
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <!--<img class="img-responsive" src="img/profile.png" alt="">-->
-                    <div class="intro-text">
-                        <h1>The ModelSEED <span class="label label-danger label-beta">beta</span>
-                        </h1>
-                        <!--<hr style="width: 30%; border: 2px solid;">-->
-                        <span class="skills">Explore, Compare, and Analyze Central Carbon Core Metabolic Models</span>
-                    </div>
-                    <br>
-                    <div class="col-lg-8">
-                        <a href="app/#/models/" class="btn btn-outline">
-                          Get Started
-                        </a>
-                        <!--
-                        <a href="app/#/models/" class="btn btn-outline btn-tour">
-                            Take a Tour
-                        </a>
-                        -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-
-    <section id="about">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>About</h2><br>
-                    <!--<hr class="star-primary">-->
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <p>The ModelSEED is a resource for the exploration, comparison, and analysis of central carbon core metabolic models.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="dark" id="portfolio">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>Highlights</h2>
-                    <br>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Comprehensive Data Views</b></p>
-                    <a href="app/#/models/janakakbase:CM-ATP-eq/core_83333.1" class="portfolio-link" data-toggle="modal">
-                        <div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-3x fa-arrow-circle-o-right"></i>
-                            </div>
-                        </div>
-                        <img src="splash/img/examples/table.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Pathways</b></p>
-                    <a class="portfolio-nolink">
-                        <!--<div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
-                        </div>-->
-                        <img src="splash/img/examples/pathway.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Heatmaps</b></p>
-                    <a class="portfolio-nolink">
-                        <!--<div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
-                        </div>-->
-                        <img src="splash/img/examples/heatmap.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <!--
-                <div class="col-sm-4 portfolio-item">
-                    <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
-                        <div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
-                        </div>
-                        <img src="splash/img/examples/etc.png" class="img-responsive" alt="">
-                    </a>
-                </div>-->
-
-            </div>
-        </div>
-    </section>
-
-
-    <section class="light"  id="more">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>More Info</h2>
-                    <br>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h4>Utilized Data Sources</h4>
-                    Core Models were designed based on the information derived from published literature. Genomes were annotated using RAST annotation pipeline and core models were generated using <a href="http://kbase.us" target="_blank">KBase</a> resources.  We've done our best to cite contributing data sources here. If you believe your data has been utilized and not properly cited, please email us <a href="mailto:janaked@anl.gov">here</a>.<br>
-                    <br>
-
-
-                    <h4>Sources Funding Development</h4>
-                    This material was based upon work supported by the U.S. Department of Energy, Office of Biological and Environmental Research; under contract DE-AC02-06CH11357 and by the National Science Foundation grant number MCB-1153357<br>
-                    <br>
-
-
-                    <h4>Citing the ModelSEED</h4>
-                    Henry, C.S., DeJongh, M., Best, A.B., Frybarger, P.M., Linsay, B., and R.L. Stevens. High-throughput Generation and Optimization of Genome-scale Metabolic Models. Nature Biotechnology, (2010).<br>
-                    [New citation to follow]<br>
-                    <br>
-
-                    <h4>Development Team</h4>
-                    <table class="table">
-                        <tr>
-                            <th>Contributor</th>
-                            <th>Institution</th>
-                            <th>Role</th>
-                        </tr>
-                        <tr>
-                            <td>Neal Conrad</td>
-                            <td>Argonne National Laboratory</td>
-                            <td>UI Engineer</td>
-                        </tr>
-                        <tr>
-                            <td>Janaka Edirisinghe</td>
-                            <td>Argonne National Laboratory</td>
-                            <td>Research</td>
-                        </tr>
-                        <tr>
-                            <td>Chris Henry</td>
-                            <td>Argonne National Laboratory</td>
-                            <td>Principal Investigator</td>
-                        </tr>
-                    </table>
-
-                    <h4>Questions, comments, and bug reports?</h4>
-                    Please direct questions, comments, and bug reports on our site to our development team via <a href="mailto:nconrad@anl.gov">email</a>
-                    or on <a href="http://www.github.com/modelseed/ModelSEEDApp" target="_blank">github</a>.
-
-                </div>
-            </div>
-
-        </div> <!-- end container -->
-    </section>
-
-    <!-- Footer -->
-    <footer class="text-center">
-        <div class="footer-above">
-            <div class="container">
-                <div class="row">
-                    <div class="footer-col col-md-4">
-                        <h3>Join the Mailing List!</h3>
-                        <div class="row">
-                            <div class="col-lg-12">
-                            <form method="POST" action="splash/mail/newsletter.php">
-                                <div class="input-group">
-                                    <input class="form-control" type="text" name="email" size="30" placeholder="you@example.com">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" type="submit" value="Submit" name="submit">
-                                            Subscribe
-                                        </button>
-                                    </span>
-                                </div>
-                            </form>
-                            </div>
-                        </div>
-                        <br>
-                        <div class="sub-text">
-                            Stay up to date with the latest on ModelSEED 2.0.
-                            Unsubscribe at any time.
-                        </div>
-                    </div>
-                    <div class="footer-col col-md-4">
-                        <h3>On Github!</h3>
-                        <ul class="list-inline">
-                            <li>
-                                <a href="http://www.github.com/modelseed/ModelSEEDApp" target="_blank" class="btn-social">
-                                    <i class="fa fa-github"></i>
-                                </a>
-                            </li>
-                            <!--
-                            <li>
-                                <a href="kbase.us" class="btn-social btn-outline" style="font-size: 6pt;">
-                                    <i class="fa"></i>
-                                    KBase
-                                </a>
-                            </li>
-                            <li>
-                                <a href="http://patricbrc.org" class="btn-social btn-outline" style="font-size: 8pt">
-                                    <i class="fa"></i>
-                                    Patric
-                                </a>
-                            </li>-->
-                        </ul>
-                    </div>
-                    <div class="footer-col col-md-4">
-                        <h3>About ModelSEED</h3>
-                        <div class="sub-text">
-                        ModelSEED is free, open source application created by <a href="#about">The ModelSEED Team</a>.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer-below">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        Copyright &copy; Core Model Viewer
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
-    <div class="scroll-top page-scroll visible-xs visble-sm">
-        <a class="btn btn-primary" href="#page-top">
-            <i class="fa fa-chevron-up"></i>
-        </a>
+    <div id="wrapper" >
+        <div ui-view></div>
     </div>
 
-    <script src="components/jquery/dist/jquery.min.js"></script>
-    <script src="components/bootstrap/dist/js/bootstrap.min.js"></script>
-
-    <script src="splash/js/jquery.easing.min.js"></script>
-    <script src="splash/js/classie.js"></script>
-    <script src="splash/js/cbpAnimatedHeader.js"></script>
-    <script src="splash/js/jqBootstrapValidation.js"></script>
-    <script src="splash/js/freelancer.js"></script>
 
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

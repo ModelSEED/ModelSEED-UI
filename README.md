@@ -15,6 +15,15 @@ Notes:
 - `bower install` installs some third-party (front-end) dependencies
 
 
+Now point your favorite webserver at `modelseed-ui` and you are ready to go!
+
+From `modelseed-ui`:
+
+```
+http-server -o
+```
+
+
 ### Build
 
 This step creates an `index.html` with compiled/minimized CSS/JS files (located in `/app/build/`).
@@ -30,16 +39,6 @@ Notes:
 - `npm install` installs grunt dependencies.
 - `grunt build` does the build work
 
-
-### Serve it
-
-Now point your favorite webserver at `modelseed-ui`.
-
-From `modelseed-ui`:
-
-```
-http-server -o
-```
 
 ## Contributing
 

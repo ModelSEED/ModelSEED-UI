@@ -1,0 +1,361 @@
+
+<link href="splash/css/splash.css" rel="stylesheet">
+
+<script>
+    // Closes the Responsive Menu on Menu Item Click
+    $('.navbar-collapse ul li a').unbind('click');
+    $('.navbar-collapse ul li a').click(function() {
+        $('.navbar-toggle:visible').click();
+    })
+
+    $(function() {
+        var docElem = document.documentElement,
+            didScroll = false,
+            changeHeaderOn = 100;
+
+        function init() {
+            window.addEventListener( 'scroll', function( event ) {
+                if( !didScroll ) {
+                    didScroll = true;
+                    setTimeout( scrollPage, 250 );
+                }
+            }, false );
+        }
+
+        function scrollPage() {
+            var sy = scrollY();
+            if ( sy >= changeHeaderOn )
+                $('.navbar-fixed-top').addClass('navbar-shrink' );
+            else
+                $('.navbar-fixed-top').removeClass('navbar-shrink' );
+
+            didScroll = false;
+        }
+
+        function scrollY() {
+            return window.pageYOffset || docElem.scrollTop;
+        }
+
+        init();
+    });
+</script>
+
+
+<div id="page-top" class="index">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#page-top" du-smooth-scroll>ModelSEED</a>
+                <span class="label label-danger label-beta">beta</span>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="page-scroll" du-scrollspy="about">
+                        <a href="#about" du-smooth-scroll>About</a>
+                    </li>
+                    <li class="page-scroll" du-scrollspy="portfolio">
+                        <a href="#portfolio" du-smooth-scroll>Highlights</a>
+                    </li>
+                    <li class="page-scroll" du-scrollspy="more">
+                        <a href="#more" du-smooth-scroll>More Info</a>
+                    </li>
+                    <!--<li class="page-scroll">
+                        <a href="#contact">Contact</a>
+                    </li>-->
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <!--<img class="img-responsive" src="img/profile.png" alt="">-->
+                    <div class="intro-text">
+                        <h1>The ModelSEED <span class="label label-danger label-beta">beta</span>
+                        </h1>
+                        <!--<hr style="width: 30%; border: 2px solid;">-->
+                        <span class="skills">Explore, Compare, and Analyze Central Carbon Core Metabolic Models</span>
+                    </div>
+                    <br>
+                    <div class="col-lg-8">
+                        <a ui-sref="app.publicModels" class="btn btn-outline">
+                          Get Started
+                        </a>
+                        <!--
+                        <a href="app/#/models/" class="btn btn-outline btn-tour">
+                            Take a Tour
+                        </a>
+                        -->
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="login" ng-controller="Login">
+                        <h4>Login to continue to ModelSEED</h4>
+
+                        <div ng-if="inValid" class="alert alert-danger" role="alert">
+                            <b>Try again.</b>
+                            Wrong username and/or password
+                        </div>
+
+                        <div ng-if="failMsg" class="alert alert-danger" role="alert">
+                            <b>Oh snap!</b>
+                            {{failMsg}}
+                        </div>
+
+                        <form>
+                            <md-input-container>
+                                <label>KBase Username</label>
+                                <input ng-model="user">
+                            </md-input-container>
+                            <md-input-container>
+                                <label>Password</label>
+                                <input ng-model="pass" label="Password" type="password">
+                            </md-input-container>
+                            <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary pull-left">
+                                Login
+                            </md-button>
+                        </form>
+
+                        <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </header>
+
+
+    <section id="about">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>About</h2><br>
+                    <!--<hr class="star-primary">-->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>The ModelSEED is a resource for the exploration, comparison, and analysis of central carbon core metabolic models.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dark" id="portfolio">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>Highlights</h2>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 portfolio-item">
+                    <p><b>Comprehensive Data Views</b></p>
+                    <a ui-sref="app.modelPage({ws: 'janakakbase:CM-ATP-eq', name: 'core_83333.1'})" class="portfolio-link" data-toggle="modal">
+                        <div class="caption">
+                            <div class="caption-content">
+                                <i class="fa fa-3x fa-arrow-circle-o-right"></i>
+                            </div>
+                        </div>
+                        <img src="splash/img/examples/table.png" class="img-responsive" alt="">
+                    </a>
+                </div>
+                <div class="col-sm-4 portfolio-item">
+                    <p><b>Pathways</b></p>
+                    <a class="portfolio-nolink">
+                        <!--<div class="caption">
+                            <div class="caption-content">
+                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                            </div>
+                        </div>-->
+                        <img src="splash/img/examples/pathway.png" class="img-responsive" alt="">
+                    </a>
+                </div>
+                <div class="col-sm-4 portfolio-item">
+                    <p><b>Heatmaps</b></p>
+                    <a class="portfolio-nolink">
+                        <!--<div class="caption">
+                            <div class="caption-content">
+                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                            </div>
+                        </div>-->
+                        <img src="splash/img/examples/heatmap.png" class="img-responsive" alt="">
+                    </a>
+                </div>
+                <!--
+                <div class="col-sm-4 portfolio-item">
+                    <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
+                        <div class="caption">
+                            <div class="caption-content">
+                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                            </div>
+                        </div>
+                        <img src="splash/img/examples/etc.png" class="img-responsive" alt="">
+                    </a>
+                </div>-->
+
+            </div>
+        </div>
+    </section>
+
+
+    <section class="light"  id="more">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>More Info</h2>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4>Utilized Data Sources</h4>
+                    Core Models were designed based on the information derived from published literature. Genomes were annotated using RAST annotation pipeline and core models were generated using <a href="http://kbase.us" target="_blank">KBase</a> resources.  We've done our best to cite contributing data sources here. If you believe your data has been utilized and not properly cited, please email us <a href="mailto:janaked@anl.gov">here</a>.<br>
+                    <br>
+
+
+                    <h4>Sources Funding Development</h4>
+                    This material was based upon work supported by the U.S. Department of Energy, Office of Biological and Environmental Research; under contract DE-AC02-06CH11357 and by the National Science Foundation grant number MCB-1153357<br>
+                    <br>
+
+
+                    <h4>Citing the ModelSEED</h4>
+                    Henry, C.S., DeJongh, M., Best, A.B., Frybarger, P.M., Linsay, B., and R.L. Stevens. High-throughput Generation and Optimization of Genome-scale Metabolic Models. Nature Biotechnology, (2010).<br>
+                    [New citation to follow]<br>
+                    <br>
+
+                    <h4>Development Team</h4>
+                    <table class="table">
+                        <tr>
+                            <th>Contributor</th>
+                            <th>Institution</th>
+                            <th>Role</th>
+                        </tr>
+                        <tr>
+                            <td>Neal Conrad</td>
+                            <td>Argonne National Laboratory</td>
+                            <td>UI Engineer</td>
+                        </tr>
+                        <tr>
+                            <td>Janaka Edirisinghe</td>
+                            <td>Argonne National Laboratory</td>
+                            <td>Research</td>
+                        </tr>
+                        <tr>
+                            <td>Chris Henry</td>
+                            <td>Argonne National Laboratory</td>
+                            <td>Principal Investigator</td>
+                        </tr>
+                    </table>
+
+                    <h4>Questions, comments, and bug reports?</h4>
+                    Please direct questions, comments, and bug reports on our site to our development team via <a href="mailto:nconrad@anl.gov">email</a>
+                    or on <a href="http://www.github.com/modelseed/ModelSEED-UI" target="_blank">github</a>.
+
+                </div>
+            </div>
+
+        </div> <!-- end container -->
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="footer-above">
+            <div class="container">
+                <div class="row">
+                    <div class="footer-col col-md-4">
+                        <h3>Join the Mailing List!</h3>
+                        <div class="row">
+                            <div class="col-lg-12">
+                            <form method="POST" action="splash/mail/newsletter.php">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="email" size="30" placeholder="you@example.com">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" type="submit" value="Submit" name="submit">
+                                            Subscribe
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="sub-text">
+                            Stay up to date with the latest on ModelSEED 2.0.
+                            Unsubscribe at any time.
+                        </div>
+                    </div>
+                    <div class="footer-col col-md-4">
+                        <h3>On Github!</h3>
+                        <ul class="list-inline">
+                            <li>
+                                <a href="http://www.github.com/modelseed/ModelSEED-UI" target="_blank" class="btn-social">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </li>
+                            <!--
+                            <li>
+                                <a href="kbase.us" class="btn-social btn-outline" style="font-size: 6pt;">
+                                    <i class="fa"></i>
+                                    KBase
+                                </a>
+                            </li>
+                            <li>
+                                <a href="http://patricbrc.org" class="btn-social btn-outline" style="font-size: 8pt">
+                                    <i class="fa"></i>
+                                    Patric
+                                </a>
+                            </li>-->
+                        </ul>
+                    </div>
+                    <div class="footer-col col-md-4">
+                        <h3>About ModelSEED</h3>
+                        <div class="sub-text">
+                        ModelSEED is free, open source application created by <a href="#about">The ModelSEED Team</a>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-below">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        Copyright &copy; Core Model Viewer
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+    <div class="scroll-top page-scroll visible-xs visble-sm">
+        <a class="btn btn-primary" href="#page-top" du-smooth-scroll>
+            <i class="fa fa-chevron-up"></i>
+        </a>
+    </div>
+
+</div>
+
