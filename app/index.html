@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html ng-app="coreModelViewer" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="description" content="The Core Model Viewer is a resource for the exploration, comparison, and analysis of central carbon core metabolic models.">
+    <link rel="shortcut icon" href="/img/mv.ico?v=1.0">
+    <meta name="author" content="nconrad">
+
+    <title>ModelSEED</title>
+
+    <link rel="stylesheet" href="../components/angular-material/angular-material.css">
+    <link rel="stylesheet" href="../components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../components/font-awesome/css/font-awesome.min.css">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- build:css build/style.css -->
+        <link rel="stylesheet" href="../css/main.css">
+        <link rel="stylesheet" href="../css/core.css">
+        <link rel="stylesheet" href="../css/viz.css">
+        <link rel="stylesheet" href="../css/tabs.css">
+    <!-- endbuild -->
+
+    <!-- build:js build/site.js -->
+        <script src="../components/jquery/dist/jquery.min.js"></script>
+        <script src="../components/jquery-ui/jquery-ui.min.js"></script><!-- to be removed -->
+        <script src="../components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="../components/d3/d3.min.js"></script>
+
+        <script src="../components/datatables/media/js/jquery.dataTables.min.js"></script>
+        <script src="../lib/datatables-bootstrap/dataTables.bootstrap.js"></script>
+
+        <script src="../lib/ui-common/src/kbwidget.js"></script>
+        <script src="../lib/ui-common/src/widgets/kbaseAuthenticatedWidget.js"></script>
+        <script src="../lib/ui-common/src/widgets/maps/kbasePathway.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBModeling.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/kbaseTabTable.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/kbaseTabs.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBaseFBA.FBA.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBaseFBA.FBAModel.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/kbaseETCDiagram.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBaseBiochem.Media.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBasePhenotypes.PhenotypeSet.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBasePhenotypes.PhenotypeSimulationSet.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBaseSearch.GenomeSet.js"></script>
+        <script src="../lib/ui-common/src/widgets/modeling/KBaseFBA.FBAModelSet.js"></script>
+        <script src="../app/viz/modelSeedVizConfig.js"></script>
+
+        <script src="../components/angular/angular.js"></script>
+        <script src="../components/ui-router/release/angular-ui-router.js"></script>
+        <script src="../components/angular-aria/angular-aria.js"></script>
+        <script src="../components/angular-animate/angular-animate.js"></script>
+        <script src="../components/angular-material/angular-material.js"></script>
+
+        <script src="../config.js"></script>
+        <script src="../app/app.js"></script>
+
+        <script src="../lib/kbase-rpc/kbase-rpc.js"></script>
+        <script src="../app/controllers/controllers.js"></script>
+        <script src="../app/controllers/ms-controllers.js"></script>
+        <script src="../app/services/fba.js"></script>
+        <script src="../app/services/mv.js"></script>
+        <script src="../app/services/patric.js"></script>
+        <script src="../app/directives.js"></script>
+    <!-- endbuild -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <div id="wrapper" >
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand sidebar-collapse" sidebar-collapse>
+                    <i class="fa fa-caret-left"></i> <i class="fa fa-bars"></i>
+                </a>
+                <a class="navbar-brand" href="../">
+                    ModelSEED
+                </a>
+                <div class="label label-danger label-beta">beta</div>
+
+            </div>
+
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-top-links">
+                    <li ng-class="{ active: $state.includes('biochem') }">
+                        <a ui-sref="biochem">Biochemistry</a>
+                    </li>
+                    <li ng-class="{ active: $state.includes('reconstruct') }">
+                        <a ui-sref="reconstruct">Reconstruct</a>
+                    </li>
+                    <li ng-class="{ active: $state.includes('myModels') }">
+                        <a ui-sref="myModels">My Models</a>
+                    </li>
+                    <li ng-class="{ active: $state.includes('publicModels') }">
+                        <a ui-sref="publicModels">Public Models</a>
+                    </li>
+                    <!--<li ng-class="{ active: $state.includes('modelEditor')}" >
+                        <a ui-sref="modelEditor">Model Editor</a>
+                    </li>-->
+                    <li ng-class="{ active: $state.includes('compare')}" >
+                        <a ui-sref="compare">Analysis
+                            <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
+                        </a>
+                    </li>
+                </ul>
+
+
+                <ul class="nav navbar-nav navbar-top-links pull-right">
+                    <li>
+                        <a href="../#about">About</a>
+                    </li>
+                </ul>
+
+
+            </div>
+
+
+        </nav>
+
+
+        <nav class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse">
+
+                <div id="selected-models" ng-controller="SelectedData">
+                    <div class="header">MODEL ANALYSIS
+                        <div class="pull-right" ng-if="MV.models.length">(
+                            <a ng-click="MV.rmAll()">
+                                <small>Clear All</small>
+                            </a>)
+                        </div>
+                    </div>
+
+                    <ul ng-show="MV.models.length" class="list-unstyled">
+                        <li ng-repeat="item in MV.models track by $index">
+
+                            <div class="ellipsis selected-data-item">
+                                <a ui-sref="modelPage({ws: item.model.ws, name: item.model.name})"
+                                   class="model" ng-click="makeActive($event)">
+                                   {{item.org}}
+                                </a>
+                                <span class="fa fa-remove hover pointer"
+                                      ng-click="MV.rm($index)">
+                                </span>
+                            </div>
+
+                            <div class="ellipsis selected-data-item">
+                                <a ui-sref="fbaPage({ws: item.fba.ws, name: item.fba.name})"
+                                   class="fba" ng-click="makeActive($event)">
+                                   <span class="label label-fba">FBA</span> {{item.media}}
+                                </a>
+                                <span class="glyphicon glyphicon-cog hover pointer"
+                                      ng-click="openFBAView($event, $index, item)">
+                                </span>
+                            </div>
+
+                            <br>
+                        </li>
+                    </ul>
+
+                    <div ng-if="!MV.models.length" class="warning-msg text-danger">
+                        No data selected
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="sidebar-nav-small" style="display: none;">
+                <ul class="nav">
+                    <li>
+                        <a ui-sref="compare">
+                            <span class="badge model-count">{{MV.models.length}}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-md-12">
+                    <div ui-view id="content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!--
+        <div id="footer">
+            <span class="pull-right">
+                <i class="text-muted">Powered by </i>
+                <a href="http://kbase.us" class="hover-inverted">
+                    <img width=30 height=30 src="img/labs_icon.png" />
+                </a>
+            </span>
+        </div>
+        -->
+    </div>
+
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-61918506-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</body>
+
+</html>

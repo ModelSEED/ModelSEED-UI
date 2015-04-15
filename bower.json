@@ -1,0 +1,28 @@
+{
+  "name": "js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/PATRIC3/oxcart",
+  "authors": [
+    "nconrad <nealconrad@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.12.2",
+    "ui-router": "~0.2.13",
+    "bootstrap": "~3.3.2",
+    "d3": "~3.5.3",
+    "jquery-ui": "~1.11.2",
+    "font-awesome": "~4.3.0",
+    "angular-smoothscroll": "~1.1.1",
+    "datatables": "~1.10.5",
+    "datatables-colreorder": "~1.1.2",
+    "angular-material": "~0.8.3"
+  }
+}

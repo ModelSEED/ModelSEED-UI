@@ -1,0 +1,81 @@
+
+<h2 class="page-header">Model Reconstruction</h2>
+
+
+<div class="table-controls">
+    <div layout="row" layout-align="start start" class="pull-left">
+        <i class="fa fa-search query-opt"></i>
+
+        <md-input-container md-no-float>
+            <input ng-model="opts.query" type="text" placeholder="Search PATRIC genomes" class="query-input">
+        </md-input-container>
+    </div>
+    <md-progress-circular ng-if="loading"
+                          md-mode="indeterminate"
+                          class="pull-left"
+                          md-diameter="20">
+    </md-progress-circular>
+
+
+    <div class="pull-right">
+        <select ng-model="opts.limit" class="btn btn-default">
+            <option>25</option>
+            <option>100</option>
+            <option>250</option>
+        </select>
+
+        <span pagination>
+            <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
+                <i class="fa fa-chevron-left"></i> prev
+            </div>
+            <div class="btn btn-default btn-sm" ng-click="next()">next
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </span>
+    </div>
+
+    <div class="pull-right query-opt">
+        {{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results
+    </div>
+</div>
+
+<table class="table">
+    <thead sortable>
+        <tr>
+            <th ng-click="sortBy($event,'genome_name')">
+                Name
+            </th>
+            <th ng-click="sortBy($event,'genome_id')">
+                ID
+            </th>
+            <th ng-click="sortBy($event,'genus')">
+                Genus
+            </th>
+            <th ng-click="sortBy($event,'taxon_id')">
+                Tax ID
+            </th>
+            <th ng-click="sortBy($event,'contigs')">
+                Contigs
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat="g in genomes.docs">
+            <td>{{g.genome_name}}</td>
+            <td>{{g.genome_id}}</td>
+            <td>{{g.genus}}</td>
+            <td>{{g.taxon_id}}</td>
+            <td>{{g.contigs}}</td>
+        </tr>
+        <div ng-if="genomes.docs.length == 0">
+            <td>No genome found</td>
+        </div>
+    </tbody>
+</table>
+
+
+
+
+
+

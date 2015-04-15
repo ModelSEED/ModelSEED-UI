@@ -1,0 +1,139 @@
+
+
+
+/* global styling */
+
+.viz-tip {
+    position:fixed;
+    bottom: 2px;
+    right: 10px;
+    margin-left: 10px;
+    font-size: .8em;
+}
+
+.viz-legend {
+    position:fixed;
+    bottom: 2px;
+    left: 225px;
+}
+
+
+
+rect:hover,
+circle:hover,
+line,
+.cpd-label,
+.edited-label{
+    cursor: hand;
+    cursor: pointer;
+}
+
+/* kegg map styling */
+.line1,
+.line2,
+.link {
+    stroke-width: 1px;
+    stroke: #666;
+}
+
+.line-start,
+.line-middle,
+.line-end {
+    fill: #F00;
+    fill-opacity: 0.3;
+    stroke: #000;
+    style-width: 2px;
+}
+
+.rxn {
+    fill: #fff;
+    stroke-width: 1px;
+    stroke: #aaa;
+}
+.rxn-divider {
+    stroke-width: 0px;
+    stroke: #fff;
+}
+.rxn-divider-stroke {
+    stroke-width: 1px;
+    stroke: #aaa;
+}
+
+.map {
+    fill: #fff;
+    stroke-width: 1px;
+    stroke: #666;
+}
+
+.cpd-label,
+.map-label {
+    fill: #666;
+}
+
+.rxn-label {
+    font-size: 10px;
+    stroke: #666;
+}
+
+.rxn-label-light {
+    font-size: 10px;
+    stroke: #000;
+}
+
+.cpd {
+    stroke-width: 1px;
+    fill: #fff;
+    stroke: #666;
+}
+
+/* cdd viewer */
+.cdd-box {
+    fill: lightsteelblue;
+    stroke: steelblue;
+    stroke-width: 1px;
+}
+
+.grid-line {
+    stroke-width: 1px;
+    stroke: #999;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+
+/* etc viewer */
+.etc-step-box {
+    fill: #fff;
+    stroke-width: 1px;
+    stroke: #777;
+}
+.etc-step-text {
+    font-size: 8pt;
+    fill: #777;
+}
+.etc-step-text:hover {
+    cursor: pointer;
+    cursor: hand;
+}
+
+
+
+
+
+
+
+

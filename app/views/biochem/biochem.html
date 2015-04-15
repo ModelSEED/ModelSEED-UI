@@ -1,0 +1,57 @@
+
+
+<h2 class="page-header">Biochemistry</h2>
+
+<!--<ng-include src="'views/biochem/rxn-table.html'"></ng-include>-->
+
+<md-tabs md-selected="tabs.selectedIndex">
+    <md-tab>
+        <md-tab-label>Reactions</md-tab-label>
+        <md-tab-template>
+            <ng-table table-header="rxnHeader"
+                      table-data="rxns"
+                      table-opts="rxnOpts"
+                      table-loading="loadingRxns"
+                      table-placeholder="Search reactions">
+            </ng-table>
+
+        </md-tab-template>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Compounds</md-tab-label>
+        <md-tab-template>
+            <ng-table table-header="cpdHeader"
+                      table-data="cpds"
+                      table-opts="cpdOpts"
+                      table-loading="loadingCpds"
+                      table-placeholder="Search compounds"
+                      >
+            </ng-table>
+        </md-tab-template>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Biomass Compounds</md-tab-label>
+        <md-tab-template>
+            Coming soon!
+        </md-tab-template>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Genes</md-tab-label>
+        <md-tab-template>
+            Coming soon!
+        </md-tab-template>
+    </md-tab>
+
+
+    <md-tab>
+        <md-tab-label>Media Formulations</md-tab-label>
+        <md-tab-template>
+            Coming soon!
+        </md-tab-template>
+    </md-tab>
+
+</md-tabs>
+

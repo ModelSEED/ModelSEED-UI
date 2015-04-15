@@ -1,0 +1,34 @@
+{
+  "name": "model-viewer",
+  "version": "0.1.0",
+  "devDependencies": {
+    "bower": "^1.3.12",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-cssmin": "^0.10.0",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-nodeunit": "0.4.1",
+    "grunt-contrib-uglify": "0.5.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-ng-annotate": "^0.4.0",
+    "grunt-usemin": "^2.5.1",
+    "react-tools": "*"
+  },
+  "description": "model-viewer ======",
+  "main": "config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nconrad/model-viewer.git"
+  },
+  "author": "nconrad@anl.gov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nconrad/model-viewer/issues"
+  },
+  "homepage": "https://github.com/nconrad/model-viewer"
+}
