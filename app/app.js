@@ -1,13 +1,16 @@
 
 
-angular.module('coreModelViewer',
+angular.module('ModelSEED',
 ['config',
  'core-directives',
  'mv-controllers',
  'ms-controllers',
+ 'duScroll',
  'ui.router',
  'ngAnimate',
  'kbase-rpc',
+ 'kbase-auth',
+ 'dd-filter',
  'ngMaterial',
  'FBA',
  'ModelViewer',
@@ -18,86 +21,82 @@ angular.module('coreModelViewer',
 
     $locationProvider.html5Mode(false);
 
+
     $stateProvider
         .state('home', {
-            url: "/",
-            templateUrl: 'views/home.html'
+            url: "/home/",
+            templateUrl: 'app/views/home.html',
+        }).state('app', {
+            templateUrl: 'app/views/app.html',
         })
 
-        .state('biochem', {
+        .state('app.biochem', {
             url: "/biochem/",
-            templateUrl: 'views/biochem/biochem.html',
+            templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem'
-        }).state('reconstruct', {
+        }).state('app.reconstruct', {
             url: "/reconstruct/",
-            templateUrl: 'views/reconstruct.html',
+            templateUrl: 'app/views/reconstruct.html',
             controller: 'Reconstruct'
-        })
-
-
-        .state('myModels', {
+        }).state('app.myModels', {
             url: "/my-models/",
-            templateUrl: 'views/my-models.html',
-        }).state('publicModels', {
+            templateUrl: 'app/views/my-models.html',
+        }).state('app.publicModels', {
             url: "/models/",
-            templateUrl: 'views/public-models.html',
-        }).state('modelEditor', {
+            templateUrl: 'app/views/public-models.html',
+        }).state('app.modelEditor', {
             url: "/model-editor/",
-            templateUrl: 'views/editor/model-editor.html',
+            templateUrl: 'app/views/editor/model-editor.html',
         })
 
-        /*
-        .state('genomes', {
-            url: "/genomes/",
-            templateUrl: 'views/genomes.html',
-        })*/
 
-        .state('media', {
+        .state('app.media', {
             url: "/media/",
-            templateUrl: 'views/media.html',
-        }).state('fba', {
+            templateUrl: 'app/views/media.html',
+        }).state('app.fba', {
             url: "/fba/",
-            templateUrl: 'views/fbas.html',
+            templateUrl: 'app/views/fbas.html',
         })
-        .state('fbaByWS', {
+        .state('app.fbaByWS', {
             url: "/fba/:ws",
-            templateUrl: 'views/fbaws.html',
+            templateUrl: 'app/views/fbaws.html',
             controller: 'FBAByWS'
         })
 
         // object views
-        .state('modelPage', {
+        .state('app.modelPage', {
             url: "/models/:ws/:name",
-            templateUrl: 'views/modelPage.html',
+            templateUrl: 'app/views/modelPage.html',
             controller: 'ObjectPage'
-        }).state('mediaPage', {
+        }).state('app.mediaPage', {
             url: "/media/:ws/:name",
-            templateUrl: 'views/mediaPage.html',
+            templateUrl: 'app/views/mediaPage.html',
             controller: 'ObjectPage'
-        }).state('fbaPage', {
+        }).state('app.fbaPage', {
             url: "/fba/:ws/:name",
-            templateUrl: 'views/fbaPage.html',
+            templateUrl: 'app/views/fbaPage.html',
             controller: 'ObjectPage'
-        }).state('genome', {
+        }).state('app.genome', {
             url: "/genomes/:ws/:name/:tab",
-            templateUrl: 'views/genomePage.html',
+            templateUrl: 'app/views/genomePage.html',
             controller: 'ObjectPage'
         })
 
-        .state('proto', {
+        .state('app.proto', {
             url: "/proto",
-            templateUrl: 'views/proto.html'
+            templateUrl: 'app/views/proto.html'
         })
 
-        .state('compare', {
+        .state('app.compare', {
             url: "/compare",
-            templateUrl: 'views/compare.html',
+            templateUrl: 'app/views/compare.html',
             controller: 'Compare',
         })
 
 
-    $urlRouterProvider.when('', '/models/')
-                      .when('#', '/models/');
+    $urlRouterProvider.when('', '/home/')
+                      .when('/', '/home/')
+                      .when('#', '/home/');
 
 }])
 
@@ -107,21 +106,13 @@ angular.module('coreModelViewer',
         .accentPalette('light-blue');
 }])
 
-.run(['$rootScope', '$state', '$stateParams', '$location',
-    function($rootScope, $state, $sParams, $location) {
+.run(['$rootScope', '$state', '$stateParams', '$location', 'authService',
+    function($rootScope, $state, $sParams, $location, authService) {
     $rootScope.$state = $state;
     $rootScope.$stateParams = $sParams;
 
-    $rootScope.$on('$stateChangeSuccess',
-        function(event, toState, toParams, fromState, fromParams){
-            $rootScope.$subURL = toState.url.split('/')[1]
-        })
 
-    // global method for active styling
-    $rootScope.isActive = function(ws, name) {
-        if (ws === $sParams.ws && name === $sParams.name) return true;
-        return false;
-    }
+    $rootScope.user = authService.user;
+    $rootScope.token = authService.token;
 
-    //kb = new KBCacheClient();
 }]);
