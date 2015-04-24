@@ -25,15 +25,15 @@
             <li ng-class="{ active: $state.includes('app.reconstruct') }">
                 <a ui-sref="app.reconstruct">Reconstruct</a>
             </li>
-            <li ng-class="{ active: $state.includes('app.myModels') }">
+            <!--<li ng-class="{ active: $state.includes('app.myModels') }">
                 <a ui-sref="app.myModels">My Models</a>
-            </li>
+            </li>-->
             <li ng-class="{ active: $state.includes('app.publicModels') }">
-                <a ui-sref="app.publicModels">Public Models</a>
+                <a ui-sref="app.publicModels">Public</a>
             </li>
-            <li ng-class="{ active: $state.includes('app.modelEditor')}" >
+            <!--<li ng-class="{ active: $state.includes('app.modelEditor')}" >
                 <a ui-sref="app.modelEditor">Model Editor</a>
-            </li>
+            </li>-->
             <li ng-class="{ active: $state.includes('app.compare')}" >
                 <a ui-sref="app.compare">Analysis
                     <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>

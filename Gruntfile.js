@@ -5,29 +5,25 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         copy: {
             copyindex: {
-                src: 'app/index.html',
-                dest: 'app/dev.html'
+                src: 'index.html',
+                dest: 'dev.html'
             }
         },
         useminPrepare: {
-            html: 'app/index.html',
+            html: 'index.html',
             options: {
-                dest: './app/'
+                dest: './'
             }
         },
         usemin: {
-            html: ['app/index.html'],
+            html: ['index.html'],
             options: {
                 assetsDirs: ['build']
             }
         },
-        watch: {
-            files: ['app/css/*', 'app/js/*'],
-            tasks: ['uglify']
-        },
         jshint: {
             options: {
-                //curly: true,  // don't believe in this.
+                //curly: true,
                 eqeqeq: true,
                 asi: true,
                 sub: true, // don't enforce dot notation.  Local consistency matters.
@@ -52,7 +48,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-watch');
+    //grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     //grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-usemin');
