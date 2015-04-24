@@ -17,11 +17,11 @@ angular.module('core-directives')
             // used to support various apps with different frameworks
             function urlRouter(type, ws, name) {
                 if (type === "KBaseFBA.FBAModel")
-                    return '/app/#/models/'+ws+'/'+name;
+                    return '#/models/'+ws+'/'+name;
                 else if (type === "KBaseFBA.FBA")
-                    return '/app/#/fba/'+ws+'/'+name;
+                    return '#/fba/'+ws+'/'+name;
                 else if (type === "KBaseBiochem.Media")
-                    return '/app/#/media/'+ws+'/'+name;
+                    return '#/media/'+ws+'/'+name;
 
                 return;
             }
@@ -63,7 +63,7 @@ angular.module('core-directives')
                                       { title: "ID", data: function(d) {
                                             var name = d[1],
                                                 ws = d[7],
-                                                path = "modelPage({ws: '"+ws+"', name: '"+name+"'})",
+                                                path = "app.modelPage({ws: '"+ws+"', name: '"+name+"'})",
                                                 link = '<a ui-sref="'+path+'" >'+name+'</a>';
                                             return link;
                                       }},
@@ -133,8 +133,8 @@ angular.module('core-directives')
                         }
                     }
 
-                    var fbaLink = "fbaPage({ws: '"+ws+"', name: '"+name+"'})",
-                        mediaLink = "mediaPage({ws: 'coremodels_media', name: '"+obj.media+"'})";
+                    var fbaLink = "app.fbaPage({ws: '"+ws+"', name: '"+name+"'})",
+                        mediaLink = "app.mediaPage({ws: 'coremodels_media', name: '"+obj.media+"'})";
 
                     row.append('<td>'+cb+'</td>'+
                                '<td><a ui-sref="'+mediaLink+'">'+obj.media+'</a></td>'+
@@ -291,7 +291,7 @@ angular.module('core-directives')
 
             scope.tableOptions = {columns: [
                                       { title: 'Name', data: function(d) {
-                                        var path = "mediaPage({ws: '"+d[7]+"', name: '"+d[1]+"'})";
+                                        var path = "app.mediaPage({ws: '"+d[7]+"', name: '"+d[1]+"'})";
                                         return '<a ui-sref="'+path+'" >'+d[1]+'</a>';
                                       }}
                                   ],
@@ -328,7 +328,7 @@ function($compile, $stateParams) {
 
             scope.tableOptions = {columns: [
                                       { title: 'Name', data: function(d) {
-                                        var path = "fbaPage({ws: '"+d[7]+"', name: '"+d[1]+"'})";
+                                        var path = "app.fbaPage({ws: '"+d[7]+"', name: '"+d[1]+"'})";
                                         return '<a ui-sref="'+path+'" >'+d[1]+'</a>';
                                        }},
                                    ]}
