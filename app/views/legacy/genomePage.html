@@ -1,0 +1,24 @@
+<h2>Genome <span class="small">{{name}}</span></h2>
+
+
+<ul class="nav nav-tabs" >
+  <li ng-class="{ active: tab == 'functional' }">
+    <a ui-sref="genome({ws:ws, name:name, tab:'functional'})">Functional Subsystems</a>
+  </li>
+  <li ng-class="{ active: tab == 'contig' }" >
+    <a ui-sref="genome({ws:ws, name:name, tab:'contig'})">Contig Browser</a>
+  </li>
+  <li ng-class="{ active: tab == 'regions' }">
+    <a ui-sref="genome({ws:ws, name:name, tab:'regions'})">Regions</a>
+  </li>
+  <li ng-class="{ active: tab == 'regions' }">
+    <a ui-sref="genome({ws:ws, name:name, tab:'regions'})">Regions</a>
+  </li>
+  <li><a>Settings</a></li>
+</ul>
+
+
+
+<div ng-if="tab == 'functional'"  genome></div>
+<div ng-if="tab == 'contig'" contig></div>
+

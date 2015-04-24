@@ -1,0 +1,60 @@
+
+
+<nav class="navbar-default sidebar" role="navigation">
+    <div class="sidebar-nav navbar-collapse">
+
+        <div id="selected-models" ng-controller="SelectedData">
+            <div class="header">MODEL ANALYSIS
+                <div class="pull-right" ng-if="MV.models.length">(
+                    <a ng-click="MV.rmAll()">
+                        <small>Clear All</small>
+                    </a>)
+                </div>
+            </div>
+
+            <ul ng-show="MV.models.length" class="list-unstyled">
+                <li ng-repeat="item in MV.models track by $index">
+
+                    <div class="ellipsis selected-data-item">
+                        <a ui-sref="app.modelPage({ws: item.model.ws, name: item.model.name})"
+                           class="model" ng-click="makeActive($event)">
+                           {{item.org}}
+                        </a>
+                        <span class="fa fa-remove hover pointer"
+                              ng-click="MV.rm($index)">
+                        </span>
+                    </div>
+
+                    <div class="ellipsis selected-data-item">
+                        <a ui-sref="app.fbaPage({ws: item.fba.ws, name: item.fba.name})"
+                           class="fba" ng-click="makeActive($event)">
+                           <span class="label label-fba">FBA</span> {{item.media}}
+                        </a>
+                        <span class="glyphicon glyphicon-cog hover pointer"
+                              ng-click="openFBAView($event, $index, item)">
+                        </span>
+                    </div>
+
+                    <br>
+                </li>
+            </ul>
+
+            <div ng-if="!MV.models.length" class="warning-msg text-danger">
+                No data selected
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="sidebar-nav-small" style="display: none;">
+        <ul class="nav">
+            <li>
+                <a ui-sref="app.compare">
+                    <span class="badge model-count">{{MV.models.length}}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</nav>
