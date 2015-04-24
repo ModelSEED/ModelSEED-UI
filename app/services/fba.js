@@ -29,7 +29,18 @@ function($http, $q, $cacheFactory) {
 
         var p = $http.rpc('fba', 'get_reactions', {reactions: rxns})
                     .then(function(res) {
-                        return res;
+                        var rxns = [];
+                        for (var i=0; i<res.length; i++) {
+                            var obj = res[i];
+                            rxns.push({name: obj.name,
+                                       id: obj.id,
+                                       equation: obj.equation,
+                                       deltaG: obj.deltaG,
+                                       deltaGErr: obj.deltaGErr
+                                      })
+                        }
+
+                        return rxns;
                     })
 
         cache.put('getRxns', p);
@@ -67,7 +78,6 @@ function($http, $q, $cacheFactory) {
         return $http.rpc('fba', 'adjust_model_reaction',
                     {workspace: ws, model: name, reaction: rxnIDs, removeReaction: true})
                     .then(function(res) {
-                        console.log('removed reactions', res)
                         return res;
                     })
     }
@@ -80,7 +90,6 @@ function($http, $q, $cacheFactory) {
         return $http.rpc('fba', 'adjust_model_reaction',
                     {workspace: ws, model: name, reaction: rxnIDs, addReaction: true})
                     .then(function(res) {
-                        console.log('added reactions', res)
                         return res;
                     })
     }

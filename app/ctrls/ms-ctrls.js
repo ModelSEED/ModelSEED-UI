@@ -37,6 +37,52 @@ angular.module('ms-ctrls', [])
     }
 }])
 
+.controller('Biochem',
+['$scope', 'FBA',
+function($scope, FBA) {
+
+    $scope.rxnOpts = {query: '', limit: 21, offset: 0, sort: null};
+    $scope.cpdOpts = {query: '', limit: 22, offset: 0, sort: null};
+
+    $scope.tabs = {selectedIndex : 0};
+
+    $scope.loadingRxns = true,
+    $scope.loadingCpds = true;
+
+    $scope.rxnHeader = [{label: 'ID', key: 'id'},
+                        {label: 'Name', key: 'name'},
+                        {label: 'Equation', key: 'name'},
+                        {label: 'deltaG', key: 'deltaG'},
+                        {label: 'detalGErr', key: 'deltaGErr'}];
+
+    $scope.cpdHeader = [{label: 'ID', key: 'id'},
+                        {label: 'Name', key: 'name'},
+                        {label: 'Formula', key: 'formula'},
+                        {label: 'Abbrev', key: 'abbrev'},
+                        {label: 'deltaG', key: 'deltaG'},
+                        {label: 'detalGErr', key: 'deltaGErr'}];
+
+    $scope.$watch('rxnOpts', function(value){
+        $scope.rxnsOpts = value
+    }, true)
+
+    FBA.getBiochem()
+       .then(function(res) {
+
+            FBA.getRxns(res.reactions)
+               .then(function(rxns) {
+                    $scope.rxns = rxns;
+                    $scope.loadingRxns = false;
+               })
+
+            FBA.getCpds(res.compounds)
+               .then(function(cpds) {
+                    $scope.cpds = cpds;
+                    $scope.loadingCpds = false;
+               })
+       })
+
+}])
 
 .controller('ModelEditor',
 ['$scope', 'FBA', 'WS', '$mdDialog', '$sce', '$timeout',
@@ -56,7 +102,6 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
        .then(function(res) {
             FBA.getRxns(res.reactions)
                .then(function(rxns) {
-                console.log('bio', rxns)
                     $scope.rxns = rxns;
                     $scope.loadingRxns = false;
                })
@@ -261,56 +306,6 @@ function($scope, MV, Patric, $q, $timeout) {
 
 }])
 
-.controller('Biochem',
-['$scope', 'FBA',
-function($scope, FBA) {
-
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
-
-    $scope.tabs = {
-        selectedIndex : 0
-    };
-
-
-    $scope.loadingRxns = true,
-    $scope.loadingCpds = true;
-
-
-    $scope.rxnHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Equation', key: 'name'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
-
-    $scope.cpdHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Formula', key: 'formula'},
-                        {label: 'Abbrev', key: 'abbrev'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
-
-
-    FBA.getBiochem()
-       .then(function(res) {
-
-            FBA.getRxns(res.reactions)
-               .then(function(rxns) {
-                    $scope.rxns = rxns;
-                    $scope.loadingRxns = false;
-               })
-
-            FBA.getCpds(res.compounds)
-               .then(function(cpds) {
-                console.log('cpds', cpds)
-                    $scope.cpds = cpds;
-                    $scope.loadingCpds = false;
-               })
-       })
-
-}])
-
 
 .directive('ngTable', function() {
     return {
@@ -344,7 +339,6 @@ function($scope, FBA) {
         templateUrl: 'app/views/general/table-editor.html',
         link: function(scope, elem, attrs) {
 
-            console.log(scope.addItems)
             scope.checkedItems = [];
 
             scope.checkItem = function(item) {

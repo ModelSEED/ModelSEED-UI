@@ -15,7 +15,6 @@
             </md-progress-circular>
         </div>
 
-
         <div class="pull-right">
             <!--
             <select ng-model="opts.limit" class="btn btn-default" type="number">
@@ -38,7 +37,7 @@
             {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{filtered.length}} results
         </div>
     </div>
-
+<br>
 
     <table class="table table-striped table-bordered">
         <thead sortable>
@@ -47,8 +46,8 @@
             </tr>
         </thead>
 
-        <tr ng-repeat="item in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
-                        | limitTo : opts.limit : (opts.query ? 0 : opts.offset)" >
+        <tr ng-repeat="item in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                        | limitTo : opts.limit : opts.offset)">
             <td ng-repeat="h in header">{{item[h.key]}}</td>
         </tr>
 
