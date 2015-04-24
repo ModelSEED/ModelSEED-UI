@@ -19,8 +19,7 @@
 
             <tr ng-repeat="fba in fbas track by $index"
                 ng-click="selectFBA($index, fba, item);"
-                ng-class="{active: activeFBAIndex == $index}"
-                >
+                ng-class="{active: activeFBAIndex == $index}">
                 <td>
                     <i class="fa {{activeFBAIndex == $index ? 'fa-circle': 'fa-circle-o'}}"></i>
                 </td>

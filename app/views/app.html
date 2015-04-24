@@ -43,6 +43,16 @@
 
 
         <ul class="nav navbar-nav navbar-top-links pull-right">
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">Help
+                    <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
+                    </li>
+                </ul>
+            </li>
             <li ng-if="$root.user" class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown">{{$root.user}}
                     <i class="fa fa-caret-down"></i>
@@ -64,6 +74,8 @@
                 <a href="#/home/">About</a>
             </li>-->
         </ul>
+
+
     </div>
 
 </nav>

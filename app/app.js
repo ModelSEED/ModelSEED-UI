@@ -3,8 +3,9 @@
 angular.module('ModelSEED',
 ['config',
  'core-directives',
- 'mv-controllers',
- 'ms-controllers',
+ 'ctrls',
+ 'ms-ctrls',
+ 'help-ctrls',
  'duScroll',
  'ui.router',
  'ngAnimate',
@@ -14,7 +15,8 @@ angular.module('ModelSEED',
  'ngMaterial',
  'FBA',
  'ModelViewer',
- 'Patric'
+ 'Patric',
+ 'WS'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider', '$urlRouterProvider',
     function($locationProvider, $stateProvider, $httpProvider, $urlRouterProvider) {
@@ -47,6 +49,7 @@ angular.module('ModelSEED',
         }).state('app.modelEditor', {
             url: "/model-editor/",
             templateUrl: 'app/views/editor/model-editor.html',
+            controller: 'ModelEditor'
         })
 
 
@@ -91,6 +94,13 @@ angular.module('ModelSEED',
             url: "/compare",
             templateUrl: 'app/views/compare.html',
             controller: 'Compare',
+        })
+
+
+        .state('app.api', {
+            url: "/help/api",
+            templateUrl: 'app/views/docs/api.html',
+            controller: 'Help',
         })
 
 

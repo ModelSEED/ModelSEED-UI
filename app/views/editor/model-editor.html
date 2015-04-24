@@ -1,4 +1,163 @@
+<style>
+    .table-controls .btn-add {
+        margin-left: 20px;
+    }
+</style>
+
+<div class="row">
+    <div class="h2 col-md-4">Model Editor
+        <!--<div class="label label-warning label-beta">Demo</div>-->
+    </div>
 
 
-<h2 class="page-header">Model Editor</h2>
+    <div ng-show="!loading" class="col-md-8">
+        <br>
+        Workspace
+        <dd-filter
+             dd-id="ws-selector"
+             dd-data="wsList"
+             dd-title="Workspaces"
+             dd-placeholder="Search workspaces"
+             ng-model="selectedWS">
+        </dd-filter>
+
+        Model
+        <dd-filter
+             dd-id="model-selector"
+             dd-data="models"
+             dd-title="Models"
+             dd-placeholder="Search models"
+             ng-model="selectedModel">
+        </dd-filter>
+    </div>
+</div>
+
+<hr class="no-margin">
+
+
+<md-progress-circular ng-if="loading"
+                      md-mode="indeterminate"
+                      class="pull-left"
+                      md-diameter="40">
+</md-progress-circular>
+
+<div class="clearfix"></div>
+
+
+<div ng-if="data">
+    <div class="table-controls">
+        <div layout="row" layout-align="start start" class="pull-left">
+            <i class="fa fa-search query-opt"></i>
+
+            <md-input-container md-no-float>
+                <input ng-model="opts.query" type="text" placeholder="Search reactions" class="query-input">
+            </md-input-container>
+
+            <button ng-if="!checkedRxns.length && !loadingModel"
+                    ng-click="addRxns($event)"
+                    class="btn btn-primary btn-sm btn-add">
+                <i class="fa fa-plus"></i> Reactions
+            </button>
+
+            <button ng-if="checkedRxns.length"
+                    ng-click="rmRxns()"
+                    class="btn btn-danger btn-sm btn-add"
+                    ng-disabled="loadingModel">
+                <i class="fa fa-minus"></i> ({{checkedRxns.length}}) Reactions
+            </button>
+
+            <md-progress-circular ng-if="loadingModel"
+                                  md-mode="indeterminate"
+                                  class="pull-left"
+                                  md-diameter="20">
+            </md-progress-circular>
+        </div>
+
+
+        <div class="pull-right">
+            <!--
+            <select ng-init="opts.limit = 20" ng-model="opts.limit" class="btn btn-default" type="number">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="100">100</option>
+            </select>-->
+
+            <span pagination>
+                <div ng-disabled="opts.offset == 0"
+                     class="btn btn-default btn-sm" ng-click="prev()">
+                    <i class="fa fa-chevron-left"></i> prev
+                </div>
+                <div ng-disabled="opts.offset+opts.limit > filtered.length"
+                     class="btn btn-default btn-sm" ng-click="next()">next
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </span>
+        </div>
+
+        <div class="pull-right query-opt">
+            {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{filtered.length}} reactions
+        </div>
+    </div>
+
+
+
+    <table class="table table-bordered table-hover">
+        <thead sortable>
+            <tr>
+                <th></th>
+                <th ng-click="sortBy($event, 'id')">ID</th>
+                <th ng-click="sortBy($event, 'name')">Name</th>
+                <th ng-click="sortBy($event, 'equation')">Equation</th>
+                <th ng-click="sortBy($event, 'genes')">Genes</th>
+            </tr>
+        </thead>
+
+        <tr ng-repeat="item in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )                | limitTo : opts.limit : (opts.query ? 0 : opts.offset)" >
+            <td ng-click="checkRxn(item)">
+                <i ng-if="item.checked" class="fa fa-check-square-o"></i>
+                <i ng-if="!item.checked" class="fa fa-square-o"></i>
+            </td>
+            <td style="position: relative;"> <!-- ng-click="editRxn($event, item)"  -->
+                {{item.id}}
+            </td>
+            <td style="position: relative;">
+                {{item.name}}
+            </td>
+            <td editable ng-click="editDirection($event, item)" style="position: relative;">
+                <span ng-if="!item.editable">{{item.equation}}</span>
+
+                <span ng-if="item.editable">
+                    {{FBA.splitEq(item.equation)[0]}}
+                    <select class="input-sm"
+                            style="width: 55px;"
+                            ng-init="direction = item.direction"
+                            ng-model="direction"
+                            ng-blur="item.editable = false"
+                            ng-change="saveDirection(item, direction)" auto-focus>
+                        <option value="="><=></option>
+                        <option value=">">=></option>
+                        <option value="<"><=</option>
+                    </select>
+                    {{FBA.splitEq(item.equation)[1]}}
+                </span>
+            </td>
+
+            <td editable ng-click="editGenes(item)" style="position: relative;" ng-bind-html="joinGenes(item.genes)">
+            </td>
+        </tr>
+
+        <div ng-if="!loading && filtered.length == 0">
+            No reaction found
+        </div>
+    </table>
+</div>
+
+<br>
+<md-progress-circular ng-if="loadingModel"
+                      md-mode="indeterminate"
+                      class="pull-left"
+                      md-diameter="40">
+</md-progress-circular>
+
+<div
 

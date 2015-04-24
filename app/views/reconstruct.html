@@ -67,10 +67,9 @@
             <td>{{g.genus}}</td>
             <td>{{g.taxon_id}}</td>
             <td>{{g.contigs}}</td>
+            <td ng-if="genomes.docs == 0 && !loading">No genome found</td>
         </tr>
-        <div ng-if="genomes.docs.length == 0">
-            <td>No genome found</td>
-        </div>
+
     </tbody>
 </table>
 

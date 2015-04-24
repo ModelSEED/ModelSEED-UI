@@ -64,13 +64,14 @@
         <script src="app/services/auth.js"></script>
         <script src="lib/kbase-rpc/kbase-rpc.js"></script>
         <script src="lib/dd-filter/dd-filter.js"></script>
-        <script src="app/controllers/controllers.js"></script>
-        <script src="app/controllers/ms-controllers.js"></script>
-        <script src="app/controllers/splash.js"></script>
+        <script src="app/ctrls/ctrls.js"></script>
+        <script src="app/ctrls/ms-ctrls.js"></script>
+        <script src="app/ctrls/help-ctrls.js"></script>
         <script src="app/services/fba.js"></script>
         <script src="app/services/mv.js"></script>
         <script src="app/services/patric.js"></script>
-        <script src="app/directives.js"></script>
+        <script src="app/services/ws.js"></script>
+        <script src="app/directives/directives.js"></script>
     <!-- endbuild -->
 
 
@@ -83,11 +84,9 @@
 </head>
 
 <body>
-
-    <div id="wrapper" >
+    <div id="wrapper">
         <div ui-view></div>
     </div>
-
 
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

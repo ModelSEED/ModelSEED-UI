@@ -27,7 +27,6 @@ function($http, $q, $rootScope) {
         } else
             url += '&keyword(*)';
 
-
         // cancel any previous request
         if (liveReq) liveReq.resolve();
 

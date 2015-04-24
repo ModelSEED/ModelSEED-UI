@@ -37,22 +37,37 @@ module.exports = function(grunt) {
             uses_defaults: ['app/**/*.js',
                             '!app/build/*',
                             '!app/clients/*'],
+        },
+        watch: {
+            js: {
+                files: ['**/*.js',
+                        '!node_modules/**',
+                        '!lib/ui-common/**',
+
+                        ],
+                options: {
+                    livereload: true,
+                }
+            },
+            css: {
+                files: ['css/'],
+                options: {
+                    livereload: true,
+                }
+            }
         }
 
 
     });
 
 
-
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    //grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    //grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-usemin');
-
 
     grunt.registerTask('build', ['copy:copyindex',
                                  'useminPrepare',
@@ -62,8 +77,5 @@ module.exports = function(grunt) {
                                  'usemin']);
 
     grunt.registerTask('lint', ['jshint']);
-
-
-    //grunt.registerTask('default', ['ngAnnotate','uglify']);
 
 };
