@@ -41,6 +41,7 @@ module.exports = function(grunt) {
         watch: {
             js: {
                 files: ['**/*.js',
+                        '**/*.html',
                         '!node_modules/**',
                         '!lib/ui-common/**',
 
