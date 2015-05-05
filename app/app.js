@@ -46,6 +46,7 @@ angular.module('ModelSEED',
         }).state('app.publicModels', {
             url: "/models/",
             templateUrl: 'app/views/public-models.html',
+            controller: 'Public'
         }).state('app.modelEditor', {
             url: "/model-editor/",
             templateUrl: 'app/views/editor/model-editor.html',
@@ -53,36 +54,19 @@ angular.module('ModelSEED',
         })
 
 
-        .state('app.media', {
-            url: "/media/",
-            templateUrl: 'app/views/media.html',
-        }).state('app.fba', {
-            url: "/fba/",
-            templateUrl: 'app/views/fbas.html',
-        })
-        .state('app.fbaByWS', {
-            url: "/fba/:ws",
-            templateUrl: 'app/views/fbaws.html',
-            controller: 'FBAByWS'
-        })
-
         // object views
         .state('app.modelPage', {
             url: "/models/:ws/:name",
-            templateUrl: 'app/views/modelPage.html',
-            controller: 'ObjectPage'
+            templateUrl: 'app/views/data/model.html',
+            controller: 'DataPage'
         }).state('app.mediaPage', {
             url: "/media/:ws/:name",
-            templateUrl: 'app/views/mediaPage.html',
-            controller: 'ObjectPage'
+            templateUrl: 'app/views/data/media.html',
+            controller: 'DataPage'
         }).state('app.fbaPage', {
             url: "/fba/:ws/:name",
-            templateUrl: 'app/views/fbaPage.html',
-            controller: 'ObjectPage'
-        }).state('app.genome', {
-            url: "/genomes/:ws/:name/:tab",
-            templateUrl: 'app/views/genomePage.html',
-            controller: 'ObjectPage'
+            templateUrl: 'app/views/data/fba.html',
+            controller: 'DataPage'
         })
 
         .state('app.proto', {

@@ -1,12 +1,11 @@
 
-
 .login {
     margin: 20px 0 0 0;
 }
 
 .login md-input-container.md-default-theme .md-input  {
     color: #fff;
-    border-color: #fff;
+    border-color:#fff;
 }
 
 .login md-input-container.md-default-theme label {
@@ -259,6 +258,11 @@
 }
 
 /* tables */
+
+table tr.table-hover {
+    background-color: #f5f5f5;
+}
+
 .table-controls {
     margin: 20px 0 0 0;
 }
@@ -370,28 +374,4 @@ md-tab.active {
 /* labels */
 .label-fba {
     background-color: #5cb85c;
-}
-
-
-
-/* animations */
-.animate-enter {
-    -webkit-transition: 1s linear all; /* Chrome */
-    transition: 1s linear all;
-    opacity: 0;
-}
-
-.animate-enter.animate-enter-active {
-    opacity: 1;
-}
-
-
-
-.sample-show-hide {
-  -webkit-transition:all linear 0.5s;
-  transition:all linear 0.5s;
-}
-
-.sample-show-hide.ng-hide {
-  opacity:0;
 }

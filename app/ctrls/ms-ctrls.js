@@ -41,8 +41,8 @@ angular.module('ms-ctrls', [])
 ['$scope', 'FBA',
 function($scope, FBA) {
 
-    $scope.rxnOpts = {query: '', limit: 21, offset: 0, sort: null};
-    $scope.cpdOpts = {query: '', limit: 22, offset: 0, sort: null};
+    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
 
     $scope.tabs = {selectedIndex : 0};
 

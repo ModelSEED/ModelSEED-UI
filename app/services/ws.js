@@ -75,4 +75,21 @@ function($http, $q, $cacheFactory) {
                    })
     }
 
+    this.getPublic = function() {
+        return $http.get('data/app/modelList.json', {cache:true})
+                    .then(function(res) {
+                        console.log('data fetched', res)
+                        var models = [];
+                        for (var i=0; i<res.data.length; i++) {
+                            var d = res.data[i];
+                            models.push({orgName: d[10]['Name'],
+                                         name: d[1],
+                                         ws: d[7],
+                                         rxnCount: d[10]['Number reactions'],
+                                         cpdCount: d[10]['Number compounds']
+                                        })
+                        }
+                        return models;
+                    })
+    }
 }])
