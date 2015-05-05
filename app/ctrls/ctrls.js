@@ -9,7 +9,7 @@ angular.module('ctrls', [])
 function($scope, WS, MV, $compile, $timeout) {
     $scope.MV = MV;
 
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: {field: 'orgName'}};
 
     $scope.loading = true;
     WS.getPublic().then(function(data) {

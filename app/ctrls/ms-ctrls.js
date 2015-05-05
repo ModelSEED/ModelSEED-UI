@@ -391,29 +391,27 @@ function($scope, MV, Patric, $q, $timeout) {
 .directive('sortable', function() {
     return {
         restrict: 'EA',
-        scope: true,
         link: function(scope, elem, attrs) {
-            var sorted;
 
+            // see table styling in core.css for sorting carets
             scope.sortBy = function($event, name) {
                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
                 scope.opts.sort = {field: name, desc: desc};
 
+                angular.element(elem).find('th').removeClass('sorting-asc')
+                angular.element(elem).find('th').removeClass('sorting-desc')
 
-                angular.element(elem).find('i').remove();
-
-                if (desc)
-                    angular.element($event.target)
-                           .append(' <i class="fa fa-caret-up pull-right"></i>')
-                else
-                    angular.element($event.target)
-                           .append(' <i class="fa fa-caret-down pull-right"></i>')
+                if (desc) {
+                    angular.element($event.target).removeClass('sorting-asc')
+                    angular.element($event.target).addClass('sorting-desc')
+                } else {
+                    angular.element($event.target).removeClass('sorting-desc')
+                    angular.element($event.target).addClass('sorting-asc')
+                }
             }
         }
     }
  })
-
-
 
 
 .directive('pagination', function() {

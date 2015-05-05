@@ -16,24 +16,21 @@
         </thead>
             <tr ng-repeat="fba in item.relatedFBAs"
                 ng-click="addFBA($event, fba, item)"
-                ng-mouseover="fbaHover = true"
-                ng-mouseout="fbaHover = false">
-
+                class="table-hover">
                 <td>
-                    <i class="fa {{fba.checked ? 'fa-check-square-o' : 'fa-square-o'}}"
-                       style="opacity: {{fbaHover && !fba.checked ? '1.0' : (fba.checked ? '1.0' : '0.5')}};"></i>
+                    <i class="fa {{fba.checked ? 'fa-check-square-o' : 'fa-square-o'}}"></i>
                 </td>
                 <td>
                     <a ui-sref="app.mediaPage({ws: fba.ws, name: fba.name})"
-                       ng-click="$event.stopPropagation()">{{fba.media}}</a>
+                       ng-click="$event.stopPropagation()">{{::fba.media}}</a>
                    </td>
                 <td>
                     <a ui-sref="app.fbaPage({ws: fba.ws, name: fba.name})"
-                        ng-click="$event.stopPropagation()">{{fba.name}}</a>
+                        ng-click="$event.stopPropagation()">{{::fba.name}}</a>
                 </td>
                 <td>{{fba.objective === '10000000' ? 0 : fba.objective}}</td>
-                <td>{{fba.rxnCount}}</td>
-                <td>{{fba.cpdCount}}</td>
+                <td>{{::fba.rxnCount}}</td>
+                <td>{{::fba.cpdCount}}</td>
                 <td>{{fba.biomass ? fba.biomass : 'N/A'}}</td>
            </tr>
     </table>

@@ -50,7 +50,7 @@
             <tr>
                 <th></th>
                 <th ng-click="sortBy($event, 'orgName')">Organism</th>
-                <th ng-click="sortBy($event, 'id')">ID</th>
+                <th ng-click="sortBy($event, 'name')">ID</th>
                 <th ng-click="sortBy($event, 'rxnCount')">Reactions</th>
                 <th ng-click="sortBy($event, 'cpdCount')">Compounds</th>
             </tr>
@@ -58,14 +58,13 @@
             <tr ng-repeat-start="item in (filtered = ( data | filter: opts.query
                                                       | orderBy : opts.sort.field : opts.sort.desc)
                                                       | limitTo : opts.limit : opts.offset)"
-                ng-mouseover="hover = true"
-                ng-mouseout="hover = false"
+                class="table-hover"
                 ng-click="showFBAs($event, item)"
-                ng-class="{'table-hover': hover}">
+                > <!--ng-class="{'table-hover': hover}"-->
                 <td>
                     <i ng-if="!item.loading && !item.relatedFBAs"
                        class="fa fa-caret-right"
-                       style="opacity: {{hover ? '1.0' : '0.5'}}"></i>
+                       style="opacity: 0.5;"></i>
                     <i ng-if="item.relatedFBAs"
                        class="fa fa-caret-down"
                        style="opacity: 1.0;"></i>
