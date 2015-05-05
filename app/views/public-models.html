@@ -58,9 +58,8 @@
         <tr ng-repeat-start="item in (filtered = ( data | filter: opts.query
                                                   | orderBy : opts.sort.field : opts.sort.desc)
                                                   | limitTo : opts.limit : opts.offset)"
-            class="table-hover"
             ng-click="showFBAs($event, item)"
-            > <!--ng-class="{'table-hover': hover}"-->
+            class="table-hover">
             <td>
                 <i ng-if="!item.loading && !item.relatedFBAs"
                    class="fa fa-caret-right"

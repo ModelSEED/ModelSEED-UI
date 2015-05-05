@@ -369,6 +369,11 @@ table tr.active {
     transition: none !important;
 }
 
+/* see https://github.com/angular/material/issues/2162 */
+md-input-container:not(.md-input-has-value) input:not(:focus) {
+    color: inherit;
+}
+
 .md-tabs-content .map-table {
     margin-top: 15px;
 }
