@@ -4,6 +4,100 @@ angular.module('ctrls', [])
     $scope.MV = MV;
 }])
 
+
+.controller('Public', ['$scope', 'WS', 'ModelViewer', '$compile', '$timeout',
+function($scope, WS, MV, $compile, $timeout) {
+    $scope.MV = MV;
+
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
+
+    $scope.loading = true;
+    WS.getPublic().then(function(data) {
+        $scope.data = data;
+        $scope.loading = false;
+    })
+
+
+    $scope.showFBAs = function($event, item) {
+        if (item.relatedFBAs)
+            delete item.relatedFBAs;
+        else {
+            item.loading = true;
+            MV.getRelatedFBAs([{workspace: item.ws, name: item.name}])
+                .then(function(fbas) {
+
+                    // select any previously selected
+                    for (var i=0; i<fbas.length; i++) {
+                        if (MV.isSelected(item, fbas[i]))
+                            fbas[i].checked = true;
+                    }
+
+                    item.relatedFBAs = fbas;
+
+                    item.loading = false;
+                })
+        }
+    }
+
+    $scope.addFBA = function(e, fba, model) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var data = {model: {
+                        ws: model.ws,
+                        name: model.name
+                    },
+                    fba: {
+                        ws: fba.ws,
+                        name: fba.name
+                    },
+                    org: model.orgName,
+                    media: fba.media};
+
+
+        if (fba.checked) {
+            MV.rm(data, true);
+            fba.checked = false;
+        } else {
+            MV.add(data);
+            fba.checked = true;
+        }
+    }
+
+
+    // fixme: use MV service and refs
+    $scope.$on('MV.event.change', function(e, item) {
+        // if added to MV
+        if (!item) return;
+
+        if (item === 'clear') {
+            for (var i in $scope.data) {
+                var model = $scope.data[i];
+
+                for (var j in model.relatedFBAs) {
+                    var fba = model.relatedFBAs[j];
+                    fba.checked = false;
+                }
+            }
+        } else {
+            for (var i in $scope.data) {
+                var model = $scope.data[i];
+                if (!model.relatedFBAs) continue;
+
+                for (var j in model.relatedFBAs) {
+                    var fba = model.relatedFBAs[j];
+                    if (item.model.ws === model.ws &&
+                        item.model.name === model.name &&
+                        item.fba.ws === fba.ws &&
+                        item.fba.name === fba.name)
+                        fba.checked = false;
+                }
+            }
+        }
+    })
+
+}])
+
 .controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer', '$rootScope',
 function($scope, $dialog, MV, $rootScope) {
 
@@ -103,7 +197,7 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
     })
 }])
 
-.controller('ObjectPage',
+.controller('DataPage',
     ['$scope', '$stateParams',
     function($scope, $stateParams) {
 
@@ -114,71 +208,6 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
 
 }])
 
-.controller('FBAByWS', function() {
-
-})
-
-.controller('ModelsByWS',
-    ['$scope', '$stateParams', '$http', '$log', 'ModelViewer',
-    function($scope, $stateParams, $http, $log, ModelViewer) {
-    $scope.ML = ModelViewer;
-    $scope.filterOptions = {
-            filterText: '',
-            useExternalFilter: false,
-            showFilter: true
-          };
-
-    $scope.gridOptions = {//enableFiltering: true,
-                          //enableRowSelection: true,
-                          //enableSelectAll: false,
-                          filterOptions: $scope.filterOptions,
-                          showColumnMenu: true,
-                          columnDefs: [
-                               {field: "name",
-                                displayName: "Name",
-                                cellTemplate:
-                                        '<div class="ui-grid-cell-contents">'+
-                                        '<a ui-sref="modelPage({ws: '+"'"+'coremodels'+"'"+', name: row.entity[col.field]})">'+
-                                            '{{row.entity[col.field]}}'+
-                                        '</a> '+
-                                        '<a ng-click="ML.add({{row.entity.ws}}, {{row.entity.name}})" class="btn btn-default btn-xs pull-right">add model</a>'+
-                                        '</div>'},
-                                //{field: "blah", displayName: "new"}
-                            ]};
-
-    $scope.selectedCount = 0;
-
-    $scope.gridOptions.onRegisterApi = function (gridApi) {
-        $scope.gridApi = gridApi;
-    }
-
-
-    var params;
-    if ($stateParams.ws === 'coremodels_ATP') {
-        params = {workspaces: [$stateParams.ws],
-                  includeMetadata: 1};
-    } else if ($stateParams.ws === 'coremodels') {
-        params = {workspaces: [$stateParams.ws],
-                  type: 'KBaseFBA.FBAModel',
-                  includeMetadata: 1};
-}
-
-
-    $scope.loading = true;
-    $http.rpc('ws', 'list_objects', params)
-        .then(function(d) {
-            $scope.loading = false;
-            var data = [];
-            for (var i in d) {
-                var ws = d[i][7];
-                var name = d[i][1]
-                data.push({name: name, blah: 'blah', ws:ws});
-            }
-
-            $scope.gridOptions.data = data;
-        })
-
-}])
 
 .controller('CompareTabs', ['$scope', '$timeout', 'ModelViewer', 'VizOptions',
 function ($scope, $timeout, MV, VizOpts) {
@@ -213,6 +242,7 @@ function ($scope, $timeout, MV, VizOpts) {
                 $scope.loadMap(map);
             })
         })
+
 
         // update if flux settings change
         $scope.$on('Compare.event.absFlux', function() {

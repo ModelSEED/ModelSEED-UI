@@ -27,17 +27,19 @@ function($http, $q, $rootScope) {
         // similary for fba
         self.models.push(item);
         localStorage.setItem(key, angular.toJson(self.models));
-        $rootScope.$broadcast('MV.event.change');
+        $rootScope.$broadcast('MV.event.change', item);
     }
 
     this.addBulk = function(models) {
         self.models = self.models.concat(models);
         localStorage.setItem(key, angular.toJson(self.models));
-        $rootScope.$broadcast('MV.event.change');
+        $rootScope.$broadcast('MV.event.change', models);
     }
 
     this.rm = function(item, anyMatch) {
         // if anyMatch is true, an object comparison will occur
+        var removedItem = self.models[item];
+
         if (!anyMatch) {
             self.models.splice(item, 1);
         } else {
@@ -48,14 +50,14 @@ function($http, $q, $rootScope) {
         }
 
         localStorage.setItem(key, angular.toJson(self.models));
-        $rootScope.$broadcast('MV.event.change');
+        $rootScope.$broadcast('MV.event.change', removedItem);
     }
 
     this.rmAll = function() {
         self.models.splice(0, self.models.length);
         localStorage.setItem(key, '[]');
         this.referencing = {};
-        $rootScope.$broadcast('MV.event.change');
+        $rootScope.$broadcast('MV.event.change', 'clear');
     }
 
     this.swapItem = function(index, newItem) {
@@ -64,9 +66,14 @@ function($http, $q, $rootScope) {
         $rootScope.$broadcast('MV.event.change');
     }
 
-    this.isSelected = function(item) {
+    this.isSelected = function(model, obj) {
+        // a hack until refs are used
         for (var i=0; i<this.models.length; i++) {
-            if (angular.equals(this.models[i], item))
+            var m = this.models[i];
+            if (m.model.ws === model.ws &&
+                m.model.name === model.name &&
+                m.fba.ws === obj.ws &&
+                m.fba.name === obj.name)
                 return true;
         }
 
