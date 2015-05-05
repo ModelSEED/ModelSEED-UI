@@ -429,5 +429,5 @@ function($scope, MV, Patric, $q, $timeout) {
             }
         }
     }
- })
+})
 
