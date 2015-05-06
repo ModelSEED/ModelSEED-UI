@@ -13,6 +13,7 @@ function($http, $q, $rootScope) {
     this.getGenomes = function(opts) {
         var query = opts.query;
         var url = endpoint+'genome/?http_accept=application/solr+json';
+        url += '&select(genome_name,genome_id,taxon_id,genus,contigs)'
 
         if (opts.limit)
             url += '&limit('+opts.limit+ (opts.offset ? ','+opts.offset : '') +')';
@@ -30,6 +31,7 @@ function($http, $q, $rootScope) {
         // cancel any previous request
         if (liveReq) liveReq.resolve();
 
+        console.log('url', url)
         liveReq = $q.defer();
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res){

@@ -287,12 +287,14 @@ table thead[sortable] th.sorting-asc:after {
 }
 
 .table-hover:hover td:first-child i.fa-caret-right,
-.table-hover:hover td:first-child i.fa-square-o {
+.table-hover:hover td:first-child i.fa-square-o,
+.table-hover:hover td:first-child i.fa-circle-o {
     opacity: 1.0 !important;
 }
 
 .table-hover td:first-child i.fa-caret-right,
-.table-hover td:first-child i.fa-square-o {
+.table-hover td:first-child i.fa-square-o,
+.table-hover td:first-child i.fa-circle-o {
     opacity: 0.5 !important;
 }
 
@@ -305,6 +307,9 @@ table thead[sortable] th.sorting-asc:after {
 }
 .table-controls .query-input {
     width: 200px;
+}
+.table-controls .btn-reconstruct {
+    margin-right: 50px;
 }
 
 .table-controls .btn-default {

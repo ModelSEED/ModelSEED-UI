@@ -3,6 +3,7 @@
 <div class="h2">Model Reconstruction</div>
 <hr class="no-margin">
 
+<!--<ng-include src="'app/views/apps/reconstruct.html'"></ng-include>-->
 
 <div class="table-controls">
     <div layout="row" layout-align="start start" class="pull-left">
@@ -40,11 +41,23 @@
     <div class="pull-right query-opt">
         {{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results
     </div>
+
+    <!--
+    <div class="pull-right">
+        <div ng-if="selected"
+             ng-click="reconstruct($event, selectedID)"
+             class="btn btn-primary btn-sm btn-reconstruct">
+            Reconstruct
+        </div>
+    </div>-->
+
+
 </div>
 
 <table class="table">
     <thead sortable>
         <tr>
+            <th></th>
             <th ng-click="sortBy($event,'genome_name')">
                 Name
             </th>
@@ -64,7 +77,12 @@
     </thead>
 
     <tbody>
-        <tr ng-repeat="g in genomes.docs">
+        <tr ng-repeat="g in genomes.docs"
+            ng-click="selectGenome(g)"
+            class="table-hover">
+            <td>
+                <!--<i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>-->
+            </td>
             <td>{{g.genome_name}}</td>
             <td>{{g.genome_id}}</td>
             <td>{{g.genus}}</td>
@@ -72,7 +90,6 @@
             <td>{{g.contigs}}</td>
             <td ng-if="genomes.docs == 0 && !loading">No genome found</td>
         </tr>
-
     </tbody>
 </table>
 

@@ -119,7 +119,7 @@ function($scope, $dialog, MV, $rootScope) {
     $scope.openFBAView = function(ev, $index, item) {
         $dialog.show({
             templateUrl: 'app/views/dialogs/fba.html',
-            // targetEvent: ev, //fixme
+            // targetEvent: ev, //fixme: bug report
             controller: ['$scope', '$http', 'ModelViewer',
                 function($scope, $http, MV) {
                 $scope.MV = MV;

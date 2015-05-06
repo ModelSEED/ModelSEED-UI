@@ -284,8 +284,8 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
 }])
 
 .controller('Reconstruct',
-['$scope', 'ModelViewer', 'Patric', '$q', '$timeout',
-function($scope, MV, Patric, $q, $timeout) {
+['$scope', 'Patric', '$mdDialog', '$timeout',
+function($scope, Patric, $dialog, $timeout) {
 
     $scope.opts = {query: '', limit: 25, offset: 0, sort: null};
 
@@ -304,6 +304,26 @@ function($scope, MV, Patric, $q, $timeout) {
               })
     }
 
+    $scope.selectGenome = function(g) {
+        $scope.selected = g;
+    }
+
+    $scope.reconstruct = function(ev, item) {
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/reconstruct.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }
 }])
 
 

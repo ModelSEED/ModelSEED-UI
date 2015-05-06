@@ -80,7 +80,6 @@ angular.module('ModelSEED',
             controller: 'Compare',
         })
 
-
         .state('app.api', {
             url: "/help/api",
             templateUrl: 'app/views/docs/api.html',

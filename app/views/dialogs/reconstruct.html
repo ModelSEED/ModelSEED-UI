@@ -1,0 +1,18 @@
+
+<md-dialog flex="50">
+
+    <md-content>
+		<h3>Reconstruct Model</h3>
+		<b>Organism</b>: {{selected.genome_name}}<br>
+		<b>ID</b>: {{selected.genome_id}}
+
+        <ng-include src="'app/views/apps/reconstruct.html'"></ng-include>
+
+    </md-content>
+
+    <div class="md-actions">
+        <md-button ng-click="cancel()">
+            Reconstruct
+        </md-button>
+    </div>
+</md-dialog>
