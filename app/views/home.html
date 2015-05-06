@@ -97,10 +97,10 @@
                     </div>
                     <br>
                     <div class="col-lg-8">
+                        <!--
                         <a ui-sref="app.publicModels" class="btn btn-outline">
                           Get Started
                         </a>
-                        <!--
                         <a href="app/#/models/" class="btn btn-outline btn-tour">
                             Take a Tour
                         </a>
@@ -109,7 +109,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="login" ng-controller="Login">
+                    <div ng-if="!$root.user" ng-controller="Login" class="login">
                         <h4>Login to continue to ModelSEED</h4>
 
                         <div ng-if="inValid" class="alert alert-danger" role="alert">
@@ -138,6 +138,15 @@
 
                         <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
                     </div>
+
+                    <div ng-if="$root.user" ng-controller="Login" class="login">
+                        <h4>Go Back to the ModelSEED</h4>
+                        <a ui-sref="app.publicModels" class="btn btn-outline">
+                            Continue
+                        </a>
+                    </div>
+
+
                 </div>
 
 
