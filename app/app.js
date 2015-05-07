@@ -49,7 +49,8 @@ angular.module('ModelSEED',
         }).state('app.publicModels', {
             url: "/models/",
             templateUrl: 'app/views/public-models.html',
-            controller: 'Public'
+            controller: 'Public',
+            authenticate: true
         }).state('app.modelEditor', {
             url: "/model-editor/",
             templateUrl: 'app/views/editor/model-editor.html',

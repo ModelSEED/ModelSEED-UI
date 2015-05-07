@@ -25,10 +25,13 @@
     position: absolute;
 }
 
-.navbar-header .label-beta {
-    margin-top: 10px;
-}
+.navbar-header {
+    position: relative;
 
+}
+.label-alpha {
+    font-size: 10px;
+}
 
 :focus {
     outline: none !important;
@@ -58,12 +61,34 @@
 }
 
 .navbar-nav {
-    margin: 0 0 0 50px;
+    margin-left: 15px;
 }
 
 .navbar-default .navbar-nav>li>a {
-  color: #fff;
-  font-weight: 300;
+    color: #fff;
+    font-weight: 300;
+}
+
+.navbar-default .navbar-top-links > li > a{
+    padding: 0;
+    font-size: 8pt;
+    line-height: 1.1em;
+    margin: 0 7px;
+    text-align: center;
+}
+.navbar-default .navbar-top-links > li i {
+    display: inline-block;
+    padding-top: 8px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.icon-benzene {
+    font-weight: 600;
+}
+
+.icon-tools-2 {
+    font-weight: 600;
 }
 
 .navbar-default .navbar-nav>li>a:hover {
@@ -79,12 +104,22 @@
 
 
 .navbar-brand {
-    padding-right: 5px;
+    padding-left: 20px;
+    padding-right: 37px;
     color: #fff !important;
+    background-color: #444;
 }
 .navbar-brand:hover {
-    color: #f2f2f2 !important;
+    color: #dfdfdf !important; /*overrides*/
+    background-color: #444 !important;
 }
+.brand-home {
+    background-color: transparent;
+}
+.navbar-brand:hover {
+    background-color: transparent !important;
+}
+
 
 .sidebar {
     z-index: 3000;
@@ -112,10 +147,15 @@
 }
 
 .sidebar-collapse {
-    color: #444 !important;
+    float: left;
+    height: 50px;
+    padding: 15px 15px;
+    font-size: 18px;
+    line-height: 20px;
+
 }
 .sidebar-collapse:hover {
-    color: #555 !important;
+    color: #dfdfdf;
 }
 
 .nav .open>a {

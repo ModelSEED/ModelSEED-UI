@@ -42,6 +42,7 @@ module.exports = function(grunt) {
             js: {
                 files: ['**/*.js',
                         '**/*.html',
+                        '**/*.css',
                         '!node_modules/**',
                         '!lib/ui-common/**',
 
