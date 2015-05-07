@@ -116,7 +116,7 @@
 .brand-home {
     background-color: transparent;
 }
-.navbar-brand:hover {
+.brand-home:hover {
     background-color: transparent !important;
 }
 
