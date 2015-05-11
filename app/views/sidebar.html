@@ -15,37 +15,40 @@
             <ul ng-show="MV.models.length" class="list-unstyled">
                 <li ng-repeat="item in MV.models track by $index">
 
-                    <div class="ellipsis selected-data-item">
-                        <a ui-sref="app.modelPage({ws: item.model.ws, name: item.model.name})"
-                           class="model" ng-click="makeActive($event)">
+                    <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
+                        <a ui-sref=".modelPage({ws: item.model.ws, name: item.model.name})"
+                           class="model">
                            {{item.org}}
                         </a>
-                        <span class="fa fa-remove hover pointer"
+                        <i class="icon-close hover pointer"
                               ng-click="MV.rm($index)">
-                        </span>
+                        </i>
                     </div>
 
                     <div class="ellipsis selected-data-item">
-                        <a ui-sref="app.fbaPage({ws: item.fba.ws, name: item.fba.name})"
+                        <a ui-sref=".fbaPage({ws: item.fba.ws, name: item.fba.name})"
                            class="fba" ng-click="makeActive($event)">
                            <span class="label label-fba">FBA</span> {{item.media}}
                         </a>
-                        <span class="glyphicon glyphicon-cog hover pointer"
+
+                        <i class="glyphicon glyphicon-cog hover pointer"
                               ng-click="openFBAView($event, $index, item)">
-                        </span>
+                        </i>
                     </div>
 
                     <br>
                 </li>
             </ul>
 
-            <div ng-if="!MV.models.length" class="warning-msg text-danger">
-                No data selected
+            <div ng-if="!MV.models.length" class="warning-msg">
+                <div class="text-danger">No data selected</div>
+                <br>
+                <div class="warning-msg-select" ng-if="!$state.includes('app.publicModels')">
+                    ( <a ui-sref=".publicModels"><small>Select Data</small></a> )
+                </div>
             </div>
         </div>
-
     </div>
-
 
     <div class="sidebar-nav-small" style="display: none;">
         <ul class="nav">

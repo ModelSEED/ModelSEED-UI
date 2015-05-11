@@ -105,14 +105,14 @@ function($scope, $dialog, MV, $rootScope) {
 
     $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams){
-            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 )
+            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
                 angular.element('#selected-models').find('.active').removeClass('active')
+            }
         })
 
     // selected navigation item.  Only highlights clicked
     $scope.makeActive = function(event, index, type, item) {
-        angular.element('#selected-models').find('.active').removeClass('active')
-        angular.element(event.target).parent().addClass('active');
+        //angular.element(event.target).parent().addClass('active');
     }
 
 

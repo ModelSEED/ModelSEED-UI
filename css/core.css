@@ -83,16 +83,14 @@
     text-align: center;
 }
 
-.icon-benzene {
+.navbar-default .navbar-top-links > li i.icon-tools,
+.navbar-default .navbar-top-links > li i.icon-benzene {
     font-weight: 600;
 }
 
-.icon-tools-2 {
-    font-weight: 600;
-}
 
 .navbar-default .navbar-nav>li>a:hover {
-    color: #f2f2f2;
+    color: #dfdfdf;
 }
 
 .navbar-default .navbar-nav>.active>a,
@@ -132,14 +130,12 @@
     border-bottom: none;
 }
 
-.sidebar a > i,
-.sidebar a > img{
+.sidebar a > i {
     color: #fff;
     font-size: 1.2em;
 }
 
 .sidebar-nav .nav > li > a {
-    color: #fff;
     background-color: #555;
     font-weight: 500;
     padding: 10px 10px 10px 15px;
@@ -170,9 +166,6 @@
     font-size: 1.5em;
 }
 
-#selected-models {
-}
-
 #selected-models .header {
     margin: 15px 7px;
     font-size: .9em;
@@ -183,19 +176,24 @@
 
 #selected-models a {
     text-decoration: none;
-    color: #fff;
-
 }
+#selected-models a {
+    color: #fff;
+}
+
+
 
 #selected-models .selected-data-item,
 #selected-models .warning-msg {
     border-left: 4px solid #555;
     padding-left: 5px;
 }
+#selected-models .warning-msg-select {
+    color: #9f9f9f;
+}
 
 #selected-models .selected-data-item.active {
     border-left: 4px solid #aaa;
-
 }
 
 #selected-models .active a {
@@ -206,7 +204,8 @@
     color: #dfdfdf;
 }
 
-#selected-models .fa,
+
+#selected-models i,
 #selected-models .glyphicon{
     margin: .1em 0 0 0;
     font-size: 1.3em;
@@ -216,6 +215,7 @@
     top: auto;
     line-height: .8em;
 }
+
 #selected-models .glyphicon {
     right: 8px;
 }
@@ -238,11 +238,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.sidebar-nav i,
-.sidebar-nav object {
-    color: #666;
 }
 
 
@@ -275,12 +270,6 @@
     margin: 10px 0 0 0;
 }
 
-
-
-.obj-grid {
-    height: 100%;
-}
-
 .dataTables_wrapper table {
     margin-bottom: 10px;
 }
@@ -298,8 +287,6 @@
 }
 
 /* tables */
-
-
 table thead[sortable] th:not(:empty):after {
   content: "\f0dc";
   float: right;
@@ -409,9 +396,12 @@ table tr.active {
 }
 
 /* md mods */
-
 [role="tabpanel"] {
     transition: none !important;
+}
+
+md-input-container {
+    padding-bottom: 15px;
 }
 
 /* see https://github.com/angular/material/issues/2162 */
@@ -445,13 +435,6 @@ md-card {
 .md-dialog-container {
     z-index: 3000;
 }
-
-/* experiment */
-/*
-md-tab.active {
-    border: 2px solid #aaa;
-}*/
-
 
 
 /* labels */

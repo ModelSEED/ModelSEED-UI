@@ -127,8 +127,11 @@ angular.module('ModelSEED',
         else if (toState.authenticate && !auth.isAuthenticated()) {
             $state.transitionTo('home');
             event.preventDefault();
-
         }
+
+            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
+                angular.element('#selected-models').find('.active').removeClass('active')
+            }
     })
 
     $rootScope.$state = $state;
