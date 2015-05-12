@@ -54,10 +54,14 @@
             No reaction found
         </div>
     </table>
+
+    <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 </div>
-<br>
-<md-progress-circular ng-if="loading"
-                      md-mode="indeterminate"
-                      md-diameter="40">
-</md-progress-circular>
+
+
+<div ng-if="!data">
+    <br>
+    Oh no.  Something seems to have gone wrong.
+</div>
+
 

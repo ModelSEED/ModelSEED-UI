@@ -32,6 +32,22 @@ angular.module('core-directives')
     }
  })
 
+.directive('email', function() {
+    return {
+        link: function(scope, elem, attrs) {
+            var emailList = ['nealconrad@gmail.com'];
+            var emailSubject = attrs.emailSubject ? attrs.emailSubject : 'Inquiry';
+
+            var link = '<a href="mailto:'+emailList.join(',')+'">'+
+                            (attrs.text? attrs.text : 'Send email')+
+                       '</a>'
+
+            angular.element(elem).append(link);
+        }
+    }
+ })
+
+
 .directive('pathTest', function() {
     return {
         link: function(scope, elem, attrs) {
