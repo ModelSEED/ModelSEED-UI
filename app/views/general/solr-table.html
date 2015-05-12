@@ -34,7 +34,7 @@
         </div>
 
         <div class="pull-right query-opt">
-            {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{filtered.length}} results
+            {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{data.numFound}} results
         </div>
     </div>
     <br>
@@ -46,12 +46,11 @@
             </tr>
         </thead>
 
-        <tr ng-repeat="item in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
-                        | limitTo : opts.limit : opts.offset)">
+        <tr ng-repeat="item in data.docs">
             <td ng-repeat="h in header">{{item[h.key]}}</td>
         </tr>
 
-        <div ng-if="!loading && filtered.length == 0">
+        <div ng-if="!loading && data.numFound == 0">
             No reaction found
         </div>
     </table>

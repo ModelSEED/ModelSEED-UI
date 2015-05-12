@@ -23,7 +23,7 @@ function($http, $q, $rootScope) {
 
         var cache = true;
         if (query) {
-            url += '&keyword('+query+')';
+            url += '&keyword("'+query+'")';
             cache = false;
         } else
             url += '&keyword(*)';

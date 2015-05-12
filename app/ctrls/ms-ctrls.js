@@ -38,50 +38,55 @@ angular.module('ms-ctrls', [])
 }])
 
 .controller('Biochem',
-['$scope', 'FBA',
-function($scope, FBA) {
+['$scope', 'Biochem',
+function($scope, Biochem) {
 
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
 
     $scope.tabs = {selectedIndex : 0};
 
-    $scope.loadingRxns = true,
-    $scope.loadingCpds = true;
 
     $scope.rxnHeader = [{label: 'ID', key: 'id'},
                         {label: 'Name', key: 'name'},
-                        {label: 'Equation', key: 'name'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
+                        {label: 'Equation', key: 'equation'},
+                        {label: 'deltaG', key: 'deltag'},
+                        {label: 'detalGErr', key: 'deltagerr'}];
 
     $scope.cpdHeader = [{label: 'ID', key: 'id'},
                         {label: 'Name', key: 'name'},
                         {label: 'Formula', key: 'formula'},
-                        {label: 'Abbrev', key: 'abbrev'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
+                        {label: 'Abbrev', key: 'abbreviation'},
+                        {label: 'deltaG', key: 'deltag'},
+                        {label: 'detalGErr', key: 'deltagerr'}];
+
+
+    function updateRxns() {
+        Biochem.get('reaction', $scope.rxnOpts)
+           .then(function(res) {
+                $scope.rxns = res;
+                $scope.loadingRxns = false;
+           })
+    }
+
+    function updateCpds() {
+        Biochem.get('compound', $scope.cpdOpts)
+           .then(function(res) {
+                $scope.cpds = res;
+                $scope.loadingCpds = false;
+                console.log('cpds', res)
+           })
+    }
 
     $scope.$watch('rxnOpts', function(value){
-        $scope.rxnsOpts = value
+        $scope.loadingRxns = true;
+        updateRxns();
     }, true)
 
-    FBA.getBiochem()
-       .then(function(res) {
-
-            FBA.getRxns(res.reactions)
-               .then(function(rxns) {
-                    $scope.rxns = rxns;
-                    $scope.loadingRxns = false;
-               })
-
-            FBA.getCpds(res.compounds)
-               .then(function(cpds) {
-                    $scope.cpds = cpds;
-                    $scope.loadingCpds = false;
-               })
-       })
-
+    $scope.$watch('cpdOpts', function(value){
+        $scope.loadingCpds = true;
+        updateCpds();
+    }, true)
 }])
 
 .controller('ModelEditor',
@@ -175,7 +180,6 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
                 }
 
                 $scope.addItems = function(items){
-                    console.log('clicked add items... data was', $scope.data)
                     $dialog.hide();
                     var ws = $scope.selectedWS.name,
                         name = $scope.selectedModel.name;
@@ -186,7 +190,6 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
                         console.log('res', res)
                             $scope.data = $scope.data.concat(items)
                             $scope.loadingModel = false;
-                            console.log('data is now', $scope.data)
                        })
                 }
             }]
@@ -204,7 +207,6 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
                 for (var i=0; i<$scope.data.length; i++) {
                     for (var j=0; j<$scope.checkedRxns.length; j++) {
                         if ($scope.data[i].id === $scope.checkedRxns[j].id) {
-                            console.log('removing locally', $scope.data[i])
                             $scope.data.splice(i, 1)
                             break;
                         }
@@ -338,6 +340,22 @@ function($scope, Patric, $dialog, $timeout) {
             placeholder: '@tablePlaceholder',
         },
         templateUrl: 'app/views/general/table.html',
+        link: function(scope, elem, attrs) {
+
+        }
+    }
+ })
+.directive('ngTableSolr', function() {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+        },
+        templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
 
         }

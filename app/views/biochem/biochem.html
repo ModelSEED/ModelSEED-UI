@@ -7,12 +7,12 @@
     <md-tab>
         <md-tab-label>Reactions</md-tab-label>
         <md-tab-template>
-            <ng-table table-header="rxnHeader"
-                      table-data="rxns"
-                      table-opts="rxnOpts"
-                      table-loading="loadingRxns"
-                      table-placeholder="Search reactions">
-            </ng-table>
+            <ng-table-solr table-header="rxnHeader"
+                           table-data="rxns"
+                           table-opts="rxnOpts"
+                           table-loading="loadingRxns"
+                           table-placeholder="Search reactions">
+            </ng-table-solr>
 
         </md-tab-template>
     </md-tab>
@@ -20,13 +20,12 @@
     <md-tab>
         <md-tab-label>Compounds</md-tab-label>
         <md-tab-template>
-            <ng-table table-header="cpdHeader"
-                      table-data="cpds"
-                      table-opts="cpdOpts"
-                      table-loading="loadingCpds"
-                      table-placeholder="Search compounds"
-                      >
-            </ng-table>
+            <ng-table-solr table-header="cpdHeader"
+                           table-data="cpds"
+                           table-opts="cpdOpts"
+                           table-loading="loadingCpds"
+                           table-placeholder="Search compounds">
+            </ng-table-solr>
         </md-tab-template>
     </md-tab>
 

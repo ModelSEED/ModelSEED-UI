@@ -16,7 +16,8 @@ angular.module('ModelSEED',
  'FBA',
  'ModelViewer',
  'Patric',
- 'WS'
+ 'WS',
+ 'Biochem'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider', '$urlRouterProvider',
     function($locationProvider, $stateProvider, $httpProvider, $urlRouterProvider) {
