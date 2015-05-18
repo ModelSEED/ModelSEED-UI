@@ -17,13 +17,17 @@ angular.module('ModelSEED',
  'ModelViewer',
  'Patric',
  'WS',
+ 'MS',
  'Biochem'
  ])
-.config(['$locationProvider', '$stateProvider', '$httpProvider', '$urlRouterProvider',
-    function($locationProvider, $stateProvider, $httpProvider, $urlRouterProvider) {
+.config(['$locationProvider', '$stateProvider', '$httpProvider',
+         '$urlRouterProvider', '$urlMatcherFactoryProvider',
+function($locationProvider, $stateProvider, $httpProvider,
+         $urlRouterProvider, $urlMatcherFactoryProvider) {
 
     $locationProvider.html5Mode(false);
 
+    $urlMatcherFactoryProvider.strictMode(false);
 
     $stateProvider
         .state('home', {
@@ -81,6 +85,7 @@ angular.module('ModelSEED',
         .state('app.proto', {
             url: "/proto",
             templateUrl: 'app/views/proto.html',
+            controller: 'Proto',
         })
 
         .state('app.compare', {
@@ -94,6 +99,28 @@ angular.module('ModelSEED',
             url: "/help/api",
             templateUrl: 'app/views/docs/api.html',
             controller: 'Help',
+        })
+
+
+        /* only used for testing analysis forms */
+        .state('app.run', {
+            url: "/run",
+            templateUrl: 'app/views/run/run.html',
+        })
+        .state('app.runReconstruct', {
+            url: "/run/reconstruct",
+            templateUrl: 'app/views/run/reconstruct.html',
+            controller: 'RunReconstruct',
+        })
+        .state('app.runFBA', {
+            url: "/run/fba",
+            templateUrl: 'app/views/run/fba.html',
+            controller: 'RunFBA',
+        })
+        .state('app.runGapfill', {
+            url: "/run/gapfill",
+            templateUrl: 'app/views/run/gapfill.html',
+            controller: 'RunGapfill',
         })
 
     // default redirects (when not already authenticated)
