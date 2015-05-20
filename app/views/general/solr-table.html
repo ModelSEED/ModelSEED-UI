@@ -10,7 +10,7 @@
 
             <md-progress-circular ng-if="loading"
                                   md-mode="indeterminate"
-                                  class="pull-left"
+                                  class="table-loading pull-left"
                                   md-diameter="20">
             </md-progress-circular>
         </div>
@@ -39,7 +39,7 @@
     </div>
     <br>
 
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered" ng-if="data.docs.length">
         <thead sortable>
             <tr>
                 <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{h.label}}</th>
@@ -55,13 +55,10 @@
         </div>
     </table>
 
-    <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 </div>
 
 
-<div ng-if="!data">
+<div ng-if="!loading && !data">
     <br>
     Oh no.  Something seems to have gone wrong.
 </div>
-
-

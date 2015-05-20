@@ -11,19 +11,40 @@ function($http, $q, $rootScope) {
 
     var liveReq;
     this.getGenomes = function(opts) {
-        var query = opts.query;
-        var url = endpoint+'genome/?http_accept=application/solr+json';
-        url += '&select(genome_name,genome_id,taxon_id,genus,contigs)'
-
-        if (opts.limit)
-            url += '&limit('+opts.limit+ (opts.offset ? ','+opts.offset : '') +')';
-
-        if (opts.sort)
-            url += '&sort('+(opts.sort.desc ? '-': '+')+opts.sort.field+')';
-
         var cache = true;
-        if (query) {
-            url += '&keyword("'+query+'")';
+        var url = endpoint+'genome/?http_accept=application/solr+json';
+
+        if (opts) {
+            var query = opts.query ? opts.query : null,
+                limit = opts.limit ? opts.limit : null,
+                offset = opts.offset ? opts.offset : null,
+                sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
+                sortField = opts.sort ? opts.sort.field : '',
+                cols = opts.visible ? opts.visible : [];
+        }
+
+        if (limit) url += '&limit('+limit+ (offset ? ','+offset : '') +')';
+        if (sort) url += '&sort('+(opts.sort.desc ? '-': '+')+opts.sort.field+')';
+
+
+        if (cols) {
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push(cols[i]);
+            }
+            url += '&select('+set.join(',')+')';
+        }
+
+        console.log('columns', cols)
+        if (query && cols.length) {
+            console.log('adding eqs')
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push('eq('+cols[i]+',*'+query+'*)');
+            }
+            url += '&or('+set.join(',')+')';
+        } else if (query) {
+            url += "&keyword('"+query+"')";
             cache = false;
         } else
             url += '&keyword(*)';

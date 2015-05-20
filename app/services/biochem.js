@@ -13,29 +13,42 @@ function($http, $q, $rootScope) {
     var cpdReq, rxnReq;
     this.get = function(collection, opts) {
         var cache = true;
-        var query = opts ? opts.query : null;
         var url = endpoint+'model_'+collection+'/?http_accept=application/solr+json'
 
-        if (opts.limit)
-            url += '&limit('+opts.limit+ (opts.offset ? ','+opts.offset : '') +')';
+        if (opts) {
+            var query = opts.query ? opts.query : null,
+                limit = opts.limit ? opts.limit : null,
+                offset = opts.offset ? opts.offset : null,
+                sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
+                sortField = opts.sort ? opts.sort.field : '';
+        }
 
-        if (opts.sort) {
-            url += '&sort('+(opts.sort.desc ? '-': '+')+opts.sort.field+')';
+        if (limit)
+            url += '&limit('+limit+ (offset ? ','+offset : '') +')';
+
+        if (sort && !query) {
+            url += '&sort('+sort+sortField+')';
             cache = false;
         }
 
         if (query) {
-            url += '&keyword("'+query+'")';
+            // sort by id when querying
+            url += '&keyword("'+query+'")&sort(id)'
             cache = false;
-        } else
+        } else {
             url += '&keyword(*)';
+            cache = false;
+        }
 
-        // cancel any previous request
+        if (offset === 0) cache = true;
+
+        // cancel any previous request using defer
         if (rxnReq && collection === 'reaction') rxnReq.resolve();
         if (cpdReq && collection === 'compound') cpdReq.resolve();
 
         var liveReq = $q.defer();
 
+        // save defer for later use
         if (collection === 'reaction')
             rxnReq = liveReq;
         else if (collection === 'compound')
@@ -43,7 +56,7 @@ function($http, $q, $rootScope) {
 
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res){
-                        liveReq = false;
+                        rxnReq = false, cpdReq = false;
                         return res.data.response;
                     })
     }

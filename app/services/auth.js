@@ -7,8 +7,8 @@
  *
 */
 
-angular.module('kbase-auth', [])
-.service('authService', ['$http', 'config', function($http, config) {
+angular.module('Auth', [])
+.service('Auth', ['$http', 'config', function($http, config) {
     var self = this;
 
     var auth = JSON.parse( localStorage.getItem('auth') );
@@ -58,6 +58,3 @@ angular.module('kbase-auth', [])
     }
 
 }]);
-
-
-

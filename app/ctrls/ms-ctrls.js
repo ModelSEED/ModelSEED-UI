@@ -1,6 +1,6 @@
 
 angular.module('ms-ctrls', [])
-.controller('Login', ['$scope', '$state', 'authService', '$window',
+.controller('Login', ['$scope', '$state', 'Auth', '$window',
     function($scope, $state, auth, $window) {
 
     $scope.loginUser = function(user, pass) {
@@ -24,7 +24,6 @@ angular.module('ms-ctrls', [])
                 } else {
                     $scope.failMsg = "Could not reach authentication service: "+e.error_msg;
                 }
-
             })
     }
 
@@ -37,10 +36,18 @@ angular.module('ms-ctrls', [])
     }
 }])
 
+
+
+.controller('Run',
+['$scope', '$http',
+function($scope, $http) {
+
+
+}])
+
 .controller('Biochem',
 ['$scope', 'Biochem',
 function($scope, Biochem) {
-
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
 
@@ -63,19 +70,19 @@ function($scope, Biochem) {
 
     function updateRxns() {
         Biochem.get('reaction', $scope.rxnOpts)
-           .then(function(res) {
-                $scope.rxns = res;
-                $scope.loadingRxns = false;
-           })
+               .then(function(res) {
+                    $scope.rxns = res;
+                    $scope.loadingRxns = false;
+               })
     }
 
     function updateCpds() {
         Biochem.get('compound', $scope.cpdOpts)
-           .then(function(res) {
-                $scope.cpds = res;
-                $scope.loadingCpds = false;
-                console.log('cpds', res)
-           })
+               .then(function(res) {
+                    $scope.cpds = res;
+                    $scope.loadingCpds = false;
+                    console.log('cpds', res)
+               })
     }
 
     $scope.$watch('rxnOpts', function(value){
@@ -286,15 +293,48 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
 }])
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$mdDialog', '$timeout',
-function($scope, Patric, $dialog, $timeout) {
+['$scope', 'Patric', '$mdDialog', '$timeout', '$http',
+function($scope, Patric, $dialog, $timeout, $http) {
+    $scope.showMenu = function() {
+      $scope.menuVisible = true;
+    }
 
-    $scope.opts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.opts = {query: '',
+                   limit: 25,
+                   offset: 0,
+                   sort: null,
+                   visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+
+    // all possible columns
+    $scope.columns = [{prop: 'genome_name', label: 'Name'},
+                      {prop: 'genome_id', label: 'ID'},
+                      {prop: 'genus', label: 'Genus'},
+                      {prop: 'taxon_id', label: 'Tax ID'},
+                      {prop: 'contigs', label: 'Contigs'}]
+
+    $scope.getLabel = function(prop) {
+        for (var i=0; i<$scope.columns.length; i++) {
+            var col = $scope.columns[i];
+            if (col.prop === prop) return col.label;
+        }
+        return '';
+    }
+
+    $scope.exists = function(item, visible) {
+      return visible.indexOf(item) > -1;
+    }
+
+    $scope.toggle = function(item, visible) {
+        var idx = visible.indexOf(item);
+        if (idx > -1) visible.splice(idx, 1);
+        else visible.push(item);
+    };
 
     $scope.$watch('opts', function(value){
         update()
     }, true)
 
+    // update visible genomes
     function update(opts) {
         $scope.loading = true;
         Patric.getGenomes( $scope.opts )
@@ -328,144 +368,24 @@ function($scope, Patric, $dialog, $timeout) {
     }
 }])
 
-
-.directive('ngTable', function() {
-    return {
-        restrict: 'EA',
-        scope: {
-            header: '=tableHeader',
-            data: '=tableData',
-            opts: '=tableOpts',
-            loading: '=tableLoading',
-            placeholder: '@tablePlaceholder',
-        },
-        templateUrl: 'app/views/general/table.html',
-        link: function(scope, elem, attrs) {
-
-        }
-    }
- })
-.directive('ngTableSolr', function() {
-    return {
-        restrict: 'EA',
-        scope: {
-            header: '=tableHeader',
-            data: '=tableData',
-            opts: '=tableOpts',
-            loading: '=tableLoading',
-            placeholder: '@tablePlaceholder',
-        },
-        templateUrl: 'app/views/general/solr-table.html',
-        link: function(scope, elem, attrs) {
-
-        }
-    }
- })
+.controller('RunReconstruct',
+['$scope',
+function($scope) {
 
 
-.directive('ngTableEditor', function() {
-    return {
-        restrict: 'EA',
-        scope: {
-            header: '=tableHeader',
-            data: '=tableData',
-            opts: '=tableOpts',
-            loading: '=tableLoading',
-            placeholder: '@tablePlaceholder',
-            addItems: '=tableAddItems',
-        },
-        templateUrl: 'app/views/general/table-editor.html',
-        link: function(scope, elem, attrs) {
-
-            scope.checkedItems = [];
-
-            scope.checkItem = function(item) {
-                item.checked = item.checked ? false : true;
-
-                if (item.checked)
-                    scope.checkedItems.push(item)
-                else {
-                    // remove from checked list
-                    for (var i=0; i<scope.checkedItems.length; i++) {
-                        if ( angular.equals(scope.checkedItems[i], item) )
-                            scope.checkedItems.splice(i, 1)
-                    }
-                }
-            }
-
-        }
-    }
- })
-
-
-.directive('editable', ['$timeout', 'FBA',
-    function($timeout, FBA) {
-    return {
-        restrict: 'EA',
-        link: function(scope, elem, attrs) {
-
-            $(elem).hover(function(){
-                $(this).append(' <i class="fa fa-pencil-square-o pull-right"'+
-                    ' style="position: absolute; bottom: 0; right: 0;"></i>')
-            }, function() {
-                $(this).find('i').remove();
-            })
-
-        }
-    }
- }])
-
-.directive('autoFocus', ['$timeout', function($timeout) {
-    return {
-        restrict: 'AC',
-        link: function(scope, elem) {
-            $timeout(function(){
-                elem[0].focus();
-            }, 0);
-        }
-    }
 }])
 
-.directive('sortable', function() {
-    return {
-        restrict: 'EA',
-        link: function(scope, elem, attrs) {
-
-            // see table styling in core.css for sorting carets
-            scope.sortBy = function($event, name) {
-                var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
-                scope.opts.sort = {field: name, desc: desc};
-
-                angular.element(elem).find('th').removeClass('sorting-asc')
-                angular.element(elem).find('th').removeClass('sorting-desc')
-
-                if (desc) {
-                    angular.element($event.target).removeClass('sorting-asc')
-                    angular.element($event.target).addClass('sorting-desc')
-                } else {
-                    angular.element($event.target).removeClass('sorting-desc')
-                    angular.element($event.target).addClass('sorting-asc')
-                }
-            }
-        }
-    }
- })
+.controller('RunFBA',
+['$scope',
+function($scope) {
 
 
-.directive('pagination', function() {
-    return {
-        restrict: 'EA',
-        scope: true,
-        link: function(scope, elem, attrs) {
+}])
 
-            scope.next = function() {
-                scope.opts.offset += scope.opts.limit;
-            }
 
-            scope.prev = function() {
-                scope.opts.offset -= scope.opts.limit;
-            }
-        }
-    }
-})
+.controller('RunGapfill',
+['$scope',
+function($scope) {
 
+
+}])

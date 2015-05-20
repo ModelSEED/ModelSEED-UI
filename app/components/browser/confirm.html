@@ -1,0 +1,15 @@
+<md-dialog>
+
+    <md-content>
+        This file name already exists.  Do you want to overwrite it?
+    </md-content>
+
+
+    <div class="md-actions" layout="row">
+        <span flex></span>
+        <md-button class="md-button" ng-click="cancel()" aria-label="cancel">Cancel</md-button>
+        <!--<md-button class="md-primary" ng-click="keep()" aria-label="keep both">Keep Both</md-button>-->
+        <md-button class="md-primary" ng-click="overwrite()" aria-label="save">Overwrite</md-button>
+    </div>
+
+</md-dialog>

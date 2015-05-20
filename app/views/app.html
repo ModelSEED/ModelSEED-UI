@@ -19,36 +19,47 @@
 
     <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-top-links">
+            <li ng-class="{ active: $state.includes('app.myData') }">
+                <a ui-sref="app.myData({dir: '/'+$root.user})">
+                    <i class="icon-folder-open-o"></i> My Data
+                </a>
+            </li>
+            <li ng-class="{ active: $state.includes('app.reconstruct') }">
+                <a ui-sref="app.reconstruct">
+                    <i class="icon-earth"></i> Public Genomes
+                </a>
+            </li>
             <li ng-class="{ active: $state.includes('app.biochem') }">
                 <a ui-sref="app.biochem">
                     <i class="icon-benzene"></i> Biochemistry
                 </a>
             </li>
+            <!--
             <li ng-class="{ active: $state.includes('app.reconstruct') }">
                 <a ui-sref="app.reconstruct">
                     <i class="icon-tools"></i> Reconstruct
                 </a>
-            </li>
+            </li>-->
             <!--<li ng-class="{ active: $state.includes('app.myModels') }">
                 <a ui-sref="app.myModels">
                     <i class="icon-folder-open-o"></i> My Models
                 </a>
             </li>-->
-            <li ng-class="{ active: $state.includes('app.publicModels') }">
+            <!--<li ng-class="{ active: $state.includes('app.publicModels') }">
                 <a ui-sref="app.publicModels">
                     <i class="icon-earth"></i> Public
                 </a>
-            </li>
+            </li>-->
             <!--<li ng-class="{ active: $state.includes('app.modelEditor')}" >
                 <a ui-sref="app.modelEditor">Model Editor</a>
             </li>-->
-            <li ng-class="{ active: $state.includes('app.compare')}" >
+            <!--<li ng-class="{ active: $state.includes('app.compare')}" >
                 <a ui-sref="app.compare">
                     <i class="icon-lab"></i>
                     Analysis
                     <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
                 </a>
-            </li>
+            </li>-->
         </ul>
 
 

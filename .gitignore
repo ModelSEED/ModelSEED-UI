@@ -1,6 +1,6 @@
-app/dev.html
-build/
-components/
+/app/dev.html
+/build/
+/components/
 .tmp/
 
 #emacs

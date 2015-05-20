@@ -32,6 +32,36 @@ angular.module('core-directives')
     }
  })
 
+.directive('fixedHeader', ['$window', '$timeout', function($window, $timeout) {
+   return function(scope, elem, attr) {
+
+        var header_id = '#'+attr.fixedHeader;
+        var table_id = '#'+attr.fixedTable;
+
+        var w = angular.element($window);
+        w.bind('resize', function() {
+            adjustHeader();
+        })
+
+        function adjustHeader() {
+            var headers = elem.find('th');
+            var orig_headers = angular.element(table_id).find('th');
+
+            angular.forEach(orig_headers, function(v, k) {
+                // .css is the jquery
+                $(headers[k]).css({width: orig_headers[k].clientWidth});
+            })
+        }
+
+        scope.$watch('loading', function() {
+            $timeout(function() {
+                adjustHeader();
+            });
+        });
+   };
+}])
+
+
 .directive('email', function() {
     return {
         link: function(scope, elem, attrs) {
@@ -1129,7 +1159,7 @@ function($compile, $stateParams) {
 })
 
 
-.directive('tooltipa', function() {
+.directive('tooltip', function() {
     return {
         link: function(scope, element, attr) {
 
@@ -1140,6 +1170,147 @@ function($compile, $stateParams) {
             element.click(function() {
                 element.tooltip('hide');
             })
+        }
+    }
+})
+
+
+.directive('ngTable', function() {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+        },
+        templateUrl: 'app/views/general/table.html',
+        link: function(scope, elem, attrs) {
+
+        }
+    }
+ })
+.directive('ngTableSolr', function() {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+        },
+        templateUrl: 'app/views/general/solr-table.html',
+        link: function(scope, elem, attrs) {
+
+        }
+    }
+ })
+
+
+.directive('ngTableEditor', function() {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+            addItems: '=tableAddItems',
+        },
+        templateUrl: 'app/views/general/table-editor.html',
+        link: function(scope, elem, attrs) {
+
+            scope.checkedItems = [];
+
+            scope.checkItem = function(item) {
+                item.checked = item.checked ? false : true;
+
+                if (item.checked)
+                    scope.checkedItems.push(item)
+                else {
+                    // remove from checked list
+                    for (var i=0; i<scope.checkedItems.length; i++) {
+                        if ( angular.equals(scope.checkedItems[i], item) )
+                            scope.checkedItems.splice(i, 1)
+                    }
+                }
+            }
+
+        }
+    }
+ })
+
+
+.directive('editable', ['$timeout', 'FBA',
+    function($timeout, FBA) {
+    return {
+        restrict: 'EA',
+        link: function(scope, elem, attrs) {
+
+            $(elem).hover(function(){
+                $(this).append(' <i class="fa fa-pencil-square-o pull-right"'+
+                    ' style="position: absolute; bottom: 0; right: 0;"></i>')
+            }, function() {
+                $(this).find('i').remove();
+            })
+
+        }
+    }
+ }])
+
+.directive('autoFocus', ['$timeout', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(scope, elem) {
+            $timeout(function(){
+                elem[0].focus();
+            }, 0);
+        }
+    }
+}])
+
+.directive('sortable', function() {
+    return {
+        restrict: 'EA',
+        link: function(scope, elem, attrs) {
+
+            // see table styling in core.css for sorting carets
+            scope.sortBy = function($event, name) {
+                var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
+                scope.opts.sort = {field: name, desc: desc};
+
+                angular.element(elem).find('th').removeClass('sorting-asc')
+                angular.element(elem).find('th').removeClass('sorting-desc')
+
+                if (desc) {
+                    angular.element($event.target).removeClass('sorting-asc')
+                    angular.element($event.target).addClass('sorting-desc')
+                } else {
+                    angular.element($event.target).removeClass('sorting-desc')
+                    angular.element($event.target).addClass('sorting-asc')
+                }
+            }
+        }
+    }
+ })
+
+
+.directive('pagination', function() {
+    return {
+        restrict: 'EA',
+        scope: true,
+        link: function(scope, elem, attrs) {
+
+            scope.next = function() {
+                scope.opts.offset += scope.opts.limit;
+            }
+
+            scope.prev = function() {
+                scope.opts.offset -= scope.opts.limit;
+            }
         }
     }
 })

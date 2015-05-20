@@ -1,0 +1,35 @@
+<md-dialog flex="50">
+
+    <md-content>
+    	<h4>Upload to <i>{{uploadPath}}</i></h4>
+
+
+        <form id="upload-form" class="upload-form form-horizontal">
+            <div class="form-group">
+               <label class="control-label">Type</label>
+                <select ng-model="type" ng-init="type='Genome'" class="form-control">
+                    <option value="Genome">Genome</option>
+                    <option value="string">String</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+               <label class="control-label">Upload</label>
+                <span class="btn btn-default browser-upload">
+                    Choose File...
+                    <input name="upload"
+                           enctype="multipart/form-data"
+                           type="file"
+                           onchange="angular.element(this).scope().createNode(this.files)" />
+                </span>
+            </div>
+        </form>
+
+    </md-content>
+
+    <div class="md-actions" layout="row">
+        <span flex></span>
+        <button class="btn btn-default" ng-click="cancel()" aria-label="cancel">Cancel</button>
+    </div>
+
+</md-dialog>

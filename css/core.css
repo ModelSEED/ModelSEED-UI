@@ -3,7 +3,7 @@
     margin: 20px 0 0 0;
 }
 
-.login md-input-container.md-default-theme .md-input  {
+.login md-input-container.md-default-theme .md-input {
     color: #fff;
     border-color:#fff;
 }
@@ -177,11 +177,10 @@
 #selected-models a {
     text-decoration: none;
 }
-#selected-models a {
+#selected-models a,
+#selected-models .icon-lab {
     color: #fff;
 }
-
-
 
 #selected-models .selected-data-item,
 #selected-models .warning-msg {
@@ -205,8 +204,8 @@
 }
 
 
-#selected-models i,
-#selected-models .glyphicon{
+#selected-models .icon-close,
+#selected-models .glyphicon-cog{
     margin: .1em 0 0 0;
     font-size: 1.3em;
     display: inline-block;
@@ -287,6 +286,22 @@
 }
 
 /* tables */
+
+.table {
+    margin-bottom: 0;
+}
+
+.table-loading {
+    margin-bottom: -10px !important;
+}
+.no-data {
+  margin: 150px 0 0;
+}
+
+#data-browser.table>tbody>tr>td {
+    vertical-align: inherit;
+}
+
 table thead[sortable] th:not(:empty):after {
   content: "\f0dc";
   float: right;
@@ -329,6 +344,12 @@ table thead[sortable] th.sorting-asc:after {
     margin: 20px 0 0 0;
 }
 
+.table-controls .table-settings {
+    margin: 0 10px 0 0;
+}
+.table-controls .table-settings button {
+    padding: 0px 5px;
+}
 .table-controls .query-opt {
     margin: 10px 10px 0 0;
 }
@@ -436,8 +457,129 @@ md-card {
     z-index: 3000;
 }
 
+/* bootstrap mods */
+
+.dropdown-menu-visible {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  float: left;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  font-size: 14px;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
 
 /* labels */
 .label-fba {
     background-color: #5cb85c;
+}
+
+
+/* brower */
+#data-browser {
+    margin-top:60px;
+}
+
+.fixed-header {
+  z-index: 10;
+  position: fixed;
+  background-color: #fff;
+  margin: -69px 25px 0 0;
+}
+
+.fixed-header h4 {
+    margin-top: 17px;
+    margin-bottom: 0
+}
+
+
+.ws-opt {
+    margin: 0 0 0 15px;
+    color: #333;
+}
+.ws-opt i {
+    color: #333;
+}
+
+.ws-opt:hover {
+    opacity: 0.75;
+    cursor: pointer;
+}
+
+.ws-opt .fa-folder-o {
+    font-weight: 700;
+}
+
+
+.select-opts .select-name {
+    margin-right: 20px;
+}
+
+
+.select-opts {
+    background-color: #fff;
+    position: absolute;
+    width: 100%;
+    top: 79px;
+    padding: 0 0 6px 0;
+    border-bottom: 2px solid #ddd;
+}
+.select-opts span {
+    margin: 0 25px 0 0;
+}
+.hidden-header { /* used for table header (select-opts) */
+    visibility: hidden !important;
+}
+
+.fixed-header md-progress-linear { /* hack for table header */
+    margin-bottom: 5px;
+}
+
+.browser-download {
+    text-decoration: none;
+    color: #333;
+}
+
+.browser-upload {
+    position:relative;
+}
+
+input[name=upload] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    cursor: pointer;
+    filter: alpha(opacity=0);
+}
+
+/* end browser */
+
+/* override bootstrap */
+.form-group {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+tr .fa-folder-o,
+tr .fa-file-text-o {
+    opacity: 0.5;
 }

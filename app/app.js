@@ -10,7 +10,7 @@ angular.module('ModelSEED',
  'ui.router',
  'ngAnimate',
  'kbase-rpc',
- 'kbase-auth',
+ 'Auth',
  'dd-filter',
  'ngMaterial',
  'FBA',
@@ -18,7 +18,9 @@ angular.module('ModelSEED',
  'Patric',
  'WS',
  'MS',
- 'Biochem'
+ 'Upload', 
+ 'Biochem',
+ 'Browser'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider',
@@ -29,12 +31,32 @@ function($locationProvider, $stateProvider, $httpProvider,
 
     $urlMatcherFactoryProvider.strictMode(false);
 
+    function valToString(val) {
+      return val !== null ? decodeURI(val) : val;
+    }
+
+    $urlMatcherFactoryProvider.type('nonURIEncoded', {
+        encode: valToString,
+        decode: valToString,
+        is: function () { return true; }
+    });
+
+
     $stateProvider
         .state('home', {
             url: "/home/",
             templateUrl: 'app/views/home.html',
         }).state('app', {
             templateUrl: 'app/views/app.html',
+        })
+
+
+        // data browser
+        .state('app.myData', {
+            url: "/data{dir:nonURIEncoded}",
+            templateUrl: 'app/components/browser/browser.html',
+            controller: 'MyData',
+            authenticate: true
         })
 
         .state('app.biochem', {
@@ -106,18 +128,15 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('app.run', {
             url: "/run",
             templateUrl: 'app/views/run/run.html',
-        })
-        .state('app.runReconstruct', {
+        }).state('app.runReconstruct', {
             url: "/run/reconstruct",
             templateUrl: 'app/views/run/reconstruct.html',
             controller: 'RunReconstruct',
-        })
-        .state('app.runFBA', {
+        }).state('app.runFBA', {
             url: "/run/fba",
             templateUrl: 'app/views/run/fba.html',
             controller: 'RunFBA',
-        })
-        .state('app.runGapfill', {
+        }).state('app.runGapfill', {
             url: "/run/gapfill",
             templateUrl: 'app/views/run/gapfill.html',
             controller: 'RunGapfill',
@@ -136,7 +155,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         .accentPalette('light-blue');
 }])
 
-.run(['$rootScope', '$state', '$stateParams', '$location', 'authService', '$timeout',
+.run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout',
     function($rootScope, $state, $sParams, $location, auth, $timeout) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){

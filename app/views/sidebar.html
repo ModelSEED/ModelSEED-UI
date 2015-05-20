@@ -4,9 +4,15 @@
     <div class="sidebar-nav navbar-collapse">
 
         <div id="selected-models" ng-controller="SelectedData">
-            <div class="header">MODEL ANALYSIS
-                <div class="pull-right" ng-if="MV.models.length">(
-                    <a ng-click="MV.rmAll()">
+            <div class="header">
+                <!--<a ui-sref="app.compare" >-->
+                    <i class="icon-lab"></i>
+                    Model Analysis
+                    <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
+                <!--</a>-->
+
+                <div class="pull-right" ng-if="MV.models.length">
+                    (<a ng-click="MV.rmAll()">
                         <small>Clear All</small>
                     </a>)
                 </div>
@@ -41,11 +47,11 @@
             </ul>
 
             <div ng-if="!MV.models.length" class="warning-msg">
-                <div class="text-danger">No data selected</div>
+                <div class="text-muted">Coming soon</div>
                 <br>
-                <div class="warning-msg-select" ng-if="!$state.includes('app.publicModels')">
+                <!--<div class="warning-msg-select" ng-if="!$state.includes('app.publicModels')">
                     ( <a ui-sref=".publicModels"><small>Select Data</small></a> )
-                </div>
+                </div>-->
             </div>
         </div>
     </div>

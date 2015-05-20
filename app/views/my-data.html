@@ -1,0 +1,229 @@
+
+
+
+<h2 class="page-header">My Data</h2>
+
+
+<div id="table-page-wrapper">
+    <div class="fixed-header" fixed-header fixed-table="ws-table">
+        <h4>
+            <img src="img/file-cabinet-icon.svg" style="opacity: .5;" width="22" height="22">
+
+            <span ng-if="!path.length">
+                My Data
+            </span>
+
+            <span ng-if="path.length">
+                <a ui-sref="app.ws({dir: myDataPath})">My Data</a>
+                <span ng-repeat="d in path | limitTo: path.length-1">
+                    / <a ui-sref="app.ws({dir: '{{getLink($index)}}' })">{{d}}</a>
+                </span>
+                / {{path[path.length-1]}}
+            </span>
+        </h4>
+
+        <!--
+        <div style="margin: 10px 0 0 0;">
+
+            <div dd-filter
+                ng-model="test23"
+                dd-id="input-apps"
+                dd-title="'Select an app to run'"
+                dd-placeholder="Filter apps"
+                dd-default="'Apps'"
+                dd-data="appUI.appList"
+                dd-class="input-sm"
+                class="pull-left">
+            </div>
+            <div class="col-md-5 pull-left">
+                <input ng-model="query" id="{{ddID}}" type="text" class="form-control input-sm" placeholder="Search my data">
+            </div>
+        </div>-->
+
+        <div ng-if="!loading" class="pull-right">
+            <span class="ws-opt" ng-click="newPlaceholder()">
+                <i class="fa fa-folder-o"></i>
+                new folder
+            </span>
+            <!--
+            <span class="ws-opt" >
+                <i class="fa fa-plus"></i>
+                new object
+            </span>
+            -->
+            <!--<span>
+                <input type="text" class="form-control input-sm pull-right" ng-model="wsSearch" placeholder="search {{path[0]}}..." >
+            </span>-->
+        </div>
+
+
+        <table ng-show="!loading" class="table ws-table-header">
+            <thead>
+                <tr ng-class="{'hidden-table': select == true}">
+                    <th></th>
+                    <th ng-click="predicate = 'name'; reverse=!reverse;" class="point">Name
+                        <span ng-if="predicate == 'name'">
+                            <i ng-if="reverse" class="fa fa-caret-down"></i>
+                            <i ng-if="!reverse" class="fa fa-caret-up"></i>
+                        </span>
+                    </th>
+                    <th ng-click="predicate = 'type'; reverse=!reverse;" class="point">Type
+                        <span ng-if="predicate == 'type'">
+                            <i ng-if="reverse" class="fa fa-caret-down mute"></i>
+                            <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
+                        </span>
+                    </th>
+                    <th ng-click="predicate = 'timestamp'; reverse=!reverse;" class="point">Mod Date
+                        <span ng-if="predicate == 'timestamp'">
+                            <i ng-if="reverse" class="fa fa-caret-down mute"></i>
+                            <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
+                        </span>
+                    </th>
+                    <th ng-click="predicate = 'size'; reverse=!reverse;" class="point">Size
+                        <span ng-if="predicate == 'size'">
+                            <i ng-if="reverse" class="fa fa-caret-down mute"></i>
+                            <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
+                        </span>
+                    </th>
+                    <th ng-click="predicate = 'files'; reverse=!reverse;" class="point">Files
+                        <span ng-if="predicate == 'files'">
+                            <i ng-if="reverse" class="fa fa-caret-down mute"></i>
+                            <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
+                        </span>
+                    </th>
+
+                    <div class="select-opts" ng-if="select">
+                        <span>
+                            <b>{{uiTools.trim(selected.name, 20)}}</b>
+                        </span>
+
+                        <span class="ws-opt" ng-click="deleteObj(selected.name)">
+                            <i class="fa fa-trash-o"></i> Delete
+                        </span>
+                        <span class="ws-opt">
+                            <i class="fa fa-edit"></i> Rename...
+                        </span>
+                        <!--<span class="ws-opt"><i class="fa fa-cloud-download"></i> Download...</span>-->
+                    </div>
+
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <table ng-if="!loading" id="ws-table" class="table">
+        <thead>
+            <tr>
+                <th> </th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Mod Date</th>
+                <th>Size</th>
+                <th>Files</th>
+            </tr>
+        </thead>
+
+        <tr ng-if="placeHolder">
+            <td><i class="fa fa-folder-o fa-2x soft"></i></td>
+            <td>
+                <form ng-submit="createFolder(newFolder.name)">
+                    <input type="text"
+                           name="newFolder"
+                           ng-model="newFolder.name"
+                           focus-on="placeholderAdded"
+                           ng-blur="createFolder(newFolder.name)">
+                </form>
+                <span ng-if="saving">saving...</span>
+            </td>
+            <td>Folder</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+
+        <tr ng-repeat="item in items | orderBy:predicate:reverse"
+            ng-class="{active: selected.index == $index}"
+            context-menu="openMenu($event, $index, item)"
+            context-menu-close="closeMenu($event, $index, item)"
+            data-target="context-menu"
+            ng-click="selectRow($event, $index, item)">
+
+            <td ng-if="item.type == 'folder'">
+                <i class="fa fa-folder-o fa-2x soft"></i>
+            </td>
+            <td ng-if="item.type != 'folder'">
+                <i class="fa fa-file-text-o fa-2x soft"></i>
+            </td>
+
+            <td>
+                <form ng-if="edit.index == $index" ng-submit="rename(selected.name, edit.name)">
+                    <input ng-if="!saving"
+                           type="text"
+                           ng-model="edit.name"
+                           focus-on="editable"
+                           ng-blur="rename(selected.name, edit.name)" required>
+                    <span ng-if="saving">saving...</span>
+                </form>
+
+                <a ng-if="item.type == 'folder' && edit.index != $index"
+                   ui-sref="app.ws({dir: '{{folder}}/{{item.name}}' })"
+                   ng-click="prevent($event)">
+                    {{item.name}}
+                </a>
+                <span ng-if="deleting">deleting...</span>
+
+                <span ng-if="item.type != 'folder' && edit.index != $index"
+                      ng-click="prevent($event)">
+                    {{item.name}}
+
+                </span>
+            </td>
+            <td>{{item.type}}</td>
+            <td>{{relativeTime(item.mod_date)}}</td>
+            <td>{{item.type != 'folder' ? readableSize(item.size) : '-'}}</td>
+            <td>{{item.type == 'folder' ? item.files : '-'}}</td>
+        </tr>
+    </table>
+
+    <div class="dropdown position-fixed" id="context-menu">
+        <ul class="dropdown-menu" role="menu">
+            <li>
+              <a class="pointer" role="menuitem" tabindex="1"
+                 ng-click="deleteObj(selected.name) ">
+                 <i class="fa fa-trash-o"></i> Delete...
+              </a>
+            </li>
+            <li>
+              <a class="pointer" role="menuitem" tabindex="2"
+                 ng-click="editableName(selected)">
+                 <i class="fa fa-edit"> Rename...</i>
+                 <span ng-if="selected.type == 'folder'" class="label label-danger pull-right">No API</span>
+              </a>
+            </li>
+
+            <li ng-if="selected.type != 'folder'">
+              <a class="pointer" role="menuitem" tabindex="3"
+                 ng-click="panel.expanded = true">
+                <i class="fa fa-cloud-download"></i> Download
+                <span class="label label-danger pull-right">No API</span>
+              </a>
+            </li>
+        </ul>
+    </div>
+
+
+    <div ng-if="!items.length && !loading" class="text-center no-data soft">
+        No data here.
+        Drag files here to upload (coming soon).
+    </div>
+
+    <md-progress-circular ng-if="loading"
+                          md-mode="indeterminate"
+                          class="text-center"
+                          md-diameter="40">
+   </md-progress-circular>
+</div>
+
+<md-progress-circular ng-if="loading"
+                      md-mode="indeterminate">
+</md-progress-circular>
