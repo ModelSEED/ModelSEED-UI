@@ -9,7 +9,7 @@ angular.module('ms-ctrls', [])
             .success(function(data) {
 
                 // see https://github.com/angular-ui/ui-router/issues/582
-                $state.transitionTo('app.publicModels', {}, {reload: true, inherit: true, notify: false})
+                $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
                       .then(function() {
                         setTimeout(function(){
                             $window.location.reload();

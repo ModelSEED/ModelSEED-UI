@@ -18,7 +18,7 @@ angular.module('ModelSEED',
  'Patric',
  'WS',
  'MS',
- 'Upload', 
+ 'Upload',
  'Biochem',
  'Browser'
  ])
@@ -165,7 +165,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         if (fromState.name === '' && toState.name === "home" && auth.isAuthenticated()) {
             // wait for state set
             $timeout(function() {
-                $state.transitionTo('app.publicModels')
+                $state.transitionTo('app.reconstruct')
                 event.preventDefault();
             })
         }
@@ -176,9 +176,10 @@ function($locationProvider, $stateProvider, $httpProvider,
             event.preventDefault();
         }
 
-            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
-                angular.element('#selected-models').find('.active').removeClass('active')
-            }
+        // fixme
+        if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
+            angular.element('#selected-models').find('.active').removeClass('active')
+        }
     })
 
     $rootScope.$state = $state;

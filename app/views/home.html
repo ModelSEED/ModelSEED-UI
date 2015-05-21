@@ -87,7 +87,7 @@
     <header>
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <!--<img class="img-responsive" src="img/profile.png" alt="">-->
                     <div class="intro-text">
                         <h1>The ModelSEED <span class="label label-danger label-beta">alpha</span>
@@ -108,9 +108,9 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div ng-if="!$root.user" ng-controller="Login" class="login">
-                        <h4>Login to continue to ModelSEED</h4>
+                <div class="col-md-4" ng-if="!$root.user" >
+                    <div ng-controller="Login" class="login">
+                        <h4>Sign in with RAST account to continue</h4>
 
                         <div ng-if="inValid" class="alert alert-danger" role="alert">
                             <b>Try again.</b>
@@ -124,29 +124,47 @@
 
                         <form>
                             <md-input-container>
-                                <label>KBase Username</label>
+                                <label>RAST Username</label>
                                 <input ng-model="user">
                             </md-input-container>
                             <md-input-container>
                                 <label>Password</label>
                                 <input ng-model="pass" label="Password" type="password">
                             </md-input-container>
-                            <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary pull-left">
-                                Login
+                            <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary md-raised pull-left">
+                                Sign in
                             </md-button>
+
+                            <small class="pull-right">
+                                <a href="http://rast.nmpdr.org/?page=Register" target="_blank">Create new account</a>
+                            </small>
+
                         </form>
 
                         <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
                     </div>
+                </div>
 
-                    <div ng-if="$root.user" ng-controller="Login" class="login">
+                <div class="col-md-3" ng-if="!$root.user">
+                    <br>
+                    Alernatively, sign in with:
+                    <div style="margin-top: 10px;">
+                        <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
+                        <div class="pull-left" style="margin: 8px 10px;">
+                            PATRIC<br>
+                            <small class="text-muted">(coming soon)</small>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-7" ng-if="$root.user">
+                    <div ng-controller="Login" class="login">
                         <h4>Continue to the ModelSEED</h4>
-                        <a ui-sref="app.publicModels" class="btn btn-outline">
+                        <a ui-sref="app.reconstruct" class="btn btn-outline">
                             Continue
                         </a>
                     </div>
-
-
                 </div>
 
 
@@ -417,4 +435,3 @@
     </div>
 
 </div>
-
