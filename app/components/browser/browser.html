@@ -202,8 +202,8 @@
             </td>
             <td>{{item.type}}</td>
             <td>{{relativeTime(item.modDate)}}</td>
-            <td>{{item.type != 'folder' && item.size ? readableSize(item.size) : '-'}}</td>
-            <td>{{item.type == 'folder' ? item.files : '-'}}</td>
+            <td>{{item.type != 'folder' ? readableSize(item.size) : '-'}}</td>
+            <td>{{item.type == 'folder' && item.files ? item.files : '-'}}</td>
         </tr>
     </table>
 

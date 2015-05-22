@@ -156,7 +156,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 }])
 
 .run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout',
-    function($rootScope, $state, $sParams, $location, auth, $timeout) {
+function($rootScope, $state, $sParams, $location, auth, $timeout) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
 

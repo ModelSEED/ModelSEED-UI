@@ -41,8 +41,9 @@ angular.module('MS', [])
                 modDate: ws[3],
                 id: ws[4],
                 owner: ws[5],
-                files: ws[6],
-                folders: ws[7],
+                size: ws[6],
+                files: null, // need
+                folders: null, // need
                 timestamp: Date.parse(ws[3])
                };
     }
@@ -89,7 +90,8 @@ angular.module('MS', [])
 
     // takes workspace spec hash, creates node.  fixme: cleanup
     this.createNode = function(p) {
-        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
+        console.log('data to store', p.data)
+        var objs = [[p.path, p.type, null, null]];
         var params = {objects:objs, createUploadNodes: 1};
         console.log('creating upload node', params)
         return $http.rpc('ws', 'create', params).then(function(res) {
@@ -97,6 +99,19 @@ angular.module('MS', [])
                     return res;
                 })
     }
+
+    // takes workspace spec hash, creates node.  fixme: cleanup
+    this.uploadData = function(p) {
+        console.log('data to store', p.data)
+        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? JSON.parse(p.data) : null]];
+        var params = {objects:objs};
+        console.log('creating upload node', params)
+        return $http.rpc('ws', 'create', params).then(function(res) {
+                    console.log('response', res)
+                    return res;
+                })
+    }
+
 
     // takes path of new folder, creates it
     this.createFolder = function(path) {
@@ -118,6 +133,8 @@ angular.module('MS', [])
                     })
 
     }
+
+    this.getObject
 
 
 }]);

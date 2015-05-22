@@ -204,6 +204,8 @@ angular.module('Browser', ['uiTools'])
         console.log('ev', path)
         $dialog.show({
             targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
             templateUrl: 'app/components/browser/mini-uploader.html',
             controller: ['$scope', function($scope) {
                 var $this = $scope;
@@ -213,35 +215,70 @@ angular.module('Browser', ['uiTools'])
                 $scope.type;
 
                 $scope.createNode = function(files) {
-                    console.log('files!', files, $scope.type)
-                        MS.createNode({path: path+'/'+files[0].name, type:$scope.type})
-                          .then(function(res) {
-                              $dialog.hide();
-                              Upload.uploadFile(files, res[0][11])
-                          })
-                          .catch(function(e) {
-                              if (e.data.error.code == -32603) {
-                                  $dialog.show({
-                                      templateUrl: 'app/vicomponents/browser/confirm.html',
-                                      controller: ['$scope', function($scope) {
-                                          $scope.cancel = function(){
-                                              $dialog.hide();
 
-                                          }
-                                          $scope.overwrite = function(name){
-                                              $this.createNode(files, true);
-                                          }
-                                          /*
-                                          $scope.keep = function(name){
-                                          $this.createNode(files, true);
+                    // upload to SHOCK
+                    /*
+                    MS.createNode({path: path+'/'+files[0].name, type:$scope.type})
+                      .then(function(res) {
+                          $dialog.hide();
+                          Upload.uploadFile(files, res[0][11])
+                      })
+                      .catch(function(e) {
+                          if (e.data.error.code == -32603) {
+                              $dialog.show({
+                                  templateUrl: 'app/vicomponents/browser/confirm.html',
+                                  controller: ['$scope', function($scope) {
+                                      $scope.cancel = function(){
                                           $dialog.hide();
-                                      }*/
-                                      }]
-                                  })
-                                } else {
-                                    alert('Server error! Could not upload node.')
-                                }
-                           })
+
+                                      }
+                                      $scope.overwrite = function(name){
+                                          $this.createNode(files, true);
+                                      }
+                                      /*
+                                      $scope.keep = function(name){
+                                      $this.createNode(files, true);
+                                      $dialog.hide();
+                                  }
+                                  }]
+                              })
+                            } else {
+                                alert('Server error! Could not upload node.')
+                            }
+                       })*/
+
+                    // Store as file on Server
+
+                    // Check for the various File API support.
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        // Great success! All the File APIs are supported.
+                    } else {
+                        alert('The File APIs are not fully supported in this browser.');
+                    }
+
+                    var file = files[0]
+
+                    var reader = new FileReader();
+                    reader.readAsText(file, "UTF-8");
+                    reader.onload = loadedFile;
+                    reader.onerror = errorHandler;
+
+                    function loadedFile(event) {
+                        $dialog.hide();
+
+                        var data = event.target.result;
+                        MS.uploadData({path: path+'/'+files[0].name,
+                                       type: $scope.type,
+                                       data: data})
+                          .then(function(res) {
+                              $this.updateDir();
+                              console.log('res', res)
+                          })
+                    }
+
+                    function errorHandler(event) {
+                        alert(event);
+                    }
                 }
 
                 $scope.cancel = function() {
@@ -250,6 +287,8 @@ angular.module('Browser', ['uiTools'])
             }]
         })
     }
+
+
 
     // update dropdown after upload
     $scope.$watch('Upload.status', function(value) {

@@ -1,11 +1,18 @@
 
 angular.module('ms-ctrls', [])
 .controller('Login', ['$scope', '$state', 'Auth', '$window',
-    function($scope, $state, auth, $window) {
+/**
+ * [Login contoller used on login/logout]
+ * @param $scope
+ * @param $state
+ * @param Auth    [Auth Service]
+ * @param $window [Used to do refresh of app state]
+ */
+function($scope, $state, Auth, $window) {
 
     $scope.loginUser = function(user, pass) {
         $scope.loading = true;
-        auth.login(user, pass)
+        Auth.login(user, pass)
             .success(function(data) {
 
                 // see https://github.com/angular-ui/ui-router/issues/582
@@ -28,14 +35,13 @@ angular.module('ms-ctrls', [])
     }
 
     $scope.logout = function() {
-        auth.logout();
+        Auth.logout();
         $state.transitionTo('home', {}, { reload: true, inherit: true, notify: false })
               .then(function() {
                   $window.location.reload();
               });
     }
 }])
-
 
 
 .controller('Run',
@@ -45,9 +51,16 @@ function($scope, $http) {
 
 }])
 
-.controller('Biochem',
-['$scope', 'Biochem',
+
+.controller('Biochem',['$scope', 'Biochem',
+/**
+ * [Responsible for options, table specs,
+ * 	and updating of reaction/compound tables ]
+ * @param  {[type]} $scope  [description]
+ * @param  {[type]} Biochem [Biochem Service]
+ */
 function($scope, Biochem) {
+
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
 
@@ -97,11 +110,23 @@ function($scope, Biochem) {
 }])
 
 .controller('ModelEditor',
-['$scope', 'FBA', 'WS', '$mdDialog', '$sce', '$timeout',
-function($scope, FBA, WS, $dialog, $sce, $timeout) {
+['$scope', 'FBA', 'WS', '$mdDialog', '$sce',
+/**
+ * [Responsible for:
+ *  	- table options/spec,
+ *  	- updating state of table,
+ *  	- adding, removing, updating things in table(s)]
+ * @param  {[type]} $scope   [description]
+ * @param  {[type]} FBA      [OLD FBA Service]
+ * @param  {[type]} WS       [Workspace Service]
+ * @param  {[type]} $dialog  [Material Dialog]
+ * @param  {[type]} $sce     [Needed for altering of DOM]
+ * @param  {[type]} $timeout [description]
+ * @return {[type]}          [description]
+ */
+function($scope, FBA, WS, $dialog, $sce) {
     $scope.FBA = FBA;
 
-    // pre fetch bio chemistry if needed.
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.rxnHeader = [{label: 'ID', key: 'id'},
                         {label: 'Name', key: 'name'},
@@ -124,7 +149,10 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
                           {label: 'Name', key: 'name'},
                           {label: 'Equation', key: 'equation'}];
 
-    // checked reactions for removal
+    /**
+     * [checkedRxns description]
+     * @type {Array}
+     */
     $scope.checkedRxns = []
 
     // get user's writable workspaces
@@ -162,7 +190,9 @@ function($scope, FBA, WS, $dialog, $sce, $timeout) {
         updateModel();
     })
 
-
+    /**
+     * [updateModel description]
+     */
     function updateModel() {
         $scope.loadingModel = true;
         WS.getModel($scope.selectedWS.name, $scope.selectedModel.name )

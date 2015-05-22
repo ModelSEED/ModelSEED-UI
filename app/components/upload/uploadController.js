@@ -1,3 +1,5 @@
+
+angular.module('Upload', [])
 .controller('Upload',
 ['$scope', '$http', 'uiTools', 'config', 'Auth',
 function($scope, $http, uiTools, config, auth) {
