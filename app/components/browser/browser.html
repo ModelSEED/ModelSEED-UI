@@ -124,11 +124,26 @@
                                 <i class="fa fa-cloud-download"></i> Download...
                             </a>
                         </span>
-                        <span ng-if="path.length"
+
+                        <span ng-if="path.length && selected.type == 'genome'"
                               class="ws-opt"
                               ng-click="reconstruct($event, folder+'/'+selected.name)">
                             <i class="icon-tools"></i>
                             Reconstruct
+                        </span>
+
+                        <span ng-if="path.length && selected.type == 'model'"
+                              class="ws-opt"
+                              ng-click="gapfill($event, folder+'/'+selected.name)">
+                            <i class="fa fa-circle"></i>
+                            Gapfill
+                        </span>
+
+                        <span ng-if="path.length && selected.type == 'model'"
+                              class="ws-opt"
+                              ng-click="runFBA($event, folder+'/'+selected.name)">
+                            <i class="fa fa-bar-chart"></i>
+                            Run FBA
                         </span>
 
                     </div>
@@ -232,7 +247,6 @@
             </li>
         </ul>
     </div>
-
 
     <div ng-if="!items.length && !loading" class="text-center no-data soft">
         No data here.

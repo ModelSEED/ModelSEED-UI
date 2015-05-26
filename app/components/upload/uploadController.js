@@ -37,7 +37,7 @@ function($scope, $http, uiTools, config, auth) {
                 })
             },
             error: function(e){
-                console.log('failed upload', e)
+                console.error('failed upload', e)
             },
             data: form,
             contentType: false,

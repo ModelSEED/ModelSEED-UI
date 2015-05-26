@@ -1,0 +1,16 @@
+
+<md-dialog flex="50">
+
+    <md-content>
+		<h3>Gapfill Model</h3>
+        {{folder}} {{selected.name}}
+
+        <ng-include src="'app/views/apps/gapfill.html'"></ng-include>
+    </md-content>
+
+    <div class="md-actions">
+        <md-button ng-click="gapfill()">
+            Gapfill
+        </md-button>
+    </div>
+</md-dialog>

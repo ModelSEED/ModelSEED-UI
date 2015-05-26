@@ -18,10 +18,9 @@ angular.module('MS', [])
         var params = {paths: [path]};
         angular.extend(params, opts);
 
-        console.log('calling with: ', params)
         return $http.rpc('ws', 'ls', params)
                     .then(function(d) {
-                        console.log('data returned', d)
+                        console.log('ws data returned', d)
                         var d = d[path];
 
                         // parse into list of dicts
@@ -55,8 +54,6 @@ angular.module('MS', [])
 
     this.rmFromModel = function(ws) {
         for (var i=0; i<self.workspaces.length; i++) {
-            console.log(self.workspaces[i].id, ws[4])
-
             if (self.workspaces[i].id == ws[4])
                 self.workspaces.splice(i, 1);
         }
@@ -90,28 +87,23 @@ angular.module('MS', [])
 
     // takes workspace spec hash, creates node.  fixme: cleanup
     this.createNode = function(p) {
-        console.log('data to store', p.data)
         var objs = [[p.path, p.type, null, null]];
         var params = {objects:objs, createUploadNodes: 1};
-        console.log('creating upload node', params)
         return $http.rpc('ws', 'create', params).then(function(res) {
                     console.log('response', res)
                     return res;
                 })
     }
 
-    // takes workspace spec hash, creates node.  fixme: cleanup
+    // takes   fixme: cleanup
     this.uploadData = function(p) {
-        console.log('data to store', p.data)
-        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? JSON.parse(p.data) : null]];
+        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
         var params = {objects:objs};
-        console.log('creating upload node', params)
         return $http.rpc('ws', 'create', params).then(function(res) {
                     console.log('response', res)
                     return res;
                 })
     }
-
 
     // takes path of new folder, creates it
     this.createFolder = function(path) {
@@ -125,7 +117,6 @@ angular.module('MS', [])
     }
 
     this.getDownloadURL = function(path) {
-        console.log('get_download_url', path)
         return $http.rpc('ws', 'get_download_url', {objects:[path]})
                     .then(function(res) {
                         console.log('download response', res)
@@ -134,7 +125,26 @@ angular.module('MS', [])
 
     }
 
-    this.getObject
+    this.reconstruct = function(item) {
+        return $http.rpc('ms', 'ModelReconstruction', {genome: item})
+                    .then(function(res){
+                        return res;
+                    })
+    }
+
+    this.runFBA = function(item) {
+        return $http.rpc('ms', 'FluxBalanceAnalysis', {model: item})
+                    .then(function(res){
+                        return res;
+                    })
+    }
+
+    this.gapfill = function(item) {
+        return $http.rpc('ms', 'GapfillModel', {model: item})
+                    .then(function(res){
+                        return res;
+                    })
+    }
 
 
 }]);

@@ -1,9 +1,9 @@
 
 angular.module('Browser', ['uiTools'])
 .controller('MyData',
-    ['$scope', '$stateParams', 'MS', '$log',
-     'uiTools', '$document', '$timeout', '$mdDialog', 'Upload',
-    function($scope, $stateParams, MS, $log, uiTools, $document, $timeout, $dialog, Upload) {
+['$scope', '$stateParams', 'MS', '$log',
+ 'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast', 'Upload',
+  function($scope, $stateParams, MS, $log, uiTools, $document, $timeout, $dialog,  $mdToast, Upload) {
 
     $scope.Upload = Upload;
     $scope.MS = MS;
@@ -17,7 +17,7 @@ angular.module('Browser', ['uiTools'])
     $scope.reverse = true;
 
     // model: row selection data
-    $scope.selected;
+    $scope.selected = {};
 
     // model: when in edit mode
     $scope.edit = false;
@@ -111,7 +111,6 @@ angular.module('Browser', ['uiTools'])
     // delete an object
     $scope.deleteObj = function(name) {
         MS.deleteObj( path(name) ).then(function(res) {
-            console.log('response', res)
             MS.rmFromModel(res[0]);
             $scope.updateDir();
         })
@@ -314,15 +313,18 @@ angular.module('Browser', ['uiTools'])
         $dialog.show({
             templateUrl: 'app/views/dialogs/reconstruct.html',
             targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                console.log('folder', item)
-
                 $scope.reconstruct = function(){
-                    $http.rpc('ms', 'ModelReconstruction', {genome: item})
-                         .then(function(res) {
-                             console.log('response', res )
-                         })
+                    var name = $scope.selected.name;
+                    showToast('Reconstructing', name)
+                    MS.reconstruct(item)
+                      .then(function(res) {
+                           console.log('response', res )
+                           showComplete('Reconstruct Complete', name)
+                      })
                     $dialog.hide();
                 }
 
@@ -333,5 +335,124 @@ angular.module('Browser', ['uiTools'])
             }]
         })
     }
+
+    $scope.runFBA = function(ev, item) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/runFBA.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+
+                $scope.reconstruct = function(){
+                    var name = $scope.selected.name;
+                    showToast('Running Flux Balance Analysis', name)
+                    MS.reconstruct(item)
+                      .then(function(res) {
+                           showComplete('Reconstruct Complete', name)
+                      }).catch(function(e) {
+                          showError(e.error.message)
+                      })
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }
+
+    $scope.gapfill = function(ev, item) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/gapfill.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+
+                $scope.gapfill = function(){
+                    var name = $scope.selected.name;
+                    showToast('Gapfilling', name)
+                    MS.gapfill(item)
+                      .then(function(res) {
+                           showComplete('Gapfill Complete', name)
+                      }).catch(function(e) {
+                          showError(e.error.message)
+                      })
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }
+
+    function showToast(title, name) {
+      $mdToast.show({
+        controller: 'ToastCtrl',
+        //templateUrl:'app/views/dialogs/notify.html',
+        template: '<md-toast>'+
+                      '<span flex style="margin-right: 30px;">'+
+                         '<span class="ms-color">'+title+'</span><br>'+
+                         name.slice(0,20)+'...'+'</span>'+
+                      '<md-button offset="33" ng-click="closeToast()">'+
+                        'Close'+
+                      '</md-button>'+
+                    '</md-toast>',
+        hideDelay: 0,
+      });
+
+    };
+
+    function showComplete(title, name) {
+        $mdToast.show({
+         controller: 'ToastCtrl',
+         //templateUrl:'app/views/dialogs/notify.html',
+         template: '<md-toast>'+
+                         '<span flex style="margin-right: 30px;">'+
+                           '<span class="ms-color-complete">'+title+'</span><br>'+
+                           name.slice(0,20)+'...'+
+                          '</span>'+
+                       '<md-button offset="33" ng-click="closeToast()" ui-sref="app.proto">'+
+                         'View'+
+                       '</md-button>'+
+                     '</md-toast>',
+         hideDelay: 6000
+       });
+   }
+
+   function showError(msg) {
+       $mdToast.show({
+        controller: 'ToastCtrl',
+        //templateUrl:'app/views/dialogs/notify.html',
+        template: '<md-toast>'+
+                        '<span flex style="margin-right: 30px;">'+
+                          '<span class="ms-color-error">Error</span><br>'+
+                          msg+
+                         '</span>'+
+                      '<md-button offset="33" ng-click="closeToast()" ui-sref="app.proto">'+
+                        'View'+
+                      '</md-button>'+
+                    '</md-toast>',
+        hideDelay: 6000
+      });
+  }
+}])
+
+
+.controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
+  $scope.closeToast = function() {
+    $mdToast.hide();
+  };
+
 
 }])

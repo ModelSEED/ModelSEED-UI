@@ -1,11 +1,22 @@
 
+.ms-color {
+    color: #26C6DA;
+}
+.ms-color-complete {
+    color: #26DA4A;
+}
+
+.ms-color-error {
+    color: #DA265D;
+}
+
 .login {
     margin: 20px 0 0 0;
 }
 
 .login md-input-container.md-default-theme .md-input {
     color: #fff;
-    border-color:#fff;
+    border-color: #fff;
 }
 
 .login md-input-container.md-default-theme label {
@@ -106,6 +117,7 @@
     padding-right: 37px;
     color: #fff !important;
     background-color: #444;
+    font-weight: 800;
 }
 .navbar-brand:hover {
     color: #dfdfdf !important; /*overrides*/
@@ -120,7 +132,7 @@
 
 
 .sidebar {
-    z-index: 3000;
+    z-index: 50;
     color: #fff;
     background-color: #555;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
@@ -414,6 +426,10 @@ table tr.active {
 /* bootstrap mods */
 .popover {
     z-index: 9000;
+}
+
+.navbar-fixed-top {
+    border-width: 0;
 }
 
 /* md mods */
