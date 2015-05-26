@@ -50,8 +50,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/app.html',
         })
 
-
         // data browser
+        .state('app.modelPage', {
+            url: "/model{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/model.html',
+            controller: 'DataPage',
+            authenticate: true
+        })
         .state('app.myData', {
             url: "/data{dir:nonURIEncoded}",
             templateUrl: 'app/components/browser/browser.html',
@@ -87,6 +92,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
         // object views
+        /*
         .state('app.modelPage', {
             url: "/models/:ws/:name",
             templateUrl: 'app/views/data/model.html',
@@ -102,7 +108,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/fba.html',
             controller: 'DataPage',
             authenticate: true
-        })
+        })*/
 
         .state('app.proto', {
             url: "/proto",

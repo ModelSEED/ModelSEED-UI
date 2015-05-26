@@ -201,10 +201,33 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
     ['$scope', '$stateParams',
     function($scope, $stateParams) {
 
-    $scope.ws = $stateParams.ws;
-    $scope.name = $stateParams.name;
+    //$scope.ws = $stateParams.ws;
+    //$scope.name = $stateParams.name;
 
-    $scope.tab = $stateParams.tab;
+    //$scope.tab = $stateParams.tab;
+
+    // get path in list form
+    // FIXME: make service or such
+
+    $scope.objPath = $stateParams.path;
+    var depth = $stateParams.path.split('/').length -2;
+    $scope.path = $stateParams.path.split('/').splice(2, depth);
+
+    // get path strings for parent folders
+    var dir_names = $stateParams.path.split('/').splice(1, depth);
+    var links = [];
+    for (var i=0; i < depth; i++) {
+        var link = '/'+dir_names.join('/');
+        links.push(link);
+        dir_names.pop();
+    }
+    links.reverse();
+    links = links.slice(1, links.length);
+
+    // method for retrieving links of all parent folders
+    $scope.getLink = function(i) {
+        return links[i];
+    }
 
 }])
 

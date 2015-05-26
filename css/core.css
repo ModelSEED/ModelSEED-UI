@@ -392,6 +392,9 @@ table tr.active {
 .dataTables_paginate{
     float: right;
 }
+.dataTables_length {
+    float: left
+}
 
 .dataTables_paginate .pagination {
     margin: 0;

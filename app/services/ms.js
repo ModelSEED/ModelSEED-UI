@@ -146,5 +146,13 @@ angular.module('MS', [])
                     })
     }
 
+    this.getObject = function(path) {
+        console.log('retrieving object', path)
+        return $http.rpc('ws', 'get', {objects: [path]})
+                    .then(function(res) {
+                        console.log('get response', JSON.parse(res[0][1]) )
+                        return {meta: res[0][0], data: JSON.parse(res[0][1])}
+                    })
+    }
 
 }]);

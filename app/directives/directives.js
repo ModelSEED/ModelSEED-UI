@@ -1,6 +1,40 @@
 
 angular.module('core-directives', []);
 angular.module('core-directives')
+.directive('msTables', ['MS', function(MS) {
+    return {
+        link: function(scope, elem, attrs) {
+            var path = attrs.objPath,
+                type = attrs.type;
+
+            MS.getObject(path)
+              .then(function(data) {
+                  console.log('parsed', data)
+                  
+                  var params = {type: type,
+                                obj: data.data,
+                                meta: data.meta,
+                                options: {showETC: true, urlRouter: urlRouter}
+                               };
+
+                  // used to support various apps with different frameworks
+                  function urlRouter(type, ws, name) {
+                      if (type === "KBaseFBA.FBAModel")
+                          return '#/models/'+ws+'/'+name;
+                      else if (type === "KBaseFBA.FBA")
+                          return '#/fba/'+ws+'/'+name;
+                      else if (type === "KBaseBiochem.Media")
+                          return '#/media/'+ws+'/'+name;
+
+                      return;
+                  }
+                  $(elem).kbaseTabTable(params);
+              })
+        }
+    }
+}])
+
+
 .directive('kbTables', function() {
     return {
         link: function(scope, elem, attrs) {

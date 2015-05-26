@@ -101,12 +101,12 @@
                             <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
                         </span>
                     </th>
-                    <th ng-click="predicate = 'files'; reverse=!reverse;" class="point">Files
+                    <!--<th ng-click="predicate = 'files'; reverse=!reverse;" class="point">Files
                         <span ng-if="predicate == 'files'">
                             <i ng-if="reverse" class="fa fa-caret-down mute"></i>
                             <i ng-if="!reverse" class="fa fa-caret-up mute"></i>
                         </span>
-                    </th>
+                    </th>-->
 
                     <div class="select-opts" ng-if="select">
                         <span class="select-name">
@@ -161,7 +161,7 @@
                 <th>Type</th>
                 <th>Mod Date</th>
                 <th>Size</th>
-                <th>Files</th>
+                <!--<th>Files</th>-->
             </tr>
         </thead>
 
@@ -208,17 +208,24 @@
                    ng-click="prevent($event)">
                     {{item.name}}
                 </a>
+
+                <a ng-if="item.type == 'model' && edit.index != $index"
+                   ui-sref="app.modelPage({path: folder+'/'+item.name })"
+                   ng-click="prevent($event)">
+                    {{item.name}}
+                </a>
+
                 <span ng-if="deleting">deleting...</span>
 
-                <span ng-if="item.type != 'folder' && edit.index != $index"
+                <span ng-if="(item.type != 'folder' && item.type != 'model') && edit.index != $index"
                       ng-click="prevent($event)">
                     {{item.name}}
                 </span>
             </td>
             <td>{{item.type}}</td>
-            <td>{{relativeTime(item.modDate)}}</td>
+            <td>{{relativeTime(item.timestamp)}}</td>
             <td>{{item.type != 'folder' ? readableSize(item.size) : '-'}}</td>
-            <td>{{item.type == 'folder' && item.files ? item.files : '-'}}</td>
+            <!--<td>{{item.type == 'folder' && item.files ? item.files : '-'}}</td>-->
         </tr>
     </table>
 
