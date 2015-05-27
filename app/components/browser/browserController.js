@@ -109,8 +109,8 @@ angular.module('Browser', ['uiTools'])
     }
 
     // delete an object
-    $scope.deleteObj = function(name) {
-        MS.deleteObj( path(name) ).then(function(res) {
+    $scope.deleteObj = function(item) {
+        MS.deleteObj( path(item.name), item.type ).then(function(res) {
             MS.rmFromModel(res[0]);
             $scope.updateDir();
         })
@@ -287,8 +287,6 @@ angular.module('Browser', ['uiTools'])
         })
     }
 
-
-
     // update dropdown after upload
     $scope.$watch('Upload.status', function(value) {
         if (value.complete == true) {
@@ -307,7 +305,6 @@ angular.module('Browser', ['uiTools'])
 
     }, true);
 
-
     $scope.reconstruct = function(ev, item) {
         ev.stopPropagation();
         $dialog.show({
@@ -321,9 +318,9 @@ angular.module('Browser', ['uiTools'])
                     var name = $scope.selected.name;
                     showToast('Reconstructing', name)
                     MS.reconstruct(item)
-                      .then(function(res) {
-                           console.log('response', res )
-                           showComplete('Reconstruct Complete', name)
+                      .then(function(r) {
+                           console.log('response', r )
+                           showComplete('Reconstruct Complete', name, r[2]+r[0])
                       })
                     $dialog.hide();
                 }
@@ -413,19 +410,19 @@ angular.module('Browser', ['uiTools'])
 
     };
 
-    function showComplete(title, name) {
+    function showComplete(title, name, path) {
         $mdToast.show({
          controller: 'ToastCtrl',
          //templateUrl:'app/views/dialogs/notify.html',
          template: '<md-toast>'+
-                         '<span flex style="margin-right: 30px;">'+
-                           '<span class="ms-color-complete">'+title+'</span><br>'+
-                           name.slice(0,20)+'...'+
-                          '</span>'+
-                       '<md-button offset="33" ng-click="closeToast()" ui-sref="app.proto">'+
-                         'View'+
-                       '</md-button>'+
-                     '</md-toast>',
+                     '<span flex style="margin-right: 30px;">'+
+                       '<span class="ms-color-complete">'+title+'</span><br>'+
+                       name.slice(0,20)+'...'+
+                      '</span>'+
+                   '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+
+                     'View'+
+                   '</md-button>'+
+                 '</md-toast>',
          hideDelay: 6000
        });
    }
@@ -443,7 +440,7 @@ angular.module('Browser', ['uiTools'])
                         'View'+
                       '</md-button>'+
                     '</md-toast>',
-        hideDelay: 6000
+        hideDelay: 10000
       });
   }
 }])

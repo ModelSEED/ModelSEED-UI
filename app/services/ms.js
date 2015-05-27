@@ -73,10 +73,13 @@ angular.module('MS', [])
     }
 
     // takes path of object, deletes object
-    this.deleteObj = function(path) {
+    this.deleteObj = function(path, isFolder) {
         console.log('calling delete')
-        return $http.rpc('ws', 'delete',
-                    {objects: [path]}).then(function(res) {
+        var params = {objects: [path],
+                      deleteDirectories: isFolder ? 1 : 0,
+                      force: isFolder ? 1 : 0};
+        return $http.rpc('ws', 'delete', params)
+                    .then(function(res) {
                         console.log('deleted object', res)
                         return res;
                     }).catch(function(e) {
