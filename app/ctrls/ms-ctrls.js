@@ -1,6 +1,6 @@
 
 angular.module('ms-ctrls', [])
-.controller('Login', ['$scope', '$state', 'Auth', '$window',
+.controller('Login', ['$scope', '$state', '$stateParams', 'Auth', '$window',
 /**
  * [Login contoller used on login/logout]
  * @param $scope
@@ -8,30 +8,44 @@ angular.module('ms-ctrls', [])
  * @param Auth    [Auth Service]
  * @param $window [Used to do refresh of app state]
  */
-function($scope, $state, Auth, $window) {
+function($scope, $state, $stateParams, Auth, $window) {
+
+    // set login method
+    if ($stateParams.login == 'patric')
+        $scope.method = Auth.loginMethod('patric');
+    else
+        $scope.method = Auth.loginMethod('rast');
+
+
+    // sets method and changes url param
+    $scope.switchMethod = function(method) {
+        $scope.method = Auth.loginMethod(method);
+        $state.go('home', {login: method});
+    }
 
     $scope.loginUser = function(user, pass) {
         $scope.loading = true;
-        Auth.login(user, pass)
-            .success(function(data) {
 
-                // see https://github.com/angular-ui/ui-router/issues/582
-                $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
-                      .then(function() {
-                        setTimeout(function(){
-                            $window.location.reload();
-                        }, 0);
-                      });
+        if ($scope.method.name == 'PATRIC')
+            var prom = Auth.loginPatric(user, pass)
+        else
+            var prom = Auth.login(user, pass)
 
-            }).error(function(e, status){
-                console.log('error', e)
-                $scope.loading = false;
-                if (status == 401) {
-                    $scope.inValid = true;
-                } else {
-                    $scope.failMsg = "Could not reach authentication service: "+e.error_msg;
-                }
-            })
+        prom.success(function(data) {
+            // see https://github.com/angular-ui/ui-router/issues/582
+            $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
+                  .then(function() {
+                    setTimeout(function(){
+                        $window.location.reload();
+                    }, 0);
+                });
+        }).error(function(e, status){
+            $scope.loading = false;
+            if (status == 401)
+                $scope.inValid = true;
+            else
+                $scope.failMsg = "Could not reach authentication service: "+e.error_msg;
+        })
     }
 
     $scope.logout = function() {

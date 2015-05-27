@@ -44,7 +44,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
     $stateProvider
         .state('home', {
-            url: "/home/",
+            url: "/home/?login",
             templateUrl: 'app/views/home.html',
         }).state('app', {
             templateUrl: 'app/views/app.html',

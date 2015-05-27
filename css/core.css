@@ -10,25 +10,43 @@
     color: #DA265D;
 }
 
-.login {
+header .login {
     margin: 20px 0 0 0;
 }
 
-.login md-input-container.md-default-theme .md-input {
+header .login md-input-container.md-default-theme .md-input {
     color: #fff;
     border-color: #fff;
 }
 
-.login md-input-container.md-default-theme label {
+header .login md-input-container.md-default-theme label {
     color: #fff;
 }
 
-.login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
+header .login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
     color: #aaa;
 }
 
-.login .md-button {
+header .login .md-button {
     text-transform: none;
+}
+header .login img {
+    margin: -2px 5px 0 0;
+    width: 40px;
+    height: 40px;
+}
+
+header .alt-login {
+    margin-top: 10px;
+
+}
+header .alt-login:hover {
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+header .alt-login div {
+    margin: 8px 10px;
 }
 
 .label-beta {

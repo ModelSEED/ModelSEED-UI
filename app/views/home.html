@@ -108,64 +108,80 @@
                     </div>
                 </div>
 
-                <div class="col-md-4" ng-if="!$root.user" >
-                    <div ng-controller="Login" class="login">
-                        <h4>Sign in with RAST account to continue</h4>
+                <div ng-controller="Login">
+                    <div class="col-md-4" ng-if="!$root.user" >
+                        <div class="login">
+                            <h4>
+                                <!--<img ng-if="method.name == 'RAST'" src="img/seed.png" class="pull-left"/>
+                                <img ng-if="method.name == 'PATRIC'" src="img/patric.jpg" class="pull-left"/>-->
+                                Sign in with {{method.name}} account to continue
+                            </h4>
 
-                        <div ng-if="inValid" class="alert alert-danger" role="alert">
-                            <b>Try again.</b>
-                            Wrong username and/or password
+                            <div ng-if="inValid" class="alert alert-danger" role="alert">
+                                <b>Try again.</b>
+                                Wrong username and/or password
+                            </div>
+
+                            <div ng-if="failMsg" class="alert alert-danger" role="alert">
+                                <b>Oh snap!</b>
+                                {{failMsg}}
+                            </div>
+
+                            <form>
+                                <md-input-container>
+                                    <label>{{method.name}} Username</label>
+                                    <input ng-model="user">
+                                </md-input-container>
+                                <md-input-container>
+                                    <label>Password</label>
+                                    <input ng-model="pass" label="Password" type="password">
+                                </md-input-container>
+                                <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary md-raised pull-left">
+                                    Sign in
+                                </md-button>
+
+                                <small class="pull-right">
+                                    <a href="{{method.newAccountURL}}" target="_blank">Create new account</a>
+                                </small>
+
+                            </form>
+
+                            <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
                         </div>
+                    </div>
 
-                        <div ng-if="failMsg" class="alert alert-danger" role="alert">
-                            <b>Oh snap!</b>
-                            {{failMsg}}
+                    <div class="col-md-3" ng-if="!$root.user && method.name == 'RAST'">
+                        <br>
+                        Alernatively, sign in with:
+                        <div class="alt-login" ng-click="switchMethod('patric')">
+                            <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
+                            <div class="pull-left">
+                                PATRIC<br>
+                                <small class="text-muted">(beta only)</small>
+                            </div>
                         </div>
-
-                        <form>
-                            <md-input-container>
-                                <label>RAST Username</label>
-                                <input ng-model="user">
-                            </md-input-container>
-                            <md-input-container>
-                                <label>Password</label>
-                                <input ng-model="pass" label="Password" type="password">
-                            </md-input-container>
-                            <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary md-raised pull-left">
-                                Sign in
-                            </md-button>
-
-                            <small class="pull-right">
-                                <a href="http://rast.nmpdr.org/?page=Register" target="_blank">Create new account</a>
-                            </small>
-
-                        </form>
-
-                        <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
                     </div>
-                </div>
 
-                <div class="col-md-3" ng-if="!$root.user">
-                    <br>
-                    Alernatively, sign in with:
-                    <div style="margin-top: 10px;">
-                        <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
-                        <div class="pull-left" style="margin: 8px 10px;">
-                            PATRIC<br>
-                            <small class="text-muted">(coming soon)</small>
+                    <div class="col-md-3" ng-if="!$root.user && method.name == 'PATRIC'">
+                        <br>
+                        Alernatively, sign in with:
+                        <div class="alt-login" ng-click="switchMethod('rast')">
+                            <img src="img/seed.png" width="50" height="50" class="pull-left" />
+                            <div class="pull-left">
+                                RAST<br>
+                            </div>
                         </div>
-
                     </div>
-                </div>
 
-                <div class="col-md-7" ng-if="$root.user">
-                    <div ng-controller="Login" class="login">
-                        <h4>Continue to the ModelSEED</h4>
-                        <a ui-sref="app.reconstruct" class="btn btn-outline">
-                            Continue
-                        </a>
+                    <div class="col-md-7" ng-if="$root.user">
+                        <div ng-controller="Login" class="login">
+                            <h4>Continue to the ModelSEED</h4>
+                            <a ui-sref="app.reconstruct" class="btn btn-outline">
+                                Continue
+                            </a>
+                        </div>
                     </div>
-                </div>
+                </div> <!-- end auth -->
 
 
             </div>
