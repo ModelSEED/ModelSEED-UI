@@ -1,9 +1,9 @@
 
 angular.module('Browser', ['uiTools'])
 .controller('MyData',
-['$scope', '$stateParams', 'MS', '$log',
+['$scope', '$state', '$stateParams', 'MS', '$log',
  'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast', 'Upload', '$mdSidenav',
-  function($scope, $stateParams, MS, $log, uiTools, $document,
+  function($scope, $state, $stateParams, MS, $log, uiTools, $document,
            $timeout, $dialog,  $mdToast, Upload, $mdSidenav) {
 
     $scope.Upload = Upload;
@@ -477,6 +477,12 @@ angular.module('Browser', ['uiTools'])
       });
     }
 
+    $scope.goTo = function(item) {
+        if (item.type === 'folder')
+            $state.go('app.myData', {dir: path(item.name)})
+        else if (item.type === 'model')
+            $state.go('app.modelPage', {path: path(item.name) })
+    }
 }])
 
 .controller('SideNav',

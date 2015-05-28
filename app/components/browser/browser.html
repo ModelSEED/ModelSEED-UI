@@ -189,7 +189,8 @@
 
         <tr ng-repeat="item in items | orderBy : predicate : reverse"
             ng-class="{active: selected.index == $index}"
-            ng-click="selectRow($event, $index, item)">
+            ng-click="selectRow($event, $index, item)"
+            ng-dblclick="goTo(item)" >
 
             <td ng-if="item.type == 'folder'">
                 <i class="fa fa-folder-o fa-2x soft"></i>
