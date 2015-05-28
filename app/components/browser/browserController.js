@@ -259,36 +259,6 @@ angular.module('Browser', ['uiTools'])
                             }
                        })
 
-                    // Store as file on Server
-
-                    // Check for the various File API support.
-                    /*
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        // Great success! All the File APIs are supported.
-                    } else {
-                        alert('The File APIs are not fully supported in this browser.');
-                    }
-
-                    var file = files[0]
-
-                    var reader = new FileReader();
-                    reader.readAsText(file, "UTF-8");
-                    reader.onload = loadedFile;
-                    reader.onerror = errorHandler;
-
-                    function loadedFile(event) {
-                        $dialog.hide();
-
-                        var data = event.target.result;
-                        MS.uploadData({path: path+'/'+files[0].name,
-                                       type: $scope.type,
-                                       data: data})
-                          .then(function(res) {
-                              $this.updateDir();
-                              console.log('res', res)
-                          })
-                    }*/
-
                     function errorHandler(event) {
                         alert(event);
                     }
@@ -488,18 +458,13 @@ angular.module('Browser', ['uiTools'])
 .controller('SideNav',
 ['$scope', '$mdSidenav',
 function($scope, $mdSidenav) {
-
     $scope.close = function() {
         $mdSidenav('right').toggle();
     }
-
-
 }])
 
 .controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
   $scope.closeToast = function() {
     $mdToast.hide();
   };
-
-
 }])

@@ -620,6 +620,7 @@ md-card {
 
 .fixed-header md-progress-linear { /* hack for table header */
     margin-bottom: 5px;
+    visibility: hidden;
 }
 
 .browser-download {

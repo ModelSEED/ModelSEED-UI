@@ -17,7 +17,7 @@
             </span>
         </h4>
 
-        <md-progress-linear style="visibility: {{status.count ? 'visible':'hidden'}};"
+        <md-progress-linear ng-style="{visibility: (status.count ? 'visible' : 'hidden')}"
                             md-mode="determinate"
                             ng-value="status.progress">
         </md-progress-linear>

@@ -298,7 +298,6 @@ function ($scope, $timeout, MV, VizOpts) {
                                         })
                                     }});
     }
-
 }])
 
 .service('VizOptions', [function() {
