@@ -113,12 +113,17 @@
                             <b>{{uiTools.trim(selected.name, 20)}}</b>
                         </span>
 
+                        <span class="ws-opt" ng-click="showMeta($event, selected)">
+                            <i class="fa fa-eye"></i> View Meta
+                        </span>
+
                         <span class="ws-opt" ng-click="deleteObj(selected)">
                             <i class="fa fa-trash-o"></i> Delete
                         </span>
-                        <span class="ws-opt">
+
+                        <!--<span class="ws-opt">
                             <i class="fa fa-edit"></i> Rename...
-                        </span>
+                        </span>-->
                         <span class="ws-opt" ng-if="selected.type != 'folder'">
                             <a class="browser-download" href="{{selected.downloadURL}}">
                                 <i class="fa fa-cloud-download"></i> Download...

@@ -158,4 +158,12 @@ angular.module('MS', [])
                     })
     }
 
+    this.getObjectMeta = function(path) {
+        console.log('retrieving meta', path)
+        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
+                    .then(function(res) {
+                        return res[0];
+                    })
+    }
+
 }]);

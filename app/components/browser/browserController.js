@@ -214,9 +214,7 @@ angular.module('Browser', ['uiTools'])
                 $scope.type;
 
                 $scope.createNode = function(files) {
-
                     // upload to SHOCK
-                    /*
                     MS.createNode({path: path+'/'+files[0].name, type:$scope.type})
                       .then(function(res) {
                           $dialog.hide();
@@ -234,21 +232,23 @@ angular.module('Browser', ['uiTools'])
                                       $scope.overwrite = function(name){
                                           $this.createNode(files, true);
                                       }
+
                                       /*
                                       $scope.keep = function(name){
-                                      $this.createNode(files, true);
-                                      $dialog.hide();
-                                  }
+                                          $this.createNode(files, true);
+                                          $dialog.hide();
+                                      }*/
                                   }]
                               })
                             } else {
                                 alert('Server error! Could not upload node.')
                             }
-                       })*/
+                       })
 
                     // Store as file on Server
 
                     // Check for the various File API support.
+                    /*
                     if (window.File && window.FileReader && window.FileList && window.Blob) {
                         // Great success! All the File APIs are supported.
                     } else {
@@ -273,7 +273,7 @@ angular.module('Browser', ['uiTools'])
                               $this.updateDir();
                               console.log('res', res)
                           })
-                    }
+                    }*/
 
                     function errorHandler(event) {
                         alert(event);
@@ -289,19 +289,16 @@ angular.module('Browser', ['uiTools'])
 
     // update dropdown after upload
     $scope.$watch('Upload.status', function(value) {
-        if (value.complete == true) {
+        $timeout(function() {
 
-            // clear uploader; fix
-            //document.getElementById('upload-form').innerHTML =
-            //document.getElementById('upload-form').innerHTML;
-
-            $timeout(function() {
-                $scope.status.complete = false;
+            if (value.complete == true) {
+                console.log('updating')
                 $scope.updateDir();
-            }, 2000)
-        }
+            }
+            $scope.status = value;
 
-        $scope.status = value;
+            console.log('status', $scope.status)
+        })
 
     }, true);
 
@@ -333,6 +330,26 @@ angular.module('Browser', ['uiTools'])
         })
     }
 
+    $scope.showMeta = function(ev, item) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/show-meta.html',
+            targetEvent: ev,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                MS.getObjectMeta(path(item.name))
+                  .then(function(meta) {
+                      $scope.metaData = meta;
+                  })
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }
+
     $scope.runFBA = function(ev, item) {
         ev.stopPropagation();
         $dialog.show({
@@ -346,9 +363,9 @@ angular.module('Browser', ['uiTools'])
                 $scope.reconstruct = function(){
                     var name = $scope.selected.name;
                     showToast('Running Flux Balance Analysis', name)
-                    MS.reconstruct(item)
+                    MS.runFBA(item)
                       .then(function(res) {
-                           showComplete('Reconstruct Complete', name)
+                           showComplete('FBA Complete', name)
                       }).catch(function(e) {
                           showError(e.error.message)
                       })
@@ -376,6 +393,7 @@ angular.module('Browser', ['uiTools'])
                 $scope.gapfill = function(){
                     var name = $scope.selected.name;
                     showToast('Gapfilling', name)
+
                     MS.gapfill(item)
                       .then(function(res) {
                            showComplete('Gapfill Complete', name)
@@ -423,7 +441,7 @@ angular.module('Browser', ['uiTools'])
                      'View'+
                    '</md-button>'+
                  '</md-toast>',
-         hideDelay: 6000
+         hideDelay: 10000
        });
    }
 
@@ -436,9 +454,6 @@ angular.module('Browser', ['uiTools'])
                           '<span class="ms-color-error">Error</span><br>'+
                           msg+
                          '</span>'+
-                      '<md-button offset="33" ng-click="closeToast()" ui-sref="app.proto">'+
-                        'View'+
-                      '</md-button>'+
                     '</md-toast>',
         hideDelay: 10000
       });

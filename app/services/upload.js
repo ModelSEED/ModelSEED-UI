@@ -31,50 +31,51 @@ angular.module('Upload', [])
     this.uploadFile = function(files, nodeURL) {
         console.log('uploading...', files, nodeURL)
 
-        $timeout(function() {
-            self.status.count = 1;
-            self.status.complete = false;
+        self.status.count = 1;
+        self.status.complete = false;
 
-            var form = new FormData($('#upload-form')[0]);
-            $.ajax({
-                url: nodeURL,
-                type: 'PUT',
-                headers: authObj,
-                xhr: function() {
-                    var myXhr = $.ajaxSettings.xhr();
-                    if(myXhr.upload){
-                        myXhr.upload.addEventListener('progress', updateProgress, false);
-                    }
-                    return myXhr;
-                },
-                success: function(data) {
-                    console.log('upload success', data)
-                    $timeout(function() {
-                        self.status.count = 0;
-                        self.status.progress = 0;
-                        self.status.complete = true;
-                    })
-                },
-                error: function(e){
-                    console.log('failed upload', e)
-                },
-                data: form,
-                contentType: false,
-                processData: false
-            });
+        var form = new FormData($('#upload-form')[0]);
 
-            function updateProgress (oEvent) {
-                if (oEvent.lengthComputable) {
-                    var percent = oEvent.loaded / files[0].size;
-
-                    $timeout(function() {
-                        self.status.progress = Math.floor(percent*100);
-                    })
+        console.log('form', form)
+        $.ajax({
+            url: nodeURL,
+            type: 'PUT',
+            headers: authObj,
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    myXhr.upload.addEventListener('progress', updateProgress, false);
                 }
-            }
-        })
+                return myXhr;
+            },
+            success: function(data) {
+                console.log('upload success', data)
+                $timeout(function() {
+                    self.status.count = 0;
+                    self.status.progress = 0;
+                    self.status.complete = true;
+                })
+            },
+            error: function(e){
+                console.log('failed upload', e)
+            },
+            data: form,
+            contentType: false,
+            processData: false
+        });
 
-    }
+        function updateProgress (oEvent) {
+            if (oEvent.lengthComputable) {
+                var percent = oEvent.loaded / files[0].size;
+
+                $timeout(function() {
+                    self.status.progress = Math.floor(percent*100);
+                })
+            }
+        }
+
+
+}
 
     /*
     $scope.uploadFile = function(files, nodeURL) {
