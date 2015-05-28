@@ -35,9 +35,7 @@ function($http, $q, $rootScope) {
             url += '&select('+set.join(',')+')';
         }
 
-        console.log('columns', cols)
         if (query && cols.length) {
-            console.log('adding eqs')
             var set = [];
             for (var i=0; i<cols.length; i++) {
                 set.push('eq('+cols[i]+',*'+query+'*)');
