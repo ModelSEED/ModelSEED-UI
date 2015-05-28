@@ -153,18 +153,7 @@ angular.module('Browser', ['uiTools'])
 
     $scope.selectRow = function(e, i, item) {
         console.log('called select row', e, i, item)
-
-        if (item.type === 'model') {
-            if (!$mdSidenav('modelOpts').isOpen())
-                $mdSidenav('modelOpts').open();
-
-            $document.bind('click', function(e) {
-                $mdSidenav('modelOpts').close();
-                $document.unbind(e)
-            })
-        } else if ($mdSidenav('modelOpts').isOpen()) {
-            $mdSidenav('modelOpts').close()
-        }
+        toggleOperations(item);
 
         $scope.select = true;
         $scope.selected = {type: item.type ? item.type : 'Workspace',
@@ -366,7 +355,6 @@ angular.module('Browser', ['uiTools'])
     }
 
     $scope.gapfill = function(ev, item) {
-        $mdSidenav('modelOpts').toggle();
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/gapfill.html',
@@ -445,6 +433,29 @@ angular.module('Browser', ['uiTools'])
                     '</md-toast>',
         hideDelay: 10000
       });
+    }
+
+    function toggleOperations(item) {
+        if (item.type === 'model') {
+            if (!$mdSidenav('modelOpts').isOpen())
+                $mdSidenav('modelOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('modelOpts').close();
+                $document.unbind(e)
+            })
+        } else if (item.type === 'genome') {
+            if (!$mdSidenav('genomeOpts').isOpen())
+                $mdSidenav('genomeOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('genomeOpts').close();
+                $document.unbind(e)
+            })
+
+        } else if ($mdSidenav('modelOpts').isOpen()) {
+            $mdSidenav('modelOpts').close()
+        }
     }
 
     $scope.goTo = function(item) {

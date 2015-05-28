@@ -276,16 +276,16 @@
         <md-toolbar class="md-theme-light">
             <h1 class="md-toolbar-tools">Model Options</h1>
         </md-toolbar>
-        <md-content layout-padding>
+        <md-content layout-padding layout="column" layout-align="center center">
 
             <md-button class="md-grid-item-content" ng-click="gapfill($event, folder+'/'+selected.name)">
                 <i class="fa fa-2x fa-circle"></i>
-                <div class=""> Gapfill </div>
+                <div> Gapfill </div>
             </md-button>
 
             <md-button class="md-grid-item-content" ng-click="runFBA($event, folder+'/'+selected.name)">
                 <i class="fa fa-2x fa-bar-chart"></i>
-                <div class=""> Run FBA </div>
+                <div> Run FBA </div>
             </md-button>
 
             <md-button ng-click="close()" class="md-primary">
@@ -296,21 +296,16 @@
 
     <md-sidenav  class="md-sidenav-right md-whiteframe-z2" md-component-id="genomeOpts">
         <md-toolbar class="md-theme-light">
-            <h1 class="md-toolbar-tools">Model Options</h1>
+            <h1 class="md-toolbar-tools">Genome Options</h1>
         </md-toolbar>
-        <md-content layout-padding>
+        <md-content layout-padding layout="column" layout-align="center center">
 
-            <md-button class="md-grid-item-content" ng-click="gapfill($event, folder+'/'+selected.name)">
-                <i class="fa fa-2x fa-circle"></i>
-                <div class=""> Gapfill </div>
+            <md-button class="md-grid-item-content" ng-click="reconstruct($event, folder+'/'+selected.name)">
+                <i class="icon-tools fa-2x"></i>
+                <div><small>Reconstruct</small></div>
             </md-button>
 
-            <md-button class="md-grid-item-content" ng-click="runFBA($event, folder+'/'+selected.name)">
-                <i class="fa fa-2x fa-bar-chart"></i>
-                <div class=""> Run FBA </div>
-            </md-button>
-
-            <md-button ng-click="close()" class="md-primary">
+            <md-button ng-click="close()" class="md-primary" layout-align="center">
                 Close
             </md-button>
         </md-content>

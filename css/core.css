@@ -461,7 +461,7 @@ table tr.active {
 
 md-sidenav {
     min-width: 50px;
-    max-width: 125px;
+    max-width: 140px;
     bottom:inherit;
     position: fixed;
 }
@@ -471,13 +471,18 @@ md-sidenav button div {
     margin-bottom: 15px;
 }
 
+
 md-sidenav button i {
     margin-top: 10px;
-
 }
 
 .md-sidenav-right {
     top:75px;
+}
+
+.md-toolbar-tools {
+    font-size: 16px;
+    text-align: center;
 }
 
 md-backdrop {
@@ -657,6 +662,10 @@ input[name=upload] {
 .icon-file-download {
     margin-top: 5px;
     font-size: 1.2em;
+}
+
+.icon-tools {
+    font-weight: 600;
 }
 
 
