@@ -319,6 +319,7 @@ header .alt-login div {
 /* tables */
 
 .table {
+    width: 100%;
     margin-bottom: 0;
 }
 
@@ -500,12 +501,18 @@ md-input-container {
 md-input-container:not(.md-input-has-value) input:not(:focus) {
     color: inherit;
 }
-
+.md-tab {
+    text-transform: inherit;
+}
 .md-tabs-content .map-table {
     margin-top: 15px;
 }
 .md-header-items-container {
     text-transform: capitalize;
+}
+
+md-tabs-wrapper {
+    border-bottom: 1px solid #444;
 }
 
 md-tabs md-tab:hover {

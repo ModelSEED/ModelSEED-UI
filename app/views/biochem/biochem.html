@@ -3,30 +3,27 @@
 <hr class="no-margin">
 
 
-<md-tabs md-selected="tabs.selectedIndex" md-no-ink>
-    <md-tab>
-        <md-tab-label>Reactions</md-tab-label>
-        <md-tab-template>
+<md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
+    <md-tab label="Reactions">
+        <md-content>
             <ng-table-solr table-header="rxnHeader"
                            table-data="rxns"
                            table-opts="rxnOpts"
                            table-loading="loadingRxns"
                            table-placeholder="Search reactions">
             </ng-table-solr>
-
-        </md-tab-template>
+        </md-content>
     </md-tab>
 
-    <md-tab>
-        <md-tab-label>Compounds</md-tab-label>
-        <md-tab-template>
+    <md-tab label="Compounds">
+        <md-content>
             <ng-table-solr table-header="cpdHeader"
                            table-data="cpds"
                            table-opts="cpdOpts"
                            table-loading="loadingCpds"
                            table-placeholder="Search compounds">
             </ng-table-solr>
-        </md-tab-template>
+        </md-content>
     </md-tab>
 
     <!-- waiting on API
