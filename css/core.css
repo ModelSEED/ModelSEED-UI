@@ -10,6 +10,7 @@
     color: #DA265D;
 }
 
+
 header .login {
     margin: 20px 0 0 0;
 }
@@ -458,6 +459,34 @@ table tr.active {
     transition: none !important;
 }
 
+md-sidenav {
+    min-width: 50px;
+    max-width: 125px;
+    bottom:inherit;
+    position: fixed;
+}
+
+md-sidenav button div {
+    line-height: 15px;
+    margin-bottom: 15px;
+}
+
+md-sidenav button i {
+    margin-top: 10px;
+
+}
+
+.md-sidenav-right {
+    top:75px;
+}
+
+md-backdrop {
+    visbility: hidden;
+    display:none;
+}
+
+
+
 md-input-container {
     padding-bottom: 15px;
 }
@@ -472,6 +501,14 @@ md-input-container:not(.md-input-has-value) input:not(:focus) {
 }
 .md-header-items-container {
     text-transform: capitalize;
+}
+
+md-tabs md-tab:hover {
+    color: #444;
+}
+
+md-tab.md-tab-themed {
+  transition: background 0.35s cubic-bezier(0.35, 0, 0.25, 1);
 }
 
 md-card {
@@ -544,16 +581,17 @@ md-card {
 
 .ws-opt {
     margin: 0 0 0 15px;
-    color: #333;
-}
-.ws-opt i {
-    color: #333;
+    color: #666;
 }
 
 .ws-opt:hover {
-    opacity: 0.75;
+    color: #222;
     cursor: pointer;
 }
+.ws-opt a {
+    text-decoration: none;
+}
+
 
 .ws-opt .fa-folder-o {
     font-weight: 700;
@@ -609,6 +647,20 @@ input[name=upload] {
 }
 
 /* end browser */
+
+/* icon mods */
+.icon-info {
+    line-height: .9em;
+}
+
+.icon-file-download {
+    margin-top: 5px;
+    font-size: 1.2em;
+}
+
+
+/* end icon mods */
+
 
 /* override bootstrap */
 .form-group {

@@ -114,11 +114,11 @@
                         </span>
 
                         <span class="ws-opt" ng-click="showMeta($event, selected)">
-                            <i class="fa fa-eye"></i> View Meta
+                            <i class="icon-info"></i> Meta
                         </span>
 
                         <span class="ws-opt" ng-click="deleteObj(selected)">
-                            <i class="fa fa-trash-o"></i> Delete
+                            <i class="icon-trash"></i> Delete
                         </span>
 
                         <!--<span class="ws-opt">
@@ -126,11 +126,11 @@
                         </span>-->
                         <span class="ws-opt" ng-if="selected.type != 'folder'">
                             <a class="browser-download" href="{{selected.downloadURL}}">
-                                <i class="fa fa-cloud-download"></i> Download...
+                                <i class="icon-file-download"></i> Download...
                             </a>
                         </span>
 
-                        <span ng-if="path.length && selected.type == 'genome'"
+                        <!--<span ng-if="path.length && selected.type == 'genome'"
                               class="ws-opt"
                               ng-click="reconstruct($event, folder+'/'+selected.name)">
                             <i class="icon-tools"></i>
@@ -149,7 +149,7 @@
                               ng-click="runFBA($event, folder+'/'+selected.name)">
                             <i class="fa fa-bar-chart"></i>
                             Run FBA
-                        </span>
+                        </span>-->
 
                     </div>
 
@@ -268,3 +268,50 @@
     <md-progress-circular ng-if="loading" md-mode="indeterminate">
    </md-progress-circular>
 </div>
+
+
+<section ng-controller="SideNav">
+    <md-sidenav  class="md-sidenav-right md-whiteframe-z2" md-component-id="modelOpts">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">Model Options</h1>
+        </md-toolbar>
+        <md-content layout-padding>
+
+            <md-button class="md-grid-item-content" ng-click="gapfill($event, folder+'/'+selected.name)">
+                <i class="fa fa-2x fa-circle"></i>
+                <div class=""> Gapfill </div>
+            </md-button>
+
+            <md-button class="md-grid-item-content" ng-click="runFBA($event, folder+'/'+selected.name)">
+                <i class="fa fa-2x fa-bar-chart"></i>
+                <div class=""> Run FBA </div>
+            </md-button>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+    <md-sidenav  class="md-sidenav-right md-whiteframe-z2" md-component-id="genomeOpts">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">Model Options</h1>
+        </md-toolbar>
+        <md-content layout-padding>
+
+            <md-button class="md-grid-item-content" ng-click="gapfill($event, folder+'/'+selected.name)">
+                <i class="fa fa-2x fa-circle"></i>
+                <div class=""> Gapfill </div>
+            </md-button>
+
+            <md-button class="md-grid-item-content" ng-click="runFBA($event, folder+'/'+selected.name)">
+                <i class="fa fa-2x fa-bar-chart"></i>
+                <div class=""> Run FBA </div>
+            </md-button>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+</section>

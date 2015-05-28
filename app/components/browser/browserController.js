@@ -2,8 +2,9 @@
 angular.module('Browser', ['uiTools'])
 .controller('MyData',
 ['$scope', '$stateParams', 'MS', '$log',
- 'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast', 'Upload',
-  function($scope, $stateParams, MS, $log, uiTools, $document, $timeout, $dialog,  $mdToast, Upload) {
+ 'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast', 'Upload', '$mdSidenav',
+  function($scope, $stateParams, MS, $log, uiTools, $document,
+           $timeout, $dialog,  $mdToast, Upload, $mdSidenav) {
 
     $scope.Upload = Upload;
     $scope.MS = MS;
@@ -152,6 +153,19 @@ angular.module('Browser', ['uiTools'])
 
     $scope.selectRow = function(e, i, item) {
         console.log('called select row', e, i, item)
+
+        if (item.type === 'model') {
+            if (!$mdSidenav('modelOpts').isOpen())
+                $mdSidenav('modelOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('modelOpts').close();
+                $document.unbind(e)
+            })
+        } else if ($mdSidenav('modelOpts').isOpen()) {
+            $mdSidenav('modelOpts').close()
+        }
+
         $scope.select = true;
         $scope.selected = {type: item.type ? item.type : 'Workspace',
                            name: item.name,
@@ -335,6 +349,7 @@ angular.module('Browser', ['uiTools'])
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-meta.html',
             targetEvent: ev,
+            clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
                 MS.getObjectMeta(path(item.name))
@@ -345,7 +360,6 @@ angular.module('Browser', ['uiTools'])
                 $scope.cancel = function(){
                     $dialog.hide();
                 }
-
             }]
         })
     }
@@ -355,12 +369,13 @@ angular.module('Browser', ['uiTools'])
         $dialog.show({
             templateUrl: 'app/views/dialogs/runFBA.html',
             targetEvent: ev,
+            clickOutsideToClose: true,
             scope: $scope.$new(),
             preserveScope: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
 
-                $scope.reconstruct = function(){
+                $scope.runFBA = function(){
                     var name = $scope.selected.name;
                     showToast('Running Flux Balance Analysis', name)
                     MS.runFBA(item)
@@ -381,14 +396,17 @@ angular.module('Browser', ['uiTools'])
     }
 
     $scope.gapfill = function(ev, item) {
+        $mdSidenav('modelOpts').toggle();
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/gapfill.html',
             targetEvent: ev,
             scope: $scope.$new(),
+            clickOutsideToClose: true,
             preserveScope: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
+
 
                 $scope.gapfill = function(){
                     var name = $scope.selected.name;
@@ -419,9 +437,9 @@ angular.module('Browser', ['uiTools'])
                       '<span flex style="margin-right: 30px;">'+
                          '<span class="ms-color">'+title+'</span><br>'+
                          name.slice(0,20)+'...'+'</span>'+
-                      '<md-button offset="33" ng-click="closeToast()">'+
-                        'Close'+
-                      '</md-button>'+
+                      '<!--<md-button offset="33" ng-click="closeToast()">'+
+                        'Hide'+
+                      '</md-button>-->'+
                     '</md-toast>',
         hideDelay: 0,
       });
@@ -443,9 +461,9 @@ angular.module('Browser', ['uiTools'])
                  '</md-toast>',
          hideDelay: 10000
        });
-   }
+    }
 
-   function showError(msg) {
+    function showError(msg) {
        $mdToast.show({
         controller: 'ToastCtrl',
         //templateUrl:'app/views/dialogs/notify.html',
@@ -457,9 +475,20 @@ angular.module('Browser', ['uiTools'])
                     '</md-toast>',
         hideDelay: 10000
       });
-  }
+    }
+
 }])
 
+.controller('SideNav',
+['$scope', '$mdSidenav',
+function($scope, $mdSidenav) {
+
+    $scope.close = function() {
+        $mdSidenav('right').toggle();
+    }
+
+
+}])
 
 .controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
   $scope.closeToast = function() {
