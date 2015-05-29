@@ -275,33 +275,6 @@ angular.module('Browser', ['uiTools'])
 
     }, true);
 
-    $scope.reconstruct = function(ev, item) {
-        ev.stopPropagation();
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/reconstruct.html',
-            targetEvent: ev,
-            scope: $scope.$new(),
-            preserveScope: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-                $scope.reconstruct = function(){
-                    var name = $scope.selected.name;
-                    showToast('Reconstructing', name)
-                    MS.reconstruct(item)
-                      .then(function(r) {
-                           console.log('response', r )
-                           showComplete('Reconstruct Complete', name, r[2]+r[0])
-                      })
-                    $dialog.hide();
-                }
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-
-            }]
-        })
-    }
 
     $scope.showMeta = function(ev, item) {
         ev.stopPropagation();
@@ -319,6 +292,35 @@ angular.module('Browser', ['uiTools'])
                 $scope.cancel = function(){
                     $dialog.hide();
                 }
+            }]
+        })
+    }
+
+    $scope.reconstruct = function(ev, item) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/reconstruct.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            clickOutsideToClose: true,            
+            preserveScope: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+
+                $scope.reconstruct = function(){
+                    var name = $scope.selected.name;
+                    showToast('Reconstructing', name)
+                    MS.reconstruct(item)
+                      .then(function(r) {
+                           showComplete('Reconstruct Complete', name, r[2]+r[0])
+                      })
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
             }]
         })
     }
