@@ -109,7 +109,6 @@ function($scope, Biochem) {
                .then(function(res) {
                     $scope.cpds = res;
                     $scope.loadingCpds = false;
-                    console.log('cpds', res)
                })
     }
 
