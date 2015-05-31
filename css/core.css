@@ -478,7 +478,7 @@ md-sidenav button i {
 }
 
 .md-sidenav-right {
-    top:75px;
+    top: 95px;
 }
 
 .md-toolbar-tools {
@@ -490,8 +490,6 @@ md-backdrop {
     visbility: hidden;
     display:none;
 }
-
-
 
 md-input-container {
     padding-bottom: 15px;

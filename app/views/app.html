@@ -19,7 +19,12 @@
         <ul class="nav navbar-nav navbar-top-links">
             <li ng-class="{ active: $state.includes('app.myData') }">
                 <a ui-sref="app.myData({dir: '/'+$root.user})">
-                    <i class="icon-folder-open-o"></i> My Data
+                    <i class="icon-archive2"></i> My Data
+                </a>
+            </li>
+            <li ng-class="{ active: $state.includes('app.myModels') }">
+                <a ui-sref="app.myModels">
+                    <i class="icon-folder-open-o"></i> My Models
                 </a>
             </li>
             <li ng-class="{ active: $state.includes('app.reconstruct') }">
@@ -36,11 +41,6 @@
             <li ng-class="{ active: $state.includes('app.reconstruct') }">
                 <a ui-sref="app.reconstruct">
                     <i class="icon-tools"></i> Reconstruct
-                </a>
-            </li>-->
-            <!--<li ng-class="{ active: $state.includes('app.myModels') }">
-                <a ui-sref="app.myModels">
-                    <i class="icon-folder-open-o"></i> My Models
                 </a>
             </li>-->
             <!--<li ng-class="{ active: $state.includes('app.publicModels') }">

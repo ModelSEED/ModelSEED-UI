@@ -150,7 +150,7 @@ angular.module('MS', [])
     }
 
     this.getObject = function(path) {
-        console.log('retrieving object', path)
+        $log.log('retrieving object', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
                         var data = {meta: res[0][0], data: JSON.parse(res[0][1])}
@@ -159,10 +159,61 @@ angular.module('MS', [])
     }
 
     this.getObjectMeta = function(path) {
-        console.log('retrieving meta', path)
-        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
+        $log.log('retrieving meta', path)
+        return $http.rpc('ms', 'get', {objects: [path], metadata_only: 1})
                     .then(function(res) {
                         return res[0];
+                    })
+    }
+
+
+    this.getModels = function() {
+        $log.log('list models')
+        return $http.rpc('ms', 'list_models', {})
+                    .then(function(res) {
+                        $log.log('list models res', res)
+                        var models = []
+                        for (var i in res) {
+                            var name = res[i].split('/')
+                            var model = {name: res[i].split('/')[res[i].split('/').length-1],
+                                         ref: res[i]};
+                            models.push(model);
+                        }
+                        return models;
+                    })
+    }
+
+
+    this.getModelFBAs = function(model) {
+        $log.log('list related fbas', model)
+        return $http.rpc('ms', 'list_fba_studies', {model: model})
+                    .then(function(res) {
+                        return res;
+                    })
+    }
+
+    this.getModelEdits = function(model) {
+        $log.log('list model edits', model)
+        return $http.rpc('ms', 'list_model_edits', {model: model})
+                    .then(function(res) {
+                        return res;
+                    })
+    }
+
+    /*
+        REQUIRED INPUTS:
+        ref model - reference to model to integrate solutions for
+        mapping<edit_id,gapfill_command> commands - list of edit commands
+
+        OPTIONAL INPUTS:
+        edit_data new_edit - list of new edits to add
+    */
+    this.manage_model_edits = function(p) {
+        $log.log('manage model edits', p)
+        return $http.rpc('ws', 'get', {model: p.model, commands: p.command})
+                    .then(function(res) {
+                        $log.log('manage model response', res)
+                        return res;
                     })
     }
 

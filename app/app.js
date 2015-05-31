@@ -77,6 +77,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.myModels', {
             url: "/my-models/",
             templateUrl: 'app/views/my-models.html',
+            controller: 'MyModels',
             authenticate: true
         }).state('app.publicModels', {
             url: "/models/",
