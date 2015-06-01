@@ -396,6 +396,7 @@ function ($scope, $timeout, MV, VizOpts) {
     }
 }])
 
+
 .service('VizOptions', [function() {
 
     // default for abs flux

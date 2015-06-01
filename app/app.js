@@ -20,7 +20,8 @@ angular.module('ModelSEED',
  'MS',
  'Upload',
  'Biochem',
- 'Browser'
+ 'Browser',
+ 'Regulons'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider',
@@ -32,7 +33,7 @@ function($locationProvider, $stateProvider, $httpProvider,
     $urlMatcherFactoryProvider.strictMode(false);
 
     function valToString(val) {
-      return val !== null ? decodeURI(val) : val;
+        return val !== null ? decodeURI(val) : val;
     }
 
     $urlMatcherFactoryProvider.type('nonURIEncoded', {
@@ -122,6 +123,21 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/compare.html',
             controller: 'Compare',
             authenticate: true
+        })
+
+        // ModelSEED Projects
+        .state('projects', {
+            templateUrl: 'projects/projects.html',
+        }).state('projects.home', {
+            url: '/projects',
+            templateUrl: 'projects/home.html',
+        }).state('regulons', {
+            url: '/regulons',
+            templateUrl: 'projects/regulons/overview.html',
+        }).state('regulons.genes', {
+            url: '/genes',
+            templateUrl: 'projects/regulons/genes.html',
+            controller: 'Regulons'
         })
 
         .state('app.api', {

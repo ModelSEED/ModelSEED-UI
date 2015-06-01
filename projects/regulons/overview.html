@@ -1,0 +1,30 @@
+
+
+
+
+
+<ng-include src="'app/views/nav.html'"></ng-include>
+
+<div layout="row">
+    <md-sidenav layout-fill class="md-sidenav-left md-whiteframe-z2"
+                style="min-width:100px; max-width: 100px; position: fixed; top:50px;"
+                md-component-id="left" md-is-locked-open="true">
+        <md-toolbar style="background-color: #555;">
+            <h1 class="md-toolbar-tools">Views</h1>
+        </md-toolbar>
+        <md-content layout-margin>
+            <ul class="list-unstyled" layout-margin>
+                <li><a ui-sref="regulons">Overview</a></li>
+                <li><a ui-sref="regulons.genes">Genes</a></li>
+            </ul>
+        </md-content>
+    </md-sidenav>
+
+    <md-content layout="column" layout-margin flex offset="10">
+        <div ui-view flex>
+            <md-content layout-margin>
+                <h3>Atomic Regulons</h3>
+            </md-content>
+        </div>
+    </md-content>
+</div>
