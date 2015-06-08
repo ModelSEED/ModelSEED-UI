@@ -1,22 +1,25 @@
 
 <md-dialog flex="50">
-
-    <md-content layout-margin>
+    <form>
+    <md-dialog-content class="sticky-container" layout-margin>
         <h3>Reconstruct Model <small>{{item.name}}</small></h3>
 
-        <md-input-container md-no-float>
-            <input ng-model="form.output_file" placeholder="Optional Name">
-        </md-input-container>
+        <div>
+            <md-input-container md-no-float>
+                <input ng-model="form.output_file" placeholder="Optional Name">
+            </md-input-container>
 
-        <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
-            Include Full DB?
-        </md-checkbox>
+            <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
+                Include Full DB?
+            </md-checkbox>
+        </div>
 
-    </md-content>
+    </md-dialog-content>
 
     <div class="md-actions">
-        <md-button ng-click="reconstruct()">
+        <md-button ng-click="reconstruct()" type="button">
             Reconstruct
         </md-button>
     </div>
+    </form>
 </md-dialog>

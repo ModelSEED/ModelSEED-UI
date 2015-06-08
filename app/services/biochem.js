@@ -59,7 +59,7 @@ function($http, $q, config, $log) {
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
                         $log.log('res', res)
-                        rxnReq = false, cpdReq = false; geneReq;
+                        rxnReq = false, cpdReq = false; geneReq = false;
                         return res.data.response;
                     })
     }

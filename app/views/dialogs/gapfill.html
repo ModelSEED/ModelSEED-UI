@@ -1,21 +1,18 @@
 
 <md-dialog flex="65">
     <form>
-        <md-dialog-content>
-            <md-subheader><h4>Gapfill</h4></md-subheader>
+        <md-dialog-content class="sticky-container" layout-margin>
+            <h3>Gapfill <small>{{item.name}}</small></h3>
 
             <div>
-
                 <div layout layout-sm="column">
                     <md-input-container flex="50">
                         <label>Comprehensive gapfilling priority</label>
                         <input type="number" step="any" ng-model="form.alpha" ng-init="form.alpha = 0">
                     </md-input-container>
                 </div>
-
-
-
             </div>
+
 
         </md-dialog-content>
 

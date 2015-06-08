@@ -30,7 +30,6 @@ function(MS, $dialog, $mdToast) {
     }
 
     this.reconstruct = function(ev, item) {
-        console.log('item', item)
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/reconstruct.html',
@@ -170,7 +169,7 @@ function(MS, $dialog, $mdToast) {
     function showError(msg) {
        $mdToast.show({
         controller: 'ToastCtrl',
-        parent: angular.element('.sidebar'),        
+        parent: angular.element('.sidebar'),
         //templateUrl:'app/views/dialogs/notify.html',
         template: '<md-toast>'+
                         '<span flex style="margin-right: 30px;">'+

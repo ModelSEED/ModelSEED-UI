@@ -96,14 +96,6 @@ function($scope, Biochem) {
                         {label: 'detalGErr', key: 'deltagerr'},
                         {label: 'Charge', key: 'charge'}];
 
-    $scope.geneHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Formula', key: 'formula'},
-                        {label: 'Abbrev', key: 'abbreviation'},
-                        {label: 'deltaG', key: 'deltag'},
-                        {label: 'detalGErr', key: 'deltagerr'},
-                        {label: 'Charge', key: 'charge'}];
-
 
     function updateRxns() {
         Biochem.get('model_reaction', $scope.rxnOpts)
@@ -121,6 +113,7 @@ function($scope, Biochem) {
                })
     }
 
+    /*
     function updateGenes() {
         Biochem.get('gene_ontology_ref', $scope.geneOpts)
                .then(function(res) {
@@ -128,7 +121,7 @@ function($scope, Biochem) {
                     $scope.genes = res;
                     $scope.loadingGenes = false;
                })
-    }
+    }*/
 
     $scope.$watch('rxnOpts', function(value){
         $scope.loadingRxns = true;
@@ -140,10 +133,6 @@ function($scope, Biochem) {
         updateCpds();
     }, true)
 
-    $scope.$watch('geneOpts', function(value){
-        $scope.loadingGenes = true;
-        updateGenes();
-    }, true)
 }])
 
 .controller('MediaEditor',

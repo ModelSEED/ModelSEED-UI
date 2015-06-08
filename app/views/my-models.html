@@ -92,14 +92,14 @@
             <td colspan="6" style="padding-left: 30px;">
 
                 <md-tabs class="my-models-tabs" md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
-                    <md-tab label="FBA Simulations">
+                    <md-tab label="FBA Simulations ({{item.fbaCount}})">
 
                         <md-tab-body>
                             <ng-include src="'app/views/lists/expanded-fbas.html'">
                         </md-tab-body>
                     </md-tab>
 
-                    <md-tab label="Gapfills">
+                    <md-tab label="Gapfills ({{item.gapfillCount}})">
                         <md-tab-body>
                             <ng-include src="'app/views/lists/expanded-gapfills.html'">
                         </md-tab-body>
