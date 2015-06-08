@@ -56,6 +56,7 @@ function($http, $q, $rootScope) {
 
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
+                        console.log('res', res)                        
                         rxnReq = false, cpdReq = false;
                         return res.data.response;
                     })

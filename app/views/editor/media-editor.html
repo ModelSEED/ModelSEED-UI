@@ -1,0 +1,124 @@
+<style>
+    .table-controls .btn-add {
+        margin-left: 20px;
+    }
+</style>
+
+<div class="row">
+    <div class="h2 col-md-4">Media Editor
+        <!--<div class="label label-warning label-beta">Demo</div>-->
+    </div>
+
+</div>
+
+<hr class="no-margin">
+
+
+<div class="clearfix"></div>
+
+
+<div ng-if="data">
+    <div class="table-controls">
+        <div layout="row" layout-align="start start" class="pull-left">
+            <i class="fa fa-search query-opt"></i>
+
+            <md-input-container md-no-float>
+                <input ng-model="opts.query" type="text" placeholder="Search media compounds" class="query-input">
+            </md-input-container>
+
+            <button ng-if="!checkedCpds.length && !loadingModel"
+                    ng-click="addCpds($event)"
+                    class="btn btn-primary btn-sm btn-add">
+                <i class="fa fa-plus"></i> Compounds
+            </button>
+
+            <button ng-if="checkedCpds.length"
+                    ng-click="rmCpds()"
+                    class="btn btn-danger btn-sm btn-add"
+                    ng-disabled="loadingModel">
+                <i class="fa fa-minus"></i> ({{checkedCpds.length}}) Compounds
+            </button>
+
+            <md-progress-circular ng-if="loadingModel"
+                                  md-mode="indeterminate"
+                                  class="pull-left"
+                                  md-diameter="20">
+            </md-progress-circular>
+        </div>
+
+
+        <div class="pull-right">
+            <!--
+            <select ng-init="opts.limit = 20" ng-model="opts.limit" class="btn btn-default" type="number">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="100">100</option>
+            </select>-->
+
+            <span pagination>
+                <div ng-disabled="opts.offset == 0"
+                     class="btn btn-default btn-sm" ng-click="prev()">
+                    <i class="fa fa-chevron-left"></i> prev
+                </div>
+                <div ng-disabled="opts.offset+opts.limit > filtered.length"
+                     class="btn btn-default btn-sm" ng-click="next()">next
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </span>
+        </div>
+
+        <div class="pull-right query-opt">
+            {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{filtered.length}} compounds
+        </div>
+    </div>
+
+
+
+    <table class="table table-bordered">
+        <thead sortable>
+            <tr>
+                <th></th>
+                <th ng-click="sortBy($event, 'name')">Name</th>
+                <th ng-click="sortBy($event, 'id')">ID</th>
+                <th ng-click="sortBy($event, 'concentration')">Concentration</th>
+                <th ng-click="sortBy($event, 'minFlux')">Min Flux</th>
+                <th ng-click="sortBy($event, 'maxFlux')">Max Flux</th>
+            </tr>
+        </thead>
+
+        <tr ng-repeat="item in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
+                        | limitTo : opts.limit : (opts.query ? 0 : opts.offset)" >
+            <td ng-click="checkCpd(item)">
+                <i ng-if="item.checked" class="fa fa-check-square-o"></i>
+                <i ng-if="!item.checked" class="fa fa-square-o"></i>
+            </td>
+            <td style="position: relative;">
+                {{item.name ? item.name : '--'}}
+            </td>
+            <td style="position: relative;"> <!-- ng-click="editRxn($event, item)"  -->
+                {{item.id}}
+            </td>
+            <td editable style="position: relative;">
+                {{item.concentration}}
+            </td>
+            <td editable style="position: relative;">
+                {{item.minFlux}}
+            </td>
+            <td editable style="position: relative;">
+                {{item.maxFlux}}
+            </td>
+
+        </tr>
+
+        <div ng-if="!loading && filtered.length == 0">
+            No reaction found
+        </div>
+    </table>
+</div>
+
+<br>
+<md-progress-circular ng-if="loading"
+                      md-mode="indeterminate"
+                      class="pull-left"
+                      md-diameter="40">
+</md-progress-circular>

@@ -85,13 +85,20 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/public-models.html',
             controller: 'Public',
             authenticate: true
-        }).state('app.modelEditor', {
+        })
+
+        // Object Editors
+        .state('app.modelEditor', {
             url: "/model-editor/",
             templateUrl: 'app/views/editor/model-editor.html',
             controller: 'ModelEditor',
             authenticate: true
+        }).state('app.media', {
+            url: "/media-editor/",
+            templateUrl: 'app/views/editor/media-editor.html',
+            controller: 'MediaEditor',
+            authenticate: true
         })
-
 
         // object views
         /*

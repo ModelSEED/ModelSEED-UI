@@ -10,7 +10,7 @@ angular.module('core-directives')
             MS.getObject(path)
               .then(function(data) {
                   console.log('parsed', data)
-                  
+
                   var params = {type: type,
                                 obj: data.data,
                                 meta: data.meta,
@@ -1241,6 +1241,42 @@ function($compile, $stateParams) {
         }
     }
  })
+
+
+ .directive('ngSolrTableEditor', function() {
+     return {
+         restrict: 'EA',
+         scope: {
+             header: '=tableHeader',
+             data: '=tableData',
+             opts: '=tableOpts',
+             loading: '=tableLoading',
+             placeholder: '@tablePlaceholder',
+             addItems: '=tableAddItems',
+             notFoundText: '@tableNotFoundText',             
+         },
+         templateUrl: 'app/views/general/solr-table-editor.html',
+         link: function(scope, elem, attrs) {
+
+             scope.checkedItems = [];
+
+             scope.checkItem = function(item) {
+                 item.checked = item.checked ? false : true;
+
+                 if (item.checked)
+                     scope.checkedItems.push(item)
+                 else {
+                     // remove from checked list
+                     for (var i=0; i<scope.checkedItems.length; i++) {
+                         if ( angular.equals(scope.checkedItems[i], item) )
+                             scope.checkedItems.splice(i, 1)
+                     }
+                 }
+             }
+
+         }
+     }
+  })
 
 
 .directive('ngTableEditor', function() {

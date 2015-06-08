@@ -1,0 +1,23 @@
+
+<md-dialog flex="80" style="min-height: 80%;">
+
+    <md-content layout-margin>
+    <h4>Add Compounds</i></h4>
+
+    <ng-solr-table-editor table-header="cpdHeader"
+              table-data="cpds"
+              table-opts="cpdOpts"
+              table-loading="loadingCpds"
+              table-placeholder="Search compounds"
+              table-add-items="addItems"
+              table-not-found-text="Compound not found">
+    </ng-solr-table-editor>
+
+    <!--
+    <div class="md-actions">
+        <md-button ng-click="cancel()">
+            Close
+        </md-button>
+    </div>-->
+    </md-content>
+</md-dialog>

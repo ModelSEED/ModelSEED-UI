@@ -75,7 +75,6 @@ function($scope, $http) {
  * @param  {[type]} Biochem [Biochem Service]
  */
 function($scope, Biochem) {
-
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
 
@@ -84,7 +83,7 @@ function($scope, Biochem) {
 
     $scope.rxnHeader = [{label: 'ID', key: 'id'},
                         {label: 'Name', key: 'name'},
-                        {label: 'Equation', key: 'equation'},
+                        {label: 'EQ', key: 'definition'},
                         {label: 'deltaG', key: 'deltag'},
                         {label: 'detalGErr', key: 'deltagerr'}];
 
@@ -93,7 +92,8 @@ function($scope, Biochem) {
                         {label: 'Formula', key: 'formula'},
                         {label: 'Abbrev', key: 'abbreviation'},
                         {label: 'deltaG', key: 'deltag'},
-                        {label: 'detalGErr', key: 'deltagerr'}];
+                        {label: 'detalGErr', key: 'deltagerr'},
+                        {label: 'Charge', key: 'charge'}];
 
 
     function updateRxns() {
@@ -121,6 +121,147 @@ function($scope, Biochem) {
         $scope.loadingCpds = true;
         updateCpds();
     }, true)
+}])
+
+.controller('MediaEditor',
+['$scope', 'FBA', 'WS', '$mdDialog', '$sce', '$http', 'Biochem', '$timeout',
+/**
+ * [Responsible for:
+ *  	- table options/spec,
+ *  	- updating state of table,
+ *  	- adding, removing, updating things in table(s)]
+ * @param  {[type]} $scope   [description]
+ * @param  {[type]} FBA      [OLD FBA Service]
+ * @param  {[type]} WS       [Workspace Service]
+ * @param  {[type]} $dialog  [Material Dialog]
+ * @param  {[type]} $sce     [Needed for altering of DOM]
+ * @param  {[type]} $timeout [description]
+ * @return {[type]}          [description]
+ */
+function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
+
+    // data model for media data
+    $scope.data;
+
+    // data model for checked compounds
+    $scope.checkedCpds= [];
+
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+
+    var req = 'data/test-data/Rsp_minimal.json';
+    $scope.loading = true
+    $http.get(req)
+         .then(function(res) {
+             var cpds = res.data.mediacompounds;
+             var data = [];
+             for (var i=0; i<cpds.length; i++) {
+                 var obj = cpds[i];
+                 obj.id = getCpdName(obj.compound_ref)
+                 data.push(obj)
+             }
+
+             $scope.data = data;
+             $scope.loading = false;
+         })
+
+
+    function getCpdName(ref) {
+        var pathList = ref.split('/');
+        return pathList[pathList.length -1];
+    }
+
+    // replace with whated update method(s)
+    $scope.addToDataModel = function(newItems) {
+        $scope.data = $scope.data.concat(newItems)
+    }
+
+    $scope.checkCpd = function(item) {
+        console.log('item', item)
+        item.checked = item.checked ? false : true;
+
+        if (item.checked)
+            $scope.checkedCpds.push(item)
+        else {
+            // remove from checked list
+            for (var i=0; i<$scope.checkedCpds.length; i++) {
+                if ( angular.equals($scope.checkedCpds[i], item) )
+                    $scope.checkedCpds.splice(i, 1)
+            }
+        }
+    }
+
+    $scope.addCpds = function(ev, item) {
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/add-cpds.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+                $scope.addItems = function(items){
+                    $dialog.hide();
+
+                    // add items to media
+                    var newItems = [];
+                    for (var i=0; i<items.length; i++) {
+                        var cpd = items[i]
+                        newItems.push({compound_ref: '/some/path/ref/'+cpd.id,
+                                       deltagerr: cpd.deltagerr,
+                                       deltag: cpd.deltag,
+                                       name: cpd.name,
+                                       concentration: 0})
+                    }
+
+                    $scope.addToDataModel(newItems)
+                }
+            }]
+        })
+    }
+
+    $scope.rmCpds = function() {
+        console.log('removing', $scope.checkedCpds)
+        for (var i=0; i<$scope.data.length; i++) {
+            for (var j=0; j<$scope.checkedCpds.length; j++) {
+                console.log($scope.data[i], $scope.checkedCpds[j])
+                if ($scope.data[i].compound_ref === $scope.checkedCpds[j].compound_ref) {
+                    console.log('removing', i)
+                    $scope.data.splice(i, 1)
+                    break;
+                }
+            }
+        }
+
+        $scope.checkedCpds = [];
+    }
+
+    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.cpdHeader = [{label: 'Name', key: 'name'},
+                        {label: 'ID', key: 'id'},
+                        {label: 'Formula', key: 'formula'},
+                        {label: 'Abbrev', key: 'abbreviation'},
+                        {label: 'deltaG', key: 'deltag'},
+                        {label: 'detalGErr', key: 'deltagerr'},
+                        {label: 'Charge', key: 'charge'}];
+
+    function updateCpds() {
+        Biochem.get('compound', $scope.cpdOpts)
+               .then(function(res) {
+                    console.log('biochem res', res)
+                    $scope.cpds = res;
+                    $scope.loadingCpds = false;
+               })
+    }
+
+    $scope.$watch('cpdOpts', function(value){
+        $scope.loadingCpds = true;
+        updateCpds();
+    }, true)
+
 }])
 
 .controller('ModelEditor',
@@ -215,7 +356,6 @@ function($scope, FBA, WS, $dialog, $sce) {
               $scope.loadingModel = false;
            })
     }
-
 
     $scope.addRxns = function(ev, item) {
         $dialog.show({
@@ -333,7 +473,6 @@ function($scope, FBA, WS, $dialog, $sce) {
         for (var i in genes) ids.push(genes[i].id);
         return $sce.trustAsHtml(ids.join('<br>'));
     }
-
 }])
 
 .controller('Reconstruct',

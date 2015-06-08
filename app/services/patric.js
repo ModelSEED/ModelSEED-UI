@@ -54,6 +54,7 @@ function($http, $q, $rootScope) {
         liveReq = $q.defer();
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res){
+                        console.log('res', res)
                         liveReq = false;
                         return res.data.response;
                     })
