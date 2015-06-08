@@ -13,18 +13,24 @@
     <table class="table table-condensed">
         <thead>
             <tr ng-if="item.relatedGapfills.length">
+                <th>Integrated?</th>
                 <th>ID</th>
                 <th>Media</th>
                 <th>Time</th>
+
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in item.relatedGapfills | orderBy : '-timestamp'"
-                class="table-hover">
+            <tr ng-repeat="gf in item.relatedGapfills"
+                class="table-hover"
+                ng-click="integrateGapfill(gf.integrated, item, gf.id)">
+                <td>
+                    <i class="fa {{gf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}"></i>
+                </td>
                 <td>
                     <a>{{::gf.id}}</a>
                 </td>
-                <td>{{::gf.media}}</td>
+                <td>{{::gf.media.toName()}}</td>
                 <td>{{relativeTime(gf.timestamp)}}</td>
             </tr>
         </tbody>

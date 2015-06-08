@@ -256,19 +256,21 @@ angular.module('MS', [])
         return $http.rpc('ms', 'list_gapfill_solutions', {model: path})
                     .then(function(res) {
                         $log.log('related gfs', res)
-                        // select any previously selected
-                        var d = [];
-                        for (key in res) {
-                            var gf = res[key];
 
-                            gf.media = gf.media.toName();
-                            gf.timestamp = Date.parse(gf.rundate);
-
-                            d.push(res[key]);
-                        }
-                        return d;
+                        return res;
                     }).catch(function() {
                         return [];
+                    })
+    }
+
+    this.manageGapfills = function(path, gfID, operation){
+        $log.log('manage_gapfill_solutions', path)
+        var commands = {};
+        commands[gfID] = operation;
+        return $http.rpc('ms', 'manage_gapfill_solutions', {model: path, commands: commands})
+                    .then(function(res) {
+                        $log.log('manage_gapfill_solutions response', res)
+                        return res[gfID];
                     })
     }
 

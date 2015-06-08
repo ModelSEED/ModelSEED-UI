@@ -18,11 +18,6 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
         console.log('res', res)
         $scope.data = res;
         $scope.loading = false;
-        MS.getObjectMetas(res)
-          .then(function(data) {
-              $scope.data = data;
-              $scope.loading = false;
-          })
     })
 
     $scope.showFBAs = function(item) {
@@ -133,6 +128,22 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
               fbas.splice(i, 1)
           })
     }
+
+    $scope.integrateGapfill = function(isIntegrated, model, gfID) {
+        // if not integrated, integrate
+        // if integrated, unintegrate
+        MS.manageGapfills(model.path, gfID, isIntegrated ? 'U' : 'I')
+          .then(function(res) {
+              for (var i=0; i < model.relatedGapfills.length; i++) {
+                  var gf = model.relatedGapfills[i];
+                  if (gf.id == gfID) {
+                      model.relatedGapfills[i] = res
+                      break;
+                  }
+              }
+          })
+    }
+
 
 }])
 

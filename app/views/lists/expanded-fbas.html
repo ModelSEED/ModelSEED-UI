@@ -35,7 +35,7 @@
                        ng-click="$event.stopPropagation()">{{::fba.media}}</a>
                 </td>
                 <td>
-                    <a ui-sref="app.fbaPage({path: fba.fba})"
+                    <a ui-sref="app.fbaPage({path: fba.path})"
                         ng-click="$event.stopPropagation()">{{::fba.id}}</a>
                 </td>
                 <td>{{fba.objective === '10000000' ? 0 : fba.objective}}</td>

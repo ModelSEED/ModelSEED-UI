@@ -99,7 +99,6 @@ function(MS, $dialog, $mdToast) {
     }
 
     this.gapfill = function(ev, item, cb) {
-        console.log('item!!!', item)
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/gapfill.html',
