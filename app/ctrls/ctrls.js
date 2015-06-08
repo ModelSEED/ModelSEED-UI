@@ -5,52 +5,81 @@ angular.module('ctrls', [])
 }])
 
 
-.controller('MyModels', ['$scope', 'WS', 'MS', '$compile', '$timeout',
-function($scope, WS, MS, $compile, $timeout) {
+.controller('MyModels',
+['$scope', 'WS', 'MS', '$compile', 'uiTools', 'Dialogs', 'ModelViewer',
+function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
     $scope.MS = MS;
+    $scope.relativeTime = uiTools.relativeTime;
 
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
     $scope.loading = true;
-    MS.getModels().then(function(data) {
-        $scope.data = data;
-        console.log('models', data)
-        $scope.loading = false;
+    MS.getModels().then(function(res) {
+        console.log('res', res)
+        $scope.data = res;
+        $scope.loading = false;        
+        MS.getObjectMetas(res)
+          .then(function(data) {
+              $scope.data = data;
+              $scope.loading = false;
+          })
     })
 
-    $scope.showFBAs = function($event, item) {
+    $scope.showFBAs = function(item) {
+        $scope.showGapfills(item);
+
         if (item.relatedFBAs)
             delete item.relatedFBAs;
+        else
+            updateFBAs(item)
+    }
+
+    function updateFBAs(item) {
+        item.loading = true;
+        MS.getModelFBAs(item.path)
+            .then(function(fbas) {
+                item.relatedFBAs = fbas;
+                item.loading = false;
+            })
+    }
+
+    $scope.showGapfills = function(item) {
+        if (item.relatedGapfills)
+            delete item.relatedGapfills;
         else {
-            item.loading = true;
-            MS.getModelFBAs(item.ref)
-                .then(function(fbas) {
-
-                    // select any previously selected
-                    for (var i=0; i<fbas.length; i++) {
-                        if (MV.isSelected(item, fbas[i]))
-                            fbas[i].checked = true;
-                    }
-
-                    item.relatedFBAs = fbas;
-
-                    item.loading = false;
-                })
+            updateGapfills(item);
         }
+    }
+
+    function updateGapfills(item) {
+        item.loading = true;
+        MS.getModelGapfills(item.path)
+            .then(function(gfs) {
+                console.log('gfs', gfs)
+                item.relatedGapfills = gfs;
+                item.loading = false;
+            })
+    }
+
+    $scope.runFBA = function(ev, item) {
+        Dialogs.runFBA(ev, item, function() {
+            updateFBAs(item)
+        })
+    }
+
+    $scope.gapfill = function(ev, item) {
+        Dialogs.gapfill(ev, item, function() {
+            updateGapfills(item)
+        })
     }
 
     $scope.addFBA = function(e, fba, model) {
         e.preventDefault();
         e.stopPropagation();
 
-        var data = {model: {
-                        ws: model.ws,
-                        name: model.name
-                    },
-                    fba: {
-                        ws: fba.ws,
-                        name: fba.name
-                    },
+        console.log('adding', fba, model)
+        var data = {model: model.path,
+                    fba: fba.fba,
                     org: model.orgName,
                     media: fba.media};
 
@@ -86,10 +115,8 @@ function($scope, WS, MS, $compile, $timeout) {
 
                 for (var j in model.relatedFBAs) {
                     var fba = model.relatedFBAs[j];
-                    if (item.model.ws === model.ws &&
-                        item.model.name === model.name &&
-                        item.fba.ws === fba.ws &&
-                        item.fba.name === fba.name)
+
+                    if (item.model === model.path && item.fba === fba.fba)
                         fba.checked = false;
                 }
             }
@@ -97,8 +124,87 @@ function($scope, WS, MS, $compile, $timeout) {
     })
 
 
+    // general operations
+    $scope.deleteFBA = function(e, i, item, fbas) {
+        e.stopPropagation();
+        console.log('deleteing', item.path)
+        MS.deleteObj(item.path)
+          .then(function(res) {
+              fbas.splice(i, 1)
+          })
+    }
+
 }])
 
+
+
+.controller('CompoundDropdown', ['$scope', 'Biochem',
+function($scope, Biochem) {
+    var self = this;
+    self.form = $scope.form
+
+    self.readonly = false;
+    self.selectedItem = null;
+    self.searchText = null;
+    self.querySearch = querySearch;
+    self.compounds = [];
+    self.numberChips = [];
+    self.numberChips2 = [];
+    self.numberBuffer = '';
+
+    /**
+     * Search for vegetables.
+     */
+    function querySearch (query) {
+        return Biochem.get('model_compound', {query: query, limit: 10})
+                .then(function(res) {
+                    var data = [];
+                    for (var i in res.docs) {
+                        var doc = res.docs[i];
+
+                        if (doc.id === 'cpd00000') continue;
+                        data.push({name: doc.name,
+                                  id: doc.id})
+                    }
+
+                    return data;
+                })
+    }
+}])
+
+.controller('ReactionDropdown', ['$scope', 'Biochem',
+function($scope, Biochem) {
+    var self = this;
+    self.form = $scope.form
+
+    self.readonly = false;
+    self.selectedItem = null;
+    self.searchText = null;
+    self.querySearch = querySearch;
+    self.reactions = [];
+    self.numberChips = [];
+    self.numberChips2 = [];
+    self.numberBuffer = '';
+
+    /**
+     * Search for vegetables.
+     */
+    function querySearch (query) {
+        return Biochem.get('model_reaction', {query: query, limit: 10})
+                .then(function(res) {
+                    var data = [];
+                    for (var i in res.docs) {
+                        var doc = res.docs[i];
+
+                        if (doc.id === 'rxn00000') continue;
+                        data.push({name: doc.name,
+                                  id: doc.id})
+                    }
+
+                    return data;
+                })
+    }
+}])
 
 
 .controller('Public', ['$scope', 'WS', 'ModelViewer', '$compile', '$timeout',
@@ -395,7 +501,11 @@ function ($scope, $timeout, MV, VizOpts) {
                                     }});
     }
 }])
-
+.controller('Proto',
+    ['$scope', '$stateParams',
+    function($scope, $stateParams) {
+    }
+])
 
 .service('VizOptions', [function() {
 

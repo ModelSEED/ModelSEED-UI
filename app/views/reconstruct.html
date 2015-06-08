@@ -58,15 +58,15 @@
         {{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results
     </div>
 
-    <!--
-    <div class="pull-right">
-        <div ng-if="selected"
-             ng-click="reconstruct($event, selectedID)"
-             class="btn btn-primary btn-sm btn-reconstruct">
-            Reconstruct
-        </div>
-    </div>-->
 
+    <div>
+        <md-button md-no-ink
+            class="md-primary md-raised btn-reconstruct"
+            ng-if="selected"
+            ng-click="reconstruct($event, selected)">
+            Reconstruct
+        </md-button>
+    </div>
 
 </div>
 
@@ -86,7 +86,7 @@
             class="table-hover">
 
             <td>
-                <!--<i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>-->
+                <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
             </td>
             <td ng-repeat="col in opts.visible">{{g[col]}}</td>
 

@@ -2,10 +2,16 @@
 <md-dialog flex="50">
 
     <md-content layout-margin>
-		<h3>Reconstruct Model</h3>
-        {{folder}} {{selected.name}}
+        <h3>Reconstruct Model <small>{{item.name}}</small></h3>
 
-        <ng-include src="'app/views/apps/reconstruct.html'"></ng-include>
+        <md-input-container md-no-float>
+            <input ng-model="form.output_file" placeholder="Optional Name">
+        </md-input-container>
+
+        <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
+            Include Full DB?
+        </md-checkbox>
+
     </md-content>
 
     <div class="md-actions">

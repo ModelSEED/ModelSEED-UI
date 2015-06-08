@@ -22,7 +22,7 @@
                 <li ng-repeat="item in MV.models track by $index">
 
                     <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
-                        <a ui-sref=".modelPage({ws: item.model.ws, name: item.model.name})"
+                        <a ui-sref=".modelPage({path: item.model})"
                            class="model">
                            {{item.org}}
                         </a>
@@ -32,7 +32,7 @@
                     </div>
 
                     <div class="ellipsis selected-data-item">
-                        <a ui-sref=".fbaPage({ws: item.fba.ws, name: item.fba.name})"
+                        <a ui-sref=".fbaPage({path: item.fba})"
                            class="fba" ng-click="makeActive($event)">
                            <span class="label label-fba">FBA</span> {{item.media}}
                         </a>

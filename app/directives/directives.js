@@ -7,6 +7,9 @@ angular.module('core-directives')
             var path = attrs.objPath,
                 type = attrs.type;
 
+            scope.loading = true;
+
+            console.log('get object with path', path)
             MS.getObject(path)
               .then(function(data) {
                   console.log('parsed', data)
@@ -17,54 +20,24 @@ angular.module('core-directives')
                                 options: {showETC: true, urlRouter: urlRouter}
                                };
 
-                  // used to support various apps with different frameworks
-                  function urlRouter(type, ws, name) {
-                      if (type === "KBaseFBA.FBAModel")
-                          return '#/models/'+ws+'/'+name;
-                      else if (type === "KBaseFBA.FBA")
-                          return '#/fba/'+ws+'/'+name;
-                      else if (type === "KBaseBiochem.Media")
-                          return '#/media/'+ws+'/'+name;
-
-                      return;
-                  }
+                  scope.loading = false;
                   $(elem).kbaseTabTable(params);
               })
+
+              // used to support various apps with different frameworks
+              function urlRouter(type, ws, name) {
+                  if (type === "KBaseFBA.FBAModel")
+                      return '#/models/'+ws+'/'+name;
+                  else if (type === "KBaseFBA.FBA")
+                      return '#/fba/'+ws+'/'+name;
+                  else if (type === "KBaseBiochem.Media")
+                      return '#/media/'+ws+'/'+name;
+
+                  return;
+              }
         }
     }
 }])
-
-
-.directive('kbTables', function() {
-    return {
-        link: function(scope, elem, attrs) {
-            var type = attrs.kbTables,
-                ws = attrs.kbTablesWs,
-                obj = attrs.kbTablesObj;
-
-            var params = {type: type,
-                          ws: ws,
-                          obj: obj,
-                          options: {showETC: true, urlRouter: urlRouter}
-                         };
-
-            // used to support various apps with different frameworks
-            function urlRouter(type, ws, name) {
-                if (type === "KBaseFBA.FBAModel")
-                    return '#/models/'+ws+'/'+name;
-                else if (type === "KBaseFBA.FBA")
-                    return '#/fba/'+ws+'/'+name;
-                else if (type === "KBaseBiochem.Media")
-                    return '#/media/'+ws+'/'+name;
-
-                return;
-            }
-
-
-            $(elem).kbaseTabTable(params);
-        }
-    }
- })
 
 .directive('fixedHeader', ['$window', '$timeout', function($window, $timeout) {
    return function(scope, elem, attr) {
@@ -1253,7 +1226,7 @@ function($compile, $stateParams) {
              loading: '=tableLoading',
              placeholder: '@tablePlaceholder',
              addItems: '=tableAddItems',
-             notFoundText: '@tableNotFoundText',             
+             notFoundText: '@tableNotFoundText',
          },
          templateUrl: 'app/views/general/solr-table-editor.html',
          link: function(scope, elem, attrs) {

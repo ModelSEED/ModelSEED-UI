@@ -1,16 +1,12 @@
-
 <h4>
-	<img src="img/file-cabinet-icon.svg" style="opacity: .5;" width="22" height="22">
+	<i class="icon-folder-open-o"></i>
 
 	<span ng-if="!path.length">
-		My Data
+		My Models
 	</span>
 
 	<span ng-if="path.length">
-		<a ui-sref="app.myData({dir: '/'+$root.user})">My Data</a>
-		<span ng-repeat="d in path | limitTo: path.length-1">
-			/ <a ui-sref="app.myData({dir: '{{getLink($index)}}' })">{{d}}</a>
-		</span>
+		<a ui-sref="app.myModels()">My Models</a>
 		/ {{path[path.length-1]}}
 	</span>
 </h4>
@@ -62,6 +58,10 @@
   </form>
 </div>-->
 
+<md-progress-circular ng-if="loading"
+					md-mode="indeterminate"
+					md-diameter="40">
+</md-progress-circular>
 
 <div class="obj-view">
 	<div ms-tables type="KBaseFBA.FBAModel" obj-path="{{objPath}}"></div>

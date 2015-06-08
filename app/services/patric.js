@@ -1,13 +1,13 @@
 
 
 angular.module('Patric', [])
-.service('Patric', ['$http', '$q', '$rootScope',
-function($http, $q, $rootScope) {
+.service('Patric', ['$http', '$q', '$rootScope', 'config',
+function($http, $q, $rootScope, config) {
     "use strict";
 
     var self = this
 
-    var endpoint = 'https://www.patricbrc.org/api/';
+    var endpoint = config.services.solr_url;
 
     var liveReq;
     this.getGenomes = function(opts) {
@@ -42,7 +42,7 @@ function($http, $q, $rootScope) {
             }
             url += '&or('+set.join(',')+')';
         } else if (query) {
-            url += "&keyword('"+query+"')";
+            url += "&keyword(*"+query+"*)";
             cache = false;
         } else
             url += '&keyword(*)';

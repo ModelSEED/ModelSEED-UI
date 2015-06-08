@@ -6,13 +6,16 @@
 */
 
 angular.module('MS', [])
-.service('MS', ['$http', '$log', 'Auth', 'config', '$cacheFactory', '$q',
-    function($http, $log, auth, config, $cacheFactory, $q) {
+.service('MS', ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer',
+    function($http, $log, $cacheFactory, $q, MV) {
 
     var self = this;
 
-    // model for displayed workspaces
+    // model for displayed things
     this.workspaces = [];
+    this.myModels = [];
+
+    var cache = $cacheFactory('ms');
 
     this.getMyData = function(path, opts) {
         var params = {paths: [path]};
@@ -128,31 +131,33 @@ angular.module('MS', [])
 
     }
 
-    this.reconstruct = function(item) {
-        return $http.rpc('ms', 'ModelReconstruction', {genome: item})
+    this.reconstruct = function(form) {
+        return $http.rpc('ms', 'ModelReconstruction', form)
                     .then(function(res){
                         return res;
                     })
     }
 
-    this.runFBA = function(item) {
-        return $http.rpc('ms', 'FluxBalanceAnalysis', {model: item})
+    this.runFBA = function(form) {
+        $log.log('run fba params', form)
+        return $http.rpc('ms', 'FluxBalanceAnalysis', form)
                     .then(function(res){
                         return res;
                     })
     }
 
-    this.gapfill = function(item) {
-        return $http.rpc('ms', 'GapfillModel', {model: item})
+    this.gapfill = function(path) {
+        return $http.rpc('ms', 'GapfillModel', {model: path})
                     .then(function(res){
                         return res;
                     })
     }
 
     this.getObject = function(path) {
-        $log.log('retrieving object', path)
+        $log.log('get (object)', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
+                        $log.log('get (object) response', res)
                         var data = {meta: res[0][0], data: JSON.parse(res[0][1])}
                         return data;
                     })
@@ -160,35 +165,110 @@ angular.module('MS', [])
 
     this.getObjectMeta = function(path) {
         $log.log('retrieving meta', path)
-        return $http.rpc('ms', 'get', {objects: [path], metadata_only: 1})
+        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
                     .then(function(res) {
                         return res[0];
                     })
     }
 
+    this.getObjectMetas = function(paths) {
+        if ( cache.get('objectmetas') )
+            return cache.get('objectmetas');
+
+        $log.log('get (metas)', paths)
+
+        var p = $http.rpc('ws', 'get', {objects: paths, metadata_only: 1})
+                    .then(function(res) {
+                        console.log('res', res)
+                        var res = [].concat.apply([], res)
+
+                        var data = [];
+                        for (var i=0; i<res.length; i++) {
+                            var meta = res[i];
+                            var d = meta[8];
+
+                            data.push({name: meta[0],
+                                       timestamp: Date.parse(meta[3]),
+                                       path: meta[2]+meta[0],
+                                       orgName: d.name,
+                                       rxnCount: d.num_reactions,
+                                       cpdCount: d.num_compounds})
+                        }
+
+                        return data;
+                    })
+        cache.put('objectmetas', p);
+        return p;
+    }
 
     this.getModels = function() {
         $log.log('list models')
         return $http.rpc('ms', 'list_models', {})
                     .then(function(res) {
-                        $log.log('list models res', res)
-                        var models = []
-                        for (var i in res) {
-                            var name = res[i].split('/')
-                            var model = {name: res[i].split('/')[res[i].split('/').length-1],
-                                         ref: res[i]};
-                            models.push(model);
+                        $log.log('listmodels resp', res)
+                        var data = [];
+                        for (var i=0; i<res.length; i++) {
+                            var obj = res[i];
+
+                            data.push({name: obj.id,
+                                       path: obj.ref,
+                                       orgName: obj.name,
+                                       rxnCount: obj.num_reactions,
+                                       cpdCount: obj.num_compounds,
+                                       fbaCount: obj.fba_count,
+                                       gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills})
                         }
-                        return models;
+                        return data;
                     })
     }
 
 
-    this.getModelFBAs = function(model) {
-        $log.log('list related fbas', model)
-        return $http.rpc('ms', 'list_fba_studies', {model: model})
+    this.getModelFBAs = function(modelPath) {
+
+        $log.log('list related fbas!', modelPath)
+        return $http.rpc('ms', 'list_fba_studies', {model: modelPath})
                     .then(function(res) {
-                        return res;
+                        $log.log('related fbas', res)
+                        // select any previously selected
+                        var d = [];
+                        for (key in res) {
+                            var fba = res[key];
+                            if (MV.isSelected(modelPath, fba))
+                                fba.checked = true;
+
+                            // consistency
+                            fba.path = fba.fba;
+                            delete fba['fba'];
+
+                            fba.media = fba.media.toName();
+                            fba.timestamp = Date.parse(fba.rundate);
+
+                            d.push(res[key]);
+                        }
+                        return d;
+                    }).catch(function() {
+                        return [];
+                    })
+    }
+
+    this.getModelGapfills = function(path) {
+        $log.log('list gapfills', path)
+        return $http.rpc('ms', 'list_gapfill_solutions', {model: path})
+                    .then(function(res) {
+                        $log.log('related gfs', res)
+                        // select any previously selected
+                        var d = [];
+                        for (key in res) {
+                            var gf = res[key];
+
+                            gf.media = gf.media.toName();
+                            gf.timestamp = Date.parse(gf.rundate);
+
+                            d.push(res[key]);
+                        }
+                        return d;
+                    }).catch(function() {
+                        return [];
                     })
     }
 

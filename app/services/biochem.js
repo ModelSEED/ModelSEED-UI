@@ -1,19 +1,18 @@
 
 
 angular.module('Biochem', [])
-.service('Biochem', ['$http', '$q', '$rootScope',
-function($http, $q, $rootScope) {
+.service('Biochem', ['$http', '$q', 'config', '$log',
+function($http, $q, config, $log) {
     "use strict";
 
     var self = this
 
-    var endpoint = 'https://www.beta.patricbrc.org/api/'
+    var endpoint = config.services.solr_url;
 
-
-    var cpdReq, rxnReq;
+    var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {
         var cache = true;
-        var url = endpoint+'model_'+collection+'/?http_accept=application/solr+json'
+        var url = endpoint+collection+'/?http_accept=application/solr+json'
 
         if (opts) {
             var query = opts.query ? opts.query : null,
@@ -33,7 +32,7 @@ function($http, $q, $rootScope) {
 
         if (query) {
             // sort by id when querying
-            url += '&keyword("'+query+'")&sort(id)'
+            url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
         } else {
             url += '&keyword(*)';
@@ -43,21 +42,24 @@ function($http, $q, $rootScope) {
         if (offset === 0) cache = true;
 
         // cancel any previous request using defer
-        if (rxnReq && collection === 'reaction') rxnReq.resolve();
-        if (cpdReq && collection === 'compound') cpdReq.resolve();
+        if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
+        if (cpdReq && collection === 'model_compound') cpdReq.resolve();
+        if (geneReq && collection === 'gene') geneReq.resolve();
 
         var liveReq = $q.defer();
 
         // save defer for later use
-        if (collection === 'reaction')
+        if (collection === 'model_reaction')
             rxnReq = liveReq;
-        else if (collection === 'compound')
+        else if (collection === 'model_compound')
             cpdReq = liveReq;
+        else if (collection === 'gene')
+            geneReq = liveReq;
 
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
-                        console.log('res', res)                        
-                        rxnReq = false, cpdReq = false;
+                        $log.log('res', res)
+                        rxnReq = false, cpdReq = false; geneReq;
                         return res.data.response;
                     })
     }

@@ -1,0 +1,32 @@
+<md-button md-no-ink class="md-primary md-raised" ng-click="gapfill($event, item)">
+    <i class="fa fa-plus"></i> Gapfill Model
+</md-button>
+
+
+<div class="gapfill-table expanded-table">
+    <!--<h5>Gapfills</h5>-->
+
+    <!--<div ng-if="!item.relatedGappfills.length" class="text-muted">
+        You have no Gappfill.
+    </div>-->
+
+    <table class="table table-condensed">
+        <thead>
+            <tr ng-if="item.relatedGapfills.length">
+                <th>ID</th>
+                <th>Media</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="gf in item.relatedGapfills | orderBy : '-timestamp'"
+                class="table-hover">
+                <td>
+                    <a>{{::gf.id}}</a>
+                </td>
+                <td>{{::gf.media}}</td>
+                <td>{{relativeTime(gf.timestamp)}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

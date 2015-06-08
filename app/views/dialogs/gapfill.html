@@ -1,16 +1,29 @@
 
-<md-dialog flex="50">
+<md-dialog flex="65">
+    <form>
+        <md-dialog-content>
+            <md-subheader><h4>Gapfill</h4></md-subheader>
 
-    <md-content layout-margin>
-		<h3>Gapfillsdf</h3>
-        {{folder}} {{selected.name}}
+            <div>
 
-        <ng-include src="'app/views/apps/gapfill.html'"></ng-include>
-    </md-content>
+                <div layout layout-sm="column">
+                    <md-input-container flex="50">
+                        <label>Comprehensive gapfilling priority</label>
+                        <input type="number" step="any" ng-model="form.alpha" ng-init="form.alpha = 0">
+                    </md-input-container>
+                </div>
 
-    <div class="md-actions">
-        <md-button ng-click="gapfill()">
-            Gapfill
-        </md-button>
-    </div>
+
+
+            </div>
+
+        </md-dialog-content>
+
+
+        <div class="md-actions" layout="row">
+            <md-button ng-click="gapfill()">
+                Gapfill
+            </md-button>
+        </div>
+    </form>
 </md-dialog>

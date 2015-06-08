@@ -2,9 +2,10 @@
 angular.module('Browser', ['uiTools'])
 .controller('MyData',
 ['$scope', '$state', '$stateParams', 'MS', '$log',
- 'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast', 'Upload', '$mdSidenav',
+ 'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast',
+ 'Upload', '$mdSidenav', 'Dialogs',
   function($scope, $state, $stateParams, MS, $log, uiTools, $document,
-           $timeout, $dialog,  $mdToast, Upload, $mdSidenav) {
+           $timeout, $dialog,  $mdToast, Upload, $mdSidenav, Dialogs) {
 
     $scope.Upload = Upload;
     $scope.MS = MS;
@@ -68,6 +69,7 @@ angular.module('Browser', ['uiTools'])
     $scope.openMenu = function(e, i, item) {
         console.log('called open row', e, i, item)
         $scope.selected = {type: item.type ? item.type : 'Workspace',
+                           path: item.path+item.name,
                            name: item.name,
                            index: i};
         console.log('selected item is ', $scope.selected)
@@ -157,6 +159,7 @@ angular.module('Browser', ['uiTools'])
 
         $scope.select = true;
         $scope.selected = {type: item.type ? item.type : 'Workspace',
+                           path: item.path+item.name,
                            name: item.name,
                            index: i};
 
@@ -277,165 +280,21 @@ angular.module('Browser', ['uiTools'])
 
 
     $scope.showMeta = function(ev, item) {
-        ev.stopPropagation();
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/show-meta.html',
-            targetEvent: ev,
-            clickOutsideToClose: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-                MS.getObjectMeta(path(item.name))
-                  .then(function(meta) {
-                      $scope.metaData = meta;
-                  })
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-            }]
-        })
+        Dialogs.showMeta(ev, path(item.name))
     }
 
     $scope.reconstruct = function(ev, item) {
-        ev.stopPropagation();
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/reconstruct.html',
-            targetEvent: ev,
-            scope: $scope.$new(),
-            clickOutsideToClose: true,            
-            preserveScope: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-
-                $scope.reconstruct = function(){
-                    var name = $scope.selected.name;
-                    showToast('Reconstructing', name)
-                    MS.reconstruct(item)
-                      .then(function(r) {
-                           showComplete('Reconstruct Complete', name, r[2]+r[0])
-                      })
-                    $dialog.hide();
-                }
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-
-            }]
-        })
+        Dialogs.reconstruct(ev, item)
     }
 
     $scope.runFBA = function(ev, item) {
-        ev.stopPropagation();
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/runFBA.html',
-            targetEvent: ev,
-            clickOutsideToClose: true,
-            scope: $scope.$new(),
-            preserveScope: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-
-                $scope.runFBA = function(){
-                    var name = $scope.selected.name;
-                    showToast('Running Flux Balance Analysis', name)
-                    MS.runFBA(item)
-                      .then(function(res) {
-                           showComplete('FBA Complete', name)
-                      }).catch(function(e) {
-                          showError(e.error.message)
-                      })
-                    $dialog.hide();
-                }
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-
-            }]
-        })
+        Dialogs.runFBA(ev, item)
     }
 
     $scope.gapfill = function(ev, item) {
-        ev.stopPropagation();
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/gapfill.html',
-            targetEvent: ev,
-            scope: $scope.$new(),
-            clickOutsideToClose: true,
-            preserveScope: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-
-
-                $scope.gapfill = function(){
-                    var name = $scope.selected.name;
-                    showToast('Gapfilling', name)
-
-                    MS.gapfill(item)
-                      .then(function(res) {
-                           showComplete('Gapfill Complete', name)
-                      }).catch(function(e) {
-                          showError(e.error.message)
-                      })
-                    $dialog.hide();
-                }
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-
-            }]
-        })
+        Dialogs.gapfill(ev, item)
     }
 
-    function showToast(title, name) {
-      $mdToast.show({
-        controller: 'ToastCtrl',
-        //templateUrl:'app/views/dialogs/notify.html',
-        template: '<md-toast>'+
-                      '<span flex style="margin-right: 30px;">'+
-                         '<span class="ms-color">'+title+'</span><br>'+
-                         name.slice(0,20)+'...'+'</span>'+
-                      '<!--<md-button offset="33" ng-click="closeToast()">'+
-                        'Hide'+
-                      '</md-button>-->'+
-                    '</md-toast>',
-        hideDelay: 0,
-      });
-
-    };
-
-    function showComplete(title, name, path) {
-        $mdToast.show({
-         controller: 'ToastCtrl',
-         //templateUrl:'app/views/dialogs/notify.html',
-         template: '<md-toast>'+
-                     '<span flex style="margin-right: 30px;">'+
-                       '<span class="ms-color-complete">'+title+'</span><br>'+
-                       name.slice(0,20)+'...'+
-                      '</span>'+
-                   '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+
-                     'View'+
-                   '</md-button>'+
-                 '</md-toast>',
-         hideDelay: 10000
-       });
-    }
-
-    function showError(msg) {
-       $mdToast.show({
-        controller: 'ToastCtrl',
-        //templateUrl:'app/views/dialogs/notify.html',
-        template: '<md-toast>'+
-                        '<span flex style="margin-right: 30px;">'+
-                          '<span class="ms-color-error">Error</span><br>'+
-                          msg+
-                         '</span>'+
-                    '</md-toast>',
-        hideDelay: 10000
-      });
-    }
 
     function toggleOperations(item) {
         if (item.type === 'model') {
@@ -474,10 +333,4 @@ function($scope, $mdSidenav) {
     $scope.close = function() {
         $mdSidenav('right').toggle();
     }
-}])
-
-.controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
-  $scope.closeToast = function() {
-    $mdToast.hide();
-  };
 }])

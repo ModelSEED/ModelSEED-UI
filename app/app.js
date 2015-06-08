@@ -21,7 +21,8 @@ angular.module('ModelSEED',
  'Upload',
  'Biochem',
  'Browser',
- 'Regulons'
+ 'Regulons',
+ 'Dialogs'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider',
@@ -42,7 +43,6 @@ function($locationProvider, $stateProvider, $httpProvider,
         is: function () { return true; }
     });
 
-
     $stateProvider
         .state('home', {
             url: "/home/?login",
@@ -52,19 +52,24 @@ function($locationProvider, $stateProvider, $httpProvider,
         })
 
         // data browser
-        .state('app.modelPage', {
-            url: "/model{path:nonURIEncoded}",
-            templateUrl: 'app/views/data/model.html',
-            controller: 'DataPage',
-            authenticate: true
-        })
         .state('app.myData', {
             url: "/data{dir:nonURIEncoded}",
             templateUrl: 'app/components/browser/browser.html',
             controller: 'MyData',
             authenticate: true
+        }).state('app.modelPage', {
+            url: "/model{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/model.html',
+            controller: 'DataPage',
+            authenticate: true
+        }).state('app.fbaPage', {
+            url: "/fba{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/fba.html',
+            controller: 'DataPage',
+            authenticate: true
         })
 
+        // The good stuff
         .state('app.biochem', {
             url: "/biochem/",
             templateUrl: 'app/views/biochem/biochem.html',
@@ -100,31 +105,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-        // object views
-        /*
-        .state('app.modelPage', {
-            url: "/models/:ws/:name",
-            templateUrl: 'app/views/data/model.html',
-            controller: 'DataPage',
-            authenticate: true
-        }).state('app.mediaPage', {
-            url: "/media/:ws/:name",
-            templateUrl: 'app/views/data/media.html',
-            controller: 'DataPage',
-            authenticate: true
-        }).state('app.fbaPage', {
-            url: "/fba/:ws/:name",
-            templateUrl: 'app/views/data/fba.html',
-            controller: 'DataPage',
-            authenticate: true
-        })*/
-
-        .state('app.proto', {
-            url: "/proto",
-            templateUrl: 'app/views/proto.html',
-            controller: 'Proto',
-        })
-
+        // comparative analysis
         .state('app.compare', {
             url: "/compare",
             templateUrl: 'app/views/compare.html',
@@ -153,6 +134,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Help',
         })
 
+        // prototype page
+        .state('app.proto', {
+            url: "/proto",
+            templateUrl: 'app/views/proto.html',
+            controller: 'Proto',
+        })
 
         /* only used for testing analysis forms */
         .state('app.run', {
@@ -160,15 +147,15 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/run/run.html',
         }).state('app.runReconstruct', {
             url: "/run/reconstruct",
-            templateUrl: 'app/views/run/reconstruct.html',
+            templateUrl: 'app/views/apps/reconstruct.html',
             controller: 'RunReconstruct',
         }).state('app.runFBA', {
             url: "/run/fba",
-            templateUrl: 'app/views/run/fba.html',
+            templateUrl: 'app/views/apps/runFBA.html',
             controller: 'RunFBA',
         }).state('app.runGapfill', {
             url: "/run/gapfill",
-            templateUrl: 'app/views/run/gapfill.html',
+            templateUrl: 'app/views/apps/gapfill.html',
             controller: 'RunGapfill',
         })
 

@@ -77,6 +77,7 @@ function($scope, $http) {
 function($scope, Biochem) {
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
 
     $scope.tabs = {selectedIndex : 0};
 
@@ -95,9 +96,17 @@ function($scope, Biochem) {
                         {label: 'detalGErr', key: 'deltagerr'},
                         {label: 'Charge', key: 'charge'}];
 
+    $scope.geneHeader = [{label: 'ID', key: 'id'},
+                        {label: 'Name', key: 'name'},
+                        {label: 'Formula', key: 'formula'},
+                        {label: 'Abbrev', key: 'abbreviation'},
+                        {label: 'deltaG', key: 'deltag'},
+                        {label: 'detalGErr', key: 'deltagerr'},
+                        {label: 'Charge', key: 'charge'}];
+
 
     function updateRxns() {
-        Biochem.get('reaction', $scope.rxnOpts)
+        Biochem.get('model_reaction', $scope.rxnOpts)
                .then(function(res) {
                     $scope.rxns = res;
                     $scope.loadingRxns = false;
@@ -105,10 +114,19 @@ function($scope, Biochem) {
     }
 
     function updateCpds() {
-        Biochem.get('compound', $scope.cpdOpts)
+        Biochem.get('model_compound', $scope.cpdOpts)
                .then(function(res) {
                     $scope.cpds = res;
                     $scope.loadingCpds = false;
+               })
+    }
+
+    function updateGenes() {
+        Biochem.get('gene_ontology_ref', $scope.geneOpts)
+               .then(function(res) {
+                   console.log('res', res)
+                    $scope.genes = res;
+                    $scope.loadingGenes = false;
                })
     }
 
@@ -120,6 +138,11 @@ function($scope, Biochem) {
     $scope.$watch('cpdOpts', function(value){
         $scope.loadingCpds = true;
         updateCpds();
+    }, true)
+
+    $scope.$watch('geneOpts', function(value){
+        $scope.loadingGenes = true;
+        updateGenes();
     }, true)
 }])
 
@@ -227,9 +250,7 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
         console.log('removing', $scope.checkedCpds)
         for (var i=0; i<$scope.data.length; i++) {
             for (var j=0; j<$scope.checkedCpds.length; j++) {
-                console.log($scope.data[i], $scope.checkedCpds[j])
                 if ($scope.data[i].compound_ref === $scope.checkedCpds[j].compound_ref) {
-                    console.log('removing', i)
                     $scope.data.splice(i, 1)
                     break;
                 }
@@ -251,7 +272,6 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     function updateCpds() {
         Biochem.get('compound', $scope.cpdOpts)
                .then(function(res) {
-                    console.log('biochem res', res)
                     $scope.cpds = res;
                     $scope.loadingCpds = false;
                })
@@ -378,7 +398,6 @@ function($scope, FBA, WS, $dialog, $sce) {
                     $scope.loadingModel = true;
                     FBA.addRxns($scope.selectedWS.name, name, items)
                        .then(function(res) {
-                        console.log('res', res)
                             $scope.data = $scope.data.concat(items)
                             $scope.loadingModel = false;
                        })
@@ -476,8 +495,8 @@ function($scope, FBA, WS, $dialog, $sce) {
 }])
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$mdDialog', '$timeout', '$http',
-function($scope, Patric, $dialog, $timeout, $http) {
+['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs',
+function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
     $scope.showMenu = function() {
       $scope.menuVisible = true;
     }
@@ -534,20 +553,8 @@ function($scope, Patric, $dialog, $timeout, $http) {
     }
 
     $scope.reconstruct = function(ev, item) {
-        $dialog.show({
-            templateUrl: 'app/views/dialogs/reconstruct.html',
-            targetEvent: ev,
-            scope: $scope.$new(),
-            preserveScope: true,
-            controller: ['$scope', '$http',
-            function($scope, $http) {
-
-                $scope.cancel = function(){
-                    $dialog.hide();
-                }
-
-            }]
-        })
+        Dialogs.reconstruct(ev,
+            {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name})
     }
 }])
 

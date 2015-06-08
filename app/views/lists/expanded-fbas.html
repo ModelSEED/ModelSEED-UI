@@ -1,14 +1,15 @@
 
-<div class="fba-table">
-    <h5>FBA Results</h5>
+<md-button md-no-ink class="md-primary md-raised" ng-click="runFBA($event, item)">
+    <i class="fa fa-plus"></i> Run FBA
+</md-button>
 
-    <div ng-if="!item.relatedFBAs.length" class="text-muted">
+
+<div class="fba-table expanded-table">
+    <!--<h5>FBA Results</h5>-->
+
+    <!--<div ng-if="!item.relatedFBAs.length" class="text-muted">
         You have no FBA simulations.
-    </div>
-
-    <md-button md-no-ink class="md-primary md-raised" ng-click="runFBA($event, item)">
-        <i class="fa fa-plus"></i> Run FBA
-    </md-button>
+    </div>-->
 
     <table class="table table-condensed">
         <thead>
@@ -17,10 +18,9 @@
                 <th>Media</th>
                 <th>ID</th>
                 <th>Objective</th>
-                <th>Rxn Vars</th>
-                <th>Cpd Vars</th>
-                <th>Biomass Function</th>
+                <th>Objective Function</th>
                 <th>Time</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -39,10 +39,13 @@
                         ng-click="$event.stopPropagation()">{{::fba.id}}</a>
                 </td>
                 <td>{{fba.objective === '10000000' ? 0 : fba.objective}}</td>
-                <td>{{::fba.rxnCount}}</td>
-                <td>{{::fba.cpdCount}}</td>
                 <td>{{fba.objective_function ? fba.objective_function : 'N/A'}}</td>
                 <td>{{relativeTime(fba.timestamp)}}</td>
+                <td>
+                    <a ng-click="deleteFBA($event, $index, fba, item.relatedFBAs)" class="no-link">
+                        <i class="icon-trash"></i>
+                    </a>
+                </td>
             </tr>
         </tbody>
     </table>

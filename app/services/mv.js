@@ -66,14 +66,10 @@ function($http, $q, $rootScope) {
         $rootScope.$broadcast('MV.event.change');
     }
 
-    this.isSelected = function(model, obj) {
-        // a hack until refs are used
+    this.isSelected = function(modelPath, obj) {
         for (var i=0; i<this.models.length; i++) {
             var m = this.models[i];
-            if (m.model.ws === model.ws &&
-                m.model.name === model.name &&
-                m.fba.ws === obj.ws &&
-                m.fba.name === obj.name)
+            if (m.fba === obj.fba && m.model === modelPath)
                 return true;
         }
 

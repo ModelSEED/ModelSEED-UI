@@ -1,16 +1,204 @@
 
-<md-dialog flex="50" layout-padding>
+<md-dialog flex="65" aria-label="run fba">
+    <form>
+    <md-dialog-content class="sticky-container">
+        <md-subheader><h4>Run FBA</h4></md-subheader>
 
-    <md-content layout-margin>
-		<h3>Run FBA</h3>
-        {{folder}} {{selected.name}}
+        <div>
+            <!-- select media name:media -->
 
-        <ng-include src="'app/views/apps/runFBA.html'"></ng-include>
-    </md-content>
+            <div flex="50">
+                <md-checkbox ng-model="form.fba" aria-label="fva checkbox" md-no-ink>
+                    FVA?
+                </md-checkbox>
+            </div>
 
-    <div class="md-actions">
+            <div flex="50">
+                <md-checkbox ng-model="form.simulateko" aria-label="fva checkbox" md-no-ink>
+                    Simulate Gene Knockout?
+                </md-checkbox>
+            </div>
+
+            <div flex="50">
+                <md-checkbox ng-model="form.minimizeflux" aria-label="fva checkbox" md-no-ink>
+                    Minimize Flux?
+                </md-checkbox>
+            </div>
+
+
+            <div flex="50">
+                <md-checkbox ng-model="form.findminmedia" aria-label="find min media checkbox" md-no-ink>
+                    Find Min Media?
+                </md-checkbox>
+            </div>
+
+            <div flex="50">
+                <md-checkbox ng-model="form.allreversible" aria-label="all reversible checkbox" md-no-ink>
+                    All Reversible?
+                </md-checkbox>
+            </div>
+
+            <h5>Thermodynamic constraints</label><h5>
+            <select ng-model="form.thermo_const_type" placeholder="None" ng-init="form.thermo_const_type='None'">
+                <option value="None">No Thermodynamic Type</option>
+    			<option value="Simple">Simple</option>
+            </select>
+
+            <div layout layout-sm="column">
+                <md-input-container flex="25">
+                    <label>Min Flux</label>
+                    <input type="number" step="any" ng-model="form.minfluxsddf">
+                </md-input-container>
+                <md-input-container flex="25">
+                    <label>Max Flux</label>
+                    <input type="number" step="any" ng-model="form.maxflux">
+                </md-input-container>
+
+                <md-input-container flex="25">
+                    <label>Min Uptake</label>
+                    <input type="number" ng-model="form.minuptake">
+                </md-input-container>
+                <md-input-container flex="25">
+                    <label>Max Uptake</label>
+                    <input type="number" step="any" ng-model="form.maxuptake">
+                </md-input-container>
+            </div>
+
+            <label>Media Supplements</label>
+            <div ng-controller="CompoundDropdown as ctrl" layout="column">
+                <md-content class="md-padding" layout="column">
+                    <md-chips ng-model="ctrl.form.media_supplement" md-autocomplete-snap md-require-match>
+                        <md-autocomplete
+                            md-selected-item="ctrl.selectedItem"
+                            md-search-text="ctrl.searchText"
+                            md-items="item in ctrl.querySearch(ctrl.searchText)"
+                            md-item-text="item.name"
+                            placeholder="Search for a compound">
+                            <span md-highlight-text="ctrl.searchText">{{item.name}}
+                                ({{item.id}})
+                            </span>
+                        </md-autocomplete>
+                        <md-chip-template>
+                            <span>
+                                <strong>{{$chip.name.length > 19 ? $chip.name.slice(0,20)+'...' :  $chip.name.slice(0,20)}}</strong>
+                                <em>({{$chip.id}})</em>
+                            </span>
+                        </md-chip-template>
+                    </md-chips>
+                </md-content>
+            </div>
+
+            <label>Reaction Knockouts</label>
+            <div ng-controller="ReactionDropdown as ctrl" layout="column">
+                <md-content class="md-padding" layout="column">
+                    <md-chips ng-model="ctrl.reactions" md-autocomplete-snap md-require-match>
+                        <md-autocomplete
+                            md-selected-item="ctrl.selectedItem"
+                            md-search-text="ctrl.searchText"
+                            md-items="item in ctrl.querySearch(ctrl.searchText)"
+                            md-item-text="item.name"
+                            placeholder="Search for a reaction">
+                            <span md-highlight-text="ctrl.searchText">{{item.name}}
+                                ({{item.id}})
+                            </span>
+                        </md-autocomplete>
+                        <md-chip-template>
+                            <span>
+                                <strong>{{$chip.name.length > 19 ? $chip.name.slice(0,20)+'...' :  $chip.name.slice(0,20)}}</strong>
+                                <em>({{$chip.id}})</em>
+                            </span>
+                        </md-chip-template>
+                    </md-chips>
+                </md-content>
+            </div>
+
+            <!--
+            <md-input-container layout layout-sm="row" flex="50">
+                <label>Objective Fraction</label>
+                <input type="text" ng-model="form.objective_fraction">
+            </md-input-container>
+            -->
+
+                <!--
+        		{
+        			"id":"geneko",
+        			"allow_multiple": true,
+        			"label":"Gene knockouts",
+        			"required":0,
+        			"default":null,
+        			"desc":"List of gene knockouts to simulation in FBA.",
+        			"type":"string"
+        		},-->
+                <!--
+            <label>Uptake Limit</label>
+            <div layout layout-sm="column">
+
+    			<div class="row">
+    				<label for="uptakeLimitC">C</label>
+    				<input name="uptakeLimitC"
+    				    data-dojo-type="dijit/form/NumberTextBox"
+    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
+    				    rangeMessage:'Invalid elevation.'"
+    					style="width: 50px;" />
+
+    				<label for="uptakeLimitN">N</label>
+    				<input name="uptakeLimitN"
+    				    data-dojo-type="dijit/form/NumberTextBox"
+    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
+    				    rangeMessage:'Invalid elevation.'"
+    					style="width: 50px;" />
+
+    				<label for="uptakeLimitP">P</label>
+    				<input name="uptakeLimitP"
+    				    data-dojo-type="dijit/form/NumberTextBox"
+    					data-dojo-props="smallDelta:10, constraints:{min:10,max:2000,places:0}"
+    					style="width: 50px;" />
+
+    				<label for="atomtype-o">O</label>
+    				<input name="uptakeLimitO"
+    				    data-dojo-type="dijit/form/NumberTextBox"
+    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
+    				    rangeMessage:'Invalid elevation.'"
+    					style="width: 50px;" />
+
+    				<label for="atomtype-s">S</label>
+    				<input name="uptakeLimitS"
+    				    data-dojo-type="dijit/form/NumberTextBox"
+    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
+    				    rangeMessage:'Invalid elevation.'"
+    					style="width: 50px;" />
+    			</div>
+                -->
+
+    			<!--
+    				ref media - reference to media for FBA study
+    				bool fva;
+    				bool simulateko;
+    				bool minimizeflux;
+    				bool findminmedia;
+    				bool allreversible;
+    				thermotype thermo_const_type;
+    				list<string> media_supplements;
+    				list<string> geneko;
+    				list<string> rxnko;
+    				string output_id;
+    				float maxflux;
+    				float maxuptake;
+    				float minuptake;
+    				float primary_objective_fraction;
+    				mapping<atomtype,float> uptakelim;  atom types in potential uptake limits [C/N/P/O/S]
+    				list<tuple<vartype type,string id,float min,float max>> custom_bounds;
+    				list<tuple<vartype type,string id,float coefficient>> objective;
+    				list<constraint> custom_constraints;
+    			-->
+            <!--<ng-include src="'app/views/apps/runFBA.html'"></ng-include>-->
+        </div>
+    </md-dialog-content>
+
+    <div class="md-actions" layout="row">
         <md-button ng-click="runFBA()">
             Run FBA
         </md-button>
     </div>
+    </form>
 </md-dialog>

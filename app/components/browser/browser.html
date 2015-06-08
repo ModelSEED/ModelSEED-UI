@@ -278,12 +278,12 @@
         </md-toolbar>
         <md-content layout-padding layout="column" layout-align="center center">
 
-            <md-button class="md-grid-item-content" ng-click="gapfill($event, folder+'/'+selected.name)">
+            <md-button class="md-grid-item-content" ng-click="gapfill($event, selected)">
                 <i class="fa fa-2x fa-circle"></i>
                 <div> Gapfill </div>
             </md-button>
 
-            <md-button class="md-grid-item-content" ng-click="runFBA($event, folder+'/'+selected.name)">
+            <md-button class="md-grid-item-content" ng-click="runFBA($event, selected)">
                 <i class="fa fa-2x fa-bar-chart"></i>
                 <div> Run FBA </div>
             </md-button>
@@ -300,7 +300,7 @@
         </md-toolbar>
         <md-content layout-padding layout="column" layout-align="center center">
 
-            <md-button class="md-grid-item-content" ng-click="reconstruct($event, folder+'/'+selected.name)">
+            <md-button class="md-grid-item-content" ng-click="reconstruct($event, selected)">
                 <i class="icon-tools fa-2x"></i>
                 <div><small>Reconstruct</small></div>
             </md-button>

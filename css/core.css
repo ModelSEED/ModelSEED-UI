@@ -10,6 +10,9 @@
     color: #DA265D;
 }
 
+a.no-link {
+    text-decoration: none;
+}
 
 header .login {
     margin: 20px 0 0 0;
@@ -28,7 +31,7 @@ header .login md-input-container.md-default-theme:not(.md-input-invalid).md-inpu
     color: #aaa;
 }
 
-header .login .md-button {
+.md-button {
     text-transform: none;
 }
 header .login img {
@@ -389,7 +392,7 @@ table thead[sortable] th.sorting-asc:after {
     width: 200px;
 }
 .table-controls .btn-reconstruct {
-    margin-right: 50px;
+    margin: 0 0 0 50px;
 }
 
 .table-controls .btn-default {
@@ -420,6 +423,12 @@ table tr.active {
     margin: 0;
 }
 
+
+.expanded-table {
+    margin: 5px 0 20px 0;
+    padding-left: 10px;
+}
+
 .fba-table h5{
     padding-top: 5px;
     text-transform: uppercase;
@@ -428,7 +437,10 @@ table tr.active {
 
 .fba-table {
     border-left: 4px solid #5CB85C;
-    padding-left: 10px;
+}
+
+.gapfill-table {
+    border-left: 4px solid #25AABB;;
 }
 
 .fba-table table td,
@@ -456,8 +468,16 @@ table tr.active {
 }
 
 /* md mods */
+
+md-toast.md-bottom {
+    position: fixed;
+}
+
 [role="tabpanel"] {
     transition: none !important;
+}
+.md-autocomplete-suggestions {
+    z-index: 9999;
 }
 
 md-sidenav {
@@ -541,6 +561,17 @@ md-card {
     z-index: 3000;
 }
 
+/* and related mods */
+
+.my-models-tabs .md-tab{
+    padding: 0px 7px;
+}
+.my-models-tabs md-pagination-wrapper,
+.my-models-tabs md-tabs-canvas {
+    height: 30px;
+}
+
+
 /* bootstrap mods */
 
 .dropdown-menu-visible {
@@ -568,6 +599,13 @@ md-card {
 /* labels */
 .label-fba {
     background-color: #5cb85c;
+}
+.label-gapfill {
+    background-color: #25AABB;
+}
+
+td .label-gapfill {
+    margin-right: 15px;
 }
 
 
