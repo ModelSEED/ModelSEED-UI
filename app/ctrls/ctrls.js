@@ -17,7 +17,7 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
     MS.getModels().then(function(res) {
         console.log('res', res)
         $scope.data = res;
-        $scope.loading = false;        
+        $scope.loading = false;
         MS.getObjectMetas(res)
           .then(function(data) {
               $scope.data = data;
@@ -79,7 +79,7 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
 
         console.log('adding', fba, model)
         var data = {model: model.path,
-                    fba: fba.fba,
+                    fba: fba.path,
                     org: model.orgName,
                     media: fba.media};
 

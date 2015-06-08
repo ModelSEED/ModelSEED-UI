@@ -69,7 +69,7 @@ function($http, $q, $rootScope) {
     this.isSelected = function(modelPath, obj) {
         for (var i=0; i<this.models.length; i++) {
             var m = this.models[i];
-            if (m.fba === obj.fba && m.model === modelPath)
+            if (m.fba === obj.path && m.model === modelPath)
                 return true;
         }
 
