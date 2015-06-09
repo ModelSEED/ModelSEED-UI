@@ -587,7 +587,6 @@ md-card {
 
 .my-model {
     border: 2px solid #f1f1f1;
-    padding: 10px 10px 10px 0;
     margin-top: 10px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -595,8 +594,11 @@ md-card {
 }
 
 .my-model button {
+    min-width: 29px;
+    min-height: inherit;
     margin: 0;
 }
+
 .my-model button i {
     margin-top: 10px;
 }

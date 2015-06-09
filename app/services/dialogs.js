@@ -8,6 +8,7 @@
 angular.module('Dialogs', [])
 .service('Dialogs', ['MS', '$mdDialog', '$mdToast',
 function(MS, $dialog, $mdToast) {
+    var self = this;
 
     this.showMeta = function(ev, path) {
         ev.stopPropagation();
@@ -46,7 +47,7 @@ function(MS, $dialog, $mdToast) {
                     showToast('Reconstructing', item.name)
                     MS.reconstruct($scope.form)
                       .then(function(r) {
-                           showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       })
                     $dialog.hide();
                 }
@@ -82,7 +83,7 @@ function(MS, $dialog, $mdToast) {
                       .then(function(res) {
                           console.log('resp', res)
                            cb();
-                           showComplete('FBA Complete',
+                           self.showComplete('FBA Complete',
                                         res[0]+' '+res[7].media.toName())
                       }).catch(function(e) {
                           showError(e.error.message)
@@ -114,7 +115,7 @@ function(MS, $dialog, $mdToast) {
                       .then(function(res) {
                           console.log('gapfill response', res)
                            cb();
-                           showComplete('Gapfill Complete', res[0])
+                           self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {
                           showError(e.error.message)
                       })
@@ -147,7 +148,7 @@ function(MS, $dialog, $mdToast) {
 
     };
 
-    function showComplete(title, name, path) {
+    this.showComplete = function(title, name, path) {
         $mdToast.show({
          controller: 'ToastCtrl',
          parent: angular.element('.sidebar'),
@@ -157,9 +158,10 @@ function(MS, $dialog, $mdToast) {
                        '<span class="ms-color-complete">'+title+'</span><br>'+
                        name.slice(0,20)+'...'+
                       '</span>'+
-                   '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+
-                     'View'+
-                   '</md-button>'+
+                      (path ?
+                          '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+
+                          'View'+
+                          '</md-button>' : '')+
                  '</md-toast>',
          hideDelay: 10000
        });

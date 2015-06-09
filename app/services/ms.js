@@ -12,7 +12,6 @@ angular.module('MS', [])
     var self = this;
 
     // model for displayed things
-    this.workspaces = [];
     this.myModels = [];
 
     var cache = $cacheFactory('ms');
@@ -77,16 +76,16 @@ angular.module('MS', [])
 
     // takes path of object, deletes object
     this.deleteObj = function(path, isFolder) {
-        console.log('calling delete')
+        $log.log('calling delete')
         var params = {objects: [path],
                       deleteDirectories: isFolder ? 1 : 0,
                       force: isFolder ? 1 : 0};
         return $http.rpc('ws', 'delete', params)
                     .then(function(res) {
-                        console.log('deleted object', res)
+                        $log.log('deleted object', res)
                         return res;
                     }).catch(function(e) {
-                        console.error('delete failed', e, path)
+                        $log.error('delete failed', e, path)
                     })
 
     }
@@ -216,6 +215,7 @@ angular.module('MS', [])
                                        rxnCount: obj.num_reactions,
                                        cpdCount: obj.num_compounds,
                                        fbaCount: obj.fba_count,
+                                       timestamp: Date.parse(obj.rundate),
                                        gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills})
                         }
                         return data;
@@ -297,6 +297,16 @@ angular.module('MS', [])
                         $log.log('manage model response', res)
                         return res;
                     })
+    }
+
+    this.downloadSBML = function(path) {
+        $log.log('export model (download sbml)', path)
+        return $http.rpc('ms', 'export_model', {model: path, format: "sbml", toshock: 1})
+                    .then(function(res) {
+                        $log.log('export model (download sbml) response', res)
+                        return res;
+                    })
+
     }
 
 }]);

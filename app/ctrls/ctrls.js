@@ -6,8 +6,11 @@ angular.module('ctrls', [])
 
 
 .controller('MyModels',
-['$scope', 'WS', 'MS', '$compile', 'uiTools', 'Dialogs', 'ModelViewer',
-function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
+['$scope', 'WS', 'MS', '$compile', 'uiTools', '$mdDialog', 'Dialogs',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$log',
+function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
+MV, $document, $mdSidenav, $q, $log) {
+
     $scope.MS = MS;
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -15,11 +18,15 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
         return $scope.relativeTime(Date.parse(datetime));
     }
 
+    // the selected item for operations such as download, delete.
+    $scope.selected;
+
+    // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
+    // load models
     $scope.loading = true;
     MS.getModels().then(function(res) {
-        console.log('res', res)
         $scope.data = res;
         $scope.loading = false;
     })
@@ -27,10 +34,8 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
     $scope.showFBAs = function(item) {
         $scope.showGapfills(item);
 
-        if (item.relatedFBAs)
-            delete item.relatedFBAs;
-        else
-            updateFBAs(item)
+        if (item.relatedFBAs) delete item.relatedFBAs;
+        else updateFBAs(item)
     }
 
     function updateFBAs(item) {
@@ -115,7 +120,7 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
                 for (var j in model.relatedFBAs) {
                     var fba = model.relatedFBAs[j];
 
-                    if (item.model === model.path && item.fba === fba.fba)
+                    if (item.model === model.path && item.fba === fba.path)
                         fba.checked = false;
                 }
             }
@@ -150,12 +155,74 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
           })
     }
 
+    $scope.toggleOperations = function(e, type, item) {
+        $scope.selected = item;
+        console.log('the item', item)
+        MS.getDownloadURL(item.path)
+          .then(function(res) {
+              $scope.selected.downloadURL = res[0];
+          })
+
+        e.stopPropagation();
+        if (type === 'download') {
+            if (!$mdSidenav('downloadOpts').isOpen())
+                $mdSidenav('downloadOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('downloadOpts').close();
+                $document.unbind(e)
+                $scope.selected = {};
+            })
+        } else if ($mdSidenav('downloadOpts').isOpen()) {
+            $mdSidenav('downloadOpts').close()
+        }
+    }
+
     $scope.deleteGapfill = function(i, model, gapfill) {
         gapfill.loading = true;
         MS.manageGapfills(model.path, gapfill.id, 'D')
           .then(function(res) {
               model.relatedGapfills.splice(i, 1)
           })
+    }
+
+    $scope.prepareDownload = function($event, selected) {
+        console.log('selected', selected)
+        MS.downloadSBML(selected.path)
+          .then(function(data) {
+
+          })
+    }
+
+    $scope.rmModel = function(ev, i, item) {
+        ev.stopPropagation();
+        console.log('index', i, $mdDialog.confirm())
+
+        var confirm = $mdDialog.confirm()
+            //.parent(angular.element(document.body))
+            .title('WARNING')
+            .content('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ariaLabel('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ok('Delete it all!')
+            .cancel('No')
+            .clickOutsideToClose(true)
+            .targetEvent(ev);
+
+            $mdDialog.show(confirm).then(function() {
+                //delete both object and related data
+                var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name
+                console.log('deleting', item.path, 'and', folder, 'with index', i)
+
+                var p1 = MS.deleteObj(item.path)
+                var p2 = MS.deleteObj(folder, true)
+                $q.all([p1,p2]).then(function(one, two) {
+                    console.log('removing entity', i)
+                    $scope.data.splice(i, 1)
+                    Dialogs.showComplete('Deleted', item.name)
+                })
+            }, function() {
+                $log.log('not deleting')
+            });
     }
 }])
 
