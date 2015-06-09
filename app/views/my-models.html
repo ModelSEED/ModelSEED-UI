@@ -37,8 +37,93 @@
     </div>
 </div>
 
+<br>
+<br>
 
 
+<div layout="row"
+    ng-repeat-start="item in (filtered = ( data | filter: opts.query
+                                              | orderBy : opts.sort.field : opts.sort.desc)
+                                              | limitTo : opts.limit : opts.offset)  | orderBy : '-timestamp'"
+    ng-click="showFBAs(item)"
+    class="table-hover my-model">
+
+
+    <div class="expand-container vertical-center">
+        <md-tooltip md-direction="left" md-delay="1000" md-autohide="true">
+            {{!item.relatedFBAs ? 'Click row to view FBA and Gapfills' : 'Click row to hide FBA and Gapfills'}}
+        </md-tooltip>
+        <i ng-if="!item.loading && !item.relatedFBAs"
+           class="fa fa-caret-right"
+           style="opacity: 0.5;"></i>
+        <i ng-if="item.relatedFBAs"
+           class="fa fa-caret-down"
+           style="opacity: 1.0;"></i>
+
+        <img ng-if="item.loading"
+             src="img/ajax-loader.gif"
+             width="15" height="15">
+        </img>
+    </div>
+
+    <div flex="35" class="vertical-center">
+        {{::item.orgName}}<br>
+        <a ui-sref="app.modelPage({path: item.path})">
+            <md-tooltip  md-delay="800">View Model</md-tooltip>
+            {{::item.name}}
+        </a>
+    </div>
+
+    <div flex class="vertical-center">
+        <md-button md-no-ink ng-click="runFBA($event, item)">
+            <i class="fa fa-code-fork"></i>
+            Run FBA
+        </md-button>
+        <md-button md-no-ink ng-click="gapfill($event, item)">
+            <i class="fa fa-circle"></i>
+            Gapfill
+        </md-button>
+    </div>
+
+
+    <div flex style="text-align: right;" class="vertical-center">
+        <span class="badge label-fba">
+            <md-tooltip>Number of FBAs</md-tooltip>
+            {{::item.fbaCount}} FBAs
+        </span>
+
+        <span class="badge label-gapfill">
+            <md-tooltip>Number of Gapfill Solutions</md-tooltip>
+            {{::item.gapfillCount}} Gapfills
+        </span>
+    </div>
+
+    <div flex="15" style="text-align: right;" class="vertical-center">
+        <small>
+        {{::item.rxnCount}} Compounds<br>
+        {{::item.cpdCount}} Reactions
+        </small>
+    </div>
+</div>
+
+<div ng-if="item.relatedFBAs || item.relatedGapfills" ng-repeat-end class="my-models-tabs">
+    <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
+        <md-tab label="FBA Simulations ({{item.fbaCount}})">
+            <md-tab-body>
+                <ng-include src="'app/views/lists/expanded-fbas.html'">
+            </md-tab-body>
+        </md-tab>
+
+        <md-tab label="Gapfills ({{item.gapfillCount}})">
+            <md-tab-body>
+                <ng-include src="'app/views/lists/expanded-gapfills.html'">
+            </md-tab-body>
+        </md-tab>
+    </md-tab>
+</div>
+
+
+<!--
 <table class="table">
     <thead sortable>
         <tr>
@@ -89,7 +174,7 @@
         </tr>
 
         <tr ng-if="item.relatedFBAs || item.relatedGapfills" ng-repeat-end>
-            <td colspan="6" style="padding-left: 30px;">
+            <td colspan="7" style="padding-left: 30px;">
 
                 <md-tabs class="my-models-tabs" md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
                     <md-tab label="FBA Simulations ({{item.fbaCount}})">
@@ -107,15 +192,8 @@
                 </md-tabs>
             </td>
         </tr>
-        <!--
-        <tr ng-if="item.relatedGapfills" ng-repeat-end>
-            <td colspan="6">
-                <ng-include src="'app/views/lists/expanded-gapfills.html'">
-            </td>
-        </tr>
-        -->
     </tbody>
-</table>
+</table>-->
 
 <!--
 <md-progress-circular ng-if="loading"

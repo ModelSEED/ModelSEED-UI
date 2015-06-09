@@ -1,14 +1,14 @@
-<md-button md-no-ink class="md-primary md-raised" ng-click="gapfill($event, item)">
+<!--<md-button md-no-ink class="md-primary md-raised" ng-click="gapfill($event, item)">
     <i class="fa fa-plus"></i> Gapfill Model
-</md-button>
+</md-button>-->
 
 
 <div class="gapfill-table expanded-table">
     <!--<h5>Gapfills</h5>-->
 
-    <!--<div ng-if="!item.relatedGappfills.length" class="text-muted">
-        You have no Gappfill.
-    </div>-->
+    <div ng-if="!item.relatedGapfills.length" class="text-muted">
+        You have no Gapfills.
+    </div>
 
     <table class="table table-condensed">
         <thead>
@@ -17,21 +17,31 @@
                 <th>ID</th>
                 <th>Media</th>
                 <th>Time</th>
-
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in item.relatedGapfills"
+            <tr ng-repeat="gf in item.relatedGapfills track by $index"
                 class="table-hover"
-                ng-click="integrateGapfill(gf.integrated, item, gf.id)">
+                ng-click="integrateGapfill(gf.integrated, item, gf)">
                 <td>
-                    <i class="fa {{gf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}"></i>
+                    <img ng-if="gf.loading"
+                         src="img/ajax-loader.gif"
+                         width="15" height="15">
+                    <i ng-if="!gf.loading"
+                       class="fa {{gf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}">
+                    </i>
                 </td>
                 <td>
                     <a>{{::gf.id}}</a>
                 </td>
                 <td>{{::gf.media.toName()}}</td>
-                <td>{{relativeTime(gf.timestamp)}}</td>
+                <td>{{relTime(gf.rundate)}}</td>
+                <td>
+                    <a ng-click="deleteGapfill($index, item, gf)" class="no-link">
+                        <i class="icon-trash"></i>
+                    </a>
+                </td>
             </tr>
         </tbody>
     </table>

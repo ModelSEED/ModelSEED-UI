@@ -14,6 +14,11 @@ a.no-link {
     text-decoration: none;
 }
 
+.vertical-center {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 header .login {
     margin: 20px 0 0 0;
 }
@@ -363,13 +368,13 @@ table thead[sortable] th.sorting-asc:after {
     background-color: #f5f5f5;
 }
 
-.table-hover:hover td:first-child i.fa-caret-right,
+.table-hover:hover div:first-child i.fa-caret-right,
 .table-hover:hover td:first-child i.fa-square-o,
 .table-hover:hover td:first-child i.fa-circle-o {
     opacity: 1.0 !important;
 }
 
-.table-hover td:first-child i.fa-caret-right,
+.table-hover div:first-child i.fa-caret-right,
 .table-hover td:first-child i.fa-square-o,
 .table-hover td:first-child i.fa-circle-o {
     opacity: 0.5 !important;
@@ -425,7 +430,7 @@ table tr.active {
 
 
 .expanded-table {
-    margin: 5px 0 20px 0;
+    margin: 10px 0 20px 0;
     padding-left: 10px;
 }
 
@@ -453,7 +458,7 @@ table tr.active {
     cursor: hand;
 }
 
-.fba-table .fa-square-o {
+.expanded-table .fa-square-o {
     font-weight: 900;
     opacity: .5;
 }
@@ -561,7 +566,16 @@ md-card {
     z-index: 3000;
 }
 
+.md-tab.md-active{
+    color: #333 !important;
+}
+
 /* and related mods */
+
+
+.my-models-tabs {
+    margin: 15px 40px;
+}
 
 .my-models-tabs .md-tab{
     padding: 0px 7px;
@@ -570,6 +584,29 @@ md-card {
 .my-models-tabs md-tabs-canvas {
     height: 30px;
 }
+
+.my-model {
+    border: 2px solid #f1f1f1;
+    padding: 10px 10px 10px 0;
+    margin-top: 10px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.my-model button {
+    margin: 0;
+}
+.my-model button i {
+    margin-top: 10px;
+}
+
+.expand-container {
+    float: left;
+    width: 40px;
+    text-align: center;
+}
+
 
 
 /* bootstrap mods */

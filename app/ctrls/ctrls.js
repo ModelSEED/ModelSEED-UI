@@ -11,6 +11,10 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
     $scope.MS = MS;
     $scope.relativeTime = uiTools.relativeTime;
 
+    $scope.relTime = function(datetime) {
+        return $scope.relativeTime(Date.parse(datetime));
+    }
+
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
     $scope.loading = true;
@@ -129,14 +133,16 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
           })
     }
 
-    $scope.integrateGapfill = function(isIntegrated, model, gfID) {
+    $scope.integrateGapfill = function(isIntegrated, model, gapfill) {
         // if not integrated, integrate
         // if integrated, unintegrate
-        MS.manageGapfills(model.path, gfID, isIntegrated ? 'U' : 'I')
+        gapfill.loading = true;
+        MS.manageGapfills(model.path, gapfill.id, isIntegrated ? 'U' : 'I')
           .then(function(res) {
+              delete gapfill.loading;
               for (var i=0; i < model.relatedGapfills.length; i++) {
                   var gf = model.relatedGapfills[i];
-                  if (gf.id == gfID) {
+                  if (gf.id == gapfill.id) {
                       model.relatedGapfills[i] = res
                       break;
                   }
@@ -144,7 +150,13 @@ function($scope, WS, MS, $compile, uiTools, Dialogs, MV) {
           })
     }
 
-
+    $scope.deleteGapfill = function(i, model, gapfill) {
+        gapfill.loading = true;
+        MS.manageGapfills(model.path, gapfill.id, 'D')
+          .then(function(res) {
+              model.relatedGapfills.splice(i, 1)
+          })
+    }
 }])
 
 

@@ -170,6 +170,8 @@ function($locationProvider, $stateProvider, $httpProvider,
     $mdThemingProvider.theme('default')
         .primaryPalette('cyan')
         .accentPalette('light-blue');
+        //rgb(38, 198, 218);
+        //.accentPalette('light-blue');
 }])
 
 .run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout',
