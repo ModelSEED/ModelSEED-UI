@@ -543,7 +543,10 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
 
     $scope.reconstruct = function(ev, item) {
         Dialogs.reconstruct(ev,
-            {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name})
+            {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
+            function(res) {
+                console.log('the response', res)
+            })
     }
 }])
 

@@ -30,7 +30,7 @@ function(MS, $dialog, $mdToast) {
         })
     }
 
-    this.reconstruct = function(ev, item) {
+    this.reconstruct = function(ev, item, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/reconstruct.html',
@@ -42,11 +42,10 @@ function(MS, $dialog, $mdToast) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    console.log('form!', $scope.form)
-
                     showToast('Reconstructing', item.name)
                     MS.reconstruct($scope.form)
                       .then(function(r) {
+                           cb(r);
                            self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       })
                     $dialog.hide();
@@ -81,7 +80,6 @@ function(MS, $dialog, $mdToast) {
                     showToast('Running Flux Balance Analysis', item.name)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                          console.log('resp', res)
                            cb();
                            self.showComplete('FBA Complete',
                                         res[0]+' '+res[7].media.toName())

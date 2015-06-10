@@ -26,11 +26,17 @@ MV, $document, $mdSidenav, $q, $log) {
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // load models
-    $scope.loading = true;
-    MS.getModels().then(function(res) {
-        $scope.data = res;
-        $scope.loading = false;
-    })
+
+    console.log('my models!', MS.myModels)
+    if (MS.myModels) {
+        $scope.data = MS.myModels;
+    } else {
+        $scope.loading = true;
+        MS.getModels().then(function(res) {
+            $scope.data = res;
+            $scope.loading = false;
+        })
+    }
 
     $scope.showFBAs = function(item) {
         $scope.showGapfills(item);
@@ -132,10 +138,9 @@ MV, $document, $mdSidenav, $q, $log) {
     // general operations
     $scope.deleteFBA = function(e, i, item, fbas) {
         e.stopPropagation();
-        console.log('deleteing', item.path)
         MS.deleteObj(item.path)
           .then(function(res) {
-              fbas.splice(i, 1)
+              fbas.splice(i, 1);
           })
     }
 

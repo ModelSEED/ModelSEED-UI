@@ -12,7 +12,7 @@ angular.module('MS', [])
     var self = this;
 
     // model for displayed things
-    this.myModels = [];
+    this.myModels = null;
 
     var cache = $cacheFactory('ms');
 
@@ -218,6 +218,8 @@ angular.module('MS', [])
                                        timestamp: Date.parse(obj.rundate),
                                        gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills})
                         }
+
+                        self.myModels = data;
                         return data;
                     })
     }
@@ -307,6 +309,11 @@ angular.module('MS', [])
                         return res;
                     })
 
+    }
+
+    this.addModel = function(model) {
+        console.log('adding model', model)
+        this.myModels.push(model)
     }
 
 }]);
