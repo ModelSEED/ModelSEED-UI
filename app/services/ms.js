@@ -209,20 +209,26 @@ angular.module('MS', [])
                         for (var i=0; i<res.length; i++) {
                             var obj = res[i];
 
-                            data.push({name: obj.id,
-                                       path: obj.ref,
-                                       orgName: obj.name,
-                                       rxnCount: obj.num_reactions,
-                                       cpdCount: obj.num_compounds,
-                                       fbaCount: obj.fba_count,
-                                       timestamp: Date.parse(obj.rundate),
-                                       gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills})
+                            data.push(self.sanitizeModel(obj))
                         }
 
                         self.myModels = data;
                         return data;
                     })
     }
+
+    this.sanitizeModel = function(obj) {
+        return {name: obj.id,
+                path: obj.ref,
+                orgName: obj.name,
+                rxnCount: obj.num_reactions,
+                cpdCount: obj.num_compounds,
+                fbaCount: obj.fba_count,
+                timestamp: Date.parse(obj.rundate),
+                gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills}
+
+    }
+
 
 
     this.getModelFBAs = function(modelPath) {
@@ -313,7 +319,7 @@ angular.module('MS', [])
 
     this.addModel = function(model) {
         console.log('adding model', model)
-        this.myModels.push(model)
+        this.myModels.push(self.sanitizeModel(model))
     }
 
 }]);

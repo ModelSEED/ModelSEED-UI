@@ -1,6 +1,8 @@
 
 
-<div class="h2">My Models</div>
+<div class="h2">My Models
+    <small class="help-text">Click on a model to view associated FBA, Gapfill data, and more.</small>
+</div>
 <hr class="no-margin">
 
 
@@ -40,7 +42,8 @@
     </div>
 
     <br>
-    <br><br>
+    <br>
+    <br>
 
     <div layout="row"
         ng-repeat-start="item in (filtered = ( data | filter: opts.query
@@ -69,7 +72,7 @@
 
         <div flex="35" class="vertical-center">
             {{item.orgName}}<br>
-            <a ui-sref="app.modelPage({path: item.path})">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}
             </a>
