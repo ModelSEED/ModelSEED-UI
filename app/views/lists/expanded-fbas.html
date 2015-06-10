@@ -1,9 +1,3 @@
-
-<!--<md-button md-no-ink class="md-primary md-raised" ng-click="runFBA($event, item)">
-    <i class="fa fa-plus"></i> Run FBA
-</md-button>-->
-
-
 <div class="fba-table expanded-table">
     <!--<h5>FBA Results</h5>-->
 
@@ -43,7 +37,8 @@
                 <td>{{relativeTime(fba.timestamp)}}</td>
                 <td>
                     <a ng-click="deleteFBA($event, $index, fba, item.relatedFBAs)" class="no-link">
-                        <i class="icon-trash"></i>
+                        <md-tooltip md-delay="800">Delete FBA</md-tooltip>
+                        <i class="icon-highlight-remove"></i>
                     </a>
                 </td>
             </tr>

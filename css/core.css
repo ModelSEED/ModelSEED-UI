@@ -11,7 +11,13 @@
 }
 
 a.no-link {
+    color: #000;
+    opacity: 0.5;
     text-decoration: none;
+}
+
+a.no-link:hover {
+    opacity: 1.0;
 }
 
 .vertical-center {
@@ -598,9 +604,17 @@ md-card {
     min-height: inherit;
     margin: 0;
 }
+.my-model button:focus {
+    outline: none; /* yeah, this sucks */
+}
 
 .my-model button i {
     margin-top: 10px;
+}
+
+.my-model .timestamp {
+    text-align: right;
+    margin-top: 6px;"
 }
 
 .expand-container {

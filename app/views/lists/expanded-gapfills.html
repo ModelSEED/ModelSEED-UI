@@ -1,7 +1,3 @@
-<!--<md-button md-no-ink class="md-primary md-raised" ng-click="gapfill($event, item)">
-    <i class="fa fa-plus"></i> Gapfill Model
-</md-button>-->
-
 
 <div class="gapfill-table expanded-table">
     <!--<h5>Gapfills</h5>-->
@@ -39,7 +35,8 @@
                 <td>{{relTime(gf.rundate)}}</td>
                 <td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">
-                        <i class="icon-trash"></i>
+                        <md-tooltip md-delay="800">Unintegrate and delete gapfill</md-tooltip>
+                        <i class="icon-highlight-remove"></i>
                     </a>
                 </td>
             </tr>

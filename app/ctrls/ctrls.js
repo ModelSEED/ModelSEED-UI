@@ -10,6 +10,7 @@ angular.module('ctrls', [])
  'ModelViewer', '$document', '$mdSidenav', '$q', '$log',
 function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
 MV, $document, $mdSidenav, $q, $log) {
+    var $self = $scope;
 
     $scope.MS = MS;
     $scope.relativeTime = uiTools.relativeTime;
@@ -19,7 +20,7 @@ MV, $document, $mdSidenav, $q, $log) {
     }
 
     // the selected item for operations such as download, delete.
-    $scope.selected;
+    $scope.selected = null;
 
     // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
@@ -156,22 +157,25 @@ MV, $document, $mdSidenav, $q, $log) {
     }
 
     $scope.toggleOperations = function(e, type, item) {
+        var tar = e.target;
+        e.stopPropagation();
+
+        // set selected item
         $scope.selected = item;
-        console.log('the item', item)
+
         MS.getDownloadURL(item.path)
           .then(function(res) {
               $scope.selected.downloadURL = res[0];
           })
 
-        e.stopPropagation();
         if (type === 'download') {
             if (!$mdSidenav('downloadOpts').isOpen())
                 $mdSidenav('downloadOpts').open();
 
             $document.bind('click', function(e) {
-                $mdSidenav('downloadOpts').close();
+                $mdSidenav('downloadOpts').close()
                 $document.unbind(e)
-                $scope.selected = {};
+                $scope.selected = null;
             })
         } else if ($mdSidenav('downloadOpts').isOpen()) {
             $mdSidenav('downloadOpts').close()
@@ -196,10 +200,8 @@ MV, $document, $mdSidenav, $q, $log) {
 
     $scope.rmModel = function(ev, i, item) {
         ev.stopPropagation();
-        console.log('index', i, $mdDialog.confirm())
 
         var confirm = $mdDialog.confirm()
-            //.parent(angular.element(document.body))
             .title('WARNING')
             .content('Are you sure you want to delete '+item.name+' and all associated data?')
             .ariaLabel('Are you sure you want to delete '+item.name+' and all associated data?')
@@ -208,21 +210,19 @@ MV, $document, $mdSidenav, $q, $log) {
             .clickOutsideToClose(true)
             .targetEvent(ev);
 
-            $mdDialog.show(confirm).then(function() {
-                //delete both object and related data
-                var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name
-                console.log('deleting', item.path, 'and', folder, 'with index', i)
-
-                var p1 = MS.deleteObj(item.path)
-                var p2 = MS.deleteObj(folder, true)
-                $q.all([p1,p2]).then(function(one, two) {
-                    console.log('removing entity', i)
-                    $scope.data.splice(i, 1)
-                    Dialogs.showComplete('Deleted', item.name)
-                })
-            }, function() {
-                $log.log('not deleting')
-            });
+        $mdDialog.show(confirm).then(function() {
+            //delete both object and related data
+            var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name;
+            var p1 = MS.deleteObj(item.path),
+                p2 = MS.deleteObj(folder, true);
+            $q.all([p1,p2]).then(function(one, two) {
+                $log.log('removing entity', i)
+                $self.data.splice(i, 1)
+                Dialogs.showComplete('Deleted', item.name)
+            })
+        }, function() {
+            $log.log('not deleting')
+        });
     }
 }])
 
