@@ -131,6 +131,7 @@ angular.module('MS', [])
     }
 
     this.reconstruct = function(form) {
+        console.log('reconstruct form', form)
         return $http.rpc('ms', 'ModelReconstruction', form)
                     .then(function(res){
                         return res;

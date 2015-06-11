@@ -553,9 +553,9 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
             {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
             function(res) {
                 console.log('the response', res)
-                MS.addModel({name: res[0],
+                /*MS.addModel({name: res[0],
                              path: res[1],
-                             orgName: item.genome_name})
+                             orgName: item.genome_name})*/
             })
     }
 
