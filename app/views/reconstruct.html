@@ -1,9 +1,20 @@
 
+<div layout="row">
+    <div flex class="h2">
+        {{filters.myGenomes ? 'My' : 'Public'}} Genomes
+    </div>
 
-<div class="h2">Public Genomes</div>
+    <div flex style="margin-top: 10px;">
+        <md-switch md-no-ink
+                   ng-model="filters.myGenomes"
+                   aria-label="view my genomes"
+                   ng-click="toggleMyGenomes()">
+            View my genomes
+        </md-switch>
+    </div>
+</div>
 <hr class="no-margin">
 
-<!--<ng-include src="'app/views/apps/reconstruct.html'"></ng-include>-->
 
 <div class="table-controls">
     <div layout="row" layout-align="start start" class="pull-left">

@@ -490,6 +490,8 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
       $scope.menuVisible = true;
     }
 
+    $scope.filters = {myGenomes: false};
+
     $scope.opts = {query: '',
                    limit: 25,
                    offset: 0,
@@ -525,10 +527,15 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
         update()
     }, true)
 
+    $scope.toggleMyGenomes = function() {
+        // timeout for prom
+        $timeout(function() { update() });
+    }
+
     // update visible genomes
-    function update(opts) {
+    function update() {
         $scope.loading = true;
-        Patric.getGenomes( $scope.opts )
+        Patric.getGenomes( $scope.opts, $scope.filters.myGenomes )
               .then(function(genomes) {
                   $scope.genomes = genomes;
                   $timeout(function() {

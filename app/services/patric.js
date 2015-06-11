@@ -1,16 +1,16 @@
 
 
 angular.module('Patric', [])
-.service('Patric', ['$http', '$q', '$rootScope', 'config',
-function($http, $q, $rootScope, config) {
+.service('Patric', ['$http', '$q', '$rootScope', 'config', 'Auth',
+function($http, $q, $rootScope, config, Auth) {
     "use strict";
 
-    var self = this
+    var self = this;
 
     var endpoint = config.services.solr_url;
 
     var liveReq;
-    this.getGenomes = function(opts) {
+    this.getGenomes = function(opts, owned) {
         var cache = true;
         var url = endpoint+'genome/?http_accept=application/solr+json';
 
@@ -49,11 +49,17 @@ function($http, $q, $rootScope, config) {
 
         // cancel any previous request
         if (liveReq) liveReq.resolve();
-
-        console.log('url', url)
         liveReq = $q.defer();
-        return $http.get(url, {cache: cache, timeout: liveReq.promise})
-                    .then(function(res){
+
+        if (owned) {
+            url += "&eq(public,false)";
+            var p = $http.get(url, {cache: cache,
+                                    timeout: liveReq.promise,
+                                    headers: { 'Authorization': Auth.token}});
+        } else
+            var p = $http.get(url, {cache: cache, timeout: liveReq.promise});
+
+        return p.then(function(res){
                         console.log('res', res)
                         liveReq = false;
                         return res.data.response;
