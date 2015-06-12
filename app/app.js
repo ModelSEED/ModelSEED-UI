@@ -59,7 +59,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'MyData',
             authenticate: true
         }).state('app.modelPage', {
-            url: "/model{path:nonURIEncoded}/?login",
+            url: "/model{path:nonURIEncoded}?login",
             templateUrl: 'app/views/data/model.html',
             controller: 'DataPage',
             authenticate: true
