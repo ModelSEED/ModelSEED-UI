@@ -26,8 +26,6 @@ MV, $document, $mdSidenav, $q, $log) {
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // load models
-
-    console.log('my models!', MS.myModels)
     if (MS.myModels) {
         $scope.data = MS.myModels;
     } else {
@@ -495,8 +493,15 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
 }])
 
 .controller('DataPage',
-    ['$scope', '$stateParams',
-    function($scope, $stateParams) {
+    ['$scope', '$state', '$stateParams', 'Auth',
+    function($scope, $state, $stateParams, Auth) {
+
+            console.log('$stateParams', $stateParams)
+
+    if ($stateParams.login === 'patric' && !Auth.isAuthenticated()) {
+        console.log('transitioning')
+        $state.transitionTo('home', {redirect: $stateParams.path, login: 'patric'});
+    }
 
     //$scope.ws = $stateParams.ws;
     //$scope.name = $stateParams.name;

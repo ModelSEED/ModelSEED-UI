@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    <div ng-if="item.relatedFBAs || item.relatedGapfills" ng-repeat-end class="my-models-tabs">
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="my-models-tabs">
         <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
             <md-tab label="FBA Simulations ({{item.fbaCount}})">
                 <md-tab-body>

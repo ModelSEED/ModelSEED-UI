@@ -45,8 +45,9 @@ function($locationProvider, $stateProvider, $httpProvider,
 
     $stateProvider
         .state('home', {
-            url: "/home/?login",
+            url: "/home/?login&redirect",
             templateUrl: 'app/views/home.html',
+            controller: 'Home',
         }).state('app', {
             templateUrl: 'app/views/app.html',
         })
@@ -58,7 +59,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'MyData',
             authenticate: true
         }).state('app.modelPage', {
-            url: "/model{path:nonURIEncoded}",
+            url: "/model{path:nonURIEncoded}/?login",
             templateUrl: 'app/views/data/model.html',
             controller: 'DataPage',
             authenticate: true
@@ -191,8 +192,8 @@ function($rootScope, $state, $sParams, $location, auth, $timeout) {
 
         // else, if not authenticated and url is private, go to home
         else if (toState.authenticate && !auth.isAuthenticated()) {
-            $state.transitionTo('home');
-            event.preventDefault();
+            //$state.transitionTo('home', $sParams, false);
+            //event.preventDefault();
         }
 
         // fixme
@@ -200,6 +201,7 @@ function($rootScope, $state, $sParams, $location, auth, $timeout) {
             angular.element('#selected-models').find('.active').removeClass('active')
         }
     })
+
 
     $rootScope.$state = $state;
     $rootScope.$stateParams = $sParams;

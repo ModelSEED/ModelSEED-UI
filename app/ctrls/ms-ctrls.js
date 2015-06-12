@@ -33,12 +33,18 @@ function($scope, $state, $stateParams, Auth, $window) {
 
         prom.success(function(data) {
             // see https://github.com/angular-ui/ui-router/issues/582
-            $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
-                  .then(function() {
-                    setTimeout(function(){
-                        $window.location.reload();
-                    }, 0);
-                });
+            if ($stateParams.redirect) {
+                var path = $stateParams.redirect.replace(/%2F/g, '/');
+                var p = $state.transitionTo('app.modelPage', {path: path},
+                                        {reload: true, inherit: true, notify: false})
+            } else
+                var p = $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
+
+            p.then(function() {
+                setTimeout(function(){
+                    $window.location.reload();
+                }, 0);
+            });
         }).error(function(e, status){
             $scope.loading = false;
             if (status == 401)
@@ -55,6 +61,11 @@ function($scope, $state, $stateParams, Auth, $window) {
                   $window.location.reload();
               });
     }
+}])
+
+.controller('Home', ['$scope', '$stateParams',
+function($scope, $stateParams) {
+    console.log('$stateParams', $stateParams)
 }])
 
 
