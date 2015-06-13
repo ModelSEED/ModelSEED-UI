@@ -136,7 +136,7 @@ MV, $document, $mdSidenav, $q, $log) {
     // general operations
     $scope.deleteFBA = function(e, i, item, fbas) {
         e.stopPropagation();
-        MS.deleteObj(item.path)
+        WS.deleteObj(item.path)
           .then(function(res) {
               fbas.splice(i, 1);
           })
@@ -216,8 +216,8 @@ MV, $document, $mdSidenav, $q, $log) {
         $mdDialog.show(confirm).then(function() {
             //delete both object and related data
             var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name;
-            var p1 = MS.deleteObj(item.path),
-                p2 = MS.deleteObj(folder, true);
+            var p1 = WS.deleteObj(item.path),
+                p2 = WS.deleteObj(folder, true);
             $q.all([p1,p2]).then(function(one, two) {
                 $log.log('removing entity', i)
                 $self.data.splice(i, 1)
