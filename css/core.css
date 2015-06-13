@@ -29,8 +29,13 @@ small.help-text {
     font-size: 8pt;
 }
 
-header .login {
-    margin: 20px 0 0 0;
+
+#login {
+    border-right: 1px solid #666;
+}
+
+.alt-login-container {
+    margin: 10px 0 0 0;
 }
 
 header .login md-input-container.md-default-theme .md-input {

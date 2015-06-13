@@ -93,7 +93,7 @@
                         <h1>The ModelSEED <span class="label label-danger label-beta">alpha</span>
                         </h1>
                         <!--<hr style="width: 30%; border: 2px solid;">-->
-                        <span class="skills">Reconstruct, Explore, Compare, and Analyze Metabolic Models</span>
+                        <div class="h4 text-muted">Metabolic Modeling Made Simple.</div>
                     </div>
                     <br>
                     <div class="col-lg-8">
@@ -109,7 +109,7 @@
                 </div>
 
                 <div ng-controller="Login">
-                    <div class="col-md-4" ng-if="!$root.user" >
+                    <div class="col-md-4" ng-if="!$root.user" id="login">
                         <div class="login">
                             <h4>
                                 <!--<img ng-if="method.name == 'RAST'" src="img/seed.png" class="pull-left"/>
@@ -150,9 +150,8 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3" ng-if="!$root.user && method.name == 'RAST'">
-                        <br>
-                        Alernatively, sign in with:
+                    <div class="col-md-3 alt-login-container" ng-if="!$root.user && method.name == 'RAST'">
+                        Or, sign in with:
                         <div class="alt-login" ng-click="switchMethod('patric')">
                             <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
                             <div class="pull-left">
@@ -161,9 +160,8 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3" ng-if="!$root.user && method.name == 'PATRIC'">
-                        <br>
-                        Alernatively, sign in with:
+                    <div class="col-md-3 alt-login-container" ng-if="!$root.user && method.name == 'PATRIC'">
+                        Or, sign in with:
                         <div class="alt-login" ng-click="switchMethod('rast')">
                             <img src="img/seed.png" width="50" height="50" class="pull-left" />
                             <div class="pull-left">

@@ -1,60 +1,58 @@
 
 
 angular.module('WS', [])
-.service('WS', ['$http', '$q', '$cacheFactory',
-function($http, $q, $cacheFactory) {
+.service('WS', ['$http', '$q', '$cacheFactory', '$log',
+function($http, $q, $cacheFactory, $log) {
     "use strict";
 
     var self = this;
     var cache = $cacheFactory('ws');
 
-    this.getMyWS = function() {
-        //if ( cache.get('getMyWS') )
-        //    return cache.get('getMyWS');
+    this.workspaces = [];
 
-        var p = $http.rpc('ws', 'list_workspaces', {})
-                    .then(function(res) {
-                        var res = res.sort(function (a,b) {
-                                    if (Date.parse(b[2]) < Date.parse(a[2])) return -1;
-                                    if (Date.parse(b[2]) >  Date.parse(a[2])) return 1;
-                                    return 0;
-                                  });
 
-                        // only include writable
-                        var wsList = [];
-                        for (var i in res) {
-                            if (['w', 'a'].indexOf(res[i][4]) === -1) continue;
-                            wsList.push({name: res[i][0]});
-                        }
+    this.getMyData = function(path, opts) {
+        var params = {paths: [path]};
+        angular.extend(params, opts);
 
-                        return wsList;
+        return $http.rpc('ws', 'ls', params)
+                    .then(function(d) {
+                        var d = d[path];
+
+                        // parse into list of dicts
+                        var data = [];
+                        for (var i in d)
+                            data.push( self.wsListToDict(d[i]) );
+
+                        return data;
                     })
-
-        //cache.put('getMyWS', p);
-        return p;
     }
 
-    this.getMyModels = function(ws) {
-        //if ( cache.get('getMyModels-'+ws) )
-        //    return cache.get('getMyModels-'+ws);
+    // wsListToDict: takes workspace info array, returns dict.
+    this.wsListToDict = function(ws) {
+        return {name: ws[0],
+                type: ws[1],
+                path: ws[2],
+                modDate: ws[3],
+                id: ws[4],
+                owner: ws[5],
+                size: ws[6],
+                files: null, // need
+                folders: null, // need
+                timestamp: Date.parse(ws[3])
+               };
+    }
 
-        var params = {workspaces: [ws], type: 'KBaseFBA.FBAModel'};
-        var p = $http.rpc('ws', 'list_objects', params)
-                    .then(function(res) {
-                        var res = res.sort(function (a,b) {
-                                    if (Date.parse(b[3]) < Date.parse(a[3])) return -1;
-                                    if (Date.parse(b[3]) >  Date.parse(a[3])) return 1;
-                                    return 0;
-                                  });
+    this.addToModel = function(ws) {
+        self.workspaces.push( self.wsListToDict(ws) );
+    }
 
-                        var objList = [];
-                        for (var i in res) objList.push({name: res[i][1]});
 
-                        return objList;
-                    })
-
-        //cache.put('getMyModels-'+ws, p);
-        return p;
+    this.rmFromModel = function(ws) {
+        for (var i=0; i<self.workspaces.length; i++) {
+            if (self.workspaces[i].id == ws[4])
+                self.workspaces.splice(i, 1);
+        }
     }
 
     this.getObject = function(ws, name) {
@@ -62,6 +60,33 @@ function($http, $q, $cacheFactory) {
                     .then(function(res) {
                         return res[0].data;
                     })
+    }
+
+    // takes source and destimation paths, moves object
+    this.mv = function(src, dest) {
+        var params = {objects: [[src, dest]], move: 1 };
+        return $http.rpc('ws', 'copy', params)
+                    .then(function(res) {
+                        return res;
+                    }).catch(function(e) {
+                        console.error('could not mv', e)
+                    })
+    }
+
+    // takes path of object, deletes object
+    this.deleteObj = function(path, isFolder) {
+        $log.log('calling delete')
+        var params = {objects: [path],
+                      deleteDirectories: isFolder ? 1 : 0,
+                      force: isFolder ? 1 : 0};
+        return $http.rpc('ws', 'delete', params)
+                    .then(function(res) {
+                        $log.log('deleted object', res)
+                        return res;
+                    }).catch(function(e) {
+                        $log.error('delete failed', e, path)
+                    })
+
     }
 
 
@@ -92,4 +117,14 @@ function($http, $q, $cacheFactory) {
                         return models;
                     })
     }
+
+    // takes workspace spec hash, creates node.  fixme: cleanup
+    this.createNode = function(p) {
+        var objs = [[p.path, p.type, null, null]];
+        var params = {objects:objs, createUploadNodes: 1};
+        return $http.rpc('ws', 'create', params).then(function(res) {
+                    console.log('response', res)
+                    return res;
+                })
+    }    
 }])

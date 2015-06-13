@@ -5,8 +5,8 @@
 */
 
 angular.module('Upload', [])
-.service('Upload', ['Auth', 'config', 'MS', '$timeout',
-    function(auth, config, ms, $timeout) {
+.service('Upload', ['Auth', 'config', 'WS', '$timeout',
+    function(auth, config, WS, $timeout) {
 
     var self = this;
 
@@ -21,7 +21,7 @@ angular.module('Upload', [])
         var params = {objects: [[path+'/'+files[0].name, 'String']],
                       createUploadNodes: 1,
                       overwrite: overwrite ? true : false};
-        return ms.createNode(params, overwrite).then(function(res){
+        return WS.createNode(params, overwrite).then(function(res){
                     var nodeURL = res[0][11];
                     console.log('created upload node:', nodeURL)
                     self.uploadFile(files, nodeURL);
@@ -107,7 +107,7 @@ angular.module('Upload', [])
         $dialog.hide();
 
         var data = event.target.result;
-        MS.uploadData({path: path+'/'+files[0].name,
+        WS.uploadData({path: path+'/'+files[0].name,
                        type: $scope.type,
                        data: data})
           .then(function(res) {

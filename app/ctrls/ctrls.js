@@ -231,6 +231,51 @@ MV, $document, $mdSidenav, $q, $log) {
 
 
 
+.controller('MediaDropdown', ['$scope', 'MS',
+function($scope, MS) {
+    var self = this;
+    self.form = $scope.form
+
+    self.readonly = false;
+    self.selectedItem = null;
+    self.searchText = null;
+    self.querySearch = querySearch;
+    self.compounds = [];
+    self.numberChips = [];
+    self.numberChips2 = [];
+    self.numberBuffer = '';
+
+
+    MS.getPublicMedia('model_compound', {query: query, limit: 10})
+           .then(function(res) {
+               var data = [];
+               for (var i in res.docs) {
+                   var doc = res.docs[i];
+
+                   data.push({name: doc.name,
+                             id: doc.id})
+               }
+
+               return data;
+           })
+
+    function querySearch (query) {
+        return Biochem.get('model_compound', {query: query, limit: 10})
+                .then(function(res) {
+                    var data = [];
+                    for (var i in res.docs) {
+                        var doc = res.docs[i];
+
+                        if (doc.id === 'cpd00000') continue;
+                        data.push({name: doc.name,
+                                  id: doc.id})
+                    }
+
+                    return data;
+                })
+    }
+}])
+
 .controller('CompoundDropdown', ['$scope', 'Biochem',
 function($scope, Biochem) {
     var self = this;
@@ -245,9 +290,7 @@ function($scope, Biochem) {
     self.numberChips2 = [];
     self.numberBuffer = '';
 
-    /**
-     * Search for vegetables.
-     */
+
     function querySearch (query) {
         return Biochem.get('model_compound', {query: query, limit: 10})
                 .then(function(res) {
@@ -279,9 +322,6 @@ function($scope, Biochem) {
     self.numberChips2 = [];
     self.numberBuffer = '';
 
-    /**
-     * Search for vegetables.
-     */
     function querySearch (query) {
         return Biochem.get('model_reaction', {query: query, limit: 10})
                 .then(function(res) {

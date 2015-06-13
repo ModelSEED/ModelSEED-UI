@@ -1,14 +1,14 @@
 
 angular.module('Browser', ['uiTools'])
 .controller('MyData',
-['$scope', '$state', '$stateParams', 'MS', '$log',
+['$scope', '$state', '$stateParams', 'WS', '$log',
  'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast',
  'Upload', '$mdSidenav', 'Dialogs',
-  function($scope, $state, $stateParams, MS, $log, uiTools, $document,
+  function($scope, $state, $stateParams, WS, $log, uiTools, $document,
            $timeout, $dialog,  $mdToast, Upload, $mdSidenav, Dialogs) {
 
     $scope.Upload = Upload;
-    $scope.MS = MS;
+    $scope.WS = WS;
 
     $scope.uiTools = uiTools;
     $scope.relativeTime = uiTools.relativeTime;
@@ -51,7 +51,7 @@ angular.module('Browser', ['uiTools'])
 
     // load initial data
     $scope.loading = true;
-    MS.getMyData($scope.folder).then(function(data) {
+    WS.getMyData($scope.folder).then(function(data) {
         $scope.items = data;
         $scope.loading = false;
     })
@@ -102,7 +102,7 @@ angular.module('Browser', ['uiTools'])
         if (!name) return;
 
         $scope.saving = true;
-        return MS.createFolder( path(name) ).then(function() {
+        return WS.createFolder( path(name) ).then(function() {
                    $scope.saving = false;
                    $scope.updateDir();
                }).catch(function(e){
@@ -113,8 +113,8 @@ angular.module('Browser', ['uiTools'])
 
     // delete an object
     $scope.deleteObj = function(item) {
-        MS.deleteObj( path(item.name), item.type ).then(function(res) {
-            MS.rmFromModel(res[0]);
+        WS.deleteObj( path(item.name), item.type ).then(function(res) {
+            WS.rmFromModel(res[0]);
             $scope.updateDir();
         })
     }
@@ -133,7 +133,7 @@ angular.module('Browser', ['uiTools'])
         $scope.selected = undefined;
 
         $scope.saving = true;
-        MS.mv(src, dest).then(function( ){
+        WS.mv(src, dest).then(function( ){
             $scope.saving = false;
             $scope.edit = false;
             $scope.updateDir();
@@ -179,7 +179,7 @@ angular.module('Browser', ['uiTools'])
         }
 
         if (item.type != 'folder')
-            MS.getDownloadURL(path(item.name))
+            WS.getDownloadURL(path(item.name))
               .then(function(res) {
                   $scope.selected.downloadURL = res[0];
               })
@@ -187,7 +187,7 @@ angular.module('Browser', ['uiTools'])
 
     // updates the view (bruteforce for now)
     $scope.updateDir = function() {
-        MS.getMyData($scope.folder).then(function(data) {
+        WS.getMyData($scope.folder).then(function(data) {
             console.log('data returned', data)
             $scope.items = data;
         })
@@ -195,7 +195,7 @@ angular.module('Browser', ['uiTools'])
 
     // updates the view
     $scope.updateWorkspaces = function() {
-        MS.getWorkspaces().then(function(d) {
+        WS.getWorkspaces().then(function(d) {
             $scope.workspaces = d;
             $scope.loading = false;
         })
@@ -221,7 +221,7 @@ angular.module('Browser', ['uiTools'])
 
                 $scope.createNode = function(files) {
                     // upload to SHOCK
-                    MS.createNode({path: path+'/'+files[0].name, type:$scope.type})
+                    WS.createNode({path: path+'/'+files[0].name, type:$scope.type})
                       .then(function(res) {
                           $dialog.hide();
                           Upload.uploadFile(files, res[0][11])

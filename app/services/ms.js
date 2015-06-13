@@ -16,89 +16,13 @@ angular.module('MS', [])
 
     var cache = $cacheFactory('ms');
 
-    this.getMyData = function(path, opts) {
-        var params = {paths: [path]};
-        angular.extend(params, opts);
-
-        return $http.rpc('ws', 'ls', params)
-                    .then(function(d) {
-                        console.log('ws data returned', d)
-                        var d = d[path];
-
-                        // parse into list of dicts
-                        var data = [];
-                        for (var i in d)
-                            data.push( self.wsListToDict(d[i]) );
-
-                        return data;
-                    })
-    }
-
-    // wsListToDict: takes workspace info array, returns dict.
-    this.wsListToDict = function(ws) {
-        return {name: ws[0],
-                type: ws[1],
-                path: ws[2],
-                modDate: ws[3],
-                id: ws[4],
-                owner: ws[5],
-                size: ws[6],
-                files: null, // need
-                folders: null, // need
-                timestamp: Date.parse(ws[3])
-               };
-    }
-
-    this.addToModel = function(ws) {
-        self.workspaces.push( self.wsListToDict(ws) );
-    }
-
-
-    this.rmFromModel = function(ws) {
-        for (var i=0; i<self.workspaces.length; i++) {
-            if (self.workspaces[i].id == ws[4])
-                self.workspaces.splice(i, 1);
-        }
-    }
-
-    // takes source and destimation paths, moves object
-    this.mv = function(src, dest) {
-        var params = {objects: [[src, dest]], move: 1 };
-        console.log('trying to rename with', params);
-        return $http.rpc('ws', 'copy', params)
-                    .then(function(res) {
-                        console.log('response was', res)
-                        return res;
-                    }).catch(function(e) {
-                        console.log('could not mv', e)
-                    })
-    }
-
-    // takes path of object, deletes object
-    this.deleteObj = function(path, isFolder) {
-        $log.log('calling delete')
-        var params = {objects: [path],
-                      deleteDirectories: isFolder ? 1 : 0,
-                      force: isFolder ? 1 : 0};
-        return $http.rpc('ws', 'delete', params)
-                    .then(function(res) {
-                        $log.log('deleted object', res)
-                        return res;
-                    }).catch(function(e) {
-                        $log.error('delete failed', e, path)
-                    })
-
-    }
-
-    // takes workspace spec hash, creates node.  fixme: cleanup
-    this.createNode = function(p) {
-        var objs = [[p.path, p.type, null, null]];
-        var params = {objects:objs, createUploadNodes: 1};
-        return $http.rpc('ws', 'create', params).then(function(res) {
+    this.getPublicMedia = function() {
+        return $http.rpc('ms', 'create', params).then(function(res) {
                     console.log('response', res)
                     return res;
                 })
     }
+
 
     // takes   fixme: cleanup
     this.uploadData = function(p) {
