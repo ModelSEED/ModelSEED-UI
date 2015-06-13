@@ -71,18 +71,18 @@
         </div>
 
         <div flex="35" class="vertical-center">
-            {{item.orgName}}<br>
+            {{item.orgName.length > 19 ? item.orgName.slice(0,20)+'...' : item.orgName}}<br>
             <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}
             </a>
         </div>
 
-        <div flex class="vertical-center">
+        <div flex="30" class="vertical-center">
             <md-button md-no-ink ng-click="runFBA($event, item)">
                 <i class="fa fa-code-fork"></i>
                 Run FBA
-            </md-button><br>
+            </md-button>
             <md-button md-no-ink ng-click="gapfill($event, item)">
                 <i class="fa fa-circle"></i>
                 Gapfill
@@ -91,14 +91,14 @@
 
 
         <div flex="15" class="vertical-center" style="text-align: left;">
-            <span class="badge label-fba">
+            <!--<span class="badge label-fba">
                 <md-tooltip>Number of FBAs</md-tooltip>
                 {{item.fbaCount}}
             </span>
             <span class="badge label-gapfill">
                 <md-tooltip>Number of Gapfill Solutions</md-tooltip>
                 {{item.gapfillCount}}
-            </span><br>
+            </span><br>-->
             <small><b>{{item.rxnCount}}</b> Compounds</small>
             <br>
             <small><b>{{item.cpdCount}}</b> Reactions</small>
@@ -124,13 +124,23 @@
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="my-models-tabs">
         <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
-            <md-tab label="FBA Simulations ({{item.fbaCount}})">
+            <md-tab>
+                <md-tab-label>
+                    FBA Simulations
+                    (<span class="label-fba-count">{{item.fbaCount}}</span>)
+                </md-tab-label>
+
                 <md-tab-body>
                     <ng-include src="'app/views/lists/expanded-fbas.html'">
                 </md-tab-body>
             </md-tab>
 
-            <md-tab label="Gapfills ({{item.gapfillCount}})">
+            <md-tab>
+                <md-tab-label>
+                    Gapfills
+                    (<span class="label-gapfill-count">{{item.gapfillCount}}</span>)
+                </md-table-label>
+
                 <md-tab-body>
                     <ng-include src="'app/views/lists/expanded-gapfills.html'">
                 </md-tab-body>

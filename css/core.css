@@ -660,6 +660,12 @@ md-card {
 .label-gapfill {
     background-color: #25AABB;
 }
+.label-fba-count {
+    color: #5cb85c;
+}
+.label-gapfill-count {
+    color: #25AABB;
+}
 
 td .label-gapfill {
     margin-right: 15px;
