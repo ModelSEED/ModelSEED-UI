@@ -1,0 +1,20 @@
+<table class="table">
+    <thead>
+    </thead>
+    <tbody>
+        <tr><td><b>Compound</b></td><td>{{selected.modelCpd.id.split('_')[0]}}</td></tr>
+        <tr><td><b>Name</b></td><td>{{selected.modelCpd.name.split('_')[0]}}</td></tr>
+        <tr><td><b>Formula</b></td><td>{{selected.cpd.formula}}</td></tr>
+        <tr><td><b>Charge</b></td><td>{{selected.cpd.charge}}</td></tr>
+        <tr><td><b>Compartment</b></td><td>{{selected.modelCpd.compartment}}</td></tr>
+        <tr><td><b>Delta G</b></td><td>{{selected.cpd.deltag}} kcal/mol</td></tr>
+        <tr>
+            <td><b>Aliases</b></td>
+            <td>
+                <div ng-repeat="alias in selected.cpd.aliases" ng-if="alias.indexOf('searchname') != -1">
+                    {{alias.replace('searchname:', '')}}
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,23 +1,126 @@
 <h4>
 	<i class="icon-folder-open-o"></i>
-	<span ng-if="path.length">
+	<span>
 		<a ui-sref="app.myModels()">My Models</a>
-		/ {{path[path.length-1]}}
+		/ {{name}}
 	</span>
 </h4>
 
-<h2 class="page-header">Model
-	<span class="small">
-		{{name}}
-	</span>
-</h2>
+<div class="h2">Model</div>
+<hr class="no-margin">
 
 
-<md-progress-circular ng-if="loading"
-					md-mode="indeterminate"
-					md-diameter="40">
-</md-progress-circular>
+<md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
 
-<div class="obj-view">
-	<div ms-tables type="KBaseFBA.FBAModel" obj-path="{{objPath}}"></div>
-</div>
+	<md-tab>
+		<md-tab-label>Reactions</md-tab-label>
+		<md-tab-body>
+			<ng-table table-header="rxnHeader"
+						table-data="rxns"
+						table-opts="rxnOpts"
+						table-loading="loading"
+						table-placeholder="Search reactions">
+			</ng-table>
+		</md-tab-body>
+	</md-tab>
+
+	<md-tab>
+		<md-tab-label>Compounds</md-tab-label>
+		<md-tab-body>
+			<ng-table table-header="cpdHeader"
+						table-data="cpds"
+						table-opts="cpdOpts"
+						table-loading="loading"
+						table-placeholder="Search compounds">
+			</ng-table>
+		</md-tab-body>
+	</md-tab>
+
+	<md-tab>
+		<md-tab-label>Genes</md-tab-label>
+		<md-tab-body>
+			<ng-table table-header="geneHeader"
+						table-data="genes"
+						table-opts="geneOpts"
+						table-loading="loading"
+						table-placeholder="Search genes">
+			</ng-table>
+		</md-tab-body>
+	</md-tab>
+
+	<md-tab>
+		<md-tab-label>Compartments</md-tab-label>
+		<md-tab-body>
+			<ng-table table-header="compartmentHeader"
+						table-data="compartments"
+						table-opts="compartmentOpts"
+						table-loading="loading"
+						table-placeholder="Search compartments">
+			</ng-table>
+		</md-tab-body>
+	</md-tab>
+
+	<md-tab>
+		<md-tab-label>Biomass</md-tab-label>
+		<md-tab-body>
+			<ng-table table-header="biomassHeader"
+						table-data="biomass"
+						table-opts="biomassOpts"
+						table-loading="loading"
+						table-placeholder="Search biomass eqs">
+			</ng-table>
+		</md-tab-body>
+	</md-tab>
+
+	<md-tab>
+		<md-tab-label>Gapfilling</md-tab-label>
+		<md-tab-body>
+			<ng-include src="'app/views/lists/expanded-gapfills.html'"></ng-include>
+		</md-tab-body>
+	</md-tab>
+
+
+	<md-tab ng-repeat="tab in Tabs.tabs">
+		<md-tab-label>{{tab.title}}
+			<span ng-if="tab.removable"
+                  ng-click="Tabs.removeTab(tab)"
+                  class="fa fa-remove hover">
+            </span>
+		</md-tab-label>
+		<md-tab-body>
+			<ng-include src="'app/views/lists/rxn-page.html'" onload="rxn = tab.title;" ng-controller="RxnPage"></ng-include>
+		</md-tab-body>
+	</md-tab>
+</md-tabs>
+
+
+<section ng-controller="SideNav">
+
+    <md-sidenav class="rxn-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="rxnView" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';">
+        <md-toolbar class="md-light-theme">
+            <h1 class="md-toolbar-tools">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center center">
+			<ng-include src="'app/views/lists/rxn-page.html'"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+	<md-sidenav  class="cpd-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="cpdView">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center left">
+			<ng-include src="'app/views/lists/cpd-page.html'" ng-controller="RxnPage"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+
+</section>

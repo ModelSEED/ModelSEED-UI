@@ -7,12 +7,6 @@
             <md-input-container md-no-float>
                 <input ng-model="opts.query" type="text" placeholder="{{placeholder}}" class="query-input">
             </md-input-container>
-
-            <md-progress-circular ng-if="loading"
-                                  md-mode="indeterminate"
-                                  class="pull-left"
-                                  md-diameter="20">
-            </md-progress-circular>
         </div>
 
         <div class="pull-right">
@@ -42,17 +36,37 @@
     <table class="table table-striped table-bordered">
         <thead sortable>
             <tr>
-                <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{h.label}}</th>
+                <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{::h.label}}</th>
             </tr>
         </thead>
 
         <tr ng-repeat="item in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
                         | limitTo : opts.limit : opts.offset)">
-            <td ng-repeat="h in header">{{item[h.key]}}</td>
+            <td ng-repeat="h in header">
+
+                <span ng-if="h.hasOwnProperty('newTab')">
+                    <a ng-click="h.call($event, item[h.key])">{{::item[h.key].split('_')[0]}}[{{::item[h.key].split('_')[1]}}]</a>
+                </span>
+
+                <span ng-if="h.hasOwnProperty('formatter')"
+                      ng-bind-html="h.formatter(item[h.key])"></span>
+
+                <span ng-if="h.hasOwnProperty('newTabList')">
+                    <span ng-repeat="x in item[h.key]">
+                        <a ng-click="h.call($event, x)">{{x.split('_')[0]}}[{{::x.split('_')[1]}}]</a>
+                        <span ng-if="$index < item[h.key].length-1">,</span>
+                    </span>
+                </span>
+
+                <span ng-if="!h.hasOwnProperty('newTab') && !h.hasOwnProperty('formatter') && !h.hasOwnProperty('newTabList') ">
+                    {{::item[h.key]}}
+                </span>
+
+            </td>
         </tr>
 
         <div ng-if="!loading && filtered.length == 0">
-            No reaction found
+            No item found
         </div>
     </table>
 </div>
@@ -61,4 +75,3 @@
                       md-mode="indeterminate"
                       md-diameter="40">
 </md-progress-circular>
-

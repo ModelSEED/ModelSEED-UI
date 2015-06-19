@@ -1,0 +1,35 @@
+<table class="table">
+    <thead>
+    </thead>
+    <tbody>
+        <tr><td><b>Reaction</b></td><td>{{selected.modelRxn.id.split('_')[0]}}</td></tr>
+        <tr><td><b>Name</b></td><td>{{selected.modelRxn.name.split('_')[0]}}</td></tr>
+        <tr><td><b>Compartment</b></td><td>{{selected.modelRxn.compartment}}</td></tr>
+        <tr><td><b>Equation</b></td><td>{{selected.modelRxn.eq}}</td></tr>
+        <tr>
+            <td><b>GPR</b></td>
+            <td>{{selected.modelRxn.gpr}}</td>
+        </tr>
+        <tr><td><b>Delta G</b></td><td>{{selected.rxn.deltag}}</td></tr>
+        <tr>
+            <td><b>Enzymes</b></td>
+            <td>
+                <span ng-if="!selected.rxn.ec_numbers.length">-<span>
+                <a ng-repeat="ec in selected.rxn.ec_numbers"
+                   href="http://www.genome.jp/dbget-bin/www_bget?ec:{{ec}}"
+                   target="_blank"
+                   ng-click="$event.stopPropagation()">
+                    {{ec}}{{$last ? '' : ', '}}
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td><b>Aliases</b></td>
+            <td>
+                <div ng-repeat="alias in selected.rxn.aliases" ng-if="alias.indexOf('searchname') != -1">
+                    {{alias.replace('searchname:', '')}}
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -159,6 +159,14 @@ MV, $document, $mdSidenav, $q, $log) {
           })
     }
 
+    $scope.deleteGapfill = function(i, model, gapfill) {
+        gapfill.loading = true;
+        MS.manageGapfills(model.path, gapfill.id, 'D')
+          .then(function(res) {
+              model.relatedGapfills.splice(i, 1)
+          })
+    }
+
     $scope.toggleOperations = function(e, type, item) {
         var tar = e.target;
         e.stopPropagation();
@@ -183,14 +191,6 @@ MV, $document, $mdSidenav, $q, $log) {
         } else if ($mdSidenav('downloadOpts').isOpen()) {
             $mdSidenav('downloadOpts').close()
         }
-    }
-
-    $scope.deleteGapfill = function(i, model, gapfill) {
-        gapfill.loading = true;
-        MS.manageGapfills(model.path, gapfill.id, 'D')
-          .then(function(res) {
-              model.relatedGapfills.splice(i, 1)
-          })
     }
 
     $scope.prepareDownload = function($event, selected) {
@@ -532,45 +532,17 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
     })
 }])
 
+
+
 .controller('DataPage',
     ['$scope', '$state', '$stateParams', 'Auth',
-    function($scope, $state, $stateParams, Auth) {
+    function($scope, $state, $sParams, Auth) {
 
-            console.log('$stateParams', $stateParams)
-
-    if ($stateParams.login === 'patric' && !Auth.isAuthenticated()) {
-        console.log('transitioning')
-        $state.transitionTo('home', {redirect: $stateParams.path, login: 'patric'});
+    if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
+        $state.transitionTo('home', {redirect: $sParams.path, login: 'patric'});
     }
 
-    //$scope.ws = $stateParams.ws;
-    //$scope.name = $stateParams.name;
-
-    //$scope.tab = $stateParams.tab;
-
-    // get path in list form
-    // FIXME: make service or such
-
-    $scope.objPath = $stateParams.path;
-    var depth = $stateParams.path.split('/').length -2;
-    $scope.path = $stateParams.path.split('/').splice(2, depth);
-
-    // get path strings for parent folders
-    var dir_names = $stateParams.path.split('/').splice(1, depth);
-    var links = [];
-    for (var i=0; i < depth; i++) {
-        var link = '/'+dir_names.join('/');
-        links.push(link);
-        dir_names.pop();
-    }
-    links.reverse();
-    links = links.slice(1, links.length);
-
-    // method for retrieving links of all parent folders
-    $scope.getLink = function(i) {
-        return links[i];
-    }
-
+    $scope.path = $sParams.path.toName();
 }])
 
 
@@ -646,6 +618,15 @@ function ($scope, $timeout, MV, VizOpts) {
     function($scope, $stateParams) {
     }
 ])
+
+
+.controller('SideNav',
+['$scope', '$mdSidenav',
+function($scope, $mdSidenav) {
+    $scope.close = function() {
+        $mdSidenav('right').toggle();
+    }
+}])
 
 .service('VizOptions', [function() {
 

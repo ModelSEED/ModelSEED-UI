@@ -64,4 +64,20 @@ function($http, $q, config, $log) {
                     })
     }
 
+    this.getRxn = function(id) {
+        var url = endpoint+'model_reaction/?http_accept=application/json&eq(id,'+id+')'
+        return $http.get(url)
+                    .then(function(res) {
+                        return res.data[0];
+                    })
+    }
+
+    this.getCpd= function(id) {
+        var url = endpoint+'model_compound/?http_accept=application/json&eq(id,'+id+')'
+        return $http.get(url)
+                    .then(function(res) {
+                        return res.data[0];
+                    })
+    }
+
 }])

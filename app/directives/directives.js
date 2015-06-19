@@ -1182,7 +1182,7 @@ function($compile, $stateParams) {
 })
 
 
-.directive('ngTable', function() {
+.directive('ngTable', ['$sce', '$compile', function($sce, $compile) {
     return {
         restrict: 'EA',
         scope: {
@@ -1197,7 +1197,21 @@ function($compile, $stateParams) {
 
         }
     }
- })
+}])
+
+.directive('dynamic', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function (scope, ele, attrs) {
+            scope.$watch(attrs.dynamic, function(html) {
+                ele.html(html);
+                $compile(ele.contents())(scope);
+            });
+        }
+    };
+}])
+
 .directive('ngTableSolr', function() {
     return {
         restrict: 'EA',

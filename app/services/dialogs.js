@@ -1,4 +1,3 @@
-
 /**
  * [module Dialogs]
  *
@@ -193,9 +192,3 @@ function($scope, $mdToast, $timeout) {
     $mdToast.hide();
   };
 }])
-
-// takes workspace path, returns name
-String.prototype.toName = function() {
-    var a = this.split('/');
-    return a[a.length-1]
-}

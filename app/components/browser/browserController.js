@@ -326,11 +326,3 @@ angular.module('Browser', ['uiTools'])
             $state.go('app.modelPage', {path: path(item.name) })
     }
 }])
-
-.controller('SideNav',
-['$scope', '$mdSidenav',
-function($scope, $mdSidenav) {
-    $scope.close = function() {
-        $mdSidenav('right').toggle();
-    }
-}])

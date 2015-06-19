@@ -6,6 +6,7 @@ angular.module('ModelSEED',
  'ctrls',
  'ms-ctrls',
  'help-ctrls',
+ 'DataViewCtrls',
  'duScroll',
  'ui.router',
  'ngAnimate',
@@ -25,11 +26,12 @@ angular.module('ModelSEED',
  'Dialogs'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
-         '$urlRouterProvider', '$urlMatcherFactoryProvider',
+         '$urlRouterProvider', '$urlMatcherFactoryProvider', '$sceProvider',
 function($locationProvider, $stateProvider, $httpProvider,
-         $urlRouterProvider, $urlMatcherFactoryProvider) {
+         $urlRouterProvider, $urlMatcherFactoryProvider, $sceProvider) {
 
     $locationProvider.html5Mode(false);
+    $sceProvider.enabled(false);
 
     $urlMatcherFactoryProvider.strictMode(false);
 
@@ -61,7 +63,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.modelPage', {
             url: "/model{path:nonURIEncoded}?login",
             templateUrl: 'app/views/data/model.html',
-            controller: 'DataPage',
+            controller: 'ModelDataView',
             authenticate: true
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
@@ -175,10 +177,11 @@ function($locationProvider, $stateProvider, $httpProvider,
         //.accentPalette('light-blue');
 }])
 
-.run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout',
-function($rootScope, $state, $sParams, $location, auth, $timeout) {
+.run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout', '$templateCache',
+function($rootScope, $state, $sParams, $location, auth, $timeout, $templateCache) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
+        //$templateCache.removeAll();
 
         // if first load on home and user is authenticated,
         // forward to application page [good UX!]
@@ -196,6 +199,7 @@ function($rootScope, $state, $sParams, $location, auth, $timeout) {
             //event.preventDefault();
         }
 
+
         // fixme
         if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
             angular.element('#selected-models').find('.active').removeClass('active')
@@ -209,3 +213,8 @@ function($rootScope, $state, $sParams, $location, auth, $timeout) {
     $rootScope.user = auth.user;
     $rootScope.token = auth.token;
 }]);
+
+// parse name from workspace path
+String.prototype.toName = function() {
+    return this.split('/').pop();
+}

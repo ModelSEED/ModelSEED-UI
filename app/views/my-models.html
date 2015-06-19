@@ -123,7 +123,7 @@
     </div>
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="my-models-tabs">
-        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height="false">
+        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
             <md-tab>
                 <md-tab-label>
                     FBA Simulations
@@ -150,7 +150,7 @@
 </div>
 
 <section ng-controller="SideNav">
-    <md-sidenav  class="md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">
+    <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">
         <md-toolbar class="md-theme-light">
             <h1 class="md-toolbar-tools">Download</h1>
         </md-toolbar>

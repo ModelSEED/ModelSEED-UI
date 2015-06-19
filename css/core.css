@@ -489,6 +489,10 @@ table tr.active {
 
 /* md mods */
 
+md-tab-item:hover {
+    color: #555;
+}
+
 md-toast.md-bottom {
     position: fixed;
 }
@@ -500,9 +504,23 @@ md-toast.md-bottom {
     z-index: 9999;
 }
 
-md-sidenav {
+.dl-sidenav {
+    top: 95px;
     min-width: 50px;
     max-width: 140px;
+    bottom:inherit;
+    position: fixed;
+}
+
+
+
+.rxn-sidenav,
+.cpd-sidenav {
+    top: 50px;
+    width: inherit;
+    min-width: 50px;
+    max-width: 600px;
+    max-height: 600px;
     bottom:inherit;
     position: fixed;
 }
@@ -515,10 +533,6 @@ md-sidenav button div {
 
 md-sidenav button i {
     margin-top: 10px;
-}
-
-.md-sidenav-right {
-    top: 95px;
 }
 
 .md-toolbar-tools {
@@ -539,6 +553,7 @@ md-input-container {
 md-input-container:not(.md-input-has-value) input:not(:focus) {
     color: inherit;
 }
+
 .md-tab {
     text-transform: inherit;
 }
