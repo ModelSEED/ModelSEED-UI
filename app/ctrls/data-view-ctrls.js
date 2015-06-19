@@ -319,6 +319,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                        charge: cpd.charge,
                        compartment: compartment}
 
+            cpd.name = name;
             cpd.compartName = compartNameMapping[compartment[0]]+' '+compartment[1];
             cpd.compartment = compartment;
             this.cpdhash[cpd.id] = cpd;
