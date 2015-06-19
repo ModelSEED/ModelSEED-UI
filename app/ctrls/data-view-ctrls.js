@@ -319,7 +319,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                        charge: cpd.charge,
                        compartment: compartment}
 
-            cpd.compartment = compartNameMapping[compartment[0]]+' '+compartment[1];
+            cpd.compartName = compartNameMapping[compartment[0]]+' '+compartment[1];
+            cpd.compartment = compartment;
             this.cpdhash[cpd.id] = cpd;
             compounds.push(obj);
         }
