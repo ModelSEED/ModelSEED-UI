@@ -114,7 +114,6 @@ function(MS, $dialog, $mdToast) {
 
                     MS.gapfill(item.path)
                       .then(function(res) {
-                          console.log('gapfill response', res)
                            cb();
                            self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {

@@ -33,6 +33,9 @@ MV, $document, $mdSidenav, $q, $log) {
         MS.getModels().then(function(res) {
             $scope.data = res;
             $scope.loading = false;
+        }).catch(function(e) {
+            $scope.error = e.message.error;
+            $scope.loading = false;
         })
     }
 

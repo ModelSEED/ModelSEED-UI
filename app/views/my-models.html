@@ -156,18 +156,24 @@
         </md-toolbar>
         <md-content layout-padding layout="column" layout-align="center center">
 
-            <md-button class="md-grid-item-content" href="{{selected.downloadURL}}">
-                <b class="fa-2x">{}</b>
-                <div> JSON </div>
+            <md-button class="md-grid-item-content" href="{{selected.downloads.sbml}}">
+                <img src="img/sbml-logo-32.png" height="20">
+                <div>SBML</div>
             </md-button>
 
-            <md-button class="md-grid-item-content"> <!-- ng-click="prepareDownload($event, selected)"-->
-                <md-progress-circular ng-if="loadingSBML"
-                                      md-mode="indeterminate"
-                                      md-diameter="20">
-                </md-progress-circular>
-                <img src="img/sbml-logo-32.png" height="20">
-                <div>SBML<br>(coming soon)</div>
+            <md-button class="md-grid-item-content" href="{{selected.downloads.json}}">
+                <b class="fa-2x">{}</b>
+                <div>JSON</div>
+            </md-button>
+
+            <md-button class="md-grid-item-content" href="{{selected.downloads.rxnTable}}">
+                <i class="fa-file-text-o fa-2x"></i>
+                <div>Reactions<br>(tab-separated)</div>
+            </md-button>
+
+            <md-button class="md-grid-item-content" href="{{selected.downloads.cpdTable}}">
+                <i class="fa-file-text-o fa-2x"></i>
+                <div>Compounds<br>(tab-separated)</div>
             </md-button>
 
             <md-button ng-click="close()" class="md-primary">
@@ -186,4 +192,9 @@
 <div ng-if="data && !data.length">
     <br>
     You have no models.  Consider <a ui-sref="app.reconstruct">resconstructing a model</a>.
+</div>
+
+<div ng-if="error" class="ms-color-error">
+    Oh no.  Something has went wrong.
+    {{error}}
 </div>
