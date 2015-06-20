@@ -46,7 +46,11 @@ function(MS, $dialog, $mdToast) {
                       .then(function(r) {
                            cb(r);
                            self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                      }).catch(function(e) {
+                          self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
+
+
                     $dialog.hide();
                 }
 
@@ -83,7 +87,7 @@ function(MS, $dialog, $mdToast) {
                            self.showComplete('FBA Complete',
                                         res[0]+' '+res[7].media.toName())
                       }).catch(function(e) {
-                          showError(e.error.message)
+                          self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
                     $dialog.hide();
                 }
@@ -114,7 +118,7 @@ function(MS, $dialog, $mdToast) {
                            cb();
                            self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {
-                          showError(e.error.message)
+                          self.showError('Gapfill Error', e.error.message.slice(0,30)+'...')
                       })
                     $dialog.hide();
                 }
@@ -164,7 +168,7 @@ function(MS, $dialog, $mdToast) {
        });
     }
 
-    function showError(msg) {
+    this.showError = function(msg) {
        $mdToast.show({
         controller: 'ToastCtrl',
         parent: angular.element('.sidebar'),
