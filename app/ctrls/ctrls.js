@@ -12,7 +12,10 @@ function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
 MV, $document, $mdSidenav, $q, $log) {
     var $self = $scope;
 
+
+
     $scope.MS = MS;
+    $scope.uiTools = uiTools;
     $scope.relativeTime = uiTools.relativeTime;
 
     $scope.relTime = function(datetime) {
@@ -177,9 +180,12 @@ MV, $document, $mdSidenav, $q, $log) {
         // set selected item
         $scope.selected = item;
 
-        MS.getDownloadURL(item.path)
-          .then(function(res) {
-              $scope.selected.downloadURL = res[0];
+        $scope.loadingDownloads = true;
+        MS.getDownloads(item.path)
+          .then(function(dls) {
+              console.log('download stuff', dls)
+              $scope.selected.downloads = dls;
+              $scope.loadingDownloads = false;
           })
 
         if (type === 'download') {
@@ -194,14 +200,6 @@ MV, $document, $mdSidenav, $q, $log) {
         } else if ($mdSidenav('downloadOpts').isOpen()) {
             $mdSidenav('downloadOpts').close()
         }
-    }
-
-    $scope.prepareDownload = function($event, selected) {
-        console.log('selected', selected)
-        MS.downloadSBML(selected.path)
-          .then(function(data) {
-
-          })
     }
 
     $scope.rmModel = function(ev, i, item) {

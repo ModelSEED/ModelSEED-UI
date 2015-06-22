@@ -22,7 +22,6 @@
             </md-progress-circular>
         </div>
 
-
         <div class="pull-right">
             <span pagination>
                 <div ng-disabled="opts.offset == 0"
@@ -105,7 +104,7 @@
         </div>
 
 
-        <div flex class="timestamp">
+        <div flex class="timestamp vertical-center">
             <small>{{relativeTime(item.timestamp)}}</small>
         </div>
 
@@ -154,27 +153,61 @@
         <md-toolbar class="md-theme-light">
             <h1 class="md-toolbar-tools">Download</h1>
         </md-toolbar>
-        <md-content layout-padding layout="column" layout-align="center center">
+        <md-content layout-padding layout="column" layout-align="center left">
+            <md-progress-circular ng-if="loadingDownloads"
+                                  md-mode="indeterminate"
+                                  md-diameter="30">
+            </md-progress-circular>
 
-            <md-button class="md-grid-item-content" href="{{selected.downloads.sbml}}">
-                <img src="img/sbml-logo-32.png" height="20">
-                <div>SBML</div>
-            </md-button>
-
-            <md-button class="md-grid-item-content" href="{{selected.downloads.json}}">
-                <b class="fa-2x">{}</b>
-                <div>JSON</div>
-            </md-button>
-
-            <md-button class="md-grid-item-content" href="{{selected.downloads.rxnTable}}">
-                <i class="fa-file-text-o fa-2x"></i>
-                <div>Reactions<br>(tab-separated)</div>
-            </md-button>
-
-            <md-button class="md-grid-item-content" href="{{selected.downloads.cpdTable}}">
-                <i class="fa-file-text-o fa-2x"></i>
-                <div>Compounds<br>(tab-separated)</div>
-            </md-button>
+            <table ng-if="!loadingDownloads" class="table">
+                <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Type</td>
+                        <td>Size</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i> <a href="{{selected.downloads.sbml.url}}">{{selected.downloads.sbml.name}}</a>
+                        </td>
+                        <td>
+                            <img src="img/sbml-logo-32.png" height="18">
+                        </td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.sbml.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i>  <a href="{{selected.downloads.json.url}}">{{selected.downloads.json.name}}</a>
+                        </td>
+                        <td>JSON</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.json.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i>  <a href="{{selected.downloads.rxnTable.url}}">{{selected.downloads.rxnTable.name}}</a>
+                        </td>
+                        <td>Tab-separated</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.rxnTable.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i> <a href="{{selected.downloads.cpdTable.url}}">{{selected.downloads.cpdTable.name}}</a>
+                        </td>
+                        <td>Tab-separated</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.cpdTable.size )}}</small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
             <md-button ng-click="close()" class="md-primary">
                 Close
@@ -185,7 +218,6 @@
 
 <md-progress-circular ng-if="loading"
                       md-mode="indeterminate"
-                      class="pull-left"
                       md-diameter="40">
 </md-progress-circular>
 

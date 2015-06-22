@@ -6,8 +6,8 @@
 */
 
 angular.module('MS', [])
-.service('MS', ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer',
-    function($http, $log, $cacheFactory, $q, MV) {
+.service('MS', ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer', 'WS',
+    function($http, $log, $cacheFactory, $q, MV, WS) {
 
     var self = this;
 
@@ -51,6 +51,59 @@ angular.module('MS', [])
                         console.log('download response', res)
                         return res;
                     })
+    }
+
+
+    // complete nonsense.
+    this.getDownloads = function(path) {
+        var jsonPath = path,
+            hiddenDir = path.slice(0, path.lastIndexOf('/')+1)+'.'+ path.split('/').pop();
+
+        var p1 = WS.list(hiddenDir, {recursive: true, excludeDirectories: true});
+        var p2 = WS.getObjectMeta(jsonPath).then(function(res) { return res[0]; })
+
+        return $q.all([p1, p2])
+                 .then(function(args) {
+                    var r = args[0], r2 = args[1];
+
+                    var paths = [], objs = [];
+                    for (var i=0; i<r.length; i++) {
+                        var obj = r[i];
+                        objs.push({path: obj.path+obj.name, size: obj.size, name: obj.name});
+                        paths.push(obj.path+obj.name);
+                    }
+
+                    // add json download url data
+                    objs.push({path: r2[2]+r2[0], size: r2[6], name: r2[0]});
+                    paths.push(r2[2]+r2[0]);
+
+                    return $http.rpc('ws', 'get_download_url', {objects:paths})
+                                .then(function(urls) {
+                                    console.log('urls', urls)
+                                    var downloads = {};
+                                    for (var i=0; i<urls.length; i++) {
+                                        var url = urls[i],
+                                            obj = objs[i];
+
+                                        var dl = {url: url,
+                                                  size: obj.size,
+                                                  name: obj.name};
+
+                                        if (i == urls.length-1)
+                                            downloads.json = dl;
+                                        else if (url.indexOf('.sbml') > 0)
+                                            downloads.sbml = dl;
+                                        else if (url.indexOf('.cpdtbl') > 0)
+                                            downloads.cpdTable = dl;
+                                        else if (url.indexOf('.rxntbl') > 0)
+                                            downloads.rxnTable = dl;
+                                    }
+
+                                    return downloads;
+                                })
+
+                 })
+
 
     }
 
@@ -84,14 +137,6 @@ angular.module('MS', [])
                         $log.log('get (object) response', res)
                         var data = {meta: res[0][0], data: JSON.parse(res[0][1])}
                         return data;
-                    })
-    }
-
-    this.getObjectMeta = function(path) {
-        $log.log('retrieving meta', path)
-        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
-                    .then(function(res) {
-                        return res[0];
                     })
     }
 

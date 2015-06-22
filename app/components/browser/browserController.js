@@ -30,7 +30,6 @@ angular.module('Browser', ['uiTools'])
     // model: items in folder that is being viewed
     $scope.items;
 
-
     // Use url in path
     $scope.folder = $stateParams.dir;
 

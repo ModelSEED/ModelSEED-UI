@@ -5,8 +5,8 @@
  *
  */
 angular.module('Dialogs', [])
-.service('Dialogs', ['MS', '$mdDialog', '$mdToast',
-function(MS, $dialog, $mdToast) {
+.service('Dialogs', ['MS', 'WS', '$mdDialog', '$mdToast',
+function(MS, WS, $dialog, $mdToast) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -17,7 +17,7 @@ function(MS, $dialog, $mdToast) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                MS.getObjectMeta(path)
+                WS.getObjectMeta(path)
                   .then(function(meta) {
                       $scope.metaData = meta;
                   })

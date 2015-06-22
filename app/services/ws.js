@@ -10,6 +10,23 @@ function($http, $q, $cacheFactory, $log) {
 
     this.workspaces = [];
 
+    this.list = function(path, opts) {
+        var params = {paths: [path]};
+        angular.extend(params, opts);
+
+        return $http.rpc('ws', 'ls', params)
+                    .then(function(d) {
+                        console.log('data', d)
+                        var d = d[path];
+
+                        // parse into list of dicts
+                        var data = [];
+                        for (var i in d)
+                            data.push( self.wsListToDict(d[i]) );
+
+                        return data;
+                    })
+    }
 
     this.getMyData = function(path, opts) {
         var params = {paths: [path]};
@@ -42,6 +59,15 @@ function($http, $q, $cacheFactory, $log) {
                 timestamp: Date.parse(ws[3])
                };
     }
+
+    this.getObjectMeta = function(path) {
+        $log.log('retrieving meta', path)
+        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
+                    .then(function(res) {
+                        return res[0];
+                    })
+    }
+
 
     this.addToModel = function(ws) {
         self.workspaces.push( self.wsListToDict(ws) );
@@ -126,5 +152,5 @@ function($http, $q, $cacheFactory, $log) {
                     console.log('response', res)
                     return res;
                 })
-    }    
+    }
 }])
