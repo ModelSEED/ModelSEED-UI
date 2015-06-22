@@ -102,7 +102,10 @@
                 <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
             </td>
             <td ng-repeat="col in opts.visible">
-                <a ng-if="col == 'genome_name'" href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}" target="_blank">{{g[col]}}</a>
+                <a ng-if="col == 'genome_name'"
+                   href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}"
+                   target="_blank"
+                   ng-click="$event.stopPropagation()">{{g[col]}}</a>
                 <span ng-if="col != 'genome_name'">{{g[col]}}</span>
             </td>
 
