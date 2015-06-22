@@ -555,11 +555,8 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
               })
     }
 
-    $scope.selectGenome = function(g) {
-        $scope.selected = g;
-    }
-
     $scope.reconstruct = function(ev, item) {
+        $scope.selected = item;
         Dialogs.reconstruct(ev,
             {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
             function(res) {

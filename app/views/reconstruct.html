@@ -2,9 +2,10 @@
 <div layout="row">
     <div flex class="h2">
         {{filters.myGenomes ? 'My' : 'Public'}} Genomes
+        <br><small class="help-text">Select a genome from below to reconstruct</small>
     </div>
 
-    <div flex style="margin-top: 10px;">
+    <div flex style="margin-top: 20px;">
         <md-switch md-no-ink
                    ng-model="filters.myGenomes"
                    aria-label="view my genomes"
@@ -69,7 +70,7 @@
         {{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results
     </div>
 
-
+    <!--
     <div>
         <md-button md-no-ink
             class="md-primary md-raised btn-reconstruct"
@@ -78,6 +79,7 @@
             Reconstruct
         </md-button>
     </div>
+    -->
 
 </div>
 
@@ -93,13 +95,16 @@
 
     <tbody>
         <tr ng-repeat="g in genomes.docs"
-            ng-click="selectGenome(g)"
+            ng-click="reconstruct($event, g)"
             class="table-hover">
 
             <td>
                 <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
             </td>
-            <td ng-repeat="col in opts.visible">{{g[col]}}</td>
+            <td ng-repeat="col in opts.visible">
+                <a ng-if="col == 'genome_name'" href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}" target="_blank">{{g[col]}}</a>
+                <span ng-if="col != 'genome_name'">{{g[col]}}</span>
+            </td>
 
             <td ng-if="genomes.docs == 0 && !loading">No genome found</td>
         </tr>
