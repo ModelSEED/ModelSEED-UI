@@ -16,20 +16,12 @@ angular.module('MS', [])
 
     var cache = $cacheFactory('ms');
 
-    this.getPublicMedia = function() {
-        return $http.rpc('ms', 'create', params).then(function(res) {
-                    console.log('response', res)
-                    return res;
-                })
-    }
-
-
     // takes   fixme: cleanup
     this.uploadData = function(p) {
         var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
         var params = {objects:objs};
         return $http.rpc('ws', 'create', params).then(function(res) {
-                    console.log('response', res)
+                    $log.log('response', res)
                     return res;
                 })
     }
@@ -38,7 +30,7 @@ angular.module('MS', [])
     this.createFolder = function(path) {
         var params = {objects: [[path, 'Directory']]};
         return $http.rpc('ws', 'create', params).then(function(res) {
-                    console.log('response', res)
+                    $log.log('response', res)
                     return res;
                 }).catch(function(e){
                     console.error('Could not create folder', path, e.data.error)
@@ -48,7 +40,7 @@ angular.module('MS', [])
     this.getDownloadURL = function(path) {
         return $http.rpc('ws', 'get_download_url', {objects:[path]})
                     .then(function(res) {
-                        console.log('download response', res)
+                        $log.log('download response', res)
                         return res;
                     })
     }
@@ -79,7 +71,6 @@ angular.module('MS', [])
 
                     return $http.rpc('ws', 'get_download_url', {objects:paths})
                                 .then(function(urls) {
-                                    console.log('urls', urls)
                                     var downloads = {};
                                     for (var i=0; i<urls.length; i++) {
                                         var url = urls[i],
@@ -108,7 +99,7 @@ angular.module('MS', [])
     }
 
     this.reconstruct = function(form) {
-        console.log('reconstruct form', form)
+        $log.log('reconstruct form', form)
         return $http.rpc('ms', 'ModelReconstruction', form)
                     .then(function(res){
                         return res;
@@ -148,7 +139,7 @@ angular.module('MS', [])
 
         var p = $http.rpc('ws', 'get', {objects: paths, metadata_only: 1})
                     .then(function(res) {
-                        console.log('res', res)
+                        $log.log('get (metas) res', res)
                         var res = [].concat.apply([], res)
 
                         var data = [];
@@ -172,7 +163,7 @@ angular.module('MS', [])
 
     this.getModels = function() {
         $log.log('list models')
-        return $http.rpc('ms', 'list_models', {})
+        return $http.rpc('ms', 'list_models')
                     .then(function(res) {
                         $log.log('listmodels resp', res)
                         var data = [];
@@ -199,10 +190,23 @@ angular.module('MS', [])
 
     }
 
+    this.getPublicMedia = function() {
+        var publicMedia = '/chenry/public/modelsupport/media';
+        return WS.listL(publicMedia)
+                 .then(function(objs) {
 
+                        var media = [];
+                        for (var i=0; i<objs.length; i++) {
+                            media.push({name: objs[i][7].name,
+                                        path: objs[i][2]+objs[i][0] });
+                        }
+
+                        $log.log('returned media', media)
+                        return media;
+                  })
+    }
 
     this.getModelFBAs = function(modelPath) {
-
         $log.log('list related fbas!', modelPath)
         return $http.rpc('ms', 'list_fba_studies', {model: modelPath})
                     .then(function(res) {
@@ -288,7 +292,7 @@ angular.module('MS', [])
     }
 
     this.addModel = function(model) {
-        console.log('adding model', model)
+        $log.log('adding model', model)
         this.myModels.push(self.sanitizeModel(model))
     }
 

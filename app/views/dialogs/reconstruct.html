@@ -4,15 +4,44 @@
     <md-dialog-content class="sticky-container" layout-margin>
         <h3>Reconstruct Model <small>{{item.name}}</small></h3>
 
+        <br>
+
         <div>
+
+            Media formulation
+            <div ng-controller="MediaDropdown as ctrl" layout="column">
+                <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()">
+                  <md-autocomplete
+                      ng-disabled="ctrl.isDisabled"
+                      md-selected-item="ctrl.selectedItem"
+                      md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                      md-search-text="ctrl.searchText"
+                      md-selected-item-change="ctrl.selectedItemChange(item)"
+                      md-items="item in ctrl.querySearch(ctrl.searchText)"
+                      md-item-text="item.name"
+                      md-min-length="0"
+                      placeholder="Search for media...">
+                    <md-item-template>
+                      <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                    </md-item-template>
+                    <md-not-found>
+                      No matches found for "{{ctrl.searchText}}".
+                    </md-not-found>
+                  </md-autocomplete>
+                </form>
+            </div>
+            <br>
+
             <md-input-container md-no-float>
-                <input ng-model="form.output_file" placeholder="Optional Name">
+                <input ng-model="form.output_file" placeholder="Enter optional Name">
             </md-input-container>
 
             <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
                 Include Full DB?
             </md-checkbox>
+
         </div>
+
 
     </md-dialog-content>
 

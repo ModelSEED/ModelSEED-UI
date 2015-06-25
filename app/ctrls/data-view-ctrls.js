@@ -183,6 +183,103 @@ function($scope, $state, $sParams, Auth, MS, Biochem,
 
 }])
 
+.controller('FBADataView',
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'Biochem',
+ 'FBAParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',
+function($scope, $state, $sParams, Auth, MS, Biochem,
+         FBAParser, $compile, $timeout, uiTools, Tabs, $mdSidenav, $document) {
+
+    //var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
+
+    $scope.Tabs = Tabs;
+    //Tabs.totalTabCount = 6;
+
+    $scope.relativeTime = uiTools.relativeTime;
+
+    $scope.relTime = function(datetime) {
+        return $scope.relativeTime(Date.parse(datetime));
+    }
+
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.toName();
+
+
+    // selected compound, reaction, etc.
+    $scope.selected;
+
+    // table options
+    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: null};
+
+
+    $scope.rxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn',
+                            call: function(e, item) {
+                                $scope.toggleView(e, 'rxn', item );
+                            }},
+                         {label: 'Name', key: 'name'},
+                         {label: 'EQ', key: 'eq'},
+                         {label: 'Genes', key: 'genes',
+                             formatter: function(item) {
+                                 if (!item.length) return '-';
+
+                                 var links = [];
+                                 for (var i=0; i<item.length; i++) {
+                                     links.push('<a href="'+
+                                                    featureUrl+item[i]+'" target="_blank">'
+                                                 +item[i]+'</a>')
+                                 }
+
+                                 return links.join('<br>');
+                             }
+                        }];
+
+    $scope.cpdHeader = [{label: 'ID', key: 'id', newTab: 'cpd',
+                            call: function(e, item) {
+                                $scope.toggleView(e, 'cpd', item );
+                            }},
+                         {label: 'Name', key: 'name'},
+                         {label: 'Formula', key: 'formula'},
+                         {label: 'Charge', key: 'charge'},
+                         {label: 'Compartment', key: 'compartment'}];
+
+
+     $scope.geneHeader = [{label: 'Gene', key: 'id'},
+                          {label: 'Reactions', key: 'reactions', newTabList: true,
+                              call: function(e, item) {
+                                  $scope.toggleView(e, 'rxn', item );
+                              }
+                          }];
+
+     $scope.compartmentHeader = [{label: 'Compartment', key: 'id'},
+                                 {label: 'Name', key: 'id'},
+                                 {label: 'pH', key: 'pH'},
+                                 {label: 'Potential', key: 'potential'}]
+
+     $scope.biomassHeader = [{label: 'Biomass', key: 'id'},
+                             {label: 'Compound', key: 'cpdID'},
+                             {label: 'Name', key: 'name'},
+                             {label: 'Coefficient', key: 'coefficient'},
+                             {label: 'Compartment', key: 'compartment'}]
+
+
+     // fetch object data and parse it.
+     $scope.loading = true;
+     MS.getObject(path).then(function(res) {
+         console.log('fba res', res)
+
+         var data = FBAParser.parse(res.data);
+         /*$scope.rxns = data.reactions;
+         $scope.cpds = data.compounds;
+         $scope.genes = data.genes;
+         $scope.compartments = data.compartments;
+         $scope.biomass = data.biomass;
+         $scope.loading = false;*/
+     })
+}])
 
 .service('Tabs', ['$timeout', 'MS', '$stateParams', 'uiTools', 'ModelParser',
 function ($timeout, MS, $sParams, uiTools, ModelParser) {
@@ -241,7 +338,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
 }])
 
-.service('ModelParser', ['$sce', 'MS', function($sce, MS) {
+.service('ModelParser', ['MS', function(MS) {
     var self = this;
 
     var compartNameMapping = {
@@ -498,5 +595,186 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         return modelTables;
     };
+
+}])
+
+
+
+.service('FBAParser', ['MS', 'ModelParser', function(MS, ModelParser) {
+    var self = this;
+
+    this.parse = function (data) {
+        console.log('parsing', data)
+
+        var modelRef = data.fbamodel_ref.replace(/\|\|/g, '');
+
+        MS.getObject(modelRef).then(function(res) {
+            console.log('modelobject', res)
+
+
+        })
+
+
+        ModelParser.parse()
+
+        this.modelreactions = this.model.modelreactions;
+        this.modelcompounds = this.model.modelcompounds;
+        this.biomasses = this.model.biomasses;
+        this.biomasscpds = this.model.biomasscpds;
+        this.modelgenes = this.model.modelgenes;
+
+
+        this.FBAConstraints = self.data.FBAConstraints;
+        this.FBAMinimalMediaResults = self.data.FBAMinimalMediaResults;
+        this.FBAMinimalReactionsResults = self.data.FBAMinimalReactionsResults;
+        this.FBAMetaboliteProductionResults = self.data.FBAMetaboliteProductionResults;
+        this.rxnhash = {};
+        for (var i=0; i < self.data.FBAReactionVariables.length; i++) {
+            var rxnid = self.data.FBAReactionVariables[i].modelreaction_ref.split("/").pop();
+            self.data.FBAReactionVariables[i].ko = 0;
+            this.rxnhash[rxnid] = self.data.FBAReactionVariables[i];
+        }
+        for (var i=0; i < self.data.reactionKO_refs.length; i++) {
+            var rxnid = self.data.reactionKO_refs[i].split("/").pop();
+            this.rxnhash[rxnid].ko = 1;
+        }
+        this.cpdhash = {};
+        for (var i=0; i < self.data.FBACompoundVariables.length; i++) {
+            var cpdid = self.data.FBACompoundVariables[i].modelcompound_ref.split("/").pop();
+            self.data.FBACompoundVariables[i].additionalcpd = 0;
+            this.cpdhash[cpdid] = self.data.FBACompoundVariables[i];
+        }
+        for (var i=0; i < self.data.additionalCpd_refs.length; i++) {
+            var cpdid = self.data.additionalCpd_refs[i].split("/").pop();
+            this.cpdhash[cpdid].additionalcpd = 1;
+        }
+        this.biohash = {};
+        for (var i=0; i < self.data.FBABiomassVariables.length; i++) {
+            var bioid = self.data.FBABiomassVariables[i].biomass_ref.split("/").pop();
+            this.biohash[bioid] = self.data.FBABiomassVariables[i];
+        }
+        this.maxpod = 0;
+        this.metprodhash = {};
+        for (var i=0; i < this.FBAMetaboliteProductionResults.length; i++) {
+            this.tabList[4].columns[5].visible = 1;
+            var metprod = self.data.FBAMetaboliteProductionResults[i];
+            var cpdid = metprod.modelcompound_ref.split("/").pop();
+            this.metprodhash[cpdid] = metprod;
+        }
+        this.genehash = {};
+        for (var i=0; i < this.modelgenes.length; i++) {
+            this.genehash[this.modelgenes[i].id] = this.modelgenes[i];
+            this.genehash[this.modelgenes[i].id].ko = 0;
+        }
+        /*
+        for (var i=0; i < self.data.geneKO_refs.length; i++) {
+            var geneid = self.data.geneKO_refs[i].split("/").pop();
+            this.genehash[geneid].ko = 1;
+        }*/
+        this.delhash = {};
+        for (var i=0; i < self.data.FBADeletionResults.length; i++) {
+            var geneid = self.data.FBADeletionResults[i].feature_refs[0].split("/").pop();
+            this.delhash[geneid] = self.data.FBADeletionResults[i];
+        }
+        this.cpdboundhash = {};
+        for (var i=0; i < self.data.FBACompoundBounds.length; i++) {
+            var cpdid = self.data.FBACompoundBounds[i].modelcompound_ref.split("/").pop();
+            this.cpdboundhash[cpdid] = self.data.FBACompoundBounds[i];
+        }
+        this.rxnboundhash = {};
+        for (var i=0; i < self.data.FBAReactionBounds.length; i++) {
+            var rxnid = self.data.FBAReactionBounds[i].modelreaction_ref.split("/").pop();
+            this.rxnboundhash[rxnid] = self.data.FBAReactionBounds[i];
+        }
+        for (var i=0; i< this.modelgenes.length; i++) {
+            var mdlgene = this.modelgenes[i];
+            if (this.genehash[mdlgene.id]) {
+                mdlgene.ko = this.genehash[mdlgene.id].ko;
+            }
+            if (this.delhash[mdlgene.id]) {
+                mdlgene.growthFraction = this.delhash[mdlgene.id].growthFraction;
+            }
+        }
+        for (var i=0; i< this.modelreactions.length; i++) {
+            var mdlrxn = this.modelreactions[i];
+            if (this.rxnhash[mdlrxn.id]) {
+                mdlrxn.upperFluxBound = this.rxnhash[mdlrxn.id].upperBound;
+                mdlrxn.lowerFluxBound = this.rxnhash[mdlrxn.id].lowerBound;
+                mdlrxn.fluxMin = this.rxnhash[mdlrxn.id].min;
+                mdlrxn.fluxMax = this.rxnhash[mdlrxn.id].max;
+                mdlrxn.flux = this.rxnhash[mdlrxn.id].value;
+                mdlrxn.fluxClass = this.rxnhash[mdlrxn.id].class;
+                mdlrxn.disp_low_flux = mdlrxn.fluxMin + "<br>(" + mdlrxn.lowerFluxBound + ")";
+                mdlrxn.disp_high_flux = mdlrxn.fluxMax + "<br>(" + mdlrxn.upperFluxBound + ")";
+            }
+            if (this.rxnboundhash[mdlrxn.id]) {
+                mdlrxn.customUpperBound = this.rxnboundhash[mdlrxn.id].upperBound;
+                mdlrxn.customLowerBound = this.rxnboundhash[mdlrxn.id].lowerBound;
+            }
+        }
+        this.compoundFluxes = [];
+        this.cpdfluxhash = {};
+        for (var i=0; i< this.modelcompounds.length; i++) {
+            var mdlcpd = this.modelcompounds[i];
+            if (this.cpdhash[mdlcpd.id]) {
+                mdlcpd.exchangerxn = " => "+mdlcpd.name+"[e]";
+                mdlcpd.upperFluxBound = this.cpdhash[mdlcpd.id].upperBound;
+                mdlcpd.lowerFluxBound = this.cpdhash[mdlcpd.id].lowerBound;
+                mdlcpd.fluxMin = this.cpdhash[mdlcpd.id].min;
+                mdlcpd.fluxMax = this.cpdhash[mdlcpd.id].max;
+                mdlcpd.uptake = this.cpdhash[mdlcpd.id].value;
+                mdlcpd.fluxClass = this.cpdhash[mdlcpd.id].class;
+                mdlcpd.disp_low_flux = mdlcpd.fluxMin + "<br>(" + mdlcpd.lowerFluxBound + ")";
+                mdlcpd.disp_high_flux = mdlcpd.fluxMax + "<br>(" + mdlcpd.upperFluxBound + ")";
+                this.cpdfluxhash[mdlcpd.id] = mdlcpd;
+                this.compoundFluxes.push(mdlcpd);
+            }
+            if (this.metprodhash[mdlcpd.id]) {
+                mdlcpd.maxProd = this.metprodhash[mdlcpd.id].maximumProduction;
+                //if (!this.cpdfluxhash[mdlcpd.id]) {
+                //  this.compoundFluxes.push(mdlcpd);
+                //}
+            }
+            if (this.cpdboundhash[mdlcpd.id]) {
+                mdlcpd.customUpperBound = this.cpdboundhash[mdlcpd.id].upperBound;
+                mdlcpd.customLowerBound = this.cpdboundhash[mdlcpd.id].lowerBound;
+                if (!this.cpdfluxhash[mdlcpd.id]) {
+                    this.compoundFluxes.push(mdlcpd);
+                }
+            }
+        }
+        for (var i=0; i< this.biomasses.length; i++) {
+            var bio = this.biomasses[i];
+            if (this.biohash[bio.id]) {
+                bio.upperFluxBound = this.biohash[bio.id].upperBound;
+                bio.lowerFluxBound = this.biohash[bio.id].lowerBound;
+                bio.fluxMin = this.biohash[bio.id].min;
+                bio.fluxMax = this.biohash[bio.id].max;
+                bio.flux = this.biohash[bio.id].value;
+                bio.fluxClass = this.biohash[bio.id].class;
+                this.modelreactions.push(bio);
+            } else {
+                this.biohash[bio.id] = bio;
+                bio.upperFluxBound = 1000;
+                bio.lowerFluxBound = 0;
+                bio.fluxMin = 0;
+                bio.fluxMax = 1000;
+                bio.flux = 0;
+                bio.fluxClass = "Blocked";
+                this.modelreactions.push(bio);
+            }
+            bio.disp_low_flux = bio.fluxMin + "<br>(" + bio.lowerFluxBound + ")";
+            bio.disp_high_flux = bio.fluxMax + "<br>(" + bio.upperFluxBound + ")";
+        }
+        for (var i=0; i < this.biomasscpds.length; i++) {
+            var biocpd = this.biomasscpds[i];
+            if (this.biohash[biocpd.biomass]) {
+                biocpd.bioflux = this.biohash[biocpd.biomass].flux;
+            }
+            if (this.metprodhash[biocpd.id]) {
+                biocpd.maxprod = this.metprodhash[biocpd.id].maximumProduction;
+            }
+        }
+    }
 
 }])

@@ -60,7 +60,6 @@ function($http, $q, $rootScope, config, Auth) {
             var p = $http.get(url, {cache: cache, timeout: liveReq.promise});
 
         return p.then(function(res){
-                        console.log('res', res)
                         liveReq = false;
                         return res.data.response;
                     })

@@ -11,7 +11,7 @@ function($http, $q, $cacheFactory, $log) {
     this.workspaces = [];
 
     this.list = function(path, opts) {
-        var params = {paths: [path]};
+        var params = {paths: typeof path === 'string' ? [path] : path };
         angular.extend(params, opts);
 
         return $http.rpc('ws', 'ls', params)
@@ -28,22 +28,17 @@ function($http, $q, $cacheFactory, $log) {
                     })
     }
 
-    this.getMyData = function(path, opts) {
-        var params = {paths: [path]};
+    this.listL = function(path, opts) {
+        var params = {paths: typeof path === 'string' ? [path] : path };
         angular.extend(params, opts);
 
         return $http.rpc('ws', 'ls', params)
                     .then(function(d) {
-                        var d = d[path];
-
-                        // parse into list of dicts
-                        var data = [];
-                        for (var i in d)
-                            data.push( self.wsListToDict(d[i]) );
-
-                        return data;
+                        if (typeof path === 'string') return d[path];
+                        return d;
                     })
     }
+
 
     // wsListToDict: takes workspace info array, returns dict.
     this.wsListToDict = function(ws) {
@@ -79,13 +74,6 @@ function($http, $q, $cacheFactory, $log) {
             if (self.workspaces[i].id == ws[4])
                 self.workspaces.splice(i, 1);
         }
-    }
-
-    this.getObject = function(ws, name) {
-        return $http.rpc('ws', 'get_objects', [{workspace: ws, name: name}])
-                    .then(function(res) {
-                        return res[0].data;
-                    })
     }
 
     // takes source and destimation paths, moves object

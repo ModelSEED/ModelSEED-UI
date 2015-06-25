@@ -1140,6 +1140,19 @@ function($compile, $stateParams) {
 })
 
 
+.directive('mediaSelector', ['MS', function(MS) {
+    return {
+        link: function(scope, element, attr) {
+
+            MS.getPublicMedia()
+              .then(function(media) {
+                  scope.media = media
+
+              })
+        }
+    }
+}])
+/*
 .directive('proto', function() {
     return {
         link: function(scope, element, attr) {
@@ -1163,7 +1176,7 @@ function($compile, $stateParams) {
             $(element).append(s)
         }
     }
-})
+})*/
 
 
 .directive('tooltip', function() {

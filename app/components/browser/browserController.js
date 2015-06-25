@@ -50,7 +50,7 @@ angular.module('Browser', ['uiTools'])
 
     // load initial data
     $scope.loading = true;
-    WS.getMyData($scope.folder).then(function(data) {
+    WS.list($scope.folder).then(function(data) {
         $scope.items = data;
         $scope.loading = false;
     })
@@ -186,7 +186,7 @@ angular.module('Browser', ['uiTools'])
 
     // updates the view (bruteforce for now)
     $scope.updateDir = function() {
-        WS.getMyData($scope.folder).then(function(data) {
+        WS.list($scope.folder).then(function(data) {
             console.log('data returned', data)
             $scope.items = data;
         })

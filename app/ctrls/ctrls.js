@@ -231,50 +231,50 @@ MV, $document, $mdSidenav, $q, $log) {
 }])
 
 
-
-.controller('MediaDropdown', ['$scope', 'MS',
-function($scope, MS) {
+.controller('MediaDropdown', ['$scope', 'MS', '$log',
+function($scope, MS, $log) {
     var self = this;
+
     self.form = $scope.form
+    console.log('form!!!', self.form)
 
-    self.readonly = false;
-    self.selectedItem = null;
-    self.searchText = null;
+    self.isDisabled = false;
     self.querySearch = querySearch;
-    self.compounds = [];
-    self.numberChips = [];
-    self.numberChips2 = [];
-    self.numberBuffer = '';
+    self.selectedItemChange = selectedItemChange;
+    self.searchTextChange = searchTextChange;
 
+    MS.getPublicMedia()
+      .then(function(media) {
+         var objs = [];
+         for (var i=0; i<media.length; i++) {
+             objs.push({value: media[i].name.toLowerCase(),
+                        name: media[i].name,
+                        path: media[i].path });
+         }
 
-    MS.getPublicMedia('model_compound', {query: query, limit: 10})
-           .then(function(res) {
-               var data = [];
-               for (var i in res.docs) {
-                   var doc = res.docs[i];
-
-                   data.push({name: doc.name,
-                             id: doc.id})
-               }
-
-               return data;
-           })
+         self.media = objs;
+      })
 
     function querySearch (query) {
-        return Biochem.get('model_compound', {query: query, limit: 10})
-                .then(function(res) {
-                    var data = [];
-                    for (var i in res.docs) {
-                        var doc = res.docs[i];
-
-                        if (doc.id === 'cpd00000') continue;
-                        data.push({name: doc.name,
-                                  id: doc.id})
-                    }
-
-                    return data;
-                })
+        var results = query ? self.media.filter( createFilterFor(query) ) : self.media;
+        return results;
     }
+
+    function searchTextChange(text) {
+      $log.info('Text changed to ' + text);
+    }
+    function selectedItemChange(item) {
+        self.form.media = item.path;
+    }
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(state) {
+            return (state.value.indexOf(lowercaseQuery) === 0);
+        };
+    }
+
+
 }])
 
 .controller('CompoundDropdown', ['$scope', 'Biochem',
@@ -312,7 +312,9 @@ function($scope, Biochem) {
 .controller('ReactionDropdown', ['$scope', 'Biochem',
 function($scope, Biochem) {
     var self = this;
+
     self.form = $scope.form
+    console.log('form', self.form)
 
     self.readonly = false;
     self.selectedItem = null;

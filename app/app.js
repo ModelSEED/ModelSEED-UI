@@ -68,7 +68,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
-            controller: 'DataPage',
+            controller: 'FBADataView',
             authenticate: true
         })
 
@@ -181,7 +181,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 function($rootScope, $state, $sParams, $location, auth, $timeout, $templateCache) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
-        //$templateCache.removeAll();
+        $templateCache.removeAll();
 
         // if first load on home and user is authenticated,
         // forward to application page [good UX!]
