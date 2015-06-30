@@ -141,4 +141,13 @@ function($http, $q, $cacheFactory, $log) {
                     return res;
                 })
     }
+
+
+    this.getDownloadURL = function(path) {
+        return $http.rpc('ws', 'get_download_url', {objects:[path]})
+                    .then(function(res) {
+                        $log.log('download response', res)
+                        return res;
+                    })
+    }
 }])
