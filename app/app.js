@@ -10,7 +10,7 @@ angular.module('ModelSEED',
  'duScroll',
  'ui.router',
  'ngAnimate',
- 'kbase-rpc',
+ 'ms-rpc',
  'Auth',
  'dd-filter',
  'ngMaterial',
@@ -201,9 +201,9 @@ function($rootScope, $state, $sParams, $location, auth, $timeout, $templateCache
 
 
         // fixme
-        if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
+        /*if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
             angular.element('#selected-models').find('.active').removeClass('active')
-        }
+        }*/
     })
 
 

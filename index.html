@@ -12,14 +12,16 @@
     <title>ModelSEED</title>
 
     <link rel="stylesheet" href="components/angular-material/angular-material.css">
-    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css"> <!-- to be removed -->
     <link rel="stylesheet" href="components/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="icomoon/style.css">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
     <!-- build:css build/style.css -->
-        <link rel="stylesheet" href="css/main.css">
+        <!--<link rel="stylesheet" href="css/main.css">-->
         <link rel="stylesheet" href="css/core.css">
         <link rel="stylesheet" href="css/viz.css">
         <link rel="stylesheet" href="css/tabs.css">
@@ -30,13 +32,12 @@
 
     <!-- build:js build/site.js -->
         <script src="components/jquery/dist/jquery.min.js"></script>
-        <script src="components/jquery-ui/jquery-ui.min.js"></script><!-- to be removed -->
-        <script src="components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="components/jquery-ui/jquery-ui.min.js"></script> <!-- to be removed -->
+        <script src="components/bootstrap/dist/js/bootstrap.min.js"></script> <!-- to be removed -->
         <script src="components/d3/d3.min.js"></script>
 
-
-        <script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
-        <script src="lib/datatables-bootstrap/dataTables.bootstrap.js"></script>
+        <!--<script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
+        <script src="lib/datatables-bootstrap/dataTables.bootstrap.js"></script>-->
 
         <script src="lib/modeling/kbwidget.js"></script>
         <script src="lib/modeling/kbasePathway.js"></script>
@@ -64,7 +65,7 @@
         <script src="app/app.js"></script>
 
         <script src="app/services/auth.js"></script>
-        <script src="lib/kbase-rpc/kbase-rpc.js"></script>
+        <script src="lib/ms-rpc/ms-rpc.js"></script>
         <script src="lib/dd-filter/dd-filter.js"></script>
         <script src="app/ctrls/ctrls.js"></script>
         <script src="app/ctrls/ms-ctrls.js"></script>
@@ -80,8 +81,6 @@
         <script src="app/services/uiTools.js"></script>
         <script src="app/services/dialogs.js"></script>
 
-
-        <!-- browser -->
         <script src="app/components/browser/browserController.js"></script>
         <script src="app/components/browser/browserDirective.js"></script>
 
@@ -100,10 +99,8 @@
 </head>
 
 <body>
-    <div id="wrapper">
-        <div ui-view></div>
-    </div>
-
+        
+    <div ui-view style="height: 100%;" layout="row"></div>
 
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

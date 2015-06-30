@@ -1,89 +1,65 @@
 
 <div layout="row">
-    <div flex class="h2">
-        {{filters.myGenomes ? 'My' : 'Public'}} Genomes
-        <br><small class="help-text">Select a genome from below to reconstruct</small>
+    <div flex="50" class="content-header">
+        {{filters.myGenomes ? 'My' : 'Public'}} {{view.slice(0, -1)}} Genomes
+        <br>
+        <small class="help-text" hide-sm>Select a genome from below to reconstruct</small>
     </div>
 
-    <div flex style="margin-top: 20px;">
+    <md-input-container flex="35" layout-align="center center">
         <md-switch md-no-ink
                    ng-model="filters.myGenomes"
                    aria-label="view my genomes"
                    ng-click="toggleMyGenomes()">
             View my genomes
         </md-switch>
-    </div>
+    </md-input-container>
+
+    <md-radio-group ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle" >
+        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
+        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
+    </md-radio-group>
 </div>
 <hr class="no-margin">
 
 
-<div class="table-controls">
-    <div layout="row" layout-align="start start" class="pull-left">
+<div ng-if="view == 'Microbes'" class="table-controls" layout="row">
+    <md-input-container class="table-settings">
+        <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-visible table-settings">
+            <li ng-repeat="item in columns">
+                <div ng-click="toggle(item.prop, opts.visible)">
+                  <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
+                </div>
+            </li>
+        </ul>
+    </md-input-container>
 
-        <div class="btn-group table-settings">
-            <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-visible table-settings">
-                <li ng-repeat="item in columns">
-                    <div ng-click="toggle(item.prop, opts.visible)">
-                      <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
-                    </div>
-                </li>
-            </ul>
-        </div>
+    <md-input-container md-no-float flex="45">
+        <md-icon class="material-icons">search</md-icon>
+        <input ng-model="opts.query" type="text" placeholder="Search PATRIC genomes" class="query-input">
+    </md-input-container>
 
-
-        <i class="fa fa-search query-opt"></i>
-
-        <md-input-container md-no-float>
-            <input ng-model="opts.query" type="text" placeholder="Search PATRIC genomes" class="query-input">
-        </md-input-container>
-
-    </div>
     <md-progress-circular ng-if="loading"
+                          class="table-loading"
                           md-mode="indeterminate"
-                          class="table-loading pull-left"
                           md-diameter="20">
     </md-progress-circular>
 
-
-    <div class="pull-right">
-        <!--
-        <select ng-model="opts.limit" class="btn btn-default">
-            <option>25</option>
-            <option>100</option>
-            <option>250</option>
-        </select>-->
-
-        <span pagination>
-            <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
-                <i class="fa fa-chevron-left"></i> prev
-            </div>
-            <div class="btn btn-default btn-sm" ng-click="next()">next
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </span>
-    </div>
-
-    <div class="pull-right query-opt">
-        {{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results
-    </div>
-
-    <!--
-    <div>
-        <md-button md-no-ink
-            class="md-primary md-raised btn-reconstruct"
-            ng-if="selected"
-            ng-click="reconstruct($event, selected)">
-            Reconstruct
-        </md-button>
-    </div>
-    -->
-
+    <md-input-container pagination layout="row" layout-align="end center" flex>
+        <span hide-sm>{{opts.offset+1}}-{{opts.offset+opts.limit}} of {{genomes.numFound}} results</span>
+        <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
+            <i class="fa fa-chevron-left"></i> prev
+        </div>
+        <div class="btn btn-default btn-sm" ng-click="next()">next
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </md-input-container>
 </div>
 
-<table class="table">
+<table ng-if="view == 'Microbes'" class="table">
     <thead sortable>
         <tr>
             <th></th>
@@ -113,3 +89,26 @@
         </tr>
     </tbody>
 </table>
+
+<div ng-if="view == 'Plants' && !filters.myGenomes">
+    
+    <div ng-repeat="p in plants" layout="row" class="plant-row">
+
+        <img width="150" height="150" src="data/plants/img/{{p.image}}">
+        <div flex>
+            <b>{{p.name}}</b><br>
+            <i>{{p.organism}}</i><br>
+            <div class="links">
+                Links
+                <div ng-repeat="link in p.links">
+                    <a href="{{link.url}}" ng-class="{bold: link.name == 'PubSEED'}" target="_blank">{{link.name}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div ng-if="view == 'Plants' && filters.myGenomes">
+    <br>
+    Coming soon.
+</div>

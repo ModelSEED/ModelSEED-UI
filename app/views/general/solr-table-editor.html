@@ -1,41 +1,33 @@
 
 <div ng-if="data">
-    <div class="table-controls">
-        <div layout="row" layout-align="start start" class="pull-left">
-            <i class="fa fa-search query-opt"></i>
+    <div class="table-controls" layout="row">
+        <md-input-container md-no-float flex="45">
+            <md-icon class="material-icons">search</md-icon>
+            <input ng-model="opts.query" type="text" placeholder="{{placeholder}}" class="query-input">
+        </md-input-container>
 
-            <md-input-container md-no-float>
-                <input ng-model="opts.query" type="text" placeholder="{{placeholder}}" class="query-input">
-            </md-input-container>
+        <button ng-if="checkedItems.length"
+                ng-click="addItems(checkedItems)"
+                class="btn btn-primary btn-sm btn-add">
+            <i class="fa fa-plus"></i> Add ({{checkedItems.length}})
+        </button>
 
-            <button ng-if="checkedItems.length"
-                    ng-click="addItems(checkedItems)"
-                    class="btn btn-primary btn-sm btn-add">
-                <i class="fa fa-plus"></i> Add ({{checkedItems.length}})
-            </button>
-
-            <md-progress-circular ng-if="loading"
-                                  md-mode="indeterminate"
-                                  class="pull-left"
-                                  md-diameter="20">
-            </md-progress-circular>
-        </div>
+        <md-progress-circular ng-if="loading"
+                              md-mode="indeterminate"
+                              class="table-loading"
+                              md-diameter="20">
+        </md-progress-circular>
 
 
-        <div class="pull-right">
-            <span pagination>
-                <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
-                    <i class="fa fa-chevron-left"></i> prev
-                </div>
-                <div class="btn btn-default btn-sm" ng-click="next()">next
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </span>
-        </div>
-
-        <div class="pull-right query-opt">
-            {{opts.offset+1}}-{{opts.offset + opts.limit}} of {{data.numFound}}  results
-        </div>
+        <md-input-container pagination layout="row" layout-align="end center" flex>
+            <span hide-sm>{{opts.offset+1}}-{{opts.offset + opts.limit}} of {{data.numFound}} results</span>
+            <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
+                <i class="fa fa-chevron-left"></i> prev
+            </div>
+            <div class="btn btn-default btn-sm" ng-click="next()">next
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </md-input-container>
     </div>
 
 

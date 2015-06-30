@@ -495,11 +495,24 @@ function($scope, FBA, WS, $dialog, $sce) {
 }])
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs',
-function($scope, Patric, $dialog, $timeout, $http, Dialogs) {
+['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs', 'ViewOptions',
+function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions) {
+    // microbes / plants view
+    $scope.view = ViewOptions.getType();
+
+    $scope.changeView = function(view) {
+        $scope.view = ViewOptions.changeType(view);
+    }
+
     $scope.showMenu = function() {
       $scope.menuVisible = true;
     }
+
+    $http.get('data/plants/plants.json')
+         .then(function(res) {
+             console.log('plants', res)
+             $scope.plants = res.data;
+         })
 
     $scope.filters = {myGenomes: false};
 

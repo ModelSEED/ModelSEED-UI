@@ -1,12 +1,176 @@
 
-<ng-include src="'app/views/nav.html'"></ng-include>
+<!--<ng-include src="'app/views/nav.html'"></ng-include>-->
 
-<ng-include src="'app/views/sidebar.html'"></ng-include>
+<!--<ng-include src="'app/views/sidebar.html'"></ng-include>-->
 
+
+            <!--<div ui-view id="content"></div>-->
+
+<!--
 <div id="page-wrapper">
     <div class="row">
         <div class="col-md-12">
             <div ui-view id="content"></div>
         </div>
     </div>
+</div>-->
+
+
+<md-sidenav class="md-sidenav-left md-whiteframe-z2"
+            md-component-id="left"
+            md-is-locked-open="$mdMedia('min-width: 800px')"
+            style="height: 100%;">
+
+    <md-toolbar ng-controller="LeftCtrl" style="background-color: #444;">
+        <div class="md-toolbar-tools">
+            <md-button class="md-icon-button" aria-label="Settings">
+              <md-icon class="material-icons">menu</md-icon>
+            </md-button>
+            <h2 class="logo">ModelSEED</h2>
+        </div>
+
+    </md-toolbar>
+
+    <md-content layout-padding>
+        <div id="selected-models" ng-controller="SelectedData">
+            <div class="header">
+                <i class="icon-lab"></i>
+                Model Analysis
+                <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
+                <div class="text-muted">Coming soon</div>
+            </div>
+
+            <hr class="no-margin">
+
+            <ul ng-show="MV.models.length" class="list-unstyled">
+                <li ng-repeat="item in MV.models track by $index" class="selected-model">
+
+                    <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
+                        <a ui-sref=".modelPage({path: item.model})"
+                           class="model">
+                           {{item.org}}
+                        </a>
+                        <i class="icon-close hover pointer"
+                              ng-click="MV.rm($index)">
+                        </i>
+                    </div>
+
+                    <div class="ellipsis selected-data-item">
+                        <a ui-sref=".fbaPage({path: item.fba})"
+                           class="fba" ng-click="makeActive($event)">
+                           <span class="label label-fba">FBA</span> {{item.media}}
+                        </a>
+
+                        <i class="glyphicon glyphicon-cog hover pointer"
+                              ng-click="openFBAView($event, $index, item)">
+                        </i>
+                    </div>
+                </li>
+            </ul>
+            <div class="pull-right" ng-if="MV.models.length">
+                (<a ng-click="MV.rmAll()">
+                    <small>Clear All</small>
+                </a>)
+            </div>
+
+            <div ng-if="!MV.models.length" class="warning-msg">
+
+            </div>
+        </div>
+    </md-content>
+
+</md-sidenav>
+
+<div layout="column" tabindex="-1" role="main" flex>
+    <md-toolbar class="md-toolbar-tools md-whiteframe-z1">
+
+        <ul class="toolbar" >
+            <li ng-class="{ active: $state.includes('app.biochem') }">
+                <a ui-sref="app.biochem">
+                    <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
+                </a>
+            </li>
+            <li ng-class="{ active: $state.includes('app.reconstruct') }">
+                <a ui-sref="app.reconstruct">
+                    <i class="icon-tools"></i> <span hide-sm>Reconstruct</span>
+                </a>
+            </li>
+            <!--<li ng-class="{ active: $state.includes('app.myData') }">
+                <a ui-sref="app.myData({dir: '/'+$root.user})">
+                    <i class="icon-archive2"></i> All Files
+                </a>
+            </li>-->
+            <li ng-class="{ active: $state.includes('app.myModels') }">
+                <a ui-sref="app.myModels">
+                    <i class="icon-folder-open-o"></i> <span hide-sm>My Models</span>
+                </a>
+            </li>
+
+            <!--
+            <li ng-class="{ active: $state.includes('app.reconstruct') }">
+                <a ui-sref="app.reconstruct">
+                    <i class="icon-tools"></i> Reconstruct
+                </a>
+            </li>-->
+            <!--<li ng-class="{ active: $state.includes('app.publicModels') }">
+                <a ui-sref="app.publicModels">
+                    <i class="icon-earth"></i> Public
+                </a>
+            </li>-->
+            <!--<li ng-class="{ active: $state.includes('app.modelEditor')}" >
+                <a ui-sref="app.modelEditor">Model Editor</a>
+            </li>-->
+            <!--<li ng-class="{ active: $state.includes('app.compare')}" >
+                <a ui-sref="app.compare">
+                    <i class="icon-lab"></i>
+                    Analysis
+                    <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
+                </a>
+            </li>-->
+        </ul>
+        <span flex></span>
+
+
+        <ul class="nav navbar-nav pull-right">
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">Advanced
+                    <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a ui-sref="app.myData({dir: '/'+$root.user})">
+                        <i class="icon-archive2"></i> All My Files
+                    </a></li>
+                    <!--<li>
+                        <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
+                    </li>-->
+                </ul>
+            </li>
+            <li ng-if="$root.user" class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">
+                    {{$root.user.split('@')[0]}}<br>{{$root.user.split('@')[1]}}
+                    <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu" ng-controller="Login">
+                    <!--<li>
+                        <a ui-sref="user"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                    </li>
+                    <li>
+                        <a ui-sref="userSettings"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                    </li>
+                    <li class="divider"></li>-->
+                    <li>
+                        <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    </li>
+                </ul>
+            </li>
+            <!--<li ng-if="!root.user">
+                <a href="#/home/">About</a>
+            </li>-->
+        </ul>
+
+
+    </md-toolbar>
+
+
+    <md-content ui-view id="content" layout-padding></md-content>
 </div>

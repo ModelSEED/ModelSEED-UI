@@ -1,69 +1,24 @@
 
+<!--
+<div style="position: relative;" >
 
-<nav class="navbar-default sidebar" role="navigation">
-    <div class="sidebar-nav navbar-collapse">
+    <section layout="row" flex style="position: fixed; width: 200px;">
 
-        <div id="selected-models" ng-controller="SelectedData">
-            <div class="header">
-                <!--<a ui-sref="app.compare" >-->
-                    <i class="icon-lab"></i>
-                    Model Analysis
-                    <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
-                <!--</a>-->
+        <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+            <md-toolbar class="md-theme-indigo">
+                <h1 class="md-toolbar-tools">Sidenav Left</h1>
+            </md-toolbar>
+            <md-content layout-padding ng-controller="LeftCtrl">
+                <md-button ng-click="close()" class="md-primary" hide-gt-md>
+                    Close Sidenav Left
+                </md-button>
+                <p hide-md show-gt-md>
+                    This sidenav is locked open on your device. To go back to the default behavior, narrow your display.
+                </p>
+            </md-content>
+        </md-sidenav>
 
-                <div class="pull-right" ng-if="MV.models.length">
-                    (<a ng-click="MV.rmAll()">
-                        <small>Clear All</small>
-                    </a>)
-                </div>
-            </div>
+    </section>
 
-            <ul ng-show="MV.models.length" class="list-unstyled">
-                <li ng-repeat="item in MV.models track by $index">
-
-                    <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
-                        <a ui-sref=".modelPage({path: item.model})"
-                           class="model">
-                           {{item.org}}
-                        </a>
-                        <i class="icon-close hover pointer"
-                              ng-click="MV.rm($index)">
-                        </i>
-                    </div>
-
-                    <div class="ellipsis selected-data-item">
-                        <a ui-sref=".fbaPage({path: item.fba})"
-                           class="fba" ng-click="makeActive($event)">
-                           <span class="label label-fba">FBA</span> {{item.media}}
-                        </a>
-
-                        <i class="glyphicon glyphicon-cog hover pointer"
-                              ng-click="openFBAView($event, $index, item)">
-                        </i>
-                    </div>
-
-                    <br>
-                </li>
-            </ul>
-
-            <div ng-if="!MV.models.length" class="warning-msg">
-                <div class="text-muted">Coming soon</div>
-                <br>
-                <!--<div class="warning-msg-select" ng-if="!$state.includes('app.publicModels')">
-                    ( <a ui-sref=".publicModels"><small>Select Data</small></a> )
-                </div>-->
-            </div>
-        </div>
-    </div>
-
-    <div class="sidebar-nav-small" style="display: none;">
-        <ul class="nav">
-            <li>
-                <a ui-sref="app.compare">
-                    <span class="badge model-count">{{MV.models.length}}</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-
-</nav>
+</div>
+-->

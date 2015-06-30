@@ -7,12 +7,10 @@ angular.module('ctrls', [])
 
 .controller('MyModels',
 ['$scope', 'WS', 'MS', '$compile', 'uiTools', '$mdDialog', 'Dialogs',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$log',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$log', '$timeout', 'ViewOptions',
 function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
-MV, $document, $mdSidenav, $q, $log) {
+MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
     var $self = $scope;
-
-
 
     $scope.MS = MS;
     $scope.uiTools = uiTools;
@@ -22,11 +20,18 @@ MV, $document, $mdSidenav, $q, $log) {
         return $scope.relativeTime(Date.parse(datetime));
     }
 
-    // the selected item for operations such as download, delete.
-    $scope.selected = null;
+    // microbes / plants view
+    $scope.view = ViewOptions.getType();
+
+    $scope.changeView = function(view) {
+        $scope.view = ViewOptions.changeType(view);
+    }
 
     // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
+
+    // the selected item for operations such as download, delete.
+    $scope.selected = null;
 
     // load models
     if (MS.myModels) {
@@ -37,7 +42,11 @@ MV, $document, $mdSidenav, $q, $log) {
             $scope.data = res;
             $scope.loading = false;
         }).catch(function(e) {
-            $scope.error = e.message.error;
+            if (e.error.code === -32603)
+                $scope.error = 'Something seems to have went wrong. '+
+                               'Please try logging out and back in again.';
+            else
+                $scope.error = e.error.message;
             $scope.loading = false;
         })
     }
@@ -92,7 +101,6 @@ MV, $document, $mdSidenav, $q, $log) {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log('adding', fba, model)
         var data = {model: model.path,
                     fba: fba.path,
                     org: model.orgName,
@@ -234,9 +242,7 @@ MV, $document, $mdSidenav, $q, $log) {
 .controller('MediaDropdown', ['$scope', 'MS', '$log',
 function($scope, MS, $log) {
     var self = this;
-
     self.form = $scope.form
-    console.log('form!!!', self.form)
 
     self.isDisabled = false;
     self.querySearch = querySearch;
@@ -274,7 +280,6 @@ function($scope, MS, $log) {
         };
     }
 
-
 }])
 
 .controller('CompoundDropdown', ['$scope', 'Biochem',
@@ -290,7 +295,6 @@ function($scope, Biochem) {
     self.numberChips = [];
     self.numberChips2 = [];
     self.numberBuffer = '';
-
 
     function querySearch (query) {
         return Biochem.get('model_compound', {query: query, limit: 10})
@@ -312,9 +316,7 @@ function($scope, Biochem) {
 .controller('ReactionDropdown', ['$scope', 'Biochem',
 function($scope, Biochem) {
     var self = this;
-
     self.form = $scope.form
-    console.log('form', self.form)
 
     self.readonly = false;
     self.selectedItem = null;
@@ -631,9 +633,39 @@ function($scope, $mdSidenav) {
     }
 }])
 
+.controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
+
+  $scope.close = function () {
+    $mdSidenav('left').close()
+      .then(function () {
+        $log.debug("close LEFT is done");
+      });
+  };
+})
+
 .service('VizOptions', [function() {
 
     // default for abs flux
     this.flux = 'absFlux';
+
+}])
+
+.service('ViewOptions', [function() {
+    /**
+     *  Options that persist across pages
+    */
+
+    var type = JSON.parse( localStorage.getItem('ViewOptions') );
+
+    this.changeType = function(selection) {
+        type = selection;
+        localStorage.setItem('ViewOptions', JSON.stringify(type) )
+        return type;
+    }
+
+    this.getType = function() {
+        console.log('type', type)
+        return type ? type : 'Microbes';
+    }
 
 }])
