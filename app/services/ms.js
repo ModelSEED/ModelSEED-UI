@@ -37,16 +37,6 @@ angular.module('MS', [])
                 })
     }
 
-    this.getDownloadURL = function(path) {
-        return $http.rpc('ws', 'get_download_url', {objects:[path]})
-                    .then(function(res) {
-                        $log.log('download response', res)
-                        return res;
-                    })
-    }
-
-
-    // complete nonsense.
     this.getDownloads = function(path) {
         var jsonPath = path,
             hiddenDir = path.slice(0, path.lastIndexOf('/')+1)+'.'+ path.split('/').pop();
