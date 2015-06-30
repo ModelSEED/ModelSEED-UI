@@ -1,6 +1,6 @@
 [submodule "lib/dd-filter"]
 	path = lib/dd-filter
 	url = https://github.com/nconrad/dd-filter.git
-[submodule "lib/kbase-rpc"]
-	path = lib/kbase-rpc
-	url = https://github.com/nconrad/kbase-rpc.git
+[submodule "ms-rpc"]
+	path = ms-rpc
+	url = /lib/ms-rpc/
