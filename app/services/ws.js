@@ -1,8 +1,8 @@
 
 
 angular.module('WS', [])
-.service('WS', ['$http', '$q', '$cacheFactory', '$log',
-function($http, $q, $cacheFactory, $log) {
+.service('WS', ['$http', '$q', '$cacheFactory', '$log', 'config', 'Auth',
+function($http, $q, $cacheFactory, $log, config, Auth) {
     "use strict";
 
     var self = this;
@@ -63,6 +63,27 @@ function($http, $q, $cacheFactory, $log) {
                     })
     }
 
+    this.get = function(path) {
+        $log.log('get (object)', path)
+        return $http.rpc('ws', 'get', {objects: [path]})
+                    .then(function(res) {
+                        $log.log('get (object) response', res)
+
+                        // if shock node, fetch. Otherwise, return data.
+                        if (res[0][0][11].length > 0) {
+                            $log.log('getting data from shock', Auth.token)
+                            var url = res[0][0][11]+'?download',
+                                header = {headers: {Authorization: 'OAuth '+Auth.token}};
+
+                            return $http.get(url, header)
+                                        .then(function(res) {
+                                            return res.data;
+                                        })
+                        } else {
+                            return {meta: res[0][0], data: JSON.parse(res[0][1])};
+                        }
+                    })
+    }
 
     this.addToModel = function(ws) {
         self.workspaces.push( self.wsListToDict(ws) );

@@ -111,16 +111,6 @@ angular.module('MS', [])
                     })
     }
 
-    this.getObject = function(path) {
-        $log.log('get (object)', path)
-        return $http.rpc('ws', 'get', {objects: [path]})
-                    .then(function(res) {
-                        $log.log('get (object) response', res)
-                        var data = {meta: res[0][0], data: JSON.parse(res[0][1])}
-                        return data;
-                    })
-    }
-
     this.getObjectMetas = function(paths) {
         if ( cache.get('objectmetas') )
             return cache.get('objectmetas');
