@@ -19,16 +19,12 @@
             <input ng-model="opts.query" type="text" placeholder="Search models">
         </md-input-container>
 
-        <md-input-container pagination  layout="row" layout-align="end center" flex>
-            <span hide-sm>{{opts.offset+1}}-{{opts.offset + opts.limit}} of {{filtered.length}} models </span>
-            <div ng-disabled="opts.offset == 0"
-                 class="btn btn-default btn-sm" ng-click="prev()">
-                <i class="fa fa-chevron-left"></i> prev
-            </div>
-            <div ng-disabled="opts.offset+opts.limit > filtered.length"
-                 class="btn btn-default btn-sm" ng-click="next()">next
-                <i class="fa fa-chevron-right"></i>
-            </div>
+        <md-input-container pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
         </md-input-container>
     </div>
 

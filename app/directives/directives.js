@@ -1274,18 +1274,49 @@ function($compile, $stateParams) {
  })
 
 
+ .directive('search', function() {
+     return {
+         restrict: 'EA',
+         scope: {
+             query: '=search',
+             opts: '=searchOpts',
+             searchPlaceholder: '@searchPlaceholder'
+         },
+         template: '<md-icon class="material-icons">search</md-icon>'+
+                   '<input ng-model="query" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()">',
+         link: function(scope, elem, attrs) {
+             var lastQuery;
+
+             scope.queryChange = function() {
+                 if (lastQuery != scope.query) scope.opts.offset = 0;
+             }
+         }
+     }
+ })
+
+
 .directive('pagination', function() {
     return {
         restrict: 'EA',
-        scope: true,
+        scope: {
+            offset: '=paginationOffset',
+            limit: '=paginationLimit',
+            total: '=paginationTotal'
+        },
+        template: '<span hide-sm ng-if="total">{{offset+1}}-{{total < offset+limit ? total : offset+limit}} of {{total}} results</span>'+
+                    '<div ng-disabled="offset == 0" class="btn btn-default btn-sm" ng-click="prev()">'+
+                        '<i class="fa fa-chevron-left"></i> prev'+
+                    '</div>'+
+                    '<div ng-disabled="total <= offset + limit" class="btn btn-default btn-sm" ng-click="next()">next '+
+                        '<i class="fa fa-chevron-right"></i>'+
+                    '</div>',
         link: function(scope, elem, attrs) {
-
             scope.next = function() {
-                scope.opts.offset += scope.opts.limit;
+                scope.offset += scope.limit;
             }
 
             scope.prev = function() {
-                scope.opts.offset -= scope.opts.limit;
+                scope.offset -= scope.limit;
             }
         }
     }

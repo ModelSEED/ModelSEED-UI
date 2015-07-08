@@ -22,20 +22,20 @@ function($http, $q, config, $log) {
                 sortField = opts.sort ? opts.sort.field : '';
         }
 
-        if (limit)
-            url += '&limit('+limit+ (offset ? ','+offset : '') +')';
-
-        if (sort && !query) {
-            url += '&sort('+sort+sortField+')';
-            cache = false;
-        }
-
         if (query) {
             // sort by id when querying
             url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
         } else {
             url += '&keyword(*)';
+            cache = false;
+        }
+
+        if (limit)
+            url += '&limit('+limit+ (offset ? ','+offset : '') +')';
+
+        if (sort && !query) {
+            url += '&sort('+sort+sortField+')';
             cache = false;
         }
 
@@ -58,7 +58,6 @@ function($http, $q, config, $log) {
 
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
-                        $log.log('res', res)
                         rxnReq = false, cpdReq = false; geneReq = false;
                         return res.data.response;
                     })

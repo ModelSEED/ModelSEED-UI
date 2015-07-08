@@ -2,9 +2,8 @@
 <div ng-if="data">
     <div class="table-controls">
         <div class="table-controls"  layout="row">
-            <md-input-container md-no-float flex="45">
-                <md-icon class="material-icons">search</md-icon>
-                <input ng-model="opts.query" type="text" placeholder="{{placeholder}}" class="query-input">
+            <md-input-container md-no-float flex="45"
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
             </md-input-container>
 
             <md-progress-circular ng-if="loading"
@@ -13,19 +12,17 @@
                                   md-diameter="20">
             </md-progress-circular>
 
-            <md-input-container pagination layout="row" layout-align="end center" flex>
-                <span hide-sm>{{opts.offset+1}}-{{opts.offset + opts.limit}} of {{data.numFound}} results</span>
-                <div ng-disabled="opts.offset == 0" class="btn btn-default btn-sm" ng-click="prev()">
-                    <i class="fa fa-chevron-left"></i> prev
-                </div>
-                <div class="btn btn-default btn-sm" ng-click="next()">next
-                    <i class="fa fa-chevron-right"></i>
-                </div>
+            <md-input-container pagination
+                pagination-offset="opts.offset"
+                pagination-limit="opts.limit"
+                pagination-total="filtered.length"
+                layout="row"
+                layout-align="end center" flex>
             </md-input-container>
         </div>
     </div>
 
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
         <thead sortable>
             <tr>
                 <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{::h.label}}</th>
@@ -56,11 +53,11 @@
 
             </td>
         </tr>
-
-        <div ng-if="!loading && filtered.length == 0">
-            No item found
-        </div>
     </table>
+
+    <div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+        No item found
+    </div>
 </div>
 <br>
 <md-progress-circular ng-if="loading"

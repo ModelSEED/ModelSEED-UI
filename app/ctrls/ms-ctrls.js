@@ -92,7 +92,6 @@ function($scope, Biochem) {
 
     $scope.tabs = {selectedIndex : 0};
 
-
     $scope.rxnHeader = [{label: 'ID', key: 'id'},
                         {label: 'Name', key: 'name'},
                         {label: 'EQ', key: 'definition'},
@@ -124,26 +123,15 @@ function($scope, Biochem) {
                })
     }
 
-    /*
-    function updateGenes() {
-        Biochem.get('gene_ontology_ref', $scope.geneOpts)
-               .then(function(res) {
-                   console.log('res', res)
-                    $scope.genes = res;
-                    $scope.loadingGenes = false;
-               })
-    }*/
-
-    $scope.$watch('rxnOpts', function(value){
+    $scope.$watch('rxnOpts', function(after, before) {
         $scope.loadingRxns = true;
         updateRxns();
     }, true)
 
-    $scope.$watch('cpdOpts', function(value){
+    $scope.$watch('cpdOpts', function(opts) {
         $scope.loadingCpds = true;
         updateCpds();
     }, true)
-
 }])
 
 .controller('MediaEditor',
@@ -247,7 +235,6 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     }
 
     $scope.rmCpds = function() {
-        console.log('removing', $scope.checkedCpds)
         for (var i=0; i<$scope.data.length; i++) {
             for (var j=0; j<$scope.checkedCpds.length; j++) {
                 if ($scope.data[i].compound_ref === $scope.checkedCpds[j].compound_ref) {
@@ -510,7 +497,6 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions) {
 
     $http.get('data/plants/plants.json')
          .then(function(res) {
-             console.log('plants', res)
              $scope.plants = res.data;
          })
 
