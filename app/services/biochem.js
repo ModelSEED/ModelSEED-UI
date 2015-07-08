@@ -34,7 +34,7 @@ function($http, $q, config, $log) {
         if (limit)
             url += '&limit('+limit+ (offset ? ','+offset : '') +')';
 
-        if (sort && !query) {
+        if (sort) {
             url += '&sort('+sort+sortField+')';
             cache = false;
         }
