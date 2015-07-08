@@ -24,7 +24,7 @@ function($http, $q, config, $log) {
 
         if (query) {
             // sort by id when querying
-            url += '&keyword(*'+query+'*)&sort(id)'
+            url += '&keyword(*'+query.replace(/\ +/, '%20')+'*)&sort(id)'
             cache = false;
         } else {
             url += '&keyword(*)';

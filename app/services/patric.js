@@ -42,7 +42,7 @@ function($http, $q, $rootScope, config, Auth) {
             }
             url += '&or('+set.join(',')+')';
         } else if (query) {
-            url += "&keyword(*"+query+"*)";
+            url += "&keyword(*"+query.replace(/\ +/, '%20')+"*)";
             cache = false;
         } else
             url += '&keyword(*)';
