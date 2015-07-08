@@ -646,7 +646,8 @@ function($scope, $mdSidenav) {
     }
 }])
 
-.controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
+.controller('LeftCtrl', ['$scope', '$timeout', '$mdSidenav', '$log', 
+function ($scope, $timeout, $mdSidenav, $log) {
 
   $scope.close = function () {
     $mdSidenav('left').close()
@@ -654,7 +655,7 @@ function($scope, $mdSidenav) {
         $log.debug("close LEFT is done");
       });
   };
-})
+}])
 
 .service('VizOptions', [function() {
 
