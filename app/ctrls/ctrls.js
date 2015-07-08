@@ -618,11 +618,24 @@ function ($scope, $timeout, MV, VizOpts) {
                                     }});
     }
 }])
+
 .controller('Proto',
-    ['$scope', '$stateParams',
-    function($scope, $stateParams) {
-    }
-])
+['$scope', '$stateParams', 'WS',
+function($scope, $stateParams, WS) {
+
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
+
+    $scope.header = [{label: 'ID', key: 'id'},
+                     {label: 'md5', key: 'md5'}];
+
+    var obj = '/plantseed/Genomes/Test_SHOCK'
+    WS.get(obj)
+      .then(function(res) {
+          $scope.features = res.features;
+          console.log('data', $scope.features )
+      })
+
+}])
 
 
 .controller('SideNav',

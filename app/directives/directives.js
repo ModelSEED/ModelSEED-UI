@@ -1,43 +1,6 @@
 
 angular.module('core-directives', []);
 angular.module('core-directives')
-.directive('msTables', ['MS', function(MS) {
-    return {
-        link: function(scope, elem, attrs) {
-            var path = attrs.objPath,
-                type = attrs.type;
-
-            scope.loading = true;
-
-            console.log('get object with path', path)
-            MS.getObject(path)
-              .then(function(data) {
-                  console.log('parsed', data)
-
-                  var params = {type: type,
-                                obj: data.data,
-                                meta: data.meta,
-                                options: {showETC: true, urlRouter: urlRouter}
-                               };
-
-                  scope.loading = false;
-                  $(elem).kbaseTabTable(params);
-              })
-
-              // used to support various apps with different frameworks
-              function urlRouter(type, ws, name) {
-                  if (type === "KBaseFBA.FBAModel")
-                      return '#/models/'+ws+'/'+name;
-                  else if (type === "KBaseFBA.FBA")
-                      return '#/fba/'+ws+'/'+name;
-                  else if (type === "KBaseBiochem.Media")
-                      return '#/media/'+ws+'/'+name;
-
-                  return;
-              }
-        }
-    }
-}])
 
 .directive('fixedHeader', ['$window', '$timeout', function($window, $timeout) {
    return function(scope, elem, attr) {
@@ -1072,62 +1035,6 @@ function($compile, $stateParams) {
     }
 })
 
-.directive('sidebarCollapse', function() {
-    return {
-        link: function(scope, element, attr) {
-            var original_w = 220;
-            var new_w = 56;
-
-            var collapsed = false;
-
-            element.click(function() {
-                if ( !collapsed ){
-                    element.find('.fa-caret-left').fadeOut(function() {
-                        $(this).remove();
-                    });
-                    var caret = $('<span class="fa fa-caret-right">').hide().fadeIn();
-                    element.append(' ', caret);
-
-                    // animation for
-                    $('.sidebar-nav, .sidebar').hide('slide', {
-                            direction: 'left'
-                        }, 350, function() {
-                            $('.sidebar').show();
-                            $('.sidebar').css('width', new_w)
-                        });
-
-                    // animation for margin of page view
-                    $('#page-wrapper').animate({
-                            marginLeft: new_w,
-                        }, 400, function() {
-                            $('.sidebar-nav-small').fadeIn('fast');
-                            collapsed = true
-                        });
-
-                } else {
-                    element.find('.fa-caret-right').fadeOut(function() {
-                        $(this).remove();
-                    });
-                    var caret = $('<span class="fa fa-caret-left">').hide().fadeIn()
-                    element.prepend(caret, ' ')
-
-                    $('.sidebar-nav-small').fadeOut('fast');
-
-                    $('#page-wrapper').animate({
-                            marginLeft: original_w,
-                        }, 300, function() {
-                            $('.sidebar').css('width', original_w)
-                            $('.sidebar-nav').fadeIn('fast')
-                            collapsed = false
-                        });
-                }
-
-
-            })
-
-        }
-    }
-})
 
 .directive('fbaDropdown', function() {
     return {
@@ -1138,7 +1045,6 @@ function($compile, $stateParams) {
         }
     }
 })
-
 
 .directive('mediaSelector', ['MS', function(MS) {
     return {

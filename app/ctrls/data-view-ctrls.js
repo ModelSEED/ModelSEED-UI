@@ -1,9 +1,9 @@
 
 angular.module('DataViewCtrls', [])
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'Biochem',
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
  'ModelParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',
-function($scope, $state, $sParams, Auth, MS, Biochem,
+function($scope, $state, $sParams, Auth, MS, WS, Biochem,
          ModelParser, $compile, $timeout, uiTools, Tabs, $mdSidenav, $document) {
 
     // redirect stuff for patric auth
@@ -90,7 +90,7 @@ function($scope, $state, $sParams, Auth, MS, Biochem,
 
      // fetch object data and parse it.
      $scope.loading = true;
-     MS.getObject(path).then(function(res) {
+     WS.get(path).then(function(res) {
          var data = ModelParser.parse(res.data);
 
          $scope.rxns = data.reactions;
@@ -268,7 +268,7 @@ function($scope, $state, $sParams, Auth, MS, Biochem,
 
      // fetch object data and parse it.
      $scope.loading = true;
-     MS.getObject(path).then(function(res) {
+     MS.get(path).then(function(res) {
          console.log('fba res', res)
 
          var data = FBAParser.parse(res.data);
@@ -608,7 +608,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         var modelRef = data.fbamodel_ref.replace(/\|\|/g, '');
 
-        MS.getObject(modelRef).then(function(res) {
+        MS.get(modelRef).then(function(res) {
             console.log('modelobject', res)
 
 
