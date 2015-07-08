@@ -10,14 +10,15 @@ angular.module('uiTools', [])
 .service('uiTools', function() {
     var self = this;
 
-    var msecPerMinute = 1000 * 60;
-    var msecPerHour = msecPerMinute * 60;
-    var msecPerDay = msecPerHour * 24;
-    var dayOfWeek = {0: 'Sun', 1: 'Mon', 2:'Tues',3:'Wed',
-                     4:'Thurs', 5:'Fri', 6: 'Sat'};
-    var months = {0: 'Jan', 1: 'Feb', 2: 'March', 3: 'April', 4: 'May',
+    var msecPerMinute = 1000 * 60,
+        msecPerHour = msecPerMinute * 60,
+        msecPerDay = msecPerHour * 24,
+        dayOfWeek = {0: 'Sun', 1: 'Mon', 2:'Tues',3:'Wed',
+                     4:'Thurs', 5:'Fri', 6: 'Sat'},
+        months = {0: 'Jan', 1: 'Feb', 2: 'March', 3: 'April', 4: 'May',
                   5:'June', 6: 'July', 7: 'Aug', 8: 'Sept', 9: 'Oct',
                   10: 'Nov', 11: 'Dec'};
+                  
     this.relativeTime = function(timestamp) {
         var date = new Date()
 

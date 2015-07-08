@@ -177,8 +177,10 @@ function($locationProvider, $stateProvider, $httpProvider,
         //.accentPalette('light-blue');
 }])
 
-.run(['$rootScope', '$state', '$stateParams', '$location', 'Auth', '$timeout', '$templateCache',
-function($rootScope, $state, $sParams, $location, auth, $timeout, $templateCache) {
+.run(['$rootScope', '$state', '$stateParams', '$window',
+      '$location', 'Auth', '$timeout', '$templateCache',
+function($rootScope, $state, $sParams, $window,
+         $location, auth, $timeout, $templateCache) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
         $templateCache.removeAll();
@@ -199,11 +201,8 @@ function($rootScope, $state, $sParams, $location, auth, $timeout, $templateCache
             //event.preventDefault();
         }
 
-
-        // fixme
-        /*if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
-            angular.element('#selected-models').find('.active').removeClass('active')
-        }*/
+        // google analytics
+        //$window.ga('send', 'pageview', $location.path());
     })
 
 

@@ -1,20 +1,4 @@
 
-<!--<ng-include src="'app/views/nav.html'"></ng-include>-->
-
-<!--<ng-include src="'app/views/sidebar.html'"></ng-include>-->
-
-
-            <!--<div ui-view id="content"></div>-->
-
-<!--
-<div id="page-wrapper">
-    <div class="row">
-        <div class="col-md-12">
-            <div ui-view id="content"></div>
-        </div>
-    </div>
-</div>-->
-
 <div layout="row" style="height: 100%;">
     <md-sidenav class="md-sidenav-left md-whiteframe-z2"
                 md-component-id="left"
@@ -158,7 +142,9 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                            <a ng-click="logout()">
+                                <i class="fa fa-sign-out fa-fw"></i> Logout
+                            </a>
                         </li>
                     </ul>
                 </li>
