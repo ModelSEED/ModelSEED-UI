@@ -202,7 +202,7 @@ function($rootScope, $state, $sParams, $window,
         }
 
         // google analytics
-        //$window.ga('send', 'pageview', $location.path());
+        $window.ga('send', 'pageview', $location.path());
     })
 
 
