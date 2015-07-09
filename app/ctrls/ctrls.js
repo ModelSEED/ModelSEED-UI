@@ -276,7 +276,7 @@ function($scope, MS, $log) {
     function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
         return function filterFn(state) {
-            return (state.value.indexOf(lowercaseQuery) === 0);
+            return (state.value.indexOf(lowercaseQuery) >= 0);
         };
     }
 
@@ -646,7 +646,7 @@ function($scope, $mdSidenav) {
     }
 }])
 
-.controller('LeftCtrl', ['$scope', '$timeout', '$mdSidenav', '$log', 
+.controller('LeftCtrl', ['$scope', '$timeout', '$mdSidenav', '$log',
 function ($scope, $timeout, $mdSidenav, $log) {
 
   $scope.close = function () {
