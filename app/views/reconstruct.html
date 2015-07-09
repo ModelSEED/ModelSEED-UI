@@ -80,11 +80,10 @@
                    ng-click="$event.stopPropagation()">{{g[col]}}</a>
                 <span ng-if="col != 'genome_name'">{{g[col]}}</span>
             </td>
-
-            <td ng-if="genomes.docs == 0 && !loading">No genome found</td>
         </tr>
     </tbody>
 </table>
+<div ng-if="genomes.docs.length == 0 && !loading" class="alert alert-warning">No genome found</div>
 
 <div ng-if="view == 'Plants' && !filters.myGenomes">
     <div ng-repeat="p in plants" layout="row" class="plant-row">
