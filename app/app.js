@@ -183,9 +183,9 @@ function($locationProvider, $stateProvider, $httpProvider,
 }])
 
 .run(['$rootScope', '$state', '$stateParams', '$window',
-      '$location', 'Auth', '$timeout', '$templateCache',
+      '$location', 'Auth', '$timeout', '$templateCache', 'config',
 function($rootScope, $state, $sParams, $window,
-         $location, auth, $timeout, $templateCache) {
+         $location, auth, $timeout, $templateCache, config) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
         $templateCache.removeAll();
@@ -216,7 +216,9 @@ function($rootScope, $state, $sParams, $window,
 
     $rootScope.user = auth.user;
     $rootScope.token = auth.token;
-      
+
+    console.log('config', config.includePlants)
+    $rootScope.includePlants = config.includePlants;
 }]);
 
 // parse name from workspace path
