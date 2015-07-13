@@ -153,8 +153,8 @@ angular.module('Browser', ['uiTools'])
 
 
     $scope.selectRow = function(e, i, item) {
-        console.log('called select row', e, i, item)
-        toggleOperations(item);
+        //console.log('called select row', e, i, item)
+        //toggleOperations(item);
 
         $scope.select = true;
         $scope.selected = {type: item.type ? item.type : 'Workspace',
