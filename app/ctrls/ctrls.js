@@ -62,6 +62,7 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
         item.loading = true;
         MS.getModelFBAs(item.path)
             .then(function(fbas) {
+                console.log('fbas', fbas)
                 item.relatedFBAs = fbas;
                 item.loading = false;
             })
@@ -626,12 +627,37 @@ function($scope, $stateParams, WS) {
     $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
 
     $scope.header = [{label: 'ID', key: 'id'},
-                     {label: 'md5', key: 'md5'}];
+                     {label: 'function', key: 'function',
+                         formatter: function(item) {
+                            if (item.length)
+                                return item;
+                            else
+                                return '-';
+                         }},
+                     {label: 'subsystems', key: 'subsystems',
+                         formatter: function(item) {
+                            if (item.length)
+                                return item.join('<br>');
+                            else
+                                return '-';
+                         }},
+                     ];
 
-    var obj = '/plantseed/Genomes/Test_SHOCK'
+    var obj = '/plantseed/Genomes/.Osativa-MSU6/minimal_genome'
+    $scope.loading = true;
     WS.get(obj)
       .then(function(res) {
-          $scope.features = res.features;
+          console.log('res', res)
+          var objs = res.data.features,
+              data = [];
+          for (var i=0; i<objs.length; i++) {
+              data.push({id: objs[i].id,
+                         function: objs[i].function})
+          }
+          $scope.features = objs;
+
+
+          $scope.loading = false;
           console.log('data', $scope.features )
       })
 

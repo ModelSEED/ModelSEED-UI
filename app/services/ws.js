@@ -55,14 +55,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                };
     }
 
-    this.getObjectMeta = function(path) {
-        $log.log('retrieving meta', path)
-        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
-                    .then(function(res) {
-                        return res[0];
-                    })
-    }
-
     this.get = function(path) {
         $log.log('get (object)', path)
         return $http.rpc('ws', 'get', {objects: [path]})
@@ -72,7 +64,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         // if shock node, fetch. Otherwise, return data.
                         if (res[0][0][11].length > 0) {
                             $log.log('getting data from shock', Auth.token)
-                            var url = res[0][0][11]+'?download',
+                            var url = res[0][0][11]+'?download&compression=gzip',
                                 header = {headers: {Authorization: 'OAuth '+Auth.token}};
 
                             return $http.get(url, header)
@@ -82,6 +74,14 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         } else {
                             return {meta: res[0][0], data: JSON.parse(res[0][1])};
                         }
+                    })
+    }
+
+    this.getObjectMeta = function(path) {
+        $log.log('retrieving meta', path)
+        return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
+                    .then(function(res) {
+                        return res[0];
                     })
     }
 

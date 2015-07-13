@@ -15,4 +15,7 @@ angular.module('config', []).service('config', function() {
                         //auth_url: "https://p3.theseed.org/Sessions/Login",
                         //auth_url: "https://kbase.us/services/authorization/Sessions/Login",
                     };
+
+    // wether or not to include plants UI components
+    this.includePlants = true;
 })

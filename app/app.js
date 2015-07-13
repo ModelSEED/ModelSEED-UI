@@ -65,6 +65,11 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/model.html',
             controller: 'ModelDataView',
             authenticate: true
+        }).state('app.mediaPage', {
+            url: "/media{path:nonURIEncoded}?login",
+            templateUrl: 'app/views/data/media.html',
+            controller: 'MediaDataView',
+            authenticate: true
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
@@ -211,6 +216,7 @@ function($rootScope, $state, $sParams, $window,
 
     $rootScope.user = auth.user;
     $rootScope.token = auth.token;
+      
 }]);
 
 // parse name from workspace path
