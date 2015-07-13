@@ -388,11 +388,6 @@ md-toolbar,
     margin: 10px 0 0 0;
 }
 
-.dataTables_wrapper table {
-    margin-bottom: 10px;
-}
-
-
 /* pathway stuff */
 .pathway {
     position: absolute;
@@ -409,6 +404,10 @@ md-toolbar,
 .table {
     width: 100%;
     margin-bottom: 0;
+}
+
+.table-horizontal > tbody > tr > td:first-child {
+    font-weight: 800;
 }
 
 .table-loading {

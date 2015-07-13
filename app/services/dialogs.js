@@ -17,9 +17,17 @@ function(MS, WS, $dialog, $mdToast) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
+                $scope.loading = true;
                 WS.getObjectMeta(path)
                   .then(function(meta) {
-                      $scope.metaData = meta;
+                      $scope.meta = meta[0];
+                      
+                      if ( Object.keys($scope.meta[8]).length === 0 )
+                          $scope.meta[8] = null
+                      else
+                          $scope.meta[8] = JSON.stringify($scope.meta[8], null, 4)
+
+                      $scope.loading = false;
                   })
 
                 $scope.cancel = function(){

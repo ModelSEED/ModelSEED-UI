@@ -2,8 +2,27 @@
 <md-dialog flex="50">
 
     <md-content layout-margin>
-		<h3>Meta Data</h3>
-        {{metaData}}
+		<h3>Overview</h3>
+
+        <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+
+        <table ng-if="!loading" class="table table-horizontal">
+            <thead></thead>
+            <tbody>
+                <tr><td>Name</td><td>{{meta[0]}}</td></tr>
+                <tr><td>Type</td><td>{{meta[1]}}</td></tr>
+                <tr><td>Path</td><td>{{meta[2] + meta[0]}}</td></tr>
+                <tr><td>Created</td><td>{{meta[3]}}</td></tr>
+                <tr><td>Created by</td><td>{{meta[5]}}</td></tr>
+                <tr><td>UUID (ID)</td><td>{{meta[4]}}</td></tr>
+                <tr><td>Global Permission</td><td>{{meta[9]}}</td></tr>
+                <tr><td>Your Permission</td><td>{{meta[10]}}</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Meta data</h3>
+
+        <pre>{{meta[8] ? meta[8]: 'No meta data found'}}</pre>
 
     </md-content>
 
