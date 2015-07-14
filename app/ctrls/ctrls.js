@@ -149,11 +149,12 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
 
 
     // general operations
-    $scope.deleteFBA = function(e, i, item, fbas) {
+    $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
-        WS.deleteObj(item.path)
+        WS.deleteObj(model.path)
           .then(function(res) {
-              fbas.splice(i, 1);
+              model.relatedFBAs.splice(i, 1);
+              model.fbaCount -= 1;
           })
     }
 
@@ -179,6 +180,7 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
         MS.manageGapfills(model.path, gapfill.id, 'D')
           .then(function(res) {
               model.relatedGapfills.splice(i, 1)
+              model.gapfillCount -= 1;
           })
     }
 
