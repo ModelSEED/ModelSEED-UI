@@ -36,7 +36,7 @@
                 <td>{{fba.objective_function ? fba.objective_function : 'N/A'}}</td>
                 <td>{{relativeTime(fba.timestamp)}}</td>
                 <td>
-                    <a ng-click="deleteFBA($event, $index, fba, item.relatedFBAs)" class="no-link">
+                    <a ng-click="deleteFBA($event, $index, item)" class="no-link">
                         <md-tooltip md-delay="800">Delete FBA</md-tooltip>
                         <i class="icon-highlight-remove"></i>
                     </a>

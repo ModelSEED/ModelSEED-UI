@@ -159,6 +159,10 @@ header .alt-login div {
 
 /* navigation mods */
 
+.md-toolbar-accent {
+    background-color: rgba(95, 98, 168, 0.91);
+}
+
 md-toolbar,
 .md-toolbar-tools {
     height: 50px;
@@ -408,6 +412,10 @@ md-toolbar,
 
 .table-horizontal > tbody > tr > td:first-child {
     font-weight: 800;
+}
+
+.table-horizontal > tbody > tr:first-child {
+    border-width: 0px;
 }
 
 .table-loading {

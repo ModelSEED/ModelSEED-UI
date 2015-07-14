@@ -1,11 +1,18 @@
 
 <md-dialog flex="50">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Reconstruct</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
     <form>
     <md-dialog-content class="sticky-container" layout-margin>
-        <h3>Reconstruct Model <small>{{item.name}}</small></h3>
-
-        <br>
-
         <div>
 
             Media formulation

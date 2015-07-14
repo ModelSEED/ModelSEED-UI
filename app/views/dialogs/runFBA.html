@@ -1,10 +1,21 @@
 
 <md-dialog flex="65" aria-label="run fba">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Run FBA</h3>
+        <span flex></span>
+        <small>{{item.name}}</small>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+
     <form>
     <md-dialog-content class="sticky-container" layout-margin>
-        <h3>Run FBA <small>{{item.name}}</small></h3>
-
-
         <div>
             Note: Complete media is used by default.
             <!-- select media name:media -->
