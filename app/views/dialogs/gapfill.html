@@ -1,5 +1,5 @@
 
-<md-dialog flex="65">
+<md-dialog flex="70">
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
         <h3>Gapfill</h3>
@@ -11,17 +11,17 @@
     </md-toolbar>
 
     <form>
-        <md-dialog-content class="sticky-container" layout-margin>
-            <div>
-                Note: Complete media is used by default.
+        <md-dialog-content>
 
-                <div layout layout-sm="column">
-                    <md-input-container flex="50">
-                        <label>Comprehensive gapfilling priority</label>
-                        <input type="number" step="any" ng-model="form.alpha" ng-init="form.alpha = 0">
-                    </md-input-container>
-                </div>
+            <p class="text-muted">Note: Complete media is used by default.</p>
+
+            <div layout layout-sm="column">
+                <md-input-container flex="50">
+                    <label>Comprehensive gapfilling priority</label>
+                    <input type="number" step="any" ng-model="form.alpha" ng-init="form.alpha = 0">
+                </md-input-container>
             </div>
+
         </md-dialog-content>
 
 
