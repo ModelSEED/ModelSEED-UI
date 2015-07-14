@@ -86,9 +86,10 @@ function($scope, $http) {
  * @param  {[type]} Biochem [Biochem Service]
  */
 function($scope, Biochem) {
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                      visible: ['id', 'name', 'definition', 'deltag', 'deltagerr'] };
+    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null,
+                      visible: ['id', 'name', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
     $scope.tabs = {selectedIndex : 0};
 
@@ -132,6 +133,10 @@ function($scope, Biochem) {
         $scope.loadingCpds = true;
         updateCpds();
     }, true)
+
+    $scope.doSomething = function(row) {
+        console.log('row', row)
+    }
 }])
 
 .controller('MediaEditor',

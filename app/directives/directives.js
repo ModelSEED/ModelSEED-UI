@@ -1138,6 +1138,7 @@ function($compile, $stateParams) {
             header: '=tableHeader',
             data: '=tableData',
             opts: '=tableOpts',
+            rowClick: '=tableRowClick',
             loading: '=tableLoading',
             placeholder: '@tablePlaceholder',
         },

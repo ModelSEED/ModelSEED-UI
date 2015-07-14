@@ -27,9 +27,11 @@
             </tr>
         </thead>
 
-        <tr ng-repeat="item in data.docs">
-            <td ng-repeat="h in header">{{item[h.key]}}</td>
-        </tr>
+        <tbody>
+            <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
+                <td ng-repeat="h in header">{{item[h.key]}}</td>
+            </tr>
+        </tbody>
     </table>
 
     <div ng-if="!loading && data.numFound == 0" class="alert alert-warning">

@@ -15,16 +15,31 @@ function($http, $q, config, $log) {
         var url = endpoint+collection+'/?http_accept=application/solr+json'
 
         if (opts) {
-            var query = opts.query ? opts.query : null,
+            var query = opts.query ? opts.query.replace(/\ +/, '%20') : null,
                 limit = opts.limit ? opts.limit : null,
                 offset = opts.offset ? opts.offset : null,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
-                sortField = opts.sort ? opts.sort.field : '';
+                sortField = opts.sort ? opts.sort.field : '',
+                cols = opts.visible ? opts.visible : [];
         }
 
-        if (query) {
+        if (cols.length) {
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push(cols[i]);
+            }
+            url += '&select('+set.join(',')+')';
+        }
+
+        if (query && cols.length) {
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push('eq('+cols[i]+',*'+query+'*)');
+            }
+            url += '&or('+set.join(',')+')';
+        } else if (query) {
             // sort by id when querying
-            url += '&keyword(*'+query.replace(/\ +/, '%20')+'*)&sort(id)'
+            url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
         } else {
             url += '&keyword(*)';
