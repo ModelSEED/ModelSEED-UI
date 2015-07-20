@@ -15,7 +15,7 @@ function($http, $q, $rootScope, config, Auth) {
         var url = endpoint+'genome/?http_accept=application/solr+json';
 
         if (opts) {
-            var query = opts.query ? opts.query.replace(/\ +/, '%20') : null,
+            var query = opts.query ? encodeURI(opts.query).replace(/\(/g, '%28') : null,
                 limit = opts.limit ? opts.limit : null,
                 offset = opts.offset ? opts.offset : null,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,

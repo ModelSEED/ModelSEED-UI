@@ -15,7 +15,7 @@ function($http, $q, config, $log) {
         var url = endpoint+collection+'/?http_accept=application/solr+json'
 
         if (opts) {
-            var query = opts.query ? opts.query.replace(/\ +/, '%20') : null,
+            var query = opts.query ? encodeURI(opts.query) : null,
                 limit = opts.limit ? opts.limit : null,
                 offset = opts.offset ? opts.offset : null,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
@@ -23,7 +23,7 @@ function($http, $q, config, $log) {
                 cols = opts.visible ? opts.visible : [];
         }
 
-        if (cols.length) {
+        if (cols && cols.length) {
             var set = [];
             for (var i=0; i<cols.length; i++) {
                 set.push(cols[i]);
@@ -91,6 +91,16 @@ function($http, $q, config, $log) {
         return $http.get(url)
                     .then(function(res) {
                         return res.data[0];
+                    })
+    }
+
+    this.findReactions = function(cpd) {
+        var url = endpoint+'model_reaction/?http_accept=application/solr+json',
+            url = url+'&eq(equation,*'+cpd+'*)&limit(10000)&select(id,equation,name,definition)'
+        return $http.get(url)
+                    .then(function(res) {
+
+                        return res.data.response;
                     })
     }
 
