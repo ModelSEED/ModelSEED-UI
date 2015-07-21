@@ -1,5 +1,5 @@
 
-<md-dialog flex="50">
+<md-dialog flex="65">
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
@@ -11,7 +11,7 @@
       </div>
     </md-toolbar>
 
-    <md-content layout-margin>
+    <md-content layout-margin layout-padding>
         <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
         <div ng-if="!loading">
@@ -29,9 +29,40 @@
                 </tbody>
             </table>
 
-            <h3>Meta data</h3>
+            <br>
 
-            <pre>{{meta[8] ? meta[8]: 'No meta data found'}}</pre>
+            <span class="editable-header">User Meta </span>
+
+            <span ng-if="!savingMeta">
+                <span ng-if="!editMeta">
+                    <a ng-click="editUserMeta()" class="no-href">edit</a>
+                </span>
+                <span ng-if="editMeta">
+                    <a ng-click="editUserMeta()" class="no-link">Cancel</a> &middot;
+                    <a ng-if="validJSON" ng-click="saveMeta(edit.userMeta)" class="no-href">Save</a>
+                    <span ng-if="!validJSON" class="pull-right color-error">Not valid JSON</span>
+                </span>
+            </span>
+            <span ng-if="savingMeta">Saving...</span>
+
+            <div ng-if="!editMeta">
+                <pre>{{userMeta ? userMeta : 'No user metadata found'}}</pre>
+            </div>
+            <div ng-if="editMeta">
+                <textarea type="text"
+                          rows="{{userMeta.split('\n').length}}"
+                          ng-model="edit.userMeta"
+                          class="form-control editable-textarea"
+                          ng-change="validateJSON(edit.userMeta)"
+                          ng-init="edit.userMeta = userMeta">
+                </textarea>
+            </div>
+
+            <br>
+
+            <span class="editable-header">Auto Meta </span>
+            <pre>{{autoMeta ? autoMeta : 'No auto metadata found'}}</pre>
+
         </div>
 
     </md-content>

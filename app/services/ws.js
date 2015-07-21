@@ -85,6 +85,23 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
+    this.saveMeta = function(path, data) {
+        $log.log('update meta meta', path)
+
+        try {
+            var meta = JSON.parse(data);
+        } catch(err) {
+            console.log("can't parse error", err)
+        }
+
+
+        return $http.rpc('ws', 'update_metadata', {objects: [[path, meta]]})
+                    .then(function(res) {
+                        console.log('response', res)
+                        return res[0][7];
+                    })
+    }
+
     this.addToModel = function(ws) {
         self.workspaces.push( self.wsListToDict(ws) );
     }
@@ -163,11 +180,19 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                 })
     }
 
-
     this.getDownloadURL = function(path) {
         return $http.rpc('ws', 'get_download_url', {objects:[path]})
                     .then(function(res) {
                         $log.log('download response', res)
+                        return res;
+                    })
+    }
+
+
+    this.getPermissions = function(path) {
+        return $http.rpc('ws', 'list_permissions', {objects:[path]})
+                    .then(function(res) {
+                        $log.log('list_permissions response', res)
                         return res;
                     })
     }

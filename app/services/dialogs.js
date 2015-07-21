@@ -16,21 +16,55 @@ function(MS, WS, $dialog, $mdToast) {
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
-            function($scope, $http) {
-                $scope.loading = true;
+            function($s, $http) {
+                $self = $s;
+                $s.editMeta = false;
+                $s.edit = {userMeta: '', autoMeta: ''};
+                $s.validJSON = true;
+
+                $s.loading = true;
+
                 WS.getObjectMeta(path)
                   .then(function(meta) {
-                      $scope.meta = meta[0];
-                      
-                      if ( Object.keys($scope.meta[8]).length === 0 )
-                          $scope.meta[8] = null
-                      else
-                          $scope.meta[8] = JSON.stringify($scope.meta[8], null, 4)
+                      $s.meta = meta[0];
 
-                      $scope.loading = false;
+                      if ( Object.keys($s.meta[7]).length === 0 ) $s.userMeta = null;
+                      else $s.userMeta = JSON.stringify($s.meta[7], null, 4);
+
+                      if ( Object.keys($s.meta[8]).length === 0 ) $s.autoMeta = null;
+                      else $s.autoMeta = JSON.stringify($s.meta[8], null, 4);
+
+                      $s.loading = false;
                   })
 
-                $scope.cancel = function(){
+                $s.editUserMeta = function() {
+                    $s.editMeta = !$s.editMeta;
+                }
+
+                $s.saveMeta = function(meta) {
+                    console.log('saving meta', meta)
+                    $s.savingMeta = true;
+                    WS.saveMeta($s.meta[2] + $s.meta[0], meta)
+                      .then(function(newMeta) {
+                          $s.userMeta = JSON.stringify(newMeta, null, 4);;
+                          $s.editMeta = false, $s.savingMeta = false;
+                      })
+                }
+
+                WS.getPermissions(path)
+                  .then(function(blah) {
+
+                  })
+
+
+                $s.validateJSON = function(text) {
+                    try {
+                        var meta = JSON.parse(text);
+                        $s.validJSON = true;
+                    } catch(err) { $s.validJSON = false }
+                }
+
+                $s.cancel = function(){
                     $dialog.hide();
                 }
             }]
