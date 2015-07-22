@@ -566,7 +566,7 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
          })
          */
 
-    WS.listMetas('/plantseed/Genomes/')
+    WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
           var plants = [];
           for (var i=0; i<objs.length; i++) {
