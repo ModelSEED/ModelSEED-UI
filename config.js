@@ -13,5 +13,5 @@ angular.module('config', []).service('config', function() {
                     };
 
     // wether or not to include plants UI components
-    this.includePlants = true;
+    this.includePlants = false;
 })
