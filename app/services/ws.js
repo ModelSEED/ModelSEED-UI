@@ -38,7 +38,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
-    this.listMetas = function(path) {
+    this.listPlantMetas = function(path) {
         return $http.rpc('ws', 'ls', {paths: [path]})
                     .then(function(d) {
                         var d = d[path];
@@ -46,10 +46,21 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         var data = [];
                         for (var i in d) {
                             var obj = d[i];
+
+                            if ( !('name' in obj[7]) ) continue;
+
                             data.push( {name: obj[0],
                                         path: obj[2]+obj[0],
                                         meta: obj[7]});
                         }
+
+                        data.sort(function(a, b){
+                            if (a.meta.organism.toLowerCase() < b.meta.organism.toLowerCase())
+                                return -1;
+                            if (a.meta.organism.toLowerCase() > b.meta.organism.toLowerCase())
+                                return 1;
+                            return 0;
+                        })
 
                         return data;
                     })
