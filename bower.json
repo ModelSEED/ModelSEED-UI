@@ -16,7 +16,7 @@
   "dependencies": {
     "react": "~0.12.2",
     "ui-router": "~0.2.13",
-    "bootstrap": "~3.3.2",
+    "bootstrap": "3.3.4",
     "d3": "~3.5.3",
     "jquery-ui": "~1.11.2",
     "font-awesome": "~4.3.0",
