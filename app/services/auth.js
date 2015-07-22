@@ -42,7 +42,6 @@ angular.module('Auth', [])
                       url: config.services.auth_url,
                       data: $.param(data),
                     }).success(function(res) {
-                        console.log('response', res)
 
                         // store auth object
                         localStorage.setItem('auth', JSON.stringify(res));
@@ -61,18 +60,16 @@ angular.module('Auth', [])
      */
     this.loginPatric = function(user, pass) {
         var data = {username: user, password: pass};
-        console.log('calling login patric')
+        console.log('param data', $.param(data))
         return $http({method: "POST",
                       url: config.services.patric_auth_url,
                       data: $.param(data),
                   }).success(function(token) {
-                        console.log('response', token)
-
-                        var user_id = token.split('|')[0].replace('un=', '')
-                        var obj = {user_id: user_id, token: token}
+                        var user_id = token.split('|')[0].replace('un=', '');
+                        var obj = {user_id: user_id, token: token};
 
                         // store username/token
-                        localStorage.setItem('auth', JSON.stringify(obj) )
+                        localStorage.setItem('auth', JSON.stringify(obj) );
                         self.user = obj.user_id;
                         self.token = JSON.stringify(obj.token);
 

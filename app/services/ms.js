@@ -16,7 +16,6 @@ angular.module('MS', [])
 
     var cache = $cacheFactory('ms');
 
-    // takes   fixme: cleanup
     this.uploadData = function(p) {
         var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
         var params = {objects:objs};
@@ -202,7 +201,7 @@ angular.module('MS', [])
                             fba.path = fba.fba;
                             delete fba['fba'];
 
-                            fba.media = fba.media.toName();
+                            fba.media = fba.media.split('/').pop();
                             fba.timestamp = Date.parse(fba.rundate);
 
                             d.push(res[key]);
@@ -266,6 +265,16 @@ angular.module('MS', [])
         return $http.rpc('ms', 'export_model', {model: path, format: "sbml", toshock: 1})
                     .then(function(res) {
                         $log.log('export model (download sbml) response', res)
+                        return res;
+                    })
+
+    }
+
+    this.getFeature = function(genome, feature) {
+        $log.log('getting feature', feature)
+        return $http.rpc('ms', 'get_feature', {genome: genome, feature: feature})
+                    .then(function(res) {
+                        $log.log('feature response', feature)
                         return res;
                     })
 

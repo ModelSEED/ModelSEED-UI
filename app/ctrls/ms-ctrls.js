@@ -16,7 +16,6 @@ function($scope, $state, $stateParams, Auth, $window) {
     else
         $scope.method = Auth.loginMethod('rast');
 
-
     // sets method and changes url param
     $scope.switchMethod = function(method) {
         $scope.method = Auth.loginMethod(method);
@@ -78,66 +77,126 @@ function($scope, $http) {
 }])
 
 
-.controller('Biochem',['$scope', 'Biochem',
+.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams',
 /**
  * [Responsible for options, table specs,
  * 	and updating of reaction/compound tables ]
  * @param  {[type]} $scope  [description]
  * @param  {[type]} Biochem [Biochem Service]
  */
-function($scope, Biochem) {
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
-                      visible: ['id', 'name', 'definition', 'deltag', 'deltagerr'] };
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null,
-                      visible: ['id', 'name', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
+function($s, Biochem, $state, $stateParams) {
+    $s.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
+    $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: null,
+                 visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
-    $scope.tabs = {selectedIndex : 0};
+    console.log('$stateParams.tab', $stateParams.tab)
+    if ($stateParams.tab === 'compounds')
+        $s.tabs = {selectedIndex : 1};
+    else
+        $s.tabs = {selectedIndex : 0};
 
-    $scope.rxnHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'EQ', key: 'definition'},
-                        {label: 'deltaG', key: 'deltag'},
-                        {label: 'detalGErr', key: 'deltagerr'}];
 
-    $scope.cpdHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Formula', key: 'formula'},
-                        {label: 'Abbrev', key: 'abbreviation'},
-                        {label: 'deltaG', key: 'deltag'},
-                        {label: 'detalGErr', key: 'deltagerr'},
-                        {label: 'Charge', key: 'charge'}];
+    $s.rxnHeader = [{label: 'Name', key: 'name'},
+                    {label: 'ID', key: 'id'},
+                    {label: 'EQ', key: 'definition'},
+                    {label: 'deltaG', key: 'deltag'},
+                    {label: 'detalGErr', key: 'deltagerr'},
+                    {label: 'dir', key: 'direction'}];
+
+    $s.cpdHeader = [{label: 'Name', key: 'name'},
+                    {label: 'ID', key: 'id'},
+                    {label: 'Formula', key: 'formula'},
+                    {label: 'Abbrev', key: 'abbreviation'},
+                    {label: 'deltaG', key: 'deltag'},
+                    {label: 'detalGErr', key: 'deltagerr'},
+                    {label: 'Charge', key: 'charge'}];
 
 
     function updateRxns() {
-        Biochem.get('model_reaction', $scope.rxnOpts)
+        Biochem.get('model_reaction', $s.rxnOpts)
                .then(function(res) {
-                    $scope.rxns = res;
-                    $scope.loadingRxns = false;
+                    $s.rxns = res;
+                    $s.loadingRxns = false;
                })
     }
 
     function updateCpds() {
-        Biochem.get('model_compound', $scope.cpdOpts)
+        Biochem.get('model_compound', $s.cpdOpts)
                .then(function(res) {
-                    $scope.cpds = res;
-                    $scope.loadingCpds = false;
+                    $s.cpds = res;
+                    $s.loadingCpds = false;
                })
     }
 
-    $scope.$watch('rxnOpts', function(after, before) {
-        $scope.loadingRxns = true;
+    $s.$watch('rxnOpts', function(after, before) {
+        $s.loadingRxns = true;
         updateRxns();
     }, true)
 
-    $scope.$watch('cpdOpts', function(opts) {
-        $scope.loadingCpds = true;
+    $s.$watch('cpdOpts', function(opts) {
+        $s.loadingCpds = true;
         updateCpds();
     }, true)
 
-    $scope.doSomething = function(row) {
-        console.log('row', row)
+    $s.doSomething = function(row) {
+        $state.go('app.biochem', {tab: 'compounds'})
+              .then(function() {
+                  $state.go('app.biochemViewer', {cpd: row.id})
+              })
     }
 }])
+
+
+.controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams', 'Biochem',
+function($s, Biochem, $state, $stateParams, Bio) {
+    console.log('$stateParams.cpd',$stateParams.cpd)
+
+    $s.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+
+    var cpdID = $stateParams.cpd;;
+
+    Bio.get('model_compound', {query: cpdID})
+       .then(function(res) {
+           $s.totalFound = res.numFound;
+           $s.cpd = res.docs[0];
+           console.log('compound', res)
+       })
+
+    $s.loading = true;
+    Bio.findReactions(cpdID)
+       .then(function(res) {
+           $s.reactionCount = res.numFound;
+           $s.data = res.docs;
+           stats($s.data);
+           $s.loading = false;
+       })
+
+    function stats(rxns) {
+        var leftCount = 0, rightCount = 0;
+        var search = /(cpd\d*)/g;
+
+        for (var i in rxns) {
+            var rxn = rxns[i];
+
+            var splitEq = rxn.equation.split('<=>'),
+                substrates = splitEq[0].match(search),
+                products = splitEq[1].match(search)
+
+            if (substrates.indexOf(cpdID) !== -1)
+                leftCount += 1;
+            if (products.indexOf(cpdID) !== -1)
+                rightCount += 1;
+        }
+
+
+        console.log('done!')
+        $s.substrateCount = leftCount;
+        $s.productCount = rightCount;
+    }
+
+}])
+
 
 .controller('MediaEditor',
 ['$scope', 'FBA', 'WS', '$mdDialog', '$sce', '$http', 'Biochem', '$timeout',
@@ -487,8 +546,8 @@ function($scope, FBA, WS, $dialog, $sce) {
 }])
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs', 'ViewOptions',
-function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions) {
+['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS',
+function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
     // microbes / plants view
     $scope.view = ViewOptions.getType();
 
@@ -500,10 +559,30 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions) {
       $scope.menuVisible = true;
     }
 
+    /*
     $http.get('data/plants/plants.json')
          .then(function(res) {
              $scope.plants = res.data;
          })
+         */
+
+    WS.listMetas('/plantseed/Genomes/')
+      .then(function(objs) {
+          var plants = [];
+          for (var i=0; i<objs.length; i++) {
+              var obj = objs[i];
+
+              // skip any "hidden" directories and test files
+              if (obj.name[0] === '.' ||
+                  obj.name.toLowerCase().indexOf('test') !== -1)
+                  continue;
+
+              plants.push(obj);
+          }
+
+          $scope.plants = plants;
+          console.log('plants', plants)
+      })
 
     $scope.filters = {myGenomes: false};
 

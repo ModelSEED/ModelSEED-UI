@@ -37,17 +37,17 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
     if (MS.myModels) {
         $scope.data = MS.myModels;
     } else {
-        $scope.loading = true;
+        $scope.loadingMicrobes = true;
         MS.getModels().then(function(res) {
             $scope.data = res;
-            $scope.loading = false;
+            $scope.loadingMicrobes = false;
         }).catch(function(e) {
             if (e.error.code === -32603)
                 $scope.error = 'Something seems to have went wrong. '+
                                'Please try logging out and back in again.';
             else
                 $scope.error = e.error.message;
-            $scope.loading = false;
+            $scope.loadingMicrobes = false;
         })
     }
 
@@ -550,7 +550,7 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
         $state.transitionTo('home', {redirect: $sParams.path, login: 'patric'});
     }
 
-    $scope.path = $sParams.path.toName();
+    $scope.path = $sParams.path.split('/').pop();
 }])
 
 
@@ -622,6 +622,7 @@ function ($scope, $timeout, MV, VizOpts) {
     }
 }])
 
+
 .controller('Proto',
 ['$scope', '$stateParams', 'WS',
 function($scope, $stateParams, WS) {
@@ -645,11 +646,10 @@ function($scope, $stateParams, WS) {
                          }},
                      ];
 
-    var obj = '/plantseed/Genomes/.Osativa-MSU6/minimal_genome'
+    var obj = '/plantseed/Genomes/.Osativa-MSU6/minimal_genome';
     $scope.loading = true;
     WS.get(obj)
       .then(function(res) {
-          console.log('res', res)
           var objs = res.data.features,
               data = [];
           for (var i=0; i<objs.length; i++) {
@@ -657,7 +657,6 @@ function($scope, $stateParams, WS) {
                          function: objs[i].function})
           }
           $scope.features = objs;
-
 
           $scope.loading = false;
           console.log('data', $scope.features )

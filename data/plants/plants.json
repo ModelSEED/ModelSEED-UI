@@ -1,6 +1,7 @@
 [{
 	"name": "Brachypodium distachyon (1.0)",
 	"organism": "Brachypodium distachyon (L.) Beauv",
+	"path": "/plantseed/Genomes/",
 	"image": "Brachypodium_distachyon_large_square_scale.jpg",
 	"links": [{
 				"name": "PubSEED",

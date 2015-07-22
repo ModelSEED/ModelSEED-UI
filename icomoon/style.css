@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-gyet0x');
-	src:url('fonts/icomoon.eot?#iefix-gyet0x') format('embedded-opentype'),
-		url('fonts/icomoon.ttf?-gyet0x') format('truetype'),
-		url('fonts/icomoon.woff?-gyet0x') format('woff'),
-		url('fonts/icomoon.svg?-gyet0x#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?94kwi0');
+	src:url('fonts/icomoon.eot?#iefix94kwi0') format('embedded-opentype'),
+		url('fonts/icomoon.ttf?94kwi0') format('truetype'),
+		url('fonts/icomoon.woff?94kwi0') format('woff'),
+		url('fonts/icomoon.svg?94kwi0#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -23,21 +23,6 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.icon-microscope:before {
-	content: "\e613";
-}
-.icon-earth:before {
-	content: "\e606";
-}
-.icon-tools3:before {
-	content: "\e604";
-}
-.icon-info:before {
-	content: "\ea0c";
-}
-.icon-leaf:before {
-	content: "\e9a4";
-}
 .icon-benzene:before {
 	content: "\e607";
 }
@@ -82,6 +67,24 @@
 }
 .icon-remove-circle-outline:before {
 	content: "\e60b";
+}
+.icon-microscope:before {
+	content: "\e613";
+}
+.icon-earth:before {
+	content: "\e606";
+}
+.icon-tools3:before {
+	content: "\e604";
+}
+.icon-info:before {
+	content: "\ea0c";
+}
+.icon-leaf:before {
+	content: "\e9a4";
+}
+.icon-quill:before {
+	content: "\e614";
 }
 .icon-close:before {
 	content: "\e600";

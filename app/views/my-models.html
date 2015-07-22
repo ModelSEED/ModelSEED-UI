@@ -34,7 +34,7 @@
                                                      | limitTo : opts.limit : opts.offset)
                                                          | orderBy : '-timestamp' track by $index"
          ng-click="showFBAs(item)"
-         class="table-hover my-model">
+         class="row-hover my-model">
 
 
         <div class="expand-container vertical-center">
@@ -137,6 +137,9 @@
     <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
 </div> <!-- end microbes view -->
 
+<md-progress-circular ng-if="loadingMicrobes && view == 'Microbes'" md-mode="indeterminate" md-diameter="40">
+</md-progress-circular>
+
 
 <div ng-if="view == 'Plants'">
     <br>
@@ -217,10 +220,6 @@
     </md-sidenav>
 </section>
 
-<md-progress-circular ng-if="loading"
-                      md-mode="indeterminate"
-                      md-diameter="40">
-</md-progress-circular>
 
 <div ng-if="data && !data.length">
     <br>

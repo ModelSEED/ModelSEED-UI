@@ -1,5 +1,5 @@
 
-<md-dialog flex="65">
+<md-dialog flex="75">
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
@@ -31,18 +31,22 @@
 
             <br>
 
+
             <span class="editable-header">User Meta </span>
 
-            <span ng-if="!savingMeta">
-                <span ng-if="!editMeta">
-                    <a ng-click="editUserMeta()" class="no-href">edit</a>
-                </span>
-                <span ng-if="editMeta">
-                    <a ng-click="editUserMeta()" class="no-link">Cancel</a> &middot;
-                    <a ng-if="validJSON" ng-click="saveMeta(edit.userMeta)" class="no-href">Save</a>
-                    <span ng-if="!validJSON" class="pull-right color-error">Not valid JSON</span>
-                </span>
+            <span ng-if="!savingMeta && !editMeta">
+                <a ng-click="editUserMeta()" class="no-href">edit</a>
             </span>
+            <span ng-if="!savingMeta && editMeta">
+                <a ng-click="editUserMeta()" class="no-link">Cancel</a> &middot;
+                <a ng-if="validJSON" ng-click="saveMeta(edit.userMeta)" class="no-href">Save</a>
+            </span>
+
+            <span ng-if="!savingMeta && editMeta" class="pull-right">
+                <span ng-if="!validJSON" class="pull-right color-error">Not valid JSON</span>
+                <a ng-if="validJSON" class="pull-right no-href" ng-click="tidy(edit.userMeta)">tidy up</a>
+            </span>
+
             <span ng-if="savingMeta">Saving...</span>
 
             <div ng-if="!editMeta">
@@ -50,7 +54,7 @@
             </div>
             <div ng-if="editMeta">
                 <textarea type="text"
-                          rows="{{userMeta.split('\n').length}}"
+                          rows="{{edit.userMeta.split('\n').length}}"
                           ng-model="edit.userMeta"
                           class="form-control editable-textarea"
                           ng-change="validateJSON(edit.userMeta)"

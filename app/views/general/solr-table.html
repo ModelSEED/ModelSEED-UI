@@ -20,7 +20,7 @@
         </md-input-container>
     </div>
 
-    <table class="table table-striped table-bordered" ng-if="data.docs.length">
+    <table class="table table-striped table-bordered table-hover" ng-if="data.docs.length">
         <thead sortable>
             <tr>
                 <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{h.label}}</th>
@@ -29,7 +29,9 @@
 
         <tbody>
             <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
-                <td ng-repeat="h in header">{{item[h.key]}}</td>
+                <td ng-repeat="h in header">
+                    {{item[h.key]}}
+                </td>
             </tr>
         </tbody>
     </table>

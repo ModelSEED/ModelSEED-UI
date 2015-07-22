@@ -1,5 +1,81 @@
 
 angular.module('DataViewCtrls', [])
+
+
+
+.controller('GenomeDataView',
+['$scope', '$stateParams', 'WS',
+function($scope, $sParams, WS) {
+
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.split('/').pop()
+
+    $scope.opts = {query: '', limit: 20, offset: 0, sort: null};
+
+    $scope.header = [{label: 'Feature', key: 'id',
+                        link: {
+                            state: 'app.featurePage',
+                            getOpts: function(row) {
+                                return {feature: row.id, genome: path};
+                            }}
+                     },
+                     {label: 'Function', key: 'function',
+                         formatter: function(item) {
+                            if (item.length)
+                                return item;
+                            else
+                                return '-';
+                         }},
+                     {label: 'Subsystems', key: 'subsystems',
+                         formatter: function(item) {
+                            if (item.length)
+                                return item.join('<br>');
+                            else
+                                return '-';
+                         }},
+                     ];
+
+
+    var obj = path.slice(0, path.lastIndexOf('/'))+'/.'+$scope.name+'/minimal_genome'
+
+    $scope.loading = true;
+    WS.get(obj)
+      .then(function(res) {
+          var objs = res.data.features,
+              data = [];
+
+          for (var i=0; i<objs.length; i++) {
+              data.push({id: objs[i].id,
+                         function: objs[i].function})
+          }
+
+          $scope.features = objs;
+          $scope.loading = false;
+      })
+
+}])
+
+.controller('FeatureDataView',
+['$scope', '$stateParams', 'MS',
+function($scope, $sParams, MS) {
+
+    // path and name of object
+    var featureID = $sParams.feature,
+        genome = $sParams.genome;
+
+    $scope.featureID = featureID;
+
+    $scope.loading = true;
+    MS.getFeature(genome, featureID)
+      .then(function(res) {
+
+          $scope.features = objs;
+          $scope.loading = false;
+      })
+}])
+
+
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
  'ModelParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',
@@ -11,6 +87,14 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
         $state.transitionTo('home', {redirect: $sParams.path, login: 'patric'});
     }
 
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.split('/').pop()
+
+    // selected compound, reaction, etc.
+    $scope.selected;
+
+    // url used for features
     var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
 
     $scope.Tabs = Tabs;
@@ -22,14 +106,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
         return $scope.relativeTime(Date.parse(datetime));
     }
 
-    // path and name of object
-    var path = $sParams.path;
-    $scope.name = path.toName();
-
-
-    // selected compound, reaction, etc.
-    $scope.selected;
-
     // table options
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
@@ -37,7 +113,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
     $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
     $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: null};
 
-
+    // reaction table spec
     $scope.rxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn',
                             call: function(e, item) {
                                 $scope.toggleView(e, 'rxn', item );
@@ -98,6 +174,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
          $scope.genes = data.genes;
          $scope.compartments = data.compartments;
          $scope.biomass = data.biomass;
+         $scope.loading = false;
+     }).catch(function(e) {
+         console.log('the error', e)
+         $scope.error = e;
          $scope.loading = false;
      })
 
@@ -202,7 +282,7 @@ function($scope, $state, $sParams, Auth, MS, Biochem,
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.toName();
+    $scope.name = path.split('/').pop()
 
 
     // selected compound, reaction, etc.
@@ -610,10 +690,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         MS.get(modelRef).then(function(res) {
             console.log('modelobject', res)
-
-
         })
-
 
         ModelParser.parse()
 

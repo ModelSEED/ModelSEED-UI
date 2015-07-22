@@ -18,7 +18,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="gf in item.relatedGapfills track by $index"
-                class="table-hover"
+                class="row-hover"
                 ng-click="integrateGapfill(gf.integrated, item, gf)">
                 <td>
                     <img ng-if="gf.loading"
@@ -29,7 +29,7 @@
                     </i>
                 </td>
                 <td>{{::gf.id}}</td>
-                <td>{{::gf.media.toName()}}</td>
+                <td>{{::gf.media.split('/').pop()}}</td>
                 <td>{{relTime(gf.rundate)}}</td>
                 <td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">

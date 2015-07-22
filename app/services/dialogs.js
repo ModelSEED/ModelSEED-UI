@@ -56,6 +56,11 @@ function(MS, WS, $dialog, $mdToast) {
 
                   })
 
+                $s.tidy = function(text) {
+                    console.log('before', text)
+                    $s.edit.userMeta = JSON.stringify(JSON.parse(text), null, 4)
+                    console.log('after', $s.edit.userMeta)
+                }
 
                 $s.validateJSON = function(text) {
                     try {
@@ -127,7 +132,7 @@ function(MS, WS, $dialog, $mdToast) {
                       .then(function(res) {
                            cb();
                            self.showComplete('FBA Complete',
-                                        res[0]+' '+res[7].media.toName())
+                                        res[0]+' '+res[7].media.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })

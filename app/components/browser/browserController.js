@@ -279,6 +279,7 @@ angular.module('Browser', ['uiTools'])
 
 
     $scope.showMeta = function(ev, item) {
+        console.log('')
         Dialogs.showMeta(ev, path(item.name))
     }
 

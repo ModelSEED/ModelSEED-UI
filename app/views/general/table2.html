@@ -1,0 +1,58 @@
+
+<div ng-if="data">
+    <div class="table-controls">
+        <div class="table-controls"  layout="row">
+            <md-input-container md-no-float flex="45"
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+            </md-input-container>
+
+            <md-progress-circular ng-if="loading"
+                                  md-mode="indeterminate"
+                                  class="table-loading"
+                                  md-diameter="20">
+            </md-progress-circular>
+
+            <md-input-container pagination
+                pagination-offset="opts.offset"
+                pagination-limit="opts.limit"
+                pagination-total="filtered.length"
+                layout="row"
+                layout-align="end center" flex>
+            </md-input-container>
+        </div>
+    </div>
+
+    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+        <thead sortable>
+            <tr>
+                <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{::h.label}}</th>
+            </tr>
+        </thead>
+
+        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                        | limitTo : opts.limit : opts.offset)">
+            <td ng-repeat="h in header">
+
+                <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row[h.key])"></span>
+
+                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( {{h.link.getOpts(row)}} )">
+                    {{::row[h.key]}}
+                </a>
+
+                <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                    {{::row[h.key]}}
+                </span>
+
+            </td>
+        </tr>
+    </table>
+
+    <div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+        No item found
+    </div>
+</div>
+<br>
+<md-progress-circular ng-if="loading"
+                      md-mode="indeterminate"
+                      md-diameter="40">
+</md-progress-circular>

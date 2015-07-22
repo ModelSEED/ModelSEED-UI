@@ -2,7 +2,8 @@
 <div layout="row">
     <div class="content-header" flex>
         {{filters.myGenomes ? 'My' : 'Public'}} {{view.slice(0, -1)}} Genomes<br>
-        <small class="help-text" hide-sm>Select a genome from below to reconstruct</small>
+        <small ng-if="view == 'Microbes'" class="help-text" hide-sm>Select a genome from below to reconstruct</small>
+        <small ng-if="view == 'Plants'" class="help-text" hide-sm>Select a genome from below to annotate</small>
     </div>
 
     <md-input-container layout-align="center center">
@@ -37,7 +38,7 @@
     </md-input-container>
 
     <md-input-container md-no-float flex="45"
-        search="opts.query" search-opts="opts" search-placeholder="Search PATRIC genomes">
+        search="opts.query" search-opts="opts" search-placeholder="Search {{filters.myGenomes ? 'My' : 'PATRIC'}}  genomes">
     </md-input-container>
 
     <md-progress-circular ng-if="loading"
@@ -68,7 +69,7 @@
     <tbody>
         <tr ng-repeat="g in genomes.docs"
             ng-click="reconstruct($event, g)"
-            class="table-hover">
+            class="row-hover">
 
             <td>
                 <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
@@ -83,26 +84,8 @@
         </tr>
     </tbody>
 </table>
+
 <div ng-if="genomes.docs.length == 0 && !loading" class="alert alert-warning">No genome found</div>
 
-<div ng-if="view == 'Plants' && !filters.myGenomes">
-    <div ng-repeat="p in plants" layout="row" class="plant-row">
 
-        <img width="150" height="150" src="data/plants/img/{{p.image}}">
-        <div flex>
-            <b>{{p.name}}</b><br>
-            <i>{{p.organism}}</i><br>
-            <div class="links">
-                Links
-                <div ng-repeat="link in p.links">
-                    <a href="{{link.url}}" ng-class="{bold: link.name == 'PubSEED'}" target="_blank">{{link.name}}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div ng-if="view == 'Plants' && filters.myGenomes">
-    <br>
-    Coming soon.
-</div>
+<ng-include src="'app/views/plants.html'" ng-if="view == 'Plants'"></ng-include>

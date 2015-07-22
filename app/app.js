@@ -75,13 +75,29 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/fba.html',
             controller: 'FBADataView',
             authenticate: true
+        }).state('app.genomePage', {
+            url: "/genome{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/genome.html',
+            controller: 'GenomeDataView',
+            authenticate: true
+        }).state('app.featurePage', {
+            url: "/feature/{genome}/{feature}",
+            templateUrl: 'app/views/data/feature.html',
+            controller: 'FeatureDataView',
+            authenticate: true
         })
 
         // The good stuff
         .state('app.biochem', {
-            url: "/biochem/",
+            url: "/biochem/?tab",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem',
+            authenticate: true,
+            //reloadOnSearch: false
+        }).state('app.biochemViewer', {
+            url: "/biochem-viewer/?cpd?tab",
+            templateUrl: 'app/views/biochem/biochem-viewer.html',
+            controller: 'BiochemViewer',
             authenticate: true
         }).state('app.reconstruct', {
             url: "/reconstruct/",
@@ -220,8 +236,3 @@ function($rootScope, $state, $sParams, $window,
     console.log('config', config.includePlants)
     $rootScope.includePlants = config.includePlants;
 }]);
-
-// parse name from workspace path
-String.prototype.toName = function() {
-    return this.split('/').pop();
-}

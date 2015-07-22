@@ -18,7 +18,6 @@ angular.module('core-directives')
             var orig_headers = angular.element(table_id).find('th');
 
             angular.forEach(orig_headers, function(v, k) {
-                // .css is the jquery
                 $(headers[k]).css({width: orig_headers[k].clientWidth});
             })
         }
@@ -30,6 +29,59 @@ angular.module('core-directives')
         });
    };
 }])
+
+
+.directive('highlight', ['$compile', function($compile) {
+    return {
+        restrict: 'EA',
+        scope: {
+            text: '@highlight',
+            term: '=highlightTerm',
+            linkableEq: '@linkableEq',
+        },
+        link: function(scope, elem, attrs) {
+            //var newText = scope.text.replace(scope.term, '<b class="text-highlight">'+scope.term+'</b>')
+
+            var newText = '';
+
+            if ('linkableEq' in attrs) {
+                var leftNames = scope.text.split('<=>')[0].replace(/\[\w\]/g, '').replace(/\(\d+\)/g, '')
+                                        .split(' + ')
+                var rightNames = scope.text.split('<=>')[1].replace(/\[\w\]/g, '').replace(/\(\d+\)/g, '')
+                                        .split(' + ')
+                for (var i=0; i<leftNames.length; i++) leftNames[i] = leftNames[i].trim();
+                for (var i=0; i<rightNames.length; i++) rightNames[i] = rightNames[i].trim();
+
+                var sides = scope.text.split('<=>'),
+                    left = sides[0].split(' + '),
+                    right = sides[1].split(' + ')
+
+                var search = /(cpd\d*)/g;
+                var sideIDs = scope.linkableEq.split('<=>'),
+                    leftIDs = sideIDs[0].match(search),
+                    rightIDs = sideIDs[1].match(search);
+
+                //console.log('names', leftNames, rightNames)
+                //console.log('ids', leftIDs, rightIDs)
+
+                for (var i=0; i<left.length; i++) {
+                    var link = $compile( '<div><a ui-sref="app.biochemViewer({cpd:\''+leftIDs[i]+'\'})">'+leftNames[i]+'</a></div>' )(scope)
+                    left[i] = left[i].replace(leftNames[i], link.html() )
+                }
+
+                for (var i=0; i<right.length; i++) {
+                    var link = $compile( '<div><a ui-sref="app.biochemViewer({cpd:\''+rightIDs[i]+'\'})">'+rightNames[i]+'</a></div>' )(scope)
+                    right[i] = right[i].replace(rightNames[i], link.html() )
+                }
+
+                newText = left.join(' + ') + '<=>' + right.join(' + ')
+            }
+
+            angular.element(elem).html(newText);
+        }
+    }
+}])
+
 
 
 .directive('email', function() {
@@ -1112,6 +1164,23 @@ function($compile, $stateParams) {
             placeholder: '@tablePlaceholder',
         },
         templateUrl: 'app/views/general/table.html',
+        link: function(scope, elem, attrs) {
+
+        }
+    }
+}])
+
+.directive('ngTableTwo', ['$sce', '$compile', function($sce, $compile) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+        },
+        templateUrl: 'app/views/general/table2.html',
         link: function(scope, elem, attrs) {
 
         }

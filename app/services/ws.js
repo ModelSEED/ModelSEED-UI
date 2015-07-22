@@ -4,7 +4,6 @@ angular.module('WS', [])
 .service('WS', ['$http', '$q', '$cacheFactory', '$log', 'config', 'Auth',
 function($http, $q, $cacheFactory, $log, config, Auth) {
     "use strict";
-
     var self = this;
     var cache = $cacheFactory('ws');
 
@@ -39,6 +38,22 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
+    this.listMetas = function(path) {
+        return $http.rpc('ws', 'ls', {paths: [path]})
+                    .then(function(d) {
+                        var d = d[path];
+
+                        var data = [];
+                        for (var i in d) {
+                            var obj = d[i];
+                            data.push( {name: obj[0],
+                                        path: obj[2]+obj[0],
+                                        meta: obj[7]});
+                        }
+
+                        return data;
+                    })
+    }
 
     // wsListToDict: takes workspace info array, returns dict.
     this.wsListToDict = function(ws) {

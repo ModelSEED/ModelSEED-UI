@@ -25,9 +25,26 @@ a:focus {
     padding: 8px 15px;
 }
 
+.logo {  /* awaiting design */
+    margin-top: 3px;
+    /*font-weight: 800;
+    font-family: 'Varela Round', sans-serif;*/
+}
+
+.logo span {
+    /*color: #ADEFDB;*/
+}
+
+
 .logo a:hover {
-    color: #dfdfdf;
+    opacity: 0.8;
+    color: inherit;
     text-decoration: none;
+
+}
+
+.logo span {
+
 }
 
 md-toolbar {
@@ -46,24 +63,31 @@ md-sidenav.md-locked-open {
     background-color: #555;
 }
 
-.ms-color {
-    color: #26C6DA;
-}
-.ms-color-complete {
-    color: #26DA4A;
+.ms-color { color: #26C6DA; }
+.ms-color-complete, .color-complete { color: #26DA4A; }
+.ms-color-error, .color-error { color: #DA265D; }
+
+.inline { display: inline; }
+
+.text-highlight {
+    color: #000;
+    background-color: rgba(249, 255, 179, 0.43);
 }
 
-.ms-color-error {
-    color: #DA265D;
-}
 .text-light {
     color: #888;
 }
 
+.hover:hover {
+    opacity: 1.0;
+}
+.hover {
+    opacity: 0.7;
+}
 
 a.no-link {
     color: #000;
-    opacity: 0.5;
+        opacity: 0.7;
     text-decoration: none;
 }
 
@@ -71,10 +95,20 @@ a.no-link:hover {
     opacity: 1.0;
 }
 
+a.no-href {
+    text-decoration: none;
+}
+
+pre {
+    margin: inherit;
+}
+
 .vertical-center {
     margin-top: auto;
     margin-bottom: auto;
 }
+
+
 
 small.help-text {
     font-size: 8pt;
@@ -87,6 +121,14 @@ small.help-text {
 
 .alt-login-container {
     margin: 25px 0 0 0;
+}
+
+.editable-header {
+    font-size: 24px;
+}
+
+.editable-textarea {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 
 header .login md-input-container.md-default-theme .md-input {
@@ -139,10 +181,6 @@ header .alt-login div {
 
 .no-margin {
     margin: 0;
-}
-
-.hover:hover {
-    opacity: .5;
 }
 
 .pointer:hover {
@@ -450,7 +488,7 @@ table thead[sortable] th.sorting-asc:after {
   color: #222;
 }
 
-.table-hover:hover {
+.row-hover:hover {
     cursor: pointer;
     background-color: #f8f8f8;
     /*background-color: #4AC1FF;
@@ -458,15 +496,15 @@ table thead[sortable] th.sorting-asc:after {
     border-color: #B6E6FF;
 }
 
-.table-hover:hover div:first-child i.fa-caret-right,
-.table-hover:hover td:first-child i.fa-square-o,
-.table-hover:hover td:first-child i.fa-circle-o {
+.row-hover:hover div:first-child i.fa-caret-right,
+.row-hover:hover td:first-child i.fa-square-o,
+.row-hover:hover td:first-child i.fa-circle-o {
     opacity: 1.0 !important;
 }
 
-.table-hover div:first-child i.fa-caret-right,
-.table-hover td:first-child i.fa-square-o,
-.table-hover td:first-child i.fa-circle-o {
+.row-hover div:first-child i.fa-caret-right,
+.row-hover td:first-child i.fa-square-o,
+.row-hover td:first-child i.fa-circle-o {
     opacity: 0.5 !important;
 }
 
@@ -732,14 +770,30 @@ md-card {
 }
 
 .plant-row {
-    margin: 30px 0 0 0;
+    position: relative;
+    margin: 15px 0 0 0;
+    padding: 10px;
+    border: 2px solid #fff;
 }
 
 .plant-row img {
     margin-right: 10px;
 }
+
 .plant-row .links {
-    margin: 10px 0 0 0;
+    position: absolute;
+    bottom: 7px;
+}
+.plant-row-hover:hover {
+    background-color: #f8f8f8;
+    border: 2px solid #B6E6FF;
+}
+
+.plant-row .actions {
+    display: none;
+}
+.plant-row:hover .actions {
+    display: block;
 }
 
 .plants-toggle md-radio-button {

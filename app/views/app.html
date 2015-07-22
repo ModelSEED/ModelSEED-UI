@@ -10,9 +10,9 @@
                 <md-button class="md-icon-button" aria-label="Settings">
                   <md-icon class="material-icons">menu</md-icon>
                 </md-button>
-                <h2 class="logo">
-                    <a ui-sref="home">ModelSEED</a>
-                </h2>
+                <div class="logo">
+                    <a ui-sref="home">Model<span>SEED<span></a>
+                </div>
             </div>
 
         </md-toolbar>
@@ -119,7 +119,7 @@
 
             <ul class="nav navbar-nav">
                 <li class="dropdown">
-                    <a class="dropdown-toggle cursor" data-toggle="dropdown">Advanced
+                    <a class="dropdown-toggle cursor" data-toggle="dropdown">More
                         <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu">
@@ -127,6 +127,10 @@
                             <a ui-sref="app.myData({dir: '/'+$root.user})">
                                 <i class="icon-archive2"></i> All My Files
                             </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li>
+                            <a ui-sref="home">About</a>
                         </li>
                         <!--<li>
                             <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
@@ -137,7 +141,7 @@
                     <a class="dropdown-toggle cursor" data-toggle="dropdown" style="padding-top: 5px; padding-bottom: 5px;">
                         {{$root.user.split('@')[0]}}
                         <br>
-                        <small>@{{$root.user.split('@')[1]}}</small>
+                        <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}</small>
                         <i class="fa fa-caret-down vertical-center"></i>
                     </a>
                     <ul class="dropdown-menu">
