@@ -4,6 +4,13 @@ angular.module('ctrls', [])
     $scope.MV = MV;
 }])
 
+.controller('Documentation',
+['$scope', '$state',
+function($scope, $state) {
+
+    console.log('state', $state)
+
+}])
 
 .controller('MyModels',
 ['$scope', 'WS', 'MS', '$compile', 'uiTools', '$mdDialog', 'Dialogs',

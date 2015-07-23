@@ -23,7 +23,8 @@ angular.module('ModelSEED',
  'Biochem',
  'Browser',
  'Regulons',
- 'Dialogs'
+ 'Dialogs',
+ 'docs-directives'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider', '$sceProvider',
@@ -164,6 +165,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/proto.html',
             controller: 'Proto',
         })
+
+        .state('app.faq', {
+            url: "/faq",
+            templateUrl: 'app/views/docs/faq.html',
+        })
+
 
         /* only used for testing analysis forms */
         .state('app.run', {
