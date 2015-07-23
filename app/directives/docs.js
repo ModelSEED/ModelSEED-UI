@@ -2,18 +2,20 @@
 angular.module('docs-directives', []);
 angular.module('docs-directives')
 
-.directive('msFaq', ['$http', function($http) {
+.directive('msDoc', ['$http', function($http) {
    return {
         template: '<div id="docs" ng-bind-html="data"></div>'+
                   '<a class="edit-docs-btn no-href" href="{{githubURL}}" target="_blank">'+
                         '<i class="icon-pencil2"></i> Edit on Github'+
                   '</a>',
         link: function(scope, elem, attr) {
-            var url = attr.msFaq;
+            var url = 'docs/'+attr.msDoc
             $http.get(url)
                  .then(function(res) {
-                    var text = window.atob(res.data.content);
-                    scope.githubURL = res.data.html_url;
+                    var text = res.data;
+                    scope.githubURL =
+                        'https://github.com/ModelSEED/Documentation/blob/master/'
+                        +attr.msDoc;
 
                     var converter = new showdown.Converter(),
                         html = converter.makeHtml(text);
