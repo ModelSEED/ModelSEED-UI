@@ -66,11 +66,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/model.html',
             controller: 'ModelDataView',
             authenticate: true
-        }).state('app.mediaPage', {
-            url: "/media{path:nonURIEncoded}?login",
-            templateUrl: 'app/views/data/media.html',
-            controller: 'MediaDataView',
-            authenticate: true
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
@@ -85,6 +80,11 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/feature/{genome}/{feature}",
             templateUrl: 'app/views/data/feature.html',
             controller: 'FeatureDataView',
+            authenticate: true
+        }).state('app.mediaPage', {
+            url: "/media{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/media.html',
+            controller: 'MediaDataView',
             authenticate: true
         })
 
@@ -123,12 +123,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/editor/model-editor.html',
             controller: 'ModelEditor',
             authenticate: true
-        }).state('app.media', {
+        })/*.state('app.media', {
             url: "/media-editor/",
             templateUrl: 'app/views/editor/media-editor.html',
             controller: 'MediaEditor',
             authenticate: true
-        })
+        })*/
 
         // comparative analysis
         .state('app.compare', {

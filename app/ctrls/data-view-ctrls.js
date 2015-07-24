@@ -78,6 +78,45 @@ function($scope, $sParams, MS) {
 }])
 
 
+
+.controller('MediaDataView',
+['$scope', '$state', '$stateParams', 'WS', 'uiTools',
+function($scope, $state, $sParams, WS, tools) {
+
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.split('/').pop()
+    console.log('name', name)
+
+    //$scope.Tabs = Tabs;
+    //Tabs.totalTabCount = 1;
+
+
+    $scope.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
+    $scope.mediaHeader = [{label: 'Name', key: 'name'},
+                          {label: 'ID', key: 'id'},
+                          {label: 'Concentration', key: 'concentration'},
+                          {label: 'Max Flux', key: 'minflux'},
+                          {label: 'Min Flux', key: 'maxflux'}];
+
+
+     $scope.loading = true;
+     WS.get(path).then(function(res) {
+         console.log('res', res)
+
+         $scope.media =  tools.tableToJSON(res.data)
+         console.log('media ',$scope.media)
+         $scope.loading = false;
+     }).catch(function(e) {
+         console.log('the error', e)
+         $scope.error = e;
+         $scope.loading = false;
+     })
+
+}])
+
+
+
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
  'ModelParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',

@@ -77,18 +77,19 @@ function($scope, $http) {
 }])
 
 
-.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams',
+.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS',
 /**
  * [Responsible for options, table specs,
  * 	and updating of reaction/compound tables ]
  * @param  {[type]} $scope  [description]
  * @param  {[type]} Biochem [Biochem Service]
  */
-function($s, Biochem, $state, $stateParams) {
+function($s, Biochem, $state, $stateParams, MS) {
     $s.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
-    $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: null,
-                 visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
+    $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
+    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
 
     console.log('$stateParams.tab', $stateParams.tab)
     if ($stateParams.tab === 'compounds')
@@ -112,6 +113,17 @@ function($s, Biochem, $state, $stateParams) {
                     {label: 'detalGErr', key: 'deltagerr'},
                     {label: 'Charge', key: 'charge'}];
 
+    $s.mediaHeader = [{label: 'Name', key: 'name',
+                            link: {
+                                state: 'app.mediaPage',
+                                getOpts: function(row){
+                                    return {path: row.path};
+                                }
+                            }
+                        },
+                        {label: 'Minimal?', key: 'isMinimal'},
+                        {label: 'Defined?', key: 'isDefined'},
+                        {label: 'Type', key: 'type'}];
 
     function updateRxns() {
         Biochem.get('model_reaction', $s.rxnOpts)
@@ -128,6 +140,15 @@ function($s, Biochem, $state, $stateParams) {
                     $s.loadingCpds = false;
                })
     }
+
+    $s.loadingMedia = true;
+    MS.listPublicMedia()
+      .then(function(media) {
+          console.log('media', media)
+          $s.media = media;
+          $s.loadingMedia = false;
+      })
+
 
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
@@ -227,6 +248,7 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     $scope.loading = true
     $http.get(req)
          .then(function(res) {
+             console.log('res', res)
              var cpds = res.data.mediacompounds;
              var data = [];
              for (var i=0; i<cpds.length; i++) {
@@ -589,7 +611,7 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
     $scope.opts = {query: '',
                    limit: 25,
                    offset: 0,
-                   sort: null,
+                   sort: {field: 'genome_name'},
                    visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
 
     // all possible columns
