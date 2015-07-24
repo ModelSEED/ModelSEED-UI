@@ -218,7 +218,7 @@ angular.module('MS', [])
 
                             // fixme: backwards compatible
                             fba.path = fba.ref;
-                            
+
                             fba.media = fba.media_ref.split('/').pop();
                             fba.timestamp = Date.parse(fba.rundate);
 
@@ -238,8 +238,8 @@ angular.module('MS', [])
 
                         var d = [];
                         for (i in res) {
-                            var gf = res[i];
-                            gf.media = gf.media_ref.split('/').pop();
+                            var gf = res[i];                            
+                            gf.media = gf.media_ref ? gf.media_ref.split('/').pop() : '';
                         }
 
                         return res;

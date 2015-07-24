@@ -10,8 +10,8 @@
         <thead>
             <tr ng-if="item.relatedGapfills.length">
                 <th>Integrated?</th>
+                <th>Media</th>                
                 <th>ID</th>
-                <th>Media</th>
                 <th>Time</th>
                 <th>Actions</th>
             </tr>
@@ -28,8 +28,11 @@
                        class="fa {{gf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}">
                     </i>
                 </td>
+                <td>
+                    <a ui-sref="mediaPage({path: gf.media_ref})"
+                       ng-click="$event.stopPropagation()">{{::gf.media}}</a>
+                </td>
                 <td>{{::gf.id}}</td>
-                <td>{{::gf.media.split('/').pop()}}</td>
                 <td>{{relTime(gf.rundate)}}</td>
                 <td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">

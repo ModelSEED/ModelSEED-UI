@@ -25,9 +25,8 @@
                     <i class="fa {{fba.checked ? 'fa-check-square-o' : 'fa-square-o'}}"></i>
                 </td>
                 <td>
-                    <!--<a ui-sref="app.mediaPage({path: fba.path})"
-                       ng-click="$event.stopPropagation()">{{::fba.media}}</a>-->
-                    {{::fba.media}}
+                    <a ui-sref="app.mediaPage({path: fba.media_ref})"
+                       ng-click="$event.stopPropagation()">{{::fba.media}}</a>
                 </td>
                 <td>
                     <!--<a ui-sref="app.fbaPage({path: fba.path})"
