@@ -85,12 +85,15 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         $log.log('get (object)', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        $log.log('get (object) response', res)
+                        //$log.log('get (object) response', res)
+
+                        var meta = res[0][0],
+                            node = meta[11];
 
                         // if shock node, fetch. Otherwise, return data.
-                        if (res[0][0][11].length > 0) {
+                        if (node.length > 0) {
                             $log.log('getting data from shock', Auth.token)
-                            var url = res[0][0][11]+'?download&compression=gzip',
+                            var url = node+'?download&compression=gzip',
                                 header = {headers: {Authorization: 'OAuth '+Auth.token}};
 
                             return $http.get(url, header)
@@ -98,7 +101,17 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                                             return res.data;
                                         })
                         } else {
-                            return {meta: res[0][0], data: JSON.parse(res[0][1])};
+                            // try to parse, if not, assume data is string.
+                            try {
+                                var data = JSON.parse(res[0][1]);
+                            } catch(e) {
+                                var data = res[0][1];
+                            }
+
+
+                            return {meta: meta, data: data};
+
+
                         }
                     })
     }

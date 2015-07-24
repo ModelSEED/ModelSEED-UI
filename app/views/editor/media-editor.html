@@ -92,19 +92,19 @@
                 <i ng-if="item.checked" class="fa fa-check-square-o"></i>
                 <i ng-if="!item.checked" class="fa fa-square-o"></i>
             </td>
-            <td style="position: relative;">
+            <td>
                 {{item.name ? item.name : '--'}}
             </td>
-            <td style="position: relative;"> <!-- ng-click="editRxn($event, item)"  -->
+            <td> <!-- ng-click="editRxn($event, item)"  -->
                 {{item.id}}
             </td>
-            <td editable style="position: relative;">
+            <td editable>
                 {{item.concentration}}
             </td>
-            <td editable style="position: relative;">
+            <td editable>
                 {{item.minFlux}}
             </td>
-            <td editable style="position: relative;">
+            <td editable>
                 {{item.maxFlux}}
             </td>
 
