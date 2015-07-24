@@ -12,6 +12,9 @@ angular.module('config', []).service('config', function() {
                         solr_url: "https://www.patricbrc.org/api/"
                     };
 
+
+    this.paths = {media :"/chenry/public/modelsupport/media"};
+
     // wether or not to include plants UI components
     this.includePlants = false;
 })

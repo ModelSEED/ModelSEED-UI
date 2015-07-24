@@ -6,8 +6,9 @@
 */
 
 angular.module('MS', [])
-.service('MS', ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer', 'WS',
-    function($http, $log, $cacheFactory, $q, MV, WS) {
+.service('MS',
+    ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer', 'WS', 'config',
+    function($http, $log, $cacheFactory, $q, MV, WS, config) {
 
     var self = this;
 
@@ -169,18 +170,36 @@ angular.module('MS', [])
 
     }
 
-    this.getPublicMedia = function() {
-        var publicMedia = '/chenry/public/modelsupport/media';
+    this.listPublicMedia = function() {
+        var publicMedia = config.paths.media;
         return WS.listL(publicMedia)
                  .then(function(objs) {
+                     console.log('objs', objs)
 
+                        var media = [];
+                        for (var i=0; i<objs.length; i++) {
+                            var obj = objs[i];
+                            media.push({name: obj[7].name,
+                                        path: obj[2]+obj[0],
+                                        isMinimal: obj[7].isMinimal ? true : false,
+                                        isDefined: obj[7].isDefined ? true : false,
+                                        type: obj[7].type});
+                        }
+
+                        return media;
+                  })
+    }
+
+    this.listMediaDropdown = function() {
+        var publicMedia = config.mediaPath
+        return WS.listL(publicMedia)
+                 .then(function(objs) {
                         var media = [];
                         for (var i=0; i<objs.length; i++) {
                             media.push({name: objs[i][7].name,
                                         path: objs[i][2]+objs[i][0] });
                         }
 
-                        $log.log('returned media', media)
                         return media;
                   })
     }
