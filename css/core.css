@@ -124,6 +124,10 @@ small.help-text {
     margin: 25px 0 0 0;
 }
 
+td[editable] {
+    position: relative;
+}
+
 .editable-header {
     font-size: 24px;
 }
@@ -443,6 +447,10 @@ md-toolbar,
 }
 
 /* tables */
+
+tr[role=button] {
+    cursor: default;
+}
 
 .table {
     width: 100%;

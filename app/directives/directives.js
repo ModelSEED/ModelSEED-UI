@@ -1098,18 +1098,7 @@ function($compile, $stateParams) {
     }
 })
 
-.directive('mediaSelector', ['MS', function(MS) {
-    return {
-        link: function(scope, element, attr) {
 
-            MS.getPublicMedia()
-              .then(function(media) {
-                  scope.media = media
-
-              })
-        }
-    }
-}])
 /*
 .directive('proto', function() {
     return {
@@ -1160,12 +1149,17 @@ function($compile, $stateParams) {
             header: '=tableHeader',
             data: '=tableData',
             opts: '=tableOpts',
+            enablePaginatino: '@tablePagination',
             loading: '=tableLoading',
+            rowClick: '=tableRowClick',
             placeholder: '@tablePlaceholder',
         },
         templateUrl: 'app/views/general/table.html',
         link: function(scope, elem, attrs) {
 
+            scope.enablePagination =
+                scope.enablePagination ? enablePagination : true;
+            console.log('enable?', scope.enablePagination )
         }
     }
 }])
@@ -1178,11 +1172,13 @@ function($compile, $stateParams) {
             data: '=tableData',
             opts: '=tableOpts',
             loading: '=tableLoading',
+            rowClick: '=tableRowClick',
             placeholder: '@tablePlaceholder',
+            resultText: '@tableResultText',
         },
         templateUrl: 'app/views/general/table2.html',
         link: function(scope, elem, attrs) {
-
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
         }
     }
 }])
@@ -1307,27 +1303,20 @@ function($compile, $stateParams) {
     }
  }])
 
-.directive('autoFocus', ['$timeout', function($timeout) {
-    return {
-        restrict: 'AC',
-        link: function(scope, elem) {
-            $timeout(function(){
-                elem[0].focus();
-            }, 0);
-        }
-    }
-}])
-
 .directive('sortable', function() {
     return {
         restrict: 'EA',
         link: function(scope, elem, attrs) {
 
+            if (scope.opts.sort && ('desc' in scope.opts.sort) )
+            scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
+
+
             // see table styling in core.css for sorting carets
             scope.sortBy = function($event, name) {
                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
                 scope.opts.sort = {field: name, desc: desc};
-
+                /*
                 angular.element(elem).find('th').removeClass('sorting-asc')
                 angular.element(elem).find('th').removeClass('sorting-desc')
 
@@ -1337,12 +1326,22 @@ function($compile, $stateParams) {
                 } else {
                     angular.element($event.target).removeClass('sorting-desc')
                     angular.element($event.target).addClass('sorting-asc')
-                }
+                }*/
             }
         }
     }
  })
 
+ .directive('autoFocus', ['$timeout', function($timeout) {
+     return {
+         restrict: 'AC',
+         link: function(scope, elem) {
+             $timeout(function(){
+                 elem[0].focus();
+             }, 0);
+         }
+     }
+ }])
 
  .directive('search', function() {
      return {

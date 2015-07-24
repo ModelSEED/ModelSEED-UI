@@ -60,7 +60,10 @@
     <thead sortable>
         <tr>
             <th></th>
-            <th ng-repeat="h in opts.visible" ng-click="sortBy($event,h)">
+            <th ng-repeat="h in opts.visible"
+                ng-class="{'sorting-desc': opts.sort.field == h && opts.sort.desc,
+                           'sorting-asc': opts.sort.field == h && !opts.sort.desc}"
+                ng-click="sortBy($event,h)">
                 {{getLabel(h)}}
             </th>
         </tr>
