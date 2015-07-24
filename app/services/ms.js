@@ -174,8 +174,6 @@ angular.module('MS', [])
         var publicMedia = config.paths.media;
         return WS.listL(publicMedia)
                  .then(function(objs) {
-                     console.log('objs', objs)
-
                         var media = [];
                         for (var i=0; i<objs.length; i++) {
                             var obj = objs[i];
@@ -238,7 +236,7 @@ angular.module('MS', [])
 
                         var d = [];
                         for (i in res) {
-                            var gf = res[i];                            
+                            var gf = res[i];
                             gf.media = gf.media_ref ? gf.media_ref.split('/').pop() : '';
                         }
 

@@ -142,7 +142,7 @@ function($s, Biochem, $state, $stateParams, MS) {
     }
 
     $s.loadingMedia = true;
-    MS.listMediaDropdown()
+    MS.listPublicMedia()
       .then(function(media) {
           $s.media = media;
           $s.loadingMedia = false;
