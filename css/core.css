@@ -67,6 +67,7 @@ md-sidenav.md-locked-open {
 .ms-color { color: #26C6DA; }
 .ms-color-complete, .color-complete { color: #26DA4A; }
 .ms-color-error, .color-error { color: #DA265D; }
+.color-light-purple { color: #E5E4FF !important; }
 
 .inline { display: inline; }
 
@@ -109,7 +110,9 @@ pre {
     margin-bottom: auto;
 }
 
-
+.small {
+    font-size: .8em;
+}
 
 small.help-text {
     font-size: 8pt;

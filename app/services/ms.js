@@ -191,7 +191,7 @@ angular.module('MS', [])
     }
 
     this.listMediaDropdown = function() {
-        var publicMedia = config.mediaPath
+        var publicMedia = config.paths.media;
         return WS.listL(publicMedia)
                  .then(function(objs) {
                         var media = [];
