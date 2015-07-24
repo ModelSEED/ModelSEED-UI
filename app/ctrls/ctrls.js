@@ -87,7 +87,6 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
         item.loading = true;
         MS.getModelGapfills(item.path)
             .then(function(gfs) {
-                console.log('gfs', gfs)
                 item.relatedGapfills = gfs;
                 item.loading = false;
             })

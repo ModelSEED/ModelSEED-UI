@@ -216,11 +216,10 @@ angular.module('MS', [])
                             if (MV.isSelected(modelPath, fba))
                                 fba.checked = true;
 
-                            // consistency
-                            fba.path = fba.fba;
-                            delete fba['fba'];
-
-                            fba.media = fba.media.split('/').pop();
+                            // fixme: backwards compatible
+                            fba.path = fba.ref;
+                            
+                            fba.media = fba.media_ref.split('/').pop();
                             fba.timestamp = Date.parse(fba.rundate);
 
                             d.push(res[key]);
@@ -236,6 +235,12 @@ angular.module('MS', [])
         return $http.rpc('ms', 'list_gapfill_solutions', {model: path})
                     .then(function(res) {
                         $log.log('related gfs', res)
+
+                        var d = [];
+                        for (i in res) {
+                            var gf = res[i];
+                            gf.media = gf.media_ref.split('/').pop();
+                        }
 
                         return res;
                     }).catch(function() {
