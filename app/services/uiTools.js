@@ -18,7 +18,7 @@ angular.module('uiTools', [])
         months = {0: 'Jan', 1: 'Feb', 2: 'March', 3: 'April', 4: 'May',
                   5:'June', 6: 'July', 7: 'Aug', 8: 'Sept', 9: 'Oct',
                   10: 'Nov', 11: 'Dec'};
-                  
+
     this.relativeTime = function(timestamp) {
         var date = new Date()
 
@@ -72,6 +72,27 @@ angular.module('uiTools', [])
 
         if (name.length <= num) return name;
         else return name.slice(0, num)+'...';
+    }
+
+    this.tableToJSON = function(text) {
+        var table = text.split(/\r\n|\r|\n/g),
+            head = table.shift().split('\t'),
+            rows = table;
+
+        var json = [];
+        for (var i=0; i<rows.length; i++) {
+            var cols = rows[i].split('\t');
+
+            if (cols.length === 1) continue;
+
+            var obj = {}
+            for (var j=0; j<cols.length; j++) {
+                obj[head[j]] = cols[j]
+            }
+            json.push(obj)
+        }
+
+        return json;
     }
 
 });
