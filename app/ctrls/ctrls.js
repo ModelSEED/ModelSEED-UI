@@ -259,7 +259,7 @@ function($scope, MS, $log) {
     self.selectedItemChange = selectedItemChange;
     self.searchTextChange = searchTextChange;
 
-    MS.getPublicMedia()
+    MS.listMediaDropdown()
       .then(function(media) {
          var objs = [];
          for (var i=0; i<media.length; i++) {
