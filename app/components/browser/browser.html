@@ -196,15 +196,15 @@
                     {{item.name}}
                 </a>
 
-                <a ng-if="item.type == 'model' && edit.index != $index"
-                   ui-sref="app.modelPage({path: folder+'/'+item.name })"
+                <a ng-if="item.type != 'folder' && item.state && edit.index != $index"
+                   ui-sref="{{item.state}}({path: item.path })"
                    ng-click="prevent($event)">
                     {{item.name}}
                 </a>
 
                 <span ng-if="deleting">deleting...</span>
 
-                <span ng-if="(item.type != 'folder' && item.type != 'model') && edit.index != $index"
+                <span ng-if="item.type != 'folder' && !item.state && edit.index != $index"
                       ng-click="prevent($event)">
                     {{item.name}}
                 </span>

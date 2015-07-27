@@ -51,7 +51,23 @@ angular.module('Browser', ['uiTools'])
     // load initial data
     $scope.loading = true;
     WS.list($scope.folder).then(function(data) {
-        $scope.items = data;
+        var d = [];
+
+        // skip "hidden", mapping for links to pages
+        for (var i=0; i<data.length; i ++) {
+            var item = data[i]
+            if (item.name[0] == '.') continue;
+
+            if (item.type ==- "model")
+                item.state = 'app.modelPage';
+            else if (item.type === "media")
+                item.state = 'app.mediaPage';
+
+            d.push(item);
+        }
+
+        console.log('new', d)
+        $scope.items = d;
         $scope.loading = false;
     })
 

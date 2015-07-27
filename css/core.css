@@ -1,4 +1,8 @@
 
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
+
 body {
     font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -452,6 +456,9 @@ md-toolbar,
 /* tables */
 
 tr[role=button] {
+    cursor: default;
+}
+tr span[role=button] {
     cursor: default;
 }
 
