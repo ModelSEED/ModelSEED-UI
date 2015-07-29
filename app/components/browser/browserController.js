@@ -111,7 +111,6 @@ angular.module('Browser', ['uiTools'])
 
     // used for creating new folder, maybe other things later
     $scope.newPlaceholder = function() {
-        console.log('creating new place holder')
         $scope.placeHolder = true;
         $timeout(function() {
             $scope.$broadcast('placeholderAdded');
@@ -120,7 +119,6 @@ angular.module('Browser', ['uiTools'])
 
     // saves the folder name, updates view
     $scope.createFolder = function(name) {
-        console.log('creating folder', path(name))
         $scope.placeHolder = false;
 
         // if nothing entered, return

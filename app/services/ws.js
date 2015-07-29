@@ -70,7 +70,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     this.wsListToDict = function(ws) {
         return {name: ws[0],
                 type: ws[1],
-                path: ws[2],
+                path: ws[2]+ws[0],
                 modDate: ws[3],
                 id: ws[4],
                 owner: ws[5],
@@ -83,6 +83,13 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
     this.get = function(path) {
         $log.log('get (object)', path)
+
+        $http.rpc('ms', 'get_model', {model: '/nconrad@patricbrc.org/home/models/28037.93_model'})
+                    .then(function(res) {
+                        $log.log('export model (download sbml) response', res)
+                        return res;
+                    })
+
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
                         //$log.log('get (object) response', res)
@@ -180,6 +187,16 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
     }
 
+    // takes path of new folder, creates it
+    this.createFolder = function(path) {
+        var params = {objects: [[path, 'Directory']]};
+        return $http.rpc('ws', 'create', params).then(function(res) {
+                    $log.log('response', res)
+                    return res;
+                }).catch(function(e){
+                    console.error('Could not create folder', path, e.data.error)
+                })
+    }
 
     this.getModel = function(ws, name) {
         return self.getObject(ws, name)

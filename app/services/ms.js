@@ -26,16 +26,6 @@ angular.module('MS', [])
                 })
     }
 
-    // takes path of new folder, creates it
-    this.createFolder = function(path) {
-        var params = {objects: [[path, 'Directory']]};
-        return $http.rpc('ws', 'create', params).then(function(res) {
-                    $log.log('response', res)
-                    return res;
-                }).catch(function(e){
-                    console.error('Could not create folder', path, e.data.error)
-                })
-    }
 
     this.getDownloads = function(path) {
         var jsonPath = path,
