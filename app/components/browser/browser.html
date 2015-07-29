@@ -22,11 +22,16 @@
                             ng-value="status.progress">
         </md-progress-linear>
 
-        <div ng-if="!loading" class="pull-right">
-            <span class="ws-opt" ng-click="newPlaceholder()">
+
+        <div ng-if="!loading" class="pull-right" ng-init="wsOpts.filterHidden = 'one'">
+            <span class="ws-opt" ng-click="toggleHidden()">
+                <span ng-if="showHidden"><i class="icon-eye-minus"></i> hide hidden</span>
+                <span ng-if="!showHidden"><i class="icon-eye-plus"></i> show hidden</span>
+            </span>
+            <!--<span class="ws-opt" ng-click="newPlaceholder()">
                 <i class="icon-folder-add"></i>
                 new folder
-            </span>
+            </span>-->
             <span ng-if="path.length" class="ws-opt" ng-click="openUploader($event, folder)">
                 <i class="fa fa-cloud-upload"></i>
                 Upload...
@@ -168,7 +173,7 @@
             <td>-</td>
         </tr>
 
-        <tr ng-repeat="item in items | orderBy : predicate : reverse"
+        <tr ng-repeat="item in items | orderBy : predicate : reverse | filter : filterHidden"
             ng-class="{active: selected.index == $index}"
             ng-click="selectRow($event, $index, item)"
             ng-dblclick="goTo(item)" >
@@ -216,6 +221,7 @@
         </tr>
     </table>
 
+    <!-- right click dropdown context menu -->
     <div class="dropdown position-fixed" id="context-menu">
         <ul class="dropdown-menu" role="menu">
             <li>

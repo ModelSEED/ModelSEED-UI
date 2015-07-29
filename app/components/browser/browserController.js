@@ -3,9 +3,9 @@ angular.module('Browser', ['uiTools'])
 .controller('MyData',
 ['$scope', '$state', '$stateParams', 'WS', '$log',
  'uiTools', '$document', '$timeout', '$mdDialog', '$mdToast',
- 'Upload', '$mdSidenav', 'Dialogs',
+ 'Upload', '$mdSidenav', 'Dialogs', 'ViewOptions',
   function($scope, $state, $stateParams, WS, $log, uiTools, $document,
-           $timeout, $dialog,  $mdToast, Upload, $mdSidenav, Dialogs) {
+           $timeout, $dialog,  $mdToast, Upload, $mdSidenav, Dialogs, ViewOptions) {
 
     $scope.Upload = Upload;
     $scope.WS = WS;
@@ -56,7 +56,7 @@ angular.module('Browser', ['uiTools'])
         // skip "hidden", mapping for links to pages
         for (var i=0; i<data.length; i ++) {
             var item = data[i]
-            if (item.name[0] == '.') continue;
+            if (item.name[0] == '.') item.hidden = true;
 
             if (item.type ==- "model")
                 item.state = 'app.modelPage';
@@ -66,10 +66,20 @@ angular.module('Browser', ['uiTools'])
             d.push(item);
         }
 
-        console.log('new', d)
         $scope.items = d;
         $scope.loading = false;
     })
+
+    $scope.showHidden = ViewOptions.get('wsBrowser').showHidden;
+    $scope.toggleHidden = function() {
+        $scope.showHidden = !$scope.showHidden;
+        ViewOptions.set('wsBrowser', {showHidden: $scope.showHidden} )
+    }
+
+    $scope.filterHidden = function(item) {
+        if ($scope.showHidden == true) return true;
+        return !item.hidden;
+    }
 
     // method for retrieving links of all parent folders
     $scope.getLink = function(i) {
