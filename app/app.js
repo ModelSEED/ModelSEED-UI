@@ -164,6 +164,15 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/proto",
             templateUrl: 'app/views/proto.html',
             controller: 'Proto',
+        }).state('app.maps', {
+            url: "/maps",
+            templateUrl: 'app/views/maps.html',
+            controller: 'Maps',
+        })
+        .state('app.map', {
+            url: "/maps/{{id}}",
+            templateUrl: 'app/views/map.html',
+            controller: 'Map',
         })
 
         .state('app.faq', {

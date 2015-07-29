@@ -97,7 +97,6 @@ function(MS, WS, $dialog, $mdToast) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
 
-
                     $dialog.hide();
                 }
 

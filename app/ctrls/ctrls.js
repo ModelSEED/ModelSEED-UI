@@ -12,241 +12,6 @@ function($scope, $state) {
 
 }])
 
-.controller('MyModels',
-['$scope', 'WS', 'MS', '$compile', 'uiTools', '$mdDialog', 'Dialogs',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$log', '$timeout', 'ViewOptions',
-function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
-MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
-    var $self = $scope;
-
-    $scope.MS = MS;
-    $scope.uiTools = uiTools;
-    $scope.relativeTime = uiTools.relativeTime;
-
-    $scope.relTime = function(datetime) {
-        return $scope.relativeTime(Date.parse(datetime));
-    }
-
-    // microbes / plants view
-    $scope.view = ViewOptions.getType();
-
-    $scope.changeView = function(view) {
-        $scope.view = ViewOptions.changeType(view);
-    }
-
-    // table options
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
-
-    // the selected item for operations such as download, delete.
-    $scope.selected = null;
-
-    // load models
-    if (MS.myModels) {
-        $scope.data = MS.myModels;
-    } else {
-        $scope.loadingMicrobes = true;
-        MS.getModels().then(function(res) {
-            $scope.data = res;
-            $scope.loadingMicrobes = false;
-        }).catch(function(e) {
-            if (e.error.code === -32603)
-                $scope.error = 'Something seems to have went wrong. '+
-                               'Please try logging out and back in again.';
-            else
-                $scope.error = e.error.message;
-            $scope.loadingMicrobes = false;
-        })
-    }
-
-    $scope.showFBAs = function(item) {
-        $scope.showGapfills(item);
-
-        if (item.relatedFBAs) delete item.relatedFBAs;
-        else updateFBAs(item)
-    }
-
-    function updateFBAs(item) {
-        item.loading = true;
-        MS.getModelFBAs(item.path)
-            .then(function(fbas) {
-                console.log('fbas', fbas)
-                item.relatedFBAs = fbas;
-                item.loading = false;
-            })
-    }
-
-    $scope.showGapfills = function(item) {
-        if (item.relatedGapfills)
-            delete item.relatedGapfills;
-        else {
-            updateGapfills(item);
-        }
-    }
-
-    function updateGapfills(item) {
-        item.loading = true;
-        MS.getModelGapfills(item.path)
-            .then(function(gfs) {
-                item.relatedGapfills = gfs;
-                item.loading = false;
-            })
-    }
-
-    $scope.runFBA = function(ev, item) {
-        Dialogs.runFBA(ev, item, function() {
-            updateFBAs(item)
-        })
-    }
-
-    $scope.gapfill = function(ev, item) {
-        Dialogs.gapfill(ev, item, function() {
-            updateGapfills(item)
-        })
-    }
-
-    $scope.addFBA = function(e, fba, model) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var data = {model: model.path,
-                    fba: fba.path,
-                    org: model.orgName,
-                    media: fba.media};
-
-
-        if (fba.checked) {
-            MV.rm(data, true);
-            fba.checked = false;
-        } else {
-            MV.add(data);
-            fba.checked = true;
-        }
-    }
-
-
-    // fixme: use MV service and refs
-    $scope.$on('MV.event.change', function(e, item) {
-        // if added to MV
-        if (!item) return;
-
-        if (item === 'clear') {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    fba.checked = false;
-                }
-            }
-        } else {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-                if (!model.relatedFBAs) continue;
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-
-                    if (item.model === model.path && item.fba === fba.path)
-                        fba.checked = false;
-                }
-            }
-        }
-    })
-
-
-    // general operations
-    $scope.deleteFBA = function(e, i, model) {
-        e.stopPropagation();
-        WS.deleteObj(model.path)
-          .then(function(res) {
-              model.relatedFBAs.splice(i, 1);
-              model.fbaCount -= 1;
-          })
-    }
-
-    $scope.integrateGapfill = function(isIntegrated, model, gapfill) {
-        // if not integrated, integrate
-        // if integrated, unintegrate
-        gapfill.loading = true;
-        MS.manageGapfills(model.path, gapfill.id, isIntegrated ? 'U' : 'I')
-          .then(function(res) {
-              delete gapfill.loading;
-              for (var i=0; i < model.relatedGapfills.length; i++) {
-                  var gf = model.relatedGapfills[i];
-                  if (gf.id == gapfill.id) {
-                      model.relatedGapfills[i] = res
-                      break;
-                  }
-              }
-          })
-    }
-
-    $scope.deleteGapfill = function(i, model, gapfill) {
-        gapfill.loading = true;
-        MS.manageGapfills(model.path, gapfill.id, 'D')
-          .then(function(res) {
-              model.relatedGapfills.splice(i, 1)
-              model.gapfillCount -= 1;
-          })
-    }
-
-    $scope.toggleOperations = function(e, type, item) {
-        var tar = e.target;
-        e.stopPropagation();
-
-        // set selected item
-        $scope.selected = item;
-
-        $scope.loadingDownloads = true;
-        MS.getDownloads(item.path)
-          .then(function(dls) {
-              console.log('download stuff', dls)
-              $scope.selected.downloads = dls;
-              $scope.loadingDownloads = false;
-          })
-
-        if (type === 'download') {
-            if (!$mdSidenav('downloadOpts').isOpen())
-                $mdSidenav('downloadOpts').open();
-
-            $document.bind('click', function(e) {
-                $mdSidenav('downloadOpts').close()
-                $document.unbind(e)
-                $scope.selected = null;
-            })
-        } else if ($mdSidenav('downloadOpts').isOpen()) {
-            $mdSidenav('downloadOpts').close()
-        }
-    }
-
-    $scope.rmModel = function(ev, i, item) {
-        ev.stopPropagation();
-
-        var confirm = $mdDialog.confirm()
-            .title('WARNING')
-            .content('Are you sure you want to delete '+item.name+' and all associated data?')
-            .ariaLabel('Are you sure you want to delete '+item.name+' and all associated data?')
-            .ok('Delete it all!')
-            .cancel('No')
-            .clickOutsideToClose(true)
-            .targetEvent(ev);
-
-        $mdDialog.show(confirm).then(function() {
-            //delete both object and related data
-            var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name;
-            var p1 = WS.deleteObj(item.path),
-                p2 = WS.deleteObj(folder, true);
-            $q.all([p1,p2]).then(function(one, two) {
-                $log.log('removing entity', i)
-                $self.data.splice(i, 1)
-                Dialogs.showComplete('Deleted', item.name)
-            })
-        }, function() {
-            $log.log('not deleting')
-        });
-    }
-}])
-
 
 .controller('MediaDropdown', ['$scope', 'MS', '$log',
 function($scope, MS, $log) {
@@ -630,44 +395,18 @@ function ($scope, $timeout, MV, VizOpts) {
 
 
 .controller('Proto',
-['$scope', '$stateParams', 'WS',
-function($scope, $stateParams, WS) {
+['$scope', '$stateParams', 'WS', '$http',
+function($scope, $stateParams, WS, $http) {
 
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: null};
+    console.log('getting')
 
-    $scope.header = [{label: 'ID', key: 'id'},
-                     {label: 'function', key: 'function',
-                         formatter: function(item) {
-                            if (item.length)
-                                return item;
-                            else
-                                return '-';
-                         }},
-                     {label: 'subsystems', key: 'subsystems',
-                         formatter: function(item) {
-                            if (item.length)
-                                return item.join('<br>');
-                            else
-                                return '-';
-                         }},
-                     ];
+    var ref = "/nconrad@patricbrc.org/home/models/879462.4_model"
+    $http.rpc('ms', 'get_model', {model: ref})
+                .then(function(res) {
+                    console.log('response', res)
 
-    var obj = '/plantseed/Genomes/.Osativa-MSU6/minimal_genome';
-    $scope.loading = true;
-    WS.get(obj)
-      .then(function(res) {
-          var objs = res.data.features,
-              data = [];
-          for (var i=0; i<objs.length; i++) {
-              data.push({id: objs[i].id,
-                         function: objs[i].function})
-          }
-          $scope.features = objs;
-
-          $scope.loading = false;
-          console.log('data', $scope.features )
-      })
-
+                    return res;
+                })
 }])
 
 
@@ -701,18 +440,29 @@ function ($scope, $timeout, $mdSidenav, $log) {
     /**
      *  Options that persist across pages
     */
+   
+    var defaultSettings = {
+                            organismType: 'Microbes',
+                            wsBrowser: {showHidden: false}
+                          };
 
-    var type = JSON.parse( localStorage.getItem('ViewOptions') );
+    // get stored options
+    var options = JSON.parse( localStorage.getItem('ViewOptions') );
 
-    this.changeType = function(selection) {
-        type = selection;
-        localStorage.setItem('ViewOptions', JSON.stringify(type) )
-        return type;
+    // verify previous settings or reset
+    if (!options || !angular.equals(Object.keys(options), Object.keys(defaultSettings)) ) {
+        options = defaultSettings;
+        localStorage.setItem('ViewOptions', JSON.stringify(options) )
     }
 
-    this.getType = function() {
-        console.log('type', type)
-        return type ? type : 'Microbes';
+    this.set = function(key, value) {
+        options[key] = value;
+        localStorage.setItem('ViewOptions', JSON.stringify(options) )
+        return options[key];
+    }
+
+    this.get = function(key) {
+        return options[key];
     }
 
 }])

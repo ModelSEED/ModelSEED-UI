@@ -534,22 +534,6 @@ table thead[sortable] th.sorting-asc:after {
 md-input-container[pagination] span {
     margin-right: 10px;
 }
-/*
-.table-controls .table-settings {
-    margin: 0 10px 0 0;
-}
-
-.table-controls .table-settings button {
-    padding: 0px 5px;
-}
-
-.table-controls .query-opt {
-    margin: 10px 10px 0 0;
-}
-
-.table-controls .query-input {
-    width: 200px;
-}*/
 
 .table-controls .btn-reconstruct {
     margin: 0 0 0 50px;
@@ -980,9 +964,6 @@ input[name=upload] {
 .icon-tools {
     font-weight: 600;
 }
-
-
-
 /* end icon mods */
 
 

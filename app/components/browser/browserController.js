@@ -58,7 +58,7 @@ angular.module('Browser', ['uiTools'])
             var item = data[i]
             if (item.name[0] == '.') item.hidden = true;
 
-            if (item.type ==- "model")
+            if (item.type === "model")
                 item.state = 'app.modelPage';
             else if (item.type === "media")
                 item.state = 'app.mediaPage';
