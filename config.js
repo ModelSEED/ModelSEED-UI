@@ -16,5 +16,5 @@ angular.module('config', []).service('config', function() {
     this.paths = {media :"/chenry/public/modelsupport/media"};
 
     // wether or not to include plants UI components
-    this.includePlants = false;
+    this.includePlants = true;
 })
