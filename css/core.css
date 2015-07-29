@@ -1,7 +1,4 @@
 
-[ng\:cloak], [ng-cloak], .ng-cloak {
-  display: none !important;
-}
 
 body {
     font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -329,68 +326,6 @@ md-toolbar,
     background-color: #aaa;
     margin: 10px 0;
 }
-
-/*
-#selected-models .header {
-    margin: 15px 7px;
-    font-size: .9em;
-    color: #9f9f9f;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #9f9f9f;
-}
-
-#selected-models a {
-    text-decoration: none;
-}
-#selected-models a,
-#selected-models .icon-lab {
-    color: #fff;
-}
-
-#selected-models .selected-data-item,
-#selected-models .warning-msg {
-    border-left: 4px solid #555;
-    padding-left: 5px;
-}
-#selected-models .warning-msg-select {
-    color: #9f9f9f;
-}
-
-#selected-models .selected-data-item.active {
-    border-left: 4px solid #aaa;
-}
-
-#selected-models .active a {
-    color: #dfdfdf;
-}
-
-#selected-models a:hover {
-    color: #dfdfdf;
-}
-
-
-#selected-models .icon-close,
-#selected-models .glyphicon-cog{
-    margin: .1em 0 0 0;
-    font-size: 1.3em;
-    display: inline-block;
-    position: absolute;
-    right: 10px;
-    top: auto;
-    line-height: .8em;
-}
-
-#selected-models .glyphicon {
-    right: 8px;
-}
-
-#selected-models ul {
-    margin-top: 5px;
-}
-
-#selected-models ul li {
-    font-size: .85em;
-}*/
 
 .selected-data-highlight {
     color: rgb(135, 206, 235) !important;
