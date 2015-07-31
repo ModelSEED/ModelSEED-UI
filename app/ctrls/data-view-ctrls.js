@@ -68,8 +68,8 @@ function($s, $sParams, MS) {
     $s.tabs = {tabIndex : 0};
 
     // table settings
-    $s.plantSimOpts = {query: '', limit: 20, offset: 0, sort: {field: 'hit_id'},
-                  visible: ['hit_id', 'e_value', 'bit_score', 'percent_id'] };
+    $s.plantSimOpts = {query: '', limit: 20, offset: 0,
+                       visible: ['hit_id', 'e_value', 'bit_score', 'percent_id'] };
     $s.prokaryoticSimOpts = angular.copy($s.plantSimOpts);
 
     // table specs
