@@ -77,7 +77,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'GenomeDataView',
             authenticate: true
         }).state('app.featurePage', {
-            url: "/feature/{genome}/{feature}",
+            url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',
             controller: 'FeatureDataView',
             authenticate: true
@@ -168,11 +168,14 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/maps",
             templateUrl: 'app/views/maps.html',
             controller: 'Maps',
-        })
-        .state('app.map', {
+        }).state('app.map', {
             url: "/maps/{{id}}",
             templateUrl: 'app/views/map.html',
             controller: 'Map',
+        }).state('app.json', {
+            url: "/json{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/json.html',
+            controller: 'Json',
         })
 
         .state('app.faq', {

@@ -53,15 +53,19 @@ angular.module('Browser', ['uiTools'])
     WS.list($scope.folder).then(function(data) {
         var d = [];
 
-        // skip "hidden", mapping for links to pages
+        // skip "hidden"; mapping for links to pages
         for (var i=0; i<data.length; i ++) {
-            var item = data[i]
+            var item = data[i];
             if (item.name[0] == '.') item.hidden = true;
 
             if (item.type === "model")
                 item.state = 'app.modelPage';
             else if (item.type === "media")
                 item.state = 'app.mediaPage';
+            else if (item.name.slice(0,3) === "map")
+                item.state = 'app.json';
+            else if (item.type === "genome")
+                item.state = 'app.genomePage';
 
             d.push(item);
         }

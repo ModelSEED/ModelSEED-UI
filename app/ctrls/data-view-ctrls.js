@@ -86,7 +86,6 @@ function($scope, $state, $sParams, WS, tools) {
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
-    console.log('name', name)
 
     //$scope.Tabs = Tabs;
     //Tabs.totalTabCount = 1;
@@ -102,7 +101,6 @@ function($scope, $state, $sParams, WS, tools) {
 
      $scope.loading = true;
      WS.get(path).then(function(res) {
-         console.log('res', res)
 
          $scope.media =  tools.tableToJSON(res.data)
          console.log('media ',$scope.media)
