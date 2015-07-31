@@ -58,14 +58,7 @@ angular.module('Browser', ['uiTools'])
             var item = data[i];
             if (item.name[0] == '.') item.hidden = true;
 
-            if (item.type === "model")
-                item.state = 'app.modelPage';
-            else if (item.type === "media")
-                item.state = 'app.mediaPage';
-            else if (item.name.slice(0,3) === "map")
-                item.state = 'app.json';
-            else if (item.type === "genome")
-                item.state = 'app.genomePage';
+            item.state = getState(item);
 
             d.push(item);
         }
@@ -349,8 +342,21 @@ angular.module('Browser', ['uiTools'])
 
     $scope.goTo = function(item) {
         if (item.type === 'folder')
-            $state.go('app.myData', {dir: path(item.name)})
-        else if (item.type === 'model')
-            $state.go('app.modelPage', {path: path(item.name) })
+            $state.go('app.myData', {dir: item.path})
+        else {
+            var state = getState(item)
+            if (state) $state.go(state, {path: item.path })
+        }
+    }
+
+    function getState(item) {
+        if (item.type === "model")
+            return 'app.modelPage';
+        else if (item.type === "media")
+            return 'app.mediaPage';
+        else if (item.name.slice(0,3) === "map")
+            return 'app.json';
+        else if (item.type === "genome")
+            return 'app.genomePage';
     }
 }])
