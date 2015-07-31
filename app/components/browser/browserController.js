@@ -55,7 +55,7 @@ angular.module('Browser', ['uiTools'])
 
         // skip "hidden"; mapping for links to pages
         for (var i=0; i<data.length; i ++) {
-            var item = data[i]
+            var item = data[i];
             if (item.name[0] == '.') item.hidden = true;
 
             if (item.type === "model")

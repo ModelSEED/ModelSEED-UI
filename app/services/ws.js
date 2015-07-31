@@ -84,12 +84,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     this.get = function(path) {
         $log.log('get (object)', path)
 
-        $http.rpc('ms', 'get_model', {model: '/nconrad@patricbrc.org/home/models/28037.93_model'})
-                    .then(function(res) {
-                        $log.log('export model (download sbml) response', res)
-                        return res;
-                    })
-
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
                         //$log.log('get (object) response', res)
