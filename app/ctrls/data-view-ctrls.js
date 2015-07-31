@@ -58,22 +58,36 @@ function($scope, $sParams, WS) {
 
 .controller('FeatureDataView',
 ['$scope', '$stateParams', 'MS',
-function($scope, $sParams, MS) {
+function($s, $sParams, MS) {
 
     // path and name of object
     var featureID = $sParams.feature,
         genome = $sParams.genome;
 
-    $scope.featureID = featureID;
+    $s.featureID = featureID;
+    $s.tabs = {tabIndex : 0};
 
-    $scope.loading = true;
+    // table settings
+    $s.plantSimOpts = {query: '', limit: 20, offset: 0, sort: {field: 'hit_id'},
+                  visible: ['hit_id', 'e_value', 'bit_score', 'percent_id'] };
+    $s.prokaryoticSimOpts = angular.copy($s.plantSimOpts);
+
+    // table specs
+    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id'},
+               {label: 'E-Value', key: 'e_value'},
+               {label: 'Bit Score', key: 'bit_score'},
+               {label: 'Perecent ID', key: 'percent_id'}];
+    $s.prokaryoticSimSpec = angular.copy($s.plantSimSpec);
+
+    $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          $scope.features = res.features;
-          $scope.loading = false;
+          $s.plantSims = res.plant_similarities;
+          $s.prokaryoticSims = res.prokaryotic_similarities;
+          $s.loading = false;
       }).catch(function(error) {
-          $scope.error = error;
-          $scope.loading = false;
+          $s.error = error;
+          $s.loading = false;
       })
 }])
 
