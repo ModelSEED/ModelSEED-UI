@@ -4,11 +4,25 @@
 </div>
 <hr class="no-margin">
 
-<ng-table-two table-header="header"
-          table-data="features"
-          table-opts="opts"
-          table-loading="loading"
-          table-placeholder="Search thing">
-</ng-table-two>
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Plant Similarities">
+        <ng-table-two table-header="plantSimSpec"
+                  table-data="plantSims"
+                  table-opts="plantSimOpts"
+                  table-loading="loading"
+                  table-placeholder="Search plant similarities">
+        </ng-table-two>
+    </md-tab>
+
+    <md-tab label="Prokaryotic Similarities">
+        <ng-table-two table-header="prokaryoticSimSpec"
+                  table-data="prokaryoticSims"
+                  table-opts="prokaryoticSimOpts"
+                  table-loading="loading"
+                  table-placeholder="Search prokaryotic similarities">
+        </ng-table-two>
+    </md-tab>
+</md-tabs>
+
 
 <div ng-if="error" class="alert alert-danger">{{error}}</div>
