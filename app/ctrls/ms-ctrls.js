@@ -909,6 +909,17 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
     }
 }])
 
+.controller('Json',
+['$scope', '$stateParams', 'WS',
+function($s, $sParams, WS) {
+    $s.loading = true;
+    WS.get($sParams.path)
+      .then(function(json) {
+          $s.json = JSON.stringify(json, null, 4);
+          $s.loading = false;
+      })
+}])
+
 .controller('RunReconstruct',
 ['$scope',
 function($scope) {

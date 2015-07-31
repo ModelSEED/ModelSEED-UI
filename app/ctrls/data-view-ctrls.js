@@ -69,7 +69,7 @@ function($scope, $sParams, MS) {
     $scope.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          $scope.features = objs;
+          $scope.features = res.features;
           $scope.loading = false;
       }).catch(function(error) {
           $scope.error = error;

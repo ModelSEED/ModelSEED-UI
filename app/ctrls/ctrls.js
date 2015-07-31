@@ -400,13 +400,13 @@ function($scope, $stateParams, WS, $http) {
 
     console.log('getting')
 
-    var ref = "/nconrad@patricbrc.org/home/models/879462.4_model"
-    $http.rpc('ms', 'get_model', {model: ref})
-                .then(function(res) {
-                    console.log('response', res)
+    var ref = "/nconrad@patricbrc.org/home/public/pathways"
+    WS.list(ref)
+        .then(function(res) {
+            console.log('response', res)
 
-                    return res;
-                })
+            return res;
+        })
 }])
 
 
@@ -440,7 +440,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
     /**
      *  Options that persist across pages
     */
-   
+
     var defaultSettings = {
                             organismType: 'Microbes',
                             wsBrowser: {showHidden: false}
