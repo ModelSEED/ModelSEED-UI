@@ -77,7 +77,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'GenomeDataView',
             authenticate: true
         }).state('app.featurePage', {
-            url: "/feature/{genome}/{feature}",
+            url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',
             controller: 'FeatureDataView',
             authenticate: true
