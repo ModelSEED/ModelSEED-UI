@@ -38,8 +38,6 @@ angular.module('MS', [])
                  .then(function(args) {
                     var r = args[0], r2 = args[1];
 
-                    console.log('r', r)
-
                     var paths = [], objs = [];
                     for (var i=0; i<r.length; i++) {
                         var obj = r[i];

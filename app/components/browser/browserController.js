@@ -89,17 +89,12 @@ angular.module('Browser', ['uiTools'])
 
     // context menu open
     $scope.openMenu = function(e, i, item) {
-        console.log('called open row', e, i, item)
-        $scope.selected = {type: item.type ? item.type : 'Workspace',
-                           path: item.path+item.name,
-                           name: item.name,
-                           index: i};
-        console.log('selected item is ', $scope.selected)
+        $scope.selectRow(e, i , item, true);
     }
 
     // context menu close
     $scope.closeMenu = function(e, i, item) {
-        console.log('called close')
+        console.log('closing? ', $scope.edit)
         // if not editing something, remove selection
         if (!$scope.edit) {
             $scope.selected = undefined;
@@ -173,36 +168,43 @@ angular.module('Browser', ['uiTools'])
     }
 
 
-    $scope.selectRow = function(e, i, item) {
-        //console.log('called select row', e, i, item)
-        //toggleOperations(item);
-
-        $scope.select = true;
-        $scope.selected = {type: item.type ? item.type : 'Workspace',
-                           path: item.path+item.name,
+    $scope.selectRow = function(e, i, item, hideTop) {
+        $scope.select = hideTop ? false : true;
+        $scope.selected = {type: item.type ? item.type : null,
+                           path: item.path,
                            name: item.name,
                            index: i};
 
         e.stopPropagation();
         e.preventDefault();
 
-        // let template update
-        $timeout(function() { $document.bind('click', events); })
+        // if not context menu, let template update close top on document click
+        if (!hideTop) {
+            $timeout(function() { $document.bind('click', events); })
 
-        // don't interfere with context menu
-        function events() {
-            $scope.$apply(function() {
-                $scope.select = false;
-                $scope.selected = undefined;
-            })
-            $document.unbind('click', events);
+            // don't interfere with context menu
+            function events() {
+                $scope.$apply(function() {
+                    $scope.select = false;
+                    $scope.selected = undefined;
+                })
+                $document.unbind('click', events);
+            }
         }
 
-        if (item.type != 'folder')
-            WS.getDownloadURL(path(item.name))
+        if (item.type != 'folder') {
+            WS.getDownloadURL(item.path)
               .then(function(res) {
-                  $scope.selected.downloadURL = res[0];
+                    $scope.selected.downloadURL = res[0];
               })
+        }
+    }
+
+    $scope.triggerDownload = function(item) {
+        WS.getDownloadURL(item.path)
+          .then(function(res) {
+              window.open(res[0], "Download")
+          })
     }
 
     // updates the view (bruteforce for now)
@@ -340,12 +342,12 @@ angular.module('Browser', ['uiTools'])
         }
     }
 
-    $scope.goTo = function(item) {
+    $scope.goTo = function(item, state) {
         if (item.type === 'folder')
             $state.go('app.myData', {dir: item.path})
         else {
-            var state = getState(item)
-            if (state) $state.go(state, {path: item.path })
+            if (!state) var state = getState(item);
+            if (state) $state.go(state, {path: item.path });
         }
     }
 

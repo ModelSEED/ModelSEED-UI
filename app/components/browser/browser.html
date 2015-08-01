@@ -47,12 +47,6 @@
                        onchange="angular.element(this).scope().createNode(this.files)" />
             </form>-->
 
-            <!--
-            <span class="ws-opt" >
-                <i class="fa fa-plus"></i>
-                new object
-            </span>
-            -->
             <!--<span>
                 <input type="text" class="form-control input-sm pull-right" ng-model="wsSearch" placeholder="search {{path[0]}}..." >
             </span>-->
@@ -103,39 +97,19 @@
                             <i class="icon-info"></i> Meta
                         </span>
 
-                        <span class="ws-opt" ng-click="deleteObj(selected)">
-                            <i class="icon-trash"></i> Delete
+                        <span class="ws-opt" ui-sref="app.json({path: selected.path})">
+                            {<b>JS</b>} View JSON
                         </span>
 
-                        <!--<span class="ws-opt">
-                            <i class="fa fa-edit"></i> Rename...
-                        </span>-->
                         <span class="ws-opt" ng-if="selected.type != 'folder'">
                             <a class="browser-download" href="{{selected.downloadURL}}">
                                 <i class="icon-file-download"></i> Download...
                             </a>
                         </span>
 
-                        <!--<span ng-if="path.length && selected.type == 'genome'"
-                              class="ws-opt"
-                              ng-click="reconstruct($event, folder+'/'+selected.name)">
-                            <i class="icon-tools"></i>
-                            Reconstruct
+                        <span class="ws-opt" ng-click="deleteObj(selected)">
+                            <i class="icon-trash"></i> Delete
                         </span>
-
-                        <span ng-if="path.length && selected.type == 'model'"
-                              class="ws-opt"
-                              ng-click="gapfill($event, folder+'/'+selected.name)">
-                            <i class="fa fa-circle"></i>
-                            Gapfill
-                        </span>
-
-                        <span ng-if="path.length && selected.type == 'model'"
-                              class="ws-opt"
-                              ng-click="runFBA($event, folder+'/'+selected.name)">
-                            <i class="fa fa-bar-chart"></i>
-                            Run FBA
-                        </span>-->
 
                     </div>
 
@@ -176,7 +150,9 @@
         <tr ng-repeat="item in items | orderBy : predicate : reverse | filter : filterHidden"
             ng-class="{active: selected.index == $index}"
             ng-click="selectRow($event, $index, item)"
-            ng-dblclick="goTo(item)" >
+            ng-dblclick="goTo(item)"
+            context-menu="openMenu($event, $index, item)"
+            data-target="context-menu">
 
             <td ng-if="item.type == 'folder'">
                 <i class="fa fa-folder-o fa-2x soft"></i>
@@ -225,25 +201,26 @@
     <div class="dropdown position-fixed" id="context-menu">
         <ul class="dropdown-menu" role="menu">
             <li>
-              <a role="menuitem" tabindex="1"
-                 ng-click="deleteObj(selected.name) ">
-                 <i class="fa fa-trash-o"></i> Delete...
-              </a>
+                <a role="menuitem" tabindex="1"
+                   ng-click="showMeta($event, selected)">
+                   <i class="icon-info"></i> View Meta
+                </a>
             </li>
             <li>
-              <a role="menuitem" tabindex="2"
-                 ng-click="editableName(selected)">
-                 <i class="fa fa-edit"> Rename...</i>
-                 <span ng-if="selected.type == 'folder'" class="label label-danger pull-right">No API</span>
-              </a>
+                <a role="menuitem" tabindex="2" ng-click="goTo(selected, 'app.json')">
+                    {<b>JS</b>} View JSON
+                </a>
+            </li>
+            <li>
+                <a role="menuitem" tabindex="3" ng-click="deleteObj(selected)">
+                    <i class="fa fa-trash-o"></i> Delete
+                </a>
             </li>
 
             <li ng-if="selected.type != 'folder'">
-              <a class="pointer" role="menuitem" tabindex="3"
-                 ng-click="panel.expanded = true">
-                <i class="fa fa-cloud-download"></i> Download
-                <span class="label label-danger pull-right">No API</span>
-              </a>
+                <a tabindex="4" href="{{selected.downloadURL}}">
+                    <i class="icon-file-download"></i> Download...
+                </a>
             </li>
         </ul>
     </div>

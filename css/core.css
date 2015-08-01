@@ -19,6 +19,10 @@ a:focus {
     color: #0081A0;
 }
 
+.position-fixed {
+    position: fixed;
+}
+
 .bold {
     font-weight: 800;
 }
