@@ -356,9 +356,11 @@ angular.module('Browser', ['uiTools'])
             return 'app.modelPage';
         else if (item.type === "media")
             return 'app.mediaPage';
-        else if (item.name.slice(0,3) === "map")
-            return 'app.json';
+        else if (item.type === "png")
+            return 'app.image';
         else if (item.type === "genome")
             return 'app.genomePage';
+        else if (item.name.slice(0,3) === "map")
+            return 'app.map';
     }
 }])

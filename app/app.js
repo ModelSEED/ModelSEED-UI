@@ -170,13 +170,17 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/maps.html',
             controller: 'Maps',
         }).state('app.map', {
-            url: "/maps/{{id}}",
-            templateUrl: 'app/views/map.html',
+            url: "/maps{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/map.html',
             controller: 'Map',
         }).state('app.json', {
             url: "/json{path:nonURIEncoded}",
             templateUrl: 'app/views/data/json.html',
             controller: 'Json',
+        }).state('app.image', {
+            url: "/image{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/image.html',
+            controller: 'Image',
         })
 
         .state('app.faq', {

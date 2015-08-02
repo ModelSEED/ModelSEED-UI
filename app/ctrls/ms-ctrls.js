@@ -91,7 +91,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
 
-    console.log('$stateParams.tab', $stateParams.tab)
     if ($stateParams.tab === 'compounds')
         $s.tabs = {selectedIndex : 1};
     else
@@ -146,7 +145,6 @@ function($s, Biochem, $state, $stateParams, MS) {
           $s.media = media;
           $s.loadingMedia = false;
       })
-
 
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
@@ -907,17 +905,6 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
             $log.log('not deleting')
         });
     }
-}])
-
-.controller('Json',
-['$scope', '$stateParams', 'WS',
-function($s, $sParams, WS) {
-    $s.loading = true;
-    WS.get($sParams.path)
-      .then(function(json) {
-          $s.json = JSON.stringify(json, null, 4);
-          $s.loading = false;
-      })
 }])
 
 .controller('RunReconstruct',

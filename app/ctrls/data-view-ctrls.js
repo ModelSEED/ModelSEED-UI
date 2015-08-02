@@ -2,6 +2,41 @@
 angular.module('DataViewCtrls', [])
 
 
+.controller('Json',
+['$scope', '$stateParams', 'WS',
+function($s, $sParams, WS) {
+    $s.loading = true;
+    WS.get($sParams.path)
+      .then(function(json) {
+          $s.json = JSON.stringify(json, null, 4);
+          $s.loading = false;
+      })
+}])
+
+.controller('Map',
+['$scope', '$stateParams', 'WS',
+function($s, $sParams, WS) {
+    $s.name = $sParams.path.split('/').pop();    
+
+    $s.loading = true;
+    WS.get($sParams.path)
+      .then(function(data) {
+          $s.loading = false;
+      })
+}])
+
+.controller('Image',
+['$scope', '$stateParams', 'WS',
+function($s, $sParams, WS) {
+    $s.name = $sParams.path.split('/').pop();
+
+    $s.loading = true;
+    WS.get($sParams.path)
+      .then(function(res) {
+          $s.data = res.data;
+          $s.loading = false;
+      })
+}])
 
 .controller('GenomeDataView',
 ['$scope', '$stateParams', 'WS',
