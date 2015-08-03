@@ -32,8 +32,8 @@ angular.module('core-directives')
 
 
 
-.directive('pathway', ['$compile', 'config', 'WS',
-function($compile, config, WS) {
+.directive('pathway', ['$compile', 'config', 'WS', '$q',
+function($compile, config, WS, $q) {
     return {
         restrict: 'EA',
         scope: {
@@ -48,29 +48,25 @@ function($compile, config, WS) {
         link: function($s, elem, attrs) {
             console.log('pathway widget')
 
-            // get image
+            // get image and map data
             $s.loading = true;
-            var imgPath = config.paths.maps.replace('maps', 'kegg')+$s.name+'.png';
-            WS.get(imgPath)
-              .then(function(res) {
-                  console.log('image', res)
-                  $s.encodedImage = res.data;
-              })
+            var imgPath = config.paths.maps.replace('maps', 'kegg')+$s.name+'.png',
+                p1 = WS.get(imgPath),
+                p2 = WS.get(config.paths.maps+$s.name)
 
-            // get map data
-            WS.get(config.paths.maps+$s.name)
-              .then(function(res) {
+            $q.all([p1, p2])
+              .then(function(args) {
+                  $s.loading = false;                  
+                  $s.encodedImage = args[0].data;
+                  $s.mapData = args[1].data;
 
-                  $s.mapData = res.data;
-
-                  $s.loading = false;
                   var params = {elem: 'pathway-'+$s.name,
                                 usingImage: true,
                                 mapName: $s.name,
                                 mapData: $s.mapData,
-                                models: [$s.model]}
+                                models: [$s.model] }
                   var pathway = new ModelSeedPathway(params);
-              })
+               })
         }
     }
 }])

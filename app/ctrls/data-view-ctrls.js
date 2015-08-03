@@ -131,10 +131,6 @@ function($scope, $state, $sParams, WS, tools) {
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
 
-    //$scope.Tabs = Tabs;
-    //Tabs.totalTabCount = 1;
-
-
     $scope.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
     $scope.mediaHeader = [{label: 'Name', key: 'name'},
                           {label: 'ID', key: 'id'},
@@ -145,9 +141,7 @@ function($scope, $state, $sParams, WS, tools) {
 
      $scope.loading = true;
      WS.get(path).then(function(res) {
-
          $scope.media =  tools.tableToJSON(res.data)
-         console.log('media ',$scope.media)
          $scope.loading = false;
      }).catch(function(e) {
          console.log('the error', e)
