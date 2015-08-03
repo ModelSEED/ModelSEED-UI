@@ -16,13 +16,8 @@ function($s, $sParams, WS) {
 .controller('Map',
 ['$scope', '$stateParams', 'WS',
 function($s, $sParams, WS) {
-    $s.name = $sParams.path.split('/').pop();    
-
-    $s.loading = true;
-    WS.get($sParams.path)
-      .then(function(data) {
-          $s.loading = false;
-      })
+    var name = $sParams.path.split('/').pop();
+    $s.name = name;
 }])
 
 .controller('Image',
@@ -166,9 +161,9 @@ function($scope, $state, $sParams, WS, tools) {
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
- 'ModelParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', 'config',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem,
-         ModelParser, $compile, $timeout, uiTools, Tabs, $mdSidenav, $document) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, config) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -186,7 +181,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
     var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
 
     $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 6;
+    Tabs.totalTabCount = 1;
 
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -200,6 +195,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
     $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
     $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
     $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
 
     // reaction table spec
     $scope.rxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn',
@@ -233,28 +229,39 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                          {label: 'Compartment', key: 'compartment'}];
 
 
-     $scope.geneHeader = [{label: 'Gene', key: 'id'},
-                          {label: 'Reactions', key: 'reactions', newTabList: true,
+    $scope.geneHeader = [{label: 'Gene', key: 'id'},
+                         {label: 'Reactions', key: 'reactions', newTabList: true,
                               call: function(e, item) {
                                   $scope.toggleView(e, 'rxn', item );
                               }
-                          }];
+                         }];
 
-     $scope.compartmentHeader = [{label: 'Compartment', key: 'id'},
-                                 {label: 'Name', key: 'id'},
-                                 {label: 'pH', key: 'pH'},
-                                 {label: 'Potential', key: 'potential'}]
+    $scope.compartmentHeader = [{label: 'Compartment', key: 'id'},
+                                {label: 'Name', key: 'id'},
+                                {label: 'pH', key: 'pH'},
+                                {label: 'Potential', key: 'potential'}]
 
-     $scope.biomassHeader = [{label: 'Biomass', key: 'id'},
-                             {label: 'Compound', key: 'cpdID'},
-                             {label: 'Name', key: 'name'},
-                             {label: 'Coefficient', key: 'coefficient'},
-                             {label: 'Compartment', key: 'compartment'}]
+    $scope.biomassHeader = [{label: 'Biomass', key: 'id'},
+                            {label: 'Compound', key: 'cpdID'},
+                            {label: 'Name', key: 'name'},
+                            {label: 'Coefficient', key: 'coefficient'},
+                            {label: 'Compartment', key: 'compartment'}]
 
+    $scope.mapHeader = [{label: 'ID', key: 'id',
+                            click: function(item) {
+                               Tabs.addTab(item.id);
+                            }
+                        }]
+
+    $scope.test = function() {
+        console.log('TESTING')
+    }
 
      // fetch object data and parse it.
      $scope.loading = true;
      WS.get(path).then(function(res) {
+         $scope.model = res.data;
+
          var data = ModelParser.parse(res.data);
 
          $scope.rxns = data.reactions;
@@ -264,7 +271,23 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
          $scope.biomass = data.biomass;
          $scope.loading = false;
      }).catch(function(e) {
-         console.log('the error', e)
+         $scope.error = e;
+         $scope.loading = false;
+     })
+
+     $scope.loadingMaps = true;
+     WS.listL(config.paths.maps)
+       .then(function(d) {
+         console.log('maps', d);
+
+         var maps = [];
+         for (var i=0; i < d.length; i++) {
+             maps.push({id: d[i][0]})
+         }
+
+         $scope.maps = maps;
+         $scope.loadingMaps = false;
+     }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
      })

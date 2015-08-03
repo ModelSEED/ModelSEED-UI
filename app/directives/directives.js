@@ -31,6 +31,53 @@ angular.module('core-directives')
 }])
 
 
+
+.directive('pathway', ['$compile', 'config', 'WS',
+function($compile, config, WS) {
+    return {
+        restrict: 'EA',
+        scope: {
+            name: '=pathway',
+            model: '=model',
+        },
+        template: '<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>'+
+                  '<div class="pathway-container">'+
+                        '<img src="data:image/png;base64,{{encodedImage}}">'+
+                        '<div id="pathway-{{name}}" class="pathway"></div>'+
+                  '</div>',
+        link: function($s, elem, attrs) {
+            console.log('pathway widget')
+
+            // get image
+            $s.loading = true;
+            var imgPath = config.paths.maps.replace('maps', 'kegg')+$s.name+'.png';
+            WS.get(imgPath)
+              .then(function(res) {
+                  console.log('image', res)
+                  $s.encodedImage = res.data;
+              })
+
+            // get map data
+            WS.get(config.paths.maps+$s.name)
+              .then(function(res) {
+
+                  $s.mapData = res.data;
+
+                  $s.loading = false;
+                  var params = {elem: 'pathway-'+$s.name,
+                                usingImage: true,
+                                mapName: $s.name,
+                                mapData: $s.mapData,
+                                models: [$s.model]}
+                  var pathway = new ModelSeedPathway(params);
+              })
+        }
+    }
+}])
+
+
+
+
 .directive('highlight', ['$compile', function($compile) {
     return {
         restrict: 'EA',
@@ -95,18 +142,6 @@ angular.module('core-directives')
                        '</a>'
 
             angular.element(elem).append(link);
-        }
-    }
- })
-
-
-.directive('pathTest', function() {
-    return {
-        link: function(scope, elem, attrs) {
-            angular.element(elem).kbasePathway({model_ws: 'janakakbase:CoreModels-VR-GP',
-                                                model_name: 'core_1000565.3_GP',
-                                                map_name: 'map00010',
-                                                map_ws: 'nconrad:paths'});
         }
     }
  })

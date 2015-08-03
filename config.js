@@ -13,7 +13,8 @@ angular.module('config', []).service('config', function() {
                     };
 
 
-    this.paths = {media :"/chenry/public/modelsupport/media"};
+    this.paths = {media: "/chenry/public/modelsupport/media",
+                  maps: "/nconrad/public/maps/"};
 
     // wether or not to include plants UI components
     this.includePlants = true;
