@@ -627,7 +627,8 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
         .then(function(res) {
 
           // remove non-genomes
-          for (var i=0; i<res.length; i++) {
+          var i = res.length;
+          while (i--) {
               var obj = res[i];
               if (obj.name[0] === '.' || obj.type !== 'genome')
                   res.splice(i,1);
