@@ -34,6 +34,13 @@
 
 
 <div ng-if="filters.myGenomes">
-    <br>
-    Coming soon.
+    <ng-table-two table-header="myPlantsHeader"
+                table-data="myPlants"
+                table-opts="myPlantsOpts"
+                table-loading="loadingMyPlants"
+                table-placeholder="Search my plants">
+    </ng-table-two>
+
+    <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
+    
 </div>

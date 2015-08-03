@@ -167,8 +167,6 @@ function($s, Biochem, $state, $stateParams, MS) {
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams', 'Biochem',
 function($s, Biochem, $state, $stateParams, Bio) {
-    console.log('$stateParams.cpd',$stateParams.cpd)
-
     $s.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
 
     var cpdID = $stateParams.cpd;;
@@ -206,8 +204,6 @@ function($s, Biochem, $state, $stateParams, Bio) {
                 rightCount += 1;
         }
 
-
-        console.log('done!')
         $s.substrateCount = leftCount;
         $s.productCount = rightCount;
     }
@@ -269,7 +265,6 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     }
 
     $scope.checkCpd = function(item) {
-        console.log('item', item)
         item.checked = item.checked ? false : true;
 
         if (item.checked)
@@ -566,20 +561,48 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$mdDialog', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS',
-function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
+['$scope', 'Patric', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS', 'Auth',
+function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
-    console.log('view', $scope.view)
 
     $scope.changeView = function(view) {
         $scope.view = ViewOptions.set('organismType', view);
-        console.log('new view', $scope.view)
     }
 
     $scope.showMenu = function() {
       $scope.menuVisible = true;
     }
+
+    $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
+
+    $scope.opts = {query: '',
+                   limit: 25,
+                   offset: 0,
+                   sort: {field: 'genome_name'},
+                   visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+
+   $scope.myPlantsOpts = {query: '',
+                          limit: 25,
+                          offset: 0,
+                          sort: null};
+
+    $scope.columns = [{prop: 'genome_name', label: 'Name'},
+                      {prop: 'genome_id', label: 'ID'},
+                      {prop: 'genus', label: 'Genus'},
+                      {prop: 'taxon_id', label: 'Tax ID'},
+                      {prop: 'contigs', label: 'Contigs'}]
+
+    $scope.myPlantsHeader = [{key: 'name', label: 'Name',
+                                link: {
+                                    state: 'app.genomePage',
+                                    getOpts: function(row) {
+                                        return {path: row.path}
+                                    }
+                                }
+                            }]
+
+
 
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
@@ -596,23 +619,30 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
           }
 
           $scope.plants = plants;
-          console.log('plants', plants)
       })
 
-    $scope.filters = {myGenomes: false};
+      // load my plants
+      $scope.loadingMyPlants = true;
+      WS.list('/'+Auth.user+'/plantseed/genomes/')
+        .then(function(res) {
 
-    $scope.opts = {query: '',
-                   limit: 25,
-                   offset: 0,
-                   sort: {field: 'genome_name'},
-                   visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+          // remove non-genomes
+          for (var i=0; i<res.length; i++) {
+              var obj = res[i];
+              if (obj.name[0] === '.' || obj.type !== 'genome')
+                  res.splice(i,1);
+          }
 
-    // all possible columns
-    $scope.columns = [{prop: 'genome_name', label: 'Name'},
-                      {prop: 'genome_id', label: 'ID'},
-                      {prop: 'genus', label: 'Genus'},
-                      {prop: 'taxon_id', label: 'Tax ID'},
-                      {prop: 'contigs', label: 'Contigs'}]
+          $scope.myPlants = res;
+          $scope.loadingMyPlants = false;
+      }).catch(function(e) {
+          if (e.error.code === -32603)
+              $scope.error = 'Something seems to have went wrong. '+
+                             'Please try logging out and back in again.';
+          else
+              $scope.error = e.error.message;
+          $scope.loadingMyPlantsMicrobes = false;
+      })
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -638,16 +668,17 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
 
     $scope.toggleMyGenomes = function() {
         // timeout for prom
-        $timeout(function() { update() });
+        $timeout(function() {
+            ViewOptions.set('viewMyGenomes', $scope.filters.myGenomes);
+            update()
+        });
     }
 
     // update visible genomes
     function update() {
-        console.log('fetch')
         $scope.loading = true;
         Patric.getGenomes( $scope.opts, $scope.filters.myGenomes )
               .then(function(genomes) {
-                  console.log('genomes', genomes)
                   $scope.genomes = genomes;
                   $timeout(function() {
                       $scope.loading = false;
@@ -661,7 +692,6 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
         Dialogs.reconstruct(ev,
             {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
             function(res) {
-                console.log('the response', res)
                 /*MS.addModel({name: res[0],
                              path: res[1],
                              orgName: item.genome_name})*/
@@ -671,10 +701,10 @@ function($scope, Patric, $dialog, $timeout, $http, Dialogs, ViewOptions, WS) {
 }])
 
 .controller('MyModels',
-['$scope', 'WS', 'MS', '$compile', 'uiTools', '$mdDialog', 'Dialogs',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$log', '$timeout', 'ViewOptions',
-function($scope, WS, MS, $compile, uiTools, $mdDialog, Dialogs,
-MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
+['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
+function($scope, WS, MS, uiTools, $mdDialog, Dialogs,
+MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     var $self = $scope;
 
     $scope.MS = MS;
@@ -687,14 +717,13 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
 
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
-    console.log('view', $scope.view)
 
     $scope.changeView = function(view) {
         $scope.view = ViewOptions.set('organismType', view);
-        console.log('new view', $scope.view)
     }
 
     // table options
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
@@ -729,7 +758,6 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
         item.loading = true;
         MS.getModelFBAs(item.path)
             .then(function(fbas) {
-                console.log('fbas', fbas)
                 item.relatedFBAs = fbas;
                 item.loading = false;
             })
@@ -860,7 +888,6 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
         $scope.loadingDownloads = true;
         MS.getDownloads(item.path)
           .then(function(dls) {
-              console.log('download stuff', dls)
               $scope.selected.downloads = dls;
               $scope.loadingDownloads = false;
           })
@@ -897,12 +924,11 @@ MV, $document, $mdSidenav, $q, $log, $timeout, ViewOptions) {
             var p1 = WS.deleteObj(item.path),
                 p2 = WS.deleteObj(folder, true);
             $q.all([p1,p2]).then(function(one, two) {
-                $log.log('removing entity', i)
                 $self.data.splice(i, 1)
                 Dialogs.showComplete('Deleted', item.name)
             })
         }, function() {
-            $log.log('not deleting')
+            console.log('not deleting')
         });
     }
 }])

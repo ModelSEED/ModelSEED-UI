@@ -88,7 +88,7 @@
     </tbody>
 </table>
 
-<div ng-if="genomes.docs.length == 0 && !loading" class="alert alert-warning">No genome found</div>
+<div ng-if="genomes.docs.length == 0 && !loading && view == 'Microbes'" class="alert alert-warning">No genome found</div>
 
 
 <ng-include src="'app/views/plants.html'" ng-if="view == 'Plants'"></ng-include>

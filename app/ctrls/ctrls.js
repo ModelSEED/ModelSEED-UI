@@ -443,6 +443,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
 
     var defaultSettings = {
                             organismType: 'Microbes',
+                            viewMyGenomes: false,
                             wsBrowser: {showHidden: false}
                           };
 

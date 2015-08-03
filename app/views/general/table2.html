@@ -42,16 +42,15 @@
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
                         | limitTo : opts.limit : opts.offset)" ng-click="rowClick(item)">
             <td ng-repeat="h in header">
-
                 <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row[h.key])"></span>
 
-                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( {{h.link.getOpts(row)}} )">
+                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )">
                     {{::row[h.key]}}
                 </a>
 
                 <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
                     <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{::row[h.key]}}</a>
-                    <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>                    
+                    <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>
                 </span>
 
             </td>
