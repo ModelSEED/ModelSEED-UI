@@ -46,7 +46,6 @@ function($compile, config, WS, $q) {
                         '<div id="pathway-{{name}}" class="pathway"></div>'+
                   '</div>',
         link: function($s, elem, attrs) {
-            console.log('pathway widget')
 
             // get image and map data
             $s.loading = true;
@@ -56,7 +55,7 @@ function($compile, config, WS, $q) {
 
             $q.all([p1, p2])
               .then(function(args) {
-                  $s.loading = false;                  
+                  $s.loading = false;
                   $s.encodedImage = args[0].data;
                   $s.mapData = args[1].data;
 
