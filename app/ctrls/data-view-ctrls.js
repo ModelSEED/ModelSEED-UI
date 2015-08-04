@@ -245,11 +245,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                             click: function(item) {
                                Tabs.addTab(item.id);
                             }
-                        }]
-
-    $scope.test = function() {
-        console.log('TESTING')
-    }
+                        },
+                        {label: 'Name', key: 'name'},
+                        {label: 'Rxns', key: 'rxnCount'},
+                        {label: 'Cpds', key: 'cpdCount'}
+                        ]
 
      // fetch object data and parse it.
      $scope.loading = true;
@@ -272,11 +272,14 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      $scope.loadingMaps = true;
      WS.listL(config.paths.maps)
        .then(function(d) {
-         console.log('maps', d);
 
          var maps = [];
          for (var i=0; i < d.length; i++) {
-             maps.push({id: d[i][0]})
+             maps.push({id: d[i][0],
+                        name: d[i][7].name,
+                        rxnCount: d[i][7].reaction_ids.split(',').length,
+                        cpdCount: d[i][7].compound_ids.split(',').length
+                        })
          }
 
          $scope.maps = maps;
@@ -369,15 +372,15 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
 }])
 
 .controller('FBADataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'Biochem',
- 'FBAParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', '$document',
-function($scope, $state, $sParams, Auth, MS, Biochem,
-         FBAParser, $compile, $timeout, uiTools, Tabs, $mdSidenav, $document) {
+['$scope', '$state', '$stateParams', 'Auth', 'WS', 'Biochem',
+ 'FBAParser', '$compile', '$timeout', 'uiTools', 'Tabs', '$mdSidenav', 'config',
+function($scope, $state, $sParams, Auth, WS, Biochem,
+         FBAParser, $compile, $timeout, uiTools, Tabs, $mdSidenav, config) {
 
     //var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
 
     $scope.Tabs = Tabs;
-    //Tabs.totalTabCount = 6;
+    Tabs.totalTabCount = 1;
 
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -394,76 +397,76 @@ function($scope, $state, $sParams, Auth, MS, Biochem,
     $scope.selected;
 
     // table options
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.exchangeFluxOpts =  {query: '', limit: 20, offset: 0, sort: null};
+    $scope.mapOpts =  {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
 
 
-    $scope.rxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn',
-                            call: function(e, item) {
-                                $scope.toggleView(e, 'rxn', item );
-                            }},
-                         {label: 'Name', key: 'name'},
-                         {label: 'EQ', key: 'eq'},
-                         {label: 'Genes', key: 'genes',
-                             formatter: function(item) {
-                                 if (!item.length) return '-';
+    $scope.rxnFluxesHeader = [{label: 'ID', key: 'id'},
+                              {label: 'Name', key: 'name'},
+                              {label: 'Flux', key: 'flux'},
+                              {label: 'Min', key: 'min'},
+                              {label: 'Max', key: 'max'},
+                              {label: 'Lower Bound', key: 'lower_bound'},
+                              {label: 'Upper Bound', key: 'upper_bound'}]
 
-                                 var links = [];
-                                 for (var i=0; i<item.length; i++) {
-                                     links.push('<a href="'+
-                                                    featureUrl+item[i]+'" target="_blank">'
-                                                 +item[i]+'</a>')
-                                 }
+    $scope.exchangeFluxHeader = [{label: 'ID', key: 'id'},
+                                 {label: 'Name', key: 'name'},
+                                 {label: 'Flux', key: 'flux'},
+                                 {label: 'Min', key: 'min'},
+                                 {label: 'Max', key: 'max'},
+                                 {label: 'Lower Bound', key: 'lower_bound'},
+                                 {label: 'Upper Bound', key: 'upper_bound'},
+                                 {label: 'Charge', key: 'charge'}]
 
-                                 return links.join('<br>');
-                             }
-                        }];
+    $scope.mapHeader = [{label: 'ID', key: 'id',
+                            click: function(item) {
+                               Tabs.addTab(item.id);
+                            }
+                        },
+                        {label: 'Name', key: 'name'},
+                        {label: 'Rxns', key: 'rxnCount'},
+                        {label: 'Cpds', key: 'cpdCount'}
+                        ]
 
-    $scope.cpdHeader = [{label: 'ID', key: 'id', newTab: 'cpd',
-                            call: function(e, item) {
-                                $scope.toggleView(e, 'cpd', item );
-                            }},
-                         {label: 'Name', key: 'name'},
-                         {label: 'Formula', key: 'formula'},
-                         {label: 'Charge', key: 'charge'},
-                         {label: 'Compartment', key: 'compartment'}];
+    // fetch object data and parse it.
+    $scope.loading = true;
+    WS.get(path).then(function(res) {
+        console.log('fba res', res)
 
-
-     $scope.geneHeader = [{label: 'Gene', key: 'id'},
-                          {label: 'Reactions', key: 'reactions', newTabList: true,
-                              call: function(e, item) {
-                                  $scope.toggleView(e, 'rxn', item );
-                              }
-                          }];
-
-     $scope.compartmentHeader = [{label: 'Compartment', key: 'id'},
-                                 {label: 'Name', key: 'id'},
-                                 {label: 'pH', key: 'pH'},
-                                 {label: 'Potential', key: 'potential'}]
-
-     $scope.biomassHeader = [{label: 'Biomass', key: 'id'},
-                             {label: 'Compound', key: 'cpdID'},
-                             {label: 'Name', key: 'name'},
-                             {label: 'Coefficient', key: 'coefficient'},
-                             {label: 'Compartment', key: 'compartment'}]
+        FBAParser.parse(res.data)
+                 .then(function(parsed) {
+                     console.log('these', parsed)
+                    $scope.fba = res.data;
+                    $scope.model = parsed.rawModel;
+                    $scope.rxnFluxes = parsed.fba.reaction_fluxes;
+                    $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 
 
-     // fetch object data and parse it.
-     $scope.loading = true;
-     MS.get(path).then(function(res) {
-         console.log('fba res', res)
+                    $scope.loading = false;
+                 });
+    })
 
-         var data = FBAParser.parse(res.data);
-         /*$scope.rxns = data.reactions;
-         $scope.cpds = data.compounds;
-         $scope.genes = data.genes;
-         $scope.compartments = data.compartments;
-         $scope.biomass = data.biomass;
-         $scope.loading = false;*/
-     })
+
+    $scope.loadingMaps = true;
+    WS.listL(config.paths.maps)
+      .then(function(d) {
+            var maps = [];
+            for (var i=0; i < d.length; i++) {
+                maps.push({id: d[i][0],
+                            name: d[i][7].name,
+                            rxnCount: d[i][7].reaction_ids.split(',').length,
+                            cpdCount: d[i][7].compound_ids.split(',').length
+                            })
+            }
+            $scope.maps = maps;
+            $scope.loadingMaps = false;
+    }).catch(function(e) {
+        $scope.error = e;
+        $scope.loading = false;
+    })
+
+
 }])
 
 .service('Tabs', ['$timeout', 'MS', '$stateParams', 'uiTools', 'ModelParser',
@@ -477,12 +480,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
      */
     var tabs = [];
     this.tabs = tabs;
-
     this.totalTabCount = 0;
-
     this.selectedIndex = 0;
-
-
     this.addTab = function (item) {
         // if is already open, go to it
         for (var i=0; i<tabs.length; i++) {
@@ -511,6 +510,10 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             }
         }
     };
+
+    this.clearTabs = function() {
+        self.tabs = [];
+    }
 
 }])
 
@@ -781,72 +784,122 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         return modelTables;
     };
 
+    return {cpdhash: this.cpdhash,
+            biohash: this.biohash,
+            rxnhash: this.rxnhash,
+            cmphash: this.cmphash,
+            genehash: this.genehash,
+            gfhash: this.gfhash,
+            parse: this.parse}
+
+
 }])
 
 
 
-.service('FBAParser', ['MS', 'ModelParser', function(MS, ModelParser) {
+.service('FBAParser',
+['WS', 'ModelParser',
+function(WS, ModelParser) {
     var self = this;
 
-    this.parse = function (data) {
-        console.log('parsing', data)
+    this.parse = function (fbaObj) {
+        self.fba = fbaObj;
 
-        var modelRef = data.fbamodel_ref.replace(/\|\|/g, '');
+        var modelRef = fbaObj.fbamodel_ref.replace(/\|\|/g, '');
 
-        MS.get(modelRef).then(function(res) {
-            console.log('modelobject', res)
-        })
+        return WS.get(modelRef).then(function(res) {
+                    this.modelData = res;
+                    this.model = ModelParser;
+                    var modelObj =  this.model.parse(res.data);
+                    return {rawModel: res.data, fba: fbaData(modelObj) };
+                })
+    }
 
-        ModelParser.parse()
+    function fbaData (modelObj) {
+        var modelreactions = modelObj.reactions;
+        var modelcompounds = modelObj.compounds;
+        var biomasses = modelObj.biomass;
+        var biomasscpds = modelObj.biomasscpds;
+        var modelgenes = modelObj.genes;
 
-        this.modelreactions = this.model.modelreactions;
-        this.modelcompounds = this.model.modelcompounds;
-        this.biomasses = this.model.biomasses;
-        this.biomasscpds = this.model.biomasscpds;
-        this.modelgenes = this.model.modelgenes;
+        var reaction_fluxes = [],
+            exchange_fluxes = [],
+            genes = [],
+            biomass = [];
 
-
-        this.FBAConstraints = self.data.FBAConstraints;
-        this.FBAMinimalMediaResults = self.data.FBAMinimalMediaResults;
-        this.FBAMinimalReactionsResults = self.data.FBAMinimalReactionsResults;
-        this.FBAMetaboliteProductionResults = self.data.FBAMetaboliteProductionResults;
+        var FBAConstraints = self.fba.FBAConstraints;
+        var FBAMinimalMediaResults = self.fba.FBAMinimalMediaResults;
+        var FBAReactionVariables = self.fba.FBAReactionVariables;
+        var FBACompoundVariables = self.fba.FBACompoundVariables;
+        var FBAMinimalReactionsResults = self.fba.FBAMinimalReactionsResults;
+        var FBAMetaboliteProductionResults = self.fba.FBAMetaboliteProductionResults;
+        var FBADeletionResults = self.fba.FBADeletionResults;
+        var FBACompoundBounds = self.fba.FBACompoundBounds;
+        var FBAReactionBounds = self.fba.FBAReactionBounds;
         this.rxnhash = {};
-        for (var i=0; i < self.data.FBAReactionVariables.length; i++) {
-            var rxnid = self.data.FBAReactionVariables[i].modelreaction_ref.split("/").pop();
-            self.data.FBAReactionVariables[i].ko = 0;
-            this.rxnhash[rxnid] = self.data.FBAReactionVariables[i];
+        for (var i=0; i < FBAReactionVariables.length; i++) {
+            var rxn = FBAReactionVariables[i];
+            var rxnid = rxn.modelreaction_ref.split("/").pop();
+            FBAReactionVariables[i].ko = 0;   // huh?!  leaving this here for now
+            this.rxnhash[rxnid] = FBAReactionVariables[i];
+
+            reaction_fluxes.push({name: model.rxnhash[rxnid]? model.rxnhash[rxnid].name : 'not found',
+                                 id: rxnid,
+                                 ko: rxn.ko,
+                                 min: rxn.min,
+                                 max: rxn.max,
+                                 lower_bound: rxn.lowerBound,
+                                 upper_bound: rxn.upperBound,
+                                 flux: rxn.value,
+                                })
         }
-        for (var i=0; i < self.data.reactionKO_refs.length; i++) {
-            var rxnid = self.data.reactionKO_refs[i].split("/").pop();
+
+        for (var i=0; i < self.fba.reactionKO_refs.length; i++) {
+            var rxnid = self.fba.reactionKO_refs[i].split("/").pop();
             this.rxnhash[rxnid].ko = 1;
         }
+
         this.cpdhash = {};
-        for (var i=0; i < self.data.FBACompoundVariables.length; i++) {
-            var cpdid = self.data.FBACompoundVariables[i].modelcompound_ref.split("/").pop();
-            self.data.FBACompoundVariables[i].additionalcpd = 0;
-            this.cpdhash[cpdid] = self.data.FBACompoundVariables[i];
+        for (var i=0; i < FBACompoundVariables.length; i++) {
+            var cpd = FBACompoundVariables[i];
+            var cpdid = cpd.modelcompound_ref.split("/").pop();
+            var modelcpd = model.cpdhash[cpdid];
+            cpd.additionalcpd = 0;
+
+            this.cpdhash[cpdid] = cpd;
+            exchange_fluxes.push({name: modelcpd ? modelcpd.name : 'not found',
+                                 charge: modelcpd ? modelcpd.charge : 'not found',
+                                 charge: modelcpd ? modelcpd.formula : 'not found',
+                                 id: cpdid,
+                                 min: cpd.min,
+                                 max: cpd.max,
+                                 lower_bound: cpd.lowerBound,
+                                 upper_bound: cpd.upperBound,
+                                 flux: cpd.value,
+                                 class: cpd.class
+                                })
         }
-        for (var i=0; i < self.data.additionalCpd_refs.length; i++) {
-            var cpdid = self.data.additionalCpd_refs[i].split("/").pop();
+        for (var i=0; i < self.fba.additionalCpd_refs.length; i++) {
+            var cpdid = self.fba.additionalCpd_refs[i].split("/").pop();
             this.cpdhash[cpdid].additionalcpd = 1;
         }
         this.biohash = {};
-        for (var i=0; i < self.data.FBABiomassVariables.length; i++) {
-            var bioid = self.data.FBABiomassVariables[i].biomass_ref.split("/").pop();
-            this.biohash[bioid] = self.data.FBABiomassVariables[i];
+        for (var i=0; i < self.fba.FBABiomassVariables.length; i++) {
+            var bioid = self.fba.FBABiomassVariables[i].biomass_ref.split("/").pop();
+            this.biohash[bioid] = self.fba.FBABiomassVariables[i];
         }
         this.maxpod = 0;
         this.metprodhash = {};
-        for (var i=0; i < this.FBAMetaboliteProductionResults.length; i++) {
+        for (var i=0; i < FBAMetaboliteProductionResults.length; i++) {
             this.tabList[4].columns[5].visible = 1;
-            var metprod = self.data.FBAMetaboliteProductionResults[i];
+            var metprod = FBAMetaboliteProductionResults[i];
             var cpdid = metprod.modelcompound_ref.split("/").pop();
             this.metprodhash[cpdid] = metprod;
         }
         this.genehash = {};
-        for (var i=0; i < this.modelgenes.length; i++) {
-            this.genehash[this.modelgenes[i].id] = this.modelgenes[i];
-            this.genehash[this.modelgenes[i].id].ko = 0;
+        for (var i=0; i < modelgenes.length; i++) {
+            this.genehash[modelgenes[i].id] = modelgenes[i];
+            this.genehash[modelgenes[i].id].ko = 0;
         }
         /*
         for (var i=0; i < self.data.geneKO_refs.length; i++) {
@@ -854,22 +907,22 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             this.genehash[geneid].ko = 1;
         }*/
         this.delhash = {};
-        for (var i=0; i < self.data.FBADeletionResults.length; i++) {
-            var geneid = self.data.FBADeletionResults[i].feature_refs[0].split("/").pop();
-            this.delhash[geneid] = self.data.FBADeletionResults[i];
+        for (var i=0; i < FBADeletionResults.length; i++) {
+            var geneid = FBADeletionResults[i].feature_refs[0].split("/").pop();
+            this.delhash[geneid] = FBADeletionResults[i];
         }
         this.cpdboundhash = {};
-        for (var i=0; i < self.data.FBACompoundBounds.length; i++) {
-            var cpdid = self.data.FBACompoundBounds[i].modelcompound_ref.split("/").pop();
-            this.cpdboundhash[cpdid] = self.data.FBACompoundBounds[i];
+        for (var i=0; i < FBACompoundBounds.length; i++) {
+            var cpdid = FBACompoundBounds[i].modelcompound_ref.split("/").pop();
+            this.cpdboundhash[cpdid] = self.fba.FBACompoundBounds[i];
         }
         this.rxnboundhash = {};
-        for (var i=0; i < self.data.FBAReactionBounds.length; i++) {
-            var rxnid = self.data.FBAReactionBounds[i].modelreaction_ref.split("/").pop();
-            this.rxnboundhash[rxnid] = self.data.FBAReactionBounds[i];
+        for (var i=0; i < FBAReactionBounds.length; i++) {
+            var rxnid = FBAReactionBounds[i].modelreaction_ref.split("/").pop();
+            this.rxnboundhash[rxnid] = self.fba.FBAReactionBounds[i];
         }
-        for (var i=0; i< this.modelgenes.length; i++) {
-            var mdlgene = this.modelgenes[i];
+        for (var i=0; i< modelgenes.length; i++) {
+            var mdlgene = modelgenes[i];
             if (this.genehash[mdlgene.id]) {
                 mdlgene.ko = this.genehash[mdlgene.id].ko;
             }
@@ -877,8 +930,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                 mdlgene.growthFraction = this.delhash[mdlgene.id].growthFraction;
             }
         }
-        for (var i=0; i< this.modelreactions.length; i++) {
-            var mdlrxn = this.modelreactions[i];
+        for (var i=0; i< modelreactions.length; i++) {
+            var mdlrxn = modelreactions[i];
             if (this.rxnhash[mdlrxn.id]) {
                 mdlrxn.upperFluxBound = this.rxnhash[mdlrxn.id].upperBound;
                 mdlrxn.lowerFluxBound = this.rxnhash[mdlrxn.id].lowerBound;
@@ -896,8 +949,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         }
         this.compoundFluxes = [];
         this.cpdfluxhash = {};
-        for (var i=0; i< this.modelcompounds.length; i++) {
-            var mdlcpd = this.modelcompounds[i];
+        for (var i=0; i< modelcompounds.length; i++) {
+            var mdlcpd = modelcompounds[i];
             if (this.cpdhash[mdlcpd.id]) {
                 mdlcpd.exchangerxn = " => "+mdlcpd.name+"[e]";
                 mdlcpd.upperFluxBound = this.cpdhash[mdlcpd.id].upperBound;
@@ -925,8 +978,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                 }
             }
         }
-        for (var i=0; i< this.biomasses.length; i++) {
-            var bio = this.biomasses[i];
+        for (var i=0; i< biomasses.length; i++) {
+            var bio = biomasses[i];
             if (this.biohash[bio.id]) {
                 bio.upperFluxBound = this.biohash[bio.id].upperBound;
                 bio.lowerFluxBound = this.biohash[bio.id].lowerBound;
@@ -934,7 +987,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                 bio.fluxMax = this.biohash[bio.id].max;
                 bio.flux = this.biohash[bio.id].value;
                 bio.fluxClass = this.biohash[bio.id].class;
-                this.modelreactions.push(bio);
+                modelreactions.push(bio);
             } else {
                 this.biohash[bio.id] = bio;
                 bio.upperFluxBound = 1000;
@@ -948,6 +1001,15 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             bio.disp_low_flux = bio.fluxMin + "<br>(" + bio.lowerFluxBound + ")";
             bio.disp_high_flux = bio.fluxMax + "<br>(" + bio.upperFluxBound + ")";
         }
+
+        var fbaObj = {reaction_fluxes: reaction_fluxes,
+                      exchange_fluxes: exchange_fluxes,
+                      genes: genes,
+                      biomass: biomass}
+
+        console.log('fbaObj', fbaObj);
+        return fbaObj
+        /*
         for (var i=0; i < this.biomasscpds.length; i++) {
             var biocpd = this.biomasscpds[i];
             if (this.biohash[biocpd.biomass]) {
@@ -956,7 +1018,9 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             if (this.metprodhash[biocpd.id]) {
                 biocpd.maxprod = this.metprodhash[biocpd.id].maximumProduction;
             }
-        }
+        }*/
     }
+
+    return {parse: this.parse}
 
 }])

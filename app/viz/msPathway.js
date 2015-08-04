@@ -2,7 +2,7 @@
  *  ModelSEEDPathway.js
  *
  *	Usage:
- *		var pathway = new ModelSeedPathway({elem: <dom element id>})
+ *		var pathway = new ModelSeedPathway({elem: <dom_element_id>})
  *
  * 	Requires:
  * 		ModelSeedVizConfig.js - configuration file things such as colors
@@ -21,8 +21,11 @@ function ModelSeedPathway(params) {
 
     var self = this;
 
-    self.models = params.models;
-    self.fbas = params.fbas;
+    self.models = params.models || null;
+    self.fbas = params.fbas || null;
+
+    var usingImage = params.usingImage || false,
+        useAbsFlux = params.absFlux || false;
 
     var config = new ModelSeedVizConfig();
 
@@ -39,11 +42,6 @@ function ModelSeedPathway(params) {
         max_y = 0,       // used to compute canvas size (height) based on data
         c_pad = 200,     // padding around max_x/max_y
         svg = undefined; // svg element for map
-
-    var models = params.models || null,
-        usingImage = params.usingImage || false;
-
-    console.log('models1!@#', models)
 
     drawMap()
 
@@ -95,7 +93,7 @@ function ModelSeedPathway(params) {
 
     // draw reactions
     function drawReactions() {
-        var count = models ? models.length : 1;
+        var count = self.models ? self.models.length : 1;
 
         // for each rxn on the map
         for (var i=0; i<rxns.length; i++) {
@@ -173,6 +171,7 @@ function ModelSeedPathway(params) {
 
             if (self.fbas) {
                 var fba_rxns = getFbaRxns(rxn.rxns);
+
                 if ([].concat.apply([], fba_rxns).length == 0 )
                     var addFBAResults = false;
                 else
@@ -181,7 +180,6 @@ function ModelSeedPathway(params) {
 
             // color flux depending on rxns found for each fba
             if (addFBAResults) {
-
                 var w = rxn.w / self.fbas.length;
 
                 // for each fba result
@@ -200,7 +198,6 @@ function ModelSeedPathway(params) {
                                 })
                                 .attr('height', h-1.5)
 
-
                     var flux;
 
                     // there may be more than one fba result on a box,
@@ -218,7 +215,7 @@ function ModelSeedPathway(params) {
                     }
 
                     if (typeof flux != 'undefined') {
-                        var color = config.getColor(flux, self.options.absFlux);
+                        var color = config.getColor(flux, useAbsFlux);
                         if (color)
                             rect.attr('fill', color);
                         else
@@ -612,14 +609,16 @@ function ModelSeedPathway(params) {
         for (var j=0; j<self.fbas.length; j++) {
             var fba = self.fbas[j];
             //if (!fba) continue;
-            fba_objs = fba.FBAReactionVariables;
+            var fba_objs = fba.FBAReactionVariables;
 
             // see if we can find the rxn in that fbas's list of reactions
             var found_rxn = [];
 
             for (var i in fba_objs) {
                 var fba_obj = fba_objs[i];
-                if (rxn_ids.indexOf(fba_obj.modelreaction_ref.split('/')[5].split('_')[0]) != -1)
+
+                // yeeeeep...
+                if (rxn_ids.indexOf(fba_obj.modelreaction_ref.split('/').pop().split('_')[0]) != -1)
                     found_rxn.push(fba_obj);
             }
 

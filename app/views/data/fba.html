@@ -6,93 +6,66 @@
 	</span>
 </h4>
 
-<div class="h2">Model</div>
+<div class="h2">FBA</div>
 <hr class="no-margin">
 
 
-<md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
-
+<md-tabs md-no-ink md-dynamic-height class="md-no-transition">
 	<md-tab>
-		<md-tab-label>Reactions</md-tab-label>
+		<md-tab-label>Reaction Fluxes</md-tab-label>
 		<md-tab-body>
-			<ng-table table-header="rxnHeader"
-						table-data="rxns"
-						table-opts="rxnOpts"
+			<ng-table-two table-header="rxnFluxesHeader"
+						table-data="rxnFluxes"
+						table-opts="rxnFluxesOpts"
 						table-loading="loading"
-						table-placeholder="Search reactions">
-			</ng-table>
+						table-placeholder="Search reaction fluxes">
+			</ng-table-two>
 		</md-tab-body>
 	</md-tab>
 
 	<md-tab>
-		<md-tab-label>Compounds</md-tab-label>
+		<md-tab-label>Exchange Fluxes</md-tab-label>
 		<md-tab-body>
-			<ng-table table-header="cpdHeader"
-						table-data="cpds"
-						table-opts="cpdOpts"
+			<ng-table-two table-header="exchangeFluxHeader"
+						table-data="exchangeFluxes"
+						table-opts="exchangeFluxOpts"
 						table-loading="loading"
-						table-placeholder="Search compounds">
-			</ng-table>
+						table-placeholder="Search exchange fluxes">
+			</ng-table-two>
 		</md-tab-body>
 	</md-tab>
 
 	<md-tab>
-		<md-tab-label>Genes</md-tab-label>
+		<md-tab-label>Pathways</md-tab-label>
 		<md-tab-body>
-			<ng-table table-header="geneHeader"
-						table-data="genes"
-						table-opts="geneOpts"
-						table-loading="loading"
-						table-placeholder="Search genes">
-			</ng-table>
+
+			<md-tabs md-selected="Tabs.selectedIndex" md-no-ink class="small-tabs pathway-tabs">
+				<md-tab>
+					<md-tab-label>Selection</md-tab-label>
+					<md-tab-body>
+						<ng-table-two table-header="mapHeader"
+								table-data="maps"
+								table-opts="mapOpts"
+								table-loading="loadingMaps"
+								table-placeholder="Search maps">
+						</ng-table-two>
+					<md-tab-body>
+				</md-tab>
+
+				<md-tab ng-repeat="tab in Tabs.tabs">
+					<md-tab-label>{{tab.title}}
+						<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+					</md-tab-label>
+					<md-tab-body>
+						<div pathway="tab.title" model="model" fba="fba"></div>
+					</md-tab-body>
+				</md-tab>
+			</md-tabs>
+
 		</md-tab-body>
 	</md-tab>
 
-	<md-tab>
-		<md-tab-label>Compartments</md-tab-label>
-		<md-tab-body>
-			<ng-table table-header="compartmentHeader"
-						table-data="compartments"
-						table-opts="compartmentOpts"
-						table-loading="loading"
-						table-placeholder="Search compartments">
-			</ng-table>
-		</md-tab-body>
-	</md-tab>
-
-	<md-tab>
-		<md-tab-label>Biomass</md-tab-label>
-		<md-tab-body>
-			<ng-table table-header="biomassHeader"
-						table-data="biomass"
-						table-opts="biomassOpts"
-						table-loading="loading"
-						table-placeholder="Search biomass eqs">
-			</ng-table>
-		</md-tab-body>
-	</md-tab>
-
-	<md-tab>
-		<md-tab-label>Gapfilling</md-tab-label>
-		<md-tab-body>
-			<ng-include src="'app/views/lists/expanded-gapfills.html'"></ng-include>
-		</md-tab-body>
-	</md-tab>
-
-
-	<md-tab ng-repeat="tab in Tabs.tabs">
-		<md-tab-label>{{tab.title}}
-			<span ng-if="tab.removable"
-                  ng-click="Tabs.removeTab(tab)"
-                  class="fa fa-remove hover">
-            </span>
-		</md-tab-label>
-		<md-tab-body>
-			<ng-include src="'app/views/lists/rxn-page.html'" onload="rxn = tab.title;" ng-controller="RxnPage"></ng-include>
-		</md-tab-body>
-	</md-tab>
 </md-tabs>
-
 
 <section ng-controller="SideNav">
 

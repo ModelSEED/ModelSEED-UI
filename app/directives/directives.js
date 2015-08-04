@@ -31,7 +31,6 @@ angular.module('core-directives')
 }])
 
 
-
 .directive('pathway', ['$compile', 'config', 'WS', '$q',
 function($compile, config, WS, $q) {
     return {
@@ -39,6 +38,7 @@ function($compile, config, WS, $q) {
         scope: {
             name: '=pathway',
             model: '=model',
+            fba: '=fba',
         },
         template: '<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>'+
                   '<div class="pathway-container">'+
@@ -47,25 +47,42 @@ function($compile, config, WS, $q) {
                   '</div>',
         link: function($s, elem, attrs) {
 
+            // for template caching
+            $s.$watch('model', function (val)  {
+                if (!val) return;
+                loadData();
+            })
+
+            // for template caching
+            $s.$watch('fba', function (val)  {
+                if (!val) return;
+                loadData();
+            })
+
             // get image and map data
-            $s.loading = true;
-            var imgPath = config.paths.maps.replace('maps', 'kegg')+$s.name+'.png',
-                p1 = WS.get(imgPath),
-                p2 = WS.get(config.paths.maps+$s.name)
+            function loadData(){
+                $s.loading = true;
+                var imgPath = config.paths.maps.replace('maps', 'kegg')+$s.name+'.png',
+                    mapPath = config.paths.maps+$s.name,
+                    p1 = WS.get(imgPath),
+                    p2 = WS.get(mapPath);
 
-            $q.all([p1, p2])
-              .then(function(args) {
-                  $s.loading = false;
-                  $s.encodedImage = args[0].data;
-                  $s.mapData = args[1].data;
+                $q.all([p1, p2])
+                  .then(function(args) {
+                      $s.loading = false;
+                      $s.encodedImage = args[0].data;
+                      $s.mapData = args[1].data;
 
-                  var params = {elem: 'pathway-'+$s.name,
-                                usingImage: true,
-                                mapName: $s.name,
-                                mapData: $s.mapData,
-                                models: [$s.model] }
-                  var pathway = new ModelSeedPathway(params);
-               })
+                      var params = {elem: 'pathway-'+$s.name,
+                                    usingImage: true,
+                                    mapName: $s.name,
+                                    mapData: $s.mapData,
+                                    models: [$s.model],
+                                    fbas: $s.fba ? [$s.fba] : null}
+
+                      var pathway = new ModelSeedPathway(params);
+                   })
+           }
         }
     }
 }])
