@@ -17,5 +17,5 @@ angular.module('config', []).service('config', function() {
                   maps: "/nconrad/public/maps/"};
 
     // wether or not to include plants UI components
-    this.includePlants = true;
+    this.includePlants = false;
 })
