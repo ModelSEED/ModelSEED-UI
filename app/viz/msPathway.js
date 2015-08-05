@@ -1,8 +1,15 @@
-/*
+/***
  *  ModelSEEDPathway.js
  *
  *	Usage:
- *		var pathway = new ModelSeedPathway({elem: <dom_element_id>})
+ *		var pathway = new ModelSeedPathway({
+ *		     	    	elem: '<dom_id_string>',            // required
+ *                      usingImage: <true|false>,           // default: false (optional)
+ *              	    mapName: $s.name,                   // map name (required?)
+ *              	    mapData: $s.mapData,                // map json (required)
+ *              	    models: [workspace_model_objects],  // model objects (required)
+ *              	    fbas: [fba_workspace_objects]       // fba objects (optional)
+ *                   })
  *
  * 	Requires:
  * 		ModelSeedVizConfig.js - configuration file things such as colors
@@ -40,7 +47,7 @@ function ModelSeedPathway(params) {
         r = 12,          // radial offset from circle.  Hooray for math degrees.
         max_x = 0,       // used to compute canvas size (width) based on data
         max_y = 0,       // used to compute canvas size (height) based on data
-        c_pad = 200,     // padding around max_x/max_y
+        c_pad = 20,     // padding around max_x/max_y
         svg = undefined; // svg element for map
 
     drawMap()
@@ -110,8 +117,8 @@ function ModelSeedPathway(params) {
                 h = rxn.h + 2;
 
             // adjust canvas size
-            if (x > max_x) max_x = x+w+c_pad;
-            if (y > max_y) max_y = y+h+c_pad;
+            if (x > max_x) max_x = x+2*w+c_pad;
+            if (y > max_y) max_y = y+2*h+c_pad;
 
             var group = svg.append('g').attr('class', 'rect');
 
