@@ -51,16 +51,16 @@ function($scope, $sParams, WS) {
                             }}
                      },
                      {label: 'Function', key: 'function',
-                         formatter: function(item) {
-                            if (item.length)
-                                return item;
+                         formatter: function(row) {
+                            if (item.function)
+                                return row.function;
                             else
                                 return '-';
                          }},
                      {label: 'Subsystems', key: 'subsystems',
-                         formatter: function(item) {
-                            if (item.length)
-                                return item.join('<br>');
+                         formatter: function(row) {
+                            if (row.subsystems)
+                                return row.subsystems.join('<br>');
                             else
                                 return '-';
                          }},
@@ -111,8 +111,10 @@ function($s, $sParams, MS, $http) {
                        {label: 'Bit Score', key: 'bit_score'},
                        {label: 'Perecent ID', key: 'percent_id'}];
     $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
-                                formatter: function(id) {
-                                    return '<a href="'+seedFeatureUrl+id+'" target="_blank">'+id+'</a>';
+                                formatter: function(row) {
+                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'
+                                                +row.hit_id+
+                                            '</a>';
                                 }},
                              {label: 'E-Value', key: 'e_value'},
                              {label: 'Bit Score', key: 'bit_score'},

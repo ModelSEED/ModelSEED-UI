@@ -32,7 +32,7 @@ a:focus {
 }
 
 .logo {  /* awaiting design */
-    margin-top: 3px;
+    margin-top: 2px;
     /*font-weight: 800;
     font-family: 'Varela Round', sans-serif;*/
 }
@@ -252,7 +252,7 @@ md-toolbar,
 
 .toolbar li i {
     display: inline-block;
-    padding-top: 8px;
+    padding-top: 10px;
     font-size: 30px;
     text-align: center;
 }
