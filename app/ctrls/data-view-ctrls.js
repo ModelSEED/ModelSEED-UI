@@ -52,18 +52,13 @@ function($scope, $sParams, WS) {
                      },
                      {label: 'Function', key: 'function',
                          formatter: function(row) {
-                            if (item.function)
-                                return row.function;
-                            else
-                                return '-';
+                             return row.function || '-';
                          }},
                      {label: 'Subsystems', key: 'subsystems',
-                         formatter: function(row) {
-                            if (row.subsystems)
-                                return row.subsystems.join('<br>');
-                            else
-                                return '-';
-                         }},
+                        formatter: function(row) {
+                            return row.subsystems.length ?
+                                   row.subsystems.join('<br>') : '-';
+                        }},
                      ];
 
 
