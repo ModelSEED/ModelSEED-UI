@@ -5,7 +5,12 @@
                         <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
                     </a>
                 </li>
-                <li ng-class="{ active: $state.includes('app.reconstruct') }">
+                <li ng-if="$root.includePlants" ng-class="{ active: $state.includes('app.plantAnnotations') }">
+                    <a ui-sref="app.plantAnnotations">
+                        <i class="icon-quill"></i> <span hide-sm>Annotations</span>
+                    </a>
+                </li>
+                <li ng-class="{ active: $state.includes('app.reconstruct') }" >
                     <a ui-sref="app.reconstruct">
                         <i class="icon-tools"></i> <span hide-sm>Genomes</span>
                     </a>

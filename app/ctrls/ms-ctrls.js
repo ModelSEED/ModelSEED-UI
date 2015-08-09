@@ -175,7 +175,6 @@ function($s, Biochem, $state, $stateParams, Bio) {
        .then(function(res) {
            $s.totalFound = res.numFound;
            $s.cpd = res.docs[0];
-           console.log('compound', res)
        })
 
     $s.loading = true;
@@ -208,6 +207,55 @@ function($s, Biochem, $state, $stateParams, Bio) {
         $s.productCount = rightCount;
     }
 
+}])
+
+.controller('PlantAnnotations',['$scope', 'WS',
+function($s, WS) {
+    var wsPath = '/plantseed/Genomes/annotation_overview';
+
+    $s.annoOpts = {query: '', limit: 20, offset: 0, sort: null};
+
+    $s.annoHeader = [{label: 'Reactions', key: 'reactions',
+                        formatter: function(row) {
+                            return row.reactions.length ? row.reactions.join('<br>') : '-';
+                        }},
+                     {label: 'Role', key: 'role'},
+                     {label: 'Subsystems', key: 'subsystems',
+                        formatter: function(row) {
+                            return row.subsystems.join('<br>');
+                        }},
+                     {label: 'Classes', key: 'classes',
+                        formatter: function(row) {
+                            return row.classes.join('<br>');
+                        }},
+                     {label: 'Features', key: 'features',
+                        formatter: function(row) {
+                            return row.features.join('<br>');
+                        }},                        
+                    ];
+
+    $s.loading = true;
+    WS.get(wsPath)
+      .then(function(res) {
+          $s.annoOverview = parseOverview(res.data);
+          $s.loading = false;
+      })
+
+
+    // The annotation overview structure seems to consist of hashes with
+    // values of "1", instead of flat arrays.  This should be fixed.
+    // Note: the 'role' structure is correct
+    function parseOverview(data) {
+        for (var i=0; i<data.length; i++) {
+            data[i].pathways = Object.keys(data[i].pathways);
+            data[i].classes = Object.keys(data[i].classes);
+            data[i].features = Object.keys(data[i].features);
+            data[i].subsystems = Object.keys(data[i].subsystems);
+            data[i].reactions = Object.keys(data[i].reactions);
+        }
+
+        return data;
+    }
 }])
 
 
