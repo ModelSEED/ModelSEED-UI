@@ -231,7 +231,7 @@ function($s, WS) {
                      {label: 'Features', key: 'features',
                         formatter: function(row) {
                             return row.features.join('<br>');
-                        }},                        
+                        }},
                     ];
 
     $s.loading = true;
@@ -611,6 +611,8 @@ function($scope, FBA, WS, $dialog, $sce) {
 .controller('Reconstruct',
 ['$scope', 'Patric', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS', 'Auth',
 function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
+    $scope.plantModelsPath = '/plantseed/Models/';
+
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
 
