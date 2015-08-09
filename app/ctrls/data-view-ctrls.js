@@ -34,16 +34,17 @@ function($s, $sParams, WS) {
 }])
 
 .controller('GenomeDataView',
-['$scope', '$stateParams', 'WS',
-function($scope, $sParams, WS) {
+['$scope', '$stateParams', 'WS', '$http',
+function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
 
-    $scope.opts = {query: '', limit: 20, offset: 0, sort: null};
+    $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
+    $scope.annotationOpts = {query: '', limit: 20, offset: 0, sort: null};
 
-    $scope.header = [{label: 'Feature', key: 'id',
+    $scope.featureHeader = [{label: 'Feature', key: 'id',
                         link: {
                             state: 'app.featurePage',
                             getOpts: function(row) {
@@ -58,13 +59,25 @@ function($scope, $sParams, WS) {
                         formatter: function(row) {
                             return row.subsystems.length ?
                                    row.subsystems.join('<br>') : '-';
-                        }},
+                        }}
                      ];
+
+    $scope.annotationHeader = [{label: 'Reaction', key: 'rxn'},
+                               {label: 'Blast Features', key: 'blastFeatures',
+                                    formatter: function(row) {
+                                        return row.blastFeatures.join('<br>') || '-';
+                                    }},
+                               {label: 'Kmer Features', key: 'kmerFeatures',
+                                    formatter: function(row) {
+                                        return row.kmerFeatures.join('<br>') || '-';
+                                    }},
+                               ]
+
 
 
     var obj = path.slice(0, path.lastIndexOf('/'))+'/.'+$scope.name+'/minimal_genome'
 
-    $scope.loading = true;
+    $scope.loadingFeatures = true;
     WS.get(obj)
       .then(function(res) {
           var objs = res.data.features,
@@ -76,8 +89,26 @@ function($scope, $sParams, WS) {
           }
 
           $scope.features = objs;
-          $scope.loading = false;
+          $scope.loadingFeatures = false;
       })
+
+    $scope.loadingAnnotations = true;
+    $http.rpc('ms', 'plant_annotation_overview', {genome: path})
+         .then(function(res) {
+             var d = [];
+             for (var key in res) {
+                 d.push({rxn: key,
+                         blastFeatures: res[key]['blast-features'],
+                         kmerFeatures: res[key]['kmer-features']})
+             }
+
+             $scope.annotations = d;
+             $scope.loadingAnnotations = false;
+         }).catch(function(e) {
+             $scope.error = e;
+             $scope.loadingAnnotations = false;
+         })
+
 
 }])
 
@@ -150,7 +181,6 @@ function($scope, $state, $sParams, WS, tools) {
          $scope.media =  tools.tableToJSON(res.data)
          $scope.loading = false;
      }).catch(function(e) {
-         console.log('the error', e)
          $scope.error = e;
          $scope.loading = false;
      })
@@ -358,7 +388,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
 
              Biochem.getCpd(id)
                     .then(function(cpd) {
-                        console.log('bio cpd', cpd)
                          $scope.selected.cpd = cpd;
                      })
 
@@ -438,11 +467,8 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     // fetch object data and parse it.
     $scope.loading = true;
     WS.get(path).then(function(res) {
-        console.log('fba res', res)
-
         FBAParser.parse(res.data)
                  .then(function(parsed) {
-                     console.log('these', parsed)
                     $scope.fba = res.data;
                     $scope.model = parsed.rawModel;
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
@@ -1013,7 +1039,6 @@ function(WS, ModelParser) {
                       genes: genes,
                       biomass: biomass}
 
-        console.log('fbaObj', fbaObj);
         return fbaObj
         /*
         for (var i=0; i < this.biomasscpds.length; i++) {
