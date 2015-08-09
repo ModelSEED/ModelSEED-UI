@@ -213,7 +213,7 @@ function($s, Biochem, $state, $stateParams, Bio) {
 function($s, WS) {
     var wsPath = '/plantseed/Genomes/annotation_overview';
 
-    $s.annoOpts = {query: '', limit: 20, offset: 0, sort: null};
+    $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
                      {label: 'Role', key: 'role'},
