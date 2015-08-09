@@ -215,22 +215,27 @@ function($s, WS) {
 
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: null};
 
-    $s.annoHeader = [{label: 'Reactions', key: 'reactions',
-                        formatter: function(row) {
-                            return row.reactions.length ? row.reactions.join('<br>') : '-';
-                        }},
+    $s.annoHeader = [
                      {label: 'Role', key: 'role'},
                      {label: 'Subsystems', key: 'subsystems',
                         formatter: function(row) {
-                            return row.subsystems.join('<br>');
+                            return row.subsystems.join('<br>') || '-';
                         }},
                      {label: 'Classes', key: 'classes',
                         formatter: function(row) {
-                            return row.classes.join('<br>');
+                            return row.classes.join('<br>') || '-';
+                        }},
+                     {label: 'Pathways', key: 'pathways',
+                        formatter: function(row) {
+                            return row.pathways.join('<br>') || '-';
+                        }},
+                     {label: 'Reactions', key: 'reactions',
+                        formatter: function(row) {
+                            return row.reactions.join('<br>') || '-';
                         }},
                      {label: 'Features', key: 'features',
                         formatter: function(row) {
-                            return row.features.join('<br>');
+                            return row.features.join('<br>') || '-';
                         }},
                     ];
 
