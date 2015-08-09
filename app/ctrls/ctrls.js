@@ -7,9 +7,7 @@ angular.module('ctrls', [])
 .controller('Documentation',
 ['$scope', '$state',
 function($scope, $state) {
-
     console.log('state', $state)
-
 }])
 
 
@@ -398,15 +396,8 @@ function ($scope, $timeout, MV, VizOpts) {
 ['$scope', '$stateParams', 'WS', '$http',
 function($scope, $stateParams, WS, $http) {
 
-    console.log('getting')
 
-    var ref = "/nconrad@patricbrc.org/home/public/pathways"
-    WS.list(ref)
-        .then(function(res) {
-            console.log('response', res)
 
-            return res;
-        })
 }])
 
 
@@ -421,12 +412,12 @@ function($scope, $mdSidenav) {
 .controller('LeftCtrl', ['$scope', '$timeout', '$mdSidenav', '$log',
 function ($scope, $timeout, $mdSidenav, $log) {
 
-  $scope.close = function () {
-    $mdSidenav('left').close()
-      .then(function () {
-        $log.debug("close LEFT is done");
-      });
-  };
+    $scope.close = function () {
+        $mdSidenav('left').close()
+          .then(function () {
+              $log.debug("close LEFT is done");
+          });
+    };
 }])
 
 .service('VizOptions', [function() {
@@ -453,7 +444,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
     // verify previous settings or reset
     if (!options || !angular.equals(Object.keys(options), Object.keys(defaultSettings)) ) {
         options = defaultSettings;
-        localStorage.setItem('ViewOptions', JSON.stringify(options) )
+        localStorage.setItem('ViewOptions', JSON.stringify(options) );
     }
 
     this.set = function(key, value) {

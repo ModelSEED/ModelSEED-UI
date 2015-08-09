@@ -87,8 +87,8 @@ function($scope, $sParams, WS) {
 }])
 
 .controller('FeatureDataView',
-['$scope', '$stateParams', 'MS',
-function($s, $sParams, MS) {
+['$scope', '$stateParams', 'MS', '$http',
+function($s, $sParams, MS, $http) {
 
     // path and name of object
     var featureID = $sParams.feature,
@@ -104,9 +104,9 @@ function($s, $sParams, MS) {
 
     // table specs
     $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id'},
-               {label: 'E-Value', key: 'e_value'},
-               {label: 'Bit Score', key: 'bit_score'},
-               {label: 'Perecent ID', key: 'percent_id'}];
+                       {label: 'E-Value', key: 'e_value'},
+                       {label: 'Bit Score', key: 'bit_score'},
+                       {label: 'Perecent ID', key: 'percent_id'}];
     $s.prokaryoticSimSpec = angular.copy($s.plantSimSpec);
 
     $s.loading = true;
