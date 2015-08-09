@@ -97,6 +97,9 @@ function($s, $sParams, MS, $http) {
     $s.featureID = featureID;
     $s.tabs = {tabIndex : 0};
 
+    // url for SEED feature links in prokaryotic sim table
+    var seedFeatureUrl = 'http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=';
+
     // table settings
     $s.plantSimOpts = {query: '', limit: 20, offset: 0,
                        visible: ['hit_id', 'e_value', 'bit_score', 'percent_id'] };
@@ -107,7 +110,13 @@ function($s, $sParams, MS, $http) {
                        {label: 'E-Value', key: 'e_value'},
                        {label: 'Bit Score', key: 'bit_score'},
                        {label: 'Perecent ID', key: 'percent_id'}];
-    $s.prokaryoticSimSpec = angular.copy($s.plantSimSpec);
+    $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
+                                formatter: function(id) {
+                                    return '<a href="'+seedFeatureUrl+id+'" target="_blank">'+id+'</a>';
+                                }},
+                             {label: 'E-Value', key: 'e_value'},
+                             {label: 'Bit Score', key: 'bit_score'},
+                             {label: 'Perecent ID', key: 'percent_id'}];
 
     $s.loading = true;
     MS.getFeature(genome, featureID)
