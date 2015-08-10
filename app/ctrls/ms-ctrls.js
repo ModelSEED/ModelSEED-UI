@@ -209,11 +209,14 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 }])
 
-.controller('PlantAnnotations',['$scope', 'WS',
-function($s, WS) {
+.controller('PlantAnnotations',['$scope', 'WS', '$compile',
+function($s, WS, $compile) {
     var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
         subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
-        roleUrl = url + '?page=FunctionalRolePage&fr=';
+        roleUrl = url + '?page=FunctionalRolePage&fr=',
+        pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
+        featurePath = '#/feature/plantseed/Genomes/Athaliana-TAIR10/';
+
 
 
     var wsPath = '/plantseed/Genomes/annotation_overview';
@@ -239,7 +242,14 @@ function($s, WS) {
                         }},
                      {label: 'Pathways', key: 'pathways',
                         formatter: function(row) {
-                            return row.pathways.join('<br>') || '-';
+                            var links = [];
+                            row.pathways.forEach(function(name) {
+                                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
+                                                name+
+                                           '</a>');
+                            })
+
+                            return links.join('<br>') || '-';
                         }},
                      {label: 'Reactions', key: 'reactions',
                         formatter: function(row) {
@@ -247,7 +257,12 @@ function($s, WS) {
                         }},
                      {label: 'Features', key: 'features',
                         formatter: function(row) {
-                            return row.features.join('<br>') || '-';
+                            var links = [];
+                            row.features.forEach(function(name) {
+                                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
+                            })
+
+                            return links.join('<br>') || '-';
                         }},
                     ];
 
