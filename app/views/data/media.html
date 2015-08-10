@@ -3,8 +3,7 @@
 <hr class="no-margin">
 
 
-<md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
-
+<md-tabs ng-if="name != 'Complete'" md-no-ink md-dynamic-height>
 	<md-tab>
 		<md-tab-label>Media Compounds</md-tab-label>
 		<md-tab-body>
@@ -18,8 +17,15 @@
 			</ng-table-two>
 		</md-tab-body>
 	</md-tab>
-
 </md-tabs>
+
+<br>
+
+<p ng-if="name == 'Complete'">
+	Modeling growth in complete media means that the model is allowed to consume any nutrient
+	for which a transport reaction is available to the model. For this reason, the content of
+	complete media can change depending on which transport reactions are present in the model.
+</p>
 
 <section ng-controller="SideNav">
     <md-sidenav class="rxn-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="rxnView" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';">
