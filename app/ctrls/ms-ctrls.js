@@ -221,9 +221,7 @@ function($s, WS) {
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
-                     {label: 'Role', key: 'role', formatter: function(row) {
-                         return '<a href="'+roleUrl+row.role+'" target="_blank">'+row.role+'</a>';
-                     }},
+                     {label: 'Role', key: 'role'},
                      {label: 'Subsystems', key: 'subsystems',
                         formatter: function(row) {
                             var links = [];
