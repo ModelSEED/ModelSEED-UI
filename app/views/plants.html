@@ -2,7 +2,7 @@
 
 <div ng-if="!filters.myGenomes">
     <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-        
+
     <div ng-repeat="p in plants" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
 
         <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
@@ -26,7 +26,7 @@
         </div>
 
         <div layout-align="center end" class="actions">
-            <a ui-sref="app.modelPage({path: plantModelsPath+p.name})">
+            <a ui-sref="app.modelPage({path: plantModelsPath+p.name+'_Model'})">
                 View Model
             </a>
 
