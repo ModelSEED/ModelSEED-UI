@@ -4,6 +4,11 @@
 </div>
 <hr class="no-margin">
 
+<!--<div compare-regions></div>-->
+
+<h5>Protein Sequence</h5>
+<pre>{{proteinSequence}}</pre>
+
 <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
     <md-tab label="Plant Similarities">
         <ng-table-two table-header="plantSimSpec"
@@ -23,6 +28,8 @@
         </ng-table-two>
     </md-tab>
 </md-tabs>
+
+
 
 
 <div ng-if="error" class="alert alert-danger">{{error}}</div>

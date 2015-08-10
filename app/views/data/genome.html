@@ -4,9 +4,25 @@
 </div>
 <hr class="no-margin">
 
-<ng-table-two table-header="header"
-          table-data="features"
-          table-opts="opts"
-          table-loading="loading"
-          table-placeholder="Search features">
-</ng-table-two>
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Features">
+        <ng-table-two table-header="featureHeader"
+                  table-data="features"
+                  table-opts="featureOpts"
+                  table-loading="loadingFeatures"
+                  table-placeholder="Search features">
+        </ng-table-two>
+    </md-tab>
+
+    <md-tab label="Annotations">
+        <ng-table-two table-header="annotationHeader"
+                  table-data="annotations"
+                  table-opts="annotationOpts"
+                  table-loading="loadingAnnotations"
+                  table-placeholder="Search annotations">
+        </ng-table-two>
+    </md-tab>
+</md-tabs>
+
+
+<div ng-if="error" class="alert alert-danger">{{error}}</div>

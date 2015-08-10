@@ -101,6 +101,11 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/biochem/biochem-viewer.html',
             controller: 'BiochemViewer',
             authenticate: true
+        }).state('app.plantAnnotations', {
+            url: "/plant-annotations/",
+            templateUrl: 'app/views/annotations.html',
+            controller: 'PlantAnnotations',
+            authenticate: true
         }).state('app.reconstruct', {
             url: "/reconstruct/",
             templateUrl: 'app/views/reconstruct.html',

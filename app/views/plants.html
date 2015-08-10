@@ -1,6 +1,8 @@
 
 
 <div ng-if="!filters.myGenomes">
+    <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+        
     <div ng-repeat="p in plants" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
 
         <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
@@ -23,13 +25,18 @@
             </div>
         </div>
 
-        <!--<div layout-align="center end" class="actions">
-            <md-button class="md-raised md-primary" md-no-ink>
+        <div layout-align="center end" class="actions">
+            <a ui-sref="app.modelPage({path: plantModelsPath+p.name})">
+                View Model
+            </a>
+
+            <!--<md-button class="md-raised md-primary" md-no-ink>
                 <i class="icon-quill"></i> Annotate
-            </md-button>
-        </div>-->
+            </md-button>-->
+        </div>
 
     </div>
+
 </div>
 
 
@@ -42,5 +49,5 @@
     </ng-table-two>
 
     <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
-    
+
 </div>
