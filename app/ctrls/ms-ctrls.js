@@ -211,20 +211,26 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 .controller('PlantAnnotations',['$scope', 'WS',
 function($s, WS) {
-    var subsystemUrl = 'http://pubseed.theseed.org/SubsysEditor.cgi?page=ShowSubsystem&subsystem=';
+    var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
+        subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
+        roleUrl = url + '?page=FunctionalRolePage&fr=';
+
+
     var wsPath = '/plantseed/Genomes/annotation_overview';
 
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
-                     {label: 'Role', key: 'role'},
+                     {label: 'Role', key: 'role', formatter: function(row) {
+                         return '<a href="'+roleUrl+row.role+'" target="_blank">'+row.role+'</a>';
+                     }},
                      {label: 'Subsystems', key: 'subsystems',
                         formatter: function(row) {
                             var links = [];
                             row.subsystems.forEach(function(name) {
                                 links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
-                                                name.replace(/_/g, ' ')+
-                                             '</a>')
+                                                        name.replace(/_/g, ' ')+
+                                                    '</a>');
                             })
 
                             return links.join('<br>') || '-';
