@@ -1,7 +1,5 @@
 
 angular.module('DataViewCtrls', [])
-
-
 .controller('Json',
 ['$scope', '$stateParams', 'WS',
 function($s, $sParams, WS) {
@@ -41,8 +39,10 @@ function($scope, $sParams, WS, $http) {
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
 
+    $scope.tabs = {tabIndex : 0};
+
     $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
-    $scope.annotationOpts = {query: '', limit: 20, offset: 0, sort: null};
+    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: null};
 
     $scope.featureHeader = [{label: 'Feature', key: 'id',
                         link: {
@@ -149,6 +149,9 @@ function($s, $sParams, MS, $http) {
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
+          console.log('res',res)
+
+          $s.proteinSequence = res.protein_translation;
           $s.plantSims = res.plant_similarities;
           $s.prokaryoticSims = res.prokaryotic_similarities;
           $s.loading = false;

@@ -1,6 +1,6 @@
 
 <div layout="row">
-    <div class="content-header" flex>My Models<br>
+    <div class="content-header" flex>My {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
         <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
     </div>
 
@@ -143,13 +143,7 @@
 
 <div ng-if="view == 'Plants'">
     <br>
-    This is a plants view
-    <ul>
-        <li>Plant Model 1</li>
-        <li>Plant Model 2</li>
-        <li>Plant Model 3</li>
-        <li>Plant Model 4</li>
-    </ul>
+    <h4>Coming soon</h4>
 </div>
 
 <section ng-controller="SideNav">
