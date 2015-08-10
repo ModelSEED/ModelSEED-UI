@@ -80,6 +80,7 @@ function($scope, $sParams, WS, $http) {
     $scope.loadingFeatures = true;
     WS.get(obj)
       .then(function(res) {
+          console.log('res', res)
           var objs = res.data.features,
               data = [];
 
@@ -178,7 +179,6 @@ function($scope, $state, $sParams, WS, tools) {
                           {label: 'Max Flux', key: 'minflux'},
                           {label: 'Min Flux', key: 'maxflux'}];
 
-
      $scope.loading = true;
      WS.get(path).then(function(res) {
          $scope.media =  tools.tableToJSON(res.data)
@@ -187,7 +187,6 @@ function($scope, $state, $sParams, WS, tools) {
          $scope.error = e;
          $scope.loading = false;
      })
-
 }])
 
 
