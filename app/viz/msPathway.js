@@ -47,7 +47,7 @@ function ModelSeedPathway(params) {
         r = 12,          // radial offset from circle.  Hooray for math degrees.
         max_x = 0,       // used to compute canvas size (width) based on data
         max_y = 0,       // used to compute canvas size (height) based on data
-        c_pad = 20,     // padding around max_x/max_y
+        c_pad = 50,     // padding around max_x/max_y
         svg = undefined; // svg element for map
 
     drawMap()
@@ -55,10 +55,9 @@ function ModelSeedPathway(params) {
     function drawMap() {
         container.html('')
 
-        svg = d3.select('#pathway-'+params.mapName)
-                                .append("svg")
-                                .attr("width", 800)
-                                .attr("height", 1000);
+        svg = d3.select('#'+params.elem).append("svg")
+                                        .attr("width", 800)
+                                        .attr("height", 1000);
 
         // add arrow markers for use
         svg.append("svg:defs").selectAll("marker")
