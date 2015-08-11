@@ -112,8 +112,8 @@ function($scope, $sParams, WS, $http) {
 }])
 
 .controller('FeatureDataView',
-['$scope', '$stateParams', 'MS', '$http',
-function($s, $sParams, MS, $http) {
+['$scope', '$stateParams', 'MS', '$http', 'config',
+function($s, $sParams, MS, $http, config) {
 
     // path and name of object
     var featureID = $sParams.feature,
@@ -138,7 +138,7 @@ function($s, $sParams, MS, $http) {
                                 state: 'app.featurePage',
                                 getOpts: function(row) {
                                     return {feature: row.hit_id,
-                                            genome: '/plantseed/Genomes/'+row.genome};
+                                            genome: config.paths.plants.genomes+row.genome};
                                 }},
                         },
                        {label: 'Genome', key: 'genome'},
@@ -146,12 +146,12 @@ function($s, $sParams, MS, $http) {
                        {label: 'Percent ID', key: 'percent_id'}];
 
     $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
-                                link: {
-                                    state: 'app.featurePage',
-                                    getOpts: function(row) {
-                                        return {feature: row.hit_id, genome: genome};
-                                    }},
-                              },
+                                formatter: function(row) {
+                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'+
+                                                row.hit_id+
+                                            '</a>';
+                                }
+                             },
                              {label: 'Genome', key: 'genome'},
                              {label: 'Function', key: 'function'},
                              {label: 'Percent ID', key: 'percent_id'}];
