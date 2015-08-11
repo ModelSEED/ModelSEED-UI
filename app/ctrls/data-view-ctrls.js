@@ -165,11 +165,16 @@ function($s, $sParams, MS, $http) {
 
 
 .controller('MediaDataView',
-['$scope', '$state', '$stateParams', 'WS', 'uiTools',
-function($scope, $state, $sParams, WS, tools) {
+['$scope', '$state', '$stateParams', 'WS', 'uiTools', '$http', 'Auth',
+function($scope, $state, $sParams, WS, tools, $http, Auth) {
 
     // path and name of object
     var path = $sParams.path;
+
+
+    // determine if user can copy this media to their workspace
+    if (path.split('/')[1] !== Auth.user) $scope.canCopy = true;
+
     $scope.name = path.split('/').pop()
 
     $scope.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
@@ -187,6 +192,35 @@ function($scope, $state, $sParams, WS, tools) {
          $scope.error = e;
          $scope.loading = false;
      })
+
+    $scope.copyMedia = function() {
+        console.log('copying', $scope.name)
+
+        $scope.copyInProgress = true;
+
+        var destination = '/'+Auth.user+'/media/';
+        WS.createFolder(destination)
+            .then(function(res) {
+                console.log('create folder response', res)
+
+                console.log('copying', path)
+                WS.copy(path, destination+$scope.name, true)
+                    .then(function(res) {
+                        console.log('copy done')
+                        $scope.copyInProgress = false;
+                        $state.go('app.media', {tab: 'mine'})
+                    })
+            })
+    }
+
+    $scope.toggleEdit = function() {
+        $scope.editInProgress = !$scope.editInProgress;
+    }
+
+    $scope.save = function() {
+        console.log('going to save media')
+    }
+
 }])
 
 

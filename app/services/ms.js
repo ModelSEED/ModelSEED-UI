@@ -160,10 +160,12 @@ angular.module('MS', [])
 
     }
 
-    this.listPublicMedia = function() {
-        var publicMedia = config.paths.media;
-        return WS.listL(publicMedia)
+    this.listMedia = function(path) {
+        var path = path ? path : config.paths.media;
+        
+        return WS.listL(path)
                  .then(function(objs) {
+                     console.log('objects', objs)
                         var media = [];
                         for (var i=0; i<objs.length; i++) {
                             var obj = objs[i];

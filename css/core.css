@@ -48,9 +48,10 @@ a:focus {
     text-decoration: none;
 
 }
-
-.logo span {
-
+/* .logo span {} */
+.md-secondary { /*hack hack hack #fixme */
+    background-color: rgba(95, 98, 168, 0.91) !important;
+    color: #fff !important;
 }
 
 md-toolbar {

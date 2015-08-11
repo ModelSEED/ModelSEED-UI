@@ -20,6 +20,11 @@
                         <i class="icon-archive2"></i> All Files
                     </a>
                 </li>-->
+                <li ng-class="{ active: $state.includes('app.media') }">
+                    <a ui-sref="app.media">
+                        <i class="icon-lab2"></i> <span hide-sm>Media</span>
+                    </a>
+                </li>
                 <li ng-class="{ active: $state.includes('app.myModels') }">
                     <a ui-sref="app.myModels">
                         <i class="icon-folder-open-o"></i> <span hide-sm>My Models</span>

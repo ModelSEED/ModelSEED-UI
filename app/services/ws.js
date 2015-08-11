@@ -165,6 +165,16 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
+    this.copy = function(src, dest, overwrite) {
+        var params = {objects: [[src, dest]], overwrite: overwrite || false};
+        return $http.rpc('ws', 'copy', params)
+                    .then(function(res) {
+                        return res;
+                    }).catch(function(e) {
+                        console.error('could not copy', e)
+                    })
+    }
+
     // takes path of object, deletes object
     this.deleteObj = function(path, isFolder) {
         $log.log('calling delete')

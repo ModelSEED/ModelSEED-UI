@@ -1,0 +1,28 @@
+
+<div class="h2">Media</div>
+<hr class="no-margin">
+
+
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Public Media">
+        <md-content>
+            <ng-table-two table-header="mediaHeader"
+                       table-data="media"
+                       table-opts="mediaOpts"
+                       table-loading="loading"
+                       table-placeholder="Search media">
+            </ng-table-two>
+        </md-content>
+    </md-tab>
+
+    <md-tab label="My Media">
+        <md-content>
+            <ng-table-two table-header="myMediaHeader"
+                        table-data="myMedia"
+                        table-opts="myMediaOpts"
+                        table-loading="loadingMyMedia"
+                        table-placeholder="Search my media">
+            </ng-table-two>
+        </md-content>
+    </md-tab>
+</md-tabs>

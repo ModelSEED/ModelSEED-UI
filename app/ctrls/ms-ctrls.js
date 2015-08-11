@@ -89,7 +89,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
     $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
-    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
 
     if ($stateParams.tab === 'compounds')
         $s.tabs = {selectedIndex : 1};
@@ -786,6 +785,63 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
                              orgName: item.genome_name})*/
             })
     }
+
+}])
+
+
+
+.controller('Media',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
+function($s, $sParams, WS, MS, Auth) {
+
+    $s.tabs = {tabIndex: ($sParams.tab === 'mine' ? 1 : 0)};
+
+    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
+    $s.myMediaOpts = {query: '', limit: 10, offset: 0, sort: {}};
+
+    $s.mediaHeader = [{label: 'Name', key: 'name',
+                          link: {
+                              state: 'app.mediaPage',
+                              getOpts: function(row) {
+                                  return {path: row.path};
+                              }
+                          }
+                      },
+                      {label: 'Minimal?', key: 'isMinimal'},
+                      {label: 'Defined?', key: 'isDefined'},
+                      {label: 'Type', key: 'type'}];
+
+    $s.myMediaHeader = [{label: 'Name', key: 'name',
+                          link: {
+                              state: 'app.mediaPage',
+                              getOpts: function(row) {
+                                  return {path: row.path};
+                              }
+                          }
+                      },
+                      {label: 'Minimal?', key: 'isMinimal'},
+                      {label: 'Defined?', key: 'isDefined'},
+                      {label: 'Type', key: 'type'}];
+
+
+    $s.loading = true;
+    MS.listMedia()
+      .then(function(media) {
+          $s.media = media;
+          $s.loading = false;
+      })
+
+
+    $s.loadingMyMedia = true;
+    MS.listMedia('/'+Auth.user+'/media')
+      .then(function(media) {
+          console.log('my media', media)
+          $s.myMedia = media;
+          $s.loadingMyMedia = false;
+      }).catch(function(e) {
+          $s.loadingMyMedia = false;
+          $s.myMedia = [];
+      })
 
 }])
 

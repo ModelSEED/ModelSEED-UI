@@ -111,6 +111,11 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/reconstruct.html',
             controller: 'Reconstruct',
             authenticate: true
+        }).state('app.media', {
+            url: "/list-media/?tab",
+            templateUrl: 'app/views/media.html',
+            controller: 'Media',
+            authenticate: true
         }).state('app.myModels', {
             url: "/my-models/",
             templateUrl: 'app/views/my-models.html',

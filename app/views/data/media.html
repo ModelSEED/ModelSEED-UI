@@ -1,13 +1,40 @@
 
-<div class="h2">Media <small>{{name}}</small></div>
+<div layout="row">
+	<div class="h2">Media <small>{{name}}</small></div>
+
+	<!--<md-input-container ng-if="canCopy" layout-align="end end" flex>
+		<md-button class="md-raised md-secondary" ng-click="copyMedia()">
+			<span ng-if="!copyInProgress">Copy</span>
+			<span ng-if="copyInProgress">Copying...</span>
+			<md-tooltip md-delay="500">Copy to <i>My Media</i></md-tooltip>
+		</md-button>
+	</md-input-container>-->
+</div>
+
 <hr class="no-margin">
 
 
 <md-tabs ng-if="name != 'Complete'" md-no-ink md-dynamic-height>
 	<md-tab>
 		<md-tab-label>Media Compounds</md-tab-label>
+
 		<md-tab-body>
-			<ng-table-two table-header="mediaHeader"
+			<!--
+			<md-button ng-if="!canCopy && !editInProgress"
+					   class="pull-right md-secondary"
+					   ng-click="toggleEdit()">Edit</md-button>
+
+			<div class="pull-right" ng-if="editInProgress">
+			    <md-button ng-if="editInProgress"
+						   class="md-secondary"
+						   ng-click="saveMedia()">Save</md-button>
+
+			    <a ng-if="editInProgress"
+						   ng-click="toggleEdit()">Cancel</a>
+			</div>-->
+
+			<ng-table-two ng-if="!editInProgress"
+						  table-header="mediaHeader"
 						  table-data="media"
 						  table-opts="mediaOpts"
 						  table-loading="loading"
@@ -15,6 +42,16 @@
 						  table-result-text="compounds"
 						  table-placeholder="Search compounds">
 			</ng-table-two>
+
+			<ng-table-editor ng-if="editInProgress"
+						  table-header="mediaHeader"
+						  table-data="media"
+						  table-opts="mediaOpts"
+						  table-loading="loading"
+                          disable-pagination
+						  table-result-text="compounds"
+						  table-placeholder="Search compounds">
+			</ng-table-editor>
 		</md-tab-body>
 	</md-tab>
 </md-tabs>
