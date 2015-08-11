@@ -110,18 +110,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                     {label: 'detalGErr', key: 'deltagerr'},
                     {label: 'Charge', key: 'charge'}];
 
-    $s.mediaHeader = [{label: 'Name', key: 'name',
-                            link: {
-                                state: 'app.mediaPage',
-                                getOpts: function(row){
-                                    return {path: row.path};
-                                }
-                            }
-                        },
-                        {label: 'Minimal?', key: 'isMinimal'},
-                        {label: 'Defined?', key: 'isDefined'},
-                        {label: 'Type', key: 'type'}];
-
     function updateRxns() {
         Biochem.get('model_reaction', $s.rxnOpts)
                .then(function(res) {
@@ -137,13 +125,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                     $s.loadingCpds = false;
                })
     }
-
-    $s.loadingMedia = true;
-    MS.listPublicMedia()
-      .then(function(media) {
-          $s.media = media;
-          $s.loadingMedia = false;
-      })
 
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
