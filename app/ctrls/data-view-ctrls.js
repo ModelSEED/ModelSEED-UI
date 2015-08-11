@@ -160,12 +160,11 @@ function($s, $sParams, MS, $http, config) {
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          console.log('res', res)
-
-          $s.function = res.function;
+          console.log('feature res', res)
+          $s.roles = res.function.split(';');
           $s.proteinSequence = res.protein_translation;
           $s.subsystems = res.subsystems;
-          //$s.aliases = parse
+          $s.aliases = parseAliases(res.aliases);
 
           $s.plantSims = res.plant_similarities;
           $s.prokaryoticSims = res.prokaryotic_similarities;
@@ -174,6 +173,25 @@ function($s, $sParams, MS, $http, config) {
           $s.error = error;
           $s.loading = false;
       })
+
+    // this takes a hash of aliases and creates a new list of
+    // hashes ordered alphabetically by the key
+    function parseAliases(aliases) {
+        var a = [];
+        for (key in aliases) {
+            var obj = {label: key, alias: aliases[key]};
+            if (key == "SEED") obj.url = seedFeatureUrl+aliases[key];
+            a.push(obj)
+        }
+
+        a.sort(function(a, b) {
+            if (a.label.toLowerCase() < b.label.toLowerCase()) return -1;
+            if (a.label.toLowerCase() > b.label.toLowerCase()) return 1;
+            return 0;
+        });
+
+        return a;
+    }
 }])
 
 

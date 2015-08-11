@@ -10,21 +10,47 @@
 <div ng-if="!loading">
     <h4>Function</h4>
     <div class="feature-item">
-        {{function ? function : 'No function present'}}
+        <ul ng-if="roles.length" class="list-unstyled">
+            <li ng-repeat="role in roles">
+                {{role}}
+            </li>
+        </ul>
+
+        <div ng-if="!roles.length">
+            No function present
+        </div>
     </div>
 
 
     <h4>Subsystems</h4>
     <div class="feature-item">
-        <ul class="list-unstyled" ng-if="subsystems.length">
+        <ul ng-if="subsystems.length" class="list-unstyled">
             <li ng-repeat="sub in subsystems">
                 {{sub}}
             </li>
         </ul>
 
-
         <div ng-if="!subsystems.length">
             No subsystem(s) present
+        </div>
+    </div>
+
+    <h4>Aliases</h4>
+    <div class="feature-item">
+        <table class="table table-condensed">
+            <thead></thead>
+            <tbody>
+                <tr ng-repeat="item in aliases">
+                    <td><b>{{item.label}}</b></td>
+                    <td ng-if="item.url">
+                        <a href="{{item.url}}" target="_blank">{{item.alias}}</a>
+                    </td>
+                    <td ng-if="!item.url">{{item.alias}}</div>
+                </tr>
+            </tbody>
+        </table>
+        <div ng-if="!aliases.length">
+            No aliases(s) present
         </div>
     </div>
 
