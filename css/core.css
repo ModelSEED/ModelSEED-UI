@@ -936,3 +936,7 @@ tr .fa-file-text-o {
     color: #666;
     content: 'click to reconstruct';
 }
+
+.feature-item {
+    margin: 0 0 0 20px;
+}

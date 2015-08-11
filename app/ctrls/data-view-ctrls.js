@@ -133,26 +133,39 @@ function($s, $sParams, MS, $http) {
     $s.prokaryoticSimOpts = angular.copy($s.plantSimOpts);
 
     // table specs
-    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id'},
-                       {label: 'E-Value', key: 'e_value'},
-                       {label: 'Bit Score', key: 'bit_score'},
-                       {label: 'Perecent ID', key: 'percent_id'}];
-    $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
-                                formatter: function(row) {
-                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'
-                                                +row.hit_id+
-                                            '</a>';
+    //ID Genome Function Percent Identity//
+    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id',
+                            link: {
+                                state: 'app.featurePage',
+                                getOpts: function(row) {
+                                    return {feature: row.hit_id, genome: genome};
                                 }},
-                             {label: 'E-Value', key: 'e_value'},
-                             {label: 'Bit Score', key: 'bit_score'},
-                             {label: 'Perecent ID', key: 'percent_id'}];
+                        },
+                       {label: 'Genome', key: 'genome'},
+                       {label: 'Function', key: 'function'},
+                       {label: 'Percent ID', key: 'percent_id'}];
+
+    $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
+                                link: {
+                                    state: 'app.featurePage',
+                                    getOpts: function(row) {
+                                        return {feature: row.hit_id, genome: genome};
+                                    }},
+                              },
+                             {label: 'Genome', key: 'genome'},
+                             {label: 'Function', key: 'function'},
+                             {label: 'Percent ID', key: 'percent_id'}];
+
 
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
           console.log('res',res)
 
+          $s.function = res.function;
           $s.proteinSequence = res.protein_translation;
+          $s.subsystem = res.subsystem_data;
+
           $s.plantSims = res.plant_similarities;
           $s.prokaryoticSims = res.prokaryotic_similarities;
           $s.loading = false;

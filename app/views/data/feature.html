@@ -5,29 +5,55 @@
 <hr class="no-margin">
 
 <!--<div compare-regions></div>-->
+<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
-<h5>Protein Sequence</h5>
-<pre>{{proteinSequence}}</pre>
+<div ng-if="!loading">
+    <h4>Function</h4>
+    <div class="feature-item">
+        {{function ? function : 'No function present'}}
+    </div>
 
-<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    <md-tab label="Plant Similarities">
-        <ng-table-two table-header="plantSimSpec"
-                  table-data="plantSims"
-                  table-opts="plantSimOpts"
-                  table-loading="loading"
-                  table-placeholder="Search plant similarities">
-        </ng-table-two>
-    </md-tab>
 
-    <md-tab label="Prokaryotic Similarities">
-        <ng-table-two table-header="prokaryoticSimSpec"
-                  table-data="prokaryoticSims"
-                  table-opts="prokaryoticSimOpts"
-                  table-loading="loading"
-                  table-placeholder="Search prokaryotic similarities">
-        </ng-table-two>
-    </md-tab>
-</md-tabs>
+    <h4>Subsystems</h4>
+    <div class="feature-item">
+        <div ng-if="subsystems.length">
+            <ul>
+                <li ng-repeat="sub in subsystems">
+                    {{sub}}
+                </li>
+            </ul>
+        </div>
+
+        <div ng-if="!subsystems.length">
+            No subsystem(s) present
+        </div>
+    </div>
+
+
+    <h4>Protein Sequence</h4>
+    <pre class="feature-item">{{proteinSequence ? proteinSequence : 'No protein sequence'}}</pre>
+
+
+    <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+        <md-tab label="Plant Similarities">
+            <ng-table-two table-header="plantSimSpec"
+                      table-data="plantSims"
+                      table-opts="plantSimOpts"
+                      table-loading="loading"
+                      table-placeholder="Search plant similarities">
+            </ng-table-two>
+        </md-tab>
+
+        <md-tab label="Prokaryotic Similarities">
+            <ng-table-two table-header="prokaryoticSimSpec"
+                      table-data="prokaryoticSims"
+                      table-opts="prokaryoticSimOpts"
+                      table-loading="loading"
+                      table-placeholder="Search prokaryotic similarities">
+            </ng-table-two>
+        </md-tab>
+    </md-tabs>
+</div>
 
 
 
