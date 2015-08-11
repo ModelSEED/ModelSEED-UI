@@ -449,7 +449,7 @@ table thead[sortable] th.sorting-asc:after {
 
 .row-hover:hover {
     cursor: pointer;
-    background-color: #f8f8f8;
+    background-color: rgba(0, 188, 212, 0.04) !important;
     /*background-color: #4AC1FF;
     color: #fff;*/
     border-color: #B6E6FF;
@@ -920,4 +920,18 @@ input[name=upload] {
 tr .fa-folder-o,
 tr .fa-file-text-o {
     opacity: 0.5;
+}
+
+
+/* site specific things */
+.reconstruct-hover td{
+    position: relative;
+}
+.reconstruct-hover:hover td:last-child:after {
+    position: absolute;
+    right: 5px;
+    bottom: 2px;
+    font-size: 10px;
+    color: #666;
+    content: 'click to reconstruct';
 }

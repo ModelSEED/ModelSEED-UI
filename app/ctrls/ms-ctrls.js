@@ -156,7 +156,7 @@ function($s, Biochem, $state, $stateParams, MS) {
         updateCpds();
     }, true)
 
-    $s.doSomething = function(row) {
+    $s.doSomething = function($e, row) {
         $state.go('app.biochem', {tab: 'compounds'})
               .then(function() {
                   $state.go('app.biochemViewer', {cpd: row.id})
@@ -656,6 +656,8 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
       $scope.menuVisible = true;
     }
 
+
+
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
     $scope.opts = {query: '',
@@ -771,9 +773,13 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
 
 
     $scope.reconstruct = function(ev, item) {
+        if ('genome_id' in item)
+            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
+        else
+            var params = {path: item.path, name: item.name};
+
         $scope.selected = item;
-        Dialogs.reconstruct(ev,
-            {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
+        Dialogs.reconstruct(ev, params,
             function(res) {
                 /*MS.addModel({name: res[0],
                              path: res[1],

@@ -45,7 +45,9 @@
                 table-data="myPlants"
                 table-opts="myPlantsOpts"
                 table-loading="loadingMyPlants"
-                table-placeholder="Search my plants">
+                table-placeholder="Search my plants"
+                table-row-click="reconstruct"
+                table-row-hover-class="reconstruct-hover">
     </ng-table-two>
 
     <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
