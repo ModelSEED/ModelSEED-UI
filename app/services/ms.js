@@ -133,7 +133,7 @@ angular.module('MS', [])
 
     this.getModels = function() {
         $log.log('list models')
-        return $http.rpc('ms', 'list_models')
+        return $http.rpc('ms', 'list_models', {})
                     .then(function(res) {
                         $log.log('listmodels resp', res)
                         var data = [];
@@ -162,7 +162,7 @@ angular.module('MS', [])
 
     this.listMedia = function(path) {
         var path = path ? path : config.paths.media;
-        
+
         return WS.listL(path)
                  .then(function(objs) {
                      console.log('objects', objs)

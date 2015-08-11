@@ -16,13 +16,12 @@
 
     <h4>Subsystems</h4>
     <div class="feature-item">
-        <div ng-if="subsystems.length">
-            <ul>
-                <li ng-repeat="sub in subsystems">
-                    {{sub}}
-                </li>
-            </ul>
-        </div>
+        <ul class="list-unstyled" ng-if="subsystems.length">
+            <li ng-repeat="sub in subsystems">
+                {{sub}}
+            </li>
+        </ul>
+
 
         <div ng-if="!subsystems.length">
             No subsystem(s) present

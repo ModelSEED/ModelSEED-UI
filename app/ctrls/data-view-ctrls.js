@@ -109,8 +109,6 @@ function($scope, $sParams, WS, $http) {
              $scope.error = e;
              $scope.loadingAnnotations = false;
          })
-
-
 }])
 
 .controller('FeatureDataView',
@@ -126,6 +124,7 @@ function($s, $sParams, MS, $http) {
 
     // url for SEED feature links in prokaryotic sim table
     var seedFeatureUrl = 'http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=';
+    $s.seedFeatureUrl = seedFeatureUrl;
 
     // table settings
     $s.plantSimOpts = {query: '', limit: 20, offset: 0,
@@ -138,7 +137,8 @@ function($s, $sParams, MS, $http) {
                             link: {
                                 state: 'app.featurePage',
                                 getOpts: function(row) {
-                                    return {feature: row.hit_id, genome: genome};
+                                    return {feature: row.hit_id,
+                                            genome: '/plantseed/Genomes/'+row.genome};
                                 }},
                         },
                        {label: 'Genome', key: 'genome'},
@@ -160,11 +160,12 @@ function($s, $sParams, MS, $http) {
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          console.log('res',res)
+          console.log('res', res)
 
           $s.function = res.function;
           $s.proteinSequence = res.protein_translation;
-          $s.subsystem = res.subsystem_data;
+          $s.subsystems = res.subsystems;
+          //$s.aliases = parse
 
           $s.plantSims = res.plant_similarities;
           $s.prokaryoticSims = res.prokaryotic_similarities;

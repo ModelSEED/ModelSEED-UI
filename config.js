@@ -14,8 +14,14 @@ angular.module('config', []).service('config', function() {
                     };
 
 
-    this.paths = {media: "/chenry/public/modelsupport/media",
-                  maps: "/nconrad/public/maps/"};
+    this.paths = {
+                  media: "/chenry/public/modelsupport/media",
+                  maps: "/nconrad/public/maps/",
+                  plants: {
+                      models: '/plantseed/Models',
+                      genomes: '/plantseed/Genomes'
+                      }
+                 };
 
     // wether or not to include plants UI components
     this.includePlants = true;
