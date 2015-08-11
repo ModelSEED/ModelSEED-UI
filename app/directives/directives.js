@@ -1534,7 +1534,7 @@ function($compile, $stateParams) {
             opts: '=tableOpts',
             loading: '=tableLoading',
             rowClick: '=tableRowClick',
-            hoverClass: '@tableRowHoverClass',                     
+            hoverClass: '@tableRowHoverClass',
             placeholder: '@tablePlaceholder',
             resultText: '@tableResultText',
         },
@@ -1630,6 +1630,8 @@ function($compile, $stateParams) {
         },
         templateUrl: 'app/views/general/table-editor.html',
         link: function(scope, elem, attrs) {
+
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
             scope.checkedItems = [];
 
