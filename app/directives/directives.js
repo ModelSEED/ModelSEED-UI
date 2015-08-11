@@ -1534,12 +1534,17 @@ function($compile, $stateParams) {
             opts: '=tableOpts',
             loading: '=tableLoading',
             rowClick: '=tableRowClick',
+            hoverClass: '@tableRowHoverClass',                     
             placeholder: '@tablePlaceholder',
             resultText: '@tableResultText',
         },
         templateUrl: 'app/views/general/table2.html',
         link: function(scope, elem, attrs) {
+            var ele = angular.element(elem);
+
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+
         }
     }
 }])
