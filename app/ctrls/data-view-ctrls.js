@@ -163,7 +163,8 @@ function($s, $sParams, MS, $http, config, Auth) {
     MS.getFeature(genome, featureID)
       .then(function(res) {
           console.log('feature res', res)
-          $s.roles = res.function.split(';');
+          //$s.roles = res.function.split(';');
+          $s.featureFunction = res.function;
           $s.proteinSequence = res.protein_translation;
           $s.subsystems = res.subsystems;
           $s.aliases = parseAliases(res.aliases);
@@ -195,6 +196,7 @@ function($s, $sParams, MS, $http, config, Auth) {
         return a;
     }
 
+    /*
     $s.editable = {};
     $s.editRole = function(i) {
         // cancel all other editing
@@ -218,7 +220,32 @@ function($s, $sParams, MS, $http, config, Auth) {
                  $s.editable[i] = false;
              })
 
+    }*/
+
+
+    $s.editable = false;
+    $s.editFunction = function() {
+        $s.editable = !$s.editable;
     }
+
+    $s.edited = {function: ''};
+    $s.saveFunction = function(i) {
+        $s.saving = true;
+
+        var newFunction = $s.edited.function;
+
+        console.log('saving new function', newFunction)
+        var params = {genome: genome, feature: featureID, function: newFunction};
+        $http.rpc('ms', 'save_feature_function', params)
+             .then(function(res) {
+                 console.log('save response', res)
+                 $s.saving = false;
+                 $s.editable = false;
+                 $s.featureFunction = $s.edited.function;
+             })
+
+    }
+
 }])
 
 

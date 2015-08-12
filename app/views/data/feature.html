@@ -9,8 +9,32 @@
 
 <div ng-if="!loading">
     <h4>Function</h4>
-    <div class="feature-item">
 
+    <div class="feature-item">
+        <div ng-if="!featureFunction && !editable">
+            No function present
+        </div>
+
+        <div ng-if="!editable">
+            {{featureFunction}} <a ng-if="canEdit" ng-click="editFunction()">edit</a>
+        </div>
+
+        <div ng-if="editable">
+            <md-input-container md-no-float>
+               <input ng-init="edited.function = featureFunction"
+                      ng-model="edited.function"
+                      type="text"
+                      placeholder="Function" ng-disabled="saving">
+            </md-input-container>
+            <a ng-if="!saving" ng-click="editFunction()" class="no-link">cancel</a>
+            <a ng-if="!saving" ng-click="saveFunction()">save</a>
+            <span ng-if="saving">saving...</span>
+            <br><br>
+        </div>
+    </div>
+
+    <!--
+    <div class="feature-item">
         <ul ng-if="roles.length" class="list-unstyled">
             <li ng-repeat="role in roles track by $index">
                 <div ng-if="!editable[$index]">
@@ -48,6 +72,7 @@
             No function present
         </div>
     </div>
+    -->
 
     <h4>Subsystems</h4>
     <div class="feature-item">
