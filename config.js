@@ -18,8 +18,8 @@ angular.module('config', []).service('config', function() {
                   media: "/chenry/public/modelsupport/media",
                   maps: "/nconrad/public/maps/",
                   plants: {
-                      models: '/plantseed/Models',
-                      genomes: '/plantseed/Genomes'
+                      models: '/plantseed/Models/',
+                      genomes: '/plantseed/Genomes/'
                       }
                  };
 
