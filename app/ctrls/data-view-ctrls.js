@@ -197,6 +197,8 @@ function($s, $sParams, MS, $http, config, Auth) {
 
     $s.editable = {};
     $s.editRole = function(i) {
+        // cancel all other editing
+        $s.editable = {};
         $s.editable[i] = true;
     }
 
@@ -204,6 +206,7 @@ function($s, $sParams, MS, $http, config, Auth) {
     $s.saveRole = function(i) {
         $s.saving = true;
 
+        $s.roles[i] = $s.editedRole[i]
         var newFunction = $s.roles.join('; ')
 
         console.log('saving new function ', newFunction)

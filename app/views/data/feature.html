@@ -19,10 +19,12 @@
 
                 <div ng-if="editable[$index]">
                     <md-input-container md-no-float>
-                       <input ng-model="roles[$index]"
+                       <input ng-init="editedRole[$index] = role"
+                              ng-model="editedRole[$index]"
                               type="text"
                               placeholder="Role" ng-disabled="saving">
                     </md-input-container>
+                    <a ng-if="!saving" ng-click="editable[$index] = false" class="no-link">cancel</a>
                     <a ng-if="!saving" ng-click="saveRole($index)">save</a>
                     <span ng-if="saving">saving...</span>
                     <br><br>
