@@ -50,26 +50,40 @@ function($scope, $sParams, WS, $http) {
                             getOpts: function(row) {
                                 return {feature: row.id, genome: path};
                             }}
-                     },
-                     {label: 'Function', key: 'function',
-                         formatter: function(row) {
-                             return row.function || '-';
-                         }},
-                     {label: 'Subsystems', key: 'subsystems',
-                        formatter: function(row) {
-                            return row.subsystems.length ?
-                                   row.subsystems.join('<br>') : '-';
-                        }}
-                     ];
+                         },
+                         {label: 'Function', key: 'function',
+                             formatter: function(row) {
+                                 return row.function || '-';
+                             }},
+                         {label: 'Subsystems', key: 'subsystems',
+                            formatter: function(row) {
+                                return row.subsystems.length ?
+                                       row.subsystems.join('<br>') : '-';
+                            }}
+                         ];
 
     $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'rxn'},
                                 {label: 'Features', key: 'kmerFeatures',
                                     formatter: function(row) {
-                                        return row.kmerFeatures.join('<br>') || '-';
+                                        var links = [];
+                                        row.kmerFeatures.forEach(function(name, i) {
+                                            links.push('<a href="#/feature'+path+'/'+name+'">'+
+                                                            row.kmerFeatures[i]+
+                                                        '</a>');
+                                        })
+
+                                        return links.join('<br>') || '-';
                                     }},
                                {label: 'Exemplar Hits', key: 'blastFeatures',
                                     formatter: function(row) {
-                                        return row.blastFeatures.join('<br>') || '-';
+                                        var links = [];
+                                        row.blastFeatures.forEach(function(name, i) {
+                                            links.push('<a href="#/feature'+path+'/'+name+'">'+
+                                                            row.blastFeatures[i]+
+                                                        '</a>');
+                                        })
+
+                                        return links.join('<br>') || '-';
                                     }},
                                ]
 
