@@ -107,6 +107,37 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
+    this.reconstructPlant = function(ev, item, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/reconstruct-plant.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.item = item;
+                $scope.form = {genome: item.path};
+
+                $scope.reconstruct = function(){
+                    showToast('Reconstructing', item.name)
+                    MS.reconstruct($scope.form, {gapfill: false})
+                      .then(function(r) {
+                           cb(r);
+                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                      }).catch(function(e) {
+                          self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
+                      })
+
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
     /**
      * [function runFBA]
      * @param  {[type]}   ev   [$event object]

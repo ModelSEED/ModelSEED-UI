@@ -768,6 +768,20 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
             })
     }
 
+    $scope.reconstructPlant = function(ev, item) {
+        if ('genome_id' in item)
+            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
+        else
+            var params = {path: item.path, name: item.name};
+
+        $scope.selected = item;
+        Dialogs.reconstructPlant(ev, params,
+            function(res) {
+                /*MS.addModel({name: res[0],
+                             path: res[1],
+                             orgName: item.genome_name})*/
+            })
+    }
 
     $scope.copy = function(model) {
         var params = {model: model, copy_genome: 1, plantseed: 1}

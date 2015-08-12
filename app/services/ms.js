@@ -79,9 +79,12 @@ angular.module('MS', [])
 
     }
 
-    this.reconstruct = function(form) {
-        $log.log('reconstruct form', form)
-        return $http.rpc('ms', 'ModelReconstruction', form)
+    this.reconstruct = function(form, params) {
+        console.log('form', form)
+        console.log('addtional params', params)
+        var params = angular.extend(form, params)
+        $log.log('reconstruct form', params)
+        return $http.rpc('ms', 'ModelReconstruction', params)
                     .then(function(res){
                         return res;
                     })
@@ -141,7 +144,6 @@ angular.module('MS', [])
                         var data = [];
                         for (var i=0; i<res.length; i++) {
                             var obj = res[i];
-
                             data.push(self.sanitizeModel(obj))
                         }
 
