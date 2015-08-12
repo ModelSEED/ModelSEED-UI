@@ -15,7 +15,7 @@
 
                 <div flex>
                     <a ui-sref="app.genomePage({path: p.path})">
-                        <md-tooltip md-direction="right" md-delay="800">View Genome</md-tooltip>
+                        <md-tooltip md-direction="right">View Genome</md-tooltip>
                         {{p.meta.name}}
                     </a>
                     <br>
@@ -30,9 +30,15 @@
                     </div>
                 </div>
 
-                <div layout-align="center end" class="actions">
-                    <a ui-sref="app.modelPage({path: plantModelsPath+p.name+'_Model'})">
+                <div layout-align="center end" class="">
+                    <a ui-sref="app.modelPage({path: plantModelsPath+p.name+'_Model'})" class="pull-right">
                         View Model
+                    </a>
+                    <br><br>
+                    <br><br>
+
+                    <a ng-click="copy(plantModelsPath+p.name+'_Model')">
+                        Copy Genome/Model
                     </a>
 
                     <!--<md-button class="md-raised md-primary" md-no-ink>

@@ -767,6 +767,15 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
             })
     }
 
+
+    $scope.copy = function(model) {
+        var params = {model: model, copy_genome: 1, plantseed: 1}
+        $http.rpc('ms', 'copy_model', params)
+             .then(function(res) {
+                 console.log('copy res', res)
+             })
+    }
+
 }])
 
 

@@ -10,17 +10,42 @@
 <div ng-if="!loading">
     <h4>Function</h4>
     <div class="feature-item">
+
         <ul ng-if="roles.length" class="list-unstyled">
-            <li ng-repeat="role in roles">
-                {{role}}
+            <li ng-repeat="role in roles track by $index">
+                <div ng-if="!editable[$index]">
+                    {{role}} <a ng-if="canEdit" ng-click="editRole($index)">edit</a>
+                </div>
+
+                <div ng-if="editable[$index]">
+                    <md-input-container md-no-float>
+                       <input ng-model="roles[$index]"
+                              type="text"
+                              placeholder="Role" ng-disabled="saving">
+                    </md-input-container>
+                    <a ng-if="!saving" ng-click="saveRole($index)">save</a>
+                    <span ng-if="saving">saving...</span>
+                    <br><br>
+                </div>
+
             </li>
         </ul>
+
+        <form ng-if="editRoles">
+            <ul ng-if="roles.length" class="list-unstyled">
+                <li ng-repeat="role in roles track by $index">
+                    <md-input-container md-no-float flex>
+                        <label>Role {{$index}}</label>
+                        <input type="text" ng-model="editedRoles.role$index">
+                    </md-input-container>
+                </li>
+            </ul>
+        </form>
 
         <div ng-if="!roles.length">
             No function present
         </div>
     </div>
-
 
     <h4>Subsystems</h4>
     <div class="feature-item">

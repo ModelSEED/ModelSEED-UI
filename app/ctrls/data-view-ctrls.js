@@ -112,12 +112,14 @@ function($scope, $sParams, WS, $http) {
 }])
 
 .controller('FeatureDataView',
-['$scope', '$stateParams', 'MS', '$http', 'config',
-function($s, $sParams, MS, $http, config) {
+['$scope', '$stateParams', 'MS', '$http', 'config', 'Auth',
+function($s, $sParams, MS, $http, config, Auth) {
 
     // path and name of object
     var featureID = $sParams.feature,
         genome = $sParams.genome;
+
+    if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
     $s.featureID = featureID;
     $s.tabs = {tabIndex : 0};
@@ -191,6 +193,28 @@ function($s, $sParams, MS, $http, config) {
         });
 
         return a;
+    }
+
+    $s.editable = {};
+    $s.editRole = function(i) {
+        $s.editable[i] = true;
+    }
+
+    $s.editedRole = {};
+    $s.saveRole = function(i) {
+        $s.saving = true;
+
+        var newFunction = $s.roles.join('; ')
+
+        console.log('saving new function ', newFunction)
+        var params = {genome: genome, feature: featureID, function: newFunction};
+        $http.rpc('ms', 'save_feature_function', params)
+             .then(function(res) {
+                 console.log('save response', res)
+                 $s.saving = false;
+                 $s.editable[i] = false;
+             })
+
     }
 }])
 
