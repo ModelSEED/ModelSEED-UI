@@ -249,6 +249,7 @@ function($s, WS, $compile) {
     $s.loading = true;
     WS.get(wsPath)
       .then(function(res) {
+          console.log('res', res)
           $s.annoOverview = parseOverview(res.data);
           $s.loading = false;
       })

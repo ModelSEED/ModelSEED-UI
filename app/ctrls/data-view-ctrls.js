@@ -62,14 +62,14 @@ function($scope, $sParams, WS, $http) {
                         }}
                      ];
 
-    $scope.annotationHeader = [{label: 'Reaction', key: 'rxn'},
-                               {label: 'Blast Features', key: 'blastFeatures',
-                                    formatter: function(row) {
-                                        return row.blastFeatures.join('<br>') || '-';
-                                    }},
-                               {label: 'Kmer Features', key: 'kmerFeatures',
+    $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'rxn'},
+                                {label: 'Features', key: 'kmerFeatures',
                                     formatter: function(row) {
                                         return row.kmerFeatures.join('<br>') || '-';
+                                    }},
+                               {label: 'Exemplar Hits', key: 'blastFeatures',
+                                    formatter: function(row) {
+                                        return row.blastFeatures.join('<br>') || '-';
                                     }},
                                ]
 
