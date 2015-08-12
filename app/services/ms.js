@@ -14,6 +14,7 @@ angular.module('MS', [])
 
     // model for displayed things
     this.myModels = null;
+    this.myPlants = null;
 
     var cache = $cacheFactory('ms');
 
@@ -131,9 +132,10 @@ angular.module('MS', [])
         return p;
     }
 
-    this.getModels = function() {
-        $log.log('list models')
-        return $http.rpc('ms', 'list_models', {})
+    this.listModels = function(path) {
+        var params = path ? {path: path} : {};
+        $log.log('list models', params)
+        return $http.rpc('ms', 'list_models', params)
                     .then(function(res) {
                         $log.log('listmodels resp', res)
                         var data = [];
@@ -143,7 +145,9 @@ angular.module('MS', [])
                             data.push(self.sanitizeModel(obj))
                         }
 
-                        self.myModels = data;
+                        // cache data according to plants/microbes
+                        if (path.split('/')[2] === 'plantseed') self.myPlants = data
+                        else self.myModels = data;
                         return data;
                     })
     }

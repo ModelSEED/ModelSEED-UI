@@ -837,9 +837,9 @@ function($s, $sParams, WS, MS, Auth) {
 }])
 
 .controller('MyModels',
-['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs',
+['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
-function($scope, WS, MS, uiTools, $mdDialog, Dialogs,
+function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     var $self = $scope;
 
@@ -860,18 +860,19 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
+    $scope.plantOpts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
     $scope.selected = null;
 
     // load models
     if (MS.myModels) {
-        $scope.data = MS.myModels;
+        $scope.myMicrobes = MS.myModels;
     } else {
         $scope.loadingMicrobes = true;
-        MS.getModels().then(function(res) {
-            $scope.data = res;
+        MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
+            console.log('response', res)
+            $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
             if (e.error.code === -32603)
@@ -880,6 +881,24 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             else
                 $scope.error = e.error.message;
             $scope.loadingMicrobes = false;
+        })
+    }
+
+    if (MS.myPlants) {
+        $scope.myPlants = MS.myPlants;
+    } else {
+        $scope.loadingPlants = true;
+        MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
+            console.log('my plant models', res)
+            $scope.myPlants = res;
+            $scope.loadingPlants = false;
+        }).catch(function(e) {
+            if (e.error.code === -32603)
+                $scope.error = 'Something seems to have went wrong. '+
+                               'Please try logging out and back in again.';
+            else
+                $scope.error = e.error.message;
+            $scope.loadingPlatns = false;
         })
     }
 
