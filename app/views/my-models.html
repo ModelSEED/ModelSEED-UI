@@ -94,7 +94,7 @@
         </div>
 
         <div flex class="vertical-center" style="text-align: right;">
-            <md-button md-no-ink ng-click="rmModel($event, $index, item)" aria-label="delete model">
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
                 <md-tooltip md-direction="left" ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
             </md-button>
@@ -220,7 +220,7 @@
         </div>
 
         <div flex class="vertical-center" style="text-align: right;">
-            <md-button md-no-ink ng-click="rmModel($event, $index, item)" aria-label="delete model">
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
                 <md-tooltip md-direction="left" ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
             </md-button>
@@ -334,12 +334,14 @@
 <md-progress-circular ng-if="loadingPlants && view == 'Plants'" md-mode="indeterminate">
 </md-progress-circular>
 
-<div ng-if="myMicrobes && !myMicrobes.length">
+
+<!-- fix all this nonsense -->
+<div ng-if="myMicrobes && !myMicrobes.length && view == 'Microbes'">
     <br>
     You have no microbial models.  Consider <a ui-sref="app.reconstruct">resconstructing a model</a>.
 </div>
 
-<div ng-if="myPlants && !myPlants.length">
+<div ng-if="myPlants && !myPlants.length && view == 'Plants'">
     <br>
     You have no plant models.  Consider <a ui-sref="app.reconstruct">resconstructing a model</a>.
 </div>

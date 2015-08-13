@@ -74,33 +74,23 @@
                     </md-input-container>
 
 
-                    <div ng-if="noPagination" layout="row" layout-align="end center" flex>
-                        {{data.length}} {{resultText}}
+                    <div layout="row" layout-align="end center" flex>
+                        {{myPlants.length}} plant genomes
                     </div>
-
-                    <md-input-container
-                        ng-if="!noPagination"
-                        pagination
-                        pagination-offset="myPlantsOpts.offset"
-                        pagination-limit="myPlantsOpts.limit"
-                        pagination-total="myPlantsOpts.length"
-                        layout="row"
-                        layout-align="end center" flex>
-                    </md-input-container>
                 </div>
             </div>
             <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
-                <thead sortable-test>
+                <thead >
                     <tr>
                         <tr>
-                            <th ng-click="sortBy($event, 'name')">Name</th>
-                            <th ng-click="sortBy($event, 'timestamp')">Mod Time</th>
+                            <th>Name</th>
+                            <th>Mod Time</th>
                         </tr>
                     </tr>
                 </thead>
 
-                <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : myPlantsOpts.sort.field : myPlantsOpts.sort.desc)
-                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset)" ng-click="rowClick($event, row)" ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
+                <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : '-timestamp')
+                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset) " ng-click="rowClick($event, row)" ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
                     <td>
                         <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
                     </td>

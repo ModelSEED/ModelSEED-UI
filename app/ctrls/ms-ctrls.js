@@ -654,34 +654,13 @@ function($scope, $state, Patric, $timeout, $http,
    $scope.myPlantsOpts = {query: '',
                           limit: 25,
                           offset: 0,
-                          sort: null};
+                          sort: {field: 'timestamp'}};
 
     $scope.columns = [{prop: 'genome_name', label: 'Name'},
                       {prop: 'genome_id', label: 'ID'},
                       {prop: 'genus', label: 'Genus'},
                       {prop: 'taxon_id', label: 'Tax ID'},
                       {prop: 'contigs', label: 'Contigs'}]
-
-    $scope.myPlantsHeader = [{key: 'name', label: 'Name',
-                                link: {
-                                    state: 'app.genomePage',
-                                    getOpts: function(row) {
-                                        return {path: row.path}
-                                    }
-                                }
-                            },
-                            {key: 'timestamp', label: 'Mod Time',
-                                formatter: function(row) {
-                                    return uiTools.relativeTime(row.timestamp);
-                                }
-                            },
-                            {key: 'timestamp', label: 'Mod Time',
-                                formatter: function(row) {
-                                    return uiTools.relativeTime(row.timestamp);
-                                }
-                            },
-                            ]
-
 
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
@@ -928,7 +907,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
-            console.log('my plant models', res)
+            //console.log('my plant models', res)
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {
@@ -1100,7 +1079,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         }
     }
 
-    $scope.rmModel = function(ev, i, item) {
+    $scope.rmModel = function(ev, i, item, type) {
+        //console.log('removing item', i, item)
         ev.stopPropagation();
 
         var confirm = $mdDialog.confirm()
@@ -1118,7 +1098,10 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             var p1 = WS.deleteObj(item.path),
                 p2 = WS.deleteObj(folder, true);
             $q.all([p1,p2]).then(function(one, two) {
-                $self.data.splice(i, 1)
+                if (type.toLowerCase() === 'plant')
+                    MS.myPlants.splice(i, 1)
+                else if (type.toLowerCase() === 'microbe')
+                    MS.myModels.splice(i, 1)
                 Dialogs.showComplete('Deleted', item.name)
             })
         }, function() {
