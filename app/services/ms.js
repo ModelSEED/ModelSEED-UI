@@ -299,9 +299,12 @@ angular.module('MS', [])
 
     }
 
-    this.addModel = function(model) {
+    this.addModel = function(model, type) {
         $log.log('adding model', model)
-        this.myModels.push(self.sanitizeModel(model))
+        if (type.toLowerCase() === 'microbe')
+            this.myModels.push(self.sanitizeModel(model))
+        else if (type.toLowerCase() === 'plant')
+            this.myPlants.push(self.sanitizeModel(model))
     }
 
 }]);

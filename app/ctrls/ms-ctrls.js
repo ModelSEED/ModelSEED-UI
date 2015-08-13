@@ -801,14 +801,20 @@ function($scope, $state, Patric, $timeout, $http,
     $scope.copyInProgress = {};
     $scope.copy = function(i, model) {
         $scope.copyInProgress[i] = true;
-        console.log('copying', model)
+        //console.log('copying', model)
         Dialogs.showToast('Copying...', model.split('/').pop())
         var params = {model: model, copy_genome: 1, plantseed: 1}
         $http.rpc('ms', 'copy_model', params)
              .then(function(res) {
-                 console.log('copy complete res', res)
+                 console.log('copy complete res', res);
                  $scope.copyInProgress[i] = false;
                  Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
+
+                 // remove odd empty object
+                 delete res[model];
+
+                 // update cache
+                 if (MS.myPlants) MS.addModel(res, 'plant');
              })
     }
 
