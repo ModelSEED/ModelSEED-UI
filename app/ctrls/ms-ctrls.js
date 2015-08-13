@@ -806,7 +806,7 @@ function($scope, $state, Patric, $timeout, $http,
         var params = {model: model, copy_genome: 1, plantseed: 1}
         $http.rpc('ms', 'copy_model', params)
              .then(function(res) {
-                 console.log('copy complete res', res);
+                 //console.log('copy complete res', res);
                  $scope.copyInProgress[i] = false;
                  Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
 

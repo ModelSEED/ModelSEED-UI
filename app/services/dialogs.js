@@ -230,7 +230,7 @@ function(MS, WS, $dialog, $mdToast) {
          template: '<md-toast>'+
                      '<span flex style="margin-right: 30px; width: 200px;">'+
                        '<span class="ms-color-complete">'+title+'</span><br>'+
-                       name.slice(0,15)+'...'+
+                       name.slice(0,20)+'...'+
                       '</span>'+
                       (path ?
                           '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+

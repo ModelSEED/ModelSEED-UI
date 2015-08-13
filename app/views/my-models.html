@@ -29,10 +29,8 @@
     </div>
 
     <div layout="row"
-         ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query
-                                                           | orderBy : opts.sort.field : opts.sort.desc)
-                                                           | limitTo : opts.limit : opts.offset)
-                                                           | orderBy : '-timestamp' track by $index"
+         ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query)
+                                                           | limitTo : opts.limit : opts.offset)"
          ng-click="showFBAs(item)"
          class="row-hover my-model">
 
@@ -157,10 +155,8 @@
     </div>
 
     <div layout="row"
-         ng-repeat-start="item in (filtered = ( myPlants | filter: plantOpts.query
-                                                         | orderBy : plantOpts.sort.field : plantOpts.sort.desc)
-                                                         | limitTo : plantOpts.limit : plantOpts.offset)
-                                                         | orderBy : '-timestamp' track by $index"
+         ng-repeat-start="item in (filtered = ( myPlants | filter: plantOpts.query)
+                                                         | limitTo : plantOpts.limit : plantOpts.offset)"
          ng-click="showFBAs(item)"
          class="row-hover my-model">
 

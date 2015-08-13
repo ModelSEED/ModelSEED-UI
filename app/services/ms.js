@@ -305,6 +305,21 @@ angular.module('MS', [])
             this.myModels.push(self.sanitizeModel(model))
         else if (type.toLowerCase() === 'plant')
             this.myPlants.push(self.sanitizeModel(model))
+
+        sortCachedModels()
+    }
+
+    function sortCachedModels() {
+        self.myModels.sort(function(a, b) {
+            if (a.timestamp < b.timestamp) return 1;
+            if (a.timestamp > b.timestamp) return -1;
+            return 0;
+        })
+        self.myPlants.sort(function(a, b) {
+            if (a.timestamp < b.timestamp) return 1;
+            if (a.timestamp > b.timestamp) return -1;
+            return 0;
+        })
     }
 
 }]);
