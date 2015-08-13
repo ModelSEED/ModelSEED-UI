@@ -171,7 +171,6 @@ angular.module('MS', [])
 
         return WS.listL(path)
                  .then(function(objs) {
-                     console.log('objects', objs)
                         var media = [];
                         for (var i=0; i<objs.length; i++) {
                             var obj = objs[i];

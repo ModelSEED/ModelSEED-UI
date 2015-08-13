@@ -8,7 +8,7 @@
 
             <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
-            <div ng-repeat="p in plants" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
+            <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
 
                 <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
                 <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
@@ -37,9 +37,12 @@
                     <br><br>
                     <br><br>
 
-                    <a ng-click="copy(plantModelsPath+p.name+'_Model')">
+                    <a ng-if="!copyInProgress[$index]" ng-click="copy($index, plantModelsPath+p.name+'_Model')">
                         Copy Genome/Model
                     </a>
+                    <span ng-if="copyInProgress[$index]">
+                        Copying...
+                    </span>
 
                     <!--<md-button class="md-raised md-primary" md-no-ink>
                         <i class="icon-quill"></i> Annotate
@@ -53,6 +56,7 @@
     <md-tab>
 		<md-tab-label>My Plants</md-tab-label>
         <md-tab-body>
+            <!--
             <ng-table-two table-header="myPlantsHeader"
                         table-data="myPlants"
                         table-opts="myPlantsOpts"
@@ -61,6 +65,51 @@
                         table-row-click="reconstructPlant"
                         table-row-hover-class="reconstruct-hover">
             </ng-table-two>
+            -->
+
+            <div class="table-controls">
+                <div class="table-controls" layout="row">
+                    <md-input-container md-no-float flex="45"
+                        search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
+                    </md-input-container>
+
+
+                    <div ng-if="noPagination" layout="row" layout-align="end center" flex>
+                        {{data.length}} {{resultText}}
+                    </div>
+
+                    <md-input-container
+                        ng-if="!noPagination"
+                        pagination
+                        pagination-offset="myPlantsOpts.offset"
+                        pagination-limit="myPlantsOpts.limit"
+                        pagination-total="myPlantsOpts.length"
+                        layout="row"
+                        layout-align="end center" flex>
+                    </md-input-container>
+                </div>
+            </div>
+            <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+                <thead sortable-test>
+                    <tr>
+                        <tr>
+                            <th ng-click="sortBy($event, 'name')">Name</th>
+                            <th ng-click="sortBy($event, 'timestamp')">Mod Time</th>
+                        </tr>
+                    </tr>
+                </thead>
+
+                <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : myPlantsOpts.sort.field : myPlantsOpts.sort.desc)
+                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset)" ng-click="rowClick($event, row)" ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
+                    <td>
+                        <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
+                    </td>
+                    <td>{{uiTools.relativeTime(row.timestamp)}}
+                        <md-button class="md-secondary pull-right" ng-click="reconstructPlant($event,row)">Reconstruct</md-button>
+                    </td>
+                </tr>
+            </table>
+
         </md-tab-body>
 
         <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>

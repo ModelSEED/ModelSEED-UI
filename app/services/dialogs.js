@@ -42,7 +42,6 @@ function(MS, WS, $dialog, $mdToast) {
                 }
 
                 $s.saveMeta = function(meta) {
-                    console.log('saving meta', meta)
                     $s.savingMeta = true;
                     WS.saveMeta($s.meta[2] + $s.meta[0], meta)
                       .then(function(newMeta) {
@@ -57,9 +56,7 @@ function(MS, WS, $dialog, $mdToast) {
                   })
 
                 $s.tidy = function(text) {
-                    console.log('before', text)
                     $s.edit.userMeta = JSON.stringify(JSON.parse(text), null, 4)
-                    console.log('after', $s.edit.userMeta)
                 }
 
                 $s.validateJSON = function(text) {
@@ -88,7 +85,7 @@ function(MS, WS, $dialog, $mdToast) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    showToast('Reconstructing', item.name)
+                    self.showToast('Reconstructing', item.name)
                     MS.reconstruct($scope.form)
                       .then(function(r) {
                            cb(r);
@@ -119,7 +116,7 @@ function(MS, WS, $dialog, $mdToast) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    showToast('Reconstructing', item.name)
+                    self.showToast('Reconstructing', item.name)
                     MS.reconstruct($scope.form, {gapfill: false})
                       .then(function(r) {
                            cb(r);
@@ -157,7 +154,7 @@ function(MS, WS, $dialog, $mdToast) {
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
-                    showToast('Running Flux Balance Analysis', item.name)
+                    self.showToast('Running Flux Balance Analysis', item.name)
                     MS.runFBA($scope.form)
                       .then(function(res) {
                            cb();
@@ -187,7 +184,7 @@ function(MS, WS, $dialog, $mdToast) {
             function($scope, $http) {
 
                 $scope.gapfill = function(){
-                    showToast('Gapfilling', item.name)
+                    self.showToast('Gapfilling', item.name)
 
                     MS.gapfill(item.path)
                       .then(function(res) {
@@ -207,7 +204,7 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
-    function showToast(title, name) {
+    this.showToast = function(title, name) {
       $mdToast.show({
         controller: 'ToastCtrl',
         parent: angular.element('.sidebar'),
@@ -231,9 +228,9 @@ function(MS, WS, $dialog, $mdToast) {
          parent: angular.element('.sidebar'),
          //templateUrl:'app/views/dialogs/notify.html',
          template: '<md-toast>'+
-                     '<span flex style="margin-right: 30px;">'+
+                     '<span flex style="margin-right: 30px; width: 200px;">'+
                        '<span class="ms-color-complete">'+title+'</span><br>'+
-                       name.slice(0,20)+'...'+
+                       name.slice(0,15)+'...'+
                       '</span>'+
                       (path ?
                           '<md-button offset="33" ng-click="closeToast()" ui-sref="app.modelPage({path:\''+path +'\'})">'+

@@ -1700,6 +1700,35 @@ function($compile, $stateParams) {
     }
  })
 
+ .directive('sortableTest', function() {
+     return {
+         restrict: 'EA',
+         link: function(scope, elem, attrs) {
+
+             if (scope.opts.sort && ('desc' in scope.opts.sort) )
+             scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
+
+
+             // see table styling in core.css for sorting carets
+             scope.sortBy = function($event, name) {
+                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
+                 scope.opts.sort = {field: name, desc: desc};
+
+                 angular.element(elem).find('th').removeClass('sorting-asc')
+                 angular.element(elem).find('th').removeClass('sorting-desc')
+
+                 if (desc) {
+                     angular.element($event.target).removeClass('sorting-asc')
+                     angular.element($event.target).addClass('sorting-desc')
+                 } else {
+                     angular.element($event.target).removeClass('sorting-desc')
+                     angular.element($event.target).addClass('sorting-asc')
+                 }
+             }
+         }
+     }
+  })
+
  .directive('autoFocus', ['$timeout', function($timeout) {
      return {
          restrict: 'AC',

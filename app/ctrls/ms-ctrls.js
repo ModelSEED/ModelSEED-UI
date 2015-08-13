@@ -622,9 +622,15 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS', 'Auth',
-function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
+['$scope', '$state', 'Patric', '$timeout', '$http',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS',
+function($scope, $state, Patric, $timeout, $http,
+    Dialogs, ViewOptions, WS, Auth, uiTools, MS) {
     $scope.plantModelsPath = '/plantseed/Models/';
+
+    // formatting time helper used in View
+    $scope.uiTools = uiTools;
+
 
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
@@ -636,8 +642,6 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
     $scope.showMenu = function() {
       $scope.menuVisible = true;
     }
-
-
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
@@ -665,8 +669,18 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
                                         return {path: row.path}
                                     }
                                 }
-                            }]
-
+                            },
+                            {key: 'timestamp', label: 'Mod Time',
+                                formatter: function(row) {
+                                    return uiTools.relativeTime(row.timestamp);
+                                }
+                            },
+                            {key: 'timestamp', label: 'Mod Time',
+                                formatter: function(row) {
+                                    return uiTools.relativeTime(row.timestamp);
+                                }
+                            },
+                            ]
 
 
     WS.listPlantMetas('/plantseed/Genomes/')
@@ -690,6 +704,7 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
       $scope.loadingMyPlants = true;
       WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
+          console.log('res', res)
 
           // remove non-genomes
           var i = res.length;
@@ -700,6 +715,7 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
           }
 
           $scope.myPlants = res;
+          console.log('myplants', $scope.myPlants)
           $scope.loadingMyPlants = false;
       }).catch(function(e) {
           if (e.error.code === -32603)
@@ -752,7 +768,6 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
               })
     }
 
-
     $scope.reconstruct = function(ev, item) {
         if ('genome_id' in item)
             var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
@@ -783,11 +798,17 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
             })
     }
 
-    $scope.copy = function(model) {
+    $scope.copyInProgress = {};
+    $scope.copy = function(i, model) {
+        $scope.copyInProgress[i] = true;
+        console.log('copying', model)
+        Dialogs.showToast('Copying...', model.split('/').pop())
         var params = {model: model, copy_genome: 1, plantseed: 1}
         $http.rpc('ms', 'copy_model', params)
              .then(function(res) {
-                 console.log('copy res', res)
+                 console.log('copy complete res', res)
+                 $scope.copyInProgress[i] = false;
+                 Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
              })
     }
 
@@ -840,7 +861,6 @@ function($s, $sParams, WS, MS, Auth) {
     $s.loadingMyMedia = true;
     MS.listMedia('/'+Auth.user+'/media')
       .then(function(media) {
-          console.log('my media', media)
           $s.myMedia = media;
           $s.loadingMyMedia = false;
       }).catch(function(e) {
@@ -885,7 +905,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingMicrobes = true;
         MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
-            console.log('response', res)
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
