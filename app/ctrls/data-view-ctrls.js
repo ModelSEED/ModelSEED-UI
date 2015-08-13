@@ -582,6 +582,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                               {label: 'Flux', key: 'flux'},
                               {label: 'Min', key: 'min'},
                               {label: 'Max', key: 'max'},
+                              {label: 'Class', key: 'class'},
                               {label: 'Lower Bound', key: 'lower_bound'},
                               {label: 'Upper Bound', key: 'upper_bound'}]
 
@@ -1023,6 +1024,7 @@ function(WS, ModelParser) {
                                  lower_bound: rxn.lowerBound,
                                  upper_bound: rxn.upperBound,
                                  flux: rxn.value,
+                                 class: rxn.class
                                 })
         }
 
