@@ -940,3 +940,9 @@ tr .fa-file-text-o {
 .feature-item {
     margin: 0 20px 30px 20px;
 }
+
+.feature-highlight {
+    font-style: italic;
+    background-color: rgba(95, 171, 86, 0.15);
+    padding-right: 3px;
+}

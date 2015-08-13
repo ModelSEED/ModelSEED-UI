@@ -42,7 +42,7 @@ function($scope, $sParams, WS, $http) {
     $scope.tabs = {tabIndex : 0};
 
     $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
-    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
 
     $scope.featureHeader = [{label: 'Feature', key: 'id',
                         link: {
@@ -62,13 +62,15 @@ function($scope, $sParams, WS, $http) {
                             }}
                          ];
 
-    $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'rxn'},
+    $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'role'},
                                 {label: 'Features', key: 'kmerFeatures',
                                     formatter: function(row) {
                                         var links = [];
                                         row.kmerFeatures.forEach(function(name, i) {
-                                            links.push('<a href="#/feature'+path+'/'+name+'">'+
-                                                            row.kmerFeatures[i]+
+                                            var match = row.blastFeatures.indexOf(name);
+                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                                            name+
                                                         '</a>');
                                         })
 
@@ -78,8 +80,10 @@ function($scope, $sParams, WS, $http) {
                                     formatter: function(row) {
                                         var links = [];
                                         row.blastFeatures.forEach(function(name, i) {
-                                            links.push('<a href="#/feature'+path+'/'+name+'">'+
-                                                            row.blastFeatures[i]+
+                                            var match = row.kmerFeatures.indexOf(name);
+                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                                            name+
                                                         '</a>');
                                         })
 
@@ -112,7 +116,7 @@ function($scope, $sParams, WS, $http) {
          .then(function(res) {
              var d = [];
              for (var key in res) {
-                 d.push({rxn: key,
+                 d.push({role: key,
                          blastFeatures: res[key]['blast-features'],
                          kmerFeatures: res[key]['kmer-features']})
              }
