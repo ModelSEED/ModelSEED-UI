@@ -17,7 +17,8 @@
     <form>
     <md-dialog-content>
         <div>
-            <p class="text-muted">Note: Complete media is used by default.</p>
+            <p ng-if="!isPlant" class="text-muted">Note: Complete media is used by default.</p>
+            <p ng-if="isPlant" class="text-muted">Note: Plant Heterotrophic Media is used by default.</p>
             <!-- select media name:media -->
 
             <!--

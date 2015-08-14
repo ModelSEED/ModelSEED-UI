@@ -150,7 +150,7 @@ function(MS, WS, $dialog, $mdToast) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                $scope.item;
+                $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
