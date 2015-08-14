@@ -1520,7 +1520,6 @@ function($compile, $stateParams) {
 
             scope.enablePagination =
                 scope.enablePagination ? enablePagination : true;
-            console.log('enable?', scope.enablePagination )
         }
     }
 }])

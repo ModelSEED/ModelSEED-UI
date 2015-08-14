@@ -18,14 +18,16 @@
         </thead>
         <tbody>
             <tr ng-repeat="gf in item.relatedGapfills track by $index"
-                class="row-hover"
-                ng-click="integrateGapfill(gf.integrated, item, gf)">
+                class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
                 <td>
                     <img ng-if="gf.loading"
                          src="img/ajax-loader.gif"
                          width="15" height="15">
-                    <i ng-if="!gf.loading"
+                    <!--<i ng-if="!gf.loading"
                        class="fa {{gf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}">
+                    </i>-->
+                    <i ng-if="!gf.loading"
+                       class="fa fa-check-square-o text-muted">
                     </i>
                 </td>
                 <td>

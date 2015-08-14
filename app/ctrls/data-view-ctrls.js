@@ -331,9 +331,9 @@ function($scope, $state, $sParams, WS, tools, $http, Auth) {
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', 'config',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', 'config', '$http',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, config) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, config, $http) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -428,11 +428,36 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                         ]
 
      // fetch object data and parse it.
+     /*
      $scope.loading = true;
      WS.get(path).then(function(res) {
          $scope.model = res.data;
 
+         console.log('model1', $scope.model)
+
          var data = ModelParser.parse(res.data);
+
+         $scope.rxns = data.reactions;
+         $scope.cpds = data.compounds;
+         $scope.genes = data.genes;
+         $scope.compartments = data.compartments;
+         $scope.biomass = data.biomass;
+         $scope.loading = false;
+
+     }).catch(function(e) {
+         $scope.error = e;
+         $scope.loading = false;
+     })*/
+
+
+     $scope.loading = true;
+     $http.rpc('ms', 'get_model', {model: path, to: true})
+         .then(function(res) {
+         //$scope.model = res.data;
+
+         console.log('model with gapfills', res)
+
+         var data = ModelParser.parse(res);
 
          $scope.rxns = data.reactions;
          $scope.cpds = data.compounds;
