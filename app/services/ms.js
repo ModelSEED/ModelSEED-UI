@@ -137,7 +137,7 @@ angular.module('MS', [])
 
     this.listModels = function(path) {
         var params = path ? {path: path} : {};
-        $log.log('list models', params)
+        //$log.log('list models', params)
         return $http.rpc('ms', 'list_models', params)
                     .then(function(res) {
                         $log.log('listmodels resp', res)
@@ -302,20 +302,25 @@ angular.module('MS', [])
     this.addModel = function(model, type) {
         $log.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
-            this.myModels.push(self.sanitizeModel(model))
+            syncCache(this.myModels, model)
         else if (type.toLowerCase() === 'plant')
-            this.myPlants.push(self.sanitizeModel(model))
-
-        sortCachedModels()
+            syncCache(this.myPlants, model)
     }
 
-    function sortCachedModels() {
-        self.myModels.sort(function(a, b) {
-            if (a.timestamp < b.timestamp) return 1;
-            if (a.timestamp > b.timestamp) return -1;
-            return 0;
-        })
-        self.myPlants.sort(function(a, b) {
+    // if new object already exists in cache,
+    // delete old, replace with new
+    function syncCache(data, model) {
+        for (var i=0; i<data.length; i++) {
+            if (data[i].path === model.ref) data.splice(i,1)
+            break;
+        }
+
+        data.push( self.sanitizeModel(model) );
+        sortCachedModels(data);
+    }
+
+    function sortCachedModels(data) {
+        data.sort(function(a, b) {
             if (a.timestamp < b.timestamp) return 1;
             if (a.timestamp > b.timestamp) return -1;
             return 0;
