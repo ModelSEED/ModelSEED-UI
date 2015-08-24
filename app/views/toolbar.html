@@ -1,97 +1,115 @@
 
-            <ul class="toolbar" >
-                <li ng-class="{ active: $state.includes('app.biochem') }">
-                    <a ui-sref="app.biochem">
-                        <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
-                    </a>
-                </li>
-                <li ng-if="$root.includePlants" ng-class="{ active: $state.includes('app.plantAnnotations') }">
-                    <a ui-sref="app.plantAnnotations">
-                        <i class="icon-quill"></i> <span hide-sm>Annotations</span>
-                    </a>
-                </li>
-                <li ng-class="{ active: $state.includes('app.reconstruct') }" >
-                    <a ui-sref="app.reconstruct">
-                        <i class="icon-tools"></i> <span hide-sm>Genomes</span>
-                    </a>
-                </li>
-                <!--<li ng-class="{ active: $state.includes('app.myData') }">
-                    <a ui-sref="app.myData({dir: '/'+$root.user})">
-                        <i class="icon-archive2"></i> All Files
-                    </a>
-                </li>-->
-                <li ng-class="{ active: $state.includes('app.media') }">
-                    <a ui-sref="app.media">
-                        <i class="icon-lab2"></i> <span hide-sm>Media</span>
-                    </a>
-                </li>
-                <li ng-class="{ active: $state.includes('app.myModels') }">
-                    <a ui-sref="app.myModels">
-                        <i class="icon-folder-open-o"></i> <span hide-sm>My Models</span>
-                    </a>
-                </li>
-
-                <!--
-                <li ng-class="{ active: $state.includes('app.reconstruct') }">
-                    <a ui-sref="app.reconstruct">
-                        <i class="icon-tools"></i> Reconstruct
-                    </a>
-                </li>-->
-                <!--<li ng-class="{ active: $state.includes('app.publicModels') }">
-                    <a ui-sref="app.publicModels">
-                        <i class="icon-earth"></i> Public
-                    </a>
-                </li>-->
-                <!--<li ng-class="{ active: $state.includes('app.modelEditor')}" >
-                    <a ui-sref="app.modelEditor">Model Editor</a>
-                </li>-->
-                <!--<li ng-class="{ active: $state.includes('app.compare')}" >
-                    <a ui-sref="app.compare">
-                        <i class="icon-lab"></i>
-                        Analysis
-                        <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
-                    </a>
-                </li>-->
-            </ul>
-            <span flex></span>
+<div class="logo zigzag" hide-sm>
+    <a ui-sref="home">Model<span>SEED<span></a>
+</div>
 
 
-            <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a class="dropdown-toggle cursor" data-toggle="dropdown">More
-                        <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a ui-sref="app.myData({dir: '/'+$root.user})">
-                                <i class="icon-archive2"></i> All My Files
-                            </a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li>
-                            <a ui-sref="app.faq">FAQ</a>
-                        </li>
-                        <li>
-                            <a ui-sref="home">About</a>
-                        </li>
-                        <!--<li>
-                            <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
-                        </li>-->
-                    </ul>
-                </li>
-                <li ng-if="$root.user" class="dropdown" ng-controller="Login">
-                    <a class="dropdown-toggle cursor" data-toggle="dropdown" style="padding-top: 5px; padding-bottom: 5px;">
-                        {{$root.user.split('@')[0]}}
-                        <br>
-                        <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}</small>
-                        <i class="fa fa-caret-down vertical-center"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a ng-click="logout()">
-                                <i class="fa fa-sign-out fa-fw"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+<ul class="toolbar">
+    <li ng-class="{ active: $state.includes('app.biochem') }">
+        <a ui-sref="app.biochem">
+            <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
+        </a>
+    </li>
+    <li ng-if="$root.includePlants" ng-class="{ active: $state.includes('app.plantAnnotations') }">
+        <a ui-sref="app.plantAnnotations">
+            <i class="icon-quill"></i> <span hide-sm>Annotations</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.reconstruct') }" >
+        <a ui-sref="app.reconstruct">
+            <i class="icon-tools"></i> <span hide-sm>Genomes</span>
+        </a>
+    </li>
+    <!--<li ng-class="{ active: $state.includes('app.myData') }">
+        <a ui-sref="app.myData({dir: '/'+$root.user})">
+            <i class="icon-archive2"></i> All Files
+        </a>
+    </li>-->
+    <li ng-class="{ active: $state.includes('app.media') }">
+        <a ui-sref="app.media">
+            <i class="icon-lab2"></i> <span hide-sm>Media</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.myModels') }">
+        <a ui-sref="app.myModels">
+            <i class="icon-folder-open-o"></i> <span hide-sm>My Models</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.compare') }">
+        <a ui-sref="app.compare">
+            <i class="icon-git-compare"></i>
+            <span hide-sm>Compare</span>
+            <span>(0)</span>
+
+            <i class="caret" style="margin-top: 10px;"></i>
+        </a>
+        <div mega-dropdown style="display: none;">
+            blah blah
+            balh
+        </div>
+    </li>
+
+    <!--
+    <li ng-class="{ active: $state.includes('app.reconstruct') }">
+        <a ui-sref="app.reconstruct">
+            <i class="icon-tools"></i> Reconstruct
+        </a>
+    </li>-->
+    <!--<li ng-class="{ active: $state.includes('app.publicModels') }">
+        <a ui-sref="app.publicModels">
+            <i class="icon-earth"></i> Public
+        </a>
+    </li>-->
+    <!--<li ng-class="{ active: $state.includes('app.modelEditor')}" >
+        <a ui-sref="app.modelEditor">Model Editor</a>
+    </li>-->
+    <!--<li ng-class="{ active: $state.includes('app.compare')}" >
+        <a ui-sref="app.compare">
+            <i class="icon-lab"></i>
+            Analysis
+            <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
+        </a>
+    </li>-->
+</ul>
+<span flex></span>
+
+
+<ul class="nav navbar-nav">
+    <li class="dropdown">
+        <a class="dropdown-toggle cursor" data-toggle="dropdown">More
+            <i class="fa fa-caret-down"></i>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a ui-sref="app.myData({dir: '/'+$root.user})">
+                    <i class="icon-archive2"></i> All My Files
+                </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li>
+                <a ui-sref="app.faq">FAQ</a>
+            </li>
+            <li>
+                <a ui-sref="home">About</a>
+            </li>
+            <!--<li>
+                <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
+            </li>-->
+        </ul>
+    </li>
+    <li ng-if="$root.user" class="dropdown" ng-controller="Login">
+        <a class="dropdown-toggle cursor" data-toggle="dropdown" style="padding-top: 5px; padding-bottom: 5px;">
+            {{$root.user.split('@')[0]}}
+            <br>
+            <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}</small>
+            <i class="fa fa-caret-down vertical-center"></i>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a ng-click="logout()">
+                    <i class="fa fa-sign-out fa-fw"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>

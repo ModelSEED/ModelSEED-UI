@@ -31,24 +31,73 @@ a:focus {
     padding: 8px 15px;
 }
 
-.logo {  /* awaiting design */
-    margin-top: 2px;
-    /*font-weight: 800;
-    font-family: 'Varela Round', sans-serif;*/
+.main-toolbar {
+    padding-left: 0;
+}
+
+.logo {
+    padding: 10px 40px 5px 20px;
+    margin: 0 10px 0 0;
+    display: inline-block;
+    background-color: #444;
+    /*
+    -webkit-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
+    -moz-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
+    box-shadow: inset -90px 10px 50px -70px rgba(0,188,212,1);*/
+
+
+
+
+
+    /*text-shadow: #00AFD8 0px 0px 3px, #00AFD8 0px 0px 3px;*/
+
+}
+.logo a {  /* awaiting design */
+    line-height: 1.4em;
+    color: #fff;
+    font-weight: 800;
+    font-size: 25px !important;
+    font-family: 'Varela Round', sans-serif;
 }
 
 .logo span {
-    /*color: #ADEFDB;*/
+    color: #ADEFDB;
 }
 
-
 .logo a:hover {
-    opacity: 0.8;
-    color: inherit;
+    opacity: 0.9;
     text-decoration: none;
 
 }
-/* .logo span {} */
+.zigzag {
+}
+
+
+
+.zigzag {
+    background-color: #444;
+  position: relative;
+}
+
+.zigzag:after {
+  background-position: right-top;
+  background-repeat: repeat-y;
+  background-size: 15px 15px;
+  content: " ";
+  display: block;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 15px;
+  height: 100%;
+}
+
+.zigzag:after{
+  background-image: linear-gradient(-45deg, #00BCD4 5px, transparent 0),
+                    linear-gradient(-135deg, #00BCD4 5px, transparent 0);
+
+}
+
 .md-secondary { /*hack hack hack #fixme */
     background-color: rgba(95, 98, 168, 0.91) !important;
     color: #fff !important;
