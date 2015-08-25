@@ -53,52 +53,43 @@
         </div>
 
         <div flex="35" class="vertical-center">
-            {{item.orgName.length > 19 ? item.orgName.slice(0,20)+'...' : item.orgName}}<br>
+            {{item.orgName}}<br><!--item.orgName.length > 19 ? item.orgName.slice(0,20)+'...' : -->
             <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}
             </a>
         </div>
 
-        <div flex="30" class="vertical-center">
+        <div flex="30" class="vertical-center" layout="row" layout-align="start">
             <md-button md-no-ink ng-click="runFBA($event, item)">
                 <i class="fa fa-code-fork"></i>
                 Run FBA
+                (<span class="label-fba-count"><md-tooltip>Number of FBAs</md-tooltip>{{item.fbaCount}}</span>)
             </md-button>
             <md-button md-no-ink ng-click="gapfill($event, item)">
                 <i class="fa fa-circle"></i>
                 Gapfill
+                (<span class="label-gapfill-count"><md-tooltip>Number of Gapfill Solutions</md-tooltip>{{item.gapfillCount}}</span>)
             </md-button>
         </div>
 
 
-        <div flex="15" class="vertical-center" style="text-align: left;" hide-sm>
-            <!--
-            <span class="badge label-fba">
-                <md-tooltip>Number of FBAs</md-tooltip>
-                {{item.fbaCount}}
-            </span>
-            <span class="badge label-gapfill">
-                <md-tooltip>Number of Gapfill Solutions</md-tooltip>
-                {{item.gapfillCount}}
-            </span>
-            -->
+        <div flex="15" class="vertical-center" layout="column" hide-sm>
+
             <small><b>{{item.rxnCount}}</b> Reactions</small>
-            <br>
             <small><b>{{item.cpdCount}}</b> Compounds</small>
         </div>
 
 
-        <div flex class="timestamp vertical-center" hide-sm>
+        <div flex class="timestamp vertical-center">
             <small>{{relativeTime(item.timestamp)}}</small>
         </div>
 
-        <div flex class="vertical-center" style="text-align: right;">
+        <div flex layout="column" layout-align="end end">
             <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
                 <md-tooltip md-direction="left" ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
             </md-button>
-            <br>
             <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
                 <md-tooltip md-direction="left" ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
