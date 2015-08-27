@@ -1015,7 +1015,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     // general operations
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
-        WS.deleteObj(model.path)
+        WS.deleteObj(model.relatedFBAs[i].ref)
           .then(function(res) {
               model.relatedFBAs.splice(i, 1);
               model.fbaCount -= 1;
