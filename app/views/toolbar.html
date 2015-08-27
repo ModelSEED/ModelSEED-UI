@@ -35,18 +35,73 @@
             <i class="icon-folder-open-o"></i> <span hide-sm>My Models</span>
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.compare') }">
+    <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">
         <a ui-sref="app.compare">
             <i class="icon-git-compare"></i>
             <span hide-sm>Compare</span>
-            <span>(0)</span>
+            <span class="model-count" ng-controller="ModelCount">({{MV.models.length}})</span>
 
             <i class="caret" style="margin-top: 10px;"></i>
         </a>
-        <div mega-dropdown style="display: none;">
-            blah blah
-            balh
-        </div>
+
+        <mega-dropdown-content id="selected-models" ng-controller="SelectedData">
+                <div class="header">
+                    <i class="icon-git-compare" style="font-size: 25px !important;"></i>
+                    Comparative Analysis
+                    <span class="model-count">({{MV.models.length}})</span>
+                </div>
+
+                <hr class="no-margin">
+
+                <ul ng-if="MV.models.length" class="list-unstyled">
+                    <li ng-repeat="item in MV.models track by $index" class="selected-model">
+                        <div>
+                            <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
+                                <a ui-sref=".modelPage({path: item.model})"
+                                   class="model">
+                                   {{item.org}}
+                                </a>
+                            </div>
+
+                            <div class="ellipsis selected-data-item ">
+                                <a ui-sref=".fbaPage({path: item.fba})"
+                                   class="fba" ng-click="makeActive($event)">
+                                   <span class="label label-fba">FBA</span> {{item.media}}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="selected-model-options">
+                            <i class="icon-close hover pointer" ng-click="MV.rm($index)">
+                                <md-tooltip md-direction="right">Remove model</md-tooltip>
+                            </i>
+                            <br>
+                            <i class="glyphicon glyphicon-cog hover pointer"
+                                ng-click="openFBAView($event, $index, item)">
+                                <md-tooltip md-direction="right">Modify selected FBA</md-tooltip>
+                            </i>
+                        </div>
+
+                    </li>
+                </ul>
+                <br>
+                <div layout="row" layout-align="end center">
+                    <a ng-if="MV.models.length" ng-click="MV.rmAll()">
+                        Clear All
+                    </a>
+                    <md-button ng-if="MV.models.length && !$state.includes('app.compare')" class="md-secondary" ui-sref="app.compare">
+                        Compare
+                    </md-button>
+                </div>
+
+                <div ng-if="!MV.models.length" class="warning-msg">
+                    You have no models selected
+                </div>
+        </mega-dropdown-content>
+
+
+
+
     </li>
 
     <!--

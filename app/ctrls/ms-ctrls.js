@@ -197,8 +197,6 @@ function($s, WS, $compile) {
         pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
         featurePath = '#/feature/plantseed/Genomes/Athaliana-TAIR10/';
 
-
-
     var wsPath = '/plantseed/Genomes/annotation_overview';
 
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
@@ -249,14 +247,13 @@ function($s, WS, $compile) {
     $s.loading = true;
     WS.get(wsPath)
       .then(function(res) {
-          console.log('res', res)
           $s.annoOverview = parseOverview(res.data);
           $s.loading = false;
       })
 
 
     // The annotation overview structure seems to consist of hashes with
-    // values of "1", instead of flat arrays.  This should be fixed.
+    // values of "1", instead of flat arrays.  This should probably be fixed.
     // Note: the 'role' structure is correct
     function parseOverview(data) {
         for (var i=0; i<data.length; i++) {

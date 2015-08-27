@@ -428,6 +428,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                         ]
 
      // fetch object data and parse it.
+
      /*
      $scope.loading = true;
      WS.get(path).then(function(res) {
@@ -449,11 +450,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
          $scope.loading = false;
      })*/
 
-
      $scope.loading = true;
      $http.rpc('ms', 'get_model', {model: path, to: true})
          .then(function(res) {
-         //$scope.model = res.data;
+         $scope.models = [res];
 
          console.log('model with gapfills', res)
 
@@ -635,8 +635,8 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     WS.get(path).then(function(res) {
         FBAParser.parse(res.data)
                  .then(function(parsed) {
-                    $scope.fba = res.data;
-                    $scope.model = parsed.rawModel;
+                    $scope.fbas = [res.data];
+                    $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 

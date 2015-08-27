@@ -9,6 +9,19 @@ body {
       max-height: 100%;
 }
 
+.background-shade-out {
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    opacity: 0.3;
+    transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
+
+}
+
+
 a {
     color: #00AFD8;
 }
@@ -17,6 +30,7 @@ a:hover,
 a:focus {
     cursor: pointer;
     color: #0081A0;
+    text-decoration: none;
 }
 
 .position-fixed {
@@ -44,24 +58,19 @@ a:focus {
     -webkit-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
     -moz-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
     box-shadow: inset -90px 10px 50px -70px rgba(0,188,212,1);*/
-
-
-
-
-
     /*text-shadow: #00AFD8 0px 0px 3px, #00AFD8 0px 0px 3px;*/
 
 }
 .logo a {  /* awaiting design */
     line-height: 1.4em;
-    color: #fff;
+    color: #dfdfdf;
     font-weight: 800;
     font-size: 25px !important;
     font-family: 'Varela Round', sans-serif;
 }
 
 .logo span {
-    color: #ADEFDB;
+    color: #29C8DC;
 }
 
 .logo a:hover {
@@ -275,15 +284,15 @@ md-toolbar,
     padding: 0;
     margin: 0;
     height: 100%;
-    list-style:none;
+    list-style: none;
 }
 
-.toolbar li {
+.toolbar > li {
     height: 100%;
     display: inline-block;
 }
 
-.toolbar li a {
+.toolbar > li > a {
     display:block;
     font-size: 8pt;
     line-height: 1.1em;
@@ -293,21 +302,21 @@ md-toolbar,
     height: 100%;
 }
 
-.toolbar li a:hover {
+.toolbar > li > a:hover {
     color: #dfdfdf;
 }
-.toolbar li.active  a{
+.toolbar > li.active > a{
     color: #555;
 }
 
-.toolbar li i {
+.toolbar > li > a >i {
     display: inline-block;
     padding-top: 10px;
     font-size: 30px;
     text-align: center;
 }
 
-.toolbar li i.icon-benzene {
+.toolbar li > a > i.icon-benzene {
     font-weight: 600;
 }
 
@@ -327,37 +336,12 @@ md-toolbar,
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
-.sidebar ul li {
-    border-bottom: none;
-}
 
-.sidebar a > i {
-    color: #fff;
-    font-size: 1.2em;
-}
 
-.sidebar-nav .nav > li > a {
-    background-color: #555;
-    font-weight: 500;
-    padding: 10px 10px 10px 15px;
-    border: none;
-}
-
-.sidebar-collapse {
-    float: left;
-    height: 50px;
-    padding: 15px 15px;
-    font-size: 18px;
-    line-height: 20px;
-
-}
-.sidebar-collapse:hover {
-    color: #dfdfdf;
-}
-
+/*
 .nav .open>a {
     background-color: #26D3DA !important;
-}
+}*/
 
 .btn-add-model {
     padding: 0px 5px;
@@ -368,12 +352,7 @@ md-toolbar,
 }
 
 
-#selected-models .selected-model {
-    background-color: #fff;
-    padding: 5px;
-    border: 2px solid rgb(232, 232, 232);
-    margin: 5px 0;
-}
+#selected-models {}
 
 #selected-models hr {
     height: 1px;
@@ -381,16 +360,65 @@ md-toolbar,
     margin: 10px 0;
 }
 
-.selected-data-highlight {
-    color: rgb(135, 206, 235) !important;
+.selected-model {
+    border: 1px solid #dfdfdf;
+    padding: 10px 28px 10px 10px;
+    margin-top: 10px;
+    background-color: #fff;
+    position: relative;
 }
 
+.selected-model a {
+    color: #00AFD8;
+}
+.selected-model a:hover {
+    color: #0081A0;
+}
+
+.selected-model-options {
+    visibility: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 5px 0 0 5px;
+    font-size: 18px;
+    color: #222;
+    height: 100%;
+    /*background-color: #000;*/
+    opacity: 0;
+    transition: opacity 0.1s linear;
+}
+
+
+
+.selected-model:hover .selected-model-options{
+    visibility: visible;
+    opacity: 1.0;
+}
+
+/*
+.model-count {
+
+    transition: all 1s ease;
+    -webkit-animation: increment .5s;
+    -moz-animation: increment .5s;
+    -ms-animation: increment .5s;
+    -o-animation: increment .5s;
+    animation: increment .5s;
+}
+
+@keyframes increment {
+    from { color: #000 !important; }
+    to   { color: #fff; }
+}*/
+
 .ellipsis {
-    width: 185px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
 
 
 /* pages */
@@ -994,4 +1022,11 @@ tr .fa-file-text-o {
     font-style: italic;
     background-color: rgba(95, 171, 86, 0.15);
     padding-right: 3px;
+}
+
+
+/*dropdown stuff */
+
+mega-dropdown-content i {
+    /*font-size: 16px !important;*/
 }

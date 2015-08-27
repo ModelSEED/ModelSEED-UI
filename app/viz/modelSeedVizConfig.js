@@ -12,7 +12,7 @@ var ModelSeedVizConfig = (function() {
     'use strict';
 
     function ModelSeedVizConfig() {
-        var maxAbsFlux = 41;
+        var maxAbsFlux = 1000;
 
         var negColorMin = 'lightred',
             negColorMax = 'darkred';
@@ -41,15 +41,13 @@ var ModelSeedVizConfig = (function() {
         posRainbow.setSpectrum(posColorMin, posColorMax);
 
         this.getColor = function(v, absFlux) {
-            var c = (Math.abs(v) / 41)*100 ;
-
+            var c = (Math.abs(v) / maxAbsFlux)*100 ;
 
             if (v === 0) return self.geneColor;
             else if (v < 0 || absFlux) return '#'+negRainbow.colourAt(c);
 
             return '#'+posRainbow.colourAt(c);
         }
-
 
         var colourGradient = new ColourGradient();
         this.getNegMinHex = function() {

@@ -82,18 +82,18 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.get = function(path) {
-        $log.log('get (object)', path)
-
+        //$log.log('get (object)', path)
+        console.log('fetching', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        //$log.log('get (object) response', res)
+                        $log.log('get (object) response', res)
 
                         var meta = res[0][0],
                             node = meta[11];
 
                         // if shock node, fetch. Otherwise, return data.
                         if (node.length > 0) {
-                            $log.log('getting data from shock', Auth.token)
+                            console.log('getting data from shock', Auth.token);
                             var url = node+'?download&compression=gzip',
                                 header = {headers: {Authorization: 'OAuth '+Auth.token}};
 
@@ -109,13 +109,33 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                                 var data = res[0][1];
                             }
 
-
                             return {meta: meta, data: data};
-
-
                         }
                     })
     }
+
+    this.getObjects = function(paths) {
+        console.log('fetching', paths)
+        return $http.rpc('ws', 'get', {objects: paths})
+                    .then(function(res) {
+                        var objs = [];
+                        for (var i=0; i<res.length; i++) {
+                            var meta = res[i][0],
+                                node = meta[11];
+
+                            // try to parse, if not, assume data is string.
+                            try {
+                                var data = JSON.parse(res[i][1]);
+                            } catch(e) {
+                                var data = res[i][1];
+                            }
+                            objs.push({meta: meta, data: data});
+                        }
+
+                        return objs;
+                    })
+    }
+
 
     this.getObjectMeta = function(path) {
         $log.log('retrieving meta', path)

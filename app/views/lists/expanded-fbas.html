@@ -19,7 +19,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="fba in item.relatedFBAs | orderBy : '-timestamp'"
-                ng-click="addFBA($event, fba, item)"
+                ng-click="addFBA($event, fba, item)"            
                 class="row-hover">
                 <td>
                     <i class="fa {{fba.checked ? 'fa-check-square-o' : 'fa-square-o'}}"></i>

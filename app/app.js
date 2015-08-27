@@ -261,13 +261,12 @@ function($rootScope, $state, $sParams, $window,
         $window.ga('send', 'pageview', $location.path());
     })
 
-
     $rootScope.$state = $state;
     $rootScope.$stateParams = $sParams;
 
     $rootScope.user = auth.user;
     $rootScope.token = auth.token;
 
-    console.log('config', config.includePlants)
+    console.log('include plants?', config.includePlants)
     $rootScope.includePlants = config.includePlants;
 }]);

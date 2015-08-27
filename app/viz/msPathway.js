@@ -31,6 +31,8 @@ function ModelSeedPathway(params) {
     self.models = params.models || null;
     self.fbas = params.fbas || null;
 
+    console.log('models', self.models)
+
     var usingImage = params.usingImage || false,
         useAbsFlux = params.absFlux || false;
 
