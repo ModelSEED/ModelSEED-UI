@@ -298,7 +298,6 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     $scope.loading = true
     $http.get(req)
          .then(function(res) {
-             console.log('res', res)
              var cpds = res.data.mediacompounds;
              var data = [];
              for (var i=0; i<cpds.length; i++) {
@@ -680,8 +679,6 @@ function($scope, $state, Patric, $timeout, $http,
       $scope.loadingMyPlants = true;
       WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
-          console.log('res', res)
-
           // remove non-genomes
           var i = res.length;
           while (i--) {
@@ -691,7 +688,6 @@ function($scope, $state, Patric, $timeout, $http,
           }
 
           $scope.myPlants = res;
-          console.log('myplants', $scope.myPlants)
           $scope.loadingMyPlants = false;
       }).catch(function(e) {
           if (e.error.code === -32603)
@@ -777,12 +773,10 @@ function($scope, $state, Patric, $timeout, $http,
     $scope.copyInProgress = {};
     $scope.copy = function(i, model) {
         $scope.copyInProgress[i] = true;
-        //console.log('copying', model)
         Dialogs.showToast('Copying...', model.split('/').pop())
         var params = {model: model, copy_genome: 1, plantseed: 1}
         $http.rpc('ms', 'copy_model', params)
              .then(function(res) {
-                 //console.log('copy complete res', res);
                  $scope.copyInProgress[i] = false;
                  Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
 
@@ -888,6 +882,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.loadingMicrobes = true;
         MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
             $scope.myMicrobes = res;
+            console.log('my microbes', $scope.myMicrobes)
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
             if (e.error.code === -32603)
@@ -926,7 +921,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     function updateFBAs(item) {
         item.loading = true;
-        MS.getModelFBAs(item.path)
+        return MS.getModelFBAs(item.path)
             .then(function(fbas) {
                 item.relatedFBAs = fbas;
                 item.loading = false;
@@ -943,7 +938,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     function updateGapfills(item) {
         item.loading = true;
-        MS.getModelGapfills(item.path)
+        return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
                 item.loading = false;
@@ -952,13 +947,17 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     $scope.runFBA = function(ev, item) {
         Dialogs.runFBA(ev, item, function() {
-            updateFBAs(item)
+            updateFBAs(item).then(function() {
+                item.fbaCount++;
+            })
         })
     }
 
     $scope.gapfill = function(ev, item) {
         Dialogs.gapfill(ev, item, function() {
-            updateGapfills(item)
+            updateGapfills(item).then(function() {
+                item.gapfillCount++;
+            })
         })
     }
 
