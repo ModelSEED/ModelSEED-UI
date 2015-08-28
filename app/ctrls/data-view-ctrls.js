@@ -429,12 +429,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
 
      // fetch object data and parse it.
 
-     /*
      $scope.loading = true;
      WS.get(path).then(function(res) {
-         $scope.model = res.data;
-
-         console.log('model1', $scope.model)
+         $scope.models = [res.data];
 
          var data = ModelParser.parse(res.data);
 
@@ -448,8 +445,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
-     })*/
+     })
 
+     /*
      $scope.loading = true;
      $http.rpc('ms', 'get_model', {model: path, to: true})
          .then(function(res) {
@@ -468,7 +466,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
-     })
+     })*/
 
      $scope.loadingMaps = true;
      WS.listL(config.paths.maps)

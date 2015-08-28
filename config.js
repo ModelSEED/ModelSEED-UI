@@ -1,5 +1,5 @@
 
-/* service configuration settings for UI */
+/* service endpoint and UI configuration settings */
 angular.module('config', []).service('config', function() {
 
     this.services = {

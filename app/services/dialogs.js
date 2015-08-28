@@ -157,9 +157,10 @@ function(MS, WS, $dialog, $mdToast) {
                     self.showToast('Running Flux Balance Analysis', item.name)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                           cb();
-                           self.showComplete('FBA Complete',
-                                        res[0]+' '+res[7].media.split('/').pop())
+                           console.log('run fba response', res)
+                          cb();
+                          self.showComplete('FBA Complete',
+                                       res[0]+' '+res[7].media.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
