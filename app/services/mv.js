@@ -131,7 +131,7 @@ function($http, $q, $rootScope, WS, config) {
     //
     this.updateData = function() {
         var items = angular.copy(self.models);
-        console.log('items', items)
+        //console.log('items', items)
 
         // take selected items, create list of objPathsByType
         var objPathsByType = {};
@@ -149,16 +149,13 @@ function($http, $q, $rootScope, WS, config) {
             }
         }
 
-        console.log('objPathsByType', objPathsByType)
-
         var proms = [];
         for (var type in objPathsByType) {
             proms.push( WS.getObjects( objPathsByType[type] ) );
         }
-        console.log('proms', proms)
 
         return $q.all(proms).then(function(d) {
-            console.log('response from all proms', d)
+            //console.log('response from all proms', d)
 
                     var data = {};
                     for (var i=0; i<proms.length; i++) {
@@ -174,11 +171,8 @@ function($http, $q, $rootScope, WS, config) {
                         }
                     }
 
-                    console.log('data', data)
-
                     // just reset the data for now
                     self.data = data;
-
                     return self.data
                });
     }

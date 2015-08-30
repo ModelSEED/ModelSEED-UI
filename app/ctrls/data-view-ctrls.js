@@ -331,9 +331,9 @@ function($scope, $state, $sParams, WS, tools, $http, Auth) {
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', 'config', '$http',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, config, $http) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -417,12 +417,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                             {label: 'Coefficient', key: 'coefficient'},
                             {label: 'Compartment', key: 'compartment'}]
 
-    $scope.mapHeader = [{label: 'ID', key: 'id',
-                            click: function(item) {
-                               Tabs.addTab(item.id);
-                            }
-                        },
-                        {label: 'Name', key: 'name'},
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                        click: function(item) {
+                           Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id'},
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]
@@ -447,7 +446,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
          $scope.loading = false;
      })
 
-     /*
+     /* get_model command that includes gapfilling
      $scope.loading = true;
      $http.rpc('ms', 'get_model', {model: path, to: true})
          .then(function(res) {
@@ -469,18 +468,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      })*/
 
      $scope.loadingMaps = true;
-     WS.listL(config.paths.maps)
-       .then(function(d) {
-
-         var maps = [];
-         for (var i=0; i < d.length; i++) {
-             maps.push({id: d[i][0],
-                        name: d[i][7].name,
-                        rxnCount: d[i][7].reaction_ids.split(',').length,
-                        cpdCount: d[i][7].compound_ids.split(',').length
-                        })
-         }
-
+     MV.getMaps()
+       .then(function(maps) {
          $scope.maps = maps;
          $scope.loadingMaps = false;
      }).catch(function(e) {
@@ -618,12 +607,12 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                                  {label: 'Upper Bound', key: 'upper_bound'},
                                  {label: 'Charge', key: 'charge'}]
 
-    $scope.mapHeader = [{label: 'ID', key: 'id',
-                            click: function(item) {
-                               Tabs.addTab(item.id);
-                            }
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                         click: function(item) {
+                             Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id',
                         },
-                        {label: 'Name', key: 'name'},
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]
@@ -637,7 +626,6 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
-
 
                     $scope.loading = false;
                  });
@@ -671,27 +659,27 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     /**
      * tabs = [
-     *    { title: 'new tab'},
-     *    { title: 'new tab 2'}];
+     *    { name: 'new tab', otherData: 'foo'},
+     *    { name: 'new tab 2', otherData: 'bar'}];
      */
     var tabs = [];
     this.tabs = tabs;
     this.totalTabCount = 0;
     this.selectedIndex = 0;
-    this.addTab = function (item) {
+    this.addTab = function (tab) {
         // if is already open, go to it
         for (var i=0; i<tabs.length; i++) {
-            if (tabs[i].title === item) {
+            if (tabs[i].name === tab.name) {
                 this.selectedIndex = i
                 return;
             }
         }
 
-        tabs.push({ title: item, removable: true });
+        tabs.push(angular.extend(tab, {removable: true}));
 
         $timeout(function() {
             for (var i=0; i<tabs.length; i++) {
-                if (tabs[i].title === item) {
+                if (tabs[i].name === tab.name) {
                     self.selectedIndex = i + self.totalTabCount;
                 }
             }
@@ -700,7 +688,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     this.removeTab = function (tab) {
         for (var j = 0; j < tabs.length; j++) {
-            if (tab.title === tabs[j].title) {
+            if (tab.name === tabs[j].name) {
                 tabs.splice(j, 1);
                 break;
             }

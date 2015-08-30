@@ -289,12 +289,11 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
     Tabs.totalTabCount = 1;
 
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.mapHeader = [{label: 'ID', key: 'id',
-                            click: function(item) {
-                               Tabs.addTab(item.id);
-                            }
-                        },
-                        {label: 'Name', key: 'name'},
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                         click: function(item) {
+                             Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id'},                        
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]

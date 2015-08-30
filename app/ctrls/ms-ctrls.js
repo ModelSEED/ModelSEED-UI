@@ -882,7 +882,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.loadingMicrobes = true;
         MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
             $scope.myMicrobes = res;
-            console.log('my microbes', $scope.myMicrobes)
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
             if (e.error.code === -32603)
@@ -899,7 +898,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
-            //console.log('my plant models', res)
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {
@@ -1076,7 +1074,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 
     $scope.rmModel = function(ev, i, item, type) {
-        //console.log('removing item', i, item)
         ev.stopPropagation();
 
         var confirm = $mdDialog.confirm()

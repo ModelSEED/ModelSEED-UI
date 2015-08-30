@@ -82,8 +82,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.get = function(path) {
-        //$log.log('get (object)', path)
-        console.log('fetching', path)
+        //console.log('fetching', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
                         $log.log('get (object) response', res)
@@ -115,7 +114,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.getObjects = function(paths) {
-        console.log('fetching', paths)
+        //console.log('fetching', paths)
         return $http.rpc('ws', 'get', {objects: paths})
                     .then(function(res) {
                         var objs = [];
@@ -146,7 +145,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.saveMeta = function(path, data) {
-        $log.log('update meta meta', path)
+        //$log.log('update meta meta', path)
 
         try {
             var meta = JSON.parse(data);
@@ -154,10 +153,9 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
             console.log("can't parse error", err)
         }
 
-
         return $http.rpc('ws', 'update_metadata', {objects: [[path, meta]]})
                     .then(function(res) {
-                        console.log('response', res)
+                        //console.log('response', res)
                         return res[0][7];
                     })
     }
@@ -235,7 +233,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     this.getPublic = function() {
         return $http.get('data/app/modelList.json', {cache:true})
                     .then(function(res) {
-                        console.log('data fetched', res)
                         var models = [];
                         for (var i=0; i<res.data.length; i++) {
                             var d = res.data[i];
@@ -255,7 +252,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         var objs = [[p.path, p.type, null, null]];
         var params = {objects:objs, createUploadNodes: 1};
         return $http.rpc('ws', 'create', params).then(function(res) {
-                    console.log('response', res)
                     return res;
                 })
     }

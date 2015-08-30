@@ -31,7 +31,8 @@ function ModelSeedPathway(params) {
     self.models = params.models || null;
     self.fbas = params.fbas || null;
 
-    console.log('models', self.models)
+    //console.log('pathway models', self.models);
+    //console.log('pathway fbas', self.fbas);
 
     var usingImage = params.usingImage || false,
         useAbsFlux = params.absFlux || false;
@@ -267,14 +268,14 @@ function ModelSeedPathway(params) {
         var content = '<table class="table table-condensed">'+
                           (typeof flux != 'undefined' ?
                           '<tr><td><b>Flux</b></td><td>'+flux+'</td></tr>' : '')+
-                          '<tr><td><b>Map RXN ID</b></td><td>'+mapRxn.id+'</td></tr>'+
-                          '<tr><td><b>Rxns</b></td><td>'+ mapRxn.rxns.join(', ')+'</td></tr>'+
+                          '<tr><td><b>Reactions</b></td><td>'+ mapRxn.rxns.join(', ')+'</td></tr>'+
                           '<tr><td><b>Substrates</b></td><td>'+subs.join(', ')+'</td></tr>'+
                           '<tr><td><b>Products</b></td><td>'+prods.join(', ')+'</td></tr>'+
+                          //'<tr><td><b>Map RXN ID</b></td><td>'+mapRxn.id+'</td></tr>'
                        '</table>'
 
-        //$(container).popover({html: true, content: content, animation: false, title: title,
-        //                      container: 'body', trigger: 'hover'});
+        $(container).popover({html: true, content: content, animation: false, title: title,
+                              container: 'body', trigger: 'hover'});
     }
 
     function drawCompounds() {

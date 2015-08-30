@@ -58,11 +58,11 @@
     				</md-tab>
 
     				<md-tab ng-repeat="tab in Tabs.tabs">
-    					<md-tab-label>{{tab.title}}
+    					<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
     						<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
     					</md-tab-label>
     					<md-tab-body>
-    						<div pathway="tab.title" models="models"></div>
+    						<div pathway="tab.mapID" models="models" fbas="fbas"></div>
     						<br>
     					</md-tab-body>
     				</md-tab>
