@@ -109,7 +109,7 @@ angular.module('MS', [])
         if ( cache.get('objectmetas') )
             return cache.get('objectmetas');
 
-        $log.log('get (metas)', paths)
+        //console.log('get (metas)', paths)
 
         var p = $http.rpc('ws', 'get', {objects: paths, metadata_only: 1})
                     .then(function(res) {

@@ -131,7 +131,7 @@ function($http, $q, $rootScope, WS, config) {
     //
     this.updateData = function() {
         var items = angular.copy(self.models);
-        //console.log('items', items)
+        console.log('MV items', items)
 
         // take selected items, create list of objPathsByType
         var objPathsByType = {};

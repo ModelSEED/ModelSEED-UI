@@ -116,100 +116,6 @@ function($scope, Biochem) {
     }
 }])
 
-
-.controller('Public', ['$scope', 'WS', 'ModelViewer', '$compile', '$timeout',
-function($scope, WS, MV, $compile, $timeout) {
-    $scope.MV = MV;
-
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {field: 'orgName'}};
-
-    $scope.loading = true;
-    WS.getPublic().then(function(data) {
-        $scope.data = data;
-        $scope.loading = false;
-    })
-
-
-    $scope.showFBAs = function($event, item) {
-        if (item.relatedFBAs)
-            delete item.relatedFBAs;
-        else {
-            item.loading = true;
-            MV.getRelatedFBAs([{workspace: item.ws, name: item.name}])
-                .then(function(fbas) {
-
-                    // select any previously selected
-                    for (var i=0; i<fbas.length; i++) {
-                        if (MV.isSelected(item, fbas[i]))
-                            fbas[i].checked = true;
-                    }
-
-                    item.relatedFBAs = fbas;
-
-                    item.loading = false;
-                })
-        }
-    }
-
-    $scope.addFBA = function(e, fba, model) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var data = {model: {
-                        ws: model.ws,
-                        name: model.name
-                    },
-                    fba: {
-                        ws: fba.ws,
-                        name: fba.name
-                    },
-                    org: model.orgName,
-                    media: fba.media};
-
-
-        if (fba.checked) {
-            MV.rm(data, true);
-            fba.checked = false;
-        } else {
-            MV.add(data);
-            fba.checked = true;
-        }
-    }
-
-
-    // fixme: use MV service and refs
-    $scope.$on('MV.event.change', function(e, item) {
-        // if added to MV
-        if (!item) return;
-
-        if (item === 'clear') {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    fba.checked = false;
-                }
-            }
-        } else {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-                if (!model.relatedFBAs) continue;
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    if (item.model.ws === model.ws &&
-                        item.model.name === model.name &&
-                        item.fba.ws === fba.ws &&
-                        item.fba.name === fba.name)
-                        fba.checked = false;
-                }
-            }
-        }
-    })
-
-}])
-
 .controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer', '$rootScope',
 function($scope, $dialog, MV, $rootScope) {
 
@@ -293,7 +199,7 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
                          click: function(item) {
                              Tabs.addTab({name: item.name, mapID: item.id});
                         }},
-                        {label: 'ID', key: 'id'},                        
+                        {label: 'ID', key: 'id'},
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]

@@ -1,8 +1,7 @@
 
 <div class="logo zigzag" hide-sm>
-    <a ui-sref="home">Model<span>SEED<span></a>
+    <a ui-sref="home"><img src="img/ModelSEED-logo.png" width="175"></a>
 </div>
-
 
 <ul class="toolbar">
     <li ng-class="{ active: $state.includes('app.biochem') }">
@@ -50,6 +49,8 @@
 
                 <ul ng-if="MV.models.length" class="list-unstyled">
                     <li ng-repeat="item in MV.models track by $index" class="selected-model">
+                        {{item}}<br>
+
                         <div>
                             <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
                                 <a ui-sref=".modelPage({path: item.model})"
@@ -59,9 +60,13 @@
                             </div>
 
                             <div class="ellipsis selected-data-item ">
+                                <a ui-sref=".mediaPage({path: item.media})"
+                                   class="media" ng-click="makeActive($event)">
+                                   <span class="label label-media">media</span> {{item.media}}
+                                </a>
                                 <a ui-sref=".fbaPage({path: item.fba})"
                                    class="fba" ng-click="makeActive($event)">
-                                   <span class="label label-fba">FBA</span> {{item.media}}
+                                   <span class="label label-fba">FBA</span> {{item.fba}}
                                 </a>
                             </div>
                         </div>

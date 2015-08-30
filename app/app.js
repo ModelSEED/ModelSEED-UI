@@ -122,11 +122,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/my-models.html',
             controller: 'MyModels',
             authenticate: true
-        }).state('app.publicModels', {
-            url: "/models/",
-            templateUrl: 'app/views/public-models.html',
-            controller: 'Public',
-            authenticate: true
         })
 
         // Object Editors

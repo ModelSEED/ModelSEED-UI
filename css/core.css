@@ -50,42 +50,31 @@ a:focus {
 }
 
 .logo {
-    padding: 10px 40px 5px 20px;
-    margin: 0 10px 0 0;
+    /*padding: 10px 40px 5px 20px;*/
+    padding: 0 15px 0 0;
+    margin: 0 10px 2px 0;
     display: inline-block;
     background-color: #444;
     /*
     -webkit-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
     -moz-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
-    box-shadow: inset -90px 10px 50px -70px rgba(0,188,212,1);*/
-    /*text-shadow: #00AFD8 0px 0px 3px, #00AFD8 0px 0px 3px;*/
-
-}
-.logo a {  /* awaiting design */
-    line-height: 1.4em;
-    color: #dfdfdf;
-    font-weight: 800;
-    font-size: 25px !important;
-    font-family: 'Varela Round', sans-serif;
-}
-
-.logo span {
-    color: #29C8DC;
+    box-shadow: inset -80px 0px 20px -75px rgba(0,188,212,1);
+    */
 }
 
 .logo a:hover {
     opacity: 0.9;
     text-decoration: none;
-
-}
-.zigzag {
 }
 
-
+.logo-sub-text {
+    margin-left: 10px;
+    font-size: 16px;
+}
 
 .zigzag {
     background-color: #444;
-  position: relative;
+    position: relative;
 }
 
 .zigzag:after {
