@@ -50,8 +50,7 @@ a:focus {
 }
 
 .logo {
-    /*padding: 10px 40px 5px 20px;*/
-    padding: 0 15px 0 0;
+    padding: 5px 15px 3px 0;
     margin: 0 10px 2px 0;
     display: inline-block;
     background-color: #444;
@@ -68,8 +67,8 @@ a:focus {
 }
 
 .logo-sub-text {
-    margin-left: 10px;
-    font-size: 16px;
+    margin-left: 12px;
+    font-size: 1.15em;
 }
 
 .zigzag {
@@ -848,11 +847,15 @@ md-card {
 
 /* labels */
 .label-fba {
-    background-color: #5cb85c;
+    color: #5cb85c;
 }
 .label-gapfill {
-    background-color: #25AABB;
+    color: #25AABB;
 }
+.label-media {
+    color: #337AB7;
+}
+
 .label-fba-count {
     color: #5cb85c;
 }
