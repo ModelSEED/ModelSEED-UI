@@ -431,6 +431,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      $scope.loading = true;
      WS.get(path).then(function(res) {
          $scope.models = [res.data];
+         $scope.orgName = res.data.name;
 
          var data = ModelParser.parse(res.data);
 

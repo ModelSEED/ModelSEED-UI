@@ -113,7 +113,7 @@ angular.module('MS', [])
 
         var p = $http.rpc('ws', 'get', {objects: paths, metadata_only: 1})
                     .then(function(res) {
-                        $log.log('get (metas) res', res)
+                        //$log.log('get (metas) res', res)
                         var res = [].concat.apply([], res)
 
                         var data = [];
@@ -140,7 +140,7 @@ angular.module('MS', [])
         //$log.log('list models', params)
         return $http.rpc('ms', 'list_models', params)
                     .then(function(res) {
-                        $log.log('listmodels resp', res)
+                        //console.log('listmodels resp', res)
                         var data = [];
                         for (var i=0; i<res.length; i++) {
                             var obj = res[i];
@@ -200,24 +200,26 @@ angular.module('MS', [])
     }
 
     this.getModelFBAs = function(modelPath) {
-        $log.log('list related fbas!', modelPath)
+        //$log.log('list related fbas!', modelPath)
         return $http.rpc('ms', 'list_fba_studies', {model: modelPath})
                     .then(function(res) {
-                        $log.log('related fbas', res)
+                        //console.log('related fbas', res)
                         // select any previously selected
                         var d = [];
-                        for (key in res) {
-                            var fba = res[key];
-                            if (MV.isSelected(modelPath, fba))
+
+                        for (var i=0; i<res.length; i++) {
+                            var fba = res[i];
+
+                            if (MV.isSelected(modelPath, fba.ref))
                                 fba.checked = true;
 
                             // fixme: backwards compatible
                             fba.path = fba.ref;
 
-                            fba.media = fba.media_ref.split('/').pop();
+                            fba.media = fba.media_ref
                             fba.timestamp = Date.parse(fba.rundate);
 
-                            d.push(res[key]);
+                            d.push(res[i]);
                         }
                         return d;
                     }).catch(function() {
@@ -226,7 +228,7 @@ angular.module('MS', [])
     }
 
     this.getModelGapfills = function(path) {
-        $log.log('list gapfills', path)
+        //$log.log('list gapfills', path)
         return $http.rpc('ms', 'list_gapfill_solutions', {model: path})
                     .then(function(res) {
                         $log.log('related gfs', res)
@@ -244,7 +246,7 @@ angular.module('MS', [])
     }
 
     this.manageGapfills = function(path, gfID, operation){
-        $log.log('manage_gapfill_solutions', path)
+        //$log.log('manage_gapfill_solutions', path)
         var commands = {};
         commands[gfID] = operation;
         return $http.rpc('ms', 'manage_gapfill_solutions', {model: path, commands: commands})
@@ -255,7 +257,7 @@ angular.module('MS', [])
     }
 
     this.getModelEdits = function(model) {
-        $log.log('list model edits', model)
+        //$log.log('list model edits', model)
         return $http.rpc('ms', 'list_model_edits', {model: model})
                     .then(function(res) {
                         return res;
@@ -271,7 +273,7 @@ angular.module('MS', [])
         edit_data new_edit - list of new edits to add
     */
     this.manage_model_edits = function(p) {
-        $log.log('manage model edits', p)
+        //$log.log('manage model edits', p)
         return $http.rpc('ws', 'get', {model: p.model, commands: p.command})
                     .then(function(res) {
                         $log.log('manage model response', res)

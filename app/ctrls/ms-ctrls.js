@@ -978,36 +978,46 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         }
     }
 
-
-    // fixme: use MV service and refs
+    // fixme: use MV service and refs, organize plants/microbes
     $scope.$on('MV.event.change', function(e, item) {
         // if added to MV
         if (!item) return;
 
         if (item === 'clear') {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    fba.checked = false;
-                }
-            }
+            clearSelected($scope.myModels)
+            clearSelected($scope.myPlants)
         } else {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-                if (!model.relatedFBAs) continue;
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-
-                    if (item.model === model.path && item.fba === fba.path)
-                        fba.checked = false;
-                }
-            }
+            console.log('there was event change', item)
+            updateSelected($scope.myModels, item);
+            updateSelected($scope.myPlants, item);
         }
     })
 
+    function clearSelected(data) {
+        console.log('clearing', data)
+        for (var i in data) {
+            var model = data[i];
+
+            for (var j in model.relatedFBAs) {
+                var fba = model.relatedFBAs[j];
+                fba.checked = false;
+            }
+        }
+    }
+
+    function updateSelected(data, item) {
+        for (var i in data) {
+            var model = data[i];
+            if (!model.relatedFBAs) continue;
+
+            for (var j in model.relatedFBAs) {
+                var fba = model.relatedFBAs[j];
+
+                if (item.model === model.path && item.fba === fba.path)
+                    fba.checked = false;
+            }
+        }
+    }
 
     // general operations
     $scope.deleteFBA = function(e, i, model) {

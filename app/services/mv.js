@@ -66,10 +66,11 @@ function($http, $q, $rootScope, WS, config) {
         $rootScope.$broadcast('MV.event.change');
     }
 
-    this.isSelected = function(modelPath, obj) {
+    this.isSelected = function(modelPath, fbaPath) {
         for (var i=0; i<this.models.length; i++) {
             var m = this.models[i];
-            if (m.fba === obj.path && m.model === modelPath)
+
+            if (m.fba === fbaPath && m.model === modelPath)
                 return true;
         }
 

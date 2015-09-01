@@ -85,7 +85,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         //console.log('fetching', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        $log.log('get (object) response', res)
+                        //console.log('get (object) response', res)
 
                         var meta = res[0][0],
                             node = meta[11];

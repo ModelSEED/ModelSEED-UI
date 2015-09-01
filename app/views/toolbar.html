@@ -1,6 +1,6 @@
 
 <div class="logo zigzag" hide-sm>
-    <a ui-sref="home"><img src="img/ModelSEED-logo.png" width="175"></a>
+    <a ui-sref="home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
 </div>
 
 <ul class="toolbar">
@@ -38,111 +38,112 @@
             <i class="caret" style="margin-top: 10px;"></i>
         </a>
 
-        <mega-dropdown-content id="selected-models" ng-controller="SelectedData">
-                <div class="header">
-                    <i class="icon-git-compare" style="font-size: 25px !important;"></i>
-                    Comparative Analysis
-                    <span class="model-count">({{MV.models.length}})</span>
-                </div>
+        <mega-dropdown-content id="selected-models" class="compare-dd" ng-controller="SelectedData">
+            <div class="header">
+                <i class="icon-git-compare" style="font-size: 25px !important;"></i>
+                Comparative Analysis
+                <span class="model-count">({{MV.models.length}})</span>
+            </div>
 
-                <hr class="no-margin">
+            <hr class="no-margin">
 
-                <ul ng-if="MV.models.length" class="list-unstyled">
-                    <li ng-repeat="item in MV.models track by $index" class="selected-model">
-                        {{item}}<br>
+            <ul ng-if="MV.models.length" class="list-unstyled">
+                <li ng-repeat="item in MV.models track by $index" class="selected-model">
 
-                        <div>
-                            <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
-                                <a ui-sref=".modelPage({path: item.model})"
-                                   class="model">
-                                   {{item.org}}
-                                </a>
-                            </div>
-
-                            <div class="ellipsis selected-data-item ">
-                                <a ui-sref=".mediaPage({path: item.media})"
-                                   class="media" ng-click="makeActive($event)">
-                                   <span class="label label-media">media</span> {{item.media}}
-                                </a>
-                                <a ui-sref=".fbaPage({path: item.fba})"
-                                   class="fba" ng-click="makeActive($event)">
-                                   <span class="label label-fba">FBA</span> {{item.fba}}
-                                </a>
-                            </div>
+                    <div>
+                        <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
+                            <a ui-sref=".modelPage({path: item.model})"
+                               class="model">
+                               {{item.org}}
+                            </a>
                         </div>
 
-                        <div class="selected-model-options">
-                            <i class="icon-close hover pointer" ng-click="MV.rm($index)">
-                                <md-tooltip md-direction="right">Remove model</md-tooltip>
-                            </i>
-                            <br>
-                            <i class="glyphicon glyphicon-cog hover pointer"
-                                ng-click="openFBAView($event, $index, item)">
-                                <md-tooltip md-direction="right">Modify selected FBA</md-tooltip>
-                            </i>
+                        <div class="sub-item selected-model-list ellipsis">
+                             &middot; <a ui-sref=".mediaPage({path: item.media})">
+                               {{item.media.split('/').pop()}} (<span class="label-media">Media</span>)
+                            </a><br>
+                             &middot; <a ui-sref=".fbaPage({path: item.fba})">
+                               {{item.fba.split('/').pop()}} (<span class="label-fba">FBA</span>)
+                           </a>
                         </div>
+                    </div>
 
-                    </li>
-                </ul>
-                <br>
-                <div layout="row" layout-align="end center">
-                    <a ng-if="MV.models.length" ng-click="MV.rmAll()">
-                        Clear All
-                    </a>
-                    <md-button ng-if="MV.models.length && !$state.includes('app.compare')" class="md-secondary" ui-sref="app.compare">
-                        Compare
-                    </md-button>
-                </div>
+                    <div class="selected-model-options">
+                        <i class="icon-close hover pointer" ng-click="MV.rm($index)">
+                            <md-tooltip md-direction="right" md-delay="600">Remove model</md-tooltip>
+                        </i>
+                        <br>
+                        <i class="glyphicon glyphicon-cog hover pointer"
+                           ng-click="openFBAView($event, $index, item)">
+                             <md-tooltip md-direction="right" md-delay="600">Modify selected FBA</md-tooltip>
+                        </i>
+                    </div>
 
-                <div ng-if="!MV.models.length" class="warning-msg">
-                    You have no models selected
-                </div>
+                </li>
+            </ul>
+            <br>
+            <div layout="row" layout-align="end center">
+                <a ng-if="MV.models.length" ng-click="MV.rmAll()">
+                    Clear All
+                </a>
+                <md-button ng-if="MV.models.length && !$state.includes('app.compare')" class="md-secondary" ui-sref="app.compare">
+                    Compare
+                </md-button>
+            </div>
+
+            <div ng-if="!MV.models.length" class="warning-msg">
+                You have no models selected
+            </div>
         </mega-dropdown-content>
-
-
-
 
     </li>
 </ul>
 
 <span flex></span>
 
-<ul class="nav navbar-nav">
-    <li class="dropdown">
-        <a class="dropdown-toggle cursor" data-toggle="dropdown">More
+<div class="toolbar-right" layout="row">
+    <div mega-dropdown id="more-dd" style="position: relative;">
+        <a class="cursor">More <i class="fa fa-caret-down"></i></a>
+        <mega-dropdown-content id="more-dd-content">
+            <ul class="list-unstyled">
+                <li>
+                    <a ui-sref="app.myData({dir: '/'+$root.user})">
+                        <i class="icon-archive2"></i> All My Files
+                    </a>
+                </li>
+                <hr class="no-margin">
+                <li>
+                    <a ui-sref="app.faq">FAQ</a>
+                </li>
+                <li>
+                    <a ui-sref="home">About</a>
+                </li>
+                <!--<li>
+                    <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
+                </li>-->
+            </ul>
+        </mega-dropdown-content>
+    </div>
+
+    <div ng-if="$root.user" mega-dropdown id="login-dd" ng-controller="Login" style="position: relative;">
+        <div class="cursor" layout="row">
+            <div layout="column">
+                <div>{{$root.user.split('@')[0]}}</div>
+                <div>
+                    <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}</small>
+                </div>
+            </div>
             <i class="fa fa-caret-down"></i>
-        </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a ui-sref="app.myData({dir: '/'+$root.user})">
-                    <i class="icon-archive2"></i> All My Files
-                </a>
-            </li>
-            <li role="separator" class="divider"></li>
-            <li>
-                <a ui-sref="app.faq">FAQ</a>
-            </li>
-            <li>
-                <a ui-sref="home">About</a>
-            </li>
-            <!--<li>
-                <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>
-            </li>-->
-        </ul>
-    </li>
-    <li ng-if="$root.user" class="dropdown" ng-controller="Login">
-        <a class="dropdown-toggle cursor" data-toggle="dropdown" style="padding-top: 5px; padding-bottom: 5px;">
-            {{$root.user.split('@')[0]}}
-            <br>
-            <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}</small>
-            <i class="fa fa-caret-down vertical-center"></i>
-        </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a ng-click="logout()">
-                    <i class="fa fa-sign-out fa-fw"></i> Logout
-                </a>
-            </li>
-        </ul>
-    </li>
-</ul>
+        </div>
+
+        <mega-dropdown-content>
+            <ul class="list-unstyled">
+                <li>
+                    <a ng-click="logout()">
+                        <i class="fa fa-sign-out fa-fw"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </mega-dropdown-content>
+    </div>
+</div>

@@ -116,23 +116,9 @@ function($scope, Biochem) {
     }
 }])
 
-.controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer', '$rootScope',
-function($scope, $dialog, MV, $rootScope) {
-
+.controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer',
+function($scope, $dialog, MV) {
     $scope.MV = MV;
-
-    $rootScope.$on('$stateChangeStart',
-        function(event, toState, toParams, fromState, fromParams){
-            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
-                angular.element('#selected-models').find('.active').removeClass('active')
-            }
-        })
-
-    // selected navigation item.  Only highlights clicked
-    $scope.makeActive = function(event, index, type, item) {
-        //angular.element(event.target).parent().addClass('active');
-    }
-
 
     $scope.openFBAView = function(ev, $index, item) {
         $dialog.show({
@@ -159,6 +145,8 @@ function($scope, $dialog, MV, $rootScope) {
                                    fba: {name: newFBA.name, ws: newFBA.ws},
                                    org: item.org,
                                    media: newFBA.media};
+
+                    console.log('new item', newItem)
 
                     MV.swapItem($scope.selectedIndex, newItem);
                     $scope.activeFBAIndex = $index;

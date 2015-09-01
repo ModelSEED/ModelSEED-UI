@@ -266,6 +266,7 @@ md-toolbar,
     height: 50px;
     min-height: 50px;
     max-height: 50px;
+    padding: 0;
 }
 
 .toolbar {
@@ -286,7 +287,6 @@ md-toolbar,
     line-height: 1.1em;
     margin: 0 7px;
     text-align: center;
-    text-decoration: none;
     height: 100%;
 }
 
@@ -297,7 +297,7 @@ md-toolbar,
     color: #555;
 }
 
-.toolbar > li > a >i {
+.toolbar > li > a >i:not(.fa-caret-down) {
     display: inline-block;
     padding-top: 10px;
     font-size: 30px;
@@ -315,7 +315,58 @@ md-toolbar,
 .brand-home:hover {
     background-color: transparent !important;
 }
+/*
+.toolbar-right {
 
+    margin: 0;
+    list-style: none;
+    height: 100%;
+}
+
+.toolbar-right > li{
+    display:block;
+        font-size: 10pt;
+        height: 100%;
+}
+
+.toolbar-right > li > a{
+    display:block;
+    font-size: 10pt;
+    height: 100%;
+}*/
+
+.toolbar-right {
+    height: 100%;
+
+}
+
+.toolbar-right > div {
+    display: inline-block;
+    height: 100%;
+    padding: 0px 10px;
+}
+.toolbar-right > div >a{
+    display: block;
+    height: 100%;
+    padding-top: 15px;
+}
+
+.toolbar-right > div li {
+    display: block;
+    width: 100%;
+}
+.toolbar-right > div li a{
+    white-space:nowrap;
+    display: block;
+    width: 100%;
+    padding: 5px 15px;
+}
+
+.toolbar-right ul{
+    display: block;
+    margin: 0;
+    width: 100%;
+}
 
 .sidebar {
     z-index: 50;
@@ -323,8 +374,6 @@ md-toolbar,
     background-color: #555;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
-
-
 
 /*
 .nav .open>a {
@@ -340,7 +389,11 @@ md-toolbar,
 }
 
 
-#selected-models {}
+#selected-models {
+    padding: 10px;
+    min-width: 240px;
+    right: -75px;
+}
 
 #selected-models hr {
     height: 1px;
@@ -377,12 +430,15 @@ md-toolbar,
     transition: opacity 0.1s linear;
 }
 
-
-
 .selected-model:hover .selected-model-options{
     visibility: visible;
     opacity: 1.0;
 }
+
+.selected-model .sub-item {
+    font-size: .9em;
+}
+
 
 /*
 .model-count {
@@ -1019,6 +1075,20 @@ tr .fa-file-text-o {
 
 /*dropdown stuff */
 
-mega-dropdown-content i {
-    /*font-size: 16px !important;*/
+#more-dd-content {
+    right: -30px;
+}
+
+#login-dd {
+    padding-top: 4px;
+    text-align: right;
+}
+
+#login-dd .fa-caret-down {
+    margin: 15px 5px;
+}
+
+#more-dd > a:hover,
+#login-dd > div:hover{
+    color: #dfdfdf;
 }
