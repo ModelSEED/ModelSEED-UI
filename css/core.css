@@ -9,6 +9,19 @@ body {
       max-height: 100%;
 }
 
+.background-shade-out {
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    opacity: 0.3;
+    transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
+
+}
+
+
 a {
     color: #00AFD8;
 }
@@ -17,6 +30,7 @@ a:hover,
 a:focus {
     cursor: pointer;
     color: #0081A0;
+    text-decoration: none;
 }
 
 .position-fixed {
@@ -31,26 +45,59 @@ a:focus {
     padding: 8px 15px;
 }
 
-.logo {  /* awaiting design */
-    margin-top: 2px;
-    /*font-weight: 800;
-    font-family: 'Varela Round', sans-serif;*/
+.main-toolbar {
+    padding-left: 0;
 }
 
-.logo span {
-    /*color: #ADEFDB;*/
+.logo {
+    padding: 5px 15px 3px 0;
+    margin: 0 10px 2px 0;
+    display: inline-block;
+    background-color: #444;
+    /*
+    -webkit-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
+    -moz-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
+    box-shadow: inset -80px 0px 20px -75px rgba(0,188,212,1);
+    */
 }
-
 
 .logo a:hover {
-    opacity: 0.8;
-    color: inherit;
+    opacity: 0.9;
     text-decoration: none;
+}
+
+.logo-sub-text {
+    margin-left: 12px;
+    font-size: 1.15em;
+}
+
+.zigzag {
+    background-color: #444;
+    position: relative;
+}
+
+.zigzag:after {
+  background-position: right-top;
+  background-repeat: repeat-y;
+  background-size: 15px 15px;
+  content: " ";
+  display: block;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 15px;
+  height: 100%;
+}
+
+.zigzag:after{
+  background-image: linear-gradient(-45deg, #00BCD4 5px, transparent 0),
+                    linear-gradient(-135deg, #00BCD4 5px, transparent 0);
 
 }
 
-.logo span {
-
+.md-secondary { /*hack hack hack #fixme */
+    background-color: rgba(95, 98, 168, 0.91) !important;
+    color: #fff !important;
 }
 
 md-toolbar {
@@ -219,45 +266,45 @@ md-toolbar,
     height: 50px;
     min-height: 50px;
     max-height: 50px;
+    padding: 0;
 }
 
 .toolbar {
     padding: 0;
     margin: 0;
     height: 100%;
-    list-style:none;
+    list-style: none;
 }
 
-.toolbar li {
+.toolbar > li {
     height: 100%;
     display: inline-block;
 }
 
-.toolbar li a {
+.toolbar > li > a {
     display:block;
     font-size: 8pt;
     line-height: 1.1em;
     margin: 0 7px;
     text-align: center;
-    text-decoration: none;
     height: 100%;
 }
 
-.toolbar li a:hover {
+.toolbar > li > a:hover {
     color: #dfdfdf;
 }
-.toolbar li.active  a{
+.toolbar > li.active > a{
     color: #555;
 }
 
-.toolbar li i {
+.toolbar > li > a >i:not(.fa-caret-down) {
     display: inline-block;
     padding-top: 10px;
     font-size: 30px;
     text-align: center;
 }
 
-.toolbar li i.icon-benzene {
+.toolbar li > a > i.icon-benzene {
     font-weight: 600;
 }
 
@@ -268,7 +315,58 @@ md-toolbar,
 .brand-home:hover {
     background-color: transparent !important;
 }
+/*
+.toolbar-right {
 
+    margin: 0;
+    list-style: none;
+    height: 100%;
+}
+
+.toolbar-right > li{
+    display:block;
+        font-size: 10pt;
+        height: 100%;
+}
+
+.toolbar-right > li > a{
+    display:block;
+    font-size: 10pt;
+    height: 100%;
+}*/
+
+.toolbar-right {
+    height: 100%;
+
+}
+
+.toolbar-right > div {
+    display: inline-block;
+    height: 100%;
+    padding: 0px 10px;
+}
+.toolbar-right > div >a{
+    display: block;
+    height: 100%;
+    padding-top: 15px;
+}
+
+.toolbar-right > div li {
+    display: block;
+    width: 100%;
+}
+.toolbar-right > div li a{
+    white-space:nowrap;
+    display: block;
+    width: 100%;
+    padding: 5px 15px;
+}
+
+.toolbar-right ul{
+    display: block;
+    margin: 0;
+    width: 100%;
+}
 
 .sidebar {
     z-index: 50;
@@ -277,37 +375,10 @@ md-toolbar,
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
 
-.sidebar ul li {
-    border-bottom: none;
-}
-
-.sidebar a > i {
-    color: #fff;
-    font-size: 1.2em;
-}
-
-.sidebar-nav .nav > li > a {
-    background-color: #555;
-    font-weight: 500;
-    padding: 10px 10px 10px 15px;
-    border: none;
-}
-
-.sidebar-collapse {
-    float: left;
-    height: 50px;
-    padding: 15px 15px;
-    font-size: 18px;
-    line-height: 20px;
-
-}
-.sidebar-collapse:hover {
-    color: #dfdfdf;
-}
-
+/*
 .nav .open>a {
     background-color: #26D3DA !important;
-}
+}*/
 
 .btn-add-model {
     padding: 0px 5px;
@@ -318,11 +389,10 @@ md-toolbar,
 }
 
 
-#selected-models .selected-model {
-    background-color: #fff;
-    padding: 5px;
-    border: 2px solid rgb(232, 232, 232);
-    margin: 5px 0;
+#selected-models {
+    padding: 10px;
+    min-width: 240px;
+    right: -75px;
 }
 
 #selected-models hr {
@@ -331,16 +401,68 @@ md-toolbar,
     margin: 10px 0;
 }
 
-.selected-data-highlight {
-    color: rgb(135, 206, 235) !important;
+.selected-model {
+    border: 1px solid #dfdfdf;
+    padding: 10px 28px 10px 10px;
+    margin-top: 10px;
+    background-color: #fff;
+    position: relative;
 }
 
+.selected-model a {
+    color: #00AFD8;
+}
+.selected-model a:hover {
+    color: #0081A0;
+}
+
+.selected-model-options {
+    visibility: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 5px 0 0 5px;
+    font-size: 18px;
+    color: #222;
+    height: 100%;
+    /*background-color: #000;*/
+    opacity: 0;
+    transition: opacity 0.1s linear;
+}
+
+.selected-model:hover .selected-model-options{
+    visibility: visible;
+    opacity: 1.0;
+}
+
+.selected-model .sub-item {
+    font-size: .9em;
+}
+
+
+/*
+.model-count {
+
+    transition: all 1s ease;
+    -webkit-animation: increment .5s;
+    -moz-animation: increment .5s;
+    -ms-animation: increment .5s;
+    -o-animation: increment .5s;
+    animation: increment .5s;
+}
+
+@keyframes increment {
+    from { color: #000 !important; }
+    to   { color: #fff; }
+}*/
+
 .ellipsis {
-    width: 185px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
 
 
 /* pages */
@@ -449,7 +571,7 @@ table thead[sortable] th.sorting-asc:after {
 
 .row-hover:hover {
     cursor: pointer;
-    background-color: #f8f8f8;
+    background-color: rgba(0, 188, 212, 0.04) !important;
     /*background-color: #4AC1FF;
     color: #fff;*/
     border-color: #B6E6FF;
@@ -781,11 +903,15 @@ md-card {
 
 /* labels */
 .label-fba {
-    background-color: #5cb85c;
+    color: #5cb85c;
 }
 .label-gapfill {
-    background-color: #25AABB;
+    color: #25AABB;
 }
+.label-media {
+    color: #337AB7;
+}
+
 .label-fba-count {
     color: #5cb85c;
 }
@@ -920,4 +1046,49 @@ input[name=upload] {
 tr .fa-folder-o,
 tr .fa-file-text-o {
     opacity: 0.5;
+}
+
+
+/* site specific things */
+.reconstruct-hover td{
+    position: relative;
+}
+.reconstruct-hover:hover td:last-child:after {
+    position: absolute;
+    right: 5px;
+    bottom: 2px;
+    font-size: 10px;
+    color: #666;
+    content: 'click to reconstruct';
+}
+
+.feature-item {
+    margin: 0 20px 30px 20px;
+}
+
+.feature-highlight {
+    font-style: italic;
+    background-color: rgba(95, 171, 86, 0.15);
+    padding-right: 3px;
+}
+
+
+/*dropdown stuff */
+
+#more-dd-content {
+    right: -30px;
+}
+
+#login-dd {
+    padding-top: 4px;
+    text-align: right;
+}
+
+#login-dd .fa-caret-down {
+    margin: 15px 5px;
+}
+
+#more-dd > a:hover,
+#login-dd > div:hover{
+    color: #dfdfdf;
 }

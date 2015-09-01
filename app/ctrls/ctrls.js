@@ -116,117 +116,9 @@ function($scope, Biochem) {
     }
 }])
 
-
-.controller('Public', ['$scope', 'WS', 'ModelViewer', '$compile', '$timeout',
-function($scope, WS, MV, $compile, $timeout) {
+.controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer',
+function($scope, $dialog, MV) {
     $scope.MV = MV;
-
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {field: 'orgName'}};
-
-    $scope.loading = true;
-    WS.getPublic().then(function(data) {
-        $scope.data = data;
-        $scope.loading = false;
-    })
-
-
-    $scope.showFBAs = function($event, item) {
-        if (item.relatedFBAs)
-            delete item.relatedFBAs;
-        else {
-            item.loading = true;
-            MV.getRelatedFBAs([{workspace: item.ws, name: item.name}])
-                .then(function(fbas) {
-
-                    // select any previously selected
-                    for (var i=0; i<fbas.length; i++) {
-                        if (MV.isSelected(item, fbas[i]))
-                            fbas[i].checked = true;
-                    }
-
-                    item.relatedFBAs = fbas;
-
-                    item.loading = false;
-                })
-        }
-    }
-
-    $scope.addFBA = function(e, fba, model) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var data = {model: {
-                        ws: model.ws,
-                        name: model.name
-                    },
-                    fba: {
-                        ws: fba.ws,
-                        name: fba.name
-                    },
-                    org: model.orgName,
-                    media: fba.media};
-
-
-        if (fba.checked) {
-            MV.rm(data, true);
-            fba.checked = false;
-        } else {
-            MV.add(data);
-            fba.checked = true;
-        }
-    }
-
-
-    // fixme: use MV service and refs
-    $scope.$on('MV.event.change', function(e, item) {
-        // if added to MV
-        if (!item) return;
-
-        if (item === 'clear') {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    fba.checked = false;
-                }
-            }
-        } else {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-                if (!model.relatedFBAs) continue;
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    if (item.model.ws === model.ws &&
-                        item.model.name === model.name &&
-                        item.fba.ws === fba.ws &&
-                        item.fba.name === fba.name)
-                        fba.checked = false;
-                }
-            }
-        }
-    })
-
-}])
-
-.controller('SelectedData', ['$scope', '$mdDialog', 'ModelViewer', '$rootScope',
-function($scope, $dialog, MV, $rootScope) {
-
-    $scope.MV = MV;
-
-    $rootScope.$on('$stateChangeStart',
-        function(event, toState, toParams, fromState, fromParams){
-            if (['modelPage', 'fbaPage'].indexOf(toState.name) === -1 ) {
-                angular.element('#selected-models').find('.active').removeClass('active')
-            }
-        })
-
-    // selected navigation item.  Only highlights clicked
-    $scope.makeActive = function(event, index, type, item) {
-        //angular.element(event.target).parent().addClass('active');
-    }
-
 
     $scope.openFBAView = function(ev, $index, item) {
         $dialog.show({
@@ -254,6 +146,8 @@ function($scope, $dialog, MV, $rootScope) {
                                    org: item.org,
                                    media: newFBA.media};
 
+                    console.log('new item', newItem)
+
                     MV.swapItem($scope.selectedIndex, newItem);
                     $scope.activeFBAIndex = $index;
                     $scope.item = newItem;
@@ -277,15 +171,26 @@ function($scope, $dialog, MV, $rootScope) {
 
 }])
 
-.controller('Compare', ['$state', '$scope', 'ModelViewer', '$stateParams', '$timeout', 'VizOptions',
-function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
-    var coreMaps = ['map00010', 'map00020', 'map00030', 'map00040', 'map00051', 'map00052'];
+.controller('Compare', ['$state', '$scope', '$timeout', 'VizOptions', 'Tabs', 'ModelViewer',
+function($state, $scope, $timeout, VizOpts, Tabs, MV) {
     $scope.MV = MV;
     $scope.VizOpts = VizOpts;
 
-    // map table
-    $scope.predicate = 'id';
-    $scope.reverse = false;
+    $scope.topLevelTabs = {selectedIndex: 0};
+
+    // secondary tabs
+    $scope.Tabs = Tabs;
+    Tabs.totalTabCount = 1;
+
+    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                         click: function(item) {
+                             Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id'},
+                        {label: 'Rxns', key: 'rxnCount'},
+                        {label: 'Cpds', key: 'cpdCount'}
+                        ]
 
     $scope.updateOptions = function() {
         // wait for radio animation
@@ -294,19 +199,108 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
         }, 100)
     }
 
-    // fetch maps (once)
-    $scope.loading = true;
+    // fetch maps
+    $scope.loadingMaps = true;
     MV.getMaps().then(function(d) {
-        $scope.loading = false;
+        $scope.loadingMaps = false;
+        $scope.maps = d;
+    })
 
-        var maps = [];
-        for (var i=0; i<d.length; i++) {
-            if (coreMaps.indexOf(d[i].id) === -1) continue
-            maps.push(d[i]);
+    function update() {
+        $scope.loading = true;
+        MV.updateData().then(function(d) {
+
+            var models = d.model,
+                fbas = d.fba;
+
+            // regenerates heatmap and kegg maps
+            $scope.heatmapData = parseData(models, fbas);
+            $scope.models = models;
+            $scope.fbas = fbas;
+            $scope.loading = false;
+        })
+    }
+
+    // update data (and rerender) when selected data changes
+    update();
+    $scope.$on('MV.event.change', function() {
+        update()
+    })
+
+    function parseData(models, fbas) {
+        // create heatmap data
+        var rxnIDs = [],
+            modelNames = [],
+            data = [];
+
+        // first, get union of reactions
+        for (var i=0; i < models.length; i++) {
+            var model = models[i];
+            modelNames.push(model.name);
+
+            var rxns = model.modelreactions;
+            for (var j=0; j < rxns.length; j++) {
+                var rxnID = rxns[j].id;
+                if (rxnIDs.indexOf(rxnID) === -1) rxnIDs.push(rxnID);
+            }
         }
 
-        $scope.maps = maps;
-    })
+        var rows = [];
+        var allFluxes = []; //used for stats
+
+        // for each model, get data for box, left to right
+        for (var i=0; i < models.length; i++) {
+            var rxns = models[i].modelreactions;
+
+            // see if there is an fba result
+            // if so, get create rxn hash
+            var hasFBA = false,
+                fbaRXNs = {};
+            if (fbas && fbas[i]) {
+                hasFBA = true;
+                var fbaRxns = fbas[i].FBAReactionVariables;
+
+                for (var j=0; j<fbaRxns.length; j++) {
+                    // oh. man.
+                    var rxnId = fbaRxns[j].modelreaction_ref.split('||')[1].split('/').pop();
+                    fbaRXNs[rxnId] = fbaRxns[j];
+                }
+            }
+
+            var row = [];
+            // for each rxn in union of rxns, try to find rxn for that model
+            for (var j=0; j < rxnIDs.length; j++) {
+                var rxnID = rxnIDs[j];
+
+                var found = false, flux;
+
+                for (var k=0; k<rxns.length; k++) {
+                    if (rxns[k].id === rxnID) {
+                        found = true;
+                        if (hasFBA && fbaRXNs[rxnID]) {
+                            flux = fbaRXNs[rxnID].value;
+                            allFluxes.push(flux);
+                        }
+                        break;
+                    }
+                }
+
+                row.push({present: (found ? 1 : 0), flux: flux});
+            }
+
+            rows.push(row);
+        }
+
+        // rxn000001_c0 => rxn000001[c0]
+        var i = rxnIDs.length;
+        while (i--) rxnIDs[i] = rxnIDs[i].replace('_','[')+']'
+
+        // update min/max for legend
+        $scope.minFlux = Math.min.apply(null, allFluxes);
+        $scope.maxFlux = Math.max.apply(null, allFluxes);
+
+        return {x: rxnIDs, y: modelNames, data: rows};
+    }
 }])
 
 
@@ -320,75 +314,6 @@ function($state, $scope, MV, $stateParams, $timeout, VizOpts) {
     }
 
     $scope.path = $sParams.path.split('/').pop();
-}])
-
-
-.controller('CompareTabs', ['$scope', '$timeout', 'ModelViewer', 'VizOptions',
-function ($scope, $timeout, MV, VizOpts) {
-    var tabs = [
-        { title: 'Heatmap'},
-        { title: 'Pathways'}
-    ];
-
-    $scope.tabs = tabs;
-    $scope.selectedIndex = 0;
-
-    $scope.addTab = function (map) {
-        // if is already open, go to it
-        for (var i=0; i<tabs.length; i++) {
-            if (tabs[i].map === map.id) {
-                $scope.selectedIndex = i
-                return;
-            }
-        }
-
-        tabs.push({ title: map.name.slice(0,10)+'...',
-                    removable: true,
-                    map: map.id});
-
-        $timeout(function() {
-            $scope.selectedIndex = tabs.length-1;
-            $scope.loadMap(map); //fixme!
-        })
-
-        $scope.$on('MV.event.change', function() {
-            MV.updateData().then(function() {
-                $scope.loadMap(map);
-            })
-        })
-
-
-        // update if flux settings change
-        $scope.$on('Compare.event.absFlux', function() {
-            $scope.loadMap(map);
-        })
-    };
-
-    $scope.removeTab = function (tab) {
-        for (var j = 0; j < tabs.length; j++) {
-            if (tab.title === tabs[j].title) {
-                $scope.tabs.splice(j, 1);
-                break;
-            }
-        }
-    };
-
-    $scope.loadMap = function(map) {
-        $('#'+map.id).find('.path-container').remove();
-        $('#'+map.id).append('<div class="path-container">')
-        $scope.loadingMap = true;
-        $('#'+map.id).find('.path-container').kbasePathway({
-                                    options: {absFlux: VizOpts.flux === 'absFlux'},
-                                    models: MV.data.FBAModel,
-                                    fbas: MV.data.FBA,
-                                    map_ws: 'nconrad:paths',
-                                    map_name: map.id,
-                                    cb: function() {
-                                        $scope.$apply(function() {
-                                            $scope.loadingMap = false;
-                                        })
-                                    }});
-    }
 }])
 
 

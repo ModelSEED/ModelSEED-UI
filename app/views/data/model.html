@@ -6,12 +6,13 @@
 	</span>
 </h4>
 
-<div class="h2">Model</div>
+<div class="h2">Model <small>{{orgName}}</small>
+</div>
 <hr class="no-margin">
 
 
 
-<md-tabs  md-no-ink md-dynamic-height>
+<md-tabs md-no-ink md-dynamic-height>
 	<md-tab>
 		<md-tab-label>Reactions</md-tab-label>
 		<md-tab-body>
@@ -97,11 +98,12 @@
 				</md-tab>
 
 				<md-tab ng-repeat="tab in Tabs.tabs">
-					<md-tab-label>{{tab.title}}
+					<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
 						<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
 					</md-tab-label>
 					<md-tab-body>
-						<div pathway="tab.title" model="model"></div>
+						<div pathway="tab.mapID" models="models"></div>
+						<br>
 					</md-tab-body>
 				</md-tab>
 			</md-tabs>

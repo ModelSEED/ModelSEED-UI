@@ -31,6 +31,9 @@ function ModelSeedPathway(params) {
     self.models = params.models || null;
     self.fbas = params.fbas || null;
 
+    //console.log('pathway models', self.models);
+    //console.log('pathway fbas', self.fbas);
+
     var usingImage = params.usingImage || false,
         useAbsFlux = params.absFlux || false;
 
@@ -47,7 +50,7 @@ function ModelSeedPathway(params) {
         r = 12,          // radial offset from circle.  Hooray for math degrees.
         max_x = 0,       // used to compute canvas size (width) based on data
         max_y = 0,       // used to compute canvas size (height) based on data
-        c_pad = 20,     // padding around max_x/max_y
+        c_pad = 50,     // padding around max_x/max_y
         svg = undefined; // svg element for map
 
     drawMap()
@@ -55,10 +58,9 @@ function ModelSeedPathway(params) {
     function drawMap() {
         container.html('')
 
-        svg = d3.select('#pathway-'+params.mapName)
-                                .append("svg")
-                                .attr("width", 800)
-                                .attr("height", 1000);
+        svg = d3.select('#'+params.elem).append("svg")
+                                        .attr("width", 800)
+                                        .attr("height", 1000);
 
         // add arrow markers for use
         svg.append("svg:defs").selectAll("marker")
@@ -266,14 +268,14 @@ function ModelSeedPathway(params) {
         var content = '<table class="table table-condensed">'+
                           (typeof flux != 'undefined' ?
                           '<tr><td><b>Flux</b></td><td>'+flux+'</td></tr>' : '')+
-                          '<tr><td><b>Map RXN ID</b></td><td>'+mapRxn.id+'</td></tr>'+
-                          '<tr><td><b>Rxns</b></td><td>'+ mapRxn.rxns.join(', ')+'</td></tr>'+
+                          '<tr><td><b>Reactions</b></td><td>'+ mapRxn.rxns.join(', ')+'</td></tr>'+
                           '<tr><td><b>Substrates</b></td><td>'+subs.join(', ')+'</td></tr>'+
                           '<tr><td><b>Products</b></td><td>'+prods.join(', ')+'</td></tr>'+
+                          //'<tr><td><b>Map RXN ID</b></td><td>'+mapRxn.id+'</td></tr>'
                        '</table>'
 
-        //$(container).popover({html: true, content: content, animation: false, title: title,
-        //                      container: 'body', trigger: 'hover'});
+        $(container).popover({html: true, content: content, animation: false, title: title,
+                              container: 'body', trigger: 'hover'});
     }
 
     function drawCompounds() {

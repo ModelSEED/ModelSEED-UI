@@ -5,29 +5,132 @@
 <hr class="no-margin">
 
 <!--<div compare-regions></div>-->
+<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
-<h5>Protein Sequence</h5>
-<pre>{{proteinSequence}}</pre>
+<div ng-if="!loading">
+    <h4>Function</h4>
 
-<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    <md-tab label="Plant Similarities">
-        <ng-table-two table-header="plantSimSpec"
-                  table-data="plantSims"
-                  table-opts="plantSimOpts"
-                  table-loading="loading"
-                  table-placeholder="Search plant similarities">
-        </ng-table-two>
-    </md-tab>
+    <div class="feature-item">
+        <div ng-if="!featureFunction && !editable">
+            No function present
+        </div>
 
-    <md-tab label="Prokaryotic Similarities">
-        <ng-table-two table-header="prokaryoticSimSpec"
-                  table-data="prokaryoticSims"
-                  table-opts="prokaryoticSimOpts"
-                  table-loading="loading"
-                  table-placeholder="Search prokaryotic similarities">
-        </ng-table-two>
-    </md-tab>
-</md-tabs>
+        <div ng-if="!editable">
+            {{featureFunction}} <a ng-if="canEdit" ng-click="editFunction()">edit</a>
+        </div>
+
+        <div ng-if="editable">
+            <md-input-container md-no-float>
+               <input ng-init="edited.function = featureFunction"
+                      ng-model="edited.function"
+                      type="text"
+                      placeholder="Function" ng-disabled="saving">
+            </md-input-container>
+            <a ng-if="!saving" ng-click="editFunction()" class="no-link">cancel</a>
+            <a ng-if="!saving" ng-click="saveFunction()">save</a>
+            <span ng-if="saving">saving...</span>
+            <br><br>
+        </div>
+    </div>
+
+    <!--
+    <div class="feature-item">
+        <ul ng-if="roles.length" class="list-unstyled">
+            <li ng-repeat="role in roles track by $index">
+                <div ng-if="!editable[$index]">
+                    {{role}} <a ng-if="canEdit" ng-click="editRole($index)">edit</a>
+                </div>
+
+                <div ng-if="editable[$index]">
+                    <md-input-container md-no-float>
+                       <input ng-init="editedRole[$index] = role"
+                              ng-model="editedRole[$index]"
+                              type="text"
+                              placeholder="Role" ng-disabled="saving">
+                    </md-input-container>
+                    <a ng-if="!saving" ng-click="editable[$index] = false" class="no-link">cancel</a>
+                    <a ng-if="!saving" ng-click="saveRole($index)">save</a>
+                    <span ng-if="saving">saving...</span>
+                    <br><br>
+                </div>
+
+            </li>
+        </ul>
+
+        <form ng-if="editRoles">
+            <ul ng-if="roles.length" class="list-unstyled">
+                <li ng-repeat="role in roles track by $index">
+                    <md-input-container md-no-float flex>
+                        <label>Role {{$index}}</label>
+                        <input type="text" ng-model="editedRoles.role$index">
+                    </md-input-container>
+                </li>
+            </ul>
+        </form>
+
+        <div ng-if="!roles.length">
+            No function present
+        </div>
+    </div>
+    -->
+
+    <h4>Subsystems</h4>
+    <div class="feature-item">
+        <ul ng-if="subsystems.length" class="list-unstyled">
+            <li ng-repeat="sub in subsystems">
+                {{sub}}
+            </li>
+        </ul>
+
+        <div ng-if="!subsystems.length">
+            No subsystem(s) present
+        </div>
+    </div>
+
+    <h4>Aliases</h4>
+    <div class="feature-item">
+        <table class="table table-condensed">
+            <thead></thead>
+            <tbody>
+                <tr ng-repeat="item in aliases">
+                    <td><b>{{item.label}}</b></td>
+                    <td ng-if="item.url">
+                        <a href="{{item.url}}" target="_blank">{{item.alias}}</a>
+                    </td>
+                    <td ng-if="!item.url">{{item.alias}}</div>
+                </tr>
+            </tbody>
+        </table>
+        <div ng-if="!aliases.length">
+            No aliases(s) present
+        </div>
+    </div>
+
+
+    <h4>Protein Sequence</h4>
+    <pre class="feature-item">{{proteinSequence ? proteinSequence : 'No protein sequence'}}</pre>
+
+
+    <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+        <md-tab label="Plant Similarities">
+            <ng-table-two table-header="plantSimSpec"
+                      table-data="plantSims"
+                      table-opts="plantSimOpts"
+                      table-loading="loading"
+                      table-placeholder="Search plant similarities">
+            </ng-table-two>
+        </md-tab>
+
+        <md-tab label="Prokaryotic Similarities">
+            <ng-table-two table-header="prokaryoticSimSpec"
+                      table-data="prokaryoticSims"
+                      table-opts="prokaryoticSimOpts"
+                      table-loading="loading"
+                      table-placeholder="Search prokaryotic similarities">
+            </ng-table-two>
+        </md-tab>
+    </md-tabs>
+</div>
 
 
 

@@ -1,53 +1,109 @@
 
+<md-tabs ng-if="view == 'Plants'" md-no-ink md-dynamic-height>
 
-<div ng-if="!filters.myGenomes">
-    <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-        
-    <div ng-repeat="p in plants" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
+    <md-tab>
+		<md-tab-label>Public Plants</md-tab-label>
 
-        <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
-        <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
+		<md-tab-body>
 
-        <div flex>
-            <a ui-sref="app.genomePage({path: p.path})">
-                <md-tooltip md-direction="right" md-delay="800">View Genome</md-tooltip>
-                {{p.meta.name}}
-            </a>
-            <br>
+            <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
-            <i>{{p.meta.organism}}</i><br>
-            <div ng-if="p.meta.links" class="links" hide-sm>
-                Links:
-                <div ng-repeat="link in p.meta.links track by $index" class="inline">
-                    <a href="{{link.url}}" target="_blank">{{link.name}}</a>
-                    {{$index != p.meta.links.length-1 ? '|' : ''}}
+            <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
+
+                <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
+                <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
+
+                <div flex>
+                    <a ui-sref="app.genomePage({path: p.path})">
+                        <md-tooltip md-direction="right">View Genome</md-tooltip>
+                        {{p.meta.name}}
+                    </a>
+                    <br>
+
+                    <i>{{p.meta.organism}}</i><br>
+                    <div ng-if="p.meta.links" class="links" hide-sm>
+                        Links:
+                        <div ng-repeat="link in p.meta.links track by $index" class="inline">
+                            <a href="{{link.url}}" target="_blank">{{link.name}}</a>
+                            {{$index != p.meta.links.length-1 ? '|' : ''}}
+                        </div>
+                    </div>
+                </div>
+
+                <div layout-align="center end" class="">
+                    <a ui-sref="app.modelPage({path: plantModelsPath+p.name+'_Model'})" class="pull-right">
+                        View Model
+                    </a>
+                    <br><br>
+                    <br><br>
+
+                    <a ng-if="!copyInProgress[$index]" ng-click="copy($index, plantModelsPath+p.name+'_Model')">
+                        Copy Genome/Model
+                    </a>
+                    <span ng-if="copyInProgress[$index]">
+                        Copying...
+                    </span>
+
+                    <!--<md-button class="md-raised md-primary" md-no-ink>
+                        <i class="icon-quill"></i> Annotate
+                    </md-button>-->
+                </div>
+            </div> <!-- end plant row -->
+        </md-tab-body>
+
+    </md-tab>
+
+    <md-tab>
+		<md-tab-label>My Plants</md-tab-label>
+        <md-tab-body>
+            <!--
+            <ng-table-two table-header="myPlantsHeader"
+                        table-data="myPlants"
+                        table-opts="myPlantsOpts"
+                        table-loading="loadingMyPlants"
+                        table-placeholder="Search my plants"
+                        table-row-click="reconstructPlant"
+                        table-row-hover-class="reconstruct-hover">
+            </ng-table-two>
+            -->
+
+            <div class="table-controls">
+                <div class="table-controls" layout="row">
+                    <md-input-container md-no-float flex="45"
+                        search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
+                    </md-input-container>
+
+
+                    <div layout="row" layout-align="end center" flex>
+                        {{myPlants.length}} plant genomes
+                    </div>
                 </div>
             </div>
-        </div>
+            <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+                <thead >
+                    <tr>
+                        <tr>
+                            <th>Name</th>
+                            <th>Mod Time</th>
+                        </tr>
+                    </tr>
+                </thead>
 
-        <div layout-align="center end" class="actions">
-            <a ui-sref="app.modelPage({path: plantModelsPath+p.name})">
-                View Model
-            </a>
+                <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : '-timestamp')
+                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset) " ng-click="rowClick($event, row)" ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
+                    <td>
+                        <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
+                    </td>
+                    <td>{{uiTools.relativeTime(row.timestamp)}}
+                        <md-button class="md-secondary pull-right" ng-click="reconstructPlant($event,row)">Reconstruct</md-button>
+                    </td>
+                </tr>
+            </table>
 
-            <!--<md-button class="md-raised md-primary" md-no-ink>
-                <i class="icon-quill"></i> Annotate
-            </md-button>-->
-        </div>
+        </md-tab-body>
 
-    </div>
+        <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
 
-</div>
-
-
-<div ng-if="filters.myGenomes">
-    <ng-table-two table-header="myPlantsHeader"
-                table-data="myPlants"
-                table-opts="myPlantsOpts"
-                table-loading="loadingMyPlants"
-                table-placeholder="Search my plants">
-    </ng-table-two>
-
-    <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
+    </md-tab>
 
 </div>

@@ -353,8 +353,8 @@ function($compile, config, WS, $q) {
         restrict: 'EA',
         scope: {
             name: '=pathway',
-            model: '=model',
-            fba: '=fba',
+            models: '=models',
+            fbas: '=fbas',
         },
         template: '<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>'+
                   '<div class="pathway-container">'+
@@ -364,13 +364,13 @@ function($compile, config, WS, $q) {
         link: function($s, elem, attrs) {
 
             // for template caching
-            $s.$watch('model', function (val)  {
+            $s.$watch('models', function (val)  {
                 if (!val) return;
                 loadData();
             })
 
             // for template caching
-            $s.$watch('fba', function (val)  {
+            $s.$watch('fbas', function (val)  {
                 if (!val) return;
                 loadData();
             })
@@ -393,8 +393,8 @@ function($compile, config, WS, $q) {
                                     usingImage: true,
                                     mapName: $s.name,
                                     mapData: $s.mapData,
-                                    models: [$s.model],
-                                    fbas: $s.fba ? [$s.fba] : null}
+                                    models: $s.models,
+                                    fbas: $s.fbas}
 
                       var pathway = new ModelSeedPathway(params);
                    })
@@ -913,6 +913,10 @@ function($compile, $stateParams) {
     ['ModelViewer', '$q', '$http',
     function(MV, $q, $http) {
     return {
+        restrict: 'EA',
+        scope: {
+            heatmap: '=heatmap',
+        },
         link: function(scope, elem, attr) {
             var msConfig = new ModelSeedVizConfig();
 
@@ -926,40 +930,22 @@ function($compile, $stateParams) {
                 width = window.innerWidth || e.clientWidth || g.clientWidth,
                 height = window.innerHeight|| e.clientHeight|| g.clientHeight;
 
+            var w = 10, h = 10, font_size = '7px';
+            var start_x; // needs to be computed for starting position of heatmap
+
             var heatData, // avoid refresh
                 svg;
 
-            scope.models = MV.models;
-
-            function update() {
-                scope.loading = true;
-                MV.updateData().then(function(d) {
-                    var models = d.FBAModel,
-                        all_fbas = d.FBA;
-
-                    heatData = parseData(models, all_fbas);
-                    draw(heatData, true);
-                })
-            }
-
-            // update and draw
-            update();
-
-            scope.$on('Compare.event.absFlux', function(event, absFlux) {
-                draw(heatData, absFlux);
+            scope.$watch('heatmap', function (val)  {
+                if (!val) return;
+                console.log('drawing!')
+                draw(val, 1);
             })
-
-            scope.$on('MV.event.change', function() {
-                update()
-            })
-
 
             function draw(data, absFlux) {
                 elem.html('');
                 elem.append('<div id="canvas">');
                 heatmap_d3(data.x, data.y, data.data, absFlux);
-                scope.loading = false;
-
 
                 // ability to zoom
                 d3.select("#canvas")
@@ -970,73 +956,6 @@ function($compile, $stateParams) {
                 }
             }
 
-
-
-            function parseData(models, fbas) {
-                // create heatmap data
-                var rxn_names = [],
-                    model_names = [],
-                    data = [];
-
-                // first, get union of reactions
-                for (var i=0; i < models.length; i++) {
-                    var model = models[i];
-                    model_names.push(model.name);
-
-                    var rxns = model.modelreactions;
-                    for (var j=0; j < rxns.length; j++) {
-                        var rxn_name = rxns[j].reaction_ref.split('/')[5];
-                        if (rxn_names.indexOf(rxn_name) === -1) rxn_names.push(rxn_name);
-                    }
-                }
-
-                var rows = [];
-
-                // for each model, get data for box, left to right
-                for (var i=0; i < models.length; i++) {
-                    var rxns = models[i].modelreactions;
-
-                    // see if there is an fba result
-                    // if so, get create rxn hash
-                    var hasFBA = false,
-                        fbaRXNs = {};
-                    if (fbas && fbas[i]) {
-
-                        hasFBA = true;
-                        var fbaRxns = fbas[i].FBAReactionVariables;
-
-                        for (var j=0; j<fbaRxns.length; j++) {
-                            var rxnId = fbaRxns[j].modelreaction_ref.split('/')[5].split('_')[0];
-                            fbaRXNs[rxnId] = fbaRxns[j];
-                        }
-                    }
-
-                    var row = [];
-                    // for each rxn in union of rxns, try to find rxn for that model
-                    for (var j=0; j < rxn_names.length; j++) {
-                        var rxn_name = rxn_names[j];
-
-                        var found = false;
-                        var flux;
-                        for (var k=0; k<rxns.length; k++) {
-                            if (rxns[k].reaction_ref.split('/')[5] === rxn_name) {
-                                found = true;
-                                if (hasFBA && fbaRXNs[rxn_name])
-                                    flux = fbaRXNs[rxn_name].value;
-                                break;
-                            }
-                        }
-
-                        row.push({present: (found ? 1 : 0), flux: flux});
-                    }
-
-                    rows.push(row);
-                }
-
-                return {x: rxn_names, y: model_names, data: rows};
-            }
-
-
             // basic, zoomable svg map
             function heatmap_d3(xData, yData, rows, absFlux) {
                 elem.append('<div id="canvas">');
@@ -1044,8 +963,6 @@ function($compile, $stateParams) {
                     .attr("width", width)
                     .attr("height", height)
                     .append("g")
-
-                var w = 7, h = 7, font_size = '8px', start_y = 100;
 
                 // to precompute starting postion of heatmap
                 var y_widths = [];
@@ -1055,11 +972,28 @@ function($compile, $stateParams) {
 
                     //y_widths.push(label.node().getBBox().width);
                     y_widths.push(yData[i].length * 4)
-
                 }
                 $(elem).find('text').remove(); // fixme
 
-                var start_x = Math.max.apply(Math, y_widths) + 5;
+                start_x = Math.max.apply(Math, y_widths) + 5;
+
+                // draw in four sets
+                drawGroup(xData, yData, rows, absFlux, 0, 500, 100)
+                drawGroup(xData, yData, rows, absFlux, 500, 1000, 200)
+                drawGroup(xData, yData, rows, absFlux, 1000, rows[0].length, 300)
+
+                // resizing
+                function updateWindow(){
+                    width = window.innerWidth || d.clientWidth || g.clientWidth;
+                    height = window.innerHeight|| d.clientHeight|| g.clientHeight;
+                    svg.attr('width', width).attr('height', height);
+                }
+                window.onresize = updateWindow;
+            }
+
+
+            function drawGroup(xData, yData, rows, absFlux, start, end, startY) {
+                var start_y = startY ? startY : 100;
 
                 // for each row, plot each column entity
                 for (var i=0; i < yData.length; i++) {
@@ -1075,13 +1009,14 @@ function($compile, $stateParams) {
                     var bb = y_label.node().getBoundingClientRect();
                     y_label.attr('transform', 'translate('+String(start_x-4)+',0)');
 
-                    for (var j=0; j < xData.length; j++) {
+                    var interation = 0;
+                    for (var j=(start ? start : 0); j < (end ? end : xData.length); j++) {
                         if (i === 0) {
-                            var pos = start_x+j*w+w;
+                            var pos = start_x+interation*w+w;
 
                             var x_label = svg.append("text")
                                              .attr("x", pos)
-                                             .attr("y", start_y-3)
+                                             .attr("y", start_y-5)
                                              .text(xData[j])
                                              .attr("font-size", font_size)
                                              .attr("transform", 'rotate(-45,'+pos+','+start_y+')')
@@ -1095,7 +1030,7 @@ function($compile, $stateParams) {
 
                         var prop = rows[i][j];
                         var rect = svg.append("rect")
-                                      .attr("x", start_x+j*w)
+                                      .attr("x", start_x+interation*w)
                                       .attr("y", start_y+i*h)
                                       .attr("width", w)
                                       .attr("height", h)
@@ -1112,9 +1047,10 @@ function($compile, $stateParams) {
                         }
 
                         // tool tips
-                        var title = xData[j];
-                        var content = '<b>Flux:</b> '+prop.flux+'<br>'+
-                                      '<b>Org:</b> '+yData[i]+'<br>';
+                        var title = '<b>'+yData[i]+'</b><br>'+xData[j];
+                        var content = '<b>Flux:</b> '+prop.flux+'<br>';
+
+
                         $(rect.node()).popover({html: true, content: content,
                                                 animation: false, title: title,
                                                 container: 'body', trigger: 'hover'});
@@ -1131,24 +1067,24 @@ function($compile, $stateParams) {
                                 .removeClass('selected-data-highlight');
                         })
 
-                        function updateWindow(){
-                            width = window.innerWidth || d.clientWidth || g.clientWidth;
-                            height = window.innerHeight|| d.clientHeight|| g.clientHeight;
-                            svg.attr('width', width).attr('height', height);
-                        }
-                        window.onresize = updateWindow;
-                    }
+                        interation = interation + 1
+                    } // end row loop
                 }
-            }
+            } // end drawGroup
 
-        }
+        }  // end link
     }
 }])
 
 .directive('legend', function() {
     return {
+        scope: {
+            min: '=min',
+            max: '=max'
+        },
         link: function(scope, elem, attr) {
             var config = new ModelSeedVizConfig();
+            console.log('called legend')
 
             angular.element(elem).append('<div id="legend">');
 
@@ -1251,7 +1187,7 @@ function($compile, $stateParams) {
                 g.append('text')
                    .attr('x', start-17)
                    .attr('y', yOffset+h)
-                   .text( -config.getMaxAbsFlux() )
+                   .text( -scope.min )
                    .attr('font-size', '10px');
 
                 g.append('text')
@@ -1282,7 +1218,7 @@ function($compile, $stateParams) {
                 g.append('text')
                    .attr('x', start+w+boxPad)
                    .attr('y', yOffset+h)
-                   .text(config.getMaxAbsFlux())
+                   .text(scope.max)
                    .attr('font-size', '10px');
 
                 g.append('text')
@@ -1315,7 +1251,7 @@ function($compile, $stateParams) {
                 g.append('text')
                    .attr('x', start+w+boxPad)
                    .attr('y', yOffset+h)
-                   .text(config.getMaxAbsFlux())
+                   .text( scope.max )
                    .attr('font-size', '10px');
 
                 g.append('text')
@@ -1326,6 +1262,11 @@ function($compile, $stateParams) {
             }
             absFluxLegend();
 
+            scope.$watch('max', function() {
+                absFluxLegend();                
+            })
+
+            // switch between absolute and actual legend
             scope.$on('Compare.event.absFlux', function(event, absFlux) {
                 if (absFlux) {
                     svg.selectAll("g#legend-neg-flux").remove();
@@ -1340,97 +1281,6 @@ function($compile, $stateParams) {
     }
 })
 
-
-
-.directive('absLegend', function() {
-    return {
-        link: function(scope, elem, attr) {
-            var config = new ModelSeedVizConfig();
-
-            angular.element(elem).append('<div id="legend">');
-
-            var w = 10,
-                h = 10;
-
-            var yOffset = 43,
-                xOffset = 10;
-
-            var boxPad = 3;
-
-            var svg = d3.select("#legend")
-                .append('svg')
-                .attr('width', 400)
-                .attr('height', 66);
-
-            // add genes present legend
-            var g = svg.append('g');
-            g.append('rect')
-               .attr('width', w)
-               .attr('height', h)
-               .attr('x', 10)
-               .attr('y', yOffset)
-               .attr('fill', config.geneColor)
-               .attr('stroke', config.stroke)
-
-            g.append('text')
-               .attr('x', xOffset+w+5)
-               .attr('y', yOffset+h)
-               .text('Gene Present')
-               .attr('font-size', '10px')
-
-
-            // add flux gradients
-            var posGradient = svg.append("svg:defs")
-              .append("svg:linearGradient")
-                .attr("id", "posGradient")
-                .attr("x1", "0%")
-                .attr("y1", "0%")
-                .attr("x2", "100%")
-                .attr("y2", "0%")
-                .attr("spreadMethod", "pad");
-            posGradient.append("svg:stop")
-                .attr("offset", "0%")
-                .attr("stop-color", config.getNegMinHex())
-                .attr("stop-opacity", 1);
-            posGradient.append("svg:stop")
-                .attr("offset", "100%")
-                .attr("stop-color", config.getNegMaxHex())
-                .attr("stop-opacity", 1);
-
-            // Negative flux
-            var g = svg.append('g'),
-                start = 125,
-                w = 50;
-
-            g.append('rect')
-               .attr('width', w)
-               .attr('height', h)
-               .attr('x', start)
-               .attr('y', yOffset)
-               //.attr('stroke', config.stroke)
-               .style("fill", "url(#posGradient)");
-
-            g.append('text')
-               .attr('x', start-10)
-               .attr('y', yOffset+h)
-               .text( 0 )
-               .attr('font-size', '10px');
-
-            g.append('text')
-               .attr('x', start+w+boxPad)
-               .attr('y', yOffset+h)
-               .text( config.getMaxAbsFlux())
-               .attr('font-size', '10px');
-
-            g.append('text')
-               .attr('x', start)
-               .attr('y', yOffset -3)
-               .text('Abs(Flux)')
-               .attr('font-size', '10px');
-
-        }
-    }
-})
 
 .directive('ngHover', function() {
     return {
@@ -1520,7 +1370,6 @@ function($compile, $stateParams) {
 
             scope.enablePagination =
                 scope.enablePagination ? enablePagination : true;
-            console.log('enable?', scope.enablePagination )
         }
     }
 }])
@@ -1534,12 +1383,17 @@ function($compile, $stateParams) {
             opts: '=tableOpts',
             loading: '=tableLoading',
             rowClick: '=tableRowClick',
+            hoverClass: '@tableRowHoverClass',
             placeholder: '@tablePlaceholder',
             resultText: '@tableResultText',
         },
         templateUrl: 'app/views/general/table2.html',
         link: function(scope, elem, attrs) {
+            var ele = angular.element(elem);
+
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+
         }
     }
 }])
@@ -1626,6 +1480,8 @@ function($compile, $stateParams) {
         templateUrl: 'app/views/general/table-editor.html',
         link: function(scope, elem, attrs) {
 
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
             scope.checkedItems = [];
 
             scope.checkItem = function(item) {
@@ -1692,6 +1548,35 @@ function($compile, $stateParams) {
         }
     }
  })
+
+ .directive('sortableTest', function() {
+     return {
+         restrict: 'EA',
+         link: function(scope, elem, attrs) {
+
+             if (scope.opts.sort && ('desc' in scope.opts.sort) )
+             scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
+
+
+             // see table styling in core.css for sorting carets
+             scope.sortBy = function($event, name) {
+                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
+                 scope.opts.sort = {field: name, desc: desc};
+
+                 angular.element(elem).find('th').removeClass('sorting-asc')
+                 angular.element(elem).find('th').removeClass('sorting-desc')
+
+                 if (desc) {
+                     angular.element($event.target).removeClass('sorting-asc')
+                     angular.element($event.target).addClass('sorting-desc')
+                 } else {
+                     angular.element($event.target).removeClass('sorting-desc')
+                     angular.element($event.target).addClass('sorting-asc')
+                 }
+             }
+         }
+     }
+  })
 
  .directive('autoFocus', ['$timeout', function($timeout) {
      return {

@@ -1,11 +1,12 @@
 
 <div layout="row">
     <div class="content-header" flex>
-        {{filters.myGenomes ? 'My' : 'Public'}} {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
+        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
         <small ng-if="view == 'Microbes'" class="help-text" hide-sm>Select a genome from below to reconstruct</small>
-        <small ng-if="view == 'Plants'" class="help-text" hide-sm>Select a genome from below to annotate</small>
+        <small ng-if="view == 'Plants'" class="help-text" hide-sm>Select a genome from 'My Plants' to reconstruct, or consider copying a genome.</small>
     </div>
 
+    <!--
     <md-input-container layout-align="center center">
         <md-switch md-no-ink
                    ng-model="filters.myGenomes"
@@ -14,6 +15,7 @@
             View my genomes
         </md-switch>
     </md-input-container>
+    -->
 
     <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
         <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
@@ -23,70 +25,83 @@
 <hr class="no-margin">
 
 
-<div ng-if="view == 'Microbes'" class="table-controls" layout="row">
-    <md-input-container class="table-settings">
-        <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-visible table-settings">
-            <li ng-repeat="item in columns">
-                <div ng-click="toggle(item.prop, opts.visible)">
-                  <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
+
+<div ng-if="view == 'Microbes'">
+    <md-tabs md-no-ink md-dynamic-height>
+    	<md-tab>
+    		<md-tab-label>Public Microbes</md-tab-label>
+
+    		<md-tab-body>
+                <div class="table-controls" layout="row">
+                    <md-input-container class="table-settings">
+                        <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-visible table-settings">
+                            <li ng-repeat="item in columns">
+                                <div ng-click="toggle(item.prop, opts.visible)">
+                                  <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
+                                </div>
+                            </li>
+                        </ul>
+                    </md-input-container>
+
+                    <md-input-container md-no-float flex="45"
+                        search="opts.query" search-opts="opts" search-placeholder="Search {{filters.myGenomes ? 'My' : 'PATRIC'}}  genomes">
+                    </md-input-container>
+
+                    <md-progress-circular ng-if="loading"
+                                          class="table-loading"
+                                          md-mode="indeterminate"
+                                          md-diameter="20">
+                    </md-progress-circular>
+
+                    <md-input-container pagination
+                        pagination-offset="opts.offset"
+                        pagination-limit="opts.limit"
+                        pagination-total="genomes.numFound"
+                        layout="row"
+                        layout-align="end center" flex>
+                    </md-input-container>
                 </div>
-            </li>
-        </ul>
-    </md-input-container>
 
-    <md-input-container md-no-float flex="45"
-        search="opts.query" search-opts="opts" search-placeholder="Search {{filters.myGenomes ? 'My' : 'PATRIC'}}  genomes">
-    </md-input-container>
+                <table class="table">
+                    <thead sortable>
+                        <tr>
+                            <th></th>
+                            <th ng-repeat="h in opts.visible"
+                                ng-class="{'sorting-desc': opts.sort.field == h && opts.sort.desc,
+                                           'sorting-asc': opts.sort.field == h && !opts.sort.desc}"
+                                ng-click="sortBy($event,h)">
+                                {{getLabel(h)}}
+                            </th>
+                        </tr>
+                    </thead>
 
-    <md-progress-circular ng-if="loading"
-                          class="table-loading"
-                          md-mode="indeterminate"
-                          md-diameter="20">
-    </md-progress-circular>
+                    <tbody>
+                        <tr ng-repeat="g in genomes.docs"
+                            ng-click="reconstruct($event, g)"
+                            class="row-hover">
 
-    <md-input-container pagination
-        pagination-offset="opts.offset"
-        pagination-limit="opts.limit"
-        pagination-total="genomes.numFound"
-        layout="row"
-        layout-align="end center" flex>
-    </md-input-container>
+                            <td>
+                                <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
+                            </td>
+                            <td ng-repeat="col in opts.visible">
+                                <a ng-if="col == 'genome_name'"
+                                   href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}"
+                                   target="_blank"
+                                   ng-click="$event.stopPropagation()">{{g[col]}}</a>
+                                <span ng-if="col != 'genome_name'">{{g[col]}}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </md-tab-body>
+        </md-tab>
+
+    </md-tabs>
 </div>
-
-<table ng-if="view == 'Microbes'" class="table">
-    <thead sortable>
-        <tr>
-            <th></th>
-            <th ng-repeat="h in opts.visible"
-                ng-class="{'sorting-desc': opts.sort.field == h && opts.sort.desc,
-                           'sorting-asc': opts.sort.field == h && !opts.sort.desc}"
-                ng-click="sortBy($event,h)">
-                {{getLabel(h)}}
-            </th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <tr ng-repeat="g in genomes.docs"
-            ng-click="reconstruct($event, g)"
-            class="row-hover">
-
-            <td>
-                <i class="fa {{selected.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
-            </td>
-            <td ng-repeat="col in opts.visible">
-                <a ng-if="col == 'genome_name'"
-                   href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}"
-                   target="_blank"
-                   ng-click="$event.stopPropagation()">{{g[col]}}</a>
-                <span ng-if="col != 'genome_name'">{{g[col]}}</span>
-            </td>
-        </tr>
-    </tbody>
-</table>
 
 <div ng-if="genomes.docs.length == 0 && !loading && view == 'Microbes'" class="alert alert-warning">No genome found</div>
 

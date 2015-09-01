@@ -42,7 +42,7 @@ function($scope, $sParams, WS, $http) {
     $scope.tabs = {tabIndex : 0};
 
     $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
-    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
 
     $scope.featureHeader = [{label: 'Feature', key: 'id',
                         link: {
@@ -50,26 +50,44 @@ function($scope, $sParams, WS, $http) {
                             getOpts: function(row) {
                                 return {feature: row.id, genome: path};
                             }}
-                     },
-                     {label: 'Function', key: 'function',
-                         formatter: function(row) {
-                             return row.function || '-';
-                         }},
-                     {label: 'Subsystems', key: 'subsystems',
-                        formatter: function(row) {
-                            return row.subsystems.length ?
-                                   row.subsystems.join('<br>') : '-';
-                        }}
-                     ];
+                         },
+                         {label: 'Function', key: 'function',
+                             formatter: function(row) {
+                                 return row.function || '-';
+                             }},
+                         {label: 'Subsystems', key: 'subsystems',
+                            formatter: function(row) {
+                                return row.subsystems.length ?
+                                       row.subsystems.join('<br>') : '-';
+                            }}
+                         ];
 
-    $scope.annotationHeader = [{label: 'Reaction', key: 'rxn'},
-                               {label: 'Blast Features', key: 'blastFeatures',
+    $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'role'},
+                                {label: 'Features', key: 'kmerFeatures',
                                     formatter: function(row) {
-                                        return row.blastFeatures.join('<br>') || '-';
+                                        var links = [];
+                                        row.kmerFeatures.forEach(function(name, i) {
+                                            var match = row.blastFeatures.indexOf(name);
+                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                                            name+
+                                                        '</a>');
+                                        })
+
+                                        return links.join('<br>') || '-';
                                     }},
-                               {label: 'Kmer Features', key: 'kmerFeatures',
+                               {label: 'Exemplar Hits', key: 'blastFeatures',
                                     formatter: function(row) {
-                                        return row.kmerFeatures.join('<br>') || '-';
+                                        var links = [];
+                                        row.blastFeatures.forEach(function(name, i) {
+                                            var match = row.kmerFeatures.indexOf(name);
+                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                                            name+
+                                                        '</a>');
+                                        })
+
+                                        return links.join('<br>') || '-';
                                     }},
                                ]
 
@@ -80,6 +98,7 @@ function($scope, $sParams, WS, $http) {
     $scope.loadingFeatures = true;
     WS.get(obj)
       .then(function(res) {
+          console.log('res', res)
           var objs = res.data.features,
               data = [];
 
@@ -97,7 +116,7 @@ function($scope, $sParams, WS, $http) {
          .then(function(res) {
              var d = [];
              for (var key in res) {
-                 d.push({rxn: key,
+                 d.push({role: key,
                          blastFeatures: res[key]['blast-features'],
                          kmerFeatures: res[key]['kmer-features']})
              }
@@ -108,23 +127,24 @@ function($scope, $sParams, WS, $http) {
              $scope.error = e;
              $scope.loadingAnnotations = false;
          })
-
-
 }])
 
 .controller('FeatureDataView',
-['$scope', '$stateParams', 'MS', '$http',
-function($s, $sParams, MS, $http) {
+['$scope', '$stateParams', 'MS', '$http', 'config', 'Auth',
+function($s, $sParams, MS, $http, config, Auth) {
 
     // path and name of object
     var featureID = $sParams.feature,
         genome = $sParams.genome;
+
+    if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
     $s.featureID = featureID;
     $s.tabs = {tabIndex : 0};
 
     // url for SEED feature links in prokaryotic sim table
     var seedFeatureUrl = 'http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=';
+    $s.seedFeatureUrl = seedFeatureUrl;
 
     // table settings
     $s.plantSimOpts = {query: '', limit: 20, offset: 0,
@@ -132,26 +152,41 @@ function($s, $sParams, MS, $http) {
     $s.prokaryoticSimOpts = angular.copy($s.plantSimOpts);
 
     // table specs
-    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id'},
-                       {label: 'E-Value', key: 'e_value'},
-                       {label: 'Bit Score', key: 'bit_score'},
-                       {label: 'Perecent ID', key: 'percent_id'}];
+    //ID Genome Function Percent Identity//
+    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id',
+                            link: {
+                                state: 'app.featurePage',
+                                getOpts: function(row) {
+                                    return {feature: row.hit_id,
+                                            genome: config.paths.plants.genomes+row.genome};
+                                }},
+                        },
+                       {label: 'Genome', key: 'genome'},
+                       {label: 'Function', key: 'function'},
+                       {label: 'Percent ID', key: 'percent_id'}];
+
     $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
                                 formatter: function(row) {
-                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'
-                                                +row.hit_id+
+                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'+
+                                                row.hit_id+
                                             '</a>';
-                                }},
-                             {label: 'E-Value', key: 'e_value'},
-                             {label: 'Bit Score', key: 'bit_score'},
-                             {label: 'Perecent ID', key: 'percent_id'}];
+                                }
+                             },
+                             {label: 'Genome', key: 'genome'},
+                             {label: 'Function', key: 'function'},
+                             {label: 'Percent ID', key: 'percent_id'}];
+
 
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          console.log('res',res)
-
+          console.log('feature res', res)
+          //$s.roles = res.function.split(';');
+          $s.featureFunction = res.function;
           $s.proteinSequence = res.protein_translation;
+          $s.subsystems = res.subsystems;
+          $s.aliases = parseAliases(res.aliases);
+
           $s.plantSims = res.plant_similarities;
           $s.prokaryoticSims = res.prokaryotic_similarities;
           $s.loading = false;
@@ -159,16 +194,91 @@ function($s, $sParams, MS, $http) {
           $s.error = error;
           $s.loading = false;
       })
+
+    // this takes a hash of aliases and creates a new list of
+    // hashes ordered alphabetically by the key
+    function parseAliases(aliases) {
+        var a = [];
+        for (key in aliases) {
+            var obj = {label: key, alias: aliases[key]};
+            if (key == "SEED") obj.url = seedFeatureUrl+aliases[key];
+            a.push(obj)
+        }
+
+        a.sort(function(a, b) {
+            if (a.label.toLowerCase() < b.label.toLowerCase()) return -1;
+            if (a.label.toLowerCase() > b.label.toLowerCase()) return 1;
+            return 0;
+        });
+
+        return a;
+    }
+
+    /*
+    $s.editable = {};
+    $s.editRole = function(i) {
+        // cancel all other editing
+        $s.editable = {};
+        $s.editable[i] = true;
+    }
+
+    $s.editedRole = {};
+    $s.saveRole = function(i) {
+        $s.saving = true;
+
+        $s.roles[i] = $s.editedRole[i]
+        var newFunction = $s.roles.join('; ')
+
+        console.log('saving new function ', newFunction)
+        var params = {genome: genome, feature: featureID, function: newFunction};
+        $http.rpc('ms', 'save_feature_function', params)
+             .then(function(res) {
+                 console.log('save response', res)
+                 $s.saving = false;
+                 $s.editable[i] = false;
+             })
+
+    }*/
+
+
+    $s.editable = false;
+    $s.editFunction = function() {
+        $s.editable = !$s.editable;
+    }
+
+    $s.edited = {function: ''};
+    $s.saveFunction = function(i) {
+        $s.saving = true;
+
+        var newFunction = $s.edited.function;
+
+        console.log('saving new function', newFunction)
+        var params = {genome: genome, feature: featureID, function: newFunction};
+        $http.rpc('ms', 'save_feature_function', params)
+             .then(function(res) {
+                 console.log('save response', res)
+                 $s.saving = false;
+                 $s.editable = false;
+                 $s.featureFunction = $s.edited.function;
+             })
+
+    }
+
 }])
 
 
 
 .controller('MediaDataView',
-['$scope', '$state', '$stateParams', 'WS', 'uiTools',
-function($scope, $state, $sParams, WS, tools) {
+['$scope', '$state', '$stateParams', 'WS', 'uiTools', '$http', 'Auth',
+function($scope, $state, $sParams, WS, tools, $http, Auth) {
 
     // path and name of object
     var path = $sParams.path;
+
+
+    // determine if user can copy this media to their workspace
+    if (path.split('/')[1] !== Auth.user) $scope.canCopy = true;
+
     $scope.name = path.split('/').pop()
 
     $scope.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
@@ -177,7 +287,6 @@ function($scope, $state, $sParams, WS, tools) {
                           {label: 'Concentration', key: 'concentration'},
                           {label: 'Max Flux', key: 'minflux'},
                           {label: 'Min Flux', key: 'maxflux'}];
-
 
      $scope.loading = true;
      WS.get(path).then(function(res) {
@@ -188,15 +297,43 @@ function($scope, $state, $sParams, WS, tools) {
          $scope.loading = false;
      })
 
+    $scope.copyMedia = function() {
+        console.log('copying', $scope.name)
+
+        $scope.copyInProgress = true;
+
+        var destination = '/'+Auth.user+'/media/';
+        WS.createFolder(destination)
+            .then(function(res) {
+                console.log('create folder response', res)
+
+                console.log('copying', path)
+                WS.copy(path, destination+$scope.name, true)
+                    .then(function(res) {
+                        console.log('copy done')
+                        $scope.copyInProgress = false;
+                        $state.go('app.media', {tab: 'mine'})
+                    })
+            })
+    }
+
+    $scope.toggleEdit = function() {
+        $scope.editInProgress = !$scope.editInProgress;
+    }
+
+    $scope.save = function() {
+        console.log('going to save media')
+    }
+
 }])
 
 
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', 'config',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, config) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -280,22 +417,45 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                             {label: 'Coefficient', key: 'coefficient'},
                             {label: 'Compartment', key: 'compartment'}]
 
-    $scope.mapHeader = [{label: 'ID', key: 'id',
-                            click: function(item) {
-                               Tabs.addTab(item.id);
-                            }
-                        },
-                        {label: 'Name', key: 'name'},
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                        click: function(item) {
+                           Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id'},
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]
 
      // fetch object data and parse it.
+
      $scope.loading = true;
      WS.get(path).then(function(res) {
-         $scope.model = res.data;
+         $scope.models = [res.data];
+         $scope.orgName = res.data.name;
 
          var data = ModelParser.parse(res.data);
+
+         $scope.rxns = data.reactions;
+         $scope.cpds = data.compounds;
+         $scope.genes = data.genes;
+         $scope.compartments = data.compartments;
+         $scope.biomass = data.biomass;
+         $scope.loading = false;
+
+     }).catch(function(e) {
+         $scope.error = e;
+         $scope.loading = false;
+     })
+
+     /* get_model command that includes gapfilling
+     $scope.loading = true;
+     $http.rpc('ms', 'get_model', {model: path, to: true})
+         .then(function(res) {
+         $scope.models = [res];
+
+         console.log('model with gapfills', res)
+
+         var data = ModelParser.parse(res);
 
          $scope.rxns = data.reactions;
          $scope.cpds = data.compounds;
@@ -306,21 +466,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
-     })
+     })*/
 
      $scope.loadingMaps = true;
-     WS.listL(config.paths.maps)
-       .then(function(d) {
-
-         var maps = [];
-         for (var i=0; i < d.length; i++) {
-             maps.push({id: d[i][0],
-                        name: d[i][7].name,
-                        rxnCount: d[i][7].reaction_ids.split(',').length,
-                        cpdCount: d[i][7].compound_ids.split(',').length
-                        })
-         }
-
+     MV.getMaps()
+       .then(function(maps) {
          $scope.maps = maps;
          $scope.loadingMaps = false;
      }).catch(function(e) {
@@ -445,6 +595,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                               {label: 'Flux', key: 'flux'},
                               {label: 'Min', key: 'min'},
                               {label: 'Max', key: 'max'},
+                              {label: 'Class', key: 'class'},
                               {label: 'Lower Bound', key: 'lower_bound'},
                               {label: 'Upper Bound', key: 'upper_bound'}]
 
@@ -457,12 +608,12 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                                  {label: 'Upper Bound', key: 'upper_bound'},
                                  {label: 'Charge', key: 'charge'}]
 
-    $scope.mapHeader = [{label: 'ID', key: 'id',
-                            click: function(item) {
-                               Tabs.addTab(item.id);
-                            }
+    $scope.mapHeader = [{label: 'Name', key: 'name',
+                         click: function(item) {
+                             Tabs.addTab({name: item.name, mapID: item.id});
+                        }},
+                        {label: 'ID', key: 'id',
                         },
-                        {label: 'Name', key: 'name'},
                         {label: 'Rxns', key: 'rxnCount'},
                         {label: 'Cpds', key: 'cpdCount'}
                         ]
@@ -472,11 +623,10 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     WS.get(path).then(function(res) {
         FBAParser.parse(res.data)
                  .then(function(parsed) {
-                    $scope.fba = res.data;
-                    $scope.model = parsed.rawModel;
+                    $scope.fbas = [res.data];
+                    $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
-
 
                     $scope.loading = false;
                  });
@@ -510,27 +660,27 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     /**
      * tabs = [
-     *    { title: 'new tab'},
-     *    { title: 'new tab 2'}];
+     *    { name: 'new tab', otherData: 'foo'},
+     *    { name: 'new tab 2', otherData: 'bar'}];
      */
     var tabs = [];
     this.tabs = tabs;
     this.totalTabCount = 0;
     this.selectedIndex = 0;
-    this.addTab = function (item) {
+    this.addTab = function (tab) {
         // if is already open, go to it
         for (var i=0; i<tabs.length; i++) {
-            if (tabs[i].title === item) {
+            if (tabs[i].name === tab.name) {
                 this.selectedIndex = i
                 return;
             }
         }
 
-        tabs.push({ title: item, removable: true });
+        tabs.push(angular.extend(tab, {removable: true}));
 
         $timeout(function() {
             for (var i=0; i<tabs.length; i++) {
-                if (tabs[i].title === item) {
+                if (tabs[i].name === tab.name) {
                     self.selectedIndex = i + self.totalTabCount;
                 }
             }
@@ -539,7 +689,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     this.removeTab = function (tab) {
         for (var j = 0; j < tabs.length; j++) {
-            if (tab.title === tabs[j].title) {
+            if (tab.name === tabs[j].name) {
                 tabs.splice(j, 1);
                 break;
             }
@@ -886,6 +1036,7 @@ function(WS, ModelParser) {
                                  lower_bound: rxn.lowerBound,
                                  upper_bound: rxn.upperBound,
                                  flux: rxn.value,
+                                 class: rxn.class
                                 })
         }
 

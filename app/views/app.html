@@ -1,6 +1,6 @@
-
 <div layout="row" style="height: 100%;">
 
+    <!--
     <md-sidenav class="md-sidenav-left md-whiteframe-z2"
                 md-component-id="left"
                 md-is-locked-open="$mdMedia('min-width: 870px')"
@@ -65,15 +65,17 @@
                 </div>
             </div>
         </md-content>
-    </md-sidenav>
+    </md-sidenav>-->
 
 
     <div layout="column" role="main" flex>
 
-        <md-toolbar class="md-toolbar-tools md-whiteframe-z1"
+        <md-toolbar class="md-toolbar-tools md-whiteframe-z1 main-toolbar"
                     ng-include="'app/views/toolbar.html'">
         </md-toolbar>
 
         <md-content ui-view id="content" layout-padding></md-content>
+
+        <div class="background-shade-out"></div>
     </div>
 </div>

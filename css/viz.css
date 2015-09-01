@@ -4,7 +4,7 @@
 /* global styling */
 
 .viz-tip {
-    position:fixed;
+    position: fixed;
     bottom: 2px;
     right: 10px;
     margin-left: 10px;
@@ -12,12 +12,10 @@
 }
 
 .viz-legend {
-    position:fixed;
+    position: fixed;
     bottom: 2px;
-    left: 225px;
+    left: 10px;
 }
-
-
 
 rect:hover,
 circle:hover,
@@ -129,11 +127,3 @@ line,
     cursor: pointer;
     cursor: hand;
 }
-
-
-
-
-
-
-
-

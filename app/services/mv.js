@@ -1,8 +1,8 @@
 
 
 angular.module('ModelViewer', [])
-.service('ModelViewer', ['$http', '$q', '$rootScope',
-function($http, $q, $rootScope) {
+.service('ModelViewer', ['$http', '$q', '$rootScope', 'WS', 'config',
+function($http, $q, $rootScope, WS, config) {
     var key = "selectedModels";
 
     var self = this;
@@ -66,10 +66,11 @@ function($http, $q, $rootScope) {
         $rootScope.$broadcast('MV.event.change');
     }
 
-    this.isSelected = function(modelPath, obj) {
+    this.isSelected = function(modelPath, fbaPath) {
         for (var i=0; i<this.models.length; i++) {
             var m = this.models[i];
-            if (m.fba === obj.path && m.model === modelPath)
+
+            if (m.fba === fbaPath && m.model === modelPath)
                 return true;
         }
 
@@ -125,46 +126,45 @@ function($http, $q, $rootScope) {
 
     // This uses this.models (organized by type)
     // and updates this.data
-    // Format:    {model: [{ws: ws, name: name}, ...],
-    //             fba: [{ws: ws, name: name}, ...]}
+    // Format:   (document)
     //
     // - Is type-independent (should work for transcriptomic data)
     //
     this.updateData = function() {
         var items = angular.copy(self.models);
+        console.log('MV items', items)
 
-        var objIDs = [];
+        // take selected items, create list of objPathsByType
+        var objPathsByType = {};
         for (var i=0; i<items.length; i++) {
             var item = items[i];
 
             for (var type in item) {
-                if (typeof item[type] === 'string')
-                    continue; //fixme!
+                // skip org and media meta data
+                if (['media', 'org'].indexOf(type) !== -1) continue;
 
-                var ws = item[type].ws,
-                    name = item[type].name;
+                if ( !(type in objPathsByType) ) objPathsByType[type] = [];
 
-                if ( !(type in objIDs) )
-                    objIDs[type] = [];
-
-                objIDs[type].push({workspace: ws, name: name})
+                // add path
+                objPathsByType[type].push( item[type] );
             }
         }
 
         var proms = [];
-        for (var type in objIDs) {
-            proms.push( $http.rpc('ws','get_objects', objIDs[type]) )
+        for (var type in objPathsByType) {
+            proms.push( WS.getObjects( objPathsByType[type] ) );
         }
 
         return $q.all(proms).then(function(d) {
+            //console.log('response from all proms', d)
 
                     var data = {};
                     for (var i=0; i<proms.length; i++) {
                         var set = d[i];
 
                         for (var j=0; j<set.length; j++) {
-                            var obj = set[j];
-                            var type = obj.info[2].split('-')[0].split('.')[1];
+                            var obj = set[j],
+                                type = obj.meta[1];
 
                             if (!(type in data)) data[type] = [];
 
@@ -172,26 +172,27 @@ function($http, $q, $rootScope) {
                         }
                     }
 
+                    // just reset the data for now
                     self.data = data;
-
                     return self.data
                });
     }
 
     this.getMaps = function() {
-        return $http.rpc('ws', 'list_objects', {workspaces: ['nconrad:paths'], includeMetadata: 1})
-                    .then(function(res) {
-                        var maps = [];
-                        for (var i in res) {
-                            maps.push({id: res[i][1],
-                                       name: res[i][10].name,
-                                       rxnCount: res[i][10].reaction_ids.split(',').length,
-                                       cpdCount: res[i][10].compound_ids.split(',').length,
-                                       source: 'KEGG'
-                                      })
-                        }
-                        return maps;
-                    })
+        return WS.listL(config.paths.maps)
+                 .then(function(d) {
+
+                    var maps = [];
+                    for (var i=0; i < d.length; i++) {
+                        maps.push({id: d[i][0],
+                                   name: d[i][7].name,
+                                   rxnCount: d[i][7].reaction_ids.split(',').length,
+                                   cpdCount: d[i][7].compound_ids.split(',').length,
+                                   source: 'KEGG'
+                                   })
+                    }
+                    return maps
+                })
     }
 
 

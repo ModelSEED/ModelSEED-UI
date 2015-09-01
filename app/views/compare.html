@@ -6,7 +6,6 @@
         <div class="h2">Comparative Viewer</div>
     </div>
 
-
     <div class="col-md-7" ng-if="MV.models.length > 0">
         <md-radio-group ng-model="VizOpts.flux" ng-change="updateOptions()" class="pull-right">
             <md-radio-button ng-value="'absFlux'"> |flux|</md-radio-button>
@@ -21,12 +20,63 @@
 <div ng-if="MV.models.length == 0">
     <br>
     <div class="text-danger">No data selected</div>
-    Add data by selecting FBA simulations from the <a ui-sref="app.publicModels">Public Models</a> page.
+    Add data by selecting FBA simulations from the <a ui-sref="app.myModels">My Models</a> page.
 </div>
 
 
-<div ng-if="MV.models.length > 0" ng-controller="CompareTabs"  layout="column">
-    <md-tabs md-selected="selectedIndex" flex >
+
+<div ng-if="MV.models.length > 0" >
+
+    <md-tabs md-no-ink md-dynamic-height md-selected="topLevelTabs.selectedIndex" >
+    	<md-tab>
+    		<md-tab-label>Heatmap</md-tab-label>
+
+    		<md-tab-body>
+                <div heatmap="heatmapData"></div>
+
+                <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+    		</md-tab-body>
+
+    	</md-tab>
+
+    	<md-tab>
+    		<md-tab-label>Pathways</md-tab-label>
+
+            <md-tab-body>
+
+    			<md-tabs md-selected="Tabs.selectedIndex" md-no-ink class="small-tabs pathway-tabs">
+    				<md-tab>
+    					<md-tab-label>Selection</md-tab-label>
+    					<md-tab-body>
+    						<ng-table-two table-header="mapHeader"
+    								table-data="maps"
+    								table-opts="mapOpts"
+    								table-loading="loadingMaps"
+    								table-placeholder="Search maps">
+    						</ng-table-two>
+    					<md-tab-body>
+    				</md-tab>
+
+    				<md-tab ng-repeat="tab in Tabs.tabs">
+    					<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
+    						<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+    					</md-tab-label>
+    					<md-tab-body>
+    						<div pathway="tab.mapID" models="models" fbas="fbas"></div>
+    						<br>
+    					</md-tab-body>
+    				</md-tab>
+    			</md-tabs>
+
+    		</md-tab-body>
+
+    	</md-tab>
+
+    </md-tabs>
+
+
+    <!--
+    <md-tabs md-selected="selectedIndex" flex>
         <md-tab ng-repeat="tab in tabs">
             {{tab.title}}
             <span ng-if="tab.removable"
@@ -60,81 +110,35 @@
 
         </div>
 
-        <div role="tabpanel"
-             id="tab2-content"
-             aria-labelledby="tab2"
-             ng-show="selectedIndex == 1"
-             md-swipe-left="next()"
-             md-swipe-right="previous()">
 
-            <table class="table table-bordered table-striped map-table">
-                <thead>
-                    <tr>
-                        <th ng-click="predicate = 'name'; reverse=!reverse;" class="point">Name
-                            <span ng-if="predicate == 'name'">
-                                <i ng-if="reverse" class="fa fa-caret-down"></i>
-                                <i ng-if="!reverse" class="fa fa-caret-up"></i>
-                            </span>
-                        </th>
-
-                        <th ng-click="predicate = 'id'; reverse=!reverse;" class="point">ID
-                            <span ng-if="predicate == 'id'">
-                                <i ng-if="reverse" class="fa fa-caret-down"></i>
-                                <i ng-if="!reverse" class="fa fa-caret-up"></i>
-                            </span>
-                        </th>
-                        <th ng-click="predicate = 'rxnCount'; reverse=!reverse;" class="point">Rxn Count
-                            <span ng-if="predicate == 'rxnCount'">
-                                <i ng-if="reverse" class="fa fa-caret-down"></i>
-                                <i ng-if="!reverse" class="fa fa-caret-up"></i>
-                            </span>
-                        </th>
-                        <th ng-click="predicate = 'cpdCount'; reverse=!reverse;" class="point">Cpd Count
-                            <span ng-if="predicate == 'cpdCount'">
-                                <i ng-if="reverse" class="fa fa-caret-down"></i>
-                                <i ng-if="!reverse" class="fa fa-caret-up"></i>
-                            </span>
-                        </th>
-                        <th ng-click="predicate = 'source'; reverse=!reverse;" class="point">Source
-                            <span ng-if="predicate == 'source'">
-                                <i ng-if="reverse" class="fa fa-caret-down"></i>
-                                <i ng-if="!reverse" class="fa fa-caret-up"></i>
-                            </span>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tr ng-repeat="map in maps | orderBy : predicate : reverse">
-                    <td><a ng-click="addTab(map)">{{map.name}}</a></td>
-                    <td>{{map.id}}</td>
-                    <td>{{map.rxnCount}}</td>
-                    <td>{{map.cpdCount}}</td>
-                    <td>{{map.source}}</td>
-                </tr>
-            </table>
 
             <div ng-if="loading">loading...</div>
 
-        </div>
-    </section>
+            <ng-table-two table-header="mapHeader"
+                    table-data="maps"
+                    table-opts="mapOpts"
+                    table-loading="loadingMaps"
+                    table-placeholder="Search maps">
+            </ng-table-two>
 
-    <div ng-repeat="tab in tabs">
-        <div ng-show="selectedIndex == $index" id="{{tab.map}}">
-            <div class="path-container">
-            </div>
 
-            <md-progress-circular ng-if="loadingMap"
-                                  md-mode="indeterminate"
-                                  class="text-center"
-                                  md-diameter="40">
-            </md-progress-circular>
-        </div>
+
+    <md-tab ng-repeat="tab in Tabs.tabs">
+        <md-tab-label>{{tab.title}}
+            <span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+        </md-tab-label>
+        <md-tab-body>
+            <div pathway="tab.title" model="model"></div>
+            <br>
+        </md-tab-body>
+    </md-tab>
+    -->
+
+
+    <div ng-if="MV.models.length && !loading" class="viz-legend" legend min="minFlux" max="maxFlux"></div>
+
+    <div ng-if="MV.models.length && !loading && topLevelTabs.selectedIndex == 0" class="viz-tip text-muted">
+        Use the mouse wheel (or double-click) to zoom. Click and drag to pan.
     </div>
 
-
-    <div ng-if="MV.models.length && selectedIndex != 1" class="viz-legend" legend></div>
 </div>
-
-
-
-

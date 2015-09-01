@@ -82,18 +82,17 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.get = function(path) {
-        $log.log('get (object)', path)
-
+        //console.log('fetching', path)
         return $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        //$log.log('get (object) response', res)
+                        //console.log('get (object) response', res)
 
                         var meta = res[0][0],
                             node = meta[11];
 
                         // if shock node, fetch. Otherwise, return data.
                         if (node.length > 0) {
-                            $log.log('getting data from shock', Auth.token)
+                            console.log('getting data from shock', Auth.token);
                             var url = node+'?download&compression=gzip',
                                 header = {headers: {Authorization: 'OAuth '+Auth.token}};
 
@@ -109,13 +108,33 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                                 var data = res[0][1];
                             }
 
-
                             return {meta: meta, data: data};
-
-
                         }
                     })
     }
+
+    this.getObjects = function(paths) {
+        //console.log('fetching', paths)
+        return $http.rpc('ws', 'get', {objects: paths})
+                    .then(function(res) {
+                        var objs = [];
+                        for (var i=0; i<res.length; i++) {
+                            var meta = res[i][0],
+                                node = meta[11];
+
+                            // try to parse, if not, assume data is string.
+                            try {
+                                var data = JSON.parse(res[i][1]);
+                            } catch(e) {
+                                var data = res[i][1];
+                            }
+                            objs.push({meta: meta, data: data});
+                        }
+
+                        return objs;
+                    })
+    }
+
 
     this.getObjectMeta = function(path) {
         $log.log('retrieving meta', path)
@@ -126,7 +145,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     }
 
     this.saveMeta = function(path, data) {
-        $log.log('update meta meta', path)
+        //$log.log('update meta meta', path)
 
         try {
             var meta = JSON.parse(data);
@@ -134,10 +153,9 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
             console.log("can't parse error", err)
         }
 
-
         return $http.rpc('ws', 'update_metadata', {objects: [[path, meta]]})
                     .then(function(res) {
-                        console.log('response', res)
+                        //console.log('response', res)
                         return res[0][7];
                     })
     }
@@ -162,6 +180,16 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         return res;
                     }).catch(function(e) {
                         console.error('could not mv', e)
+                    })
+    }
+
+    this.copy = function(src, dest, overwrite) {
+        var params = {objects: [[src, dest]], overwrite: overwrite || false};
+        return $http.rpc('ws', 'copy', params)
+                    .then(function(res) {
+                        return res;
+                    }).catch(function(e) {
+                        console.error('could not copy', e)
                     })
     }
 
@@ -205,7 +233,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     this.getPublic = function() {
         return $http.get('data/app/modelList.json', {cache:true})
                     .then(function(res) {
-                        console.log('data fetched', res)
                         var models = [];
                         for (var i=0; i<res.data.length; i++) {
                             var d = res.data[i];
@@ -225,7 +252,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         var objs = [[p.path, p.type, null, null]];
         var params = {objects:objs, createUploadNodes: 1};
         return $http.rpc('ws', 'create', params).then(function(res) {
-                    console.log('response', res)
                     return res;
                 })
     }

@@ -94,7 +94,6 @@ angular.module('Browser', ['uiTools'])
 
     // context menu close
     $scope.closeMenu = function(e, i, item) {
-        console.log('closing? ', $scope.edit)
         // if not editing something, remove selection
         if (!$scope.edit) {
             $scope.selected = undefined;
@@ -210,7 +209,6 @@ angular.module('Browser', ['uiTools'])
     // updates the view (bruteforce for now)
     $scope.updateDir = function() {
         WS.list($scope.folder).then(function(data) {
-            console.log('data returned', data)
             $scope.items = data;
         })
     }
@@ -228,7 +226,6 @@ angular.module('Browser', ['uiTools'])
     }
 
     $scope.openUploader = function(ev, path) {
-        console.log('ev', path)
         $dialog.show({
             targetEvent: ev,
             scope: $scope.$new(),
@@ -302,7 +299,6 @@ angular.module('Browser', ['uiTools'])
 
 
     $scope.showMeta = function(ev, item) {
-        console.log('')
         Dialogs.showMeta(ev, path(item.name))
     }
 

@@ -89,7 +89,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
     $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
-    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
 
     if ($stateParams.tab === 'compounds')
         $s.tabs = {selectedIndex : 1};
@@ -111,18 +110,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                     {label: 'detalGErr', key: 'deltagerr'},
                     {label: 'Charge', key: 'charge'}];
 
-    $s.mediaHeader = [{label: 'Name', key: 'name',
-                            link: {
-                                state: 'app.mediaPage',
-                                getOpts: function(row){
-                                    return {path: row.path};
-                                }
-                            }
-                        },
-                        {label: 'Minimal?', key: 'isMinimal'},
-                        {label: 'Defined?', key: 'isDefined'},
-                        {label: 'Type', key: 'type'}];
-
     function updateRxns() {
         Biochem.get('model_reaction', $s.rxnOpts)
                .then(function(res) {
@@ -139,13 +126,6 @@ function($s, Biochem, $state, $stateParams, MS) {
                })
     }
 
-    $s.loadingMedia = true;
-    MS.listPublicMedia()
-      .then(function(media) {
-          $s.media = media;
-          $s.loadingMedia = false;
-      })
-
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
         updateRxns();
@@ -156,7 +136,7 @@ function($s, Biochem, $state, $stateParams, MS) {
         updateCpds();
     }, true)
 
-    $s.doSomething = function(row) {
+    $s.doSomething = function($e, row) {
         $state.go('app.biochem', {tab: 'compounds'})
               .then(function() {
                   $state.go('app.biochemViewer', {cpd: row.id})
@@ -209,8 +189,14 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 }])
 
-.controller('PlantAnnotations',['$scope', 'WS',
-function($s, WS) {
+.controller('PlantAnnotations',['$scope', 'WS', '$compile',
+function($s, WS, $compile) {
+    var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
+        subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
+        roleUrl = url + '?page=FunctionalRolePage&fr=',
+        pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
+        featurePath = '#/feature/plantseed/Genomes/Athaliana-TAIR10/';
+
     var wsPath = '/plantseed/Genomes/annotation_overview';
 
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
@@ -219,7 +205,14 @@ function($s, WS) {
                      {label: 'Role', key: 'role'},
                      {label: 'Subsystems', key: 'subsystems',
                         formatter: function(row) {
-                            return row.subsystems.join('<br>') || '-';
+                            var links = [];
+                            row.subsystems.forEach(function(name) {
+                                links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
+                                                        name.replace(/_/g, ' ')+
+                                                    '</a>');
+                            })
+
+                            return links.join('<br>') || '-';
                         }},
                      {label: 'Classes', key: 'classes',
                         formatter: function(row) {
@@ -227,7 +220,14 @@ function($s, WS) {
                         }},
                      {label: 'Pathways', key: 'pathways',
                         formatter: function(row) {
-                            return row.pathways.join('<br>') || '-';
+                            var links = [];
+                            row.pathways.forEach(function(name) {
+                                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
+                                                name+
+                                           '</a>');
+                            })
+
+                            return links.join('<br>') || '-';
                         }},
                      {label: 'Reactions', key: 'reactions',
                         formatter: function(row) {
@@ -235,7 +235,12 @@ function($s, WS) {
                         }},
                      {label: 'Features', key: 'features',
                         formatter: function(row) {
-                            return row.features.join('<br>') || '-';
+                            var links = [];
+                            row.features.forEach(function(name) {
+                                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
+                            })
+
+                            return links.join('<br>') || '-';
                         }},
                     ];
 
@@ -248,7 +253,7 @@ function($s, WS) {
 
 
     // The annotation overview structure seems to consist of hashes with
-    // values of "1", instead of flat arrays.  This should be fixed.
+    // values of "1", instead of flat arrays.  This should probably be fixed.
     // Note: the 'role' structure is correct
     function parseOverview(data) {
         for (var i=0; i<data.length; i++) {
@@ -293,7 +298,6 @@ function($scope, FBA, WS, $dialog, $sce, $http, Biochem, $timeout) {
     $scope.loading = true
     $http.get(req)
          .then(function(res) {
-             console.log('res', res)
              var cpds = res.data.mediacompounds;
              var data = [];
              for (var i=0; i<cpds.length; i++) {
@@ -614,9 +618,15 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 .controller('Reconstruct',
-['$scope', 'Patric', '$timeout', '$http', 'Dialogs', 'ViewOptions', 'WS', 'Auth',
-function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
+['$scope', '$state', 'Patric', '$timeout', '$http',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS',
+function($scope, $state, Patric, $timeout, $http,
+    Dialogs, ViewOptions, WS, Auth, uiTools, MS) {
     $scope.plantModelsPath = '/plantseed/Models/';
+
+    // formatting time helper used in View
+    $scope.uiTools = uiTools;
+
 
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
@@ -640,24 +650,13 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
    $scope.myPlantsOpts = {query: '',
                           limit: 25,
                           offset: 0,
-                          sort: null};
+                          sort: {field: 'timestamp'}};
 
     $scope.columns = [{prop: 'genome_name', label: 'Name'},
                       {prop: 'genome_id', label: 'ID'},
                       {prop: 'genus', label: 'Genus'},
                       {prop: 'taxon_id', label: 'Tax ID'},
                       {prop: 'contigs', label: 'Contigs'}]
-
-    $scope.myPlantsHeader = [{key: 'name', label: 'Name',
-                                link: {
-                                    state: 'app.genomePage',
-                                    getOpts: function(row) {
-                                        return {path: row.path}
-                                    }
-                                }
-                            }]
-
-
 
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
@@ -680,7 +679,6 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
       $scope.loadingMyPlants = true;
       WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
-
           // remove non-genomes
           var i = res.length;
           while (i--) {
@@ -742,11 +740,14 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
               })
     }
 
-
     $scope.reconstruct = function(ev, item) {
+        if ('genome_id' in item)
+            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
+        else
+            var params = {path: item.path, name: item.name};
+
         $scope.selected = item;
-        Dialogs.reconstruct(ev,
-            {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name},
+        Dialogs.reconstruct(ev, params,
             function(res) {
                 /*MS.addModel({name: res[0],
                              path: res[1],
@@ -754,12 +755,101 @@ function($scope, Patric, $timeout, $http, Dialogs, ViewOptions, WS, Auth) {
             })
     }
 
+    $scope.reconstructPlant = function(ev, item) {
+        if ('genome_id' in item)
+            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
+        else
+            var params = {path: item.path, name: item.name};
+
+        $scope.selected = item;
+        Dialogs.reconstructPlant(ev, params,
+            function(res) {
+                /*MS.addModel({name: res[0],
+                             path: res[1],
+                             orgName: item.genome_name})*/
+            })
+    }
+
+    $scope.copyInProgress = {};
+    $scope.copy = function(i, model) {
+        $scope.copyInProgress[i] = true;
+        Dialogs.showToast('Copying...', model.split('/').pop())
+        var params = {model: model, copy_genome: 1, plantseed: 1}
+        $http.rpc('ms', 'copy_model', params)
+             .then(function(res) {
+                 $scope.copyInProgress[i] = false;
+                 Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
+
+                 // remove odd empty object
+                 delete res[model];
+
+                 // update cache
+                 if (MS.myPlants) MS.addModel(res, 'plant');
+             })
+    }
+
+}])
+
+
+
+.controller('Media',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
+function($s, $sParams, WS, MS, Auth) {
+
+    $s.tabs = {tabIndex: ($sParams.tab === 'mine' ? 1 : 0)};
+
+    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
+    $s.myMediaOpts = {query: '', limit: 10, offset: 0, sort: {}};
+
+    $s.mediaHeader = [{label: 'Name', key: 'name',
+                          link: {
+                              state: 'app.mediaPage',
+                              getOpts: function(row) {
+                                  return {path: row.path};
+                              }
+                          }
+                      },
+                      {label: 'Minimal?', key: 'isMinimal'},
+                      {label: 'Defined?', key: 'isDefined'},
+                      {label: 'Type', key: 'type'}];
+
+    $s.myMediaHeader = [{label: 'Name', key: 'name',
+                          link: {
+                              state: 'app.mediaPage',
+                              getOpts: function(row) {
+                                  return {path: row.path};
+                              }
+                          }
+                      },
+                      {label: 'Minimal?', key: 'isMinimal'},
+                      {label: 'Defined?', key: 'isDefined'},
+                      {label: 'Type', key: 'type'}];
+
+
+    $s.loading = true;
+    MS.listMedia()
+      .then(function(media) {
+          $s.media = media;
+          $s.loading = false;
+      })
+
+
+    $s.loadingMyMedia = true;
+    MS.listMedia('/'+Auth.user+'/media')
+      .then(function(media) {
+          $s.myMedia = media;
+          $s.loadingMyMedia = false;
+      }).catch(function(e) {
+          $s.loadingMyMedia = false;
+          $s.myMedia = [];
+      })
+
 }])
 
 .controller('MyModels',
-['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs',
+['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
-function($scope, WS, MS, uiTools, $mdDialog, Dialogs,
+function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     var $self = $scope;
 
@@ -780,18 +870,18 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
+    $scope.plantOpts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
     $scope.selected = null;
 
     // load models
     if (MS.myModels) {
-        $scope.data = MS.myModels;
+        $scope.myMicrobes = MS.myModels;
     } else {
         $scope.loadingMicrobes = true;
-        MS.getModels().then(function(res) {
-            $scope.data = res;
+        MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
+            $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
             if (e.error.code === -32603)
@@ -800,6 +890,23 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             else
                 $scope.error = e.error.message;
             $scope.loadingMicrobes = false;
+        })
+    }
+
+    if (MS.myPlants) {
+        $scope.myPlants = MS.myPlants;
+    } else {
+        $scope.loadingPlants = true;
+        MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
+            $scope.myPlants = res;
+            $scope.loadingPlants = false;
+        }).catch(function(e) {
+            if (e.error.code === -32603)
+                $scope.error = 'Something seems to have went wrong. '+
+                               'Please try logging out and back in again.';
+            else
+                $scope.error = e.error.message;
+            $scope.loadingPlatns = false;
         })
     }
 
@@ -812,7 +919,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     function updateFBAs(item) {
         item.loading = true;
-        MS.getModelFBAs(item.path)
+        return MS.getModelFBAs(item.path)
             .then(function(fbas) {
                 item.relatedFBAs = fbas;
                 item.loading = false;
@@ -829,7 +936,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     function updateGapfills(item) {
         item.loading = true;
-        MS.getModelGapfills(item.path)
+        return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
                 item.loading = false;
@@ -838,13 +945,17 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     $scope.runFBA = function(ev, item) {
         Dialogs.runFBA(ev, item, function() {
-            updateFBAs(item)
+            updateFBAs(item).then(function() {
+                item.fbaCount++;
+            })
         })
     }
 
     $scope.gapfill = function(ev, item) {
         Dialogs.gapfill(ev, item, function() {
-            updateGapfills(item)
+            updateGapfills(item).then(function() {
+                item.gapfillCount++;
+            })
         })
     }
 
@@ -867,41 +978,51 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         }
     }
 
-
-    // fixme: use MV service and refs
+    // fixme: use MV service and refs, organize plants/microbes
     $scope.$on('MV.event.change', function(e, item) {
         // if added to MV
         if (!item) return;
 
         if (item === 'clear') {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-                    fba.checked = false;
-                }
-            }
+            clearSelected($scope.myModels)
+            clearSelected($scope.myPlants)
         } else {
-            for (var i in $scope.data) {
-                var model = $scope.data[i];
-                if (!model.relatedFBAs) continue;
-
-                for (var j in model.relatedFBAs) {
-                    var fba = model.relatedFBAs[j];
-
-                    if (item.model === model.path && item.fba === fba.path)
-                        fba.checked = false;
-                }
-            }
+            console.log('there was event change', item)
+            updateSelected($scope.myModels, item);
+            updateSelected($scope.myPlants, item);
         }
     })
 
+    function clearSelected(data) {
+        console.log('clearing', data)
+        for (var i in data) {
+            var model = data[i];
+
+            for (var j in model.relatedFBAs) {
+                var fba = model.relatedFBAs[j];
+                fba.checked = false;
+            }
+        }
+    }
+
+    function updateSelected(data, item) {
+        for (var i in data) {
+            var model = data[i];
+            if (!model.relatedFBAs) continue;
+
+            for (var j in model.relatedFBAs) {
+                var fba = model.relatedFBAs[j];
+
+                if (item.model === model.path && item.fba === fba.path)
+                    fba.checked = false;
+            }
+        }
+    }
 
     // general operations
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
-        WS.deleteObj(model.path)
+        WS.deleteObj(model.relatedFBAs[i].ref)
           .then(function(res) {
               model.relatedFBAs.splice(i, 1);
               model.fbaCount -= 1;
@@ -962,7 +1083,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         }
     }
 
-    $scope.rmModel = function(ev, i, item) {
+    $scope.rmModel = function(ev, i, item, type) {
         ev.stopPropagation();
 
         var confirm = $mdDialog.confirm()
@@ -980,7 +1101,10 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             var p1 = WS.deleteObj(item.path),
                 p2 = WS.deleteObj(folder, true);
             $q.all([p1,p2]).then(function(one, two) {
-                $self.data.splice(i, 1)
+                if (type.toLowerCase() === 'plant')
+                    MS.myPlants.splice(i, 1)
+                else if (type.toLowerCase() === 'microbe')
+                    MS.myModels.splice(i, 1)
                 Dialogs.showComplete('Deleted', item.name)
             })
         }, function() {

@@ -1,0 +1,62 @@
+
+<md-dialog flex="70">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Reconstruct Plant
+            <i class="color-light-purple small">{{item.name}}</i>
+        </h3>
+
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <form>
+    <md-dialog-content>
+        <p class="text-muted">Reconstructing a plant model consists of generating an initial draft model
+           If no media is provided, "Plant Heterotrophic Media" will be used.<p>
+
+        <h3>Options</h3>
+        <div ng-controller="MediaDropdown as ctrl">
+            <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()">
+              <md-autocomplete
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="ctrl.selectedItemChange(item)"
+                  md-items="item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search for media formulation (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+        </div>
+        <br>
+
+        <md-input-container md-no-float>
+            <input ng-model="form.output_file" placeholder="Enter optional Name">
+        </md-input-container>
+
+        <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
+            Include Full DB?
+        </md-checkbox>
+
+    </md-dialog-content>
+
+    <div class="md-actions">
+        <md-button ng-click="reconstruct()" type="button">
+            Reconstruct
+        </md-button>
+    </div>
+    </form>
+</md-dialog>

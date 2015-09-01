@@ -42,7 +42,6 @@ function(MS, WS, $dialog, $mdToast) {
                 }
 
                 $s.saveMeta = function(meta) {
-                    console.log('saving meta', meta)
                     $s.savingMeta = true;
                     WS.saveMeta($s.meta[2] + $s.meta[0], meta)
                       .then(function(newMeta) {
@@ -57,9 +56,7 @@ function(MS, WS, $dialog, $mdToast) {
                   })
 
                 $s.tidy = function(text) {
-                    console.log('before', text)
                     $s.edit.userMeta = JSON.stringify(JSON.parse(text), null, 4)
-                    console.log('after', $s.edit.userMeta)
                 }
 
                 $s.validateJSON = function(text) {
@@ -88,8 +85,39 @@ function(MS, WS, $dialog, $mdToast) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    showToast('Reconstructing', item.name)
+                    self.showToast('Reconstructing', item.name)
                     MS.reconstruct($scope.form)
+                      .then(function(r) {
+                           cb(r);
+                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                      }).catch(function(e) {
+                          self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
+                      })
+
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
+    this.reconstructPlant = function(ev, item, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/reconstruct-plant.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.item = item;
+                $scope.form = {genome: item.path};
+
+                $scope.reconstruct = function(){
+                    self.showToast('Reconstructing', item.name)
+                    MS.reconstruct($scope.form, {gapfill: false})
                       .then(function(r) {
                            cb(r);
                            self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
@@ -122,16 +150,17 @@ function(MS, WS, $dialog, $mdToast) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                $scope.item;
+                $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
-                    showToast('Running Flux Balance Analysis', item.name)
+                    self.showToast('Running Flux Balance Analysis', item.name)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                           cb();
-                           self.showComplete('FBA Complete',
-                                        res[0]+' '+res[7].media.split('/').pop())
+                           console.log('run fba response', res)
+                          cb();
+                          self.showComplete('FBA Complete',
+                                       res[0]+' '+res[7].media.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -156,7 +185,7 @@ function(MS, WS, $dialog, $mdToast) {
             function($scope, $http) {
 
                 $scope.gapfill = function(){
-                    showToast('Gapfilling', item.name)
+                    self.showToast('Gapfilling', item.name)
 
                     MS.gapfill(item.path)
                       .then(function(res) {
@@ -176,7 +205,7 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
-    function showToast(title, name) {
+    this.showToast = function(title, name) {
       $mdToast.show({
         controller: 'ToastCtrl',
         parent: angular.element('.sidebar'),
@@ -200,7 +229,7 @@ function(MS, WS, $dialog, $mdToast) {
          parent: angular.element('.sidebar'),
          //templateUrl:'app/views/dialogs/notify.html',
          template: '<md-toast>'+
-                     '<span flex style="margin-right: 30px;">'+
+                     '<span flex style="margin-right: 30px; width: 200px;">'+
                        '<span class="ms-color-complete">'+title+'</span><br>'+
                        name.slice(0,20)+'...'+
                       '</span>'+
