@@ -984,11 +984,10 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         if (!item) return;
 
         if (item === 'clear') {
-            clearSelected($scope.myModels)
+            clearSelected($scope.myMicrobes)
             clearSelected($scope.myPlants)
         } else {
-            console.log('there was event change', item)
-            updateSelected($scope.myModels, item);
+            updateSelected($scope.myMicrobes, item);
             updateSelected($scope.myPlants, item);
         }
     })
