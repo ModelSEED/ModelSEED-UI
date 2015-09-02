@@ -55,6 +55,10 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Home',
         }).state('app', {
             templateUrl: 'app/views/app.html',
+        }).state('app.about', {
+            url: "/about/",            
+            templateUrl: 'app/views/about.html',
+            controller: 'About'
         })
 
         // data browser

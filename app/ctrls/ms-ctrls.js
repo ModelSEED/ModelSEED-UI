@@ -64,17 +64,58 @@ function($scope, $state, $stateParams, Auth, $window) {
 
 .controller('Home', ['$scope', '$stateParams',
 function($scope, $stateParams) {
-    console.log('$stateParams', $stateParams)
-}])
-
-
-
-.controller('Run',
-['$scope', '$http',
-function($scope, $http) {
-
 
 }])
+
+.controller('About', ['$scope', '$http', 'config', function($s, $http, config) {
+    console.log('config', config)
+
+    $http.get('version/version.txt')
+         .then(function(res) {
+             $s.commitHash = res.data;
+         })
+
+     $http.get('version/branch.txt')
+          .then(function(res) {
+                $s.commitBranch = res.data;
+          })
+
+    $s.urls = config.services;
+    console.log('urls', config)
+
+
+    // system status sanity check
+    $http.rpc('ms', 'list_models')
+         .then(function(res) { $s.ms = true; })
+         .catch(function() { $s.ms = false; })
+
+    $http.rpc('ws', 'get', {objects: [config.paths.media+'/Carbon-D-Glucose']})
+         .then(function(res) { $s.ws = true; })
+         .catch(function() { $s.ws = false; })
+
+    $http.get($s.urls.shock_url+'/node')
+          .then(function(res) { $s.shock = true; })
+          .catch(function() { $s.shock = false; })
+
+    $http.get($s.urls.solr_url+'model_reaction/?http_accept=application/solr+json')
+         .then(function(res) { $s.solr = true; })
+         .catch(function() { $s.solr = false; })
+
+    $http.rpc('app', 'query_task_summary', [])
+         .then(function(res) { $s.app = true; })
+         .catch(function() { $s.app = false; })
+
+    /*
+    $http({method: "POST",
+           url: config.services.patric_auth_url,
+           data: 'username=test&password=test',
+         }).then(function(res) { $s.patricAuth = true; })
+           .catch(function() { $s.patricAuth = false; })
+    */
+
+
+}])
+
 
 
 .controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS',

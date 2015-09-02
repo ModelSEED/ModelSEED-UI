@@ -1,0 +1,87 @@
+
+<div layout="row">
+    <div layout="column">
+        <img src="img/ModelSEED-logo-vertical-small.png" width="175">
+    </div>
+    <div style="margin-left: 20px;">
+        <h3>Version Alpha-1</h3>
+        Commit:
+            <a href="https://github.com/modelseed/modelseed-ui/tree/{{commitHash}}" target="_blank">{{commitHash}}</a>
+            (<a href="https://github.com/modelseed/modelseed-ui/tree/{{commitBranch}}" target="_blank">{{commitBranch}}</a>)
+        <br>
+        <br>
+
+        <table class="table table-condensed table-horizontal status-table">
+            <tr>
+                <th>Service</th><th>End Point Url</th><th>Status</th>
+            </tr>
+            <tr>
+                <td>RAST Auth</td>
+                <td>{{urls.auth_url}}</td>
+                <td><td></td></td>
+            </tr>
+            <tr>
+                <td>PATRIC Auth</td>
+                <td>{{urls.patric_auth_url}}</td>
+                <td><td></td></td>
+            </tr>
+            <tr>
+                <td>ProbModelSEED</td>
+                <td>{{urls.ms_url}}</td>
+                <td>
+                    <div ng-switch="ms">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Workspace</td>
+                <td>{{urls.ws_url}}</td>
+                <td>
+                    <div ng-switch="ws">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>SHOCK</td>
+                <td>{{urls.shock_url}}</td>
+                <td>
+                    <div ng-switch="shock">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>SOLR</td>
+                <td>{{urls.solr_url}}</td>
+                <td>
+                    <div ng-switch="solr">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>App Service (not in use)</td>
+                <td>{{urls.app_url}}</td>
+                <td>
+                    <div ng-switch="app">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div ms-doc="../CHANGELOG.md" editable="false" layout-margin></div>

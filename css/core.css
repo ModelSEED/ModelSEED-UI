@@ -1081,14 +1081,24 @@ tr .fa-file-text-o {
 
 #login-dd {
     padding-top: 4px;
-    text-align: right;
+    text-align: left;
 }
 
-#login-dd .fa-caret-down {
-    margin: 15px 5px;
-}
 
 #more-dd > a:hover,
 #login-dd > div:hover{
     color: #dfdfdf;
+}
+
+/* about/status page */
+.status-table .success {
+    color: #38BD5C;
+}
+
+.status-table .fail {
+    color: #B51B1B;
+}
+
+.status-table div { /* margin hack */
+    height: 0px;
 }
