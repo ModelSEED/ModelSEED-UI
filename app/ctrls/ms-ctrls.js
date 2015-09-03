@@ -68,24 +68,22 @@ function($scope, $stateParams) {
 }])
 
 .controller('About', ['$scope', '$http', 'config', function($s, $http, config) {
-    console.log('config', config)
 
     $http.get('version/version.txt')
          .then(function(res) {
              $s.commitHash = res.data;
          })
 
-     $http.get('version/branch.txt')
-          .then(function(res) {
-                $s.commitBranch = res.data;
-          })
+    $http.get('version/branch.txt')
+         .then(function(res) {
+             $s.commitBranch = res.data;
+         })
 
     $s.urls = config.services;
-    console.log('urls', config)
 
 
     // system status sanity check
-    $http.rpc('ms', 'list_models')
+    $http.rpc('ms', 'list_models', {})
          .then(function(res) { $s.ms = true; })
          .catch(function() { $s.ms = false; })
 

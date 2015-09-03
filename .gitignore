@@ -1,8 +1,10 @@
+/version/
 /app/dev.html
 /build/
 /components/
 /data/regulons/
 .tmp/
+
 
 #emacs
 *~
