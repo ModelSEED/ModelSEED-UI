@@ -6,8 +6,8 @@ angular.module('config', []).service('config', function() {
                         auth_url: "http://tutorial.theseed.org/Sessions/Login",
                         app_url: "http://p3.theseed.org/services/app_service",
                         ws_url: "http://p3.theseed.org/services/Workspace",
-                        //ms_url: "https://p3c.theseed.org/dev1/services/ProbModelSEED",
-                        ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
+                        ms_url: "https://p3c.theseed.org/dev1/services/ProbModelSEED",
+                        //ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
                         shock_url: "http://p3.theseed.org/services/shock_api",
                         patric_auth_url: "https://user.patricbrc.org/authenticate",
                         solr_url: "https://www.patricbrc.org/api/"
@@ -24,5 +24,5 @@ angular.module('config', []).service('config', function() {
                  };
 
     // wether or not to include plants UI components
-    this.includePlants = false;
+    this.includePlants = true;
 })
