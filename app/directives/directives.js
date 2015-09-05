@@ -1263,7 +1263,7 @@ function($compile, $stateParams) {
             absFluxLegend();
 
             scope.$watch('max', function() {
-                absFluxLegend();                
+                absFluxLegend();
             })
 
             // switch between absolute and actual legend
@@ -1465,6 +1465,56 @@ function($compile, $stateParams) {
      }
   })
 
+.directive('ngTableSelector', function() {
+      return {
+          restrict: 'EA',
+          scope: {
+              header: '=tableHeader',
+              data: '=tableData',
+              opts: '=tableOpts',
+              loading: '=tableLoading',
+              placeholder: '@tablePlaceholder',
+              addItems: '=tableAddItems',
+              onSubmit: '=onSubmit',
+              submitBtnTemplate: '@submitBtnTemplate',
+              submitProgressText: '@submitProgressText',
+          },
+          templateUrl: 'app/views/general/table-selector.html',
+          link: function(scope, elem, attrs) {
+
+              scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+              scope.checkedItems = [];
+
+              scope.checkItem = function(item) {
+                  item.checked = item.checked ? false : true;
+
+                  if (item.checked)
+                      scope.checkedItems.push(item)
+                  else {
+                      // remove from checked list
+                      for (var i=0; i<scope.checkedItems.length; i++) {
+                          if ( angular.equals(scope.checkedItems[i], item) )
+                              scope.checkedItems.splice(i, 1)
+                      }
+                  }
+              }
+
+              scope.submitInProgress = false;
+              scope.submit = function(items) {
+                  scope.submitInProgress = true;
+                  scope.onSubmit(items, function() {
+                      scope.submitInProgress = false;
+                      for (var i=0; i<items.length; i++) {
+                          items[i].checked = false;
+                          scope.checkedItems = [];
+                      }
+                  })
+              }
+
+          }
+      }
+ })
 
 .directive('ngTableEditor', function() {
     return {

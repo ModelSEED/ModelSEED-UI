@@ -174,15 +174,27 @@ angular.module('MS', [])
                         var media = [];
                         for (var i=0; i<objs.length; i++) {
                             var obj = objs[i];
-                            media.push({name: obj[7].name,
-                                        path: obj[2]+obj[0],
-                                        isMinimal: obj[7].isMinimal ? true : false,
-                                        isDefined: obj[7].isDefined ? true : false,
-                                        type: obj[7].type});
+                            media.push(self.sanitizeMedia(obj));
                         }
 
                         return media;
                   })
+    }
+
+    this.sanitizeMedia = function(obj) {
+        return {name: obj[7].name,
+                    path: obj[2]+obj[0],
+                    isMinimal: obj[7].isMinimal ? true : false,
+                    isDefined: obj[7].isDefined ? true : false,
+                    type: obj[7].type,
+                    timestamp: Date.parse(obj[3])
+                  }
+    }
+
+    this.sanitizeMediaObjs = function(objs) {
+        var mediaList = [];
+        for (var i=0; i<objs.length; i++) { mediaList.push( self.sanitizeMedia(objs[i]) ) }
+        return mediaList;
     }
 
     this.listMediaDropdown = function() {

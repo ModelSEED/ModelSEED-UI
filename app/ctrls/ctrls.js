@@ -383,3 +383,19 @@ function ($scope, $timeout, $mdSidenav, $log) {
     }
 
 }])
+
+.service('Session', [function() {
+
+    this.tabs = {};
+
+    this.setTab = function(state, tab) {
+        this.tabs[state.current.name] = tab.tabIndex;
+        console.log('the tabs', this.tabs)
+    }
+
+    this.getTab = function(state) {
+        return this.tabs[state.current.name] || null;
+    }
+
+
+}])

@@ -4,25 +4,33 @@
 
 
 <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    <md-tab label="Public Media">
-        <md-content>
-            <ng-table-two table-header="mediaHeader"
+    <md-tab>
+        <md-tab-label>Public Media</md-tab-label>
+        <md-tab-body>
+            <ng-table-selector table-header="mediaHeader"
                        table-data="media"
                        table-opts="mediaOpts"
                        table-loading="loading"
-                       table-placeholder="Search media">
-            </ng-table-two>
-        </md-content>
+                       table-placeholder="Search media"
+                       on-submit="submit"
+                       submit-btn-template="Copy $count media"
+                       submit-progress-text="Copying...">
+            </ng-table-selector>
+        </md-tab-body>
     </md-tab>
 
-    <md-tab label="My Media">
-        <md-content>
+    <md-tab>
+        <md-tab-label>
+            My Media
+            (<span class="label-gapfill-count">{{myMedia.length}}</span>)
+        </md-tab-label>
+        <md-tab-body>
             <ng-table-two table-header="myMediaHeader"
                         table-data="myMedia"
                         table-opts="myMediaOpts"
                         table-loading="loadingMyMedia"
                         table-placeholder="Search my media">
             </ng-table-two>
-        </md-content>
+        </md-tab-body>
     </md-tab>
 </md-tabs>

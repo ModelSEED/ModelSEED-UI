@@ -832,13 +832,14 @@ function($scope, $state, Patric, $timeout, $http,
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth',
-function($s, $sParams, WS, MS, Auth) {
+['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$state', 'Session', 'uiTools', 'Dialogs',
+function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
 
-    $s.tabs = {tabIndex: ($sParams.tab === 'mine' ? 1 : 0)};
+    $s.tabs = {tabIndex: Session.getTab($state)};
+    $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
-    $s.myMediaOpts = {query: '', limit: 10, offset: 0, sort: {}};
+    $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};
 
     $s.mediaHeader = [{label: 'Name', key: 'name',
                           link: {
@@ -862,7 +863,12 @@ function($s, $sParams, WS, MS, Auth) {
                       },
                       {label: 'Minimal?', key: 'isMinimal'},
                       {label: 'Defined?', key: 'isDefined'},
-                      {label: 'Type', key: 'type'}];
+                      {label: 'Type', key: 'type'},
+                      {label: 'Mod Date', key: 'timestamp',
+                        formatter: function(row) {
+                            return uiTools.relativeTime(row.timestamp);
+                        }
+                      }];
 
 
     $s.loading = true;
@@ -876,12 +882,44 @@ function($s, $sParams, WS, MS, Auth) {
     $s.loadingMyMedia = true;
     MS.listMedia('/'+Auth.user+'/media')
       .then(function(media) {
+          console.log('my media', media)
           $s.myMedia = media;
           $s.loadingMyMedia = false;
       }).catch(function(e) {
           $s.loadingMyMedia = false;
           $s.myMedia = [];
       })
+
+    $s.submit = function(items, cb) {
+        console.log('the items are ', items)
+        copyMedia(items).then(function() {
+            cb();
+        })
+    }
+
+    function copyMedia(items) {
+        console.log()
+
+
+        var paths = [];
+        items.forEach(function(item) { paths.push(item.path); })
+
+
+        var destination = '/'+Auth.user+'/media';
+        return WS.createFolder(destination)
+                 .then(function(res) {
+                     console.log('create folder response', res)
+
+                     WS.copyList(paths, destination)
+                     .then(function(res) {
+                         console.log('things', $s.myMedia)
+                         $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
+                         Dialogs.showComplete('Copied '+res.length+' media formulations')
+
+                         //$s.tabs.tabIndex = 1;
+                     })
+                 })
+    }
 
 }])
 
@@ -1172,3 +1210,28 @@ function($scope) {
 
 
 }])
+
+
+//var merged = objs1.concat(objs2);
+function mergeObjects(objs1, objs2, key) {
+    var ref = objs1.slice(0);
+
+    var result = []
+    for (var i=0; i<objs1.length; i++) {
+        if (isFound(objs1[i][key], objs2, key)) {
+            console.log('found!')
+            ref.splice(i, 1);
+            continue;
+        }
+    }
+
+    function isFound(value, objs, key) {
+        for (var i=0; i<objs.length; i++) {
+            console.log('thing', objs[i])
+            if (objs[i][key] == value) return true;
+        }
+        return false;
+    }
+
+    return ref.concat(objs2);
+}

@@ -1,6 +1,6 @@
 ##Change Log
 
-Below contains a summary of notable changes for each release.
+Below contains a summary of notable changes and deploy date for each release.
 
 
 
