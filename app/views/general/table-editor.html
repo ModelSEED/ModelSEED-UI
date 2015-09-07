@@ -1,67 +1,83 @@
 
 <div ng-if="data">
-    <div class="table-controls">
-        <div class="table-controls"  layout="row">
-            <md-input-container md-no-float flex="45"
-                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+    <div class="table-controls table-editor-controls">
+        <div layout="row">
+            <!--<md-input-container md-no-float flex="45"
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}} />
+            </md-input-container>-->
+            <md-input-container layout="row" layout-align="end center">
+                <md-button ng-if="checkedItems.length"
+                        ng-click="delete()"
+                        class="md-danger">
+                    <i class="fa fa-minus"></i>
+                    {{deleteInProgress ? deleteInProgressText : deleteBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
+                </md-button>
+
+                <md-button ng-if="!checkedItems.length"
+                        ng-click="add($event)"
+                        class="md-success">
+                    <i class="fa fa-plus"></i>
+                    {{addInProgress ? addInProgressText : addBtnTemplate}}
+                </md-button>
+
+                <md-progress-circular ng-if="loading"
+                                      md-mode="indeterminate"
+                                      class="table-loading"
+                                      md-diameter="20">
+                </md-progress-circular>
             </md-input-container>
 
-            <md-button ng-if="checkedItems.length"
-                    ng-click="submit(checkedItems)"
-                    class="md-secondary">
-                <i class="fa fa-plus"></i>
-                {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
-            </md-button>
+            <md-input-container layout="row" layout-align="end center" flex>
+                <div ng-if="noPagination" layout="row">
+                    {{data.length}} {{resultText}}
+                </div>
 
-            <md-progress-circular ng-if="loading"
-                                  md-mode="indeterminate"
-                                  class="table-loading"
-                                  md-diameter="20">
-            </md-progress-circular>
-
-            <div ng-if="noPagination" layout="row" layout-align="end center" flex>
-                {{data.length}} {{resultText}}
-            </div>
-
-            <md-input-container
-                ng-if="!noPagination"
-                pagination
-                pagination-offset="opts.offset"
-                pagination-limit="opts.limit"
-                pagination-total="filtered.length"
-                layout="row"
-                layout-align="end center" flex>
+                <md-button ng-if="operations.length" class="icon-button" ng-click="undo()">
+                    <i class="material-icons">undo</i>
+                    <md-tooltip>Undo last edit</md-tooltip>
+                </md-button>
+			    <md-button class="md-secondary" ng-click="save()" ng-disabled="saveInProgress">
+                    {{saveInProgress ? saveInProgressText : 'Save'}}
+                </md-button>
+			    <a ng-click="cancel()" class="no-link">Cancel</a>
             </md-input-container>
         </div>
     </div>
 
 
-    <table class="table table-striped table-bordered">
-        <thead sortable>
+    <table class="table table-striped table-bordered table-editor">
+        <thead>
             <tr>
                 <th></th>
                 <th ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{h.label}}</th>
             </tr>
         </thead>
 
-        <tr ng-repeat="row in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
-                        | limitTo : opts.limit : (opts.query ? 0 : opts.offset)">
+        <tr ng-repeat="row in data track by $index" ng-init="rowIndex = $index">
             <td>
-                <md-checkbox aria-label="Check media" ng-checked="row.checked" ng-click="checkItem(row)"></md-checkbox>
-                <!--<i ng-if="row.checked" class="fa fa-check-square-o"></i>
-                <i ng-if="!row.checked" class="fa fa-square-o"></i>-->
+                <md-checkbox aria-label="Check media" ng-checked="row.checked" ng-click="checkItem($index, row)"></md-checkbox>
             </td>
-            <td ng-repeat="h in header">
-                <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row)"></span>
+            <td ng-repeat="h in header track by $index" editable="h.editable" ng-click="edit(rowIndex, $index)">
+                <div ng-if="!(editing.row == rowIndex && editing.col == $index) || !h.editable">
+                    <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row)"></span>
 
-                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
-                    {{row[h.key]}}
-                </a>
+                    <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                        {{row[h.key]}}
+                    </a>
 
-                <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
-                    <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{row[h.key]}}</a>
-                    <span ng-if="!h.hasOwnProperty('click')">{{row[h.key]}}</span>
-                </span>
+                    <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                        <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{row[h.key]}}</a>
+                        <span ng-if="!h.hasOwnProperty('click')">{{row[h.key]}}</span>
+                    </span>
+                </div>
+
+                <form ng-if="editing.row == rowIndex && editing.col == $index && h.editable" ng-submit="saveCell(rowIndex, $index, row, h.key)">
+
+                    <input ng-model="edit.cell" type="text"
+                           ng-init="edit.cell = row[h.key]"
+                           ng-blur="saveCell(rowIndex, $index, row, h.key)"
+                           auto-focus="selectall">
+                </form>
             </td>
         </tr>
 

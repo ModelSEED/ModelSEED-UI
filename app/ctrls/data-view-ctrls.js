@@ -98,7 +98,6 @@ function($scope, $sParams, WS, $http) {
     $scope.loadingFeatures = true;
     WS.get(obj)
       .then(function(res) {
-          console.log('res', res)
           var objs = res.data.features,
               data = [];
 
@@ -180,7 +179,6 @@ function($s, $sParams, MS, $http, config, Auth) {
     $s.loading = true;
     MS.getFeature(genome, featureID)
       .then(function(res) {
-          console.log('feature res', res)
           //$s.roles = res.function.split(';');
           $s.featureFunction = res.function;
           $s.proteinSequence = res.protein_translation;
@@ -269,60 +267,134 @@ function($s, $sParams, MS, $http, config, Auth) {
 
 
 .controller('MediaDataView',
-['$scope', '$state', '$stateParams', 'WS', 'uiTools', '$http', 'Auth',
-function($scope, $state, $sParams, WS, tools, $http, Auth) {
+['$scope', '$state', '$stateParams', 'WS', 'uiTools',
+ '$http', 'Auth', '$filter', '$mdDialog', 'Biochem', 'Dialogs',
+function($s, $state, $sParams, WS, tools,
+         $http, Auth, $filter, $dialog, Biochem, Dialogs) {
 
     // path and name of object
     var path = $sParams.path;
 
-
     // determine if user can copy this media to their workspace
-    if (path.split('/')[1] !== Auth.user) $scope.canCopy = true;
+    if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
 
-    $scope.name = path.split('/').pop()
+    $s.name = path.split('/').pop()
 
-    $scope.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
-    $scope.mediaHeader = [{label: 'Name', key: 'name'},
+    $s.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
+    $s.mediaHeader = [{label: 'Name', key: 'name'},
                           {label: 'ID', key: 'id'},
-                          {label: 'Concentration', key: 'concentration'},
-                          {label: 'Max Flux', key: 'minflux'},
-                          {label: 'Min Flux', key: 'maxflux'}];
+                          {label: 'Concentration', key: 'concentration', editable: true},
+                          {label: 'Max Flux', key: 'minflux', editable: true},
+                          {label: 'Min Flux', key: 'maxflux', editable: true}];
 
-     $scope.loading = true;
-     WS.get(path).then(function(res) {
-         $scope.media =  tools.tableToJSON(res.data)
-         $scope.loading = false;
-     }).catch(function(e) {
-         $scope.error = e;
-         $scope.loading = false;
-     })
 
-    $scope.copyMedia = function() {
-        console.log('copying', $scope.name)
+    $s.loading = true;
+    WS.get(path).then(function(res) {
+        $s.media = tools.tableToJSON(res.data).rows;
+        $s.mediaMeta = res.meta[7];
+        $s.loading = false;
+    }).catch(function(e) {
+        $s.error = e;
+        $s.loading = false;
+    })
 
-        $scope.copyInProgress = true;
+    $s.copyMedia = function() {
+        $s.copyInProgress = true;
 
         var destination = '/'+Auth.user+'/media/';
         WS.createFolder(destination)
             .then(function(res) {
-                console.log('create folder response', res)
 
-                console.log('copying', path)
-                WS.copy(path, destination+$scope.name, true)
+                WS.copy(path, destination+$s.name, true)
                     .then(function(res) {
-                        console.log('copy done')
-                        $scope.copyInProgress = false;
+                        $s.copyInProgress = false;
                         $state.go('app.media', {tab: 'mine'})
                     })
             })
     }
 
-    $scope.toggleEdit = function() {
-        $scope.editInProgress = !$scope.editInProgress;
+    $s.toggleEdit = function() {
+        $s.editInProgress = !$s.editInProgress;
+        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field,  $s.mediaOpts.sort.desc  );
     }
 
-    $scope.save = function() {
-        console.log('going to save media')
+    $s.save = function(data) {
+        var head = ['id', 'name', 'concentration', 'minflux', 'maxflux'];
+        var table = tools.JSONToTable(head, angular.copy(data));
+
+        return WS.save(path, table, {overwrite: true, userMeta: $s.mediaMeta, type: 'media'})
+                 .then(function() {
+                     $s.media = data;
+                     Dialogs.showComplete('Saved Media', $s.name)
+                 })
+    }
+
+    $s.addCpds = function(ev) {
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/add-cpds.html',
+            targetEvent: ev,
+            scope: $s.$new(),
+            preserveScope: true,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+                $scope.addItems = function(items){
+                    $dialog.hide();
+
+                    // add items to media
+                    var newItems = [];
+                    for (var i=0; i<items.length; i++) {
+                        var cpd = items[i]
+                        newItems.push({id: cpd.id,
+                                       name: cpd.name,
+                                       concentration: 0.001,
+                                       minflux: -100,
+                                       maxflux: 100})
+                    }
+
+                    $s.editableData = newItems.concat($s.editableData);
+
+                    var opItems = [];
+                    for (var i=0; i<newItems.length; i++) {
+                        opItems.push( {index: i, item: newItems[i]} );
+                    }
+
+                    // add operation to undo
+                    $s.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
+                }
+
+                $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                              visible: ['name', 'id', 'formula', 'abbreviation',
+                                        'deltag', 'deltagerr', 'charge'] };
+
+                $s.cpdHeader = [{label: 'Name', key: 'name'},
+                                {label: 'ID', key: 'id'},
+                                {label: 'Formula', key: 'formula'},
+                                {label: 'Abbrev', key: 'abbreviation'},
+                                {label: 'deltaG', key: 'deltag'},
+                                {label: 'detalGErr', key: 'deltagerr'},
+                                {label: 'Charge', key: 'charge'}];
+
+
+                function updateCpds() {
+                    Biochem.get('model_compound', $s.cpdOpts)
+                           .then(function(res) {
+                                $s.cpds = res;
+                                $s.loadingCpds = false;
+                           })
+                }
+
+                $s.$watch('cpdOpts', function(opts) {
+                    $s.loadingCpds = true;
+                    updateCpds();
+                }, true)
+
+            }]
+        })
     }
 
 }])

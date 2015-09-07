@@ -1,42 +1,42 @@
 
 <div ng-if="data">
-    <div class="table-controls">
-        <div class="table-controls"  layout="row">
-            <md-input-container md-no-float flex="45"
-                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
-            </md-input-container>
+    <div class="table-controls table-selector-controls" layout="row">
 
-            <md-button ng-if="checkedItems.length"
-                    ng-click="submit(checkedItems)"
-                    class="md-secondary">
-                <i class="fa fa-plus"></i>
-                {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
-            </md-button>
+        <md-input-container md-no-float flex="45"
+            search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+        </md-input-container>
 
-            <md-progress-circular ng-if="loading"
-                                  md-mode="indeterminate"
-                                  class="table-loading"
-                                  md-diameter="20">
-            </md-progress-circular>
+        <md-button ng-if="checkedItems.length"
+                ng-click="submit(checkedItems)"
+                class="md-secondary">
+            <i class="fa fa-plus"></i>
+            {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
+        </md-button>
 
-            <div ng-if="noPagination" layout="row" layout-align="end center" flex>
-                {{data.length}} {{resultText}}
-            </div>
+        <md-progress-circular ng-if="loading"
+                              md-mode="indeterminate"
+                              class="table-loading"
+                              md-diameter="20">
+        </md-progress-circular>
 
-            <md-input-container
-                ng-if="!noPagination"
-                pagination
-                pagination-offset="opts.offset"
-                pagination-limit="opts.limit"
-                pagination-total="filtered.length"
-                layout="row"
-                layout-align="end center" flex>
-            </md-input-container>
+        <div ng-if="noPagination" layout="row" layout-align="end center" flex>
+            {{data.length}} {{resultText}}
         </div>
+
+        <md-input-container
+            ng-if="!noPagination"
+            pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
+        </md-input-container>
+
     </div>
 
 
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered table-selector">
         <thead sortable>
             <tr>
                 <th></th>

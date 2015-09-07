@@ -92,7 +92,23 @@ angular.module('uiTools', [])
             json.push(obj)
         }
 
-        return json;
+        var t = {head: head, rows: json};
+
+        return t;
     }
 
+
+    this.JSONToTable = function(head, rows) {
+        var table = head.join('\t')+'\r\n';
+
+        for (var i=0; i<rows.length; i++) {
+            var row = [];
+            for (var key in rows[i]) {
+                row.push(rows[i][key]);
+            }
+            table += row.join('\t')+'\n';
+        }
+
+        return table;
+    }
 });

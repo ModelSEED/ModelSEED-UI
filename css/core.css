@@ -100,6 +100,16 @@ a:focus {
     color: #fff !important;
 }
 
+.md-danger { /*hack hack hack #fixme */
+    background-color: #DA265D !important;
+    color: #fff !important;
+}
+
+.md-success {
+    background-color: #38BD5C !important;
+    color: #fff !important;
+}
+
 md-toolbar {
     z-index: 100;
 }
@@ -266,7 +276,7 @@ md-toolbar,
     height: 50px;
     min-height: 50px;
     max-height: 50px;
-    padding: 0;
+
 }
 
 .toolbar {
@@ -625,18 +635,33 @@ table tr.active {
     background-color: #ddd;
 }
 
-.dataTables_filter,
-.dataTables_paginate{
-    float: right;
-}
-.dataTables_length {
-    float: left
-}
-
-.dataTables_paginate .pagination {
+table md-checkbox {
     margin: 0;
 }
+.table-selector > tbody > tr > td:first-child,
+.table-editor > tbody > tr > td:first-child {
+    width: 1px;
+    height: 1px;
+}
 
+.table-selector > tbody > tr > td,
+.table-editor > tbody > tr > td {
+    vertical-align: initial;
+}
+
+.table-editor-controls md-input-container,
+.table-selector-controls  md-input-container {
+    padding-bottom: 5px;
+}
+
+.table-editor-controls .md-button,
+.table-selector-controls .md-button  {
+    min-width: 0;
+    padding: 0px 10px;
+}
+
+
+/* end tables */
 
 .expanded-table {
     margin: 10px 0 20px 0;

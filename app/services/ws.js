@@ -287,4 +287,20 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         return res;
                     })
     }
+
+    this.save = function(path, data, opts) {
+        var params = {objects: [[path,
+                                opts.type ? opts.type : 'string',
+                                opts.userMeta ? opts.userMeta : {},
+                                data]],
+                      overwrite: opts.overwrite ? true : false
+                     };
+
+        console.log('savinging object with', params)
+        return $http.rpc('ws', 'create', params)
+                    .then(function(res) {
+
+                        return res[0];
+                    })
+    }
 }])
