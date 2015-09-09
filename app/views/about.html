@@ -88,6 +88,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>ModelSEED Support Service</td>
+                    <td>{{urls.ms_support_url}}</td>
+                    <td>
+                        <div ng-switch="msSupport">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <td>App Service (not in use)</td>
                     <td>{{urls.app_url}}</td>
                     <td>
