@@ -78,11 +78,20 @@ function($http, $q, config, $log) {
                     })
     }
 
-    this.getRxn = function(id) {
-        var url = endpoint+'model_reaction/?http_accept=application/json&eq(id,'+id+')'
+    this.getRxn = function(id, opts) {
+        var url = endpoint+'model_reaction/?http_accept=application/json';
+
+        if (opts && 'select' in opts) {
+            if (Array.isArray(opts.select)) url += '&select('+String(opts.select)+')';
+            else                            url += '&select('+opts.select+')';
+        }
+
+        if (Array.isArray(id)) url += '&in(id,('+String(id)+'))&limit('+id.length+')';
+        else                   url += '&eq(id,'+id+')';
+
         return $http.get(url)
                     .then(function(res) {
-                        return res.data[0];
+                        return Array.isArray(id) ? res.data : res.data[0];
                     })
     }
 

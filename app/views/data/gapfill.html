@@ -1,0 +1,66 @@
+
+<div layout="row">
+	<div class="h2" flex>Gapfill <small>{{name}}</small></div>
+	<div layout="column" layout-align="center end">
+		<a ui-sref="app.modelPage({path: modelPath})">
+			{{modelPath.split('/').pop()}}
+		</a>
+		<a ui-sref="app.mediaPage({path: meta.media})">
+			{{meta.media.split('/').pop()}} (<span class="label-media">Media</span>)
+		</a>
+	</div>
+</div>
+
+<hr class="no-margin">
+
+
+<md-tabs md-no-ink md-dynamic-height>
+	<md-tab>
+		<md-tab-label>{{name}}</md-tab-label>
+
+		<md-tab-body>
+
+			<ng-table-two ng-if="!editInProgress"
+						  table-header="gfHeader"
+						  table-data="gfData"
+						  table-opts="gfOpts"
+						  table-loading="loading"
+						  table-result-text="reactions"
+						  table-placeholder="Search reactions">
+			</ng-table-two>
+
+		</md-tab-body>
+	</md-tab>
+</md-tabs>
+
+<br>
+
+
+<section ng-controller="SideNav">
+    <md-sidenav class="rxn-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="rxnView" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';">
+        <md-toolbar class="md-light-theme">
+            <h1 class="md-toolbar-tools">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center center">
+			<ng-include src="'app/views/lists/rxn-page.html'"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+	<md-sidenav  class="cpd-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="cpdView">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center left">
+			<ng-include src="'app/views/lists/cpd-page.html'" ng-controller="RxnPage"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+</section>

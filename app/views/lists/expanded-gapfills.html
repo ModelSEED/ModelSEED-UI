@@ -17,8 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in item.relatedGapfills track by $index"
-                class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
+            <tr ng-repeat="gf in item.relatedGapfills track by $index" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
                 <td>
                     <img ng-if="gf.loading"
                          src="img/ajax-loader.gif"
@@ -34,7 +33,9 @@
                     <a ui-sref="app.mediaPage({path: gf.media_ref})"
                        ng-click="$event.stopPropagation()">{{::gf.media}}</a>
                 </td>
-                <td>{{::gf.id}}</td>
+                <td>
+                    <a ui-sref="app.gfPage({path: gf.ref})" ng-click="$event.stopPropagation()">{{::gf.id}}</a>
+                </td>
                 <td>{{relTime(gf.rundate)}}</td>
                 <td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">

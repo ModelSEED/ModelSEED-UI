@@ -103,6 +103,9 @@ function($scope, $stateParams) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
+    $http.rpc('msSupport', 'list_rast_jobs', {})
+         .then(function(res) { console.log('res', res); $s.msSupport = true; })
+         .catch(function(e) { console.error('error', e); $s.msSupport = false; })
     /*
     $http({method: "POST",
            url: config.services.patric_auth_url,
@@ -788,6 +791,7 @@ function($scope, $state, Patric, $timeout, $http,
         $scope.selected = item;
         Dialogs.reconstruct(ev, params,
             function(res) {
+                console.log('done reconstructing', res)
                 /*MS.addModel({name: res[0],
                              path: res[1],
                              orgName: item.genome_name})*/
@@ -1016,6 +1020,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
+                console.log('gf', item.relatedGapfills)
                 item.loading = false;
             })
     }

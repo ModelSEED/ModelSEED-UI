@@ -56,7 +56,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app', {
             templateUrl: 'app/views/app.html',
         }).state('app.about', {
-            url: "/about/",            
+            url: "/about/",
             templateUrl: 'app/views/about.html',
             controller: 'About'
         })
@@ -91,6 +91,11 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/media{path:nonURIEncoded}",
             templateUrl: 'app/views/data/media.html',
             controller: 'MediaDataView',
+            authenticate: true
+        }).state('app.gfPage', {
+            url: "/gapfill{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/gapfill.html',
+            controller: 'GapfillDataView',
             authenticate: true
         })
 

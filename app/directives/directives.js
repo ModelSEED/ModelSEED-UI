@@ -1542,7 +1542,7 @@ function($compile, $stateParams) {
 
                 // table editor expects a copied object as of now
                 // since there is no notion of filtering/sorting for the editor
-                //scope.data = angular.copy(scope.tableData)
+                //scope.data = angular.copy(scope.data)
 
                 // list of things to be deleted or edited.
                 scope.checkedItems = [];

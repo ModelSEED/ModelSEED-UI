@@ -137,7 +137,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
 
     this.getObjectMeta = function(path) {
-        $log.log('retrieving meta', path)
+        //console.log('retrieving meta', path)
         return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
                     .then(function(res) {
                         return res[0];
@@ -158,18 +158,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         //console.log('response', res)
                         return res[0][7];
                     })
-    }
-
-    this.addToModel = function(ws) {
-        self.workspaces.push( self.wsListToDict(ws) );
-    }
-
-
-    this.rmFromModel = function(ws) {
-        for (var i=0; i<self.workspaces.length; i++) {
-            if (self.workspaces[i].id == ws[4])
-                self.workspaces.splice(i, 1);
-        }
     }
 
     // takes source and destimation paths, moves object
@@ -245,23 +233,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                    })
     }
 
-    this.getPublic = function() {
-        return $http.get('data/app/modelList.json', {cache:true})
-                    .then(function(res) {
-                        var models = [];
-                        for (var i=0; i<res.data.length; i++) {
-                            var d = res.data[i];
-                            models.push({orgName: d[10]['Name'],
-                                         name: d[1],
-                                         ws: d[7],
-                                         rxnCount: d[10]['Number reactions'],
-                                         cpdCount: d[10]['Number compounds']
-                                        })
-                        }
-                        return models;
-                    })
-    }
-
     // takes workspace spec hash, creates node.  fixme: cleanup
     this.createNode = function(p) {
         var objs = [[p.path, p.type, null, null]];
@@ -296,7 +267,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                       overwrite: opts.overwrite ? true : false
                      };
 
-        console.log('savinging object with', params)
         return $http.rpc('ws', 'create', params)
                     .then(function(res) {
 

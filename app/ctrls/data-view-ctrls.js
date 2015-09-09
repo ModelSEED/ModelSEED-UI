@@ -1281,3 +1281,70 @@ function(WS, ModelParser) {
     return {parse: this.parse}
 
 }])
+
+
+.controller('GapfillDataView',
+['$scope', '$stateParams', 'WS', '$http', 'Biochem',
+function($scope, $sParams, WS, $http, Biochem) {
+
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.split('/').pop()
+
+    var modelDirA = path.split('/').slice(0, path.split('/').length-2),
+        modelName = modelDirA.pop().slice(1);
+    $scope.modelPath = modelDirA.join('/')+'/'+modelName;
+
+    $scope.tabs = {tabIndex : 0};
+
+    $scope.gfOpts = {query: '', limit: 20, offset: 0, sort: {} };
+
+    $scope.gfHeader = [{label: 'Reaction', key: 'rxn'},
+                       {label: 'Equation', key: 'eq'},
+                       {label: 'Compartment', key: 'compartment'}];
+
+    $scope.loading = true;
+    WS.getObjectMeta(path)
+      .then(function(res) {
+          var meta = res[0][7];
+          $scope.meta = meta;
+
+          parseSolution(JSON.parse(meta.solutiondata)).then(function(data) {
+              $scope.gfData = data
+              $scope.loading = false;
+          })
+      })
+
+    var data = []
+
+    function parseSolution(solutionData) {
+        var data = [], ids = [];
+
+        for (var i=0; i<solutionData[0].length; i++) {
+            var rxn = solutionData[0][i],
+                id = rxn.reaction_ref.split('/').pop();
+
+            data.push({rxn: id,
+                       compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
+                       direction: rxn.direction
+                   });
+
+            ids.push(id);
+        }
+
+        // add equation from biochem
+        return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+            for (var i=0; i<ids.length; i++) {
+                var d = data[i].direction, dir;
+                if (d === '>' ) dir = '=>';
+                else if (d === '<' ) dir = '<=';
+                else if (d === '=' ) dir = '<=>';
+                else dir = '???';
+
+                data[i].eq = res[i].definition.replace('<=>', dir);
+            }
+            return data;
+        })
+    }
+
+}])
