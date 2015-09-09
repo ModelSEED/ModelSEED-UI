@@ -270,7 +270,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
         return $http.rpc('ws', 'create', params)
                     .then(function(res) {
-
                         return res[0];
                     })
     }

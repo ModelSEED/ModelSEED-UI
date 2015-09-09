@@ -10,12 +10,15 @@
                         ng-click="delete()"
                         class="md-danger">
                     <i class="fa fa-minus"></i>
-                    {{deleteInProgress ? deleteInProgressText : deleteBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
+                    {{deleteInProgress ?
+                        deleteInProgressText :
+                        deleteBtnTemplate.replace('$count', checkedItems.length)
+                            +(checkedItems.length > 1 ? 's':'') }}
                 </md-button>
 
                 <md-button ng-if="!checkedItems.length"
                         ng-click="add($event)"
-                        class="md-success">
+                        class="md-primary">
                     <i class="fa fa-plus"></i>
                     {{addInProgress ? addInProgressText : addBtnTemplate}}
                 </md-button>
@@ -36,7 +39,7 @@
                     <i class="material-icons">undo</i>
                     <md-tooltip>Undo last edit</md-tooltip>
                 </md-button>
-			    <md-button class="md-secondary" ng-click="save()" ng-disabled="saveInProgress">
+			    <md-button class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
 			    <a ng-click="cancel()" class="no-link">Cancel</a>
@@ -80,11 +83,11 @@
                 </form>
             </td>
         </tr>
-
-        <div ng-if="!loading && filtered.length == 0">
-            No reaction found
-        </div>
     </table>
+
+    <div ng-if="!loading && data.length == 0" class="alert alert-warning">
+        No {{resultText}} added
+    </div>
 </div>
 <br>
 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>

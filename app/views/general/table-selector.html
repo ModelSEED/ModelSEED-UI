@@ -15,7 +15,7 @@
             {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', checkedItems.length) }}
         </md-button>
 
-        <md-button ng-if="defaultBtn && !checkedItems.length"
+        <md-button ng-if="onDefault && !checkedItems.length"
                 ng-click="defaultBtn()"
                 class="{{defaultBtnClass}}">
             <i ng-if="defaultBtnType == 'add'" class="fa fa-plus"></i>

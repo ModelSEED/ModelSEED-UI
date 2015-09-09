@@ -205,6 +205,32 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
+    this.saveAs = function(ev, folder, type, userMeta, data, cb) {
+        ev.stopPropagation();
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/save-as.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+
+                $scope.save = function(name){
+                    WS.save(folder+name, data, {userMeta: userMeta, overwrite: true})
+                      .then(function() {
+                          cb(name)
+                      }).catch(function(e) {
+                          self.showError('Save error', e.error.message.slice(0,30)+'...')
+                      })
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
     this.showToast = function(title, name) {
       $mdToast.show({
         controller: 'ToastCtrl',

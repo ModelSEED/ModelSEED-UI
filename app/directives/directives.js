@@ -1480,7 +1480,7 @@ function($compile, $stateParams) {
             submitBtnType: '@submitBtnType',
             submitBtnClass: '@submitBtnClass',
             submitProgressText: '@submitProgressText',
-            onDefault: '@onDefault',
+            onDefault: '=onDefault',
             defaultBtnTemplate: '@defaultBtnTemplate',
             defaultBtnType: '@defaultBtnType',
             defaultBtnClass: '@defaultBtnClass',
@@ -1490,7 +1490,7 @@ function($compile, $stateParams) {
         link: function(scope, elem, attrs) {
 
             scope.defaultBtn = scope.defaultBtn === 'true' ? true : false;
-            scope.defaultBtnTemplate =  scope.defaultBtnTemplate ? scope.defaultBtnTemplate : 'Add'
+            scope.defaultBtnTemplate =  scope.defaultBtnTemplate ? scope.defaultBtnTemplate : 'Add';
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
@@ -1666,9 +1666,10 @@ function($compile, $stateParams) {
 
                 scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
                 scope.saveInProgress = false;
-                scope.save = function() {
+                scope.save = function($ev) {
                     scope.saveInProgress = true;
-                    scope.onSave(scope.data)
+                    
+                    scope.onSave($ev, scope.data)
                          .then(function(res) {
                              scope.saveInProgres = false;
                              scope.onCancel();

@@ -95,12 +95,17 @@ a:focus {
 
 }
 
-.md-secondary { /*hack hack hack #fixme */
+.md-primary { /*hack hack hack #fixme */
+    background-color: #00BCD4 !important;
+    color: #fff !important;
+}
+
+.md-secondary {
     background-color: rgba(95, 98, 168, 0.91) !important;
     color: #fff !important;
 }
 
-.md-danger { /*hack hack hack #fixme */
+.md-danger { 
     background-color: #DA265D !important;
     color: #fff !important;
 }
@@ -268,7 +273,7 @@ header .alt-login div {
 /* navigation mods */
 
 .md-toolbar-accent {
-    background-color: rgba(95, 98, 168, 0.91);
+    background-color: #6D70AF;
 }
 
 md-toolbar,

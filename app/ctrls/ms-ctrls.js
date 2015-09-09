@@ -836,8 +836,10 @@ function($scope, $state, Patric, $timeout, $http,
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$state', 'Session', 'uiTools', 'Dialogs',
-function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
+['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$state',
+ 'Session', 'uiTools', 'Dialogs', '$state',
+function($s, $sParams, WS, MS, Auth, $state,
+         Session, uiTools, Dialogs, $state) {
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
@@ -894,13 +896,12 @@ function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
           $s.myMedia = [];
       })
 
+    // copy media to my media
     $s.submit = function(items, cb) {
-        console.log('the items are ', items)
-        copyMedia(items).then(function() {
-            cb();
-        })
+        copyMedia(items).then(cb)
     }
 
+    // delete my media
     $s.deleteMedia = function(items, cb) {
         var paths = [];
         items.forEach(function(item) {
@@ -908,11 +909,16 @@ function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
         })
 
         WS.deleteObj(paths)
+          .then(cb)
           .then(function() {
-              cb();
+                Dialogs.showComplete('Deleted '+paths.length+' media formulation'+
+                                     (paths.length>1 ? 's' : ''))
           })
+    }
 
-
+    // direct user to new media page
+    $s.newMedia = function() {
+        $state.go('app.mediaPage', {path: '/'+Auth.user+'/media/new-media'})
     }
 
     function copyMedia(items) {
@@ -922,15 +928,12 @@ function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
         var destination = '/'+Auth.user+'/media';
         return WS.createFolder(destination)
                  .then(function(res) {
-                     console.log('create folder response', res)
 
                      WS.copyList(paths, destination)
                      .then(function(res) {
-                         console.log('things', $s.myMedia)
                          $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
-                         Dialogs.showComplete('Copied '+res.length+' media formulations')
-
-                         //$s.tabs.tabIndex = 1;
+                         Dialogs.showComplete('Copied '+res.length+' media formulation'+
+                                                (paths.length>1 ? 's' : ''))
                      })
                  })
     }

@@ -264,8 +264,6 @@ function($s, $sParams, MS, $http, config, Auth) {
 
 }])
 
-
-
 .controller('MediaDataView',
 ['$scope', '$state', '$stateParams', 'WS', 'uiTools',
  '$http', 'Auth', '$filter', '$mdDialog', 'Biochem', 'Dialogs',
@@ -287,16 +285,25 @@ function($s, $state, $sParams, WS, tools,
                           {label: 'Max Flux', key: 'minflux', editable: true},
                           {label: 'Min Flux', key: 'maxflux', editable: true}];
 
+    $s.toggleEdit = function() {
+        $s.editInProgress = !$s.editInProgress;
+        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field,  $s.mediaOpts.sort.desc  );
+    }
 
-    $s.loading = true;
-    WS.get(path).then(function(res) {
-        $s.media = tools.tableToJSON(res.data).rows;
-        $s.mediaMeta = res.meta[7];
-        $s.loading = false;
-    }).catch(function(e) {
-        $s.error = e;
-        $s.loading = false;
-    })
+    if ($s.name === 'new-media') {
+        $s.media = [];
+        $s.toggleEdit();
+    } else {
+        $s.loading = true;
+        WS.get(path).then(function(res) {
+            $s.media = tools.tableToJSON(res.data).rows;
+            $s.mediaMeta = res.meta[7];
+            $s.loading = false;
+        }).catch(function(e) {
+            $s.error = e;
+            $s.loading = false;
+        })
+    }
 
     $s.copyMedia = function() {
         $s.copyInProgress = true;
@@ -313,20 +320,25 @@ function($s, $state, $sParams, WS, tools,
             })
     }
 
-    $s.toggleEdit = function() {
-        $s.editInProgress = !$s.editInProgress;
-        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field,  $s.mediaOpts.sort.desc  );
-    }
 
-    $s.save = function(data) {
+    $s.save = function(ev, data) {
         var head = ['id', 'name', 'concentration', 'minflux', 'maxflux'];
         var table = tools.JSONToTable(head, angular.copy(data));
 
-        return WS.save(path, table, {overwrite: true, userMeta: $s.mediaMeta, type: 'media'})
-                 .then(function() {
-                     $s.media = data;
-                     Dialogs.showComplete('Saved Media', $s.name)
-                 })
+        if ($s.name === 'new-media') {
+            var folder = '/'+Auth.user+'/media/';
+            return Dialogs.saveAs(ev, folder, 'media', {}, table, function(name) {
+                        Dialogs.showComplete('Saved media', name);
+                        $state.go('app.mediaPage', {path: folder+name});
+                    })
+
+        } else {
+            return WS.save(path, table, {overwrite: true, userMeta: $s.mediaMeta, type: 'media'})
+                     .then(function() {
+                         $s.media = data;
+                         Dialogs.showComplete('Saved media', $s.name)
+                     })
+        }
     }
 
     $s.addCpds = function(ev) {
@@ -392,7 +404,6 @@ function($s, $state, $sParams, WS, tools,
                     $s.loadingCpds = true;
                     updateCpds();
                 }, true)
-
             }]
         })
     }
