@@ -13,6 +13,8 @@
                        table-loading="loading"
                        table-placeholder="Search media"
                        on-submit="submit"
+                       submit-btn-class="md-raised md-primary"
+                       submit-btn-type="add"
                        submit-btn-template="Copy $count media"
                        submit-progress-text="Copying...">
             </ng-table-selector>
@@ -25,12 +27,21 @@
             (<span class="label-gapfill-count">{{myMedia.length}}</span>)
         </md-tab-label>
         <md-tab-body>
-            <ng-table-two table-header="myMediaHeader"
+            <ng-table-selector table-header="myMediaHeader"
                         table-data="myMedia"
                         table-opts="myMediaOpts"
                         table-loading="loadingMyMedia"
+                        on-submit="deleteMedia"
+                        submit-btn-template="Delete $count media"
+                        submit-btn-type="remove"
+                        submit-btn-class="md-warn md-raised"
+                        submit-progress-text="Deleting..."
+                        on-default="newMedia"
+                        default-btn-template="New media"
+                        default-btn-type="add"
+                        default-btn-class="md-primary md-raised"
                         table-placeholder="Search my media">
-            </ng-table-two>
+            </ng-table-selector>
         </md-tab-body>
     </md-tab>
 </md-tabs>

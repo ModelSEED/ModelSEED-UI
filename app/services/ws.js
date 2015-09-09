@@ -199,7 +199,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     // takes path of object, deletes object
     this.deleteObj = function(path, isFolder) {
         $log.log('calling delete')
-        var params = {objects: [path],
+        var params = {objects: Array.isArray(path) ? path : [path],
                       deleteDirectories: isFolder ? 1 : 0,
                       force: isFolder ? 1 : 0};
         return $http.rpc('ws', 'delete', params)
@@ -211,6 +211,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
 
     }
+
 
     // takes path of new folder, creates it
     this.createFolder = function(path) {

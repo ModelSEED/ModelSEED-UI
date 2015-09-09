@@ -6,12 +6,24 @@
             search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
         </md-input-container>
 
-        <md-button ng-if="checkedItems.length"
+
+        <md-button ng-if="checkedItems.length" layout-align="center center"
                 ng-click="submit(checkedItems)"
-                class="md-secondary">
-            <i class="fa fa-plus"></i>
-            {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', '('+checkedItems.length+')') }}
+                class="{{submitBtnClass}}">
+            <i ng-if="submitBtnType == 'add'" class="fa fa-plus"></i>
+            <i ng-if="submitBtnType == 'remove'" class="fa fa-minus"></i>
+            {{submitInProgress ? submitProgressText : submitBtnTemplate.replace('$count', checkedItems.length) }}
         </md-button>
+
+        <md-button ng-if="defaultBtn && !checkedItems.length"
+                ng-click="defaultBtn()"
+                class="{{defaultBtnClass}}">
+            <i ng-if="defaultBtnType == 'add'" class="fa fa-plus"></i>
+            <i ng-if="defaultBtnType == 'remove'" class="fa fa-minus"></i>
+            {{defaultInProgress ? defaultProgressText : defaultBtnTemplate}}
+        </md-button>
+
+
 
         <md-progress-circular ng-if="loading"
                               md-mode="indeterminate"
@@ -47,9 +59,8 @@
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
                         | limitTo : opts.limit : (opts.query ? 0 : opts.offset)">
             <td>
-                <md-checkbox aria-label="Check media" ng-checked="row.checked" ng-click="checkItem(row)"></md-checkbox>
-                <!--<i ng-if="row.checked" class="fa fa-check-square-o"></i>
-                <i ng-if="!row.checked" class="fa fa-square-o"></i>-->
+                <md-checkbox aria-label="Check media" ng-checked="row.checked"
+                             ng-click="checkItem(row)" ng-class="{'md-warn': submitBtnType == 'remove'}"></md-checkbox>
             </td>
             <td ng-repeat="h in header">
                 <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row)"></span>
@@ -65,10 +76,11 @@
             </td>
         </tr>
 
-        <div ng-if="!loading && filtered.length == 0">
-            No reaction found
-        </div>
     </table>
+
+    <div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+        No item found
+    </div>
 </div>
 <br>
 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>

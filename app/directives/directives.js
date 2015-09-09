@@ -1466,54 +1466,82 @@ function($compile, $stateParams) {
   })
 
 .directive('ngTableSelector', function() {
-      return {
-          restrict: 'EA',
-          scope: {
-              header: '=tableHeader',
-              data: '=tableData',
-              opts: '=tableOpts',
-              loading: '=tableLoading',
-              placeholder: '@tablePlaceholder',
-              addItems: '=tableAddItems',
-              onSubmit: '=onSubmit',
-              submitBtnTemplate: '@submitBtnTemplate',
-              submitProgressText: '@submitProgressText',
-          },
-          templateUrl: 'app/views/general/table-selector.html',
-          link: function(scope, elem, attrs) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+            addItems: '=tableAddItems',
+            onSubmit: '=onSubmit',
+            submitBtnTemplate: '@submitBtnTemplate',
+            submitBtnType: '@submitBtnType',
+            submitBtnClass: '@submitBtnClass',
+            submitProgressText: '@submitProgressText',
+            onDefault: '@onDefault',
+            defaultBtnTemplate: '@defaultBtnTemplate',
+            defaultBtnType: '@defaultBtnType',
+            defaultBtnClass: '@defaultBtnClass',
+            defaultProgressText: '@defaultProgressText',
+        },
+        templateUrl: 'app/views/general/table-selector.html',
+        link: function(scope, elem, attrs) {
 
-              scope.noPagination = ('disablePagination' in attrs) ? true: false;
+            scope.defaultBtn = scope.defaultBtn === 'true' ? true : false;
+            scope.defaultBtnTemplate =  scope.defaultBtnTemplate ? scope.defaultBtnTemplate : 'Add'
 
-              scope.checkedItems = [];
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
-              scope.checkItem = function(item) {
-                  item.checked = item.checked ? false : true;
+            scope.checkedItems = [];
 
-                  if (item.checked)
-                      scope.checkedItems.push(item)
-                  else {
-                      // remove from checked list
-                      for (var i=0; i<scope.checkedItems.length; i++) {
-                          if ( angular.equals(scope.checkedItems[i], item) )
-                              scope.checkedItems.splice(i, 1)
-                      }
-                  }
-              }
+            scope.checkItem = function(item) {
+                item.checked = item.checked ? false : true;
 
-              scope.submitInProgress = false;
-              scope.submit = function(items) {
-                  scope.submitInProgress = true;
-                  scope.onSubmit(items, function() {
-                      scope.submitInProgress = false;
-                      for (var i=0; i<items.length; i++) {
-                          items[i].checked = false;
-                          scope.checkedItems = [];
-                      }
-                  })
-              }
+                if (item.checked)
+                scope.checkedItems.push(item)
+                else {
+                    // remove from checked list
+                    for (var i=0; i<scope.checkedItems.length; i++) {
+                        if ( angular.equals(scope.checkedItems[i], item) )
+                        scope.checkedItems.splice(i, 1)
+                    }
+                }
+            }
 
-          }
-      }
+            scope.submitInProgress = false;
+            scope.submit = function(items) {
+                scope.submitInProgress = true;
+                scope.onSubmit(items, function() {
+                    scope.submitInProgress = false;
+
+                    for (var i=0; i<items.length; i++) {
+                        items[i].checked = false;
+
+                        // if delete btn, remove from model
+                        if (scope.submitBtnType === 'remove') {
+                            var j = scope.data.length;
+                            while (j--) {
+                                if (angular.equals(scope.data[j], items[i])) {
+                                    console.log('removing', j)
+                                    scope.data.splice(j, 1)
+                                }
+                            }
+                        }
+                    }
+                    scope.checkedItems = [];
+
+                })
+            }
+
+            scope.defaultBtn = function(items) {
+                scope.onDefault();
+            }
+
+
+        }
+    }
  })
 
  .directive('ngTableEditor', ['$filter', function($filter) {

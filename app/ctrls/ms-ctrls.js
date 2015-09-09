@@ -901,13 +901,23 @@ function($s, $sParams, WS, MS, Auth, $state, Session, uiTools, Dialogs) {
         })
     }
 
+    $s.deleteMedia = function(items, cb) {
+        var paths = [];
+        items.forEach(function(item) {
+            paths.push(item.path)
+        })
+
+        WS.deleteObj(paths)
+          .then(function() {
+              cb();
+          })
+
+
+    }
+
     function copyMedia(items) {
-        console.log()
-
-
         var paths = [];
         items.forEach(function(item) { paths.push(item.path); })
-
 
         var destination = '/'+Auth.user+'/media';
         return WS.createFolder(destination)

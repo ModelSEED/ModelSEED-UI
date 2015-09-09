@@ -622,6 +622,9 @@ md-input-container[pagination] span {
     -ms-user-select: none;
     cursor:default;
 }
+.table-controls .md-button {
+    margin: 5px;
+}
 
 table th:hover {
     cursor: pointer;
@@ -649,8 +652,7 @@ table md-checkbox {
     vertical-align: initial;
 }
 
-.table-editor-controls md-input-container,
-.table-selector-controls  md-input-container {
+.table-editor-controls md-input-container {
     padding-bottom: 5px;
 }
 
