@@ -71,16 +71,21 @@ function($scope, $stateParams) {
 
     $http.get('version/version.txt')
          .then(function(res) {
-             $s.commitHash = res.data;
+             $s.commitHash = res.data.trim();
          })
 
     $http.get('version/branch.txt')
          .then(function(res) {
-             $s.commitBranch = res.data;
+             $s.commitBranch = res.data.trim();
          })
 
-    $s.urls = config.services;
+   $http.get('version/deploy-date.txt')
+        .then(function(res) {
+            $s.deployDate = res.data.trim().split(' ').slice(0, 5).join(' ');
+            console.log('Date', $s.deployDate.split(' '))
+        })
 
+    $s.urls = config.services;
 
     // system status sanity check
     $http.rpc('ms', 'list_models', {})
