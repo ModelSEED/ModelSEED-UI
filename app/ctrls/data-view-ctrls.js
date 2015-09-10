@@ -320,25 +320,35 @@ function($s, $state, $sParams, WS, tools,
             })
     }
 
+    var head = ['id', 'name', 'concentration', 'minflux', 'maxflux'];
 
-    $s.save = function(ev, data) {
-        var head = ['id', 'name', 'concentration', 'minflux', 'maxflux'];
-        var table = tools.JSONToTable(head, angular.copy(data));
+    // only allow save if not new-media
+    if ($s.name !== 'new-media') {
+        $s.save = function(data) {
+            var table = tools.JSONToTable(head, angular.copy(data));
 
-        if ($s.name === 'new-media') {
-            var folder = '/'+Auth.user+'/media/';
-            return Dialogs.saveAs(ev, folder, 'media', {}, table, function(name) {
-                        Dialogs.showComplete('Saved media', name);
-                        $state.go('app.mediaPage', {path: folder+name});
-                    })
-
-        } else {
             return WS.save(path, table, {overwrite: true, userMeta: $s.mediaMeta, type: 'media'})
                      .then(function() {
                          $s.media = data;
                          Dialogs.showComplete('Saved media', $s.name)
                      })
         }
+    }
+
+    $s.saveAs = function(data, newName) {
+        var table = tools.JSONToTable(head, angular.copy(data));
+
+        var folder = '/'+Auth.user+'/media/';
+        return WS.save(folder+newName, table, {userMeta: {}, overwrite: true})
+              .then(function(res) {
+                  console.log('save as response')
+                  Dialogs.showComplete('Saved media', newName)
+                  $state.go('app.mediaPage', {path: folder+newName})
+              }).catch(function(e) {
+                  console.log('error', e)
+                  self.showError('Save error', e.error.message.slice(0,30)+'...')
+              })
+
     }
 
     $s.addCpds = function(ev) {

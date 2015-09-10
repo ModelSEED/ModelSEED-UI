@@ -888,7 +888,6 @@ function($s, $sParams, WS, MS, Auth, $state,
     $s.loadingMyMedia = true;
     MS.listMedia('/'+Auth.user+'/media')
       .then(function(media) {
-          console.log('my media', media)
           $s.myMedia = media;
           $s.loadingMyMedia = false;
       }).catch(function(e) {
@@ -1033,7 +1032,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
-                console.log('gf', item.relatedGapfills)
                 item.loading = false;
             })
     }
@@ -1088,7 +1086,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     })
 
     function clearSelected(data) {
-        console.log('clearing', data)
         for (var i in data) {
             var model = data[i];
 
@@ -1237,7 +1234,6 @@ function mergeObjects(objs1, objs2, key) {
     var result = []
     for (var i=0; i<objs1.length; i++) {
         if (isFound(objs1[i][key], objs2, key)) {
-            console.log('found!')
             ref.splice(i, 1);
             continue;
         }

@@ -10,7 +10,7 @@
       </div>
     </md-toolbar>
 
-    <form>
+    <form ng-submit="save(form.name)">
         <md-dialog-content>
             <md-input-container flex="50">
                 <label>Media name</label>
@@ -24,7 +24,7 @@
             <md-button ng-click="cancel()">
                 cancel
             </md-button>
-            <md-button md-autofocus ng-click="save(form.name)" class="md-raised md-primary" ng-disabled="!form.name">
+            <md-button type="submit" class="md-raised md-primary" ng-disabled="!form.name">
                 Save
             </md-button>
         </div>

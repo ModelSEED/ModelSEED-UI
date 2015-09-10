@@ -146,8 +146,6 @@ function($scope, $dialog, MV) {
                                    org: item.org,
                                    media: newFBA.media};
 
-                    console.log('new item', newItem)
-
                     MV.swapItem($scope.selectedIndex, newItem);
                     $scope.activeFBAIndex = $index;
                     $scope.item = newItem;
@@ -390,7 +388,6 @@ function ($scope, $timeout, $mdSidenav, $log) {
 
     this.setTab = function(state, tab) {
         this.tabs[state.current.name] = tab.tabIndex;
-        console.log('the tabs', this.tabs)
     }
 
     this.getTab = function(state) {

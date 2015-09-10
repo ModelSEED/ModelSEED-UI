@@ -205,7 +205,7 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
-    this.saveAs = function(ev, folder, type, userMeta, data, cb) {
+    this.saveAs = function(ev, saveCB, cancelCB) {
         ev.stopPropagation();
         return $dialog.show({
             templateUrl: 'app/views/dialogs/save-as.html',
@@ -215,16 +215,12 @@ function(MS, WS, $dialog, $mdToast) {
             function($scope, $http) {
 
                 $scope.save = function(name){
-                    WS.save(folder+name, data, {userMeta: userMeta, overwrite: true})
-                      .then(function() {
-                          cb(name)
-                      }).catch(function(e) {
-                          self.showError('Save error', e.error.message.slice(0,30)+'...')
-                      })
+                    saveCB(name);
                     $dialog.hide();
                 }
 
                 $scope.cancel = function(){
+                    if (cancelCB) cancelCB();
                     $dialog.hide();
                 }
             }]

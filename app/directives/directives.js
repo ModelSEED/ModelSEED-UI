@@ -1544,7 +1544,7 @@ function($compile, $stateParams) {
     }
  })
 
- .directive('ngTableEditor', ['$filter', function($filter) {
+ .directive('ngTableEditor', ['$filter', 'Dialogs', function($filter, Dialogs) {
        return {
            restrict: 'EA',
            scope: {
@@ -1556,8 +1556,8 @@ function($compile, $stateParams) {
                addItems: '=tableAddItems',
                resultText: '@tableResultText',
                onSave: '=onSave',
+               onSaveAs: '=onSaveAs',
                saveInProgressText: '@saveInProgressText',
-               submitBtnTemplate: '@submitBtnTemplate',
                deleteBtnTemplate: '@deleteBtnTemplate',
                addBtnTemplate: '@addBtnTemplate',
                deleteInProgressText: '@deleteInProgressText',
@@ -1668,12 +1668,29 @@ function($compile, $stateParams) {
                 scope.saveInProgress = false;
                 scope.save = function($ev) {
                     scope.saveInProgress = true;
-                    
-                    scope.onSave($ev, scope.data)
+
+                    scope.onSave(scope.data)
                          .then(function(res) {
                              scope.saveInProgres = false;
                              scope.onCancel();
                          })
+                }
+
+                scope.saveAs = function($ev) {
+                    scope.saveAsInProgress = true;
+
+                    // show save as dialog, with save/cancel callbacks
+                    Dialogs.saveAs($ev,
+                        function(newName){
+                            scope.onSaveAs(scope.data, newName)
+                                 .then(function() {
+                                     scope.saveAsInProgres = false;
+                                     scope.onCancel();
+                                 });
+                        },
+                        function() {
+
+                        });
                 }
 
                 scope.cancel = function() {

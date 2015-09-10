@@ -5,6 +5,7 @@
             <!--<md-input-container md-no-float flex="45"
                 search="opts.query" search-opts="opts" search-placeholder={{placeholder}} />
             </md-input-container>-->
+
             <md-input-container layout="row" layout-align="end center">
                 <md-button ng-if="checkedItems.length"
                         ng-click="delete()"
@@ -39,8 +40,11 @@
                     <i class="material-icons">undo</i>
                     <md-tooltip>Undo last edit</md-tooltip>
                 </md-button>
-			    <md-button class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
+			    <md-button ng-if="onSave" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
+                </md-button>
+                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
+                    {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
 			    <a ng-click="cancel()" class="no-link">Cancel</a>
             </md-input-container>
