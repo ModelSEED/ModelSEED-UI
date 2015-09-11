@@ -719,7 +719,7 @@ function($scope, $state, Patric, $timeout, $http,
     MS.listRastGenomes()
       .then(function(data) {
           $scope.myMicrobes = data;
-          console.log('myMicrobes', $scope.myMicrobes)
+          console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
     WS.listPlantMetas('/plantseed/Genomes/')
