@@ -108,9 +108,14 @@ function($scope, $stateParams) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
-    $http.rpc('msSupport', 'list_rast_jobs', {})
-         .then(function(res) { console.log('res', res); $s.msSupport = true; })
-         .catch(function(e) { console.error('error', e); $s.msSupport = false; })
+    $http.rpc('msSupport', 'list_rast_jobs', {owner: 'nconrad'})
+         .then(function(res) {
+             console.log('res', res); $s.msSupport = true;
+
+         })
+         .catch(function(e) {
+             console.error('error', e); $s.msSupport = false;
+          })
     /*
     $http({method: "POST",
            url: config.services.patric_auth_url,
@@ -688,22 +693,33 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
-    $scope.opts = {query: '',
-                   limit: 25,
-                   offset: 0,
+    $scope.opts = {query: '', limit: 25, offset: 0,
                    sort: {field: 'genome_name'},
                    visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+
+    $scope.myMicrobesopts = {query: '', limit: 25,  offset: 0,
+                             sort: {field: 'genome_name'},
+                             visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
 
    $scope.myPlantsOpts = {query: '',
                           limit: 25,
                           offset: 0,
                           sort: {field: 'timestamp'}};
 
+
     $scope.columns = [{prop: 'genome_name', label: 'Name'},
                       {prop: 'genome_id', label: 'ID'},
                       {prop: 'genus', label: 'Genus'},
                       {prop: 'taxon_id', label: 'Tax ID'},
                       {prop: 'contigs', label: 'Contigs'}]
+
+    $http.rpc('msSupport', 'list_rast_jobs', {})
+        .then(function(res) {
+            console.log('res', res);
+        })
+        .catch(function(e) {
+            console.error('error', e);
+        })
 
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
@@ -787,13 +803,16 @@ function($scope, $state, Patric, $timeout, $http,
               })
     }
 
+    $scope.selectGenome = function(item) {
+        $scope.selected = item;
+    }
+
     $scope.reconstruct = function(ev, item) {
         if ('genome_id' in item)
             var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
         else
             var params = {path: item.path, name: item.name};
 
-        $scope.selected = item;
         Dialogs.reconstruct(ev, params,
             function(res) {
                 console.log('done reconstructing', res)
