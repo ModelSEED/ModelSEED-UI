@@ -129,24 +129,22 @@ function($scope, $stateParams) {
 
 
 
-.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS',
+.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
 /**
  * [Responsible for options, table specs,
  * 	and updating of reaction/compound tables ]
  * @param  {[type]} $scope  [description]
  * @param  {[type]} Biochem [Biochem Service]
  */
-function($s, Biochem, $state, $stateParams, MS) {
+function($s, Biochem, $state, $stateParams, MS, Session) {
+
+    $s.tabs = {tabIndex: Session.getTab($state)};
+    $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
+
     $s.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
     $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
-
-    if ($stateParams.tab === 'compounds')
-        $s.tabs = {selectedIndex : 1};
-    else
-        $s.tabs = {selectedIndex : 0};
-
 
     $s.rxnHeader = [{label: 'Name', key: 'name'},
                     {label: 'ID', key: 'id'},
@@ -671,14 +669,15 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 .controller('Reconstruct',
 ['$scope', '$state', 'Patric', '$timeout', '$http',
- 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session',
 function($scope, $state, Patric, $timeout, $http,
-    Dialogs, ViewOptions, WS, Auth, uiTools, MS) {
-    $scope.plantModelsPath = '/plantseed/Models/';
+    Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session) {
+
+    $scope.tabs = {tabIndex: Session.getTab($state)};
+    $scope.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // formatting time helper used in View
     $scope.uiTools = uiTools;
-
 
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');

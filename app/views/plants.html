@@ -1,5 +1,5 @@
 
-<md-tabs ng-if="view == 'Plants'" md-no-ink md-dynamic-height>
+<md-tabs ng-if="view == 'Plants'" md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
 
     <md-tab>
 		<md-tab-label>Public Plants</md-tab-label>
@@ -54,25 +54,14 @@
     </md-tab>
 
     <md-tab>
-		<md-tab-label>My Plants</md-tab-label>
+		<md-tab-label>My Plants (<span class="label-gapfill-count">{{myPlants.length}}</span>)</md-tab-label>
         <md-tab-body>
-            <!--
-            <ng-table-two table-header="myPlantsHeader"
-                        table-data="myPlants"
-                        table-opts="myPlantsOpts"
-                        table-loading="loadingMyPlants"
-                        table-placeholder="Search my plants"
-                        table-row-click="reconstructPlant"
-                        table-row-hover-class="reconstruct-hover">
-            </ng-table-two>
-            -->
 
             <div class="table-controls">
                 <div class="table-controls" layout="row">
                     <md-input-container md-no-float flex="45"
                         search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
                     </md-input-container>
-
 
                     <div layout="row" layout-align="end center" flex>
                         {{myPlants.length}} plant genomes
