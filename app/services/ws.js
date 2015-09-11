@@ -5,7 +5,7 @@ angular.module('WS', [])
 function($http, $q, $cacheFactory, $log, config, Auth) {
     "use strict";
     var self = this;
-    var cache = $cacheFactory('ws');
+    //var cache = $cacheFactory('ws');
 
     this.workspaces = [];
 
@@ -81,9 +81,13 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                };
     }
 
-    this.get = function(path) {
+    this.cached = {}
+    this.get = function(path, opts) {
+
+        if (opts && opts.cache && path in self.cached) return self.cached[path];
+
         //console.log('fetching', path)
-        return $http.rpc('ws', 'get', {objects: [path]})
+        var p = $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
                         //console.log('get (object) response', res)
 
@@ -111,6 +115,9 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                             return {meta: meta, data: data};
                         }
                     })
+
+        if (opts && opts.cache) self.cached[path] = p;
+        return p;
     }
 
     this.getObjects = function(paths) {

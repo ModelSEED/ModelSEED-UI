@@ -189,19 +189,38 @@ angular.module('MS', [])
 
     }
 
-    this.listMedia = function(path) {
-        var path = path ? path : config.paths.media;
+    this.myMedia = null;
+    this.listMyMedia = function(path) {
+        if (self.myMedia != null) return self.myMedia;
 
-        return WS.listL(path)
-                 .then(function(objs) {
-                        var media = [];
-                        for (var i=0; i<objs.length; i++) {
-                            var obj = objs[i];
-                            media.push(self.sanitizeMedia(obj));
-                        }
+        self.myMedia = WS.listL(path)
+                         .then(function(objs) {
+                                var media = [];
+                                for (var i=0; i<objs.length; i++) {
+                                    var obj = objs[i];
+                                    media.push(self.sanitizeMedia(obj));
+                                }
 
-                        return media;
-                  })
+                                return media;
+                          })
+        return self.myMedia;
+    }
+
+    this.media = null;
+    this.listPublicMedia = function() {
+        if (self.media != null) return self.media;
+
+        self.media = WS.listL( config.paths.media )
+                       .then(function(objs) {
+                            var media = [];
+                            for (var i=0; i<objs.length; i++) {
+                                 var obj = objs[i];
+                                media.push(self.sanitizeMedia(obj));
+                            }
+
+                            return media;
+                        })
+        return self.media;
     }
 
     this.sanitizeMedia = function(obj) {

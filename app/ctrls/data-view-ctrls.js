@@ -424,9 +424,9 @@ function($s, $state, $sParams, WS, tools,
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', '$timeout',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, $timeout) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -520,25 +520,18 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
                         ]
 
      // fetch object data and parse it.
-
      $scope.loading = true;
-     WS.get(path).then(function(res) {
+     WS.get(path, {cache:true}).then(function(res) {
          $scope.models = [res.data];
          $scope.orgName = res.data.name;
 
-         var data = ModelParser.parse(res.data);
-
-         $scope.rxns = data.reactions;
-         $scope.cpds = data.compounds;
-         $scope.genes = data.genes;
-         $scope.compartments = data.compartments;
-         $scope.biomass = data.biomass;
+         $scope.data = ModelParser.parse(res.data);
          $scope.loading = false;
-
      }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
      })
+
 
      /* get_model command that includes gapfilling
      $scope.loading = true;

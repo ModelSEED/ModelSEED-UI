@@ -239,8 +239,8 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 }])
 
-.controller('PlantAnnotations',['$scope', 'WS', '$compile',
-function($s, WS, $compile) {
+.controller('PlantAnnotations',['$scope', 'WS', '$compile', '$timeout',
+function($s, WS, $compile, $timeout) {
     var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
         subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
         roleUrl = url + '?page=FunctionalRolePage&fr=',
@@ -295,11 +295,17 @@ function($s, WS, $compile) {
                     ];
 
     $s.loading = true;
-    WS.get(wsPath)
-      .then(function(res) {
-          $s.annoOverview = parseOverview(res.data);
-          $s.loading = false;
-      })
+    if (WS.cached.annotations) {
+        $s.annoOverview = WS.cached.annotations;
+        $s.loading = false;            
+    } else
+        WS.get(wsPath)
+          .then(function(res) {
+              console.log('res', res)
+              $s.annoOverview = parseOverview(res.data);
+              WS.cached.annotations = $s.annoOverview;
+              $s.loading = false;
+          })
 
 
     // The annotation overview structure seems to consist of hashes with
@@ -906,7 +912,7 @@ function($s, $sParams, WS, MS, Auth, $state,
 
 
     $s.loading = true;
-    MS.listMedia()
+    MS.listPublicMedia()
       .then(function(media) {
           $s.media = media;
           $s.loading = false;
@@ -914,7 +920,7 @@ function($s, $sParams, WS, MS, Auth, $state,
 
 
     $s.loadingMyMedia = true;
-    MS.listMedia('/'+Auth.user+'/media')
+    MS.listMyMedia('/'+Auth.user+'/media')
       .then(function(media) {
           $s.myMedia = media;
           $s.loadingMyMedia = false;

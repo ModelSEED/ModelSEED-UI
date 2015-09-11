@@ -243,7 +243,7 @@ function($rootScope, $state, $sParams, $window,
          $location, auth, $timeout, $templateCache, config) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
-        $templateCache.removeAll();
+        //$templateCache.removeAll();
 
         // if first load on home and user is authenticated,
         // forward to application page [good UX!]
