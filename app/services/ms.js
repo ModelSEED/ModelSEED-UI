@@ -18,6 +18,29 @@ angular.module('MS', [])
 
     var cache = $cacheFactory('ms');
 
+    this.listRastGenomes = function() {
+        return $http.rpc('msSupport', 'list_rast_jobs', {})
+                    .then(function(jobs) {
+                        var genomes = [];
+                        for (var i=0; i<jobs.length; i++) {
+                            var job = jobs[i];
+                            if (job.type !== 'Genome') continue;
+
+                            genomes.push({timestamp: Date.parse(job.mod_time),
+                                          genome_name: job.genome_name,
+                                          genome_id: job.genome_id,
+                                          id: job.id,
+                                          contigs: job.contig_count});
+                        }
+
+                        return genomes;
+                    }).catch(function(e) {
+                        console.error('list rast genomes error', e);
+                    })
+    }
+
+
+
     this.uploadData = function(p) {
         var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
         var params = {objects:objs};

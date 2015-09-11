@@ -697,9 +697,8 @@ function($scope, $state, Patric, $timeout, $http,
                    sort: {field: 'genome_name'},
                    visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
 
-    $scope.myMicrobesopts = {query: '', limit: 25,  offset: 0,
-                             sort: {field: 'genome_name'},
-                             visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+    $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0,
+                             sort: {field: 'timestamp'}};
 
    $scope.myPlantsOpts = {query: '',
                           limit: 25,
@@ -713,13 +712,15 @@ function($scope, $state, Patric, $timeout, $http,
                       {prop: 'taxon_id', label: 'Tax ID'},
                       {prop: 'contigs', label: 'Contigs'}]
 
-    $http.rpc('msSupport', 'list_rast_jobs', {})
-        .then(function(res) {
-            console.log('res', res);
-        })
-        .catch(function(e) {
-            console.error('error', e);
-        })
+    $scope.myMicrobesSpec = [{prop: 'genome_name', label: 'Name'},
+                             {prop: 'genome_id', label: 'ID'},
+                             {prop: 'contigs', label: 'Contigs'}]
+
+    MS.listRastGenomes()
+      .then(function(data) {
+          $scope.myMicrobes = data;
+          console.log('myMicrobes', $scope.myMicrobes)
+      })
 
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
@@ -803,8 +804,12 @@ function($scope, $state, Patric, $timeout, $http,
               })
     }
 
-    $scope.selectGenome = function(item) {
-        $scope.selected = item;
+    $scope.selectPublic = function(item) {
+        $scope.selectedPublic = item;
+    }
+
+    $scope.selectPrivate = function(item) {
+        $scope.selectPrivate = item;
     }
 
     $scope.reconstruct = function(ev, item) {
