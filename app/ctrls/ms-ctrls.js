@@ -809,7 +809,7 @@ function($scope, $state, Patric, $timeout, $http,
     }
 
     $scope.selectPrivate = function(item) {
-        $scope.selectPrivate = item;
+        $scope.selectedPrivate = item;
     }
 
     $scope.reconstruct = function(ev, item) {
