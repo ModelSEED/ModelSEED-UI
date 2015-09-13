@@ -27,6 +27,7 @@
     "ng-context-menu": "1.0.1"
   },
   "resolutions": {
-    "angular": "1.4.0"
+    "angular": "1.4.0",
+    "angular-material": "0.10.1"
   }
 }
