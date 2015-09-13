@@ -229,6 +229,23 @@ function(MS, WS, $dialog, $mdToast) {
         })
     }
 
+    this.error = function(title, msg) {
+
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/error-prompt.html',
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($s, $http) {
+                $s.title = title;
+                $s.msg = msg;
+
+                $s.ok = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
     this.showToast = function(title, name) {
       $mdToast.show({
         controller: 'ToastCtrl',

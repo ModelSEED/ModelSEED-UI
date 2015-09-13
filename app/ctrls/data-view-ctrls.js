@@ -708,7 +708,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     $scope.loading = true;
     WS.get(path).then(function(res) {
         FBAParser.parse(res.data)
-                 .then(function(parsed) {                    
+                 .then(function(parsed) {
                     $scope.fbas = [res.data];
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;

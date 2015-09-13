@@ -183,8 +183,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         return $http.rpc('ws', 'copy', params)
                     .then(function(res) {
                         return res;
-                    }).catch(function(e) {
-                        console.error('could not copy', e)
                     })
     }
 
@@ -198,8 +196,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         return $http.rpc('ws', 'copy', params)
                     .then(function(res) {
                         return res;
-                    }).catch(function(e) {
-                        console.error('could not copy', e)
                     })
     }
 

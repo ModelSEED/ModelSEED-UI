@@ -967,7 +967,12 @@ function($s, $sParams, WS, MS, Auth, $state,
                          $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
                          Dialogs.showComplete('Copied '+res.length+' media formulation'+
                                                 (paths.length>1 ? 's' : ''))
+                     }).catch(function(e) {
+                         if (e.error.code === -32603)
+                             Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
+                                           "Please consider renaming or deleting.")
                      })
+
                  })
     }
 
