@@ -52,11 +52,11 @@
         </div>
 
         <div flex="35" class="vertical-center">
-            {{item.orgName}}<br><!--item.orgName.length > 19 ? item.orgName.slice(0,20)+'...' : -->
             <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip md-delay="800">View Model</md-tooltip>
                 {{item.name}}
-            </a>
+            </a><br>
+            {{item.orgName}}
         </div>
 
         <div flex="30" class="vertical-center" layout="row" layout-align="start">
