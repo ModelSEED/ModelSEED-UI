@@ -27,7 +27,7 @@
 
 <div ng-if="MV.models.length > 0" >
 
-    <md-tabs md-no-ink md-dynamic-height md-selected="topLevelTabs.selectedIndex" >
+    <md-tabs md-selected="topLevelTabs.selectedIndex" md-no-ink md-dynamic-height md-selected="topLevelTabs.selectedIndex" >
     	<md-tab>
     		<md-tab-label>Heatmap</md-tab-label>
 
@@ -39,38 +39,27 @@
 
     	</md-tab>
 
-    	<md-tab>
-    		<md-tab-label>Pathways</md-tab-label>
+		<md-tab>
+			<md-tab-label>Pathways</md-tab-label>
+			<md-tab-body>
+				<ng-table-two table-header="mapHeader"
+						table-data="maps"
+						table-opts="mapOpts"
+						table-loading="loadingMaps"
+						table-placeholder="Search maps">
+				</ng-table-two>
+			<md-tab-body>
+		</md-tab>
 
-            <md-tab-body>
-
-    			<md-tabs md-selected="Tabs.selectedIndex" md-no-ink class="small-tabs pathway-tabs">
-    				<md-tab>
-    					<md-tab-label>Selection</md-tab-label>
-    					<md-tab-body>
-    						<ng-table-two table-header="mapHeader"
-    								table-data="maps"
-    								table-opts="mapOpts"
-    								table-loading="loadingMaps"
-    								table-placeholder="Search maps">
-    						</ng-table-two>
-    					<md-tab-body>
-    				</md-tab>
-
-    				<md-tab ng-repeat="tab in Tabs.tabs">
-    					<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
-    						<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
-    					</md-tab-label>
-    					<md-tab-body>
-    						<div pathway="tab.mapID" models="models" fbas="fbas"></div>
-    						<br>
-    					</md-tab-body>
-    				</md-tab>
-    			</md-tabs>
-
-    		</md-tab-body>
-
-    	</md-tab>
+		<md-tab ng-repeat="tab in Tabs.tabs">
+			<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
+				<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+			</md-tab-label>
+			<md-tab-body>
+				<div pathway="tab.mapID" models="models" fbas="fbas"></div>
+				<br>
+			</md-tab-body>
+		</md-tab>
 
     </md-tabs>
 

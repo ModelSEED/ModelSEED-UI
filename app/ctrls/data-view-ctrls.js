@@ -444,7 +444,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
     var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
 
     $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 1;
+    Tabs.totalTabCount = 7;
 
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -654,7 +654,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     //var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
 
     $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 1;
+    Tabs.totalTabCount = 3;
 
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -708,7 +708,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
     $scope.loading = true;
     WS.get(path).then(function(res) {
         FBAParser.parse(res.data)
-                 .then(function(parsed) {
+                 .then(function(parsed) {                    
                     $scope.fbas = [res.data];
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
