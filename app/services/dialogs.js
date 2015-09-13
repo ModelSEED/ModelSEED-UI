@@ -157,7 +157,7 @@ function(MS, WS, $dialog, $mdToast) {
                     self.showToast('Running Flux Balance Analysis', item.name)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                           console.log('run fba response', res)
+                          console.log('run fba response', res)
                           cb();
                           self.showComplete('FBA Complete',
                                        res[0]+' '+res[7].media.split('/').pop())
@@ -183,6 +183,7 @@ function(MS, WS, $dialog, $mdToast) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
+                $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
 
                 $scope.gapfill = function(){
                     self.showToast('Gapfilling', item.name)
