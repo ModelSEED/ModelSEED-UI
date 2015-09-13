@@ -7,8 +7,8 @@
 
 angular.module('MS', [])
 .service('MS',
-    ['$http', '$log', '$cacheFactory', '$q', 'ModelViewer', 'WS', 'config',
-    function($http, $log, $cacheFactory, $q, MV, WS, config) {
+['$http', '$log', '$cacheFactory', '$q', 'ModelViewer', 'WS', 'config', 'Auth',
+function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
     var self = this;
 
@@ -190,9 +190,10 @@ angular.module('MS', [])
     }
 
     this.myMedia = null;
-    this.listMyMedia = function(path) {
+    this.listMyMedia = function() {
         if (self.myMedia != null) return self.myMedia;
 
+        var path = '/'+Auth.user+'/media'
         self.myMedia = WS.listL(path)
                          .then(function(objs) {
                                 var media = [];
@@ -229,27 +230,14 @@ angular.module('MS', [])
                 isMinimal: obj[7].isMinimal ? true : false,
                 isDefined: obj[7].isDefined ? true : false,
                 type: obj[7].type ? obj[7].type : 'unspecified',
-                timestamp: Date.parse(obj[3])}
+                timestamp: Date.parse(obj[3]),
+                value: obj[0].toLowerCase() }
     }
 
     this.sanitizeMediaObjs = function(objs) {
         var mediaList = [];
         for (var i=0; i<objs.length; i++) { mediaList.push( self.sanitizeMedia(objs[i]) ) }
         return mediaList;
-    }
-
-    this.listMediaDropdown = function() {
-        var publicMedia = config.paths.media;
-        return WS.listL(publicMedia)
-                 .then(function(objs) {
-                        var media = [];
-                        for (var i=0; i<objs.length; i++) {
-                            media.push({name: objs[i][7].name,
-                                        path: objs[i][2]+objs[i][0] });
-                        }
-
-                        return media;
-                  })
     }
 
     this.getModelFBAs = function(modelPath) {

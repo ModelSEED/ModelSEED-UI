@@ -11,35 +11,41 @@ function($scope, $state) {
 }])
 
 
-.controller('MediaDropdown', ['$scope', 'MS', '$log',
-function($scope, MS, $log) {
+.controller('MediaDropdown', ['$scope', 'MS', '$log', 'uiTools',
+function($s, MS, uiTools) {
     var self = this;
-    self.form = $scope.form
+
+    $s.relativeTime = uiTools.relativeTime;
+    $s.filterPublic = true;
+
+    self.form = $s.form;
 
     self.isDisabled = false;
     self.querySearch = querySearch;
     self.selectedItemChange = selectedItemChange;
     self.searchTextChange = searchTextChange;
 
-    MS.listMediaDropdown()
+    MS.listPublicMedia()
       .then(function(media) {
-         var objs = [];
-         for (var i=0; i<media.length; i++) {
-             objs.push({value: media[i].name.toLowerCase(),
-                        name: media[i].name,
-                        path: media[i].path });
-         }
+          $s.media = media;
+      })
 
-         self.media = objs;
+
+    MS.listMyMedia()
+      .then(function(media) {
+          $s.myMedia = media;
       })
 
     function querySearch (query) {
-        var results = query ? self.media.filter( createFilterFor(query) ) : self.media;
-        return results;
+        if (!$s.filterPublic)
+            var results = query ? $s.myMedia.filter( createFilterFor(query) ) : $s.myMedia;
+        else
+            var results = query ? $s.media.filter( createFilterFor(query) ) : $s.media;
+        return results.slice(0, 50);
     }
 
     function searchTextChange(text) {
-      $log.info('Text changed to ' + text);
+
     }
     function selectedItemChange(item) {
         self.form.media = item.path;
@@ -178,7 +184,7 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
 
     // secondary tabs
     $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 1;
+    Tabs.totalTabCount = 2;
 
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapHeader = [{label: 'Name', key: 'name',

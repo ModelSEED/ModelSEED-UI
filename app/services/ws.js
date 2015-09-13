@@ -15,7 +15,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
         return $http.rpc('ws', 'ls', params)
                     .then(function(d) {
-                        $log.log('data', d)
+                        //console.log('ls', d)
                         var d = d[path];
 
                         // parse into list of dicts

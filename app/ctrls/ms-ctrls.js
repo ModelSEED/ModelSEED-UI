@@ -297,7 +297,7 @@ function($s, WS, $compile, $timeout) {
     $s.loading = true;
     if (WS.cached.annotations) {
         $s.annoOverview = WS.cached.annotations;
-        $s.loading = false;            
+        $s.loading = false;
     } else
         WS.get(wsPath)
           .then(function(res) {
@@ -920,7 +920,7 @@ function($s, $sParams, WS, MS, Auth, $state,
 
 
     $s.loadingMyMedia = true;
-    MS.listMyMedia('/'+Auth.user+'/media')
+    MS.listMyMedia()
       .then(function(media) {
           $s.myMedia = media;
           $s.loadingMyMedia = false;
