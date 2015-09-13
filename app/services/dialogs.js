@@ -184,11 +184,12 @@ function(MS, WS, $dialog, $mdToast) {
             controller: ['$scope', '$http',
             function($scope, $http) {
                 $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
+                $scope.form = {model: item.path};
 
                 $scope.gapfill = function(){
                     self.showToast('Gapfilling', item.name)
 
-                    MS.gapfill(item.path)
+                    MS.gapfill($scope.form)
                       .then(function(res) {
                            cb();
                            self.showComplete('Gapfill Complete', res[0])

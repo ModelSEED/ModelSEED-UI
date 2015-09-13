@@ -121,8 +121,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })
     }
 
-    this.gapfill = function(path) {
-        return $http.rpc('ms', 'GapfillModel', {model: path})
+    this.gapfill = function(form) {
+        return $http.rpc('ms', 'GapfillModel', form)
                     .then(function(res){
                         return res;
                     })
