@@ -69,6 +69,8 @@ function($scope, $stateParams) {
 
 .controller('About', ['$scope', '$http', 'config', function($s, $http, config) {
 
+    $s.release = config.releaseVersion;
+    
     $http.get('version/version.txt')
          .then(function(res) {
              $s.commitHash = res.data.trim();
