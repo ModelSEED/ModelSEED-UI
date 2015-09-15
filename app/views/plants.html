@@ -95,4 +95,18 @@
 
     </md-tab>
 
+
+    <md-tab>
+		<md-tab-label>Annotations</md-tab-label>
+        <md-tab-body>
+            <ng-table-two ng-controller="PlantAnnotations" table-header="annoHeader"
+                      table-data="annoOverview"
+                      table-opts="annoOpts"
+                      table-loading="loading"
+                      table-placeholder="Search annotations">
+            </ng-table-two>
+        </md-tab-body>
+    </md-tab>
+
+
 </div>

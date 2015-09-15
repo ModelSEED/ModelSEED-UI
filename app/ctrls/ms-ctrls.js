@@ -70,7 +70,7 @@ function($scope, $stateParams) {
 .controller('About', ['$scope', '$http', 'config', function($s, $http, config) {
 
     $s.release = config.releaseVersion;
-    
+
     $http.get('version/version.txt')
          .then(function(res) {
              $s.commitHash = res.data.trim();
@@ -241,8 +241,8 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 }])
 
-.controller('PlantAnnotations',['$scope', 'WS', '$compile', '$timeout',
-function($s, WS, $compile, $timeout) {
+.controller('PlantAnnotations',['$scope', 'WS',
+function($s, WS) {
     var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
         subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
         roleUrl = url + '?page=FunctionalRolePage&fr=',
@@ -589,7 +589,7 @@ function($scope, $state, Patric, $timeout, $http,
     MS.listRastGenomes()
       .then(function(data) {
           $scope.myMicrobes = data;
-          console.log('myMicrobes (rast)', $scope.myMicrobes)
+          //console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
     WS.listPlantMetas('/plantseed/Genomes/')
@@ -725,7 +725,6 @@ function($scope, $state, Patric, $timeout, $http,
                  if (MS.myPlants) MS.addModel(res, 'plant');
              })
     }
-
 }])
 
 
