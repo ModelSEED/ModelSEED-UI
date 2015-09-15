@@ -6,7 +6,15 @@
 	</span>
 </h4>
 
-<div class="h2">Model <small>{{orgName}}</small>
+<div layout="row">
+	<div class="h2">Model <small>{{orgName}}</small></div>
+
+	<!--<md-input-container layout-align="end end" flex>
+		<md-button ng-if="!canCopy && !editInProgress"
+				   class="pull-right md-secondary"
+				   ng-click="toggleEdit()">Edit
+		</md-button>
+	</md-input-container>-->
 </div>
 <hr class="no-margin">
 
@@ -16,12 +24,32 @@
 	<md-tab>
 		<md-tab-label>Reactions</md-tab-label>
 		<md-tab-body>
-			<ng-table table-header="rxnHeader"
+
+
+			<ng-table ng-if="!editInProgress"
+						table-header="rxnHeader"
 						table-data="data.reactions"
 						table-opts="rxnOpts"
 						table-loading="loading"
 						table-placeholder="Search reactions">
 			</ng-table>
+
+			<ng-table-editor2 ng-if="editInProgress"
+						  table-header="editRxnHeader"
+						  table-data="editableRxns"
+						  table-opts="rxnOpts"
+						  table-loading="loading"
+						  disable-pagination
+						  table-result-text="reactions"
+						  table-placeholder="Search reactions"
+						  delete-btn-template="Delete $count reactions"
+						  add-btn-template="Add reactions"
+						  on-save="save"
+						  on-save-as="saveAs"
+						  on-add="addRxns"
+						  save-text="Saving..."
+						  on-cancel="toggleEdit()">
+			</ng-table-editor2>
 		</md-tab-body>
 	</md-tab>
 

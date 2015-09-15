@@ -1544,6 +1544,7 @@ function($compile, $stateParams) {
     }
  })
 
+// curenlty used for media editor
  .directive('ngTableEditor', ['$filter', 'Dialogs', function($filter, Dialogs) {
        return {
            restrict: 'EA',
@@ -1704,7 +1705,184 @@ function($compile, $stateParams) {
 
             }
        }
-  }])
+}])
+
+
+
+ // curenlty used for model editor
+.directive('ngTableEditor2', ['$filter', 'Dialogs', function($filter, Dialogs) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            placeholder: '@tablePlaceholder',
+            addItems: '=tableAddItems',
+            resultText: '@tableResultText',
+            onSave: '=onSave',
+            onSaveAs: '=onSaveAs',
+            saveInProgressText: '@saveInProgressText',
+            deleteBtnTemplate: '@deleteBtnTemplate',
+            addBtnTemplate: '@addBtnTemplate',
+            deleteInProgressText: '@deleteInProgressText',
+            onCancel: '&onCancel',
+            onAdd: '=onAdd'
+        },
+        templateUrl: 'app/views/general/table-editor2.html',
+        link: function(scope, elem, attrs) {
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+            // table editor expects a copied object as of now
+            // since there is no notion of filtering/sorting for the editor
+            //scope.data = angular.copy(scope.data)
+            //
+            scope.$watch('data', function(newvalue){
+                console.log(' the data changed!!!', newvalue)
+            })
+
+            // list of things to be deleted or edited.
+            scope.checkedItems = [];
+            scope.checkedIndexes = [];
+            scope.checkItem = function($index, item) {
+                item.checked = item.checked ? false : true;
+
+                if (item.checked)
+                    scope.checkedItems.push({index: $index, item: item})
+                else {
+                    // remove from checked list
+                    var i = scope.checkedItems.length;
+                    while (i--) {
+                        if ( angular.equals(scope.checkedItems[i].item, item) )
+                            scope.checkedItems.splice(i, 1)
+                    }
+                }
+            }
+
+            // command operations performed; can be undone via undo
+            scope.operations = [];
+
+
+            scope.deleteInProgressText = scope.deleteInProgressText || 'Deleting...'
+            scope.deleteInProgress = false;
+            scope.delete = function() {
+                scope.deleteInProgress = true;
+
+                // sort to delete largest index first, avoiding index issues
+                scope.checkedItems.sort(function(a,b) {
+                    if (a.index < b.index) return -1;
+                        if (a.index > b.index) return 1;
+                            return 0;
+                });
+                console.log('deleting checked items', scope.checkedItems)
+
+                // delete items
+                var i = scope.checkedItems.length;
+                while (i--) {
+                    for (var j=0; j<scope.data.length; j++) {
+
+                        if ( angular.equals(scope.data[j], scope.checkedItems[i].item) ) {
+                            scope.data.splice(j, 1);
+                            break;
+                        }
+                    }
+                }
+
+                // uncheck items
+                for (var i=0; i<scope.checkedItems.length; i++) {
+                    scope.checkedItems[i].item.checked = false;
+                }
+
+                scope.operations.push({op: 'delete', items: scope.checkedItems});
+
+                // clear checked items
+                scope.checkedItems = [];
+
+                scope.deleteInProgress = false;
+            }
+
+            scope.add = function($event) {
+                scope.onAdd($event);
+            }
+
+            scope.edit = function(rowIndex, $index, cell) {
+                scope.editing = {row: rowIndex, col: $index};
+            }
+
+            scope.saveCell = function(rowIndex, colIndex, row, key) {
+                scope.operations.push({op: 'edit',
+                                     old: row[key],
+                                     new: scope.edit.cell,
+                                     row: row,
+                                     col: key,
+                                     item: {rowIndex: rowIndex,
+                                            colIndex: colIndex}
+                                   });
+                row[key] = scope.edit.cell;
+                scope.editing = null;
+            }
+
+              scope.undo = function() {
+                  var op = scope.operations.pop();
+
+                  if (op.op === 'delete') {
+                      for (var i=0; i<op.items.length; i++) {
+                          scope.data.splice(op.items[i].index, 0, op.items[i].item);
+                      }
+                  } else if (op.op === 'add') {
+                      var i = op.items.length;
+                      while (i--) {
+                          scope.data.splice(op.items[i].index, 1);
+                      }
+                  } else if (op.op === 'edit') {
+                      scope.data[op.item.rowIndex][op.col] = op.old;
+                  }
+              }
+
+              scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
+              scope.saveInProgress = false;
+              scope.save = function($ev) {
+                  scope.saveInProgress = true;
+
+                  scope.onSave(scope.data)
+                       .then(function(res) {
+                           scope.saveInProgres = false;
+                           scope.onCancel();
+                       })
+              }
+
+              scope.saveAs = function($ev) {
+                  scope.saveAsInProgress = true;
+
+                  // show save as dialog, with save/cancel callbacks
+                  Dialogs.saveAs($ev,
+                      function(newName){
+                          scope.onSaveAs(scope.data, newName)
+                               .then(function() {
+                                   scope.saveAsInProgres = false;
+                                   scope.onCancel();
+                               });
+                      },
+                      function() {
+
+                      });
+              }
+
+              scope.cancel = function() {
+                  scope.onCancel();
+              }
+
+              // listen for operations, add to operation stack
+              scope.$on('Events.commandOperation', function(e, operation) {
+                  console.log('adding things', operation)
+                  scope.operations.push({op: operation.op, items: operation.items})
+              })
+
+          }
+     }
+}])
+
 
 
 .directive('editable', ['$timeout', 'FBA',

@@ -423,9 +423,9 @@ function($s, $state, $sParams, WS, tools,
 
 
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem',
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog',
  'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', '$timeout',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem,
+function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, $timeout) {
 
     // redirect stuff for patric auth
@@ -523,9 +523,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
      $scope.loading = true;
      WS.get(path, {cache:true}).then(function(res) {
          $scope.models = [res.data];
+         console.log('raw model', $scope.models)
          $scope.orgName = res.data.name;
 
          $scope.data = ModelParser.parse(res.data);
+         console.log('parsed model', $scope.data)
          $scope.loading = false;
      }).catch(function(e) {
          $scope.error = e;
@@ -642,6 +644,109 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem,
               $mdSidenav('cpdView').close()
           }
     }
+
+
+    // edit stuff
+
+    $scope.editRxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn'},
+                         {label: 'Name', key: 'name'},
+                         {label: 'EQ', key: 'eq'},
+                         {label: 'Genes', key: 'genes',
+                             formatter: function(row) {
+                                 if (!row.genes.length) return '-';
+
+                                 var links = [];
+                                 for (var i=0; i<row.genes.length; i++) {
+                                     links.push('<a href="'+
+                                                    featureUrl+row.genes[i]+'" target="_blank">'
+                                                 +row.genes[i]+'</a>')
+                                 }
+
+                                 return links.join('<br>');
+                             }
+                        }];
+
+    $scope.toggleEdit = function() {
+        $scope.editInProgress = !$scope.editInProgress;
+
+        $scope.editableRxns = angular.copy($scope.data.reactions)
+        console.log('editable', $scope.editableRxns)
+    }
+
+
+    $scope.addRxns = function(ev) {
+        var $self = $scope;
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/add-rxns.html',
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                console.log('scope', $scope)
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+                $scope.addItems = function(items){
+                    $dialog.hide();
+
+                    console.log('add these items', items)
+                    // add items to media
+                    var newItems = [];
+                    for (var i=0; i<items.length; i++) {
+                        var rxn = items[i]
+                        newItems.push({id: rxn.id+'_c0', // use default compartment for now
+                                       name: rxn.name,
+                                       eq: rxn.definition,
+                                       compartment: 'c0',
+                                       genes: []  // no genes for now.  can have have lookup?
+                                      })
+                    }
+                    console.log('newitems', newItems)
+
+                    console.log('before', $scope.editableRxns)
+                    $self.editableRxns = newItems.concat($scope.editableRxns);
+                    console.log('after', $scope.editableRxns)
+
+                    var opItems = [];
+                    for (var i=0; i<newItems.length; i++) {
+                        opItems.push( {index: i, item: items[i]} );
+                    }
+
+                    // add operation to undo
+                    $self.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
+                }
+
+                $scope.bioRxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                              visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
+
+                $scope.bioRxnHeader = [{label: 'Name', key: 'name'},
+                                {label: 'ID', key: 'id'},
+                                {label: 'EQ', key: 'definition'},
+                                {label: 'deltaG', key: 'deltag'},
+                                {label: 'detalGErr', key: 'deltagerr'}];
+
+
+                function updateRxns() {
+                    Biochem.get('model_reaction', $scope.rxnOpts)
+                           .then(function(res) {
+                                $scope.bioRxns = res;
+                                $scope.loadingRxns = false;
+                           })
+                }
+
+
+                $scope.$watch('bioRxnOpts', function(after, before) {
+                    $scope.loadingRxns = true;
+                    updateRxns();
+                }, true)
+            }]
+        })
+    }
+
+
 
 }])
 
@@ -935,8 +1040,16 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         	biomass.equation = reactants + " => " + products;
         }
 
+        var gapfills= []
         for (var i=0; i < data.modelreactions.length; i++) {
             var rxn = data.modelreactions[i];
+
+            // test gapfill stuff
+            /*if (Object.keys(rxn.gapfill_data).length > 0) {
+                console.log('gapfill',rxn.id, rxn.gapfill_data)
+                gapfills.push(rxn.id)
+            }*/
+
             rxn.gpr = "";
 
             var reactants = "",
