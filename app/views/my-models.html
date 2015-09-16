@@ -35,9 +35,6 @@
 
 
         <div class="expand-container vertical-center">
-            <md-tooltip md-direction="left" md-delay="1000" md-autohide="true">
-                {{!item.relatedFBAs ? 'Click row to view FBA and Gapfills' : 'Click row to hide FBA and Gapfills'}}
-            </md-tooltip>
             <i ng-if="!item.loading && !item.relatedFBAs"
                class="fa fa-caret-right"
                style="opacity: 0.5;"></i>
