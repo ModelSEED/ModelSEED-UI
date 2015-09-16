@@ -46,7 +46,7 @@
                 <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
                     {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
-			    <a ng-click="cancel()" class="no-link">Cancel</a>
+			    <a ng-click="cancel($event)" class="no-link">Cancel</a>
             </md-input-container>
         </div>
     </div>

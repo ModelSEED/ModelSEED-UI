@@ -221,7 +221,9 @@ function(MS, WS, $dialog, $mdToast) {
                     $dialog.hide();
                 }
 
-                $scope.cancel = function(){
+                $scope.cancel = function($event){
+                    console.log('calling cancel')
+                    $event.preventDefault();
                     if (cancelCB) cancelCB();
                     $dialog.hide();
                 }

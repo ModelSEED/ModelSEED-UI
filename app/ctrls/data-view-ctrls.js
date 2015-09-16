@@ -265,9 +265,9 @@ function($s, $sParams, MS, $http, config, Auth) {
 }])
 
 .controller('MediaDataView',
-['$scope', '$state', '$stateParams', 'WS', 'uiTools',
+['$scope', '$state', '$stateParams', 'WS', 'MS', 'uiTools',
  '$http', 'Auth', '$filter', '$mdDialog', 'Biochem', 'Dialogs',
-function($s, $state, $sParams, WS, tools,
+function($s, $state, $sParams, WS, MS, tools,
          $http, Auth, $filter, $dialog, Biochem, Dialogs) {
 
     // path and name of object
@@ -341,14 +341,13 @@ function($s, $state, $sParams, WS, tools,
         var folder = '/'+Auth.user+'/media/';
         return WS.save(folder+newName, table, {userMeta: {}, overwrite: true})
               .then(function(res) {
-                  console.log('save as response')
-                  Dialogs.showComplete('Saved media', newName)
+                  MS.addMyMedia(res);
+                  Dialogs.showComplete('Saved media', newName);
                   $state.go('app.mediaPage', {path: folder+newName})
               }).catch(function(e) {
                   console.log('error', e)
                   self.showError('Save error', e.error.message.slice(0,30)+'...')
               })
-
     }
 
     $s.addCpds = function(ev) {
@@ -523,11 +522,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
      $scope.loading = true;
      WS.get(path, {cache:true}).then(function(res) {
          $scope.models = [res.data];
-         console.log('raw model', $scope.models)
          $scope.orgName = res.data.name;
 
          $scope.data = ModelParser.parse(res.data);
-         console.log('parsed model', $scope.data)
          $scope.loading = false;
      }).catch(function(e) {
          $scope.error = e;

@@ -4,7 +4,7 @@
       <div class="md-toolbar-tools md-toolbar-accent">
         <h3>Save {{type}} As</h3>
         <span flex></span>
-        <md-button class="md-icon-button" ng-click="cancel()">
+        <md-button class="md-icon-button" ng-click="cancel($event)">
           <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
         </md-button>
       </div>
@@ -21,9 +21,9 @@
 
 
         <div class="md-actions" layout="row">
-            <md-button ng-click="cancel()">
+            <a class="no-link" ng-click="cancel($event);">
                 cancel
-            </md-button>
+            </a>
             <md-button type="submit" class="md-raised md-primary" ng-disabled="!form.name">
                 Save
             </md-button>

@@ -189,22 +189,31 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
     }
 
-    this.myMedia = null;
+    this.myMedia = null; //cached media data
     this.listMyMedia = function() {
-        if (self.myMedia != null) return self.myMedia;
+        if (self.myMedia != null) {
+            var d = $q.defer();
+            d.resolve(self.myMedia)
+            return d.promise;
+        }
 
-        var path = '/'+Auth.user+'/media'
-        self.myMedia = WS.listL(path)
-                         .then(function(objs) {
-                                var media = [];
-                                for (var i=0; i<objs.length; i++) {
-                                    var obj = objs[i];
-                                    media.push(self.sanitizeMedia(obj));
-                                }
+        var path = '/'+Auth.user+'/media';
+        return WS.listL(path)
+          .then(function(objs) {
+                    var media = [];
+                    for (var i=0; i<objs.length; i++) {
+                        var obj = objs[i];
+                        media.push(self.sanitizeMedia(obj));
+                    }
 
-                                return media;
-                          })
-        return self.myMedia;
+                    self.myMedia = media
+                    return media;
+              })
+    }
+
+    this.addMyMedia = function(media) {
+        if (!self.myMedia) return;
+        self.myMedia.push(self.sanitizeMedia(media));
     }
 
     this.media = null;

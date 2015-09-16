@@ -1694,7 +1694,8 @@ function($compile, $stateParams) {
                         });
                 }
 
-                scope.cancel = function() {
+                scope.cancel = function($event) {
+                    $event.preventDefault();
                     scope.onCancel();
                 }
 
@@ -1869,7 +1870,8 @@ function($compile, $stateParams) {
                       });
               }
 
-              scope.cancel = function() {
+              scope.cancel = function($event) {
+                  $event.preventDefault();
                   scope.onCancel();
               }
 

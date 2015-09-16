@@ -177,7 +177,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                     $s.loadingCpds = false;
                })
     }
-
+    
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
         updateRxns();

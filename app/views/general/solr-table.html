@@ -1,49 +1,48 @@
 
-<div ng-if="data">
-    <div class="table-controls"  layout="row">
-        <md-input-container md-no-float flex="45"
-            search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
-        </md-input-container>
+<div class="table-controls"  layout="row">
+    <md-input-container md-no-float flex="45"
+        search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+    </md-input-container>
 
-        <md-progress-circular ng-if="loading"
-                              md-mode="indeterminate"
-                              class="table-loading"
-                              md-diameter="20">
-        </md-progress-circular>
+    <md-progress-circular ng-if="loading"
+                          md-mode="indeterminate"
+                          class="table-loading"
+                          md-diameter="20">
+    </md-progress-circular>
 
-        <md-input-container pagination
-            pagination-offset="opts.offset"
-            pagination-limit="opts.limit"
-            pagination-total="data.numFound"
-            layout="row"
-            layout-align="end center" flex>
-        </md-input-container>
-    </div>
-
-    <table class="table table-striped table-bordered table-hover" ng-if="data.docs.length">
-        <thead sortable>
-            <tr>
-                <th ng-repeat="h in header track by $index"
-                    ng-class="{'sorting-desc': opts.sort.field == h.key && opts.sort.desc,
-                               'sorting-asc': opts.sort.field == h.key && !opts.sort.desc}"
-                    ng-click="sortBy($event, h.key)">{{h.label}}</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
-                <td ng-repeat="h in header">
-                    {{item[h.key]}}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div ng-if="!loading && data.numFound == 0" class="alert alert-warning">
-        No item found
-    </div>
-
+    <md-input-container pagination
+        pagination-offset="opts.offset"
+        pagination-limit="opts.limit"
+        pagination-total="data.numFound"
+        layout="row"
+        layout-align="end center" flex>
+    </md-input-container>
 </div>
+
+<table class="table table-striped table-bordered table-hover" ng-if="data.docs.length">
+    <thead sortable>
+        <tr>
+            <th ng-repeat="h in header track by $index"
+                ng-class="{'sorting-desc': opts.sort.field == h.key && opts.sort.desc,
+                           'sorting-asc': opts.sort.field == h.key && !opts.sort.desc}"
+                ng-click="sortBy($event, h.key)">{{h.label}}</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
+            <td ng-repeat="h in header">
+                {{item[h.key]}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div ng-if="!loading && data.numFound == 0" class="alert alert-warning">
+    No item found
+</div>
+
+
 
 
 <div ng-if="!loading && !data">
