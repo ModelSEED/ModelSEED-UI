@@ -48,11 +48,11 @@
             </img>
         </div>
 
-        <div flex="35" class="vertical-center">
+        <div flex="35" class="vertical-center" layout="column">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip md-delay="800">View Model</md-tooltip>
                 {{item.name}}
-            </a><br>
+            </a>
             {{item.orgName}}
         </div>
 
@@ -165,12 +165,12 @@
             </img>
         </div>
 
-        <div flex="35" class="vertical-center">
-            {{item.orgName}}<br>
+        <div flex="35" class="vertical-center" layout="column">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}
             </a>
+            {{item.orgName}}
         </div>
 
         <div flex="30" class="vertical-center">

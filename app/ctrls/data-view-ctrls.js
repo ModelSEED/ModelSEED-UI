@@ -479,7 +479,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
                                  return links.join('<br>');
                              }
-                        }];
+                        },
+                        {label: 'Gapfill', key: 'gapfill',
+                            formatter: function(item) {
+                                return item.summary || '-';
+                            }
+                    }];
 
     $scope.cpdHeader = [{label: 'ID', key: 'id', newTab: 'cpd',
                             call: function(e, item) {
@@ -1041,12 +1046,6 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         for (var i=0; i < data.modelreactions.length; i++) {
             var rxn = data.modelreactions[i];
 
-            // test gapfill stuff
-            /*if (Object.keys(rxn.gapfill_data).length > 0) {
-                console.log('gapfill',rxn.id, rxn.gapfill_data)
-                gapfills.push(rxn.id)
-            }*/
-
             rxn.gpr = "";
 
             var reactants = "",
@@ -1148,11 +1147,39 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             rxn.compartment = compartNameMapping[compartment[0]]+' '+compartment[1];
             this.rxnhash[rxn.id] = rxn;
 
+            //  gapfill stuff
+            var gapData = rxn.gapfill_data;
+            var gapfill;
+            if (Object.keys(gapData).length > 0) {
+                var added, reversed, summary;
+                //console.log('gapfill',rxn.id, gapData)
+
+                for (var key in gapData) {
+                    if (gapData[key].indexOf('added') !== -1)
+                        added = true;
+                    if (gapData[key].indexOf('reversed') !== -1)
+                        reversed = true;
+                }
+
+                if (added && reversed) {
+                    summary = 'added, reversed';
+                } else if (added) {
+                    summary = 'added';
+                } else if (reversed) {
+                    summary = 'reversed';
+                }
+                gapfill = {solutions: Object.keys(gapData),
+                           added: added || false,
+                           reversed: reversed || false,
+                           summary: summary}
+            }
+
             reactions.push({name: name,
                             id: id,
                             compartment: compartment,
                             eq: eq,
-                            genes: rxn.genes
+                            genes: rxn.genes,
+                            gapfill: gapfill || false
                           })
         }
 
