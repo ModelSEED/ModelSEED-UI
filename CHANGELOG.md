@@ -5,12 +5,15 @@ Below contains a summary of notable changes and deploy date for each release.
 
 #### Next version
 
-- Update model list after reconstruct
 - Make 'my microbe' page work against RAST genomes?
-- Highlight gapfilled reactions
+- Highlight gapfilled reactions everywhere else
 - Turn on model editing
 - Fix |flux| button (which is the default)
 
+
+####vAlpha-1.1.1
+- Update model list after reconstruct (da7a54530fe8ee93eccbacd54c026c9fbd99a050)
+- Add gapfill data to model (eac4440fd2042e218b9de900342988ac82a5c30a)
 
 ####vAlpha-1.1.0
 
