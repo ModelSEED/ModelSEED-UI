@@ -177,7 +177,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                     $s.loadingCpds = false;
                })
     }
-    
+
     $s.$watch('rxnOpts', function(after, before) {
         $s.loadingRxns = true;
         updateRxns();
@@ -691,7 +691,7 @@ function($scope, $state, Patric, $timeout, $http,
         Dialogs.reconstruct(ev, params,
             function(res) {
                 console.log('done reconstructing', res)
-                //MS.addModel(res, 'microbe')
+                MS.addModel(res, 'microbe')
             })
     }
 
@@ -704,7 +704,7 @@ function($scope, $state, Patric, $timeout, $http,
         $scope.selected = item;
         Dialogs.reconstructPlant(ev, params,
             function(res) {
-                //MS.addModel(res, 'plant')
+                MS.addModel(res, 'plant')
             })
     }
 

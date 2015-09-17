@@ -342,7 +342,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.getFeature = function(genome, feature) {
-        $log.log('getting feature', feature)
+        console.log('getting feature', feature)
         return $http.rpc('ms', 'get_feature', {genome: genome, feature: feature})
                     .then(function(res) {
                         $log.log('feature response', feature)
@@ -352,7 +352,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.addModel = function(model, type) {
-        $log.log('adding model', model)
+        console.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
             syncCache(this.myModels, model)
         else if (type.toLowerCase() === 'plant')
@@ -367,6 +367,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             break;
         }
 
+        model.fba_count += 1; // increment fba count on client for now
         data.push( self.sanitizeModel(model) );
         sortCachedModels(data);
     }
