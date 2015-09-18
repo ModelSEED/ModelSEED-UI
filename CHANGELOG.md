@@ -8,8 +8,11 @@ Below contains a summary of notable changes and deploy date for each release.
 - Make 'my microbe' page work against RAST genomes?
 - Highlight gapfilled reactions everywhere else
 - Turn on model editing
-- Fix |flux| button (which is the default)
 
+
+####vAlpha-1.1.2
+- Don't allow table for old model objects to avoid confusion in comparison of gapfilled data
+- Fix |flux| button (default for heatmap)
 
 ####vAlpha-1.1.1
 - Update model list after reconstruct (da7a54530fe8ee93eccbacd54c026c9fbd99a050)

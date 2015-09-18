@@ -529,34 +529,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
          $scope.models = [res.data];
          $scope.orgName = res.data.name;
 
-         $scope.data = ModelParser.parse(res.data);
+         try {
+             $scope.data = ModelParser.parse(res.data);
+         } catch(msg) {
+             $scope.error = msg;
+         }
          $scope.loading = false;
      }).catch(function(e) {
          $scope.error = e;
          $scope.loading = false;
      })
-
-
-     /* get_model command that includes gapfilling
-     $scope.loading = true;
-     $http.rpc('ms', 'get_model', {model: path, to: true})
-         .then(function(res) {
-         $scope.models = [res];
-
-         console.log('model with gapfills', res)
-
-         var data = ModelParser.parse(res);
-
-         $scope.rxns = data.reactions;
-         $scope.cpds = data.compounds;
-         $scope.genes = data.genes;
-         $scope.compartments = data.compartments;
-         $scope.biomass = data.biomass;
-         $scope.loading = false;
-     }).catch(function(e) {
-         $scope.error = e;
-         $scope.loading = false;
-     })*/
 
      $scope.loadingMaps = true;
      MV.getMaps()
@@ -649,7 +631,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
 
     // edit stuff
-
     $scope.editRxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn'},
                          {label: 'Name', key: 'name'},
                          {label: 'EQ', key: 'eq'},
@@ -895,14 +876,6 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
 }])
 
-.controller('RxnPage', ['$scope', '$timeout', function($scope, $timeout) {
-    $scope.rxn;
-
-    $timeout(function() {
-        console.log('rxn', $scope.rxn )
-    })
-
-}])
 
 .service('ModelParser', ['MS', function(MS) {
     var self = this;
@@ -1148,17 +1121,22 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             this.rxnhash[rxn.id] = rxn;
 
             //  gapfill stuff
-            var gapData = rxn.gapfill_data;
-            var gapfill;
-            if (Object.keys(gapData).length > 0) {
-                var added, reversed, summary;
-                //console.log('gapfill',rxn.id, gapData)
+            var gfData = rxn.gapfill_data;
+            if (!gfData) {
+                throw 'Sorry, your model is outdated.  Please reconstruct or download instead.';
+            }
 
-                for (var key in gapData) {
-                    if (gapData[key].indexOf('added') !== -1)
+            var gapfill = null;
+            var added = false,
+                reversed = false,
+                summary = null;
+            if (Object.keys(gfData).length > 0) {
+                for (var key in gfData) {
+                    if (gfData[key].indexOf('added') !== -1)
                         added = true;
-                    if (gapData[key].indexOf('reversed') !== -1)
+                    if (gfData[key].indexOf('reversed') !== -1) {
                         reversed = true;
+                    }
                 }
 
                 if (added && reversed) {
@@ -1168,9 +1146,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                 } else if (reversed) {
                     summary = 'reversed';
                 }
-                gapfill = {solutions: Object.keys(gapData),
-                           added: added || false,
-                           reversed: reversed || false,
+                gapfill = {solutions: Object.keys(gfData),
                            summary: summary}
             }
 

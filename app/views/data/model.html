@@ -131,6 +131,8 @@
 	</md-tab>
 </md-tabs>
 
+<div ng-if="error" class="alert alert-warning">{{error}}</div>
+
 
 <section ng-controller="SideNav">
 
@@ -152,7 +154,7 @@
             <h1 class="md-toolbar-tools">{{selected.id}}</h1>
         </md-toolbar>
         <md-content layout-padding layout="column" layout-align="center left">
-			<ng-include src="'app/views/lists/cpd-page.html'" ng-controller="RxnPage"></ng-include>
+			<ng-include src="'app/views/lists/cpd-page.html'"></ng-include>
 
             <md-button ng-click="close()" class="md-primary">
                 Close

@@ -394,8 +394,10 @@ function($compile, config, WS, $q) {
                                     mapName: $s.name,
                                     mapData: $s.mapData,
                                     models: $s.models,
-                                    fbas: $s.fbas}
+                                    fbas: $s.fbas,
+                                    absFlux: true}
 
+                      //console.log('pathway params', params)
                       var pathway = new ModelSeedPathway(params);
                    })
            }
@@ -942,6 +944,11 @@ function($compile, $stateParams) {
                 draw(val, 1);
             })
 
+            scope.$on('Compare.event.absFlux', function(e, absFlux) {
+                draw(scope.heatmap, absFlux);
+            })
+
+
             function draw(data, absFlux) {
                 elem.html('');
                 elem.append('<div id="canvas">');
@@ -1084,7 +1091,6 @@ function($compile, $stateParams) {
         },
         link: function(scope, elem, attr) {
             var config = new ModelSeedVizConfig();
-            console.log('called legend')
 
             angular.element(elem).append('<div id="legend">');
 
