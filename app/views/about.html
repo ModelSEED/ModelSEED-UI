@@ -30,7 +30,10 @@
         <table class="table table-condensed status-table">
             <thead>
                 <tr>
-                    <th>Service</th><th>End Point Url</th><th>Status</th>
+                    <th>Service</th>
+                    <th>End Point Url</th>
+                    <th>Status</th>
+                    <th>API</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,10 +41,12 @@
                     <td>RAST Auth</td>
                     <td>{{urls.auth_url}}</td>
                     <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>PATRIC Auth</td>
                     <td>{{urls.patric_auth_url}}</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -54,6 +59,11 @@
                             <div ng-switch-default>loading...</div>
                         </div>
                     </td>
+                    <td>
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/ProbModelSEED.spec" target="_blank">Spec</a>,
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/biop3/ProbModelSEED/ProbModelSEEDClient.py" target="_blank">Python</a>,
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/Bio/ModelSEED/ProbModelSEED/ProbModelSEEDClient.pm" target="_blank">Perl</a>
+                    </td>
                 </tr>
                 <tr>
                     <td><a href="https://github.com/PATRIC3/Workspace" target="_blank">Workspace</a></td>
@@ -64,6 +74,11 @@
                             <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
                             <div ng-switch-default>loading...</div>
                         </div>
+                    </td>
+                    <td>
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/Workspace.spec" target="_blank">Spec</a>,
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/biop3/Workspace/WorkspaceClient.py" target="_blank">Python</a>,
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm" target="_blank">Perl</a>
                     </td>
                 </tr>
                 <tr>
@@ -76,6 +91,7 @@
                             <div ng-switch-default>loading...</div>
                         </div>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>SOLR</td>
@@ -87,6 +103,7 @@
                             <div ng-switch-default>loading...</div>
                         </div>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>ModelSEED Support Service</td>
@@ -98,6 +115,7 @@
                             <div ng-switch-default>loading...</div>
                         </div>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>App Service (not in use)</td>
@@ -109,6 +127,7 @@
                             <div ng-switch-default>loading...</div>
                         </div>
                     </td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>
