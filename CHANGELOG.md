@@ -10,6 +10,10 @@ Below contains a summary of notable changes and deploy date for each release.
 - Turn on model editing
 
 
+####vAlpha-1.1.3
+- Temp fix for queries with spaces against public genome table
+- Change columns in public genome table
+
 ####vAlpha-1.1.2
 - Don't allow table for old model objects to avoid confusion in comparison of gapfilled data
 - Fix |flux| button (default for heatmap)

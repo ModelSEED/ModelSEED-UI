@@ -3,7 +3,7 @@
 angular.module('config', []).service('config', function() {
 
 
-    this.releaseVersion = 'vAlpha-1.1.2';
+    this.releaseVersion = 'vAlpha-1.1.3';
 
     // wether or not to include plants UI components
     this.includePlants = true;

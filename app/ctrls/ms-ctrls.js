@@ -565,7 +565,7 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.opts = {query: '', limit: 25, offset: 0,
                    sort: {field: 'genome_name'},
-                   visible: ['genome_name', 'genome_id', 'genus', 'taxon_id', 'contigs']};
+                   visible: ['genome_name', 'genome_id', 'species', 'contigs']};
 
     $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0,
                              sort: {field: 'timestamp'}};
@@ -578,8 +578,7 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.columns = [{prop: 'genome_name', label: 'Name'},
                       {prop: 'genome_id', label: 'ID'},
-                      {prop: 'genus', label: 'Genus'},
-                      {prop: 'taxon_id', label: 'Tax ID'},
+                      {prop: 'species', label: 'Species'},
                       {prop: 'contigs', label: 'Contigs'}]
 
     $scope.myMicrobesSpec = [{prop: 'genome_name', label: 'Name'},
@@ -665,7 +664,8 @@ function($scope, $state, Patric, $timeout, $http,
     // update visible genomes
     function update() {
         $scope.loading = true;
-        Patric.getGenomes( $scope.opts, $scope.filters.myGenomes )
+        //Patric.getGenomes( $scope.opts, $scope.filters.myGenomes )
+        Patric.listGenomes( $scope.opts )
               .then(function(genomes) {
                   $scope.genomes = genomes;
                   $timeout(function() {

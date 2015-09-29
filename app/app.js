@@ -156,14 +156,12 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         // ModelSEED Projects
         .state('projects', {
-            templateUrl: 'projects/projects.html',
-        }).state('projects.home', {
             url: '/projects',
             templateUrl: 'projects/home.html',
-        }).state('regulons', {
+        }).state('projects.regulons', {
             url: '/regulons',
             templateUrl: 'projects/regulons/overview.html',
-        }).state('regulons.genes', {
+        }).state('projects.regulons.genes', {
             url: '/genes',
             templateUrl: 'projects/regulons/genes.html',
             controller: 'Regulons'
