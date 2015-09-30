@@ -891,7 +891,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.loadingPlants = false;
         }).catch(function(e) {
             $scope.myPlants = [];
-            $scope.loadingPlatns = false;
+            $scope.loadingPlants = false;
         })
     }
 
