@@ -873,14 +873,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingMicrobes = true;
         MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
+            console.log('res', res)
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
-            if (e.error.code === -32603)
-                $scope.error = 'Something seems to have went wrong. '+
-                               'Please try logging out and back in again.';
-            else
-                $scope.error = e.error.message;
+            $scope.myMicrobes = [];
             $scope.loadingMicrobes = false;
         })
     }
@@ -893,11 +890,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {
-            if (e.error.code === -32603)
-                $scope.error = 'Something seems to have went wrong. '+
-                               'Please try logging out and back in again.';
-            else
-                $scope.error = e.error.message;
+            $scope.myPlants = [];
             $scope.loadingPlatns = false;
         })
     }
