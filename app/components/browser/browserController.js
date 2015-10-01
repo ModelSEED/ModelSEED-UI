@@ -116,9 +116,9 @@ angular.module('Browser', ['uiTools'])
         if (!name) return;
 
         $scope.saving = true;
-        return WS.createFolder( path(name) ).then(function() {
+        return WS.createFolder( path(name) ).then(function(res) {
                    $scope.saving = false;
-                   $scope.updateDir();
+                   $scope.items.push(WS.sanitizeObj(res[0]))
                }).catch(function(e){
                     console.log('there was an error', e)
                     $scope.saving = false;
@@ -126,10 +126,10 @@ angular.module('Browser', ['uiTools'])
     }
 
     // delete an object
+    $scope.filtered;
     $scope.deleteObj = function(item) {
         WS.deleteObj( path(item.name), item.type ).then(function(res) {
-            WS.rmFromModel(res[0]);
-            $scope.updateDir();
+            $scope.items.splice($scope.items.indexOf(item.name), 1);
         })
     }
 

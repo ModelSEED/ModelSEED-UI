@@ -21,7 +21,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         // parse into list of dicts
                         var data = [];
                         for (var i in d)
-                            data.push( self.wsListToDict(d[i]) );
+                            data.push( self.sanitizeObj(d[i]) );
 
                         return data;
                     })
@@ -66,18 +66,18 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
-    // wsListToDict: takes workspace info array, returns dict.
-    this.wsListToDict = function(ws) {
-        return {name: ws[0],
-                type: ws[1],
-                path: ws[2]+ws[0],
-                modDate: ws[3],
-                id: ws[4],
-                owner: ws[5],
-                size: ws[6],
+    // sanitizeObj: takes workspace info array, returns dict.
+    this.sanitizeObj = function(obj) {
+        return {name: obj[0],
+                type: obj[1],
+                path: obj[2]+obj[0],
+                modDate: obj[3],
+                id: obj[4],
+                owner: obj[5],
+                size: obj[6],
                 files: null, // need
                 folders: null, // need
-                timestamp: Date.parse(ws[3])
+                timestamp: Date.parse(obj[3])
                };
     }
 
