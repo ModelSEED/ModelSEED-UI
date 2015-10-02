@@ -26,8 +26,6 @@
         <thead sortable>
             <tr>
                 <th ng-repeat="h in header track by $index"
-                    ng-class="{'sorting-desc': opts.sort.field == h.key && opts.sort.desc,
-                               'sorting-asc': opts.sort.field == h.key && !opts.sort.desc}"
                     ng-click="sortBy($event, h.key)">{{::h.label}}</th>
             </tr>
         </thead>

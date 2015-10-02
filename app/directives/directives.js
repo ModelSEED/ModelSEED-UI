@@ -1929,7 +1929,7 @@ function($compile, $stateParams) {
             scope.sortBy = function($event, name) {
                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
                 scope.opts.sort = {field: name, desc: desc};
-                /*
+
                 angular.element(elem).find('th').removeClass('sorting-asc')
                 angular.element(elem).find('th').removeClass('sorting-desc')
 
@@ -1939,7 +1939,7 @@ function($compile, $stateParams) {
                 } else {
                     angular.element($event.target).removeClass('sorting-desc')
                     angular.element($event.target).addClass('sorting-asc')
-                }*/
+                }
             }
         }
     }
