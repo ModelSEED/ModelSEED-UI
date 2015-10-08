@@ -1,0 +1,17 @@
+
+<md-dialog flex="70">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Download</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel($event)">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+        <a id="download-csv" download="{{filename}}">CSV (excel)</a><br>
+        <a id="download-tab" download="{{filename}}.tsv">Tab-delimited (.txt file)</a>
+    </md-dialog-content>
+</md-dialog>

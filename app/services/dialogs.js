@@ -5,8 +5,8 @@
  *
  */
 angular.module('Dialogs', [])
-.service('Dialogs', ['MS', 'WS', '$mdDialog', '$mdToast',
-function(MS, WS, $dialog, $mdToast) {
+.service('Dialogs', ['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -232,7 +232,6 @@ function(MS, WS, $dialog, $mdToast) {
     }
 
     this.error = function(title, msg) {
-
         return $dialog.show({
             templateUrl: 'app/views/dialogs/error-prompt.html',
             clickOutsideToClose: true,
@@ -242,6 +241,10 @@ function(MS, WS, $dialog, $mdToast) {
                 $s.msg = msg;
 
                 $s.ok = function(){
+                    $dialog.hide();
+                }
+
+                $s.cancel = function(){
                     $dialog.hide();
                 }
             }]
@@ -300,6 +303,51 @@ function(MS, WS, $dialog, $mdToast) {
                     '</md-toast>',
         hideDelay: 10000
       });
+    }
+
+    this.showError = function(msg) {
+       $mdToast.show({
+        controller: 'ToastCtrl',
+        parent: angular.element('.sidebar'),
+        //templateUrl:'app/views/dialogs/notify.html',
+        template: '<md-toast>'+
+                        '<span flex style="margin-right: 30px;">'+
+                          '<span class="ms-color-error">Error</span><br>'+
+                          msg+
+                         '</span>'+
+                    '</md-toast>',
+        hideDelay: 10000
+      });
+    }
+
+    this.download = function(ev, cols, tbody, filename) {
+        ev.stopPropagation();
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/download.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                var csvData = uiTools.JSONToCSV(cols, tbody);
+                var tabData = uiTools.JSONToTabTable(cols, tbody);
+
+                $scope.filename = filename;
+
+                $timeout(function () {
+                    document.getElementById('download-csv')
+                            .setAttribute("href", "data:text/csv;charset=utf-8,"+encodeURI(csvData));
+
+                    document.getElementById('download-tab')
+                            .setAttribute("href", "data:text/plain;charset=utf-8,"+encodeURI(tabData));
+
+                })
+
+                $scope.cancel = function($event){
+                    $event.preventDefault();
+                    $dialog.hide();
+                }
+            }]
+        })
     }
 
 }])

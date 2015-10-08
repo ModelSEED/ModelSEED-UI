@@ -18,7 +18,6 @@ body {
     background-color: #000;
     opacity: 0.3;
     transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
-
 }
 
 
@@ -54,11 +53,6 @@ a:focus {
     margin: 0 10px 2px 0;
     display: inline-block;
     background-color: #444;
-    /*
-    -webkit-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
-    -moz-box-shadow: inset -124px 0px 41px -98px rgba(0,188,212,1);
-    box-shadow: inset -80px 0px 20px -75px rgba(0,188,212,1);
-    */
 }
 
 .logo a:hover {
@@ -105,7 +99,7 @@ a:focus {
     color: #fff !important;
 }
 
-.md-danger { 
+.md-danger {
     background-color: #DA265D !important;
     color: #fff !important;
 }
@@ -119,17 +113,7 @@ md-toolbar {
     z-index: 100;
 }
 
-md-sidenav.md-locked-open {
-    color: #fff;
-    background-color: #555;
-    width: 240px;
-    min-width: 240px;
-    max-width: 240px;
-}
 
-.md-sidenav-left md-content {
-    background-color: #555;
-}
 
 .ms-color { color: #26C6DA; }
 .ms-color-complete, .color-complete { color: #26DA4A; }
@@ -175,6 +159,10 @@ pre {
 .vertical-center {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.hidden {
+    visibility: hidden;
 }
 
 .small {
@@ -565,21 +553,19 @@ tr span[role=button] {
 
 table thead[sortable] th:not(:empty):after {
   content: "\f0dc";
-  float: right;
   font-family: fontawesome;
   color: rgba(50,50,50,.5);
+  margin-left: 3px;
 }
 
 table thead[sortable] th.sorting-desc:after {
   content: "\f0de";
-  float: right;
   font-family: fontawesome;
   color: #222;
 }
 
 table thead[sortable] th.sorting-asc:after {
   content: "\f0dd";
-  float: right;
   font-family: fontawesome;
   color: #222;
 }
@@ -646,26 +632,38 @@ table tr.active {
 table md-checkbox {
     margin: 0;
 }
+
 .table-selector > tbody > tr > td:first-child,
-.table-editor > tbody > tr > td:first-child {
+.table-editor > tbody > tr > td:first-child,
+.table-selector > tbody > tr > td:first-child md-checkbox,
+.table-editor > tbody > tr > td:first-child md-checkbox {
     width: 1px;
     height: 1px;
 }
 
+/*
 .table-selector > tbody > tr > td,
 .table-editor > tbody > tr > td {
     vertical-align: initial;
 }
+*/
 
 .table-editor-controls md-input-container {
     padding-bottom: 5px;
 }
 
+.table-controls .md-button,
 .table-editor-controls .md-button,
 .table-selector-controls .md-button  {
     min-width: 0;
     padding: 0px 10px;
 }
+
+.table-vertical-center td {
+    vertical-align: middle !important;
+    white-space: nowrap;
+}
+
 
 
 /* end tables */
@@ -1105,8 +1103,7 @@ tr .fa-file-text-o {
 }
 
 
-/*dropdown stuff */
-
+/* dropdown stuff */
 #more-dd-content {
     right: -30px;
 }
@@ -1122,6 +1119,23 @@ tr .fa-file-text-o {
     color: #dfdfdf;
 }
 
+#more-dd li a.main-opts {
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+#more-dd .icon-archive2 {
+    color: rgb(0,188,212);
+    font-weight:800;
+}
+
+#more-dd img {
+    height: 20px;
+    width: 20px;
+    margin: 0 2px 0 -2px;
+}
+
+
 /* about/status page */
 .status-table .success {
     color: #38BD5C;
@@ -1133,4 +1147,31 @@ tr .fa-file-text-o {
 
 .status-table div { /* margin hack */
     height: 0px;
+}
+
+
+/* modelseed projects / team / publications */
+.pub-title {
+    font-size: 1.4em;
+    margin: 10px 40px;
+}
+.pub-author {
+    font-size: .8em;
+
+    margin: 10px 40px;
+}
+.pub-abstract {
+    margin: 10px 40px;
+}
+.pub-citation {
+    margin: 10px 40px;
+}
+
+.project-nav {
+    margin-bottom: 0px;
+    font-size: 1.3em;
+}
+
+.project-nav li.active > a{
+    color: #444;
 }

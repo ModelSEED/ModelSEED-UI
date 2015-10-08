@@ -1,11 +1,75 @@
 
+<div class="table-controls" layout="row">
+    <md-input-container md-no-float flex="45"
+        search="opts.query" search-opts="opts" search-placeholder="Search table">
+    </md-input-container>
 
-    <h3>Genes</h3>
-    <hr>
+    <md-button ng-click="download($event)" class="small-button">
+        <i class="icon-file-download"></i>
+        <md-tooltip>Download table...</md-toolip>
+    </md-button>
 
-    <ng-table table-header="geneHeader"
-                   table-data="genes"
-                   table-opts="opts"
-                   table-loading="loading"
-                   table-placeholder="Search genes">
-    </ng-table>
+
+    <div ng-if="noPagination" layout="row" layout-align="end center" flex>
+        {{data.length}} {{resultText}}
+    </div>
+
+
+    <md-input-container
+        ng-if="!noPagination"
+        pagination
+        pagination-offset="opts.offset"
+        pagination-limit="opts.limit"
+        pagination-total="filtered.length"
+        layout="row"
+        layout-align="end center" flex>
+    </md-input-container>
+</div>
+
+<table class="table table-striped table-vertical-center" style="font-size: .8em;">
+    <thead sortable>
+        <tr>
+            <th ng-click="sortBy($event, 'bsu_number')">{{header.bsu_number}}</th>
+            <th ng-click="sortBy($event, 'gene_name')">Gene Name</th>
+            <th ng-click="sortBy($event, 'operon')">{{header.operon}}</th>
+            <th ng-click="sortBy($event, 'sigma_factor')">{{header.sigma_factor}}</th>
+            <th ng-click="sortBy($event, 'regulator_name')">{{header.regulator_name}}</th>
+            <th ng-click="sortBy($event, 'regulation_sign')">{{header.regulation_sign}}</th>
+            <th ng-click="sortBy($event, 'involved_metabolite')">{{header.involved_metabolite}}</th>
+            <th ng-click="sortBy($event, 'metabolite')">{{header.metabolite_sign}}</th>
+            <th ng-click="sortBy($event, 'regulatory_mecanisms')">{{header.regulatory_mecanisms}}</th>
+            <th ng-click="sortBy($event, 'conditioned_rules')">{{header.conditioned_rules}}</th>
+            <th ng-click="sortBy($event, 'annotation')">{{header.annotation}}</th>
+        </tr>
+    </thead>
+
+    <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                    | limitTo : opts.limit : opts.offset)">
+        <td>{{row.bsu_number}}</td>
+        <td>{{row.gene_name}}</td>
+        <td popover="That is an absolute name: in order to know all the genes belonging to this operon, we have to find all the genes with a same absolute name.">
+            {{row.operon}}
+        </td>
+        <td style="vertical-align: middle;" ng-bind-html="formatter(row.sigma_factor)">
+        </td>
+        <td>
+            <span ng-repeat="name in row.regulator_name.split('|') | limitTo : row.regulator_name.split('|').length-1">
+                <a ui-sref="projects.regulons.regulators({q: name})">{{name}}</a><br>
+            </span>
+        </td>
+        <td ng-bind-html="formatter(row.regulation_sign)"></td>
+        <td ng-bind-html="formatter(row.involved_metabolite)"></td>
+        <td ng-bind-html="formatter(row.metabolite_sign)"></td>
+        <td ng-bind-html="formatter(row.regulatory_mecanisms)"></td>
+        <td ng-bind-html="formatter(row.conditioned_rules)"></td>
+        <td>{{row.annotation}}</td>
+    </tr>
+</table>
+
+<div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+    No item found
+</div>
+
+<br>
+<md-progress-circular ng-if="!data" md-mode="indeterminate">
+</md-progress-circular>

@@ -2033,3 +2033,28 @@ function($compile, $stateParams) {
         }
     }
 })
+
+
+.directive('popover', function() {
+    return {
+        restrict: 'EA',
+        scope: {
+
+        },
+        link: function(scope, elem, attrs) {
+
+            angular.element(elem)
+                    .popover({content: attrs.popover, trigger: 'hover', placement: 'bottom',
+                              container: 'body'})
+
+            angular.element(elem).on('mouseover', function() {
+                $(this).css('font-weight', 800)
+            })
+
+            angular.element(elem).on('mouseout', function() {
+                $(this).css('font-weight', 500)
+            })
+
+        }
+    }
+})

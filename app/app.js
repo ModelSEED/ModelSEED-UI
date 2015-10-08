@@ -162,8 +162,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/regulons',
             templateUrl: 'projects/regulons/overview.html',
         }).state('projects.regulons.genes', {
-            url: '/genes',
+            url: '/genes?q',
             templateUrl: 'projects/regulons/genes.html',
+            controller: 'Regulons'
+        }).state('projects.regulons.regulators', {
+            url: '/regulators?q',
+            templateUrl: 'projects/regulons/regulators.html',
             controller: 'Regulons'
         })
 

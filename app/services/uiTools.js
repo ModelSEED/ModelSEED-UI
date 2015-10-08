@@ -111,4 +111,27 @@ angular.module('uiTools', [])
 
         return table;
     }
+
+    this.JSONToCSV = function(head, rows) {
+        var table = head.join(',')+'\r\n';
+
+        for (var i=0; i<rows.length; i++) {
+            var row = [];
+            for (var key in rows[i]) {
+                var item = rows[i][key];
+
+                if (item.indexOf(',') !== -1) item = '"'+item+'"';
+
+                row.push(item);
+            }
+            table += row.join(',')+'\n';
+        }
+
+        return table;
+    }
+
+    this.JSONToTabTable = function(head, rows) {
+        return self.JSONToTable(head, rows);
+    }
+
 });

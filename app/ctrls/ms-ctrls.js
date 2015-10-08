@@ -84,7 +84,6 @@ function($scope, $stateParams) {
    $http.get('version/deploy-date.txt')
         .then(function(res) {
             $s.deployDate = res.data.trim().split(' ').slice(0, 5).join(' ');
-            console.log('Date', $s.deployDate.split(' '))
         })
 
     $s.urls = config.services;
@@ -113,7 +112,6 @@ function($scope, $stateParams) {
     $http.rpc('msSupport', 'list_rast_jobs', {owner: 'nconrad'})
          .then(function(res) {
              console.log('res', res); $s.msSupport = true;
-
          })
          .catch(function(e) {
              console.error('error', e); $s.msSupport = false;
@@ -303,7 +301,6 @@ function($s, WS) {
     } else
         WS.get(wsPath)
           .then(function(res) {
-              console.log('res', res)
               $s.annoOverview = parseOverview(res.data);
               WS.cached.annotations = $s.annoOverview;
               $s.loading = false;
@@ -873,7 +870,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingMicrobes = true;
         MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
-            console.log('res', res)
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
@@ -894,6 +890,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.loadingPlants = false;
         })
     }
+
 
     $scope.showFBAs = function(item) {
         $scope.showGapfills(item);
@@ -1133,7 +1130,7 @@ function mergeObjects(objs1, objs2, key) {
 
     function isFound(value, objs, key) {
         for (var i=0; i<objs.length; i++) {
-            console.log('thing', objs[i])
+
             if (objs[i][key] == value) return true;
         }
         return false;
