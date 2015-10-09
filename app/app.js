@@ -33,9 +33,8 @@ angular.module('ModelSEED',
 function($locationProvider, $stateProvider, $httpProvider,
          $urlRouterProvider, $urlMatcherFactoryProvider, $sceProvider) {
 
-    $locationProvider.html5Mode(false);
+    $locationProvider.html5Mode(true);
     $sceProvider.enabled(false);
-
     $urlMatcherFactoryProvider.strictMode(false);
 
     function valToString(val) {

@@ -68,7 +68,7 @@ function($scope, $sParams, WS, $http) {
                                         var links = [];
                                         row.kmerFeatures.forEach(function(name, i) {
                                             var match = row.blastFeatures.indexOf(name);
-                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                            links.push('<a href="/feature'+path+'/'+name+'" '+
                                                             'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
                                                             name+
                                                         '</a>');
@@ -81,7 +81,7 @@ function($scope, $sParams, WS, $http) {
                                         var links = [];
                                         row.blastFeatures.forEach(function(name, i) {
                                             var match = row.kmerFeatures.indexOf(name);
-                                            links.push('<a href="#/feature'+path+'/'+name+'" '+
+                                            links.push('<a href="/feature'+path+'/'+name+'" '+
                                                             'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
                                                             name+
                                                         '</a>');

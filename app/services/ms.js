@@ -342,7 +342,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.getFeature = function(genome, feature) {
-        console.log('getting feature', feature)
+        //console.log('getting feature', feature)
         return $http.rpc('ms', 'get_feature', {genome: genome, feature: feature})
                     .then(function(res) {
                         $log.log('feature response', feature)
@@ -352,7 +352,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.addModel = function(model, type) {
-        console.log('adding model', model)
+        //console.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
             syncCache(this.myModels, model)
         else if (type.toLowerCase() === 'plant')

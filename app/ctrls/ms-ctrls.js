@@ -245,7 +245,7 @@ function($s, WS) {
         subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
         roleUrl = url + '?page=FunctionalRolePage&fr=',
         pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
-        featurePath = '#/feature/plantseed/Genomes/Athaliana-TAIR10/';
+        featurePath = '/feature/plantseed/Genomes/Athaliana-TAIR10/';
 
     var wsPath = '/plantseed/Genomes/annotation_overview';
 
