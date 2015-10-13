@@ -199,16 +199,17 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
         var path = '/'+Auth.user+'/media';
         return WS.listL(path)
-          .then(function(objs) {
-                    var media = [];
-                    for (var i=0; i<objs.length; i++) {
-                        var obj = objs[i];
-                        media.push(self.sanitizeMedia(obj));
-                    }
+            .then(function(objs) {
+                if (!objs) return [];
+                var media = [];
+                for (var i=0; i<objs.length; i++) {
+                    var obj = objs[i];
+                    media.push(self.sanitizeMedia(obj));
+                }
 
-                    self.myMedia = media
-                    return media;
-              })
+                self.myMedia = media
+                return media;
+            })
     }
 
     this.addMyMedia = function(media) {
