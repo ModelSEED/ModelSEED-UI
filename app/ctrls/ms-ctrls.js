@@ -67,7 +67,7 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('About', ['$scope', '$http', 'config', function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config', function($s, $http, config) {
 
     $s.release = config.releaseVersion;
 

@@ -32,6 +32,11 @@ a:focus {
     text-decoration: none;
 }
 
+a.disabled {
+
+    cursor: not-allowed;
+}
+
 .position-fixed {
     position: fixed;
 }
@@ -44,6 +49,7 @@ a:focus {
     padding: 8px 15px;
 }
 
+.app-toolbar,
 .main-toolbar {
     padding-left: 0;
 }
@@ -110,7 +116,7 @@ a:focus {
 }
 
 md-toolbar {
-    z-index: 100;
+    z-index: 49;
 }
 
 
@@ -179,7 +185,11 @@ small.help-text {
 }
 
 .alt-login-container {
-    margin: 25px 0 0 0;
+    margin: 20px 20px;
+}
+
+.alt-login-patric img {
+    border: 2px solid #bbb;
 }
 
 td[editable] {
@@ -210,22 +220,22 @@ header .login md-input-container.md-default-theme:not(.md-input-invalid).md-inpu
 .md-button {
     text-transform: none;
 }
-header .login img {
+.login img {
     margin: -2px 5px 0 0;
     width: 40px;
     height: 40px;
 }
 
-header .alt-login {
+.alt-login {
     margin-top: 10px;
-
 }
-header .alt-login:hover {
+
+.alt-login:hover {
     opacity: 0.9;
     cursor: pointer;
 }
 
-header .alt-login div {
+.alt-login div {
     margin: 8px 10px;
 }
 
@@ -318,29 +328,10 @@ md-toolbar,
 .brand-home:hover {
     background-color: transparent !important;
 }
-/*
-.toolbar-right {
 
-    margin: 0;
-    list-style: none;
-    height: 100%;
-}
-
-.toolbar-right > li{
-    display:block;
-        font-size: 10pt;
-        height: 100%;
-}
-
-.toolbar-right > li > a{
-    display:block;
-    font-size: 10pt;
-    height: 100%;
-}*/
 
 .toolbar-right {
     height: 100%;
-
 }
 
 .toolbar-right > div {
@@ -369,6 +360,37 @@ md-toolbar,
     display: block;
     margin: 0;
     width: 100%;
+}
+
+ul.about-toolbar {
+    list-style: none;
+}
+
+ul.about-toolbar > li {
+    display: inline-block;
+    height: 100%;
+}
+
+
+
+ul.about-toolbar > li > a {
+    margin: 0 10px;
+    padding-top: 15px;
+    height: 100%;
+    display: block;
+}
+
+ul.about-toolbar > li > a:hover {
+    color: #dfdfdf;
+}
+
+ul.about-toolbar > li.active {
+    border-bottom: 3px solid #566AAB;
+    color: #dfdfdf;
+}
+
+ul.about-toolbar > li.active > a{
+    color: #dfdfdf;
 }
 
 .sidebar {
@@ -766,6 +788,14 @@ md-backdrop {
     visbility: hidden;
     display:none;
 }
+
+.md-scroll-mask {
+    background-color: rgba(0, 0, 0, .4);
+}
+/*
+.md-dialog-container {
+    margin-top: 50px;
+}*/
 
 md-input-container {
     padding-bottom: 15px;
@@ -1174,4 +1204,23 @@ tr .fa-file-text-o {
 
 .project-nav li.active > a{
     color: #444;
+}
+
+.team-member {
+    margin: 8px 0;
+}
+
+.team-member img {
+    display: inline-block;
+    margin: 0 10px 0 0;
+    padding: 10px;
+    border: 1px solid #aaa;
+    background: #f9f9f9;
+    -moz-box-shadow: 0 0 3px #aaa;
+    -webkit-box-shadow: 0 0 3px #aaa;
+    box-shadow: 0 0 2px #aaa;
+}
+
+.team-member [layout=column]{
+    vertical-align: middle;
 }

@@ -52,12 +52,54 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/home/?login&redirect",
             templateUrl: 'app/views/home.html',
             controller: 'Home',
-        }).state('app', {
-            templateUrl: 'app/views/app.html',
-        }).state('app.about', {
-            url: "/about/",
+        })
+
+        .state('main', {
+            templateUrl: 'app/views/main.html',
+        }).state('main.team', {
+            url: "/henry-lab",
+            templateUrl: 'app/views/docs/team.html',
+        }).state('main.publications', {
+            url: "/publications",
+            templateUrl: 'app/views/docs/publications.html',
+        })
+
+        // ModelSEED Projects
+        .state('main.projects', {
+            url: '/projects',
+            templateUrl: '/ms-projects/home.html',
+        }).state('main.projects.regulons', {
+            url: '/regulons',
+            templateUrl: '/ms-projects/regulons/overview.html',
+        }).state('main.projects.regulons.genes', {
+            url: '/genes?q',
+            templateUrl: '/ms-projects/regulons/genes.html',
+            controller: 'Regulons'
+        }).state('main.projects.regulons.regulators', {
+            url: '/regulators?q',
+            templateUrl: '/ms-projects/regulons/regulators.html',
+            controller: 'Regulons'
+        })
+
+
+        .state('main.about', {
+            url: '/about',
             templateUrl: 'app/views/about.html',
-            controller: 'About'
+        })
+        .state('main.about.version', {
+            url: "/about/version",
+            templateUrl: 'app/views/version.html',
+            controller: 'Version'
+        }).state('main.about.faq', {
+            url: "/about/faq",
+            templateUrl: 'app/views/docs/faq.html',
+        })
+
+
+
+        // main application template
+        .state('app', {
+            templateUrl: 'app/views/app.html',
         })
 
         // data browser
@@ -153,23 +195,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-        // ModelSEED Projects
-        .state('projects', {
-            url: '/projects',
-            templateUrl: 'projects/home.html',
-        }).state('projects.regulons', {
-            url: '/regulons',
-            templateUrl: 'projects/regulons/overview.html',
-        }).state('projects.regulons.genes', {
-            url: '/genes?q',
-            templateUrl: 'projects/regulons/genes.html',
-            controller: 'Regulons'
-        }).state('projects.regulons.regulators', {
-            url: '/regulators?q',
-            templateUrl: 'projects/regulons/regulators.html',
-            controller: 'Regulons'
-        })
-
         .state('app.api', {
             url: "/help/api",
             templateUrl: 'app/views/docs/api.html',
@@ -199,10 +224,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Image',
         })
 
-        .state('app.faq', {
-            url: "/faq",
-            templateUrl: 'app/views/docs/faq.html',
-        })
 
 
         /* only used for testing analysis forms */
@@ -238,10 +259,35 @@ function($locationProvider, $stateProvider, $httpProvider,
         //.accentPalette('light-blue');
 }])
 
+.service('AuthDialog', ['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
+
+    this.signIn = function(title, msg) {
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/auth.html',
+            clickOutsideToClose: false,
+            controller: ['$scope', '$http',
+            function($s, $http) {
+                $s.title = title;
+                $s.msg = msg;
+
+                $s.ok = function(){
+                    $dialog.hide();
+                }
+
+                $s.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
+}])
+
 .run(['$rootScope', '$state', '$stateParams', '$window',
-      '$location', 'Auth', '$timeout', '$templateCache', 'config',
+      '$location', 'Auth', '$timeout', '$templateCache', 'config', 'AuthDialog',
 function($rootScope, $state, $sParams, $window,
-         $location, auth, $timeout, $templateCache, config) {
+         $location, auth, $timeout, $templateCache, config, AuthDialog) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
         //$templateCache.removeAll();
@@ -260,6 +306,8 @@ function($rootScope, $state, $sParams, $window,
         else if (toState.authenticate && !auth.isAuthenticated()) {
             //$state.transitionTo('home', $sParams, false);
             //event.preventDefault();
+            console.log('NEED TO AUTH')
+            AuthDialog.signIn();
         }
 
         // google analytics

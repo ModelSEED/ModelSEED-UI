@@ -1,467 +1,385 @@
 
 <link href="splash/css/splash.css" rel="stylesheet">
 
-<script>
-    // Closes the Responsive Menu on Menu Item Click
-    $('.navbar-collapse ul li a').unbind('click');
-    $('.navbar-collapse ul li a').click(function() {
-        $('.navbar-toggle:visible').click();
-    })
 
-    $(function() {
-        var docElem = document.documentElement,
-            didScroll = false,
-            changeHeaderOn = 100;
+<md-toolbar class="md-toolbar-tools md-whiteframe-z1 main-toolbar"
+            ng-include="'app/views/main-toolbar.html'">
+</md-toolbar>
 
-        function init() {
-            window.addEventListener( 'scroll', function( event ) {
-                if( !didScroll ) {
-                    didScroll = true;
-                    setTimeout( scrollPage, 250 );
-                }
-            }, false );
-        }
-
-        function scrollPage() {
-            var sy = scrollY();
-            if ( sy >= changeHeaderOn )
-                $('.navbar-fixed-top').addClass('navbar-shrink' );
-            else
-                $('.navbar-fixed-top').removeClass('navbar-shrink' );
-
-            didScroll = false;
-        }
-
-        function scrollY() {
-            return window.pageYOffset || docElem.scrollTop;
-        }
-
-        init();
-    });
-</script>
-
-
-<div id="page-top" class="index">
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header page-scroll">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand brand-home" href="#page-top" du-smooth-scroll>
-                    ModelSEED
-                    <!--<img src="/img/ModelSeed_Logo_Horizontal_RGB_Reversed.png" width="175">-->
-                </a>
-                <span class="label label-danger label-beta">alpha</span>
-            </div>
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="hidden">
-                        <a href="#page-top"></a>
-                    </li>
-                    <li du-scrollspy="about">
-                        <a href="#about" du-smooth-scroll>About</a>
-                    </li>
-                    <li du-scrollspy="portfolio">
-                        <a href="#portfolio" du-smooth-scroll>Highlights</a>
-                    </li>
-                    <li du-scrollspy="more">
-                        <a href="#more" du-smooth-scroll>More Info</a>
-                    </li>
-                    <!--<li class="page-scroll">
-                        <a href="#contact">Contact</a>
-                    </li>-->
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
+<header>
+    <div layout="row" layout-padding class="container"  ng-controller="Login">
+        <div class="intro-text" flex hide-sm>
+            <img src="/img/ModelSEED-logo-small.png" width="300" height="75">
+            <div class="logo-sub-text text-muted">Metabolic Modeling Made Simple.</div>
         </div>
-        <!-- /.container-fluid -->
-    </nav>
 
-    <!-- Header -->
-    <header>
-        <div layout="row" layout-padding layout-margin class="container"  ng-controller="Login">
-            <div class="intro-text" flex hide-sm>
-                <img src="/img/ModelSEED-logo-small.png" width="300" height="75">
-                <div class="logo-sub-text text-muted">Metabolic Modeling Made Simple.</div>
+        <div ng-if="!$root.user" id="login" class="login" flex>
+            <h4>
+                Sign in with {{method.name}} account to continue
+            </h4>
+
+            <div ng-if="inValid" class="alert alert-danger" role="alert">
+                <b>Try again.</b>
+                Wrong username and/or password
             </div>
 
-            <div ng-if="!$root.user" id="login" class="login" flex>
-                <h4>
-                    Sign in with {{method.name}} account to continue
-                </h4>
-
-                <div ng-if="inValid" class="alert alert-danger" role="alert">
-                    <b>Try again.</b>
-                    Wrong username and/or password
-                </div>
-
-                <div ng-if="failMsg" class="alert alert-danger" role="alert">
-                    <b>Oh snap!</b>
-                    {{failMsg}}
-                </div>
-
-                <form>
-                    <md-input-container>
-                        <label>{{method.name}} Username</label>
-                        <input ng-model="user">
-                    </md-input-container>
-                    <md-input-container>
-                        <label>Password</label>
-                        <input ng-model="pass" label="Password" type="password">
-                    </md-input-container>
-                    <md-button ng-click="loginUser(user, pass)" type="submit" class="md-primary md-raised pull-left">
-                        Sign in
-                    </md-button>
-
-                    <small class="pull-right">
-                        <a href="{{method.newAccountURL}}" target="_blank">Create new account</a>
-                    </small>
-                </form>
-
-                <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
-
+            <div ng-if="failMsg" class="alert alert-danger" role="alert">
+                <b>Oh snap!</b>
+                {{failMsg}}
             </div>
 
-            <div class="alt-login-container" ng-if="!$root.user && method.name == 'RAST'">
-                Or, sign in with:
-                <div class="alt-login" ng-click="switchMethod('patric')">
-                    <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
-                    <div class="pull-left">
-                        PATRIC
-                    </div>
-                </div>
-            </div>
+            <form>
+                <md-input-container>
+                    <label>{{method.name}} Username</label>
+                    <input ng-model="user">
+                </md-input-container>
+                <md-input-container>
+                    <label>Password</label>
+                    <input ng-model="pass" label="Password" type="password">
+                </md-input-container>
+                <md-button ng-click="loginUser(user, pass)" type="submit"
+                           class="md-primary md-raised pull-left" ng-disabled="!user.length || !pass.length">
+                    Sign In
+                </md-button>
 
-            <div class="alt-login-container" ng-if="!$root.user && method.name == 'PATRIC'">
-                Or, sign in with:
-                <div class="alt-login" ng-click="switchMethod('rast')">
-                    <img src="img/seed.png" width="50" height="50" class="pull-left" />
-                    <div class="pull-left">
-                        RAST<br>
-                    </div>
-                </div>
-            </div>
+                <small class="pull-right">
+                    <a href="{{method.newAccountURL}}" target="_blank">Create new account</a>
+                </small>
+            </form>
 
-            <div ng-if="$root.user">
-                <div ng-controller="Login" class="login">
-                    <h4>Continue to ModelSEED</h4>
-                    <a ui-sref="app.reconstruct" class="btn btn-outline">
-                        Continue
-                    </a><br>
-                    <br>
-                    <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+            <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
+
+        </div>
+
+        <div class="alt-login-container" ng-if="!$root.user && method.name == 'RAST'">
+            Or, sign in with:
+            <div class="alt-login" ng-click="switchMethod('patric')">
+                <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
+                <div class="pull-left">
+                    PATRIC
                 </div>
             </div>
         </div>
-    </header>
 
-
-    <section id="about">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>About</h2><br>
-                    <!--<hr class="star-primary">-->
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <p>ModelSEED is a resource for the reconstruction, exploration, comparison, and analysis of metabolic models.</p>
+        <div class="alt-login-container" ng-if="!$root.user && method.name == 'PATRIC'">
+            Or, sign in with:
+            <div class="alt-login" ng-click="switchMethod('rast')">
+                <img src="img/seed.png" width="50" height="50" class="pull-left" />
+                <div class="pull-left">
+                    RAST<br>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section class="dark" id="portfolio">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>Highlights</h2>
-                    <br>
-                </div>
+        <div ng-if="$root.user">
+            <div ng-controller="Login" class="login">
+                <h4>Continue to ModelSEED</h4>
+                <a ui-sref="app.reconstruct" class="btn btn-outline">
+                    Continue
+                </a><br>
+                <br>
+                <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
             </div>
-            <div class="row">
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Comprehensive Data Views</b></p>
-                    <a class="portfolio-nolink">
-                        <!--<div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-3x fa-arrow-circle-o-right"></i>
-                            </div>
-                        </div>-->
-                        <img src="splash/img/examples/table.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Pathways</b></p>
-                    <a class="portfolio-nolink">
-                        <!--<div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
-                        </div>-->
-                        <img src="splash/img/examples/pathway.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <div class="col-sm-4 portfolio-item">
-                    <p><b>Heatmaps</b></p>
-                    <a class="portfolio-nolink">
-                        <!--<div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
-                        </div>-->
-                        <img src="splash/img/examples/heatmap.png" class="img-responsive" alt="">
-                    </a>
-                </div>
-                <!--
-                <div class="col-sm-4 portfolio-item">
-                    <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
-                        <div class="caption">
-                            <div class="caption-content">
-                                <i class="fa fa-arrow-circle-o-right fa-3x"></i>
-                            </div>
+        </div>
+    </div>
+</header>
+
+
+<section id="about">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>About</h2><br>
+                <!--<hr class="star-primary">-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <p>ModelSEED is a resource for the reconstruction, exploration, comparison, and analysis of metabolic models.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="dark" id="portfolio">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Highlights</h2>
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4 portfolio-item">
+                <p><b>Comprehensive Data Views</b></p>
+                <a class="portfolio-nolink">
+                    <!--<div class="caption">
+                        <div class="caption-content">
+                            <i class="fa fa-3x fa-arrow-circle-o-right"></i>
                         </div>
-                        <img src="splash/img/examples/etc.png" class="img-responsive" alt="">
-                    </a>
-                </div>-->
+                    </div>-->
+                    <img src="splash/img/examples/table.png" class="img-responsive" alt="">
+                </a>
+            </div>
+            <div class="col-sm-4 portfolio-item">
+                <p><b>Pathways</b></p>
+                <a class="portfolio-nolink">
+                    <!--<div class="caption">
+                        <div class="caption-content">
+                            <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                        </div>
+                    </div>-->
+                    <img src="splash/img/examples/pathway.png" class="img-responsive" alt="">
+                </a>
+            </div>
+            <div class="col-sm-4 portfolio-item">
+                <p><b>Heatmaps</b></p>
+                <a class="portfolio-nolink">
+                    <!--<div class="caption">
+                        <div class="caption-content">
+                            <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                        </div>
+                    </div>-->
+                    <img src="splash/img/examples/heatmap.png" class="img-responsive" alt="">
+                </a>
+            </div>
+            <!--
+            <div class="col-sm-4 portfolio-item">
+                <a href="#portfolioModal4" class="portfolio-link" data-toggle="modal">
+                    <div class="caption">
+                        <div class="caption-content">
+                            <i class="fa fa-arrow-circle-o-right fa-3x"></i>
+                        </div>
+                    </div>
+                    <img src="splash/img/examples/etc.png" class="img-responsive" alt="">
+                </a>
+            </div>-->
+
+        </div>
+    </div>
+</section>
+
+
+<section class="light"  id="more">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>More Info</h2>
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h4>Utilized Data Sources</h4>
+                Core Models were designed based on the information derived from published literature. Genomes were annotated using RAST annotation pipeline and core models were generated using <a href="http://kbase.us" target="_blank">KBase</a> resources.  We've done our best to cite contributing data sources here. If you believe your data has been utilized and not properly cited, please email us <a href="mailto:janaked@anl.gov">here</a>.<br>
+                <br>
+
+
+                <h4>Sources Funding Development</h4>
+                This material was based upon work supported by the U.S. Department of Energy, Office of Biological and Environmental Research; under contract DE-AC02-06CH11357 and by the National Science Foundation grant number MCB-1153357<br>
+                <br>
+
+
+                <h4>Citing the ModelSEED</h4>
+                Henry, C.S., DeJongh, M., Best, A.B., Frybarger, P.M., Linsay, B., and R.L. Stevens. High-throughput Generation and Optimization of Genome-scale Metabolic Models. Nature Biotechnology, (2010).<br>
+                [New citation to follow]<br>
+                <br>
+
+                <h4>Core Development Team</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Contributor</th>
+                            <th hide-sm>Institutions</th>
+                            <th>Division</th>
+                            <th>Role</th>
+                        </tr>
+                    <thead>
+                    <tbody>
+                        <tr>
+                            <td>Neal Conrad</td>
+                            <td hide-sm>
+                                <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
+                                <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
+                            </td>
+                            <td>
+                                <a href="https://www.ci.uchicago.edu/" target="_blank">Computational Institute</a> &<br>
+                                <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
+                            </td>
+                            <td>UI Developer</td>
+                        </tr>
+                        <tr>
+                            <td>Janaka Edirisinghe</td>
+                            <td hide-sm>
+                                <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
+                                <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
+                            </td>
+                            <td>
+                                <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
+                                <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
+                            </td>
+                            <td>Researcher & Developer</td>
+                        </tr>
+                        <tr>
+                            <td>José Pedro Lopes Faria</td>
+                             <td hide-sm>
+                                <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
+                                <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
+                            </td>
+                            <td>
+                                <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
+                                <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
+                            </td>
+                            <td>Researcher & Developer</td>
+                        </tr>
+                        <tr>
+                            <td>Michael Mundy</td>
+                            <td hide-sm>
+                                <a href="http://www.mayoclinic.org/" target="_blank">Mayo Clinic</a>
+                            </td>
+                            <td>
+                                <a href="http://mayoresearch.mayo.edu/mayo/research/center-for-individualized-medicine/microbiome-program.asp" target="_blank">Center for Individualized Medicine Microbiome Program</a>
+                            </td>
+                            <td>Developer</td>
+                        </tr>
+                        <tr>
+                            <td>Sam Seaver</td>
+                            <td hide-sm>
+                                <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
+                                <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
+                            </td>
+                            <td>
+                                <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
+                                <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
+                            </td>
+                            <td>Researcher & Developer</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="http://www.mayo.edu/research/faculty/chia-nicholas-ph-d/bio-20087464" target="_blank">Nicholas Chia</a>
+                            </td>
+                            <td hide-sm>
+                                <a href="http://www.mayoclinic.org/" target="_blank">Mayo Clinic</a>
+                            </td>
+                            <td>
+                                <a href="http://mayoresearch.mayo.edu/mayo/research/center-for-individualized-medicine/microbiome-program.asp" target="_blank">Center for Individualized Medicine Microbiome Program</a>
+                            </td>
+                            <td>Principal Investigator</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="http://www.mcs.anl.gov/person/christopher-henry" target="_blank">Chris Henry</a>
+                            </td>
+                            <td hide-sm>
+                                <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
+                                <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
+                            </td>
+                            <td>
+                                <a href="https://www.ci.uchicago.edu/" target="_blank">Computational Institute</a> &<br>
+                                <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
+                            </td>
+                            <td>Principal Investigator & Developer</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Questions, comments, and bug reports?</h4>
+                Please direct questions, comments, and bug reports on our site to our development team via <a href="mailto:nconrad@anl.gov">email</a>
+                or on <a href="http://www.github.com/modelseed/ModelSEED-UI/issues" target="_blank">github</a>.
 
             </div>
         </div>
-    </section>
 
+    </div> <!-- end container -->
+</section>
 
-    <section class="light"  id="more">
+<!-- Footer -->
+<footer class="text-center">
+    <div class="footer-above">
         <div class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <h2>More Info</h2>
-                    <br>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h4>Utilized Data Sources</h4>
-                    Core Models were designed based on the information derived from published literature. Genomes were annotated using RAST annotation pipeline and core models were generated using <a href="http://kbase.us" target="_blank">KBase</a> resources.  We've done our best to cite contributing data sources here. If you believe your data has been utilized and not properly cited, please email us <a href="mailto:janaked@anl.gov">here</a>.<br>
-                    <br>
 
+                <div class="footer-col col-md-4">
+                    <h3>Join the Mailing List!</h3>
+                    <div class="row">
+                        <div class="col-lg-12">
 
-                    <h4>Sources Funding Development</h4>
-                    This material was based upon work supported by the U.S. Department of Energy, Office of Biological and Environmental Research; under contract DE-AC02-06CH11357 and by the National Science Foundation grant number MCB-1153357<br>
-                    <br>
-
-
-                    <h4>Citing the ModelSEED</h4>
-                    Henry, C.S., DeJongh, M., Best, A.B., Frybarger, P.M., Linsay, B., and R.L. Stevens. High-throughput Generation and Optimization of Genome-scale Metabolic Models. Nature Biotechnology, (2010).<br>
-                    [New citation to follow]<br>
-                    <br>
-
-                    <h4>Core Development Team</h4>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Contributor</th>
-                                <th hide-sm>Institutions</th>
-                                <th>Division</th>
-                                <th>Role</th>
-                            </tr>
-                        <thead>
-                        <tbody>
-                            <tr>
-                                <td>Neal Conrad</td>
-                                <td hide-sm>
-                                    <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
-                                    <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
-                                </td>
-                                <td>
-                                    <a href="https://www.ci.uchicago.edu/" target="_blank">Computational Institute</a> &<br>
-                                    <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
-                                </td>
-                                <td>UI Developer</td>
-                            </tr>
-                            <tr>
-                                <td>Janaka Edirisinghe</td>
-                                <td hide-sm>
-                                    <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
-                                    <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
-                                </td>
-                                <td>
-                                    <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
-                                    <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
-                                </td>
-                                <td>Researcher & Developer</td>
-                            </tr>
-                            <tr>
-                                <td>José Pedro Lopes Faria</td>
-                                 <td hide-sm>
-                                    <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
-                                    <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
-                                </td>
-                                <td>
-                                    <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
-                                    <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
-                                </td>
-                                <td>Researcher & Developer</td>
-                            </tr>
-                            <tr>
-                                <td>Michael Mundy</td>
-                                <td hide-sm>
-                                    <a href="http://www.mayoclinic.org/" target="_blank">Mayo Clinic</a>
-                                </td>
-                                <td>
-                                    <a href="http://mayoresearch.mayo.edu/mayo/research/center-for-individualized-medicine/microbiome-program.asp" target="_blank">Center for Individualized Medicine Microbiome Program</a>
-                                </td>
-                                <td>Developer</td>
-                            </tr>
-                            <tr>
-                                <td>Sam Seaver</td>
-                                <td hide-sm>
-                                    <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
-                                    <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
-                                </td>
-                                <td>
-                                    <a href="https://www.ci.uchicago.edu/" target="_blank">Computation Institute</a> &<br>
-                                    <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
-                                </td>
-                                <td>Researcher & Developer</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="http://www.mayo.edu/research/faculty/chia-nicholas-ph-d/bio-20087464" target="_blank">Nicholas Chia</a>
-                                </td>
-                                <td hide-sm>
-                                    <a href="http://www.mayoclinic.org/" target="_blank">Mayo Clinic</a>
-                                </td>
-                                <td>
-                                    <a href="http://mayoresearch.mayo.edu/mayo/research/center-for-individualized-medicine/microbiome-program.asp" target="_blank">Center for Individualized Medicine Microbiome Program</a>
-                                </td>
-                                <td>Principal Investigator</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="http://www.mcs.anl.gov/person/christopher-henry" target="_blank">Chris Henry</a>
-                                </td>
-                                <td hide-sm>
-                                    <a href="http://www.uchicago.edu/" target="_blank">UChicago</a> &<br>
-                                    <a href="http://www.anl.gov/" target="_blank">Argonne National Laboratory</a>
-                                </td>
-                                <td>
-                                    <a href="https://www.ci.uchicago.edu/" target="_blank">Computational Institute</a> &<br>
-                                    <a href="https://www.cels.anl.gov/" target="_blank">Computing, Environment and Life Sciences</a>
-                                </td>
-                                <td>Principal Investigator & Developer</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h4>Questions, comments, and bug reports?</h4>
-                    Please direct questions, comments, and bug reports on our site to our development team via <a href="mailto:nconrad@anl.gov">email</a>
-                    or on <a href="http://www.github.com/modelseed/ModelSEED-UI/issues" target="_blank">github</a>.
-
-                </div>
-            </div>
-
-        </div> <!-- end container -->
-    </section>
-
-    <!-- Footer -->
-    <footer class="text-center">
-        <div class="footer-above">
-            <div class="container">
-                <div class="row">
-
-                    <div class="footer-col col-md-4">
-                        <h3>Join the Mailing List!</h3>
-                        <div class="row">
-                            <div class="col-lg-12">
-
-                                <div id="mc_embed_signup">
-                                    <form action="//theseed.us11.list-manage.com/subscribe/post?u=dcadcc832fbfbab13d3b62a5e&amp;id=4c3f21e2f7" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-                                        <div id="mc_embed_signup_scroll">
-                                        <div class="input-group">
-                                    	    <input type="email" value="" name="EMAIL" class="form-control" id="mce-EMAIL" placeholder="you@example.com">
-
-                                            <span class="input-group-btn">
-                                            	<div id="mce-responses" class="clear">
-                                            		<div class="response" id="mce-error-response" style="display:none"></div>
-                                            		<div class="response" id="mce-success-response" style="display:none"></div>
-                                            	</div>
-                                                <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                                                <div style="position: absolute; left: -5000px;"><input type="text" name="b_dcadcc832fbfbab13d3b62a5e_4c3f21e2f7" tabindex="-1" value=""></div>
-                                                <div class="clear">
-                                                    <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn-primary" >
-                                                </div>
-                                            </span>
-                                        </div>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <!--
-                                <form method="POST">
+                            <div id="mc_embed_signup">
+                                <form action="//theseed.us11.list-manage.com/subscribe/post?u=dcadcc832fbfbab13d3b62a5e&amp;id=4c3f21e2f7" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+                                    <div id="mc_embed_signup_scroll">
                                     <div class="input-group">
-                                        <input class="form-control" type="text" name="email" size="30" placeholder="you@example.com">
+                                	    <input type="email" value="" name="EMAIL" class="form-control" id="mce-EMAIL" placeholder="you@example.com">
+
                                         <span class="input-group-btn">
-                                            <button class="btn btn-primary" type="submit" value="Submit" name="submit">
-                                                Subscribe
-                                            </button>
+                                        	<div id="mce-responses" class="clear">
+                                        		<div class="response" id="mce-error-response" style="display:none"></div>
+                                        		<div class="response" id="mce-success-response" style="display:none"></div>
+                                        	</div>
+                                            <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                                            <div style="position: absolute; left: -5000px;"><input type="text" name="b_dcadcc832fbfbab13d3b62a5e_4c3f21e2f7" tabindex="-1" value=""></div>
+                                            <div class="clear">
+                                                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn-primary" >
+                                            </div>
                                         </span>
                                     </div>
+                                    </div>
                                 </form>
-                                -->
                             </div>
-                        </div>
-                        <br>
-                        <div class="sub-text">
-                            Stay up to date with the latest on ModelSEED 2.0.
-                            Unsubscribe at any time.
-                        </div>
-                    </div>
-                    <div class="footer-col col-md-4">
-                        <h3>On Github!</h3>
-                        <ul class="list-inline">
-                            <li>
-                                <a href="http://www.github.com/modelseed/ModelSEED-UI" target="_blank" class="btn-social">
-                                    <i class="fa fa-github"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
 
-                    <div class="footer-col col-md-4">
-                        <h3>About ModelSEED</h3>
-                        <div class="sub-text">
-                        ModelSEED is a free, open source application created by <a href="#home/#more">The ModelSEED Team</a>.
+                            <!--
+                            <form method="POST">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="email" size="30" placeholder="you@example.com">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" type="submit" value="Submit" name="submit">
+                                            Subscribe
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                            -->
                         </div>
+                    </div>
+                    <br>
+                    <div class="sub-text">
+                        Stay up to date with the latest on ModelSEED 2.0.
+                        Unsubscribe at any time.
+                    </div>
+                </div>
+                <div class="footer-col col-md-4">
+                    <h3>On Github!</h3>
+                    <ul class="list-inline">
+                        <li>
+                            <a href="http://www.github.com/modelseed/ModelSEED-UI" target="_blank" class="btn-social">
+                                <i class="fa fa-github"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-col col-md-4">
+                    <h3>About ModelSEED</h3>
+                    <div class="sub-text">
+                    ModelSEED is a free, open source application created by <a href="#home/#more">The ModelSEED Team</a>.
                     </div>
                 </div>
             </div>
         </div>
-        <div class="footer-below">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        Copyright &copy; 2015 ModelSEED
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
-    <div class="scroll-top page-scroll visible-xs visble-sm">
-        <a class="btn btn-primary" href="#page-top" du-smooth-scroll>
-            <i class="fa fa-chevron-up"></i>
-        </a>
     </div>
+    <div class="footer-below">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    Copyright &copy; 2015 ModelSEED
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 
+<!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+<div class="scroll-top page-scroll visible-xs visble-sm">
+    <a class="btn btn-primary" href="#page-top" du-smooth-scroll>
+        <i class="fa fa-chevron-up"></i>
+    </a>
 </div>

@@ -1,0 +1,137 @@
+
+
+    <div layout="row" layout-padding="margin">
+        <div>
+            <img src="img/ModelSEED-logo-vertical-small.png" height="125">
+        </div>
+        <div layout-padding="margin" flex>
+            <h3>{{release}}</h3>
+            Deployed: {{deployDate}}<br>
+            Commit:
+            <span ng-if="commitHash.length < 100">
+                <a href="https://github.com/modelseed/modelseed-ui/tree/{{commitHash}}" target="_blank">{{commitHash}}</a>
+                (<a href="https://github.com/modelseed/modelseed-ui/tree/{{commitBranch}}" target="_blank">{{commitBranch}}</a>)
+            </span>
+            <span ng-if="commitHash.length > 100">dev</span>
+        </div>
+        <div>
+            <br>
+            <a href="http://github.com/modelseed" class="no-link" target="_blank">
+                <i class="fa fa-github" style="font-size: 3em;"></i>
+                <md-tooltip>View Project</md-tooltip>
+            </a>
+        </div>
+    </div>
+    <div layout="row">
+
+        <br>
+        <br>
+
+        <table class="table table-condensed status-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>End Point Url</th>
+                    <th>Status</th>
+                    <th>API</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>RAST Auth</td>
+                    <td>{{urls.auth_url}}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>PATRIC Auth</td>
+                    <td>{{urls.patric_auth_url}}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/ModelSEED/ProbModelSEED" target="_blank">ProbModelSEED</a></td>
+                    <td>{{urls.ms_url}}</td>
+                    <td>
+                        <div ng-switch="ms" ng-if="$root.user">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/ProbModelSEED.spec" target="_blank">Spec</a>,
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/biop3/ProbModelSEED/ProbModelSEEDClient.py" target="_blank">Python</a>,
+                        <a href="https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/Bio/ModelSEED/ProbModelSEED/ProbModelSEEDClient.pm" target="_blank">Perl</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/PATRIC3/Workspace" target="_blank">Workspace</a></td>
+                    <td>{{urls.ws_url}}</td>
+                    <td>
+                        <div ng-switch="ws" ng-if="$root.user">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/Workspace.spec" target="_blank">Spec</a>,
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/biop3/Workspace/WorkspaceClient.py" target="_blank">Python</a>,
+                        <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm" target="_blank">Perl</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/MG-RAST/Shock" target="_blank">Shock</a></td>
+                    <td>{{urls.shock_url}}</td>
+                    <td>
+                        <div ng-switch="shock">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>SOLR</td>
+                    <td>{{urls.solr_url}}</td>
+                    <td>
+                        <div ng-switch="solr">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>ModelSEED Support Service</td>
+                    <td>{{urls.ms_support_url}}</td>
+                    <td>
+                        <div ng-switch="msSupport" ng-if="$root.user">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>App Service (not in use)</td>
+                    <td>{{urls.app_url}}</td>
+                    <td>
+                        <div ng-switch="app" ng-if="$root.user">
+                            <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                            <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                            <div ng-switch-default>loading...</div>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+<div ms-doc="../CHANGELOG.md" editable="false" layout-margin></div>

@@ -55,23 +55,11 @@ a.active {
 }
 
 
-.img-centered {
-    margin: 0 auto;
-}
-
 header {
     color: #fff;
     background: #444; /*#18bc9c;*/
 }
 
-header .container {
-    padding-top: 100px;
-    padding-bottom: 50px;
-}
-
-header img {
-    display: block;
-}
 
 header .intro-text .name {
     display: block;
@@ -96,7 +84,7 @@ header .intro-text .sub-title a {
 
 @media(min-width:768px) {
     header .container {
-        padding-top: 150px;
+        padding-top: 100px;
         padding-bottom: 100px;
     }
 

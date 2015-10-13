@@ -1,0 +1,90 @@
+
+<md-dialog flex="70">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Please Signin</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()" ui-sref="home" tabindex="1">
+          <md-icon class="material-icons" aria-label="Close signin dialog, go to homepage">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <form ng-submit="ok()">
+        <md-dialog-content>
+            <div layout="row" layout-padding layout-margin  ng-controller="Login">
+
+                <div ng-if="!$root.user" id="login" class="login" flex="70">
+                    <h4>
+                        Sign in with {{method.name}} account to continue
+                    </h4>
+
+                    <div ng-if="inValid" class="alert alert-danger" role="alert">
+                        <b>Try again.</b>
+                        Wrong username and/or password
+                    </div>
+
+                    <div ng-if="failMsg" class="alert alert-danger" role="alert">
+                        <b>Oh snap!</b>
+                        {{failMsg}}
+                    </div>
+
+                    <form>
+                        <md-input-container>
+                            <label>{{method.name}} Username</label>
+                            <input ng-model="user" tabindex="2">
+                        </md-input-container>
+                        <md-input-container>
+                            <label>Password</label>
+                            <input ng-model="pass" label="Password" type="password" tabindex="3">
+                        </md-input-container>
+                        <md-button ng-click="loginUser(user, pass)" type="submit" tabindex="4"
+                                   class="md-secondary md-raised pull-left" ng-disabled="!user.length || !pass.length">
+                            Sign In
+                        </md-button>
+
+                        <small class="pull-right">
+                            <a href="{{method.newAccountURL}}" target="_blank" tabindex="5">Create new account</a>
+                        </small>
+                    </form>
+
+                    <md-progress-circular ng-if="loading" class="pull-left" md-mode="indeterminate" md-diameter="25"></md-progress-circular>
+
+                </div>
+
+                <div class="alt-login-container alt-login-patric" ng-if="!$root.user && method.name == 'RAST'" flex>
+                    Or, sign in with:
+                    <div class="alt-login" ng-click="switchMethod('patric')">
+                        <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
+                        <div class="pull-left">
+                            PATRIC
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alt-login-container" ng-if="!$root.user && method.name == 'PATRIC'" flex>
+                    Or, sign in with:
+                    <div class="alt-login" ng-click="switchMethod('rast')">
+                        <img src="img/seed.png" width="50" height="50" class="pull-left" />
+                        <div class="pull-left">
+                            RAST<br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </md-dialog-content>
+
+
+        <div class="md-actions" layout="row">
+            <md-button class="md-button md-default" ng-click="cancel()" ui-sref="home">
+                Go to homepage
+            </md-button>
+
+            <!--
+            <md-button type="submit" class="md-raised md-primary">
+                Signin
+            </md-button>
+        -->
+        </div>
+    </form>
+</md-dialog>

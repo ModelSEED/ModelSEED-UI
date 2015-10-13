@@ -1,0 +1,43 @@
+
+<div ng-if="!$state.includes('home')" class="logo zigzag" hide-sm>
+    <a ui-sref="home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
+</div>
+
+<ul class="md-toolbar-tools about-toolbar">
+    <li ng-class="{ active: $state.includes('main.team') }">
+        <a ui-sref="main.team">
+            Researchers
+        </a>
+    </li>
+
+    <li ng-class="{ active: $state.includes('main.publications') }">
+        <a ui-sref="main.publications">
+            Publications
+        </a>
+    </li>
+
+    <!--
+    <li  ng-class="{ active: $state.includes('main.projects') }">
+        <a ui-sref="main.projects">
+            Projects
+        </a>
+    </li>
+    -->
+
+    <span flex></span>
+
+    <li ng-class="{ active: $state.includes('main.about') }">
+        <a ui-sref="main.about">
+            About
+        </a>
+    </li>
+
+    <div>
+        <md-button ng-if="!$root.user" class="md-raised md-secondary pull-right" ui-sref="app.reconstruct">
+            Sign In
+        </md-button>
+        <md-button ng-if="$root.user"  class="md-raised md-secondary pull-right" ui-sref="app.reconstruct">
+            ModelSEED
+        </md-button>
+    </div>
+</ul>
