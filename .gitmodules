@@ -4,3 +4,6 @@
 [submodule "lib/ms-rpc"]
 	path = lib/ms-rpc
 	url = https://github.com/nconrad/ms-rpc.git
+[submodule "lib/intro.js"]
+	path = lib/intro.js
+	url = https://github.com/nconrad/intro.js

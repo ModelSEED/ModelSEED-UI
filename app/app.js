@@ -5,6 +5,7 @@ angular.module('ModelSEED',
  'core-directives',
  'ctrls',
  'ms-ctrls',
+ 'ms-tour',
  'help-ctrls',
  'DataViewCtrls',
  'duScroll',
@@ -48,16 +49,14 @@ function($locationProvider, $stateProvider, $httpProvider,
     });
 
     $stateProvider
-        .state('home', {
+        .state('main', {
+            templateUrl: 'app/views/main.html',
+        }).state('main.home', {
             url: "/home/?login&redirect",
             templateUrl: 'app/views/home.html',
             controller: 'Home',
-        })
-
-        .state('main', {
-            templateUrl: 'app/views/main.html',
         }).state('main.team', {
-            url: "/henry-lab",
+            url: "/researchers",
             templateUrl: 'app/views/docs/team.html',
         }).state('main.publications', {
             url: "/publications",
@@ -87,15 +86,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/about.html',
         })
         .state('main.about.version', {
-            url: "/about/version",
+            url: "/version",
             templateUrl: 'app/views/version.html',
             controller: 'Version'
         }).state('main.about.faq', {
-            url: "/about/faq",
+            url: "/faq",
             templateUrl: 'app/views/docs/faq.html',
         })
-
-
 
         // main application template
         .state('app', {
@@ -259,30 +256,6 @@ function($locationProvider, $stateProvider, $httpProvider,
         //.accentPalette('light-blue');
 }])
 
-.service('AuthDialog', ['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
-
-    this.signIn = function(title, msg) {
-        return $dialog.show({
-            templateUrl: 'app/views/dialogs/auth.html',
-            clickOutsideToClose: false,
-            controller: ['$scope', '$http',
-            function($s, $http) {
-                $s.title = title;
-                $s.msg = msg;
-
-                $s.ok = function(){
-                    $dialog.hide();
-                }
-
-                $s.cancel = function(){
-                    $dialog.hide();
-                }
-            }]
-        })
-    }
-
-}])
 
 .run(['$rootScope', '$state', '$stateParams', '$window',
       '$location', 'Auth', '$timeout', '$templateCache', 'config', 'AuthDialog',
@@ -294,7 +267,7 @@ function($rootScope, $state, $sParams, $window,
 
         // if first load on home and user is authenticated,
         // forward to application page [good UX!]
-        if (fromState.name === '' && toState.name === "home" && auth.isAuthenticated()) {
+        if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state set
             $timeout(function() {
                 $state.transitionTo('app.reconstruct')

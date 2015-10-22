@@ -33,7 +33,6 @@ a:focus {
 }
 
 a.disabled {
-
     cursor: not-allowed;
 }
 
@@ -367,30 +366,37 @@ ul.about-toolbar {
 }
 
 ul.about-toolbar > li {
-    display: inline-block;
+    display: block;
     height: 100%;
+    transition: border-width 200ms;
+    margin-right: 1px;
 }
 
 
 
 ul.about-toolbar > li > a {
-    margin: 0 10px;
-    padding-top: 15px;
+    /*margin: 0 10px;*/
+    padding: 15px;
     height: 100%;
     display: block;
 }
 
 ul.about-toolbar > li > a:hover {
-    color: #dfdfdf;
+    color: #fff;
 }
 
 ul.about-toolbar > li.active {
-    border-bottom: 3px solid #566AAB;
-    color: #dfdfdf;
+    border-bottom: 4px solid #566AAB;
+    /*color: #dfdfdf;*/
+}
+
+ul.about-toolbar > li:hover {
+    border-bottom: 4px solid #566AAB;
+
 }
 
 ul.about-toolbar > li.active > a{
-    color: #dfdfdf;
+    color: #fff;
 }
 
 .sidebar {
@@ -1224,3 +1230,57 @@ tr .fa-file-text-o {
 .team-member [layout=column]{
     vertical-align: middle;
 }
+
+
+/* tour overrides */
+md-toolbar {
+    z-index: 9999 !important;
+}
+
+/* this overrides the default behavior (absolute positioning),
+    allowing for fixed elemented */
+.introjs-fixParent:not(.md-dialog-container) {
+    position: initial !important;
+}
+
+.introjs-overlay {
+    z-index: 900 !important;
+}
+
+.introjs-tooltipReferenceLayer {
+    z-index: 10000 !important;
+}
+
+.introjs-skipbutton {
+    float: left;
+}
+
+
+.disable-click {
+    z-index: 1000000 !important;
+}
+
+.introjs-tooltip {
+    min-width: 600px;
+}
+
+
+/*
+.introjs-fixParent  {
+    z-index: 9999 !important;
+}*/
+
+/*
+.introjs-helperLayer {
+    z-index: 5005 !important
+}
+.introjs-tooltipReferenceLayer{
+    z-index: 5003 !important
+}
+.introjs-showElement {
+    z-index: 5008 !important;
+}
+
+.introjs-overlay {
+    z-index: 4000 !important;
+}*/
