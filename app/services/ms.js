@@ -26,7 +26,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             var job = jobs[i];
                             if (job.type !== 'Genome') continue;
 
-                            genomes.push({timestamp: Date.parse(job.mod_time),
+                            genomes.push({timestamp: Date.parse(job.mod_time+'+0000'),
                                           genome_name: job.genome_name,
                                           genome_id: job.genome_id,
                                           id: job.id,
@@ -145,7 +145,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             var d = meta[8];
 
                             data.push({name: meta[0],
-                                       timestamp: Date.parse(meta[3]),
+                                       timestamp: Date.parse(meta[3]+'+0000'),
                                        path: meta[2]+meta[0],
                                        orgName: d.name,
                                        rxnCount: d.num_reactions,
@@ -178,13 +178,14 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.sanitizeModel = function(obj) {
+        console.log('rundate', obj.rundate)
         return {name: obj.id,
                 path: obj.ref,
                 orgName: obj.name,
                 rxnCount: obj.num_reactions,
                 cpdCount: obj.num_compounds,
                 fbaCount: obj.fba_count,
-                timestamp: Date.parse(obj.rundate),
+                timestamp: Date.parse(obj.rundate+'+0000'),
                 gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills}
 
     }
@@ -240,7 +241,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 isMinimal: obj[7].isMinimal ? true : false,
                 isDefined: obj[7].isDefined ? true : false,
                 type: obj[7].type ? obj[7].type : 'unspecified',
-                timestamp: Date.parse(obj[3]),
+                timestamp: Date.parse(obj[3]+'+0000'),
                 value: obj[0].toLowerCase() }
     }
 
@@ -268,7 +269,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             fba.path = fba.ref;
 
                             fba.media = fba.media_ref
-                            fba.timestamp = Date.parse(fba.rundate);
+                            fba.timestamp = Date.parse(fba.rundate+'+0000');
 
                             d.push(res[i]);
                         }

@@ -389,7 +389,6 @@ function ($scope, $timeout, $mdSidenav, $log) {
 }])
 
 .service('Session', [function() {
-
     this.tabs = {};
 
     this.setTab = function(state, tab) {
@@ -399,6 +398,23 @@ function ($scope, $timeout, $mdSidenav, $log) {
     this.getTab = function(state) {
         return this.tabs[state.current.name] || null;
     }
+}])
+
+
+.controller('Publications',
+['$scope', '$http', 'uiTools',
+function($s, $http, uiTools) {
+
+    $http.get('docs/publications/Jose_publications.csv')
+        .then(function(data) {
+            console.log('date', data)
+
+            var csv = data.data;
+
+            $s.pubs = uiTools.csvToJSON(csv).rows;
+            
+
+        })
 
 
 }])

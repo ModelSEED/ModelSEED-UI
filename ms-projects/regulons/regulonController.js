@@ -10,7 +10,7 @@ function($scope, $http, $state, uiTools, Dialogs) {
     // fetch data
     if ($state.current.name == "main.projects.regulons.genes") {
         $scope.opts = {query: query, limit: 25, offset: 0, sort: {field: 'bsu_number'}};
-        $http.get('projects/regulons/data/genes.json')
+        $http.get('ms-projects/regulons/data/genes.json')
              .then(function(d) {
                 table = d.data
                 $scope.header = table.thead;
@@ -19,7 +19,7 @@ function($scope, $http, $state, uiTools, Dialogs) {
 
     } else if ($state.current.name == "main.projects.regulons.regulators") {
         $scope.opts = {query: query, limit: 25, offset: 0, sort: {field: 'regulator_name'}};
-        $http.get('projects/regulons/data/regulators.json')
+        $http.get('ms-projects/regulons/data/regulators.json')
              .then(function(data) {
                 $scope.header = data.data[0];
                 $scope.data = data.data.slice(1);

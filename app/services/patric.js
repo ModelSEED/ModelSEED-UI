@@ -83,7 +83,7 @@ function($http, $q, $rootScope, config, Auth) {
         if (limit) url += '&limit('+limit+ (offset ? ','+offset : '') +')';
         if (sort) url += '&sort('+(opts.sort.desc ? '-': '+')+opts.sort.field+')';
 
-        
+
         if (cols.length) {
             var set = [];
             for (var i=0; i<cols.length; i++) {

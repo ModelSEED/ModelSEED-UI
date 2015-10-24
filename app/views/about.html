@@ -2,11 +2,14 @@
 
 
 
+<div layout="column">
+    <div class="position-fixed sidebar"
+         ng-include="'app/views/about-sidebar.html'">
+    </div>
 
-<div class="position-fixed" ng-include="'app/views/about-sidebar.html'"></div>
-
-<div ui-view style="margin-left: 175px;">
-    <h3>About ModelSEED</h3>
-    ModelSEED is a resource for the reconstruction, exploration,
-    comparison, and analysis of metabolic models.
+    <div ui-view style="margin: 0 10px 0 175px;">
+        <h3>About ModelSEED</h3>
+        ModelSEED is a resource for the reconstruction, exploration,
+        comparison, and analysis of metabolic models.
+    </div>
 </div>

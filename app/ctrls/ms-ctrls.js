@@ -19,7 +19,7 @@ function($scope, $state, $stateParams, Auth, $window) {
     // sets method and changes url param
     $scope.switchMethod = function(method) {
         $scope.method = Auth.loginMethod(method);
-        $state.go('home', {login: method});
+        $state.go('main.home', {login: method});
     }
 
     $scope.loginUser = function(user, pass) {
@@ -32,12 +32,13 @@ function($scope, $state, $stateParams, Auth, $window) {
 
         prom.success(function(data) {
             // see https://github.com/angular-ui/ui-router/issues/582
-            if ($stateParams.redirect) {
-                var path = $stateParams.redirect.replace(/%2F/g, '/');
-                var p = $state.transitionTo('app.modelPage', {path: path},
-                                        {reload: true, inherit: true, notify: false})
+
+            // If coming from home page, go to genomes.
+            // Otherwise go to current page.
+            if ($state.current.name === 'main.home') {
+                var p = $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false});
             } else
-                var p = $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false})
+                var p = $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false});
 
             p.then(function() {
                 setTimeout(function(){
@@ -45,6 +46,7 @@ function($scope, $state, $stateParams, Auth, $window) {
                 }, 0);
             });
         }).error(function(e, status){
+            console.log('IT FAILED')
             $scope.loading = false;
             if (status == 401)
                 $scope.inValid = true;
@@ -55,7 +57,7 @@ function($scope, $state, $stateParams, Auth, $window) {
 
     $scope.logout = function() {
         Auth.logout();
-        $state.transitionTo('home', {}, { reload: true, inherit: true, notify: false })
+        $state.transitionTo('main.home', {}, { reload: true, inherit: true, notify: false })
               .then(function() {
                   $window.location.reload();
               });
@@ -1093,28 +1095,24 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 }])
 
-.controller('RunReconstruct',
-['$scope',
-function($scope) {
+
+/*
+
+{
+    element: function() {
+        // this is a dummy-step for modal
+        showNextBtn();
+        $timeout(function() {
+            intro.nextStep();
+        })
 
 
-}])
 
-.controller('RunFBA',
-['$scope',
-function($scope) {
-
-
-}])
-
-
-.controller('RunGapfill',
-['$scope',
-function($scope) {
-
-
-}])
-
+        return document.querySelector('input.ng-pristine');
+    },
+    intro: ''
+},
+*/
 
 //var merged = objs1.concat(objs2);
 function mergeObjects(objs1, objs2, key) {

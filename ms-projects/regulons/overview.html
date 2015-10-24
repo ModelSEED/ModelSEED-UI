@@ -1,36 +1,36 @@
 
 
 <div layout="column">
-    <md-content layout="column" layout-margin>
+    <md-content layout="column" layout-margin layout-padding>
         <ul class="list-unstyled list-inline project-nav">
-            <li ng-class="{ active: $state.current.name =='projects.regulons'}">
-                <a ui-sref="projects.regulons">Overview</a>
+            <li ng-class="{ active: $state.current.name =='main.projects.regulons'}">
+                <a ui-sref="main.projects.regulons">Overview</a>
             </li>
-            <li ng-class="{ active: $state.includes('projects.regulons.genes') }">
-                <a ui-sref="projects.regulons.genes">Genes</a>
+            <li ng-class="{ active: $state.includes('main.projects.regulons.genes') }">
+                <a ui-sref="main.projects.regulons.genes">Genes</a>
             </li>
-            <li ng-class="{ active: $state.includes('projects.regulons.regulators') }">
-                <a ui-sref="projects.regulons.regulators">Regulatory</a>
+            <li ng-class="{ active: $state.includes('main.projects.regulons.regulators') }">
+                <a ui-sref="main.projects.regulons.regulators">Regulatory</a>
             </li>
         </ul>
 
         <md-content ui-view layout-margin>
-            <div>
-                <b>Abstract:</b><br>
+            <b>Abstract:</b><br>
+            <br>
 
-                <div class="pub-title">Reconstruction of the Regulatory Network for Bacillus Subtilis and Reconciliation with Gene Expression Data</div>
-                <div class="pub-author">José P. Faria, Ross Overbeek, Ronald C. Taylor, Neal Conrad, Veronika Vonstein, Anne Goelzer, Vincent Fromion, Miguel Rocha, Isabel Rocha, and Christopher S. Henry</div>
+            <div class="publication">
+                <div class="title">Reconstruction of the Regulatory Network for Bacillus Subtilis and Reconciliation with Gene Expression Data</div>
+                <div class="author">José P. Faria, Ross Overbeek, Ronald C. Taylor, Neal Conrad, Veronika Vonstein, Anne Goelzer, Vincent Fromion, Miguel Rocha, Isabel Rocha, and Christopher S. Henry</div>
 
-                <div class="pub-abstract">
+                <div class="abstract">
                     We introduce a manually constructed and curated regulatory network model that describes the current state of knowledge of transcriptional regulation of B. subtilis. The model corresponds to an updated and enlarged version of the regulatory model of central metabolism originally proposed in 2008. We extended the original network to the whole genome by integration of information from DBTBS, a compendium of regulatory data that includes promoters, transcription factors (TFs), binding sites, motifs and regulated operons. Additionally, we consolidated our network with all the information on regulation included in the SporeWeb and Subtiwiki community-curated resources on B. subtilis. Finally, we reconciled our network with data from RegPrecise, which recently released their own less comprehensive reconstruction of the regulatory network for B. subtilis. Our model describes 275 regulators and their target genes, representing 30 different mechanisms of regulation such as TFs, RNA switches, Riboswitches and small regulatory RNAs. Overall, regulatory information is included in the model for approximately 2500 of the ~4200 genes in B. subtilis 168. <br>
                     <br>
                     In an effort to further expand our knowledge of B. subtilis regulation, we reconciled our model with expression data. For this process, we propose the concept of Atomic Regulon (AR), as a set of genes that share the same “ON” and “OFF” gene expression profiles across multiple samples of experimental data. Atomic regulon inference uses gene context information from operon predictions and curated SEED subsystems, in addition to expression data, to infer regulatory interactions. We show how atomic regulons for B. subtilis are able to capture many sets of genes corresponding to regulated operons in our manually curated network. Additionally, we demonstrate how atomic regulons can be used to help expand/validate the knowledge of the regulatory networks by looking at highly correlated genes in the ARs for which regulatory information is lacking. During this process, we were also able to infer novel stimuli for hypothetical genes by exploring the genome expression metadata relating to experimental conditions, gaining insights into novel biology.<br>
                     <br>
                 </div>
 
-
                 <b>Citation:</b><br>
-                <div class="pub-citation">
+                <div class="citation">
                     José P. Faria, Ross Overbeek, Ronald C. Taylor, Neal Conrad,
                     Veronika Vonstein, Anne Goelzer, Vincent Fromion, Miguel Rocha,
                     Isabel Rocha, and Christopher S. Henry,

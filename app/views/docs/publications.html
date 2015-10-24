@@ -1,5 +1,43 @@
 
+<div layout="column" id="content">
 
-<h2>Publications</h2>
+    <h3>Publications</h3>
+    <hr class="no-margin">
+    <md-content>
+        <br>
 
-(coming soon)
+        <table>
+            <thead>
+            </thead>
+            <tbody>
+                <tr ng-repeat="pub in pubs" class="publication">
+                    <td>
+                        <div class="title">{{pub.Title}}</div>
+                        <div class="author">{{pub.Authors}}</div>
+                        <div class="source">{{pub.Publication}}</div>
+                    </td>
+                    <td>
+                        <div class="year">{{pub.Year}}</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!--
+        <div layout="row" ng-repeat="pub in pubs" class="publication">
+            <div >
+                <div class="title">{{pub.Title}}</div>
+                <div layout="column">
+                    <div class="author">{{pub.Authors}}</div>
+                    <div class="source">{{pub.Publication}}</div>
+                </div>
+            </div>
+            <div class="vertical-center">
+                <div class="year">{{pub.Year}}</div>
+            </div>
+        </div>
+        -->
+
+   </md-content>
+
+</div>

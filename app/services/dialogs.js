@@ -351,6 +351,72 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
     }
 
 }])
+
+.service('AuthDialog',
+['$rootScope', '$mdDialog', '$window', '$timeout', 'Auth', '$stateParams',
+function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
+
+    this.signIn = function() {
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/auth.html',
+            clickOutsideToClose: false,
+            controller: ['$scope', '$state', '$http',
+            function($s, $state, $http) {
+                console.log('state params', $rootScope)
+
+                // set login method
+                if ($rootScope.$stateParams.login == 'patric')
+                    $s.method = Auth.loginMethod('patric');
+                else
+                    $s.method = Auth.loginMethod('rast');
+
+
+
+                $s.creds = {};
+
+                // sets method and changes url param
+                $s.switchMethod = function(method) {
+                    $s.method = Auth.loginMethod(method);
+                    $state.go($state.current.name, {login: method});
+                }
+
+
+                $s.ok = function(){
+                    console.log('logging in', $s.creds)
+                    $s.loading = true;
+
+                    if ($stateParams.login == 'PATRIC')
+                        var prom = Auth.loginPatric($s.creds.user, $s.creds.pass)
+                    else
+                        var prom = Auth.login($s.creds.user, $s.creds.pass)
+
+                    prom.success(function(data) {
+                        $dialog.hide();
+                        $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false})
+                            .then(function() {
+                                setTimeout(function(){
+                                    $window.location.reload();
+                                }, 0);
+                            });
+
+                    }).error(function(e, status){
+                        $s.loading = false;
+                        if (status == 401)
+                            $s.inValid = true;
+                        else
+                            $s.failMsg = "Could not reach authentication service: "+e.error_msg;
+                    })
+                }
+
+                $s.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
+}])
+
 .controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
   $scope.closeToast = function() {
     $mdToast.hide();

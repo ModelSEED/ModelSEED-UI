@@ -1,10 +1,10 @@
 
 <div class="logo zigzag" hide-sm>
-    <a ui-sref="home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
+    <a ui-sref="main.home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
 </div>
 
 <ul class="toolbar">
-    <li ng-class="{ active: $state.includes('app.biochem') }">
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
         <a ui-sref="app.biochem">
             <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
         </a>
@@ -14,7 +14,7 @@
             <i class="icon-quill"></i> <span hide-sm>Annotations</span>
         </a>
     </li>-->
-    <li ng-class="{ active: $state.includes('app.reconstruct') }" >
+    <li ng-class="{ active: $state.includes('app.reconstruct') }" id="tour-2">
         <a ui-sref="app.reconstruct">
             <i class="icon-tools"></i> <span hide-sm>Genomes</span>
         </a>
@@ -24,7 +24,7 @@
             <i class="icon-lab2"></i> <span hide-sm>Media</span>
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.myModels') }">
+    <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-3">
         <a ui-sref="app.myModels">
             <i class="icon-folder-open-o"></i> <span hide-sm>Models</span>
         </a>
@@ -120,10 +120,13 @@
                 -->
                 <hr class="no-margin">
                 <li>
+                    <a ui-sref="main.about">About</a>
+                </li>
+                <li>
                     <a ui-sref="main.about.faq">FAQ</a>
                 </li>
                 <li>
-                    <a ui-sref="main.about.version">About ModelSEED</a>
+                    <a ui-sref="main.about.version">Version</a>
                 </li>
                 <!--<li>
                     <a ui-sref="app.api"><i class="fa fa-sign-out fa-fw"></i> API Documentation</a>

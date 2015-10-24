@@ -54,7 +54,7 @@
         </td>
         <td>
             <span ng-repeat="name in row.regulator_name.split('|') | limitTo : row.regulator_name.split('|').length-1">
-                <a ui-sref="projects.regulons.regulators({q: name})">{{name}}</a><br>
+                <a ui-sref="main.projects.regulons.regulators({q: name})">{{name}}</a><br>
             </span>
         </td>
         <td ng-bind-html="formatter(row.regulation_sign)"></td>

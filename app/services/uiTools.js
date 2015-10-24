@@ -20,7 +20,7 @@ angular.module('uiTools', [])
                   10: 'Nov', 11: 'Dec'};
 
     this.relativeTime = function(timestamp) {
-        var date = new Date()
+        var date = new Date();
 
         var interval =  date.getTime() - timestamp;
 
@@ -133,5 +133,12 @@ angular.module('uiTools', [])
     this.JSONToTabTable = function(head, rows) {
         return self.JSONToTable(head, rows);
     }
+
+    this.csvToJSON = function(text) {
+        var d = Papa.parse(text, {header: true});
+        console.log('d', d)
+        return {head: d.meta.fields, rows: d.data};;
+    }
+
 
 });

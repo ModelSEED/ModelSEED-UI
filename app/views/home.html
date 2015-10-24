@@ -2,15 +2,18 @@
 <link href="splash/css/splash.css" rel="stylesheet">
 
 
-<md-toolbar class="md-toolbar-tools md-whiteframe-z1 main-toolbar"
-            ng-include="'app/views/main-toolbar.html'">
-</md-toolbar>
-
+<div style="padding: 0;">
 <header>
-    <div layout="row" layout-padding class="container"  ng-controller="Login">
+    <div layout="row" layout-padding class="container" ng-controller="Login">
         <div class="intro-text" flex hide-sm>
             <img src="/img/ModelSEED-logo-small.png" width="300" height="75">
             <div class="logo-sub-text text-muted">Metabolic Modeling Made Simple.</div>
+
+            <!--
+            <div layout-margin ng-controller="Tour">
+                <a ng-click="startTour()">Take a tour!</a>
+            </div>
+            -->
         </div>
 
         <div ng-if="!$root.user" id="login" class="login" flex>
@@ -37,13 +40,13 @@
                     <label>Password</label>
                     <input ng-model="pass" label="Password" type="password">
                 </md-input-container>
-                <md-button ng-click="loginUser(user, pass)" type="submit"
+                <md-button id="step1" ng-click="loginUser(user, pass)" type="submit"
                            class="md-primary md-raised pull-left" ng-disabled="!user.length || !pass.length">
                     Sign In
                 </md-button>
 
                 <small class="pull-right">
-                    <a href="{{method.newAccountURL}}" target="_blank">Create new account</a>
+                    <a  href="{{method.newAccountURL}}" target="_blank">Create new account</a>
                 </small>
             </form>
 
@@ -74,9 +77,9 @@
         <div ng-if="$root.user">
             <div ng-controller="Login" class="login">
                 <h4>Continue to ModelSEED</h4>
-                <a ui-sref="app.reconstruct" class="btn btn-outline">
-                    Continue
-                </a><br>
+                <md-button ui-sref="app.reconstruct" class="md-secondary md-raised">
+                    Continue <md-icon class="material-icons" style="color: #fff; margin-bottom: 3px;" >input</md-icon>
+                </md-button><br>
                 <br>
                 <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
             </div>
@@ -382,4 +385,6 @@
     <a class="btn btn-primary" href="#page-top" du-smooth-scroll>
         <i class="fa fa-chevron-up"></i>
     </a>
+</div>
+
 </div>

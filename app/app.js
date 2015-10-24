@@ -61,12 +61,13 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('main.publications', {
             url: "/publications",
             templateUrl: 'app/views/docs/publications.html',
+            controller: 'Publications'
         })
 
         // ModelSEED Projects
         .state('main.projects', {
             url: '/projects',
-            templateUrl: '/ms-projects/home.html',
+            templateUrl: '/ms-projects/home.html'
         }).state('main.projects.regulons', {
             url: '/regulons',
             templateUrl: '/ms-projects/regulons/overview.html',
@@ -84,14 +85,16 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('main.about', {
             url: '/about',
             templateUrl: 'app/views/about.html',
-        })
-        .state('main.about.version', {
+        }).state('main.about.version', {
             url: "/version",
             templateUrl: 'app/views/version.html',
             controller: 'Version'
         }).state('main.about.faq', {
             url: "/faq",
             templateUrl: 'app/views/docs/faq.html',
+        }).state('main.about.sources', {
+            url: "/sources",
+            templateUrl: 'app/views/docs/sources.html',
         })
 
         // main application template

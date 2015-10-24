@@ -77,7 +77,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                 size: obj[6],
                 files: null, // need
                 folders: null, // need
-                timestamp: Date.parse(obj[3])
+                timestamp: Date.parse(obj[3]+'+0000')
                };
     }
 
@@ -169,7 +169,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
     // takes source and destimation paths, moves object
     this.mv = function(src, dest) {
-        var params = {objects: [[src, dest]], move: 1 };
+        var params = {objects: [[src, dest]], move: 1, recursive: 1};
         return $http.rpc('ws', 'copy', params)
                     .then(function(res) {
                         return res;

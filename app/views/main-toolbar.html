@@ -1,6 +1,6 @@
 
-<div ng-if="!$state.includes('home')" class="logo zigzag" hide-sm>
-    <a ui-sref="home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
+<div class="logo zigzag" hide-sm>
+    <a ui-sref="main.home"><img src="img/ModelSEED-logo-small.png" width="174" height="43"></a>
 </div>
 
 <ul class="md-toolbar-tools about-toolbar">
@@ -17,7 +17,7 @@
     </li>
 
     <!--
-    <li  ng-class="{ active: $state.includes('main.projects') }">
+    <li ng-class="{ active: $state.includes('main.projects') }">
         <a ui-sref="main.projects">
             Projects
         </a>
@@ -37,7 +37,7 @@
             Sign In
         </md-button>
         <md-button ng-if="$root.user"  class="md-raised md-secondary pull-right" ui-sref="app.reconstruct">
-            ModelSEED
+            ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;">input</md-icon>
         </md-button>
     </div>
 </ul>

@@ -57,7 +57,7 @@ a.disabled {
     padding: 5px 15px 3px 0;
     margin: 0 10px 2px 0;
     display: inline-block;
-    background-color: #444;
+    background-color: #333;
 }
 
 .logo a:hover {
@@ -70,6 +70,7 @@ a.disabled {
     font-size: 1.15em;
 }
 
+/*
 .zigzag {
     background-color: #444;
     position: relative;
@@ -93,6 +94,7 @@ a.disabled {
                     linear-gradient(-135deg, #00BCD4 5px, transparent 0);
 
 }
+*/
 
 .md-primary { /*hack hack hack #fixme */
     background-color: #00BCD4 !important;
@@ -278,23 +280,27 @@ md-toolbar,
     height: 50px;
     min-height: 50px;
     max-height: 50px;
-
 }
 
-.toolbar {
+ul.toolbar {
     padding: 0;
     margin: 0;
     height: 100%;
     list-style: none;
 }
 
-.toolbar > li {
+ul.toolbar > li {
     height: 100%;
     display: inline-block;
+    transition: border-width 150ms;
+}
+ul.toolbar > li.active,
+ul.toolbar > li:hover {
+    border-bottom: 3px solid #30BCD0;
 }
 
-.toolbar > li > a {
-    display:block;
+ul.toolbar > li > a {
+    display: block;
     font-size: 8pt;
     line-height: 1.1em;
     margin: 0 7px;
@@ -302,21 +308,23 @@ md-toolbar,
     height: 100%;
 }
 
-.toolbar > li > a:hover {
+ul.toolbar > li:hover > a {
     color: #dfdfdf;
 }
-.toolbar > li.active > a{
-    color: #555;
+
+
+ul.toolbar > li.active > a{
+    color: #dfdfdf;
 }
 
-.toolbar > li > a >i:not(.fa-caret-down) {
+ul.toolbar > li > a >i:not(.fa-caret-down) {
     display: inline-block;
     padding-top: 10px;
     font-size: 30px;
     text-align: center;
 }
 
-.toolbar li > a > i.icon-benzene {
+ul.toolbar li > a > i.icon-benzene {
     font-weight: 600;
 }
 
@@ -338,7 +346,7 @@ md-toolbar,
     height: 100%;
     padding: 0px 10px;
 }
-.toolbar-right > div >a{
+.toolbar-right > div > a{
     display: block;
     height: 100%;
     padding-top: 15px;
@@ -363,48 +371,81 @@ md-toolbar,
 
 ul.about-toolbar {
     list-style: none;
+    padding: 0;
 }
 
 ul.about-toolbar > li {
     display: block;
     height: 100%;
-    transition: border-width 200ms;
+    transition: border-width 150ms;
     margin-right: 1px;
 }
 
 
-
 ul.about-toolbar > li > a {
-    /*margin: 0 10px;*/
+    margin: 0;
     padding: 15px;
     height: 100%;
     display: block;
 }
 
-ul.about-toolbar > li > a:hover {
-    color: #fff;
-}
-
-ul.about-toolbar > li.active {
-    border-bottom: 4px solid #566AAB;
-    /*color: #dfdfdf;*/
-}
-
-ul.about-toolbar > li:hover {
-    border-bottom: 4px solid #566AAB;
-
-}
-
+ul.about-toolbar > li:hover > a,
 ul.about-toolbar > li.active > a{
-    color: #fff;
+    color: #dfdfdf;
 }
 
+ul.about-toolbar > li:hover,
+ul.about-toolbar > li.active {
+    border-bottom: 3px solid #30BCD0;
+}
+
+.sidebar h4 {
+    margin: 20px 0 0 20px
+}
+
+.sidebar ul {
+    list-style: none;
+    margin-top: 15px;
+}
+
+.sidebar ul > li {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transition: border-width 150ms;
+    margin-right: 1px;
+}
+
+
+.sidebar ul > li > a {
+    margin: 0;
+    padding-left: 20px;
+    height: 100%;
+    width: 100%;
+    display: block;
+}
+
+.sidebar ul > li.active > a{
+    color: #666;
+}
+
+.sidebar ul > li:hover {
+    border-left: 3px solid #30BCD0;
+}
+
+.sidebar ul > li.active,
+.sidebar ul > li:hover  {
+    border-left: 3px solid #666;
+}
+
+
+/*
 .sidebar {
     z-index: 50;
     color: #fff;
     background-color: #555;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-}
+}*/
 
 /*
 .nav .open>a {
@@ -470,30 +511,11 @@ ul.about-toolbar > li.active > a{
     font-size: .9em;
 }
 
-
-/*
-.model-count {
-
-    transition: all 1s ease;
-    -webkit-animation: increment .5s;
-    -moz-animation: increment .5s;
-    -ms-animation: increment .5s;
-    -o-animation: increment .5s;
-    animation: increment .5s;
-}
-
-@keyframes increment {
-    from { color: #000 !important; }
-    to   { color: #fff; }
-}*/
-
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-
 
 
 /* pages */
@@ -668,13 +690,6 @@ table md-checkbox {
     width: 1px;
     height: 1px;
 }
-
-/*
-.table-selector > tbody > tr > td,
-.table-editor > tbody > tr > td {
-    vertical-align: initial;
-}
-*/
 
 .table-editor-controls md-input-container {
     padding-bottom: 5px;
@@ -864,6 +879,9 @@ md-card {
               0px 0px 5px 1px rgba(0, 0, 0, 0.084);
 }
 
+.md-subheader {
+    top: 0px !important;
+}
 
 /* my models page */
 .my-model-tabs {
@@ -1187,20 +1205,40 @@ tr .fa-file-text-o {
 
 
 /* modelseed projects / team / publications */
-.pub-title {
-    font-size: 1.4em;
-    margin: 10px 40px;
+.publications li {
+    margin: 0 0 30px 0;
 }
-.pub-author {
-    font-size: .8em;
 
+
+.publication td{
+    padding: 0px 20px 20px 0;
+}
+
+.publication .title {
+    font-size: 1.2em;
+    margin: 0px 40px;
+}
+.publication .author {
+
+    font-size: .8em;
+    margin-left: 40px;
+}
+.publication .source {
+    margin-left: 40px;
+    font-size: .8em;
+    font-style: italic;
+}
+
+.publication .abstract {
     margin: 10px 40px;
 }
-.pub-abstract {
+
+
+.citation {
     margin: 10px 40px;
 }
-.pub-citation {
-    margin: 10px 40px;
+.year {
+
 }
 
 .project-nav {
@@ -1209,7 +1247,7 @@ tr .fa-file-text-o {
 }
 
 .project-nav li.active > a{
-    color: #444;
+    /*color: #444;*/
 }
 
 .team-member {
@@ -1227,13 +1265,12 @@ tr .fa-file-text-o {
     box-shadow: 0 0 2px #aaa;
 }
 
-.team-member [layout=column]{
-    vertical-align: middle;
-}
+
 
 
 /* tour overrides */
 md-toolbar {
+    background-color: #333;
     z-index: 9999 !important;
 }
 

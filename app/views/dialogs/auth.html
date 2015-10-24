@@ -4,7 +4,7 @@
       <div class="md-toolbar-tools md-toolbar-accent">
         <h3>Please Signin</h3>
         <span flex></span>
-        <md-button class="md-icon-button" ng-click="cancel()" ui-sref="home" tabindex="1">
+        <md-button class="md-icon-button" ng-click="cancel()" ui-sref="main.home" tabindex="1">
           <md-icon class="material-icons" aria-label="Close signin dialog, go to homepage">close</md-icon>
         </md-button>
       </div>
@@ -12,7 +12,7 @@
 
     <form ng-submit="ok()">
         <md-dialog-content>
-            <div layout="row" layout-padding layout-margin  ng-controller="Login">
+            <div layout="row" layout-padding layout-margin ng-controller="Login">
 
                 <div ng-if="!$root.user" id="login" class="login" flex="70">
                     <h4>
@@ -32,14 +32,14 @@
                     <form>
                         <md-input-container>
                             <label>{{method.name}} Username</label>
-                            <input ng-model="user" tabindex="2">
+                            <input ng-model="creds.user" tabindex="2">
                         </md-input-container>
                         <md-input-container>
                             <label>Password</label>
-                            <input ng-model="pass" label="Password" type="password" tabindex="3">
+                            <input ng-model="creds.pass" label="Password" type="password" tabindex="3">
                         </md-input-container>
-                        <md-button ng-click="loginUser(user, pass)" type="submit" tabindex="4"
-                                   class="md-secondary md-raised pull-left" ng-disabled="!user.length || !pass.length">
+                        <md-button type="submit" tabindex="4"
+                                   class="md-secondary md-raised pull-left" ng-disabled="!creds.user.length || !creds.pass.length">
                             Sign In
                         </md-button>
 
@@ -52,7 +52,7 @@
 
                 </div>
 
-                <div class="alt-login-container alt-login-patric" ng-if="!$root.user && method.name == 'RAST'" flex>
+                <div class="alt-login-container alt-login-patric" ng-if="method.name == 'RAST'" flex>
                     Or, sign in with:
                     <div class="alt-login" ng-click="switchMethod('patric')">
                         <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
@@ -62,7 +62,7 @@
                     </div>
                 </div>
 
-                <div class="alt-login-container" ng-if="!$root.user && method.name == 'PATRIC'" flex>
+                <div class="alt-login-container" ng-if="method.name == 'PATRIC'" flex>
                     Or, sign in with:
                     <div class="alt-login" ng-click="switchMethod('rast')">
                         <img src="img/seed.png" width="50" height="50" class="pull-left" />
@@ -76,7 +76,7 @@
 
 
         <div class="md-actions" layout="row">
-            <md-button class="md-button md-default" ng-click="cancel()" ui-sref="home">
+            <md-button class="md-button md-default" ng-click="cancel()" ui-sref="main.home">
                 Go to homepage
             </md-button>
 
