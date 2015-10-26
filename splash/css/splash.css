@@ -45,15 +45,6 @@ p.small {
     font-size: 16px;
 }
 
-a,
-a:hover,
-a:focus,
-a:active,
-a.active {
-    outline: 0;
-    color: #26c6da;
-}
-
 
 header {
     color: #fff;
@@ -233,7 +224,7 @@ section.dark {
 }
 
 #portfolio h2 {
-    color: #A2E6FF;
+    color: #2FBBD0;
 }
 
 #portfolio p {

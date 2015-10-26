@@ -10,6 +10,11 @@ Below contains a summary of notable changes and deploy date for each release.
 - Turn on model editing
 
 
+####vAlpha-1.2.0 (Oct 26, 2015)
+- Start public portion of site (researchers, publications, etc)
+- Force login
+
+
 ####vAlpha-1.1.4 (Oct 8, 2015)
 - URLs no longer require hashes
 

@@ -22,7 +22,7 @@ body {
 
 
 a {
-    color: #00AFD8;
+    color: #2FBBD0; /*#00AFD8;*/
 }
 
 a:hover,
@@ -70,34 +70,49 @@ a.disabled {
     font-size: 1.15em;
 }
 
-/*
+
 .zigzag {
     background-color: #444;
     position: relative;
 }
 
 .zigzag:after {
-  background-position: right-top;
-  background-repeat: repeat-y;
-  background-size: 15px 15px;
-  content: " ";
-  display: block;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  width: 15px;
-  height: 100%;
+    background-position: right-top;
+    background-repeat: repeat-y;
+    background-size: 15px 15px;
+    content: " ";
+    display: block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 15px;
+    height: 100%;
 }
 
 .zigzag:after{
-  background-image: linear-gradient(-45deg, #00BCD4 5px, transparent 0),
-                    linear-gradient(-135deg, #00BCD4 5px, transparent 0);
+    background-image: linear-gradient(-45deg, #00BCD4 5px, transparent 0),
+                      linear-gradient(-135deg, #00BCD4 5px, transparent 0);
 
 }
-*/
+
+.info-list {
+    font-size: 1.2em;
+    margin: 0 0 0 10px;
+}
+.info-list .sub-item {
+    margin: 0 0 0 30px;
+}
+
+.info-check {
+    content: &#10003;
+    position:relative;
+    top: 2px;
+    font-size: 1.5em;
+    color: #2FBBD0;
+}
 
 .md-primary { /*hack hack hack #fixme */
-    background-color: #00BCD4 !important;
+    background-color: #2FBBD0 !important;
     color: #fff !important;
 }
 
@@ -271,15 +286,20 @@ header .login md-input-container.md-default-theme:not(.md-input-invalid).md-inpu
 
 /* navigation mods */
 
-.md-toolbar-accent {
-    background-color: #6D70AF;
-}
-
 md-toolbar,
 .md-toolbar-tools {
     height: 50px;
     min-height: 50px;
     max-height: 50px;
+}
+
+.md-toolbar-accent {
+    background-color: #6D70AF !important;
+}
+
+.md-toolbar-tools {
+    font-size: 1em;
+    background-color: #2FBBD0;
 }
 
 ul.toolbar {
@@ -292,11 +312,11 @@ ul.toolbar {
 ul.toolbar > li {
     height: 100%;
     display: inline-block;
-    transition: border-width 150ms;
+    transition: border-width 200ms;
 }
 ul.toolbar > li.active,
 ul.toolbar > li:hover {
-    border-bottom: 3px solid #30BCD0;
+    border-bottom: 2px solid #555;
 }
 
 ul.toolbar > li > a {
@@ -377,7 +397,7 @@ ul.about-toolbar {
 ul.about-toolbar > li {
     display: block;
     height: 100%;
-    transition: border-width 150ms;
+    transition: border-width 200ms;
     margin-right: 1px;
 }
 
@@ -396,7 +416,7 @@ ul.about-toolbar > li.active > a{
 
 ul.about-toolbar > li:hover,
 ul.about-toolbar > li.active {
-    border-bottom: 3px solid #30BCD0;
+    border-bottom: 2px solid #555;
 }
 
 .sidebar h4 {
@@ -482,7 +502,7 @@ ul.about-toolbar > li.active {
 }
 
 .selected-model a {
-    color: #00AFD8;
+    color: #2FBBD0;
 }
 .selected-model a:hover {
     color: #0081A0;
@@ -801,9 +821,6 @@ md-sidenav button i {
     margin-top: 10px;
 }
 
-.md-toolbar-tools {
-    font-size: 1em;
-}
 
 md-backdrop {
     visbility: hidden;
@@ -1270,7 +1287,6 @@ tr .fa-file-text-o {
 
 /* tour overrides */
 md-toolbar {
-    background-color: #333;
     z-index: 9999 !important;
 }
 
