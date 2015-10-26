@@ -72,7 +72,7 @@ function($http, $q, $rootScope, config, Auth) {
         var url = endpoint+'genome/?http_accept=application/solr+json';
 
         if (opts) {
-            var query = opts.query ? opts.query.replace(/\ /g, '+') : null,
+            var query = opts.query ? opts.query : null,
                 limit = opts.limit ? opts.limit : null,
                 offset = opts.offset ? opts.offset : null,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
@@ -92,8 +92,21 @@ function($http, $q, $rootScope, config, Auth) {
             url += '&select('+set.join(',')+')';
         }
 
+        //mycobacterium tubercu
         if (query) {
-            url += '&or(eq(genome_name,'+query+'),eq(species,'+query+'),eq(genome_id,*'+query+'*))';
+            var words = query.split(' ');
+
+            if (words.length > 1) {
+                var q = [];
+                for (var i=0; i<words.length-1; i++) {
+                    q.push('eq(genome_name,'+words[i]+')')
+                }
+                q.push('eq(genome_name,'+words.pop()+'*)')
+                url += '&and('+q.join(',')+')';
+            } else {
+                url += '&or(eq(genome_name,'+words[0]+'),eq(genome_id,'+words[0]+'))';
+            }
+
             cache = false;
         } else
             url += '&keyword(*)';
