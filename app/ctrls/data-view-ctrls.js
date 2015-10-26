@@ -1381,7 +1381,7 @@ function(WS, ModelParser) {
                 bio.fluxMax = 1000;
                 bio.flux = 0;
                 bio.fluxClass = "Blocked";
-                this.modelreactions.push(bio);
+                modelreactions.push(bio);
             }
             bio.disp_low_flux = bio.fluxMin + "<br>(" + bio.lowerFluxBound + ")";
             bio.disp_high_flux = bio.fluxMax + "<br>(" + bio.upperFluxBound + ")";
