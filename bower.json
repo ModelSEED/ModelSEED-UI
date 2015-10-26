@@ -24,7 +24,8 @@
     "angular-animate": "1.4.0",
     "showdown": "1.2.1",
     "ng-context-menu": "1.0.1",
-    "angular-material": "0.10.1"
+    "angular-material": "0.10.1",
+    "papaparse": "~4.1.2"
   },
   "resolutions": {
     "angular": "1.4.0"
