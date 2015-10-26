@@ -52,7 +52,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('main', {
             templateUrl: 'app/views/main.html',
         }).state('main.home', {
-            url: "/home/?login&redirect",
+            url: "/?login&redirect",
             templateUrl: 'app/views/home.html',
             controller: 'Home',
         }).state('main.team', {
