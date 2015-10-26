@@ -160,7 +160,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                           console.log('run fba response', res)
                           cb();
                           self.showComplete('FBA Complete',
-                                       res[0]+' '+res[7].media.split('/').pop())
+                                       res.id+' '+res.media_ref.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
