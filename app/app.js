@@ -92,8 +92,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('main.about.faq', {
             url: "/faq",
             templateUrl: 'app/views/docs/faq.html',
-        }).state('main.about.sources', {
-            url: "/sources",
+        }).state('main.about.data', {
+            url: "/data-sources",
             templateUrl: 'app/views/docs/sources.html',
         })
 

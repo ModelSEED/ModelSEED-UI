@@ -4,13 +4,16 @@
 <h4>Contents</h4>
 
 <ul class="list-unstyled">
+    <li ng-class="{ active: $state.current.name == 'main.about' }">
+        <a ui-sref="main.about">About</a>
+    </li>
     <li ng-class="{ active: $state.includes('main.about.faq') }">
         <a ui-sref="main.about.faq">FAQ</a>
     </li>
     <li ng-class="{ active: $state.includes('main.about.version') }">
         <a ui-sref="main.about.version">Version / Status</a>
     </li>
-    <li ng-class="{ active: $state.includes('main.about.sources') }">
-        <a ui-sref="main.about.sources">Date Sources</a>
+    <li ng-class="{ active: $state.includes('main.about.data') }">
+        <a ui-sref="main.about.data">Data Sources</a>
     </li>
 </ul>
