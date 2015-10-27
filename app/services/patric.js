@@ -104,7 +104,7 @@ function($http, $q, $rootScope, config, Auth) {
                 q.push('eq(genome_name,'+words.pop()+'*)')
                 url += '&and('+q.join(',')+')';
             } else {
-                url += '&or(eq(genome_name,'+words[0]+'),eq(genome_id,'+words[0]+'))';
+                url += '&or(eq(genome_name,'+words[0]+'*),eq(genome_id,'+words[0]+'))';
             }
 
             cache = false;
