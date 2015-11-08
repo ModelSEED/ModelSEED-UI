@@ -1,0 +1,326 @@
+[
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/list/:path",
+                    "optional": false,
+                    "description": "list objects in a folder",
+                    "line": 1,
+                    "source": "@api {get} /list/:path list objects in a folder"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "list",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName list"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "path of workspace folder",
+                    "line": 4,
+                    "source": "@apiParam {string} path path of workspace folder"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "?filter=(folders|objects)",
+                    "optional": false,
+                    "description": "only fetch folders or objects",
+                    "line": 5,
+                    "source": "@apiParam {string} ?filter=(folders|objects) only fetch folders or objects"
+                },
+                {
+                    "tag": "apiSampleRequest",
+                    "name": "/list/nconrad/home/models/",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 7,
+                    "source": "@apiSampleRequest /list/nconrad/home/models/"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "json",
+                    "name": "meta",
+                    "optional": false,
+                    "description": "metadata for listed objects",
+                    "line": 9,
+                    "source": "@apiSuccess {json} meta metadata for listed objects"
+                },
+                {
+                    "tag": "apiSuccessExample",
+                    "type": "json",
+                    "name": "Success-Response:",
+                    "optional": false,
+                    "description": "HTTP/1.1 200 OK\n[\n{\n\"name\": \"my things\",\n\"type\": \"folder\",\n\"path\": \"/nconrad/home/things\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": { },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n},\n{\n\"name\": \"1520703.3_model\",\n\"type\": \"model\",\n\"path\": \"/nconrad/home/1520703.3_model\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": { },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n}\n]",
+                    "line": 10,
+                    "source": "@apiSuccessExample {json} Success-Response:\nHTTP/1.1 200 OK\n[\n{\n\"name\": \"my things\",\n\"type\": \"folder\",\n\"path\": \"/nconrad/home/things\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": { },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n},\n{\n\"name\": \"1520703.3_model\",\n\"type\": \"model\",\n\"path\": \"/nconrad/home/1520703.3_model\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": { },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n}\n]"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /list/:path list objects in a folder\n@apiName list\n\n@apiParam {string} path path of workspace folder\n@apiParam {string} ?filter=(folders|objects) only fetch folders or objects\n\n@apiSampleRequest /list/nconrad/home/models/\n\n@apiSuccess {json} meta metadata for listed objects\n@apiSuccessExample {json} Success-Response:\n    HTTP/1.1 200 OK\n    [\n      {\n         \"name\": \"my things\",\n         \"type\": \"folder\",\n         \"path\": \"/nconrad/home/things\",\n         \"modDate\": \"2015-10-19T03:40:29\",\n         \"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n         \"owner\": \"nconrad\",\n         \"size\": 648464,\n         \"userMeta\": { },\n         \"autoMeta\": { },\n         \"userPermission\": \"r\",\n         \"globalPermission\": \"n\",\n         \"shockUrl\": \"\"\n       },\n      {\n      \t\"name\": \"1520703.3_model\",\n         \"type\": \"model\",\n         \"path\": \"/nconrad/home/1520703.3_model\",\n         \"modDate\": \"2015-10-19T03:40:29\",\n         \"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n         \"owner\": \"nconrad\",\n         \"size\": 648464,\n         \"userMeta\": { },\n         \"autoMeta\": { },\n         \"userPermission\": \"r\",\n         \"globalPermission\": \"n\",\n         \"shockUrl\": \"\"\n       }\n     ]"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/meta/:path",
+                    "optional": false,
+                    "description": "Get meta data on worksapce obj",
+                    "line": 1,
+                    "source": "@api {get} /meta/:path Get meta data on worksapce obj"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "getMeta",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName getMeta"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "path to workspace object",
+                    "line": 4,
+                    "source": "@apiParam {string} path  path to workspace object"
+                },
+                {
+                    "tag": "apiSampleRequest",
+                    "name": "/list/nconrad/home/models/1520703.3_model",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 6,
+                    "source": "@apiSampleRequest /list/nconrad/home/models/1520703.3_model"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "json",
+                    "name": "meta",
+                    "optional": false,
+                    "description": "metadata for given object",
+                    "line": 8,
+                    "source": "@apiSuccess {json} meta metadata for given object"
+                },
+                {
+                    "tag": "apiSuccessExample",
+                    "type": "json",
+                    "name": "Success-Response:",
+                    "optional": false,
+                    "description": "HTTP/1.1 200 OK\n{\n\"name\": \"1520703.3_model\",\n\"type\": \"model\",\n\"path\": \"/nconrad/home/models/1520703.3_model\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": {  },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n}",
+                    "line": 9,
+                    "source": "@apiSuccessExample {json} Success-Response:\nHTTP/1.1 200 OK\n{\n\"name\": \"1520703.3_model\",\n\"type\": \"model\",\n\"path\": \"/nconrad/home/models/1520703.3_model\",\n\"modDate\": \"2015-10-19T03:40:29\",\n\"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n\"owner\": \"nconrad\",\n\"size\": 648464,\n\"userMeta\": { },\n\"autoMeta\": {  },\n\"userPermission\": \"r\",\n\"globalPermission\": \"n\",\n\"shockUrl\": \"\"\n}"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /meta/:path Get meta data on worksapce obj\n@apiName getMeta\n\n@apiParam {string} path  path to workspace object\n\n@apiSampleRequest /list/nconrad/home/models/1520703.3_model\n\n@apiSuccess {json} meta metadata for given object\n@apiSuccessExample {json} Success-Response:\n    HTTP/1.1 200 OK\n    {\n    \t  \"name\": \"1520703.3_model\",\n       \"type\": \"model\",\n       \"path\": \"/nconrad/home/models/1520703.3_model\",\n       \"modDate\": \"2015-10-19T03:40:29\",\n       \"id\": \"245FFF5C-7613-11E5-8FA2-41B4682E0674\",\n       \"owner\": \"nconrad\",\n       \"size\": 648464,\n       \"userMeta\": { },\n       \"autoMeta\": {  },\n       \"userPermission\": \"r\",\n       \"globalPermission\": \"n\",\n       \"shockUrl\": \"\"\n     }"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/objects/:path",
+                    "optional": false,
+                    "description": "get object data from workspace",
+                    "line": 1,
+                    "source": "@api {get} /objects/:path get object data from workspace"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "getModel",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName getModel"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "Path to workspace object",
+                    "line": 4,
+                    "source": "@apiParam {string} path Path to workspace object"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "json",
+                    "name": "data",
+                    "optional": false,
+                    "description": "the metadata [meta] and object data [data] for the given object",
+                    "line": 6,
+                    "source": "@apiSuccess {json} data the metadata [meta] and object data [data] for the given object"
+                },
+                {
+                    "tag": "apiSuccessExample",
+                    "type": "json",
+                    "name": "Success-Response:",
+                    "optional": false,
+                    "description": "HTTP/1.1 200 OK\n{\n\"meta\": {},\n\"data\": {}\n}",
+                    "line": 7,
+                    "source": "@apiSuccessExample {json} Success-Response:\nHTTP/1.1 200 OK\n{\n\"meta\": {},\n\"data\": {}\n}"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /objects/:path get object data from workspace\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {json} data the metadata [meta] and object data [data] for the given object\n@apiSuccessExample {json} Success-Response:\n    HTTP/1.1 200 OK\n    {\n      \"meta\": {},\n      \"data\": {}\n    }"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/model/:path",
+                    "optional": false,
+                    "description": "Request model detail information",
+                    "line": 1,
+                    "source": "@api {get} /model/:path Request model detail information"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "getModel",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName getModel"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "Path to workspace object",
+                    "line": 4,
+                    "source": "@apiParam {string} path Path to workspace object"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "Model Object",
+                    "name": "A",
+                    "optional": false,
+                    "description": "parsed and sanitized model object",
+                    "line": 6,
+                    "source": "@apiSuccess {Model Object} A parsed and sanitized model object"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /model/:path Request model detail information\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {Model Object} A parsed and sanitized model object"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/fba/:path",
+                    "optional": false,
+                    "description": "Request model detail information",
+                    "line": 1,
+                    "source": "@api {get} /fba/:path Request model detail information"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "getModel",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName getModel"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "Path to workspace object",
+                    "line": 4,
+                    "source": "@apiParam {string} path Path to workspace object"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "fba object",
+                    "name": "A",
+                    "optional": false,
+                    "description": "parsed and sanitized fba object",
+                    "line": 6,
+                    "source": "@apiSuccess {fba object} A parsed and sanitized fba object"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /fba/:path Request model detail information\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {fba object} A parsed and sanitized fba object"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/my-models/:path",
+                    "optional": false,
+                    "description": "List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default).",
+                    "line": 1,
+                    "source": "@api {get} /my-models/:path List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default)."
+                },
+                {
+                    "tag": "apiName",
+                    "name": "getModel",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 4,
+                    "source": "@apiName getModel"
+                },
+                {
+                    "tag": "apiParam",
+                    "type": "string",
+                    "name": "path",
+                    "optional": false,
+                    "description": "Path to workspace object",
+                    "line": 6,
+                    "source": "@apiParam {string} path Path to workspace object"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "fba object",
+                    "name": "A",
+                    "optional": false,
+                    "description": "parsed and sanitized fba object",
+                    "line": 8,
+                    "source": "@apiSuccess {fba object} A parsed and sanitized fba object"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /my-models/:path List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default).\n\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {fba object} A parsed and sanitized fba object"
+        }
+    ]
+]

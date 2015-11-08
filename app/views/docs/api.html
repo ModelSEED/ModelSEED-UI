@@ -1,7 +1,15 @@
+
 <style>
     .api-docs {
-        margin-top: 15px;
+
     }
+
+    .api-docs .title {
+        font-size: 1.4em;
+        margin: 0 0 15px 0;
+        display:inline-block;
+    }
+
     .api-index {
         position:fixed;
     }
@@ -15,9 +23,7 @@
         padding: 0;
         list-style: none;
     }
-    .api-docs  ul li{
-        margin-bottom: 5px;
-    }
+
     .api-docs dt {
         margin-bottom: 5px;
         text-transform: uppercase;
@@ -32,13 +38,22 @@
         text-transform: none;
     }
     .api-docs [api-params],
-    .api-docs [api-returns] {
+    .api-docs [api-returns],
+    .api-docs [api-example] {
         margin: 10px 40px 10px 40px;
-        background: #f8f8f8;
-        padding: 0px 15px 10px 15px;
+        background-color: #f8f8f8;
+        padding: 10px 15px;
         border-left: 4px solid #26C6DA;
-        white-space: pre-line;
     }
+
+    /*
+    .api-docs [api-params] .type,
+    .api-docs [api-returns] .type {
+        color: #888;
+    }
+    */
+
+
     .api-docs span.required {
         color: #CD6F6F;
     }
@@ -46,12 +61,186 @@
         margin-left: 20px;
         white-space: normal;
     }
+
+    .api-docs .sidebar {
+        padding: 15px 20px 0 0;
+        border-right: 1px solid #dfdfdf;
+        height: 100%;
+        font-size: .9em;
+    }
+
+    .api-docs .docs-right {
+        background-color: #444;
+        padding:15px;
+        border-top: 1px solid #888;
+        color: #fff;
+    }
+
+    .api-docs .docs-left {
+        padding: 15px;
+        border-top: 1px solid #dfdfdf;
+    }
+
+    .api-docs .success-example {
+        margin-top:10px;
+    }
+
+    .api-docs .example,
+    .api-docs [api-example] .code  {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -o-pre-wrap;
+        word-wrap: break-word;
+        font-size: .85em;
+        font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+    }
+
+    .api-docs .example .string { color: #33DDF7; }
+    .api-docs .example .number { color: darkorange; }
+    .api-docs .example .boolean { color: blue; }
+    .api-docs .example .null { color: magenta; }
+    .api-docs .example .key { color: #dfdfdf; }
+
+    .api-docs .example-header {
+        color: #5EEC8C;
+    }
+
+    .api-docs .docs-right a,
+    .api-docs .switch a {
+        color: #bbb;
+    }
+
+    .api-docs .docs-right a:hover {
+        color: #ddd;
+    }
+    .api-docs .docs-left a:hover {
+        color: #888;
+    }
+
+    .api-docs .docs-right hr {
+        margin: 5px 0;
+        border-top: 1px solid #666;
+    }
+
+    .api-docs .docs-right a.active {
+        color: #dfdfdf;
+        padding-bottom: 1px;
+        border-bottom: 1px solid #aaa;
+    }
+
+    .api-docs .docs-right .switch {
+        color: #888;
+        border-bottom: 1px solid #555;
+    }
+    .api-docs .docs-left a.active {
+        color: #444;
+    }
+
+    .api-docs .get-label {
+        background-color: #26C6DA;
+        color: #fff;
+        display: inline;
+        padding: 1px 4px;
+        font-size: .8em;
+    }
+    .api-docs .post-label {
+        background-color: #444;
+        color: #fff;
+    }
+
 </style>
 
 
+<div layout="column" class="api-docs">
+    <div layout="row">
+        <div class="sidebar api-index" flex>
+            <br>
+            <dt style="margin-left: 15px;">Resources</dt>
+            <ul>
+                <li ng-repeat="endpoint in api">
 
-<div class="api-docs container">
-    <div class="api-index">
+                    <a><span class="get-label">{{endpoint.api.type.toUpperCase()}}</span> {{endpoint.api.name}}</a>
+                </li>
+            </ul>
+        </div>
+
+
+        <div style="margin: 0 10px 0 195px;" flex>
+            <div layout="row">
+                <div class="docs-left" flex="70">
+                    <h2>ModelSEED REST API</h2>
+
+                </div>
+                <div class="docs-right" flex></div>
+            </div>
+
+            <div ng-repeat="endpoint in api" layout="row">
+                <div class="docs-left" flex="70">
+                    <div class="get-label">{{endpoint.api.type.toUpperCase()}}</div>
+                    <div class="title"><b>{{endpoint.api.name}}</b>  (requires auth)</div>
+
+                    <dl class="method-description">
+                        <dt>Description</dt>
+                        <dd>
+                            {{endpoint.api.description}}
+                        </dd>
+
+                        <dt>URl</dt>
+                        <dd>{{url}}/{{version}}{{endpoint.api.name}}</dd>
+
+                        <dt>Parameters</dt>
+                        <dd api-params>
+                            <ul class="list-unstyled">
+                                <li ng-repeat="param in endpoint.params">
+                                    <b>{{param.name}}</b> <span ng-if="param.name.indexOf('?') == -1" class="type">({{param.type}})</span> - {{param.description}}
+                                </li>
+                            </ul>
+                        </dd>
+
+                        <dt>Returns</dt>
+                        <dd api-returns>
+                            {{endpoint.success.description}}
+                        </dd>
+
+                        <br>
+                        <dt>Examples</dt>
+                        <div class="switch" style="margin: 0 0 -5px 50px;">
+                            <a class="active">cURL</a> &middot; <a>CLI</a>
+                        </div>
+                        <dd api-example>
+                            <span class="code">curl "http://0.0.0.0:3000/{{version}}{{endpoint.sampleRequest.name}}" -H "Authentication: $token"</span>
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="docs-right" flex hide-sm>
+                    <dt>Example</dt>
+                    <div class="switch">
+                        <a class="active">Success</a> &middot; <a>Fail</a>
+                    </div>
+                    <!--<hr class="no-margin">-->
+
+                    <div class="success-example">
+                        <small class="example-header">{{endpoint.successExample.header}}</small><br>
+                        <div class="example" ng-bind-html="endpoint.successExample.structure"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+<!--
+<h2>ModelSEED REST API</h2>
+<hr class="no-margin"><br>
+
+
+
+<div class="api-docs container" layout="row">
+    <div class="api-index" flex>
         <br>
         <dt>Resources</dt>
         <ul>
@@ -66,123 +255,9 @@
             </li>
         </ul>
     </div>
-    <div class="row">
-        <div class="col-md-10 col-md-offset-2">
-            <h2 class="api-header">RESTful API Documentation</h2>
-            <br>
 
-            <h4 id="import_media"><b>import_media</b> - POST (requires auth)</h4>
-            <dl class="method-description">
-                <dt>Description</dt>
-                <dd>
-                    This function takes a link to an input media file, standardizes the media, and creates new media object
-                </dd>
+    <div >
 
-                <dt>URl</dt>
-                <dd>{{url}}/{{version}}/import_media</dd>
-
-                <dt>Parameters</dt>
-                <dd api-params>
-                    <b>mediafile</b> (string) - reference to an input file with media data <span class="required">(required)</span>
-                    <b>output_loc</b> (string) - reference to location where output should be created
-                    <b>ouput_id</b> (string) - id to be used for media
-                    <b>format</b> (controlled vocab) - format for uploaded file
-                </dd>
-
-                <dt>Returns</dt>
-                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
-            </dl>
-
-
-            <h4 id="reconstruct_model"><b>reconstruct_model</b> - POST (requires auth)</h4>
-            <dl class="method-description">
-                <dt>Description</dt>
-                <dd>
-                    This function constructs a metabolic model from the specified template and genome.
-                    Model is automatically gapfilled, essential genes are predicted on gapfilled media,
-                    and model and analysis results are printed in specified output location.
-                </dd>
-
-                <dt>URl</dt>
-                <dd>{{url}}/{{version}}/run_fba</dd>
-
-                <dt>Parameters</dt>
-                <dd api-params>
-                    <b>genome</b> (string) - reference to genome for which model should be constructed <span class="required">(required)</span>
-                    <b>output_loc</b> (string) - location where output should be printed <span class="required">(required)</span>
-                    <b>template_model</b> (string) - reference to template from which model should be constructed
-                    <b>ouput_id</b> (string) - id to be used for output model
-                    <b>coremodel</b> (bool) - set to true to construct a core model
-                    <b>fulldb</b> (bool) - set to true if model should include full database in specified or computed template
-                    <b>nogapfill</b>(bool) - set to true if model should not be automatically gapfilled
-                    <b>media</b> (bool) - reference to media in which gapfilling should be run
-                </dd>
-
-                <dt>Returns</dt>
-                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
-            </dl>
-
-
-            <h4 id="run_fba"><b>run_fba</b> - POST (requires auth)</h4>
-            <dl class="method-description">
-                <dt>Description</dt>
-                <dd>
-                    This function constructs a metabolic model from the specified template and genome.
-                    Model is automatically gapfilled, essential genes are predicted on gapfilled media,
-                    and model and analysis results are printed in specified output location.
-                </dd>
-
-                <dt>URl</dt>
-                <dd>{{url}}/{{version}}/run_fba</dd>
-
-                <dt>Parameters</dt>
-                <dd api-params>
-                    <b>model</b> (string) - reference to model on which FBA should be run <span class="required">(required)</span>
-                    <b>output_loc</b> (string) - location where output should be printed <span class="required">(required)</span>
-                    <b>media</b> (string) - reference to media for FBA study
-                    <b>fva</b> (bool)
-                    <b>simulateko</b> (bool)
-                    <b>minimizeflux</b> (bool)
-                    <b>findminmedia</b> (bool)
-                    <b>allreversible</b> (bool)
-                    <b>thermo_const_type</b> (string) - various types of thermodynamic variables in FBA [NO_THERMO/SIMPLE_THERMO/THERMO_NO_ERROR/THERMO_MIN_ERROR]
-                    <b>media_supplements</b> (list of strings)
-                    <b>geneko</b> (list of strings)
-                    <b>rxnko</b> (list of strings)
-                    <b>string</b> output_id (string)
-                    <b>maxflux</b> (float)
-                    <b>maxuptake</b> (float)
-                    <b>minuptake</b> (float)
-                    <b>primary_objective_fraction</b> (float)
-                    <b>uptakelim</b> (hash)
-                    <b>custom_bounds</b> (list)
-                        <div class="sub-param-details">
-                         0 (string?) - variable types [flux/drainflux/biomassflux]<br>
-                         1 (string) - the id<br>
-                         2 (float) - min flux<br>
-                         3 (float) - mas flux<br>
-                         </div>
-                    <b>objective</b> (list)
-                        <div class="sub-param-details">
-                         0 (string) - variable types [flux/drainflux/biomassflux]<br>
-                         1 (string) - id<br>
-                         2 (float) - coefficient
-                         </div>
-                    <b>custom_constraints</b> (list)
-                        <div class="sub-param-details">
-                         0 (string) - sign equality<br>
-                         1 (float) - rhs<br>
-                         2 (list) - [type, id, coefficient]
-                         </div>
-                </dd>
-
-                <dt>Returns</dt>
-                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
-            </dl>
-
-        </div>
     </div>
-
 </div>
-
-
+-->

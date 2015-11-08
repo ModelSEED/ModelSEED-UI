@@ -47,8 +47,7 @@ p.small {
 
 
 header {
-    color: #fff;
-    background: #444; /*#18bc9c;*/
+    background: #f2f2f2;
 }
 
 
@@ -170,6 +169,15 @@ header .intro-text .sub-title a {
     background-color: transparent;
 }
 
+section#about h2 {
+    color: #30BCCF;
+}
+
+section#about {
+    color: #fff;
+    background-color: #2D2D2D;   /* deep purple: #201838;  #342D4A;  #554A77;  666;*/
+
+}
 
 section {
     padding: 100px 0;
@@ -190,6 +198,11 @@ section.dark {
     background: #666;
 }
 
+section.dark-2 {
+    color: #fff;
+    background: #444;
+}
+
 @media(max-width:767px) {
     section {
         padding: 75px 0;
@@ -201,12 +214,12 @@ section.dark {
 }
 
 
-#portfolio .portfolio-item {
+#highlights .highlights-item {
     right: 0;
     margin: 0 0 15px;
 }
 
-#portfolio .portfolio-item .portfolio-link {
+#highlights .highlights-item .highlights-link {
     display: block;
     position: relative;
     margin: 0 auto;
@@ -214,7 +227,7 @@ section.dark {
     border: 5px solid #444;
 }
 
-#portfolio .portfolio-item .portfolio-nolink {
+#highlights .highlights-item .highlights-nolink {
     cursor: auto;
     display: block;
     position: relative;
@@ -223,15 +236,15 @@ section.dark {
     border: 5px solid #444;
 }
 
-#portfolio h2 {
+#highlights h2 {
     color: #2FBBD0;
 }
 
-#portfolio p {
+#highlights p {
     color: #ddd;
 }
 
-#portfolio .portfolio-item .portfolio-link .caption {
+#highlights .highlights-item .highlights-link .caption {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -242,11 +255,11 @@ section.dark {
     transition: all ease .5s;
 }
 
-#portfolio .portfolio-item .portfolio-link .caption:hover {
+#highlights .highlights-item .highlights-link .caption:hover {
     opacity: 1;
 }
 
-#portfolio .portfolio-item .portfolio-link .caption .caption-content {
+#highlights .highlights-item .highlights-link .caption .caption-content {
     position: absolute;
     top: 50%;
     width: 100%;
@@ -257,16 +270,16 @@ section.dark {
     color: #fff;
 }
 
-#portfolio .portfolio-item .portfolio-link .caption .caption-content i {
+#highlights .highlights-item .highlights-link .caption .caption-content i {
     margin-top: -12px;
 }
 
-#portfolio .portfolio-item .portfolio-link .caption .caption-content h3,
-#portfolio .portfolio-item .portfolio-link .caption .caption-content h4 {
+#highlights .highlights-item .highlights-link .caption .caption-content h3,
+#highlights .highlights-item .highlights-link .caption .caption-content h4 {
     margin: 0;
 }
 
-#portfolio * {
+#highlights * {
     z-index: 2;
 }
 
@@ -274,7 +287,7 @@ section.dark {
 
 
 @media(min-width:767px) {
-    #portfolio .portfolio-item {
+    #highlights .highlights-item {
         margin: 0 0 30px;
     }
 }

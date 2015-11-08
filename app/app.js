@@ -96,6 +96,18 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/data-sources",
             templateUrl: 'app/views/docs/sources.html',
         })
+        .state('main.api', {
+            url: "/api",
+            templateUrl: 'app/views/docs/api.html',
+            controller: 'API'
+        })
+
+        /*
+        .state('main.about.api', {
+            url: "/api",
+            templateUrl: 'app/views/docs/old-api.html',
+            controller: 'Help',
+        })*/
 
         // main application template
         .state('app', {
@@ -195,11 +207,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-        .state('app.api', {
-            url: "/help/api",
-            templateUrl: 'app/views/docs/api.html',
-            controller: 'Help',
-        })
 
         // prototype page
         .state('app.proto', {
@@ -255,8 +262,10 @@ function($locationProvider, $stateProvider, $httpProvider,
     $mdThemingProvider.theme('default')
         .primaryPalette('cyan')
         .accentPalette('light-blue');
-        //rgb(38, 198, 218);
-        //.accentPalette('light-blue');
+        //9FA1DE
+        //
+
+
 }])
 
 

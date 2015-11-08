@@ -405,16 +405,86 @@ function ($scope, $timeout, $mdSidenav, $log) {
 ['$scope', '$http', 'uiTools',
 function($s, $http, uiTools) {
 
-    $http.get('docs/publications/Jose_publications.csv')
+    $http.get('docs/publications/henry-publications.csv')
         .then(function(data) {
-            console.log('date', data)
-
             var csv = data.data;
-
             $s.pubs = uiTools.csvToJSON(csv).rows;
-            
+        })
+}])
 
+.controller('API',
+['$scope', '$http', 'uiTools',
+function($s, $http, uiTools) {
+
+    $s.url = 'http://api.modelseed.org';
+    $s.version = 'v0';
+
+
+    $http.get('/app/views/docs/api-docs.json')
+        .then(function(res) {
+            var data = res.data;
+            //console.log('data', data)
+
+            var api = [];
+
+            for (var i in data) {
+                var tags = data[i][0].tags;
+
+                var endpoint = {params: []}
+                for (var j in tags) {
+                    var tagObj = tags[j];
+                    if (tagObj.tag === 'api')
+                        endpoint.api = tagObj
+                    else if (tagObj.tag === 'apiName')
+                        endpoint.name = tagObj
+                    else if (tagObj.tag === 'apiSuccess')
+                        endpoint.success = tagObj
+                    else if (tagObj.tag === 'apiSampleRequest')
+                        endpoint.sampleRequest = tagObj
+                    else if (tagObj.tag === 'apiParam')
+                        endpoint.params.push(tagObj)
+                    else if (tagObj.tag === 'apiSuccessExample') {
+                        endpoint.successExample = tagObj
+                        endpoint.successExample.header = tagObj.description.split('\n')[0]
+
+
+                        var structure = tagObj.description.split('OK')[1];
+                        console.log(structure);
+                        endpoint.successExample.structure = syntaxHighlight(JSON.stringify(
+                            JSON.parse( tagObj.description.split('OK')[1] ), null, 2)
+                        ) ;
+                    }
+
+
+
+                        //apiSuccess
+                }
+
+                api.push(endpoint)
+            }
+
+            console.log('api',  api)
+
+            $s.api = api;
         })
 
 
+    function syntaxHighlight(json) {
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
 }])

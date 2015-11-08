@@ -5,8 +5,16 @@ body {
     -webkit-font-smoothing: subpixel-antialiased;
     height: 100%;
     /*overflow: hidden;*/
-      max-width: 100%;
-      max-height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    /*color: #555;*/
+}
+md-toolbar-tools {
+    font-family: Montserrat;
+}
+
+md-content {
+    /*color: #555;*/
 }
 
 .background-shade-out {
@@ -22,13 +30,13 @@ body {
 
 
 a {
-    color: #2FBBD0; /*#00AFD8;*/
+    color: #30BCCF; /*#00AFD8;*/
 }
 
 a:hover,
 a:focus {
     cursor: pointer;
-    color: #0081A0;
+    color: #006C86;
     text-decoration: none;
 }
 
@@ -45,7 +53,7 @@ a.disabled {
 }
 
 #content{
-    padding: 8px 15px;
+    padding: 5px 20px;
 }
 
 .app-toolbar,
@@ -66,8 +74,8 @@ a.disabled {
 }
 
 .logo-sub-text {
-    margin-left: 12px;
-    font-size: 1.15em;
+    margin: 10px 0 0 0;
+    font-size: 1.17em;
 }
 
 
@@ -112,7 +120,7 @@ a.disabled {
 }
 
 .md-primary { /*hack hack hack #fixme */
-    background-color: #2FBBD0 !important;
+    background-color: #30BCCF !important;
     color: #fff !important;
 }
 
@@ -220,17 +228,19 @@ td[editable] {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 
+
 header .login md-input-container.md-default-theme .md-input {
-    color: #fff;
-    border-color: #fff;
+    color: #666;
+    border-color: #666;
 }
 
+
 header .login md-input-container.md-default-theme label {
-    color: #fff;
+    color: #888;
 }
 
 header .login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
-    color: #aaa;
+    color: #888;
 }
 
 .md-button {
@@ -294,14 +304,15 @@ md-toolbar,
 }
 
 .md-toolbar-accent {
-    background-color: #6D70AF !important;
+    background-color: #30BCCF !important;
 }
 
 .md-toolbar-tools {
     font-size: 1em;
-    background-color: #2FBBD0;
+    background-color: #2D224E;
 }
 
+/* toolbars */
 ul.toolbar {
     padding: 0;
     margin: 0;
@@ -310,13 +321,16 @@ ul.toolbar {
 }
 
 ul.toolbar > li {
+    color: #EBEBEB;
     height: 100%;
     display: inline-block;
-    transition: border-width 200ms;
+    transition: border-width 100ms;
 }
-ul.toolbar > li.active,
-ul.toolbar > li:hover {
-    border-bottom: 2px solid #555;
+ul.toolbar > li.active {
+    border-bottom: 3px solid #ddd;
+}
+ul.toolbar > li:not(.active):hover {
+    border-bottom: 3px solid #ddd; /*#30BCCF;/* /*#9FA1DE;*/
 }
 
 ul.toolbar > li > a {
@@ -328,13 +342,10 @@ ul.toolbar > li > a {
     height: 100%;
 }
 
-ul.toolbar > li:hover > a {
-    color: #dfdfdf;
-}
+ul.toolbar > li:hover > a,
+ul.toolbar > li.active > a {
+    color: #EBEBEB;
 
-
-ul.toolbar > li.active > a{
-    color: #dfdfdf;
 }
 
 ul.toolbar > li > a >i:not(.fa-caret-down) {
@@ -358,10 +369,12 @@ ul.toolbar li > a > i.icon-benzene {
 
 
 .toolbar-right {
+
     height: 100%;
 }
 
 .toolbar-right > div {
+    color: #fff;
     display: inline-block;
     height: 100%;
     padding: 0px 10px;
@@ -395,9 +408,10 @@ ul.about-toolbar {
 }
 
 ul.about-toolbar > li {
+    color: #EBEBEB;
     display: block;
     height: 100%;
-    transition: border-width 200ms;
+    transition: border-width 100ms;
     margin-right: 1px;
 }
 
@@ -409,14 +423,15 @@ ul.about-toolbar > li > a {
     display: block;
 }
 
-ul.about-toolbar > li:hover > a,
+
+ul.about-toolbar > li:hover > a ,
 ul.about-toolbar > li.active > a{
-    color: #dfdfdf;
+    color: #EBEBEB;
 }
 
 ul.about-toolbar > li:hover,
 ul.about-toolbar > li.active {
-    border-bottom: 2px solid #555;
+    border-bottom: 3px solid #EBEBEB;/*#9FA1DE;*/
 }
 
 .sidebar h4 {
@@ -774,7 +789,31 @@ table md-checkbox {
     border-width: 0;
 }
 
+.rxn-sidenav,
+.cpd-sidenav {
+    top: 50px;
+    width: inherit;
+    min-width: 50px;
+    max-width: 600px;
+    max-height: 600px;
+    bottom:inherit;
+    position: fixed;
+}
+
+.dl-sidenav {
+    top: 50px;
+    width: inherit;
+    min-width: 400px;
+    max-width: 800px;
+    bottom:inherit;
+    position: fixed;
+}
+
 /* md mods */
+
+md-content {
+
+}
 
 md-tab-item:hover {
     color: #555;
@@ -789,26 +828,6 @@ md-toast.md-bottom {
 }
 .md-autocomplete-suggestions {
     z-index: 9999;
-}
-
-.dl-sidenav {
-    top: 50px;
-    width: inherit;
-    min-width: 400px;
-    max-width: 800px;
-    bottom:inherit;
-    position: fixed;
-}
-
-.rxn-sidenav,
-.cpd-sidenav {
-    top: 50px;
-    width: inherit;
-    min-width: 50px;
-    max-width: 600px;
-    max-height: 600px;
-    bottom:inherit;
-    position: fixed;
 }
 
 md-sidenav button div {
@@ -914,7 +933,7 @@ md-card {
 }
 
 .pathway-tabs md-ink-bar {
-    background-color: rgb(73, 4, 191);;
+    background-color: rgb(73, 4, 191);
 }
 
 .my-model {

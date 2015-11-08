@@ -1,0 +1,186 @@
+<style>
+    .api-docs {
+        margin-top: 15px;
+    }
+    .api-index {
+        position:fixed;
+    }
+    .api-header {
+        text-transform: capitalize;
+    }
+    .api-docs dl {
+        margin-bottom: 50px;
+    }
+    .api-docs  ul {
+        padding: 0;
+        list-style: none;
+    }
+    .api-docs  ul li{
+        margin-bottom: 5px;
+    }
+    .api-docs dt {
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        color: #888;
+        font-weight: 500;
+        font-size: 12px;
+    }
+    .api-docs dd {
+        margin: 0 0 20px 40px;
+    }
+    .api-docs .structure {
+        text-transform: none;
+    }
+    .api-docs [api-params],
+    .api-docs [api-returns] {
+        margin: 10px 40px 10px 40px;
+        background: #f8f8f8;
+        padding: 0px 15px 10px 15px;
+        border-left: 4px solid #26C6DA;
+        white-space: pre-line;
+    }
+    .api-docs span.required {
+        color: #CD6F6F;
+    }
+    .api-docs .sub-param-details {
+        margin-left: 20px;
+        white-space: normal;
+    }
+</style>
+
+
+
+<div class="api-docs container">
+    <div class="api-index">
+        <br>
+        <dt>Resources</dt>
+        <ul>
+            <li du-scrollspy="import_media">
+                <a href="#import_media" du-smooth-scroll offset="80">import_media</a>
+            </li>
+            <li du-scrollspy="reconstruct_model">
+                <a href="#reconstruct_model" du-smooth-scroll offset="80">reconstruct_model</a>
+            </li>
+            <li du-scrollspy="run_fba">
+                <a href="#run_fba" du-smooth-scroll offset="80">run_fba</a>
+            </li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-2">
+            <h2 class="api-header">RESTful API Documentation</h2>
+            <br>
+
+            <h4 id="import_media"><b>import_media</b> - POST (requires auth)</h4>
+            <dl class="method-description">
+                <dt>Description</dt>
+                <dd>
+                    This function takes a link to an input media file, standardizes the media, and creates new media object
+                </dd>
+
+                <dt>URl</dt>
+                <dd>{{url}}/{{version}}/import_media</dd>
+
+                <dt>Parameters</dt>
+                <dd api-params>
+                    <b>mediafile</b> (string) - reference to an input file with media data <span class="required">(required)</span>
+                    <b>output_loc</b> (string) - reference to location where output should be created
+                    <b>ouput_id</b> (string) - id to be used for media
+                    <b>format</b> (controlled vocab) - format for uploaded file
+                </dd>
+
+                <dt>Returns</dt>
+                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
+            </dl>
+
+
+            <h4 id="reconstruct_model"><b>reconstruct_model</b> - POST (requires auth)</h4>
+            <dl class="method-description">
+                <dt>Description</dt>
+                <dd>
+                    This function constructs a metabolic model from the specified template and genome.
+                    Model is automatically gapfilled, essential genes are predicted on gapfilled media,
+                    and model and analysis results are printed in specified output location.
+                </dd>
+
+                <dt>URl</dt>
+                <dd>{{url}}/{{version}}/run_fba</dd>
+
+                <dt>Parameters</dt>
+                <dd api-params>
+                    <b>genome</b> (string) - reference to genome for which model should be constructed <span class="required">(required)</span>
+                    <b>output_loc</b> (string) - location where output should be printed <span class="required">(required)</span>
+                    <b>template_model</b> (string) - reference to template from which model should be constructed
+                    <b>ouput_id</b> (string) - id to be used for output model
+                    <b>coremodel</b> (bool) - set to true to construct a core model
+                    <b>fulldb</b> (bool) - set to true if model should include full database in specified or computed template
+                    <b>nogapfill</b>(bool) - set to true if model should not be automatically gapfilled
+                    <b>media</b> (bool) - reference to media in which gapfilling should be run
+                </dd>
+
+                <dt>Returns</dt>
+                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
+            </dl>
+
+
+            <h4 id="run_fba"><b>run_fba</b> - POST (requires auth)</h4>
+            <dl class="method-description">
+                <dt>Description</dt>
+                <dd>
+                    This function constructs a metabolic model from the specified template and genome.
+                    Model is automatically gapfilled, essential genes are predicted on gapfilled media,
+                    and model and analysis results are printed in specified output location.
+                </dd>
+
+                <dt>URl</dt>
+                <dd>{{url}}/{{version}}/run_fba</dd>
+
+                <dt>Parameters</dt>
+                <dd api-params>
+                    <b>model</b> (string) - reference to model on which FBA should be run <span class="required">(required)</span>
+                    <b>output_loc</b> (string) - location where output should be printed <span class="required">(required)</span>
+                    <b>media</b> (string) - reference to media for FBA study
+                    <b>fva</b> (bool)
+                    <b>simulateko</b> (bool)
+                    <b>minimizeflux</b> (bool)
+                    <b>findminmedia</b> (bool)
+                    <b>allreversible</b> (bool)
+                    <b>thermo_const_type</b> (string) - various types of thermodynamic variables in FBA [NO_THERMO/SIMPLE_THERMO/THERMO_NO_ERROR/THERMO_MIN_ERROR]
+                    <b>media_supplements</b> (list of strings)
+                    <b>geneko</b> (list of strings)
+                    <b>rxnko</b> (list of strings)
+                    <b>string</b> output_id (string)
+                    <b>maxflux</b> (float)
+                    <b>maxuptake</b> (float)
+                    <b>minuptake</b> (float)
+                    <b>primary_objective_fraction</b> (float)
+                    <b>uptakelim</b> (hash)
+                    <b>custom_bounds</b> (list)
+                        <div class="sub-param-details">
+                         0 (string?) - variable types [flux/drainflux/biomassflux]<br>
+                         1 (string) - the id<br>
+                         2 (float) - min flux<br>
+                         3 (float) - mas flux<br>
+                         </div>
+                    <b>objective</b> (list)
+                        <div class="sub-param-details">
+                         0 (string) - variable types [flux/drainflux/biomassflux]<br>
+                         1 (string) - id<br>
+                         2 (float) - coefficient
+                         </div>
+                    <b>custom_constraints</b> (list)
+                        <div class="sub-param-details">
+                         0 (string) - sign equality<br>
+                         1 (float) - rhs<br>
+                         2 (list) - [type, id, coefficient]
+                         </div>
+                </dd>
+
+                <dt>Returns</dt>
+                <ng-include src="'app/views/docs/api-return.html'"></ng-include>
+            </dl>
+
+        </div>
+    </div>
+
+</div>

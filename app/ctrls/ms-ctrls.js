@@ -143,9 +143,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
-    $s.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+    $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
-    $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+    $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
     $s.rxnHeader = [{label: 'Name', key: 'name'},
