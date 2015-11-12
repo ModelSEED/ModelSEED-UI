@@ -56,7 +56,7 @@
 
         <div class="alt-login-container" ng-if="!$root.user && method.name == 'RAST'">
             Or, sign in with:
-            <div class="alt-login" ng-click="switchMethod('patric')">
+            <div class="alt-login alt-login-patric" ng-click="switchMethod('patric')">
                 <img src="img/patric.jpg" width="50" height="50" class="pull-left" />
                 <div class="pull-left">
                     PATRIC
@@ -92,8 +92,71 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
+                <h2>What is the ModelSEED?</h2><br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <p style="font-weight: 200;">ModelSEED is a resource for the reconstruction, exploration, comparison, and analysis of metabolic models.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="about-item">
+                    <img src="img/home/fast.png" width="170"/>
+                    <h4>Fast</h4>
+                    <small>Faster reconstruction and gapfilling of models from annotated genomes</small>
+                </div>
+
+                <div class="about-item">
+                    <img src="img/home/pencil.png" width="150"/>
+                    <h4>Easy</h4>
+                    <small>Editable media, models, and more makes experiementing with models a breeze</small>
+                </div>
+
+                <div class="about-item">
+                    <div class="">
+                        <img src="img/home/leaves.png" class="plant-img"/>
+                        <img src="img/home/microbes.png" class="microbe-img"/>
+                    </div>
+                    <br>
+                    <h4>Microbes and Plants</h4>
+                    <small>Unified resources for microbial and plant modeling, making cross-disciplinary research a reality<small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="about-item">
+                    <img src="img/home/test-tubes.png" width="160"/>
+                    <h4>Enabling Science</h4>
+                    <div>Incorporates cutting-edge and experiemental methods/algorithms</div>
+                </div>
+
+                <div class="about-item">
+                    <img src="img/home/box.png" width="170"/>
+                    <h4>Open Source</h4>
+                    <div>Open source with community contributions</div>
+                </div>
+
+                <div class="about-item">
+                    <img src="img/home/code.png" width="170"/>
+                    <h4>Programatic Access</h4>
+                    <div>API clients for Perl and Python, and a REST API in the works.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section id="about-secondary">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
                 <h2>About</h2><br>
-                <!--<hr class="star-primary">-->
             </div>
         </div>
         <div class="row">
@@ -111,6 +174,8 @@
         </div>
     </div>
 </section>
+
+
 
 <section class="dark-2" id="highlights">
     <div class="container">

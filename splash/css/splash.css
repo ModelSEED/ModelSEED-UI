@@ -169,15 +169,49 @@ header .intro-text .sub-title a {
     background-color: transparent;
 }
 
-section#about h2 {
-    color: #30BCCF;
+.about-item {
+    width: 200px;
+    margin: 0px 50px;
+    display: inline-block;
 }
+
+section#about h2 {
+    color: #04A0B5;
+}
+
+section#about .plant-microbe-box div{
+    margin-top: 30px;
+    height: 120px;
+}
+
+
+section#about .plant-img {
+    position:relative;
+    bottom: 20px;
+    width: 100px;
+}
+
+section#about .microbe-img {
+    position:relative;
+    top: 30px;
+    right: 0px;
+    width: 70px;
+}
+
 
 section#about {
-    color: #fff;
-    background-color: #2D2D2D;   /* deep purple: #201838;  #342D4A;  #554A77;  666;*/
-
+    color: #333;
+    background-color: #e3e3e3; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
+    text-align: center;
+    border-top: 2px solid #dfdfdf;
 }
+
+section#about-secondary {
+    color: #fff;
+    background-color: #201838; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
+    text-align: center;
+}
+
 
 section {
     padding: 100px 0;
