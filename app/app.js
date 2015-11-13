@@ -1,24 +1,25 @@
 
 
 angular.module('ModelSEED',
-['config',
- 'core-directives',
- 'ctrls',
- 'ms-ctrls',
- 'ms-tour',
- 'help-ctrls',
- 'DataViewCtrls',
- 'duScroll',
- 'ui.router',
- 'ngAnimate',
- 'ms-rpc',
- 'Auth',
- 'dd-filter',
- 'mega-dropdown',
- 'ng-context-menu',
- 'ngMaterial',
+['config',          // config file for urls, workspace paths, etc
+ 'core-directives', // a large set of directives.  probably should be broken into components
+ 'ctrls',           // general controllers
+ 'ms-ctrls',        // controllers more specific to the ModelSEED site
+ 'ms-tour',         // controllers related to interactive tour
+ 'help-ctrls',      // controllers related to help docs.  probably obsolete.
+ 'DataViewCtrls',   // controllers related to rendering of workspace objects
+ 'duScroll',        // plugin for hash based scrolling
+ 'ui.router',       // router for all urls
+ 'ngMaterial',      // angular material.  main dependency for layout/css, "widgets", etc
+ 'ngAnimate',       // angular animate.  ngMaterial dependency.
+ 'ms-rpc',          // module for simplifying with the KBase type compilier RPC requests
+ 'Auth',            // module for Auth-related requests and state
+ 'dd-filter',       // custom module for creating searchable dropdowns.
+ 'mega-dropdown',   // custom module for hover-over dropdowns
+ 'ng-context-menu', // module for right-click menus (see workspace browser)
  'FBA',
  'ModelViewer',
+ 'MSSolr', 
  'Patric',
  'WS',
  'MS',
@@ -26,6 +27,7 @@ angular.module('ModelSEED',
  'Biochem',
  'Browser',
  'Regulons',
+ 'Fusions',
  'Dialogs',
  'docs-directives'
  ])
@@ -80,6 +82,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: '/ms-projects/regulons/regulators.html',
             controller: 'Regulons'
         })
+
+        .state('main.projects.fusions', {
+            url: '/fusions',
+            templateUrl: '/ms-projects/fusions/overview.html',
+            controller: 'Fusions'
+        })
+
 
 
         .state('main.about', {
@@ -287,11 +296,8 @@ function($rootScope, $state, $sParams, $window,
             })
         }
 
-        // else, if not authenticated and url is private, go to home
+        // else, if not authenticated and url is private, force login
         else if (toState.authenticate && !auth.isAuthenticated()) {
-            //$state.transitionTo('home', $sParams, false);
-            //event.preventDefault();
-            console.log('NEED TO AUTH')
             AuthDialog.signIn();
         }
 
@@ -305,6 +311,5 @@ function($rootScope, $state, $sParams, $window,
     $rootScope.user = auth.user;
     $rootScope.token = auth.token;
 
-    console.log('include plants?', config.includePlants)
     $rootScope.includePlants = config.includePlants;
 }]);

@@ -1,0 +1,126 @@
+
+
+<div layout="column" layout-margin layout-padding>
+
+
+    <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+        <!--
+        <md-tab label="Fusion Overview">
+            <md-tab-body>
+                <md-content layout="column" layout-margin layout-padding>
+                    <ul class="list-unstyled list-inline project-nav">
+                        <li ng-class="{ active: $state.current.name =='main.projects.regulons'}">
+                            <a ui-sref="main.projects.regulons">Overview</a>
+                        </li>
+
+                    </ul>
+
+                    <md-content layout-margin>
+                        <b>Abstract:</b><br>
+                        <br>
+
+                        <div class="publication">
+                            <div class="title">Fusion Paper Title Goes Here</div>
+                            <div class="author">Authors can be lised here</div>
+
+                            <div class="abstract">
+                                <i>Abstract goes here</i>
+                            </div>
+
+                            <b>Citation:</b><br>
+                            <div class="citation">
+                                <i>Citation goes here</i>
+                            </div>
+
+                        </div>
+
+                    </md-content>
+                </md-content>
+            </md-tab-body>
+        </md-tab>
+        -->
+
+        <md-tab label="Fusions">
+            <md-tab-body>
+                <ng-table-solr table-header="fusionsHeader"
+                               table-data="fusions"
+                               table-opts="fusionsOpts"
+                               table-loading="loadingFusions"
+                               table-placeholder="Search fusions"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+        <md-tab label="Training Set">
+            <md-tab-body>
+            </md-tab-body>
+        </md-tab>
+
+        <md-tab label="Role">
+            <md-tab-body>
+                <ng-table-solr table-header="rolesHeader"
+                               table-data="roles"
+                               table-opts="rolesOpts"
+                               table-loading="loadingRoles"
+                               table-placeholder="Search roles"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+
+        <md-tab label="CDDs">
+            <md-tab-body>
+                <ng-table-solr table-header="cddHeader"
+                               table-data="cdds"
+                               table-opts="cddOpts"
+                               table-loading="loadingCdds"
+                               table-placeholder="Search cdds"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+
+        <md-tab label="CDD Sets">
+            <md-tab-body>
+                <ng-table-solr table-header="cddSetsHeader"
+                               table-data="cddSets"
+                               table-opts="cddSetsOpts"
+                               table-loading="loadingCddSets"
+                               table-placeholder="Search Cdd Sets"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+
+        <md-tab label="Genome Stats">
+            <md-tab-body>
+                <ng-table-solr table-header="genomeStatsHeader"
+                               table-data="genomeStats"
+                               table-opts="genomeStatsOpts"
+                               table-loading="loadingGenomeStats"
+                               table-placeholder="Search Genome Stats"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+        <md-tab label="Reactions">
+            <md-tab-body>
+            </md-tab-body>
+        </md-tab>
+
+
+        <md-tab label="Subsystems">
+            <md-tab-body>
+            </md-tab-body>
+        </md-tab>
+
+
+    </div>
+
+
+</div>
