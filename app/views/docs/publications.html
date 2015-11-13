@@ -1,48 +1,43 @@
 
 <div layout="column" id="content">
-
     <h3>Publications</h3>
     <hr class="no-margin">
-    <md-content>
+    <md-content ng-init="reversed; query;">
         <br>
 
+        <div layout="row" layout-align="center center">
+            <md-input-container md-no-float search="query" search-placeholder="Search selected publications" flex>
+            </md-input-container>
+            <div ng-click="reversed = !reversed" offset="5" layout-margin layout-padding>
+                <b>Year <i class="fa" ng-class="{'fa-caret-up': reversed, 'fa-caret-down': !reversed}"></i></b>
+            </div>
+        </div>
         <table>
             <thead>
+                <tr>
+                </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="pub in pubs | orderBy : pub.Year" class="publication">
+                <tr ng-repeat="pub in filtered = (pubs | filter : query | orderBy : '-year' : reversed)" class="publication">
                     <td>
-                        <div class="title">{{pub.Title}}</div>
-                        <div class="author">{{pub.Authors}}</div>
+                        <div class="title" ng-bind-html="pub.title | highlight: query"></div>
+                        <div class="author" ng-bind-html="pub.authors | highlight: query"></div>
                         <div class="source">
-                            {{pub.Publication}}
-                            <span>{{pub.Volume}}</span>
-                            <span>({{pub.Number}})</span>
-                            <span>{{pub.Pages}}</span>
+                            <span ng-bind-html="pub.publication | highlight: query"></span>
+                            <span>{{pub.volumn}}</span>
+                            <span>{{pub.number ? '(':''}}{{pub.number}}{{pub.number ? ')':''}}</span>
+                            <span ng-bind-html="pub.pages | highlight: query"></span>
                         </div>
                     </td>
                     <td>
-                        <div class="year">{{pub.Year}}</div>
+                        <div class="year">{{pub.year}}</div>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <!--
-        <div layout="row" ng-repeat="pub in pubs" class="publication">
-            <div >
-                <div class="title">{{pub.Title}}</div>
-                <div layout="column">
-                    <div class="author">{{pub.Authors}}</div>
-                    <div class="source">{{pub.Publication}}</div>
-                </div>
-            </div>
-            <div class="vertical-center">
-                <div class="year">{{pub.Year}}</div>
-            </div>
+        <div ng-if="filtered.length == 0" style="margin-left: 40px;" class="text-muted">
+            No publications found
         </div>
-        -->
-
    </md-content>
-
 </div>

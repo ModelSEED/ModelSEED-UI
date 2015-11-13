@@ -322,5 +322,59 @@
             "description": "",
             "source": "@api {get} /my-models/:path List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default).\n\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {fba object} A parsed and sanitized fba object"
         }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/publications/",
+                    "optional": false,
+                    "description": "List select publications related to ModelSEED. List has no particular order.",
+                    "line": 1,
+                    "source": "@api {get} /publications/ List select publications related to ModelSEED. List has no particular order."
+                },
+                {
+                    "tag": "apiName",
+                    "name": "publications",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName publications"
+                },
+                {
+                    "tag": "apiSampleRequest",
+                    "name": "/publications/",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 5,
+                    "source": "@apiSampleRequest /publications/"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "json",
+                    "name": "meta",
+                    "optional": false,
+                    "description": "List of publication objects.  All values are strings, except 'authors',\nwhich is a an array of strings and year, which is an int.",
+                    "line": 7,
+                    "source": "@apiSuccess {json} meta List of publication objects.  All values are strings, except 'authors',\nwhich is a an array of strings and year, which is an int."
+                },
+                {
+                    "tag": "apiSuccessExample",
+                    "type": "json",
+                    "name": "Success-Response:",
+                    "optional": false,
+                    "description": "HTTP/1.1 200 OK\n[{ \"authors\":\n[ \"Henry, Christopher S\",\n\"DeJongh, Matthew\",\n\"Best, Aaron A\",\n\"Frybarger, Paul M\",\n\"Linsay, Ben\",\n\"Stevens, Rick L\"],\n\"title\": \"High-throughput generation, optimization and analysis of genome-scale metabolic models\",\n\"publication\": \"Nature biotechnology\",\n\"volumn\": \"28\",\n\"number\": \"9\",\n\"pages\": \"977-982\",\n\"year\": \"2010\",\n\"publisher\": \"Nature Publishing Group\"\n}]",
+                    "line": 9,
+                    "source": "@apiSuccessExample {json} Success-Response:\nHTTP/1.1 200 OK\n[{ \"authors\":\n[ \"Henry, Christopher S\",\n\"DeJongh, Matthew\",\n\"Best, Aaron A\",\n\"Frybarger, Paul M\",\n\"Linsay, Ben\",\n\"Stevens, Rick L\"],\n\"title\": \"High-throughput generation, optimization and analysis of genome-scale metabolic models\",\n\"publication\": \"Nature biotechnology\",\n\"volumn\": \"28\",\n\"number\": \"9\",\n\"pages\": \"977-982\",\n\"year\": \"2010\",\n\"publisher\": \"Nature Publishing Group\"\n}]"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /publications/ List select publications related to ModelSEED. List has no particular order.\n@apiName publications\n\n\n@apiSampleRequest /publications/\n\n@apiSuccess {json} meta List of publication objects.  All values are strings, except 'authors',\n which is a an array of strings and year, which is an int.\n@apiSuccessExample {json} Success-Response:\n    HTTP/1.1 200 OK\n  [{ \"authors\": \n       [ \"Henry, Christopher S\",\n         \"DeJongh, Matthew\",\n         \"Best, Aaron A\",\n         \"Frybarger, Paul M\",\n         \"Linsay, Ben\",\n         \"Stevens, Rick L\"],\n      \"title\": \"High-throughput generation, optimization and analysis of genome-scale metabolic models\",\n      \"publication\": \"Nature biotechnology\",\n      \"volumn\": \"28\",\n      \"number\": \"9\",\n      \"pages\": \"977-982\",\n      \"year\": \"2010\",\n      \"publisher\": \"Nature Publishing Group\"\n   }]"
+        }
     ]
 ]

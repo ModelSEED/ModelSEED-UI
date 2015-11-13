@@ -405,20 +405,38 @@ function ($scope, $timeout, $mdSidenav, $log) {
 ['$scope', '$http', 'uiTools',
 function($s, $http, uiTools) {
 
-    $http.get('docs/publications/henry-publications.csv')
-        .then(function(data) {
-            var csv = data.data;
-            $s.pubs = uiTools.csvToJSON(csv).rows;
+    $s.reversed = false;
+
+    var url = 'http://0.0.0.0:3000/v0/'
+    $http.get(url+'publications')
+        .then(function(res) {
+            console.log('data', res)
+            var d = res.data;
+            for (var i=0; i<d.length; i++) {
+                d[i].authors = d[i].authors.join('; ')
+            }
+            $s.pubs = d;
+
+            //var csv = data.data;
+            //$s.pubs = uiTools.csvToJSON(csv).rows;
         })
 }])
+
+
+.filter('highlight', function($sce) {
+    return function(text, phrase) {
+        if (phrase) text = text.replace(new RegExp('('+phrase+')', 'gi'),
+            '<span class="text-highlight">$1</span>')
+            return $sce.trustAsHtml(text)
+    }
+})
 
 .controller('API',
 ['$scope', '$http', 'uiTools',
 function($s, $http, uiTools) {
 
-    $s.url = 'http://api.modelseed.org';
+    $s.url = 'http://modelseed.theseed.org/api/';
     $s.version = 'v0';
-
 
     $http.get('/app/views/docs/api-docs.json')
         .then(function(res) {
@@ -457,7 +475,7 @@ function($s, $http, uiTools) {
 
 
 
-                        //apiSuccess
+                    //apiSuccess
                 }
 
                 api.push(endpoint)

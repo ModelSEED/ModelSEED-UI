@@ -150,6 +150,11 @@ md-toolbar {
 .text-highlight {
     color: #000;
     background-color: rgba(249, 255, 179, 0.43);
+    background-color: rgba(48, 175, 198, 0.125);
+    border-radius: 5px;
+    padding: 3px;
+    margin: -3px;
+    font-weight: 800;
 }
 
 .text-light {
@@ -605,6 +610,10 @@ tr[role=button] {
 }
 tr span[role=button] {
     cursor: default;
+}
+
+.table-small {
+    font-size: 0.8em;
 }
 
 .table {

@@ -1,4 +1,4 @@
-## Overview of critical templates
+## Overview of critical templates (grossly outdated)
 - home.html - homepage template
 - apps.html - contains standard page layout with sidebar
 - sidebar.html - standard sidebar for list of selected items (model analysis)

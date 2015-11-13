@@ -53,7 +53,6 @@
     }
     */
 
-
     .api-docs span.required {
         color: #CD6F6F;
     }
@@ -70,7 +69,7 @@
     }
 
     .api-docs .docs-right {
-        background-color: #444;
+        background-color: #393939;
         padding:15px;
         border-top: 1px solid #888;
         color: #fff;
@@ -158,18 +157,17 @@
             <dt style="margin-left: 15px;">Resources</dt>
             <ul>
                 <li ng-repeat="endpoint in api">
-
-                    <a><span class="get-label">{{endpoint.api.type.toUpperCase()}}</span> {{endpoint.api.name}}</a>
+                    <a>
+                        <span class="get-label">{{endpoint.api.type.toUpperCase()}}</span> {{endpoint.api.name}}
+                    </a>
                 </li>
             </ul>
         </div>
-
 
         <div style="margin: 0 10px 0 195px;" flex>
             <div layout="row">
                 <div class="docs-left" flex="70">
                     <h2>ModelSEED REST API</h2>
-
                 </div>
                 <div class="docs-right" flex></div>
             </div>
@@ -186,7 +184,7 @@
                         </dd>
 
                         <dt>URl</dt>
-                        <dd>{{url}}/{{version}}{{endpoint.api.name}}</dd>
+                        <dd>{{url}}{{version}}{{endpoint.api.name}}</dd>
 
                         <dt>Parameters</dt>
                         <dd api-params>
@@ -208,7 +206,7 @@
                             <a class="active">cURL</a> &middot; <a>CLI</a>
                         </div>
                         <dd api-example>
-                            <span class="code">curl "http://0.0.0.0:3000/{{version}}{{endpoint.sampleRequest.name}}" -H "Authentication: $token"</span>
+                            <span class="code">curl "{{url}}{{version}}{{endpoint.sampleRequest.name}}" -H "Authentication: $token"</span>
                         </dd>
                     </dl>
                 </div>
@@ -228,36 +226,5 @@
             </div>
         </div>
 
-
-
     </div>
 </div>
-
-<!--
-<h2>ModelSEED REST API</h2>
-<hr class="no-margin"><br>
-
-
-
-<div class="api-docs container" layout="row">
-    <div class="api-index" flex>
-        <br>
-        <dt>Resources</dt>
-        <ul>
-            <li du-scrollspy="import_media">
-                <a href="#import_media" du-smooth-scroll offset="80">import_media</a>
-            </li>
-            <li du-scrollspy="reconstruct_model">
-                <a href="#reconstruct_model" du-smooth-scroll offset="80">reconstruct_model</a>
-            </li>
-            <li du-scrollspy="run_fba">
-                <a href="#run_fba" du-smooth-scroll offset="80">run_fba</a>
-            </li>
-        </ul>
-    </div>
-
-    <div >
-
-    </div>
-</div>
--->

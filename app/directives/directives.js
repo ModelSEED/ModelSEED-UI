@@ -1427,10 +1427,11 @@ function($compile, $stateParams) {
             rowClick: '=tableRowClick',
             loading: '=tableLoading',
             placeholder: '@tablePlaceholder',
+            stylingOpts: '=opts',
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
-
+            console.log('scope', scope.stylingOpts)
         }
     }
  })
