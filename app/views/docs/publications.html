@@ -1,12 +1,14 @@
 
-<div layout="column" id="content">
+<div layout="column" id="content" class="container">
     <h3>Publications</h3>
     <hr class="no-margin">
     <md-content ng-init="reversed; query;">
         <br>
 
         <div layout="row" layout-align="center center">
-            <md-input-container md-no-float search="query" search-placeholder="Search selected publications" flex>
+            <md-input-container class="md-icon-float" flex>
+                <md-icon class="material-icons">search</md-icon>
+                <input ng-model="query" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()">
             </md-input-container>
             <div ng-click="reversed = !reversed" offset="5" layout-margin layout-padding>
                 <b>Year <i class="fa" ng-class="{'fa-caret-up': reversed, 'fa-caret-down': !reversed}"></i></b>

@@ -1,42 +1,43 @@
-
-<div class="" hide-sm style="margin: 0 20px;">
-    <a ui-sref="main.home"><img src="img/ModelSEED-logo.png" width="174"></a>
-</div>
-
-<ul class="md-toolbar-tools about-toolbar">
-    <li ng-class="{ active: $state.includes('main.team') }">
-        <a ui-sref="main.team">
-            Researchers
-        </a>
-    </li>
-
-    <li ng-class="{ active: $state.includes('main.publications') }">
-        <a ui-sref="main.publications">
-            Publications
-        </a>
-    </li>
-
-    <!--
-    <li ng-class="{ active: $state.includes('main.projects') }">
-        <a ui-sref="main.projects">
-            Projects
-        </a>
-    </li>-->
-
-    <span flex></span>
-
-    <li ng-class="{ active: $state.includes('main.about') }">
-        <a ui-sref="main.about">
-            About
-        </a>
-    </li>
-
-    <div>
-        <md-button ng-if="!$root.user" class="md-raised md-primary pull-right" ui-sref="app.reconstruct">
-            Sign In
-        </md-button>
-        <md-button ng-if="$root.user"  class="md-raised md-primary pull-right" ui-sref="app.reconstruct">
-            ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;">input</md-icon>
-        </md-button>
+<div class="container" layout="row">
+    <div hide-sm style="margin: 3px 20px 0 0;" >
+        <a ui-sref="main.home"><img src="img/ModelSEED-logo.png" width="174"></a>
     </div>
-</ul>
+
+    <ul class="md-toolbar-tools about-toolbar">
+        <li ng-class="{ active: $state.includes('main.team') }">
+            <a ui-sref="main.team">
+                Researchers
+            </a>
+        </li>
+
+        <li ng-class="{ active: $state.includes('main.publications') }">
+            <a ui-sref="main.publications">
+                Publications
+            </a>
+        </li>
+
+        <!--
+        <li ng-class="{ active: $state.includes('main.projects') }">
+            <a ui-sref="main.projects">
+                Projects
+            </a>
+        </li>-->
+
+        <span flex></span>
+
+        <li ng-class="{ active: $state.includes('main.about') }">
+            <a ui-sref="main.about">
+                About
+            </a>
+        </li>
+
+        <div>
+            <md-button ng-if="!$root.user" class="md-raised md-primary pull-right" ui-sref="app.reconstruct">
+                Sign In
+            </md-button>
+            <md-button ng-if="$root.user"  class="md-raised md-primary pull-right" ui-sref="app.reconstruct">
+                ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;">input</md-icon>
+            </md-button>
+        </div>
+    </ul>
+</div>

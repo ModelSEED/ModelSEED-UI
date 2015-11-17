@@ -47,7 +47,7 @@ p.small {
 
 
 header {
-    background: #f2f2f2;
+    background: #f8f8f8;
 }
 
 
@@ -201,9 +201,9 @@ section#about .microbe-img {
 
 section#about {
     color: #333;
-    background-color: #e3e3e3; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
+    background-color: #e8e8e8; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
     text-align: center;
-    border-top: 2px solid #dfdfdf;
+    border-top: 2px solid #e2e2e2;
 }
 
 section#about-secondary {

@@ -402,12 +402,12 @@ function ($scope, $timeout, $mdSidenav, $log) {
 
 
 .controller('Publications',
-['$scope', '$http', 'uiTools',
-function($s, $http, uiTools) {
+['$scope', '$http', 'uiTools', 'config',
+function($s, $http, uiTools, config) {
 
     $s.reversed = false;
 
-    var url = 'http://0.0.0.0:3000/v0/'
+    var url = config.services.ms_rest_url;
     $http.get(url+'publications')
         .then(function(res) {
             console.log('data', res)
@@ -416,18 +416,15 @@ function($s, $http, uiTools) {
                 d[i].authors = d[i].authors.join('; ')
             }
             $s.pubs = d;
-
-            //var csv = data.data;
-            //$s.pubs = uiTools.csvToJSON(csv).rows;
         })
 }])
 
 
 .filter('highlight', function($sce) {
     return function(text, phrase) {
-        if (phrase) text = text.replace(new RegExp('('+phrase+')', 'gi'),
+        if (phrase && text) text = text.replace(new RegExp('('+phrase+')', 'gi'),
             '<span class="text-highlight">$1</span>')
-            return $sce.trustAsHtml(text)
+            return $sce.trustAsHtml(text);
     }
 })
 
