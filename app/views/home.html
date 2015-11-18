@@ -77,9 +77,10 @@
         <div ng-if="$root.user">
             <div ng-controller="Login" class="login">
                 <h4>Continue to ModelSEED</h4>
-                <md-button ui-sref="app.reconstruct" class="md-secondary md-raised">
-                    Continue <md-icon class="material-icons" style="color: #fff; margin-bottom: 3px;" >input</md-icon>
-                </md-button><br>
+                <br>
+                <a ui-sref="app.reconstruct" class="btn-outline">
+                    ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;" >input</md-icon>
+                </a><br>
                 <br>
                 <a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
             </div>
@@ -112,7 +113,7 @@
                 <div class="about-item">
                     <img src="img/home/pencil.png" width="150"/>
                     <h4>Easy</h4>
-                    <small>Editable media, models, and more makes experiementing with models a breeze</small>
+                    <small>Editable media, models, and more makes experimenting with models a breeze</small>
                 </div>
 
                 <div class="about-item">
@@ -132,7 +133,7 @@
                 <div class="about-item">
                     <img src="img/home/test-tubes.png" width="160"/>
                     <h4>Enabling Science</h4>
-                    <small>Incorporates cutting-edge and experiemental methods/algorithms</small>
+                    <small>Incorporates cutting-edge and experimental methods/algorithms</small>
                 </div>
 
                 <div class="about-item">
@@ -144,7 +145,7 @@
                 <div class="about-item">
                     <img src="img/home/code.png" width="170"/>
                     <h4>Programatic Access</h4>
-                    <small>API clients for Perl and Python, and a REST API in the works.</small>
+                    <small><a>API clients</a> for Perl and Python, and a <a>REST API</a> in the works.</small>
                 </div>
             </div>
         </div>

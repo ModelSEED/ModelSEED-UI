@@ -1,6 +1,9 @@
 <div class="container" layout="row">
-    <div hide-sm style="margin: 3px 20px 0 0;" >
-        <a ui-sref="main.home"><img src="img/ModelSEED-logo.png" width="174"></a>
+    <div hide-sm style="margin: 3px 20px 0 0;" class="logo">
+        <a ui-sref="main.home">
+            <img src="img/ModelSEED-logo.png" width="174">
+            <div class="ms-status">(beta)</div>
+        </a>
     </div>
 
     <ul class="md-toolbar-tools about-toolbar">
@@ -16,12 +19,12 @@
             </a>
         </li>
 
-        <!--
+
         <li ng-class="{ active: $state.includes('main.projects') }">
             <a ui-sref="main.projects">
                 Projects
             </a>
-        </li>-->
+        </li>
 
         <span flex></span>
 

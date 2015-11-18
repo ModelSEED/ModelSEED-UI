@@ -405,12 +405,11 @@ function ($scope, $timeout, $mdSidenav, $log) {
 ['$scope', '$http', 'uiTools', 'config',
 function($s, $http, uiTools, config) {
 
-    $s.reversed = false;
+    $s.reversed = false; // sort by year
 
     var url = config.services.ms_rest_url;
     $http.get(url+'publications')
         .then(function(res) {
-            console.log('data', res)
             var d = res.data;
             for (var i=0; i<d.length; i++) {
                 d[i].authors = d[i].authors.join('; ')

@@ -326,24 +326,6 @@ section.dark-2 {
     }
 }
 
-.btn-outline {
-    margin-top: 15px;
-    border: solid 2px #fff;
-    font-size: 20px;
-    color: #fff;
-    background: 0 0;
-    border-radius: 3px !important;
-    transition: all .17s ease-in-out;
-}
-
-.btn-outline:hover,
-.btn-outline:focus,
-.btn-outline:active,
-.btn-outline.active {
-    border: solid 2px #fff;
-    color: #18bc9c;
-    background: #fff;
-}
 
 .floating-label-form-group {
     position: relative;

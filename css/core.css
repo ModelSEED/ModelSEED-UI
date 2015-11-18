@@ -57,10 +57,7 @@ a.disabled {
 }
 
 .logo {
-    padding: 5px 15px 3px 0;
-    margin: 0 10px 2px 0;
-    display: inline-block;
-    background-color: #333;
+    position: relative;
 }
 
 .logo a:hover {
@@ -68,11 +65,18 @@ a.disabled {
     text-decoration: none;
 }
 
+.logo .ms-status {
+    position: absolute;
+    right: -20px;
+    top: 5px;
+    font-size: .6em;
+    color: #aaa;
+}
+
 .logo-sub-text {
     margin: 10px 0 0 0;
     font-size: 1.17em;
 }
-
 
 .zigzag {
     background-color: #444;
@@ -554,20 +558,31 @@ ul.about-toolbar > li.active {
 
 
 /* pages */
-
 .btn-outline {
-    border: solid 2px #fff;
-    font-size: 11px;
-    color: #fff;
+    margin-top: 10px;
+    border: solid 2px #30BCCF;
+    color: #30BCCF;
     background: 0 0;
     border-radius: 3px !important;
-    transition: all .17s ease-in-out;
+    transition: all .15s ease-in-out;
+    font-size: 1.4em;
+    padding: 10px;
 }
 
 .btn-outline:hover {
-    border: solid 2px #fff;
-    color: #18bc9c !important;
-    background: #fff;
+    /*border: solid 2px #30BCCF;*/
+    color: #fff;
+    background-color: #30BCCF;
+    border: solid 2px #30BCCF;
+}
+
+.btn-outline md-icon {
+    color: #30BCCF;
+    transition: all .15s ease-in-out;
+
+}
+.btn-outline:hover md-icon {
+    color: #fff;
 }
 
 .content-header {
