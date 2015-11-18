@@ -19,7 +19,7 @@ angular.module('ModelSEED',
  'ng-context-menu', // module for right-click menus (see workspace browser)
  'FBA',
  'ModelViewer',
- 'MSSolr', 
+ 'MSSolr',
  'Patric',
  'WS',
  'MS',
@@ -58,7 +58,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/home.html',
             controller: 'Home',
         }).state('main.team', {
-            url: "/researchers",
+            url: "/team",
             templateUrl: 'app/views/docs/team.html',
         }).state('main.publications', {
             url: "/publications",

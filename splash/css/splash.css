@@ -188,13 +188,13 @@ section#about .plant-microbe-box div{
 section#about .plant-img {
     position:relative;
     bottom: 20px;
-    width: 100px;
+    width: 120px;
 }
 
 section#about .microbe-img {
     position:relative;
     top: 30px;
-    right: 0px;
+    right: 20px;
     width: 70px;
 }
 
