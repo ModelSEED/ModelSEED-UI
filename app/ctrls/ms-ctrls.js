@@ -696,15 +696,20 @@ function($scope, $state, Patric, $timeout, $http,
     }
 
     $scope.reconstructPlant = function(ev, item) {
-        if ('genome_id' in item)
-            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
-        else
-            var params = {path: item.path, name: item.name};
-
+        var params = {path: item.path, name: item.name};
         $scope.selected = item;
         Dialogs.reconstructPlant(ev, params,
             function(res) {
                 MS.addModel(res, 'plant')
+            })
+    }
+
+    $scope.reconstructPrivate = function(ev, item) {
+        var params = {path: 'RAST:'+item.genome_id, name: item.genome_name};
+        Dialogs.reconstruct(ev, params,
+            function(res) {
+                console.log('done reconstructing', res)
+                MS.addModel(res, 'microbe')
             })
     }
 

@@ -28,10 +28,10 @@
 
 <div ng-if="view == 'Microbes'">
     <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    	<md-tab>
-    		<md-tab-label>Public Microbes</md-tab-label>
+        <md-tab>
+            <md-tab-label>Public Microbes</md-tab-label>
 
-    		<md-tab-body>
+            <md-tab-body>
                 <div class="table-controls" layout="row">
                     <!--
                     <md-input-container class="table-settings">
@@ -124,10 +124,10 @@
 
                     <md-button layout-align="center center"
                                ng-if="selectedPrivate.genome_id"
-                               ng-click="reconstruct($event, selectedPrivate)"
-                              class="md-primary" disabled>
+                               ng-click="reconstructPrivate($event, selectedPrivate)"
+                              class="md-primary" disable>
                         <i class="icon-tools fa-plus"></i>
-                        Reconstruct (coming soon)
+                        Reconstruct
                     </md-button>
 
                     <md-progress-circular ng-if="loading"
