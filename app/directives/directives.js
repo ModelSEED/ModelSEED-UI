@@ -1431,7 +1431,7 @@ function($compile, $stateParams) {
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
-            console.log('scope', scope.stylingOpts)
+            //console.log('scope', scope.stylingOpts)
         }
     }
  })
@@ -1996,7 +1996,7 @@ function($compile, $stateParams) {
              searchPlaceholder: '@searchPlaceholder'
          },
          template: '<md-icon class="material-icons">search</md-icon>'+
-                   '<input ng-model="query" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()">',
+                   '<input ng-model="query" ng-model-options="{debounce: {default: 100, blur: 0}}" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()">',
          link: function(scope, elem, attrs) {
              var lastQuery;
 

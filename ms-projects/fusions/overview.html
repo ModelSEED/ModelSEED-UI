@@ -3,7 +3,7 @@
 <div layout="column" layout-margin layout-padding>
 
 
-    <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height md-no-bar>
         <!--
         <md-tab label="Fusion Overview">
             <md-tab-body>
@@ -42,7 +42,7 @@
 
         <md-tab label="Fusions">
             <md-tab-body>
-                <ng-table-solr table-header="fusionsHeader"
+                <ng-table-solr table-header="fusionsHeader" ng-if="tabs.tabIndex == 0"
                                table-data="fusions"
                                table-opts="fusionsOpts"
                                table-loading="loadingFusions"
@@ -54,12 +54,19 @@
 
         <md-tab label="Training Set">
             <md-tab-body>
+                <ng-table-solr table-header="trainingHeader" ng-if="tabs.tabIndex == 1"
+                               table-data="training"
+                               table-opts="trainingOpts"
+                               table-loading="loadingTraining"
+                               table-placeholder="Search trainings"
+                               opts="opts">
+                </ng-table-solr>
             </md-tab-body>
         </md-tab>
 
         <md-tab label="Role">
             <md-tab-body>
-                <ng-table-solr table-header="rolesHeader"
+                <ng-table-solr table-header="rolesHeader" ng-if="tabs.tabIndex == 2"
                                table-data="roles"
                                table-opts="rolesOpts"
                                table-loading="loadingRoles"
@@ -72,7 +79,7 @@
 
         <md-tab label="CDDs">
             <md-tab-body>
-                <ng-table-solr table-header="cddHeader"
+                <ng-table-solr table-header="cddHeader" ng-if="tabs.tabIndex == 3"
                                table-data="cdds"
                                table-opts="cddOpts"
                                table-loading="loadingCdds"
@@ -85,11 +92,11 @@
 
         <md-tab label="CDD Sets">
             <md-tab-body>
-                <ng-table-solr table-header="cddSetsHeader"
-                               table-data="cddSets"
-                               table-opts="cddSetsOpts"
-                               table-loading="loadingCddSets"
-                               table-placeholder="Search Cdd Sets"
+                <ng-table-solr table-header="cddSetHeader" ng-if="tabs.tabIndex == 4"
+                               table-data="cddSet"
+                               table-opts="cddSetOpts"
+                               table-loading="loadingCddSet"
+                               table-placeholder="Search CDD sets"
                                opts="opts">
                 </ng-table-solr>
             </md-tab-body>
@@ -98,7 +105,7 @@
 
         <md-tab label="Genome Stats">
             <md-tab-body>
-                <ng-table-solr table-header="genomeStatsHeader"
+                <ng-table-solr table-header="genomeStatsHeader" ng-if="tabs.tabIndex == 5"
                                table-data="genomeStats"
                                table-opts="genomeStatsOpts"
                                table-loading="loadingGenomeStats"
@@ -110,12 +117,26 @@
 
         <md-tab label="Reactions">
             <md-tab-body>
+                <ng-table-solr table-header="reactionHeader" ng-if="tabs.tabIndex == 6"
+                               table-data="reaction"
+                               table-opts="reactionOpts"
+                               table-loading="loadingReaction"
+                               table-placeholder="Search reaction ids"
+                               opts="opts">
+                </ng-table-solr>
             </md-tab-body>
         </md-tab>
 
 
         <md-tab label="Subsystems">
             <md-tab-body>
+                <ng-table-solr table-header="subsystemHeader" ng-if="tabs.tabIndex == 7"
+                               table-data="subsystem"
+                               table-opts="subsystemOpts"
+                               table-loading="loadingSubsystem"
+                               table-placeholder="Search subsystems"
+                               opts="opts">
+                </ng-table-solr>
             </md-tab-body>
         </md-tab>
 

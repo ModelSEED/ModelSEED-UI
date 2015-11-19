@@ -316,6 +316,12 @@ md-toolbar,
     background-color: #2D224E;
 }
 
+.md-toolbar-tools-primary {
+    font-size: 1em;
+    background-color: #38BED1;
+}
+
+
 /* toolbars */
 ul.toolbar {
     padding: 0;
@@ -830,9 +836,11 @@ table md-checkbox {
 
 /* md mods */
 
-md-content {
+/*
+md-tab-content {
+    overflow-x: scroll !important;
+}*/
 
-}
 
 md-tab-item:hover {
     color: #555;

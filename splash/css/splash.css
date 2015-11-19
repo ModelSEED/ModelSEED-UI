@@ -209,7 +209,7 @@ section#about {
 section#about-secondary {
     color: #fff;
     background-color: #201838; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
-    text-align: center;
+    text-align: center !important;
 }
 
 
@@ -234,7 +234,7 @@ section.dark {
 
 section.dark-2 {
     color: #fff;
-    background: #444;
+    background: #222;
 }
 
 @media(max-width:767px) {

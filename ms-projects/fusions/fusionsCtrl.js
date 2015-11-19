@@ -4,17 +4,100 @@ angular.module('Fusions', [])
 ['$scope', '$http', '$state', 'uiTools', 'Dialogs', 'Session', 'MSSolr',
 function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
-    //var solr = "http://branch.mcs.anl.gov:8983/solr/"
-    var solr = "http://localhost:8983/solr/"
-
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     $s.opts = {size: 'condensed', border: false};
 
+    // fusions
+    var sFields = ['gene', 'contig_function'];
+    $s.fusionsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+
+    $s.fusionsHeader = [
+        {label: 'Gene', key: 'gene'},
+        {label: 'Function', key: 'contig_function'},
+        {label: 'Length', key: 'length'},
+        {label: 'Divide', key: 'divide'},
+        {label: 'Score', key: 'score'},
+        {label: 'Left', key: 'left'},
+        {label: 'Right', key: 'right'},
+        {label: 'Overlap', key: 'overlap'},
+        {label: 'Left SG', key: 'left_sg'},
+        {label: 'Right SG', key: 'right_sg'},
+        {label: 'Overlap SG', key: 'overlap_sg'},
+        {label: 'Matches', key: 'matches'},
+        {label: 'Best Left', key: 'best_left'},
+        {label: 'Best Right', key: 'best_right'},
+        {label: 'Best Left Align', key: 'best_left_align'},
+        {label: 'Left Links', key: 'left_links'},
+        {label: 'Right Links', key: 'right_links'},
+        {label: 'Set Count', key: 'set_count'},
+        //{label: 'Contig Length (?)', key: 'contig_length'},
+        /*{label: 'Contig', key: 'contig'},
+        {label: 'Direction', key: 'direction'},
+        {label: 'Start', key: 'start'},
+        {label: 'Stop', key: 'stop'},
+        {label: 'Species', key: 'species'},
+        {label: 'Sequence', key: 'sequence'},
+        {label: 'CDDs', key: 'cdds'},*/
+    ];
+
+    function updateFusions() {
+        MSSolr.search('fusions', $s.fusionsOpts)
+            .then(function(data) {
+                $s.fusions = data;
+                $s.loadingFusions = false;
+            })
+    }
+
+    $s.$watch('fusionsOpts', function(after, before) {
+        $s.loadingFusions = true;
+        updateFusions();
+    }, true)
+
+
+    // training table
+
+    var sFields = ['id', 'genpro', 'uncertain', 'fusion_class', 'function', 'species']
+
+    $s.trainingOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+
+    $s.trainingHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Genpro', key: 'genpro'},
+        {label: 'Seed', key: 'seed'},
+        {label: 'Img', key: 'img'},
+        {label: 'Curation', key: 'curation'},
+        {label: 'Uncertain', key: 'uncertain'},
+        {label: 'Fusion Class', key: 'fusion_class'},
+        {label: 'Fuction', key: 'function'},
+        {label: 'Length', key: 'length'},
+        {label: 'Contig', key: 'contig'},
+        {label: 'Direction', key: 'direction'},
+        {label: 'Start', key: 'start'},
+        {label: 'Stop', key: 'stop'},
+        {label: 'Species', key: 'species'},
+        //{label: 'Sequence', key: 'sequence'},
+    ];
+
+    function updateTraining() {
+        MSSolr.search('fusion-training', $s.trainingOpts)
+            .then(function(data) {
+                $s.training = data;
+                $s.loadingTraining = false;
+            })
+    }
+
+    $s.$watch('trainingOpts', function(after, before) {
+        $s.loading = true;
+        updateTraining();
+    }, true)
+
     // roles table
 
-    $s.rolesOpts = {query: '', limit: 25, offset: 0, sort: {}, searchField: 'role'};
+    var sFields = ['role', 'subsystem', 'class_one', 'class_two',
+        'frequently_fused_function_count', 'frequently_fused_function_genomes'];
+    $s.rolesOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.rolesHeader = [
         {label: 'Role', key: 'role'},
@@ -36,7 +119,6 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         MSSolr.search('fusion-roles', $s.rolesOpts)
             .then(function(data) {
                 $s.roles = data;
-                console.log('res', $s.roles)
                 $s.loadingRoles = false;
             })
     }
@@ -48,8 +130,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
     // cdd table
-
-    $s.cddOpts = {query: '', limit: 25, offset: 0, sort: {}, searchField: 'id'};
+    var sFields = ['accession', 'name', 'is_full_gene'];
+    $s.cddOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.cddHeader = [
         {label: 'ID', key: 'id'},
@@ -61,7 +143,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Is Full Gene?', key: 'is_full_gene'},
         {label: 'Long Genes', key: 'longgenes'},
         {label: 'Set', key: 'set'},
-        {label: 'Genes', key: 'genes'},
+        //{label: 'Genes', key: 'genes'},
         //{label: 'Description', key: 'description'},
     ];
 
@@ -70,7 +152,6 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         MSSolr.search('fusion-cdd', $s.cddOpts)
             .then(function(data) {
                 $s.cdds = data;
-                console.log('res', $s.roles)
                 $s.loadingCdds = false;
             })
     }
@@ -82,15 +163,15 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
     // cdd sets
+    var sFields = ['id', 'accession', 'name'];
+    $s.cddSetOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
-    $s.cddSetsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchField: 'id'};
-
-    $s.cddSetsHeader = [
+    $s.cddSetHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Accession', key: 'accession'},
         {label: 'Name', key: 'name'},
         {label: 'Length', key: 'length'},
-        {label: 'Gene Count', key: 'genes'},
+        {label: 'Gene Count', key: 'gene_count'},
         {label: 'Full Genes', key: 'fullgenes'},
         {label: 'Is Full Gene?', key: 'is_full_gene'},
         {label: 'CDDs', key: 'cdds'},
@@ -101,27 +182,27 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     ];
 
     function updateCddSets() {
-        MSSolr.search('fusion-cdd-sets', $s.cddSetsOpts)
+        MSSolr.search('fusion-cdd-sets', $s.cddSetOpts)
             .then(function(data) {
-                $s.cddSets = data;
-                $s.loadingCddSets = false;
+                $s.cddSet = data;
+                $s.loadingCddSet = false;
             })
     }
 
     $s.$watch('cddSetOpts', function(after, before) {
-        $s.loadingCddSets = true;
+        $s.loadingCddSet = true;
         updateCddSets();
     }, true)
 
 
     // genome stats
-
-    $s.genomeStatsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchField: 'id'};
+    var sFields = ['id', 'accession', 'name', 'taxonomy'];
+    $s.genomeStatsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.genomeStatsHeader = [
         {label: 'ID', key: 'id'},
-        {label: 'Accession', key: 'name'},
-        {label: 'Name', key: 'genes'},
+        {label: 'Name', key: 'name'},
+        {label: 'Genes', key: 'genes'},
         {label: 'Genes With CDDs', key: 'genes_with_cdds'},
         {label: 'Total CDD Hits', key: 'total_cdd_hits'},
         {label: 'Genes With No Overlapping CDDs', key: 'genes_with_nonoverlapping_cdds'},
@@ -154,94 +235,86 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     }, true)
 
 
-    // fusions
 
-    $s.fusionsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchField: 'gene'};
+    // reactions
+    var sFields = ['id', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
+    $s.reactionOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
-    $s.fusionsHeader = [
-        {label: 'Gene', key: 'gene'},
-        {label: 'Function', key: 'contig_function'},
-        {label: 'Length', key: 'length'},
-        {label: 'Divide', key: 'divide'},
-        {label: 'Score', key: 'score'},
-        {label: 'Left', key: 'left'},
-        {label: 'Right', key: 'right'},
-        {label: 'Overlap', key: 'overlap'},
-        {label: 'Left SG', key: 'left_sg'},
-        {label: 'Right SG', key: 'right_sg'},
-        {label: 'Overlap SG', key: 'overlap_sg'},
-        {label: 'Matches', key: 'matches'},
-        {label: 'Best Left', key: 'best_left'},
-        {label: 'Best Right', key: 'best_right'},
-        {label: 'Best Left Align', key: 'best_left_align'},
-        {label: 'Left Links', key: 'left_links'},
-        {label: 'Right Links', key: 'right_links'},
-        {label: 'Set Count', key: 'set_count'},
-        {label: 'Contig Length?', key: 'contig_length'},
-        {label: 'Contig', key: 'contig'},
-        {label: 'Direction', key: 'direction'},
-        {label: 'Start', key: 'start'},
-        {label: 'Stop', key: 'stop'},
-        {label: 'Species', key: 'species'},
-        {label: 'Sequence', key: 'sequence'},
-        {label: 'CDDs', key: 'cdds'},
+    $s.reactionHeader = [
+        {label: 'ID', key: 'reaction'},
+        {label: 'Dir', key: 'direction'},
+        {label: 'EQ', key: 'equation'},
+        {label: 'Active', key: 'active'},
+        {label: 'Essential', key: 'essential'},
+        {label: 'Active Models', key: 'active_models'},
+        {label: 'Essential Models', key: 'essential_models'},
+        {label: 'Active Side Paths', key: 'active_side_pathways'},
+        {label: 'Essential Side Paths', key: 'essential_side_pathways'},
+        {label: 'Avg Essential Flux', key: 'average_essential_flux'},
+        {label: 'Avg Active Flux', key: 'average_active_flux'},
+        {label: 'Damage Prone Rxns', key: 'damage_prone_reactants'},
+        {label: 'Role Count', key: 'role_count'},
+        {label: 'Max Genomes', key: 'max_genomes'},
+        {label: 'Max Genome Role', key: 'max_genome_role'},
+        {label: 'RNAs', key: 'max_fusions'},
+        {label: 'Max Fussion Role', key: 'max_fusion_role'},
+        {label: 'Max Fussion Fraction', key: 'max_fusion_fraction'},
+        {label: 'Max Fussion Fraction Role', key: 'max_fusion_fraction_role'},
+        {label: 'Is Complex', key: 'is_complex'},
+        {label: 'Is Transport', key: 'is_transport'},
+        {label: 'Models', key: 'models'},
+        {label: 'Delta G', key: 'deltaG'},
+        {label: 'Is Essential', key: 'is_essential'},
+        {label: 'Is Active', key: 'is_active'},
+        {label: 'Fequently Fused', key: 'frequently_fused'},
+        {label: 'Hypothesized Reason for Fusion', key: 'hypothesized_reason_for_fusion'}
     ];
 
-
-    /*
-
-    gene: "fig|443144.3.peg.472",
-    length: 1218,
-    function: "Dihydrolipoamide acyltransferase component of branched-chain alpha-keto acid dehydrogenase complex (EC 2.3.1.168)",
-    divide: 77,
-    score: 375,
-    left: 26,
-    right: 5,
-    overlap: 5,
-    left_sg: 6,
-    right_sg: 3,
-    overlap_sg: 5,
-    matches: 0,
-    best_left: 48.65,
-    best_right: 49.3,
-    best_left_align: 74,
-    best_right_align: 301,
-    left_links: 619,
-    right_links: 459,
-    set_count: 8,
-    contig_function: "Dihydrolipoamide acyltransferase component of branched-chain alpha-keto acid dehydrogenase complex (EC 2.3.1.168)",
-    contig_length: 1218,
-    contig: "443144.3:NC_012918",
-    direction: "+",
-    start: 585384,
-    stop: 586602,
-    species: "Geobacter sp. M21",
-    sequence: "MSIDFKLPDLGEGIAEVELRRWLVAEGDAVAEHQPLVEVETDKAVVEVPSPRSGVVARLHRKEGETVQVGATLVTFAEAKEAGRREEPEGERRPAQRPPSVGIVGSLPEPEAATQAPPAGFEGLATPMVRKMARERGIDLKSVRGTGPRGCIKPEDLDQIPQSAQKAKPAPQDGERVPLRGLRRTIARNVLASQKTTAFVTSMEEVDITDIWEMRGREQGEVESRGAHLTFLPFFIKAVQHALREHPLLNGSIDDEAQELVLKKQYHFGIAVDTPEGLMVPVIRDVDKKSIIELAQAVQELGRKARERSISLEELRGSSFTITNYGHFGGTFATPIINWPDVAIMGFGRIVERPWVHRGQIAIRKILPLSLTFDHRATDGADAARFLGKVLRYLEDPALLFLDSA",
-    cdds: [
-     */
-
-    function updateFusions() {
-        MSSolr.search('fusions', $s.fusionsOpts)
+    function updateReaction() {
+        MSSolr.search('fusion-reactions', $s.reactionOpts)
             .then(function(data) {
-                $s.fusions = data;
-                $s.loadingFusions = false;
+                $s.reaction = data;
+                $s.loadingReaction = false;
             })
     }
 
-    $s.$watch('fusionsOpts', function(after, before) {
-        $s.loadingFusions = true;
-        updateFusions();
+    $s.$watch('reactionOpts', function(after, before) {
+        $s.loadingReaction = true;
+        updateReaction();
     }, true)
 
 
+    // subsystem stats
+    var sFields = ['subsystem', 'class_one', 'class_two'];
+    $s.subsystemOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
-    /*
-    $s.doSomething = function($e, row) {
-        $state.go('app.biochem', {tab: 'compounds'})
-              .then(function() {
-                  $state.go('app.biochemViewer', {cpd: row.id})
-              })
-    }*/
+    $s.subsystemHeader = [
+        {label: 'Subsystem', key: 'subsystem'},
+        {label: 'Class One', key: 'class_one'},
+        {label: 'Class Two', key: 'class_two'},
+        {label: 'Function Count', key: 'function_count'},
+        {label: 'Frequently Fused Function Count', key: 'frequently_fused_function_count'},
+        {label: 'Fraction Fusions', key: 'fraction_fusions'},
+        {label: 'Fused Function Genome Count', key: 'fused_function_genome_count'},
+        {label: 'Function Genome Count', key: 'function_genome_count'},
+        {label: 'Fraction Genomes With Fusions', key: 'fraction_genomes_with_fusions'},
+
+    ];
+
+
+    function updateSubsystem() {
+        MSSolr.search('fusion-subsystems', $s.subsystemOpts)
+            .then(function(data) {
+                $s.subsystem = data;
+                $s.loadingSubsystem = false;
+            })
+    }
+
+    $s.$watch('subsystemOpts', function(after, before) {
+        $s.loadingSubsystem = true;
+        updateSubsystem();
+    }, true)
+
 
 
 }])
