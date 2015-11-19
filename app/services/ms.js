@@ -178,7 +178,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.sanitizeModel = function(obj) {
-        console.log('rundate', obj.rundate)
         return {name: obj.id,
                 path: obj.ref,
                 orgName: obj.name,
