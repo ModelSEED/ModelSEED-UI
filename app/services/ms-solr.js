@@ -46,7 +46,7 @@ function($http, $q, $rootScope, config, Auth) {
             if (searchFields) {
                 var f = [];
                 for (var i=0; i<searchFields.length; i++) {
-                    f.push(searchFields[i]+':*'+query+'*')
+                    f.push(searchFields[i]+':"*'+query+'*"');
                 }
                 url += '&q='+f.join(' OR ')
             }

@@ -9,22 +9,65 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
     $s.opts = {size: 'condensed', border: false};
 
+    // training table
+
+    var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed)
+
+    $s.trainingOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+
+    $s.trainingHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Species', key: 'species'},
+        {label: 'Fuction', key: 'function'},
+        {label: 'Fusion Class', key: 'fusion_class'},
+        {label: 'Uncertain', key: 'uncertain'},
+        {label: 'Length', key: 'length'},
+        {label: 'Genpro', key: 'genpro'},
+        {label: 'Seed', key: 'seed'},
+        {label: 'Img', key: 'img'},
+        {label: 'Curation', key: 'curation'},
+        {label: 'Contig', key: 'contig'},
+        /*{label: 'Direction', key: 'direction'},
+        {label: 'Start', key: 'start'},
+        {label: 'Stop', key: 'stop'},
+        {label: 'Sequence', key: 'sequence'},*/
+    ];
+
+    function updateTraining() {
+        MSSolr.search('fusion-training', $s.trainingOpts)
+            .then(function(data) {
+                $s.training = data;
+                $s.loadingTraining = false;
+            })
+    }
+
+    $s.$watch('trainingOpts', function(after, before) {
+        $s.loadingTraining = true;
+        updateTraining();
+    }, true)
+
+
     // fusions
-    var sFields = ['gene', 'contig_function'];
+    var sFields = ['gene', 'contig_function', 'species']//, 'contig', 'cdds'];
     $s.fusionsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+
 
     $s.fusionsHeader = [
         {label: 'Gene', key: 'gene'},
-        {label: 'Function', key: 'contig_function'},
-        {label: 'Length', key: 'length'},
-        {label: 'Divide', key: 'divide'},
+        {label: 'Species', key: 'species'},
+        {label: 'Function', key: 'contig_function'}, //fixme: rename. should be "function"
+        {label: 'Length', key: 'contig_length'}, //fixme: rename. should be "length"
+        {label: 'Left SG', key: 'left_sg'},
+        {label: 'Right SG', key: 'right_sg'},
+        {label: 'Overlap SG', key: 'overlap_sg'},
+        {label: 'Best Left', key: 'best_left'},
+        {label: 'Best Right', key: 'best_right'},
+
+        /*{label: 'Divide', key: 'divide'},
         {label: 'Score', key: 'score'},
         {label: 'Left', key: 'left'},
         {label: 'Right', key: 'right'},
         {label: 'Overlap', key: 'overlap'},
-        {label: 'Left SG', key: 'left_sg'},
-        {label: 'Right SG', key: 'right_sg'},
-        {label: 'Overlap SG', key: 'overlap_sg'},
         {label: 'Matches', key: 'matches'},
         {label: 'Best Left', key: 'best_left'},
         {label: 'Best Right', key: 'best_right'},
@@ -32,12 +75,11 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Left Links', key: 'left_links'},
         {label: 'Right Links', key: 'right_links'},
         {label: 'Set Count', key: 'set_count'},
-        //{label: 'Contig Length (?)', key: 'contig_length'},
-        /*{label: 'Contig', key: 'contig'},
+        {label: 'Contig Length (?)', key: 'contig_length'},
+        {label: 'Contig', key: 'contig'},
         {label: 'Direction', key: 'direction'},
         {label: 'Start', key: 'start'},
         {label: 'Stop', key: 'stop'},
-        {label: 'Species', key: 'species'},
         {label: 'Sequence', key: 'sequence'},
         {label: 'CDDs', key: 'cdds'},*/
     ];
@@ -55,48 +97,9 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         updateFusions();
     }, true)
 
-
-    // training table
-
-    var sFields = ['id', 'genpro', 'uncertain', 'fusion_class', 'function', 'species']
-
-    $s.trainingOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
-
-    $s.trainingHeader = [
-        {label: 'ID', key: 'id'},
-        {label: 'Genpro', key: 'genpro'},
-        {label: 'Seed', key: 'seed'},
-        {label: 'Img', key: 'img'},
-        {label: 'Curation', key: 'curation'},
-        {label: 'Uncertain', key: 'uncertain'},
-        {label: 'Fusion Class', key: 'fusion_class'},
-        {label: 'Fuction', key: 'function'},
-        {label: 'Length', key: 'length'},
-        {label: 'Contig', key: 'contig'},
-        {label: 'Direction', key: 'direction'},
-        {label: 'Start', key: 'start'},
-        {label: 'Stop', key: 'stop'},
-        {label: 'Species', key: 'species'},
-        //{label: 'Sequence', key: 'sequence'},
-    ];
-
-    function updateTraining() {
-        MSSolr.search('fusion-training', $s.trainingOpts)
-            .then(function(data) {
-                $s.training = data;
-                $s.loadingTraining = false;
-            })
-    }
-
-    $s.$watch('trainingOpts', function(after, before) {
-        $s.loading = true;
-        updateTraining();
-    }, true)
-
     // roles table
 
-    var sFields = ['role', 'subsystem', 'class_one', 'class_two',
-        'frequently_fused_function_count', 'frequently_fused_function_genomes'];
+    var sFields = ['role'];
     $s.rolesOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.rolesHeader = [
@@ -111,8 +114,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Subsystem', key: 'subsystem'},
         {label: 'class 1', key: 'class_one'},
         {label: 'Class 2', key: 'class_two'},
-        {label: 'Frequently Fused Count', key: 'frequently_fused_function_count'},
-        {label: 'Frequently used', key: 'frequently_fused_function_genomes'},
+        /*{label: 'Frequently Fused Count', key: 'frequently_fused_function_count'},
+        {label: 'Frequently used', key: 'frequently_fused_function_genomes'},*/
     ];
 
     function updateRoles() {
@@ -130,21 +133,21 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
     // cdd table
-    var sFields = ['accession', 'name', 'is_full_gene'];
+    var sFields = ['id', 'accession', 'name', 'set', 'set_name', 'description'];
     $s.cddOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.cddHeader = [
+        {label: 'Name', key: 'name'},
         {label: 'ID', key: 'id'},
         {label: 'Accession', key: 'accession'},
-        {label: 'Name', key: 'name'},
         {label: 'Length', key: 'length'},
-        {label: 'Gene Count', key: 'gene_count'},
+        //{label: 'Genes', key: 'genes'},  // fixme: wanted, but there's probably many.
+        //{label: 'Gene Count', key: 'gene_count'},
         {label: 'Full Genes', key: 'fullgenes'},
-        {label: 'Is Full Gene?', key: 'is_full_gene'},
+        //{label: 'Is Full Gene?', key: 'is_full_gene'},
         {label: 'Long Genes', key: 'longgenes'},
         {label: 'Set', key: 'set'},
-        //{label: 'Genes', key: 'genes'},
-        //{label: 'Description', key: 'description'},
+        {label: 'Description', key: 'description'},
     ];
 
 
@@ -157,13 +160,15 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     }
 
     $s.$watch('cddOpts', function(after, before) {
-        $s.loading = true;
+        $s.loadingCdds = true;
         updateCdds();
     }, true)
 
 
     // cdd sets
-    var sFields = ['id', 'accession', 'name'];
+    //
+    //
+    var sFields = ['id', 'accession', 'name', 'description'];  // cddlist (need to add)
     $s.cddSetOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.cddSetHeader = [
@@ -196,28 +201,29 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
     // genome stats
-    var sFields = ['id', 'accession', 'name', 'taxonomy'];
+    var sFields = ['id', 'name', 'taxonomy', 'domain', 'md5'];
     $s.genomeStatsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.genomeStatsHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},
+        {label: 'Taxonomy', key: 'taxonomy'},
         {label: 'Genes', key: 'genes'},
-        {label: 'Genes With CDDs', key: 'genes_with_cdds'},
+        {label: 'DNA Size', key: 'dna-size'},
+        {label: 'contigs', key: 'contigs'},
+        {label: 'Complete', key: 'complete'},
+        {label: 'Genetic Code', key: 'genetic-code'},
+        {label: 'Final Predicted Fusions', key: 'final_predicted_fusions'},
+        {label: 'Fraction of Final Fusioin Predictions', key: 'fraction_final_fusion_predictions'},
+
+        /*{label: 'Genes With CDDs', key: 'genes_with_cdds'},
         {label: 'Total CDD Hits', key: 'total_cdd_hits'},
         {label: 'Genes With No Overlapping CDDs', key: 'genes_with_nonoverlapping_cdds'},
         {label: 'Full Genes CDD Hists', key: 'full_genes_cdd_hits'},
         {label: 'Genes With No Overlapping Full Gene CDDs', key: 'genes_with_nonoverlapping_full_gene_cdds'},
-        {label: 'Final Predicted Fusions', key: 'final_predicted_fusions'},
-        {label: 'Fraction of Final Fusioin Predictions', key: 'fraction_final_fusion_predictions'},
-        {label: 'DNA Size', key: 'dna-size'},
-        {label: 'contigs', key: 'contigs'},
-        {label: 'Complete', key: 'complete'},
         {label: 'GC Content', key: 'gc-content'},
-        {label: 'Taxonomy', key: 'taxonomy'},
         {label: 'MD5', key: 'md5'},
-        {label: 'RNAs', key: 'rnas'},
-        {label: 'Genetic Code', key: 'genetic-code'},
+        {label: 'RNAs', key: 'rnas'}*/
     ];
 
 
@@ -236,24 +242,24 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
 
-    // reactions
+    // reactions table
     var sFields = ['id', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
     $s.reactionOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.reactionHeader = [
-        {label: 'ID', key: 'reaction'},
+        {label: 'Reaction', key: 'reaction'},
         {label: 'Dir', key: 'direction'},
         {label: 'EQ', key: 'equation'},
-        {label: 'Active', key: 'active'},
-        {label: 'Essential', key: 'essential'},
-        {label: 'Active Models', key: 'active_models'},
+        //{label: 'Active', key: 'active'},
+        //{label: 'Essential', key: 'essential'},
+        //{label: 'Active Models', key: 'active_models'},
         {label: 'Essential Models', key: 'essential_models'},
         {label: 'Active Side Paths', key: 'active_side_pathways'},
         {label: 'Essential Side Paths', key: 'essential_side_pathways'},
         {label: 'Avg Essential Flux', key: 'average_essential_flux'},
-        {label: 'Avg Active Flux', key: 'average_active_flux'},
+        //{label: 'Avg Active Flux', key: 'average_active_flux'},
         {label: 'Damage Prone Rxns', key: 'damage_prone_reactants'},
-        {label: 'Role Count', key: 'role_count'},
+        /*{label: 'Role Count', key: 'role_count'},
         {label: 'Max Genomes', key: 'max_genomes'},
         {label: 'Max Genome Role', key: 'max_genome_role'},
         {label: 'RNAs', key: 'max_fusions'},
@@ -262,10 +268,10 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Max Fussion Fraction Role', key: 'max_fusion_fraction_role'},
         {label: 'Is Complex', key: 'is_complex'},
         {label: 'Is Transport', key: 'is_transport'},
-        {label: 'Models', key: 'models'},
+        {label: 'Models', key: 'models'},*/
         {label: 'Delta G', key: 'deltaG'},
-        {label: 'Is Essential', key: 'is_essential'},
-        {label: 'Is Active', key: 'is_active'},
+        /*{label: 'Is Essential', key: 'is_essential'},
+        {label: 'Is Active', key: 'is_active'},*/
         {label: 'Fequently Fused', key: 'frequently_fused'},
         {label: 'Hypothesized Reason for Fusion', key: 'hypothesized_reason_for_fusion'}
     ];
@@ -298,9 +304,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Fused Function Genome Count', key: 'fused_function_genome_count'},
         {label: 'Function Genome Count', key: 'function_genome_count'},
         {label: 'Fraction Genomes With Fusions', key: 'fraction_genomes_with_fusions'},
-
     ];
-
 
     function updateSubsystem() {
         MSSolr.search('fusion-subsystems', $s.subsystemOpts)
@@ -314,7 +318,5 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         $s.loadingSubsystem = true;
         updateSubsystem();
     }, true)
-
-
 
 }])

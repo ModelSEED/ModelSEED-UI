@@ -40,21 +40,9 @@
         </md-tab>
         -->
 
-        <md-tab label="Fusions">
-            <md-tab-body>
-                <ng-table-solr table-header="fusionsHeader" ng-if="tabs.tabIndex == 0"
-                               table-data="fusions"
-                               table-opts="fusionsOpts"
-                               table-loading="loadingFusions"
-                               table-placeholder="Search fusions"
-                               opts="opts">
-                </ng-table-solr>
-            </md-tab-body>
-        </md-tab>
-
         <md-tab label="Training Set">
             <md-tab-body>
-                <ng-table-solr table-header="trainingHeader" ng-if="tabs.tabIndex == 1"
+                <ng-table-solr table-header="trainingHeader" ng-if="tabs.tabIndex == 0"
                                table-data="training"
                                table-opts="trainingOpts"
                                table-loading="loadingTraining"
@@ -64,7 +52,20 @@
             </md-tab-body>
         </md-tab>
 
-        <md-tab label="Role">
+        <md-tab label="Fusions">
+            <md-tab-body>
+                <ng-table-solr table-header="fusionsHeader" ng-if="tabs.tabIndex == 1"
+                               table-data="fusions"
+                               table-opts="fusionsOpts"
+                               table-loading="loadingFusions"
+                               table-placeholder="Search fusions"
+                               opts="opts">
+                </ng-table-solr>
+            </md-tab-body>
+        </md-tab>
+
+
+        <md-tab label="Roles">
             <md-tab-body>
                 <ng-table-solr table-header="rolesHeader" ng-if="tabs.tabIndex == 2"
                                table-data="roles"
