@@ -1,0 +1,34 @@
+
+<div layout="row">
+    <div class="content-header" flex>
+        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
+        <small ng-if="view == 'Microbes'" class="help-text" hide-sm>Select a genome from below to reconstruct</small>
+        <small ng-if="view == 'Plants'" class="help-text" hide-sm>Select a genome from 'My Plants' to reconstruct, or consider copying a genome.</small>
+    </div>
+
+    <!--
+    <md-input-container layout-align="center center">
+        <md-switch md-no-ink
+                   ng-model="filters.myGenomes"
+                   aria-label="view my genomes"
+                   ng-click="toggleMyGenomes()">
+            View my genomes
+        </md-switch>
+    </md-input-container>
+    -->
+
+    <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
+        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
+        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
+    </md-radio-group>
+</div>
+<hr class="no-margin">
+
+
+
+<div ng-if="view == 'Microbes'" ng-include="'app/views/genomes/microbes.html'"></div>
+
+<div ng-if="genomes.docs.length == 0 && !loading && view == 'Microbes'" class="alert alert-warning">No genome found</div>
+
+
+<ng-include src="'app/views/genomes/plants.html'" ng-if="view == 'Plants'"></ng-include>

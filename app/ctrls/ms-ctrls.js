@@ -36,7 +36,7 @@ function($scope, $state, $stateParams, Auth, $window) {
             // If coming from home page, go to genomes.
             // Otherwise go to current page.
             if ($state.current.name === 'main.home') {
-                var p = $state.transitionTo('app.reconstruct', {}, {reload: true, inherit: true, notify: false});
+                var p = $state.transitionTo('app.genomes', {}, {reload: true, inherit: true, notify: false});
             } else
                 var p = $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false});
 
@@ -537,7 +537,7 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 
-.controller('Reconstruct',
+.controller('Genomes',
 ['$scope', '$state', 'Patric', '$timeout', '$http',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
 function($scope, $state, Patric, $timeout, $http,

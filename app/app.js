@@ -123,6 +123,41 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/app.html',
         })
 
+
+        .state('app.biochem', {
+            url: "/biochem/?tab",
+            templateUrl: 'app/views/biochem/biochem.html',
+            controller: 'Biochem',
+            authenticate: true,
+            //reloadOnSearch: false
+        }).state('app.biochemViewer', {
+            url: "/biochem-viewer/?cpd?tab",
+            templateUrl: 'app/views/biochem/biochem-viewer.html',
+            controller: 'BiochemViewer',
+            authenticate: true
+        }).state('app.plantAnnotations', {
+            url: "/plant-annotations/",
+            templateUrl: 'app/views/annotations.html',
+            controller: 'PlantAnnotations',
+            authenticate: true
+        }).state('app.genomes', {
+            url: "/genomes/",
+            templateUrl: 'app/views/genomes/genomes.html',
+            controller: 'Genomes',
+            authenticate: true
+        }).state('app.media', {
+            url: "/list-media/?tab",
+            templateUrl: 'app/views/media.html',
+            controller: 'Media',
+            authenticate: true
+        }).state('app.myModels', {
+            url: "/my-models/",
+            templateUrl: 'app/views/my-models.html',
+            controller: 'MyModels',
+            authenticate: true
+        })
+
+
         // data browser
         .state('app.myData', {
             url: "/data{dir:nonURIEncoded}",
@@ -161,39 +196,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-        // The good stuff
-        .state('app.biochem', {
-            url: "/biochem/?tab",
-            templateUrl: 'app/views/biochem/biochem.html',
-            controller: 'Biochem',
-            authenticate: true,
-            //reloadOnSearch: false
-        }).state('app.biochemViewer', {
-            url: "/biochem-viewer/?cpd?tab",
-            templateUrl: 'app/views/biochem/biochem-viewer.html',
-            controller: 'BiochemViewer',
-            authenticate: true
-        }).state('app.plantAnnotations', {
-            url: "/plant-annotations/",
-            templateUrl: 'app/views/annotations.html',
-            controller: 'PlantAnnotations',
-            authenticate: true
-        }).state('app.reconstruct', {
-            url: "/reconstruct/",
-            templateUrl: 'app/views/reconstruct.html',
-            controller: 'Reconstruct',
-            authenticate: true
-        }).state('app.media', {
-            url: "/list-media/?tab",
-            templateUrl: 'app/views/media.html',
-            controller: 'Media',
-            authenticate: true
-        }).state('app.myModels', {
-            url: "/my-models/",
-            templateUrl: 'app/views/my-models.html',
-            controller: 'MyModels',
-            authenticate: true
-        })
 
         // Object Editors
         .state('app.modelEditor', {
@@ -291,7 +293,7 @@ function($rootScope, $state, $sParams, $window,
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state set
             $timeout(function() {
-                $state.transitionTo('app.reconstruct')
+            $state.transitionTo('app.genomes')
                 event.preventDefault();
             })
         }
