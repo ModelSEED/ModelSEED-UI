@@ -14,7 +14,7 @@ function($http, $q, $rootScope, config, Auth) {
     // this is to replace this.getGenomes
     this.search = function(core, opts) {
         var cache = true;
-        //var url = "http://branch.mcs.anl.gov:8983/solr/"
+        //var url = "http://0.0.0.0:8983/solr/"+core+'/select?wt=json'
         var url = "http://modelseed.theseed.org/solr/"+core+'/select?wt=json'
 
         if (opts) {
@@ -46,7 +46,7 @@ function($http, $q, $rootScope, config, Auth) {
             if (searchFields) {
                 var f = [];
                 for (var i=0; i<searchFields.length; i++) {
-                    f.push(searchFields[i]+':"*'+query+'*"');
+                    f.push(searchFields[i]+':(*'+query+'*)');
                 }
                 url += '&q='+f.join(' OR ')
             }
