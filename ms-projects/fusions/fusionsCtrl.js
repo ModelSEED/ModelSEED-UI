@@ -55,8 +55,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.fusionsHeader = [
         {label: 'Gene', key: 'gene'},
         {label: 'Species', key: 'species'},
-        {label: 'Function', key: 'function'}, //fixme: rename. should be "function"
-        {label: 'Length', key: 'length'}, //fixme: rename. should be "length"
+        {label: 'Function', key: 'function'},
+        {label: 'Length', key: 'length'}, 
         {label: 'Left SG', key: 'left_sg'},
         {label: 'Right SG', key: 'right_sg'},
         {label: 'Overlap SG', key: 'overlap_sg'},
