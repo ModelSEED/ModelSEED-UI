@@ -259,7 +259,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
 
     // reactions table
-    var sFields = ['id', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
+    var sFields = ['reaction', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
     $s.reactionOpts = Session.getOpts($state, 'reaction') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
