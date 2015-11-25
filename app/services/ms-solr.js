@@ -62,10 +62,14 @@ function($http, $q, $rootScope, config, Auth) {
         console.log('url', url)
         var p = $http.get(url, {cache: cache, timeout: liveReqs[core].promise});
 
-        return p.then(function(res){
-                        liveReqs[core] = false;
-                        return res.data.response;
-                     })
+        return p.then(function(res) {
+            liveReqs[core] = false;
+            return res.data.response;
+        }).catch(function(e) {
+            alert('error!')
+            console.log('e', e)
+        })
+
     }
 
 }])

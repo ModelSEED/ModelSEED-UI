@@ -48,7 +48,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
 
     // fusions
-    var sFields = ['gene', 'contig_function', 'species']//, 'contig', 'cdds'];
+    var sFields = ['gene', 'function', 'species', 'contig', 'cdds'];
     $s.fusionsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
 
@@ -56,7 +56,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
         {label: 'Gene', key: 'gene'},
         {label: 'Species', key: 'species'},
         {label: 'Function', key: 'function'},
-        {label: 'Length', key: 'length'}, 
+        {label: 'Length', key: 'length'},
         {label: 'Left SG', key: 'left_sg'},
         {label: 'Right SG', key: 'right_sg'},
         {label: 'Overlap SG', key: 'overlap_sg'},

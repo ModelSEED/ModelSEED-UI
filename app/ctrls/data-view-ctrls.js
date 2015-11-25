@@ -423,9 +423,9 @@ function($s, $state, $sParams, WS, MS, tools,
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', '$timeout',
+ 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, $timeout) {
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
 
     // redirect stuff for patric auth
     if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
@@ -523,64 +523,116 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
                         {label: 'Cpds', key: 'cpdCount'}
                         ]
 
-     // fetch object data and parse it.
-     $scope.loading = true;
-     WS.get(path, {cache:true}).then(function(res) {
-         $scope.models = [res.data];
-         $scope.orgName = res.data.name;
 
-         try {
-             $scope.data = ModelParser.parse(res.data);
-         } catch(msg) {
-             $scope.error = msg;
-         }
-         $scope.loading = false;
-     }).catch(function(e) {
-         $scope.error = e;
-         $scope.loading = false;
-     })
+    // fetch object data and parse it.
+    $scope.loading = true;
+    var start = performance.now();
+    WS.get(path, {cache:true}).then(function(res) {
 
-     $scope.loadingMaps = true;
-     MV.getMaps()
-       .then(function(maps) {
-         $scope.maps = maps;
-         $scope.loadingMaps = false;
-     }).catch(function(e) {
-         $scope.error = e;
-         $scope.loading = false;
-     })
 
-     MS.getModelGapfills(path).then(function(res) {
-         $scope.item = {relatedGapfills: res,
-                        path: path};
-     })
+        $scope.models = [res.data];
+        $scope.orgName = res.data.name;
 
-     $scope.integrateGapfill = function(isIntegrated, model, gapfill) {
-         // if not integrated, integrate
-         // if integrated, unintegrate
-         gapfill.loading = true;
-         MS.manageGapfills(model.path, gapfill.id, isIntegrated ? 'U' : 'I')
-           .then(function(res) {
-               delete gapfill.loading;
-               for (var i=0; i < model.relatedGapfills.length; i++) {
-                   var gf = model.relatedGapfills[i];
-                   if (gf.id == gapfill.id) {
-                       model.relatedGapfills[i] = res
-                       break;
-                   }
-               }
-           })
-     }
 
-     $scope.deleteGapfill = function(i, model, gapfill) {
-         gapfill.loading = true;
-         MS.manageGapfills(model.path, gapfill.id, 'D')
-           .then(function(res) {
-               model.relatedGapfills.splice(i, 1)
-           })
-     }
+        try {
+            $scope.data = ModelParser.parse(res.data);
+        } catch(msg) {
+            $scope.error = msg;
+        }
 
-     $scope.toggleView = function(e, type, item) {
+        $scope.loading = false;
+
+
+        var end = performance.now();
+        var duration = end - start;
+        console.log('time:', duration)
+    }).catch(function(e) {
+        $scope.error = e;
+        $scope.loading = false;
+    })
+
+    /*
+    time: 567.46
+    data-view-ctrls.js:551 time: 1063.2150000000001
+    data-view-ctrls.js:551 time: 1275.1100000000006
+    data-view-ctrls.js:551 time: 1005.0100000000002
+    data-view-ctrls.js:551 time: 693.5400000000009
+    data-view-ctrls.js:551 time: 359.7199999999975
+    data-view-ctrls.js:551 time: 981.6450000000004
+    */
+
+    /* testing
+    MS.getModel(path).then(function(res) {
+        console.log('res',res)
+        $scope.data = res.data;
+
+        $scope.loading = false;
+        var end = performance.now();
+        var duration = end - start;
+        console.log('time:', duration)
+    })
+    */
+
+
+    /*
+    time: 524.0299999999997
+    data-view-ctrls.js:581 time: 707.210000000001
+    data-view-ctrls.js:581 time: 838.0499999999993
+    data-view-ctrls.js:581 time: 467.83000000000175
+    data-view-ctrls.js:581 time: 351.9500000000007
+
+    data-view-ctrls.js:581 time: 402.33500000000276
+
+    data-view-ctrls.js:581 time: 739.885000000002
+    angular.js:12221 related gfs Array[0]
+    data-view-ctrls.js:575 res Object
+    data-view-ctrls.js:581 time: 459.58000000000175
+     */
+
+
+    $scope.loadingMaps = true;
+    MV.getMaps()
+        .then(function(maps) {
+            $scope.maps = maps;
+            $scope.loadingMaps = false;
+        }).catch(function(e) {
+            $scope.error = e;
+            $scope.loading = false;
+        })
+
+    MS.getModelGapfills(path).then(function(res) {
+        $scope.item = {
+            relatedGapfills: res,
+            path: path
+        };
+    })
+
+    $scope.integrateGapfill = function(isIntegrated, model, gapfill) {
+        // if not integrated, integrate
+        // if integrated, unintegrate
+        gapfill.loading = true;
+        MS.manageGapfills(model.path, gapfill.id, isIntegrated ? 'U' : 'I')
+            .then(function(res) {
+                delete gapfill.loading;
+                for (var i=0; i < model.relatedGapfills.length; i++) {
+                    var gf = model.relatedGapfills[i];
+                    if (gf.id == gapfill.id) {
+                        model.relatedGapfills[i] = res
+                        break;
+                    }
+                }
+            })
+    }
+
+    $scope.deleteGapfill = function(i, model, gapfill) {
+        gapfill.loading = true;
+        MS.manageGapfills(model.path, gapfill.id, 'D')
+            .then(function(res) {
+                model.relatedGapfills.splice(i, 1)
+            })
+    }
+
+    $scope.toggleView = function(e, type, item) {
         e.stopPropagation();
 
         if (type === 'rxn') {
@@ -601,32 +653,33 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
                 $document.unbind(e)
                 $scope.selected = null;
             })
-         } else if ($mdSidenav('rxnView').isOpen()) {
-             $mdSidenav('rxnView').close()
-         }
+        } else if ($mdSidenav('rxnView').isOpen()) {
+            $mdSidenav('rxnView').close()
+        }
 
 
-         if (type === 'cpd') {
-             var id = item.split('_')[0];
-             $scope.selected = {id: id,
-                                modelCpd: ModelParser.cpdhash[item]};
+        if (type === 'cpd') {
+            var id = item.split('_')[0];
+            $scope.selected = {
+                id: id,
+                modelCpd: ModelParser.cpdhash[item]};
 
-             Biochem.getCpd(id)
-                    .then(function(cpd) {
-                         $scope.selected.cpd = cpd;
-                     })
+            Biochem.getCpd(id)
+                .then(function(cpd) {
+                    $scope.selected.cpd = cpd;
+                })
 
-             if (!$mdSidenav('cpdView').isOpen())
-                 $mdSidenav('cpdView').open();
+            if (!$mdSidenav('cpdView').isOpen())
+                $mdSidenav('cpdView').open();
 
-             $document.bind('click', function(e) {
-                 $mdSidenav('cpdView').close()
-                 $document.unbind(e)
-                 $scope.selected = null;
+            $document.bind('click', function(e) {
+                $mdSidenav('cpdView').close()
+                $document.unbind(e)
+                $scope.selected = null;
              })
-         } else if ($mdSidenav('cpdView').isOpen()) {
-              $mdSidenav('cpdView').close()
-          }
+        } else if ($mdSidenav('cpdView').isOpen()) {
+            $mdSidenav('cpdView').close()
+        }
     }
 
 
@@ -881,19 +934,19 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
     var self = this;
 
     var compartNameMapping = {
-		"c":"Cytosol",
-		"p":"Periplasm",
-		"g":"Golgi apparatus",
-		"e":"Extracellular",
-		"r":"Endoplasmic reticulum",
-		"l":"Lysosome",
-		"n":"Nucleus",
-		"d":"Plastid",
-		"m":"Mitochondria",
-		"x":"Peroxisome",
-		"v":"Vacuole",
-		"w":"Cell wall",
-	};
+        "c":"Cytosol",
+        "p":"Periplasm",
+        "g":"Golgi apparatus",
+        "e":"Extracellular",
+        "r":"Endoplasmic reticulum",
+        "l":"Lysosome",
+        "n":"Nucleus",
+        "d":"Plastid",
+        "m":"Mitochondria",
+        "x":"Peroxisome",
+        "v":"Vacuole",
+        "w":"Cell wall",
+    };
 
     this.cpdhash = {};
     this.biohash = {};
@@ -921,8 +974,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         // create gapfilling hash
         for (var i=0; i < this.gapfillings.length; i++) {
 
-        	this.gapfillings[i].simpid = "gf."+(i+1);
-        	this.gfhash[this.gapfillings[i].simpid] = this.gapfillings[i];
+            this.gapfillings[i].simpid = "gf."+(i+1);
+            this.gfhash[this.gapfillings[i].simpid] = this.gapfillings[i];
             //gappfillings.push({integrated: })
         }
 
@@ -963,26 +1016,26 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         }
 
         for (var i=0; i < this.biomasses.length; i++) {
-        	var biomass = this.biomasses[i];
+            var biomass = this.biomasses[i];
 
-        	this.biohash[biomass.id] = biomass;
-        	biomass.dispid = biomass.id;
-        	var reactants = "";
+            this.biohash[biomass.id] = biomass;
+            biomass.dispid = biomass.id;
+            var reactants = "";
             var products = "";
-        	for(var j=0; j < biomass.biomasscompounds.length; j++) {
-        		var biocpd = biomass.biomasscompounds[j];
-        		biocpd.id = biocpd.modelcompound_ref.split("/").pop();
+            for(var j=0; j < biomass.biomasscompounds.length; j++) {
+                var biocpd = biomass.biomasscompounds[j];
+                biocpd.id = biocpd.modelcompound_ref.split("/").pop();
 
-        		//var idarray = biocpd.id.split('_');
-        		biocpd.dispid = biocpd.id//idarray[0]+"["+idarray[1]+"]";
+                //var idarray = biocpd.id.split('_');
+                biocpd.dispid = biocpd.id//idarray[0]+"["+idarray[1]+"]";
 
-        		biocpd.name = this.cpdhash[biocpd.id].name;
-        		biocpd.formula = this.cpdhash[biocpd.id].formula;
-        		biocpd.charge = this.cpdhash[biocpd.id].charge;
-        		biocpd.cmpkbid = this.cpdhash[biocpd.id].compartment;
-        		biocpd.biomass = biomass.id;
-        		this.biomasscpds.push(biocpd);
-        		if (biocpd.coefficient < 0) {
+                biocpd.name = this.cpdhash[biocpd.id].name;
+                biocpd.formula = this.cpdhash[biocpd.id].formula;
+                biocpd.charge = this.cpdhash[biocpd.id].charge;
+                biocpd.cmpkbid = this.cpdhash[biocpd.id].compartment;
+                biocpd.biomass = biomass.id;
+                this.biomasscpds.push(biocpd);
+                if (biocpd.coefficient < 0) {
                     if (reactants.length > 0) {
                         reactants += " + ";
                     }
@@ -1011,8 +1064,8 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                                 coefficient: biocpd.coefficient,
                                 compartment: compartment
                                })
-        	}
-        	biomass.equation = reactants + " => " + products;
+            }
+            biomass.equation = reactants + " => " + products;
         }
 
         var gapfills= []
@@ -1033,7 +1086,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
             // huh?
             if (rxn.modelReactionProteins > 0) {
-            	rxn.gpr = "";
+                rxn.gpr = "";
             }
             for (var j=0; j< rxn.modelReactionReagents.length; j++) {
                 var rgt = rxn.modelReactionReagents[j];
@@ -1066,25 +1119,25 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                 var prot = rxn.modelReactionProteins[j];
 
                 if (j > 0) {
-                   	rxn.gpr += " or ";
+                       rxn.gpr += " or ";
                 }
                 //rxn.gpr += "(";
                 for (var k=0; k< prot.modelReactionProteinSubunits.length; k++) {
                     var subunit = prot.modelReactionProteinSubunits[k];
                     if (k > 0) {
-                    	rxn.gpr += " and ";
+                        rxn.gpr += " and ";
                     }
                     rxn.gpr += "(";
                     if (subunit.feature_refs.length == 0) {
-                    	rxn.gpr += "Unknown";
+                        rxn.gpr += "Unknown";
                     }
                     for (var m=0; m< subunit.feature_refs.length; m++) {
-                    	var ftrid = subunit.feature_refs[m].split("/").pop();
+                        var ftrid = subunit.feature_refs[m].split("/").pop();
                         rxn.ftrhash[ftrid] = 1;
                         if (m > 0) {
-                    		rxn.gpr += " or ";
-                    	}
-                    	rxn.gpr += ftrid;
+                            rxn.gpr += " or ";
+                        }
+                        rxn.gpr += ftrid;
                     }
                     rxn.gpr += ")";
                 }
