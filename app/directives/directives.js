@@ -2016,7 +2016,7 @@ function($compile, $stateParams) {
             limit: '=paginationLimit',
             total: '=paginationTotal'
         },
-        template: '<span hide-sm ng-if="total">{{offset+1}}-{{total < offset+limit ? total : offset+limit}} of {{total}} results</span>'+
+        template: '<span hide-sm ng-if="total">{{offset+1}}-{{total < offset+limit ? total : offset+limit}} of {{total | number}} results</span>'+
                     '<div ng-disabled="offset == 0" class="btn btn-default btn-sm" ng-click="prev()">'+
                         '<i class="fa fa-chevron-left"></i> prev'+
                     '</div>'+
