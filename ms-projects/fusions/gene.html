@@ -1,0 +1,27 @@
+
+
+
+<div layout="column" layout-margin layout-padding>
+    <h3>{{gene}} <small>(Fusion Gene)</small></h3>
+
+    <br>
+
+    <table class="table table-horizontal table-striped table-condensed">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>Gene</td>
+                <td><a href="{{featureUrl+gene}}">{{gene}}</a> <span class="text-muted">(RAST)</span></td>
+            </tr>
+
+            <tr ng-repeat="r in info">
+                <td>{{r.label}}</td>
+                <td>{{result[r.key]}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+
+    <h5>Sequence</h5>
+    <pre>{{result.sequence}}</pre>
+</div>

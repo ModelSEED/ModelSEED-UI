@@ -87,6 +87,10 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/fusions',
             templateUrl: '/ms-projects/fusions/overview.html',
             controller: 'Fusions'
+        }).state('main.projects.fusionGene', {
+            url: '/fusions/gene/:gene',
+            templateUrl: '/ms-projects/fusions/gene.html',
+            controller: 'FusionGene'
         })
 
 

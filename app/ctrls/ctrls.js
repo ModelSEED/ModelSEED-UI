@@ -389,7 +389,8 @@ function ($scope, $timeout, $mdSidenav, $log) {
 }])
 
 .service('Session', [function() {
-    this.tabs = {};
+    this.tabs = {},
+    this.opts = {};
 
     this.setTab = function(state, tab) {
         this.tabs[state.current.name] = tab.tabIndex;
@@ -397,6 +398,14 @@ function ($scope, $timeout, $mdSidenav, $log) {
 
     this.getTab = function(state) {
         return this.tabs[state.current.name] || null;
+    }
+
+    this.setOpts = function(state, table, opts) {
+        this.opts[state.current.name+'-'+table] = opts;
+    }
+
+    this.getOpts = function(state, table) {
+        return this.opts[state.current.name+'-'+table] || null;
     }
 }])
 

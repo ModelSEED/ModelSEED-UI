@@ -340,3 +340,33 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     }, true)
 
 }])
+
+.controller('FusionGene',
+['$scope', '$stateParams', 'MSSolr',
+function($s, $stateParams, MSSolr) {
+    $s.gene = $stateParams.gene;
+
+    $s.featureUrl = 'http://pubseed.theseed.org/?page=Annotation&feature=';
+
+    $s.info =  [
+        {label: 'Species', key: 'species'},
+        {label: 'Fuction', key: 'function'},
+        {label: 'Fusion Class', key: 'fusion_class'},
+        {label: 'Uncertain', key: 'uncertain'},
+        {label: 'Length', key: 'length'},
+        {label: 'Genpro', key: 'genpro'},
+        {label: 'Seed', key: 'seed'},
+        {label: 'Img', key: 'img'},
+        {label: 'Curation', key: 'curation'},
+        {label: 'Contig', key: 'contig'},
+        {label: 'Direction', key: 'direction'},
+        {label: 'Start', key: 'start'},
+        {label: 'Stop', key: 'stop'},
+        //{label: 'Sequence', key: 'sequence'}
+    ];
+
+    MSSolr.search('fusion-training', {query: $s.gene, searchFields: ['id']})
+        .then(function(data) {
+            $s.result = data.docs[0];
+        })
+}])

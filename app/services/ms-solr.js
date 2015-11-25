@@ -65,11 +65,7 @@ function($http, $q, $rootScope, config, Auth) {
         return p.then(function(res) {
             liveReqs[core] = false;
             return res.data.response;
-        }).catch(function(e) {
-            alert('error!')
-            console.log('e', e)
         })
-
     }
 
 }])
