@@ -177,7 +177,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // cdd sets
     //
     //
-    var sFields = ['id', 'accession', 'name', 'description', 'cddlist']; 
+    var sFields = ['id', 'accession', 'name', 'description', 'cddlist'];
     $s.cddSetOpts = Session.getOpts($state, 'cddSet') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
@@ -227,7 +227,9 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     $s.genomeStatsHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},
-        {label: 'Taxonomy', key: 'taxonomy'},
+        {label: 'Taxonomy', key: 'taxonomy', format: function(row) {
+            return row.taxonomy.join('<br>');
+        }},
         {label: 'Genes', key: 'genes'},
         {label: 'DNA Size', key: 'dna-size'},
         {label: 'contigs', key: 'contigs'},
