@@ -1923,23 +1923,36 @@ function($compile, $stateParams) {
         link: function(scope, elem, attrs) {
 
             if (scope.opts.sort && ('desc' in scope.opts.sort) )
-            scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
+                scope.opts.sort.desc = scope.opts.sort.desc ? true : false; //fixme: overkill
 
+            var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
+            var field = scope.opts.sort.field
+
+            var colId = attrs.colId;
+
+            if (!desc && colId == field) {
+                angular.element(elem).removeClass('sorting-asc')
+                angular.element(elem).addClass('sorting-desc')
+            } else if (desc && colId == field) {
+                angular.element(elem).removeClass('sorting-desc')
+                angular.element(elem).addClass('sorting-asc')
+            }
 
             // see table styling in core.css for sorting carets
             scope.sortBy = function($event, name) {
                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
                 scope.opts.sort = {field: name, desc: desc};
 
-                angular.element(elem).find('th').removeClass('sorting-asc')
-                angular.element(elem).find('th').removeClass('sorting-desc')
+                var tr = angular.element(elem).parent().parent();
+                tr.find('th').removeClass('sorting-asc')
+                tr.find('th').removeClass('sorting-desc')
 
                 if (desc) {
-                    angular.element($event.target).removeClass('sorting-asc')
-                    angular.element($event.target).addClass('sorting-desc')
+                    angular.element(elem).removeClass('sorting-asc')
+                    angular.element(elem).addClass('sorting-desc')
                 } else {
-                    angular.element($event.target).removeClass('sorting-desc')
-                    angular.element($event.target).addClass('sorting-asc')
+                    angular.element(elem).removeClass('sorting-desc')
+                    angular.element(elem).addClass('sorting-asc')
                 }
             }
         }

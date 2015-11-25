@@ -29,9 +29,9 @@
     </div>
 
     <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
-        <thead sortable>
+        <thead>
             <tr>
-                <th ng-repeat="h in header track by $index"
+                <th sortable ng-repeat="h in header track by $index"
                     ng-click="sortBy($event, h.key)" >{{::h.label}}
                 </th>
             </tr>

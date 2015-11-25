@@ -655,20 +655,20 @@ tr span[role=button] {
     vertical-align: inherit;
 }
 
-table thead[sortable] th:not(:empty):after {
+table thead th[sortable]:not(:empty):after {
   content: "\f0dc";
   font-family: fontawesome;
   color: rgba(50,50,50,.5);
   margin-left: 3px;
 }
 
-table thead[sortable] th.sorting-desc:after {
+table thead th[sortable].sorting-desc:after {
   content: "\f0de";
   font-family: fontawesome;
   color: #222;
 }
 
-table thead[sortable] th.sorting-asc:after {
+table thead th[sortable].sorting-asc:after {
   content: "\f0dd";
   font-family: fontawesome;
   color: #222;

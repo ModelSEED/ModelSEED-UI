@@ -43,13 +43,13 @@
                     <i class="material-icons">undo</i>
                     <md-tooltip>Undo last edit</md-tooltip>
                 </md-button>
-			    <md-button ng-if="onSave" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
+                <md-button ng-if="onSave" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
                 <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
                     {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
-			    <a ng-click="cancel($event)" class="no-link">Cancel</a>
+                <a ng-click="cancel($event)" class="no-link">Cancel</a>
             </md-input-container>
 
         </div>
@@ -57,10 +57,10 @@
 
 
     <table class="table table-striped table-bordered table-editor">
-        <thead sortable>
+        <thead>
             <tr>
                 <th></th>
-                <th ng-repeat="h in header track by $index"
+                <th sortable ng-repeat="h in header track by $index"
                     ng-click="sortBy($event, h.key)">{{h.label}}</th>
             </tr>
         </thead>
