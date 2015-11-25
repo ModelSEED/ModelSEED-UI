@@ -405,7 +405,7 @@ function($compile, config, WS, $q) {
     }
 }])
 
-
+/*
 .directive('highlight', ['$compile', function($compile) {
     return {
         restrict: 'EA',
@@ -455,7 +455,7 @@ function($compile, config, WS, $q) {
             angular.element(elem).html(newText);
         }
     }
-}])
+}])*/
 
 
 
