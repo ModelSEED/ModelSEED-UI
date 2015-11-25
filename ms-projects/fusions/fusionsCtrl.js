@@ -11,10 +11,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
     // training table
 
-    var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed)
-
-    console.log('getting this', Session.getOpts($state, 'training') )
-
+    var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed?)
     $s.trainingOpts = Session.getOpts($state, 'training') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
@@ -193,9 +190,20 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Full Genes', key: 'fullgenes'},
         {label: 'Is Full Gene?', key: 'is_full_gene'},
         {label: 'CDDs', key: 'cdds'},
-        {label: 'CDD List', key: 'cddlist'},
+        {label: 'CDD List', key: 'cddlist',
+            format: function(row) {
+                return row.cddlist.split(';').join('<br>')
+            }
+        },
         {label: 'Links', key: 'links'},
-        {label: 'Linked sets', key: 'linkedsets'},
+        {label: 'Linked sets', key: 'linkedsets',
+            format: function(row) {
+                console.log('linkedsets', row.linkedsets)
+                if (row.linkedsets)
+                    return row.linkedsets[0].split(';').join('<br>');
+                else return '-';
+            }
+        }
         //{label: 'Description', key: 'description'},
     ];
 
