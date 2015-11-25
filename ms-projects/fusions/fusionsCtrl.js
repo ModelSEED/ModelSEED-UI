@@ -31,7 +31,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Seed', key: 'seed'},
         {label: 'Img', key: 'img'},
         {label: 'Curation', key: 'curation'},
-        {label: 'Contig', key: 'contig'},
+        //{label: 'Contig', key: 'contig'},
         /*{label: 'Direction', key: 'direction'},
         {label: 'Start', key: 'start'},
         {label: 'Stop', key: 'stop'},

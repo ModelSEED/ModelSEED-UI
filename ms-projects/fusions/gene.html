@@ -11,7 +11,12 @@
         <tbody>
             <tr>
                 <td>Gene</td>
-                <td><a href="{{featureUrl+gene}}">{{gene}}</a> <span class="text-muted">(RAST)</span></td>
+                <td>
+                    <span ng-if="gene.indexOf('fig') != -1" >
+                        <a href="{{featureUrl+gene}}">{{gene}}</a> <span class="text-muted">(RAST)</span>
+                    </span>
+                    <span ng-if="gene.indexOf('fig') == -1">{{gene}}</span>
+                </td>
             </tr>
 
             <tr ng-repeat="r in info">
