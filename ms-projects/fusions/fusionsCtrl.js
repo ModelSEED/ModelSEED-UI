@@ -1,8 +1,8 @@
 
 angular.module('Fusions', [])
 .controller('Fusions',
-['$scope', '$http', '$state', 'uiTools', 'Dialogs', 'Session', 'MSSolr',
-function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
+['$scope', '$http', '$state', 'uiTools', 'Dialogs', 'Session', 'MSSolr', '$compile',
+function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
@@ -13,10 +13,15 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
 
     var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed)
 
-    $s.trainingOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    console.log('getting this', Session.getOpts($state, 'training') )
+
+    $s.trainingOpts = Session.getOpts($state, 'training') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.trainingHeader = [
-        {label: 'ID', key: 'id'},
+        {label: 'Gene', key: 'id', format: function(row) {
+            return '<a ui-sref="main.projects.fusionGene({gene: \''+row.id+'\'})">'+row.id+'</a>'
+        }},
         {label: 'Species', key: 'species'},
         {label: 'Fuction', key: 'function'},
         {label: 'Fusion Class', key: 'fusion_class'},
@@ -44,12 +49,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('trainingOpts', function(after, before) {
         $s.loadingTraining = true;
         updateTraining();
+        Session.setOpts($state, 'training', after);
     }, true)
 
 
     // fusions
     var sFields = ['gene', 'function', 'species', 'contig', 'cdds'];
-    $s.fusionsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.fusionsOpts = Session.getOpts($state, 'fusions') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
 
     $s.fusionsHeader = [
@@ -95,12 +102,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('fusionsOpts', function(after, before) {
         $s.loadingFusions = true;
         updateFusions();
+        Session.setOpts($state, 'fusions', after);
     }, true)
 
     // roles table
 
     var sFields = ['role'];
-    $s.rolesOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.rolesOpts = Session.getOpts($state, 'roles') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.rolesHeader = [
         {label: 'Role', key: 'role'},
@@ -129,12 +138,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('rolesOpts', function(after, before) {
         $s.loadingRoles = true;
         updateRoles();
+        Session.setOpts($state, 'roles', after);
     }, true)
 
 
     // cdd table
     var sFields = ['id', 'accession', 'name', 'set', 'set_name', 'description'];
-    $s.cddOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.cddOpts = Session.getOpts($state, 'cdd') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.cddHeader = [
         {label: 'Name', key: 'name'},
@@ -162,6 +173,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('cddOpts', function(after, before) {
         $s.loadingCdds = true;
         updateCdds();
+        Session.setOpts($state, 'cdd', after);
     }, true)
 
 
@@ -169,7 +181,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     //
     //
     var sFields = ['id', 'accession', 'name', 'description'];  // cddlist (need to add)
-    $s.cddSetOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.cddSetOpts = Session.getOpts($state, 'cddSet') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.cddSetHeader = [
         {label: 'ID', key: 'id'},
@@ -197,12 +210,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('cddSetOpts', function(after, before) {
         $s.loadingCddSet = true;
         updateCddSets();
+        Session.setOpts($state, 'cddSet', after);
     }, true)
 
 
     // genome stats
     var sFields = ['id', 'name', 'taxonomy', 'domain', 'md5'];
-    $s.genomeStatsOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.genomeStatsOpts = Session.getOpts($state, 'genomeStats') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.genomeStatsHeader = [
         {label: 'ID', key: 'id'},
@@ -238,13 +253,15 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('genomeStatsOpts', function(after, before) {
         $s.loadingGenomeStats = true;
         updateGenomeStats();
+        Session.setOpts($state, 'genomeStats', after);
     }, true)
 
 
 
     // reactions table
     var sFields = ['id', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
-    $s.reactionOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.reactionOpts = Session.getOpts($state, 'reaction') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.reactionHeader = [
         {label: 'Reaction', key: 'reaction'},
@@ -287,12 +304,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('reactionOpts', function(after, before) {
         $s.loadingReaction = true;
         updateReaction();
+        Session.setOpts($state, 'reaction', after);
     }, true)
 
 
     // subsystem stats
     var sFields = ['subsystem', 'class_one', 'class_two'];
-    $s.subsystemOpts = {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+    $s.subsystemOpts = Session.getOpts($state, 'subsystem') ||
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
     $s.subsystemHeader = [
         {label: 'Subsystem', key: 'subsystem'},
@@ -317,6 +336,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr) {
     $s.$watch('subsystemOpts', function(after, before) {
         $s.loadingSubsystem = true;
         updateSubsystem();
+        Session.setOpts($state, 'subsystem', after);
     }, true)
 
 }])
