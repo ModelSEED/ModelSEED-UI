@@ -177,7 +177,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // cdd sets
     //
     //
-    var sFields = ['id', 'accession', 'name', 'description'];  // cddlist (need to add)
+    var sFields = ['id', 'accession', 'name', 'description', 'cddlist']; 
     $s.cddSetOpts = Session.getOpts($state, 'cddSet') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
 
@@ -196,15 +196,12 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
             }
         },
         {label: 'Links', key: 'links'},
-        {label: 'Linked sets', key: 'linkedsets',
+        /*{label: 'Linked sets', key: 'linkedsets',
             format: function(row) {
-                console.log('linkedsets', row.linkedsets)
-                if (row.linkedsets)
-                    return row.linkedsets[0].split(';').join('<br>');
-                else return '-';
+                return row.linkedsets[0].split(';').join('<br>');
             }
         }
-        //{label: 'Description', key: 'description'},
+        {label: 'Description', key: 'description'},*/
     ];
 
     function updateCddSets() {
