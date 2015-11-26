@@ -14,6 +14,23 @@ function($http, $q, $rootScope, config, Auth) {
     // this is to replace this.getGenomes
     this.search = function(core, opts) {
         var cache = true;
+
+        var url = this.getUrl(core, opts);
+
+        // cancel any previous request still being made
+        if (core in liveReqs && liveReqs[core]) liveReqs[core].resolve();
+        liveReqs[core] = $q.defer();
+
+        //console.log('url', url)
+        var p = $http.get(url, {cache: cache, timeout: liveReqs[core].promise});
+
+        return p.then(function(res) {
+            liveReqs[core] = false;
+            return res.data.response;
+        })
+    }
+
+    this.getUrl = function(core, opts) {
         //var url = "http://0.0.0.0:8983/solr/"+core+'/select?wt=json'
         var url = "http://modelseed.theseed.org/solr/"+core+'/select?wt=json'
 
@@ -30,18 +47,6 @@ function($http, $q, $rootScope, config, Auth) {
         if (limit) url += '&rows='+limit+'&start='+offset;
         if (sort && sortField) url += '&sort='+sortField+' '+sort;
 
-        // only select columns of data specified
-        /*
-        if (cols.length) {
-            var set = [];
-            for (var i=0; i<cols.length; i++) {
-                set.push(cols[i]);
-            }
-            url += '&select('+set.join(',')+')';
-        }*/
-
-        // break query into words, and search for AND of those words.
-        // if only 1 word, also search genome_id
         if (query) {
             if (searchFields) {
                 var f = [];
@@ -51,21 +56,22 @@ function($http, $q, $rootScope, config, Auth) {
                 url += '&q='+f.join(' OR ')
             }
 
-            cache = false;
+            //cache = false;
         } else
             url += '&q=*';
 
-        // cancel any previous request still being made
-        if (core in liveReqs && liveReqs[core]) liveReqs[core].resolve();
-        liveReqs[core] = $q.defer();
-
-        console.log('url', url)
-        var p = $http.get(url, {cache: cache, timeout: liveReqs[core].promise});
-
-        return p.then(function(res) {
-            liveReqs[core] = false;
-            return res.data.response;
-        })
+        return url;
     }
+
+    this.getDownloadUrl = function(core, opts) {
+        var settings =  angular.copy(opts);
+        settings.limit = 100000; // download row limit
+        settings.start = 0;
+
+        var url = this.getUrl(core, settings).replace(/wt=json/g, 'wt=csv')
+        return url
+    }
+
+
 
 }])

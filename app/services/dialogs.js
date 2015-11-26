@@ -350,6 +350,25 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
         })
     }
 
+    this.solrDownload = function(ev, core, csvUrl) {
+        ev.stopPropagation();
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/solr-download.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.csvUrl = csvUrl;
+                $scope.filename = core+'.csv';
+
+                $scope.cancel = function($event){
+                    $event.preventDefault();
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
 }])
 
 .service('AuthDialog',

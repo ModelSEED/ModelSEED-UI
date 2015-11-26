@@ -13,7 +13,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
     var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed?)
     $s.trainingOpts = Session.getOpts($state, 'training') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-training'};
 
     $s.trainingHeader = [
         {label: 'Gene', key: 'id', format: function(row) {
@@ -53,7 +53,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // fusions
     var sFields = ['gene', 'function', 'species', 'contig', 'cdds'];
     $s.fusionsOpts = Session.getOpts($state, 'fusions') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusions'};
 
 
     $s.fusionsHeader = [
@@ -106,7 +106,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
     var sFields = ['role'];
     $s.rolesOpts = Session.getOpts($state, 'roles') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-roles'};
 
     $s.rolesHeader = [
         {label: 'Role', key: 'role'},
@@ -142,7 +142,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // cdd table
     var sFields = ['id', 'accession', 'name', 'set', 'set_name', 'description'];
     $s.cddOpts = Session.getOpts($state, 'cdd') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-cdd'};
 
     $s.cddHeader = [
         {label: 'Name', key: 'name'},
@@ -179,7 +179,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     //
     var sFields = ['id', 'accession', 'name', 'description', 'cddlist'];
     $s.cddSetOpts = Session.getOpts($state, 'cddSet') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-cdd-sets'};
 
     $s.cddSetHeader = [
         {label: 'ID', key: 'id'},
@@ -222,7 +222,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // genome stats
     var sFields = ['id', 'name', 'taxonomy', 'domain', 'md5'];
     $s.genomeStatsOpts = Session.getOpts($state, 'genomeStats') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-genome-stats'};
 
     $s.genomeStatsHeader = [
         {label: 'ID', key: 'id'},
@@ -268,7 +268,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // reactions table
     var sFields = ['reaction', 'direction', 'equation', 'max_genome_role', 'max_fusion_fraction_role'];
     $s.reactionOpts = Session.getOpts($state, 'reaction') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-reactions'};
 
     $s.reactionHeader = [
         {label: 'Reaction', key: 'reaction'},
@@ -318,7 +318,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     // subsystem stats
     var sFields = ['subsystem', 'class_one', 'class_two'];
     $s.subsystemOpts = Session.getOpts($state, 'subsystem') ||
-        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields};
+        {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-subsystems'};
 
     $s.subsystemHeader = [
         {label: 'Subsystem', key: 'subsystem'},
@@ -346,6 +346,13 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         Session.setOpts($state, 'subsystem', after);
     }, true)
 
+
+    $s.download = function($ev, opts) {
+        console.log('called download', $ev, opts.core, opts)
+
+        var csvUrl = MSSolr.getDownloadUrl(opts.core, opts);
+        Dialogs.solrDownload($ev, opts.core, csvUrl);
+    }
 }])
 
 .controller('FusionGene',

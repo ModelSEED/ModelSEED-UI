@@ -4,6 +4,10 @@
         search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
     </md-input-container>
 
+    <md-input-container layout-align="start center" layout="row" ng-if="enableDownload" flex>
+        <a ng-click="download($event)"><i class="icon-file-download text-muted"></i> download</a>
+    </md-input-container>
+
     <md-progress-circular ng-if="loading"
                           md-mode="indeterminate"
                           class="table-loading"

@@ -1,0 +1,24 @@
+
+<md-dialog flex="70">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Download</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel($event)">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+        <a href="{{csvUrl}}" target="_blank" download="{{filename}}">
+            <i class="icon-file-download text-muted"></i>
+            CSV (excel)
+        </a><br>
+        <!--<a>Tab-delimited (.txt file)</a>-->
+        <br>
+        Note: download is currently limited to 100,000 rows of data.
+        Searches and sorting are obeyed, while pagination is not.  Enjoy. :)<br>
+    </md-dialog-content>
+</md-dialog>

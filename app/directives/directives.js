@@ -1428,9 +1428,14 @@ function($compile, $stateParams) {
             loading: '=tableLoading',
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
+            enableDownload: '=enableDownload',
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
+
+            scope.download = function($ev) {
+                scope.enableDownload($ev, scope.opts);
+            }
             //console.log('scope', scope.stylingOpts)
         }
     }
