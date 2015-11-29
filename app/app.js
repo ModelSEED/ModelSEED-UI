@@ -87,13 +87,39 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/fusions',
             templateUrl: '/ms-projects/fusions/overview.html',
             controller: 'Fusions'
+        }).state('main.projects.trainingGene', {
+            url: '/fusions/training-gene/:gene',
+            templateUrl: '/ms-projects/fusions/training-gene.html',
+            controller: 'TrainingGene'
         }).state('main.projects.fusionGene', {
-            url: '/fusions/gene/:gene',
-            templateUrl: '/ms-projects/fusions/gene.html',
+            url: '/fusions/fusion-gene/:gene',
+            templateUrl: '/ms-projects/fusions/fusion-gene.html',
             controller: 'FusionGene'
+        }).state('main.projects.fusionRole', {
+            url: '/fusions/role/:role',
+            templateUrl: '/ms-projects/fusions/fusion-role.html',
+            controller: 'FusionRole'
+        }).state('main.projects.fusionCdd', {
+            url: '/fusions/cdd/:cdd',
+            templateUrl: '/ms-projects/fusions/fusion-cdd.html',
+            controller: 'FusionCDD'
+        }).state('main.projects.fusionCddSets', {
+            url: '/fusions/cdd-sets/:cdd',
+            templateUrl: '/ms-projects/fusions/fusion-cdd-sets.html',
+            controller: 'FusionCDDSets'
+        }).state('main.projects.fusionGenomeStats', {
+            url: '/fusions/genome-stats/:id',
+            templateUrl: '/ms-projects/fusions/fusion-genome-stats.html',
+            controller: 'FusionGenomeStats'
+        }).state('main.projects.fusionReactions', {
+            url: '/fusions/reactions/:id',
+            templateUrl: '/ms-projects/fusions/fusion-reactions.html',
+            controller: 'FusionReactions'
+        }).state('main.projects.fusionSubsystems', {
+            url: '/fusions/subsystems/:id',
+            templateUrl: '/ms-projects/fusions/fusion-subsystems.html',
+            controller: 'FusionSubsystems'
         })
-
-
 
         .state('main.about', {
             url: '/about',

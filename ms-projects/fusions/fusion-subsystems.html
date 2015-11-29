@@ -1,0 +1,19 @@
+
+
+
+<div layout="column" layout-margin layout-padding>
+    <h3>{{id}} <small>(Fusion Subsystems)</small> <small ng-if="loading" class="pull-right">loading...</small></h3>
+
+    <br>
+
+    <table class="table table-horizontal table-striped table-condensed">
+        <thead></thead>
+        <tbody>
+
+            <tr ng-repeat="r in info" ng-if="!loading">
+                <td>{{r.label}}</td>
+                <td>{{result[r.key] ? result[r.key] : '-'}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

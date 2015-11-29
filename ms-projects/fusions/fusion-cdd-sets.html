@@ -1,0 +1,81 @@
+
+
+
+<div layout="column" layout-margin layout-padding>
+    <h3>{{cdd}} <small>(Fusion CDD Set)</small> <small ng-if="loading" class="pull-right">loading...</small></h3>
+
+    <br>
+
+    <table class="table table-horizontal table-striped table-condensed">
+        <thead></thead>
+        <tbody ng-if="!loading">
+
+            <tr>
+                <td>CDD</td>
+                <td>{{result.name ? result.name : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Index</td>
+                <td>
+                    <a href="{{indexUrl}}{{result.id}}" target="_blank">{{result.id}}</a> <span class="text-muted">(NCBI)</span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Accession</td>
+                <td>{{result.accession ? result.accession : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Length</td>
+                <td>{{result.length ? result.length  : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Gene Count</td>
+                <td>{{result.gene_count ? result.gene_count : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Full Genes</td>
+                <td>{{result.full_genes ? result.full_genes : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Is Full Gene?</td>
+                <td>{{result.is_full_gene ? result.is_full_gene : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>CDD List</td>
+                <td>{{result.cdd_list ? result.cdd_list : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Links</td>
+                <td>{{result.links ? result.links : '-'}}</td>
+            </tr>
+
+
+            <tr>
+                <td>Desciption</td>
+                <td>{{result.description ? result.description : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Linked Sets</td>
+                <td>
+                    <ul class="list-unstyled">
+                        <li ng-repeat="set in result.linkedsets[0].split(';')">
+                            {{set}}
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+
+
+        </tbody>
+    </table>
+
+</div>

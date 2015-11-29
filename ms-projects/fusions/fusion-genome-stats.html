@@ -2,7 +2,7 @@
 
 
 <div layout="column" layout-margin layout-padding>
-    <h3>{{gene}} <small>(Fusion Gene)</small></h3>
+    <h3>{{gene}} <small>(Fusion Genome Stat)</small> <small ng-if="loading" class="pull-right">loading...</small></h3>
 
     <br>
 
@@ -13,20 +13,17 @@
                 <td>Gene</td>
                 <td>
                     <span ng-if="gene.indexOf('fig') != -1" >
-                        <a href="{{featureUrl+gene}}">{{gene}}</a> <span class="text-muted">(RAST)</span>
+                        <a href="{{featureUrl+gene}}" target="_blank">{{gene}}</a> <span class="text-muted">(RAST)</span>
                     </span>
                     <span ng-if="gene.indexOf('fig') == -1">{{gene}}</span>
                 </td>
             </tr>
 
-            <tr ng-repeat="r in info">
+            <tr ng-repeat="r in info" ng-if="!loading">
                 <td>{{r.label}}</td>
                 <td>{{result[r.key]}}</td>
             </tr>
-        </tbody>
-    </table>
-    <br>
 
-    <h5>Sequence</h5>
-    <pre>{{result.sequence}}</pre>
+    </table>
+
 </div>

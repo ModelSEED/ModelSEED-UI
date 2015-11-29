@@ -1,0 +1,51 @@
+
+
+
+<div layout="column" layout-margin layout-padding>
+    <h3>{{id}} <small>(Fusion Genome Stat)</small> <small ng-if="loading" class="pull-right">loading...</small></h3>
+
+    <br>
+
+    <table class="table table-horizontal table-striped table-condensed">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>Gene</td>
+                <td>
+                    <span ng-if="id.indexOf('fig') != -1" >
+                        <a href="{{featureUrl+id}}" target="_blank">{{id}}</a> <span class="text-muted">(RAST)</span>
+                    </span>
+                    <span ng-if="id.indexOf('fig') == -1">{{id}}</span>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>Name</td>
+                <td>{{result.name ? result.name : '-'}}</td>
+            </tr>
+
+            <tr>
+                <td>Taxonomy</td>
+                <td>
+                    <ul class="list-unstyled">
+                        <li ng-repeat="t in result.taxonomy">
+                            {{t}}
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+
+
+            <tr ng-repeat="r in info" ng-if="!loading">
+                <td>{{r.label}}</td>
+                <td>{{result[r.key]}}</td>
+            </tr>
+
+        </tbody>
+    </table>
+    <br>
+
+    <h4>Sequence</h4>
+    <pre>{{result.sequence}}</pre>
+</div>

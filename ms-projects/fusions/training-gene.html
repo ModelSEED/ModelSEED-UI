@@ -1,0 +1,32 @@
+
+
+
+<div layout="column" layout-margin layout-padding>
+    <h3>{{gene}} <small>(Training Gene)</small> <small ng-if="loading" class="pull-right">loading...</small></h3>
+
+    <br>
+
+    <table class="table table-horizontal table-striped table-condensed">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>Gene</td>
+                <td>
+                    <span ng-if="gene.indexOf('fig') != -1" >
+                        <a href="{{featureUrl+gene}}" target="_blank">{{gene}}</a> <span class="text-muted">(RAST)</span>
+                    </span>
+                    <span ng-if="gene.indexOf('fig') == -1">{{gene}}</span>
+                </td>
+            </tr>
+
+            <tr ng-repeat="r in info">
+                <td>{{r.label}}</td>
+                <td>{{loading ? 'loading...' : result[r.key] }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+
+    <h4>Sequence</h4>
+    <pre>{{result.sequence}}</pre>
+</div>
