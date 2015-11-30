@@ -47,6 +47,10 @@ a.disabled {
     font-weight: 800;
 }
 
+.nowrap {
+    white-space: nowrap;
+}
+
 #content{
     padding: 5px 20px;
 }

@@ -12,10 +12,10 @@
             <tr>
                 <td>Gene</td>
                 <td>
-                    <span ng-if="id.indexOf('fig') != -1" >
-                        <a href="{{featureUrl+id}}" target="_blank">{{id}}</a> <span class="text-muted">(RAST)</span>
+                    <span ng-if="gene.indexOf('fig') != -1" >
+                        <a href="{{featureUrl+gene}}" target="_blank">{{gene}}</a> <span class="text-muted">(RAST)</span>
                     </span>
-                    <span ng-if="id.indexOf('fig') == -1">{{id}}</span>
+                    <span ng-if="gene.indexOf('fig') == -1">{{gene}}</span>
                 </td>
             </tr>
 

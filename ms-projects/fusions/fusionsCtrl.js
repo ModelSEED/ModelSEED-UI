@@ -155,7 +155,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
             return '<a ui-sref="main.projects.fusionCdd({cdd: \''+row.name+'\'})">'+row.name+'</a>'
         }},
         {label: 'Index', key: 'id', format: function(row) {
-            return '<a href="'+indexUrl+row.id+'" target="_blank">'+row.id+'</a>';
+            return '<a href="'+indexUrl+row.id+'" target="_blank" class="nowrap">'+row.id+
+                    ' <i class="fa fa-external-link text-muted"></i></a>';
         }},
         {label: 'Accession', key: 'accession'},
         {label: 'Length', key: 'length'},
@@ -166,7 +167,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Long Genes', key: 'longgenes'},
         {label: 'Set', key: 'set', format: function(row) {
             if (!row.set) return '-';
-            return '<a href="'+setUrl+row.set+'" target="_blank">'+row.set+'</a>';
+            return '<a href="'+setUrl+row.set+'" target="_blank" class="nowrap">'+row.set+
+                    ' <i class="fa fa-external-link text-muted"></i></a>';
         }},
         {label: 'Description', key: 'description'},
     ];
@@ -198,7 +200,8 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
             return '<a ui-sref="main.projects.fusionCddSets({cdd: \''+row.name+'\'})">'+row.name+'</a>'
         }},
         {label: 'Index', key: 'id', format: function(row){
-            return '<a href="'+indexUrl+row.id+'" target="_blank">'+row.id+'</a>';
+            return '<a href="'+indexUrl+row.id+'" target="_blank" class="nowrap">'+row.id+
+                    ' <i class="fa fa-external-link text-muted"></i></a>';
         }},
         {label: 'Accession', key: 'accession'},
         {label: 'Length', key: 'length'},
