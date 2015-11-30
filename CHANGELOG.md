@@ -4,10 +4,12 @@ Below contains a summary of notable changes and deploy date for each release.
 
 
 #### Proposed next version
-
-- Allow reconstruction from previously annotated genomes
 - Highlight gapfilled reactions everywhere else
 - Turn on model editing
+
+
+####vAlpha-1.2.1 (Nov 30, 2015)
+- Allow reconstruction from previously annotated genomes
 
 
 ####vAlpha-1.2.0 (Oct 26, 2015)
