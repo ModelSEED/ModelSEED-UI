@@ -42,11 +42,20 @@
                 <td>{{r.label}}</td>
                 <td>{{result[r.key]}}</td>
             </tr>
-
         </tbody>
     </table>
     <br>
 
     <h4>Sequence</h4>
     <pre>{{result.sequence}}</pre>
+
+    <h4>CDDs</h4>
+    <ul class="list-unstyled" style="margin-left: 25px;">
+        <li ng-repeat="cdd in result.cdds">
+            {{cdd}}
+        </li>
+    </ul>
+    <span ng-if="!result.cdds">-</span>
+
+
 </div>

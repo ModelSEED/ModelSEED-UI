@@ -51,7 +51,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
 
     // fusions
-    var sFields = ['gene', 'function', 'species', 'contig', 'cdds'];
+    var sFields = ['gene', 'function', 'species', 'contig']; //cdd searching
     $s.fusionsOpts = Session.getOpts($state, 'fusions') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusions'};
 
