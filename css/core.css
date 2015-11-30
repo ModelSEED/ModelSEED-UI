@@ -217,7 +217,7 @@ small.help-text {
 }
 
 .alt-login-patric img {
-    border: 2px solid #bbb;
+    border: 2px solid #ddd;
 }
 
 td[editable] {
@@ -232,7 +232,7 @@ td[editable] {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 
-
+/*
 header .login md-input-container.md-default-theme .md-input {
     color: #666;
     border-color: #666;
@@ -245,7 +245,7 @@ header .login md-input-container.md-default-theme label {
 
 header .login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
     color: #888;
-}
+}*/
 
 .md-button {
     text-transform: none;

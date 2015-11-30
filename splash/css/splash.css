@@ -47,7 +47,7 @@ p.small {
 
 
 header {
-    background: #f8f8f8;
+    background: #fdfdfd;
 }
 
 
@@ -201,7 +201,7 @@ section#about .microbe-img {
 
 section#about {
     color: #333;
-    background-color: #e8e8e8; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
+    background-color: #F1F1F1; /*#2D2D2D;   deep purple: #201838;  #342D4A;  #554A77;  666;*/
     text-align: center;
     border-top: 2px solid #e2e2e2;
 }
@@ -234,7 +234,7 @@ section.dark {
 
 section.dark-2 {
     color: #fff;
-    background: #222;
+    background: #130E21;
 }
 
 @media(max-width:767px) {
@@ -393,7 +393,7 @@ footer h3 {
 
 footer .footer-above {
     padding-top: 50px;
-    background-color: #444;/*#2c3e50;*/
+    background-color: #201838;/*#2c3e50;*/
 }
 footer .footer-above .sub-text {
     font-size: 16px;
@@ -405,7 +405,7 @@ footer .footer-col {
 
 footer .footer-below {
     padding: 25px 0;
-    background-color: #333; /*#233140;*/
+    background-color: #130E21; /*#233140;*/
 }
 
 .btn-social {
