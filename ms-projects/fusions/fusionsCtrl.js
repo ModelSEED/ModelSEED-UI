@@ -51,14 +51,14 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
 
 
     // fusions
-    var sFields = ['gene', 'function', 'species', 'contig']; //cdd searching
+    var sFields = ['gene', 'function', 'species', 'contig', 'cdds'];
     $s.fusionsOpts = Session.getOpts($state, 'fusions') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusions'};
 
 
     $s.fusionsHeader = [
         {label: 'Gene', key: 'gene', format: function(row) {
-            return '<a ui-sref="main.projects.fusionGene({gene: \''+row.gene+'\'})">'+row.gene+'</a>'
+            return '<a ui-sref="main.projects.fusionGene({gene: \''+row.gene+'\'})">'+row.gene+'</a>';
         }},
         {label: 'Species', key: 'species'},
         {label: 'Function', key: 'function'},
@@ -85,8 +85,13 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Direction', key: 'direction'},
         {label: 'Start', key: 'start'},
         {label: 'Stop', key: 'stop'},
-        {label: 'Sequence', key: 'sequence'},
-        {label: 'CDDs', key: 'cdds'},*/
+        {label: 'Sequence', key: 'sequence'},*/
+        {label: 'CDDs', key: 'cdds', format: function(row) {
+            var e = row.cdds.length > 5 ? 5 : row.cdds.length;
+            var overflow = row.cdds.length - e;
+            return row.cdds.slice(0,e).join('<br>')+'<br>'+
+                '<a ui-sref="main.projects.fusionGene({gene: \''+row.gene+'\'})">and '+overflow+' more...</a>' ;
+        }},
     ];
 
     function updateFusions() {
