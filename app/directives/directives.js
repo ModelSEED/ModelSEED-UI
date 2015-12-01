@@ -1926,6 +1926,8 @@ function($compile, $stateParams) {
     return {
         restrict: 'EA',
         link: function(scope, elem, attrs) {
+            
+            if (attrs.sortable == 'false' ) return;
 
             if (scope.opts.sort && ('desc' in scope.opts.sort) )
                 scope.opts.sort.desc = scope.opts.sort.desc ? true : false; //fixme: overkill

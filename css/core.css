@@ -677,6 +677,13 @@ table thead th[sortable].sorting-asc:after {
   font-family: fontawesome;
   color: #222;
 }
+table thead th[sortable="false"] {
+    cursor: default;
+}
+table thead th[sortable="false"]:not(:empty):after {
+    cursor: default;
+    content: normal ;
+}
 
 .row-hover:hover {
     cursor: pointer;

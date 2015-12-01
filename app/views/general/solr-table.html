@@ -28,7 +28,7 @@
        ng-if="data.docs.length">
     <thead>
         <tr>
-            <th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}"
+            <th sortable="{{h.sortable}}" ng-repeat="h in header track by $index" col-id="{{h.key}}"
                 ng-click="sortBy($event, h.key)">{{h.label}}</th>
         </tr>
     </thead>

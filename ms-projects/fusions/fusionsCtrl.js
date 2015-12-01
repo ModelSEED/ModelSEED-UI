@@ -86,7 +86,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Start', key: 'start'},
         {label: 'Stop', key: 'stop'},
         {label: 'Sequence', key: 'sequence'},*/
-        {label: 'CDDs', key: 'cdds', format: function(row) {
+        {label: 'CDDs', key: 'cdds', sortable: false, format: function(row) {
             var e = row.cdds.length > 5 ? 5 : row.cdds.length;
             var overflow = row.cdds.length - e;
             return row.cdds.slice(0,e).join('<br>')+'<br>'+
@@ -151,7 +151,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     var indexUrl = 'http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=', //ex: 198330
         setUrl = 'http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=';
 
-    var sFields = ['id', 'accession', 'name', 'set', 'set_name', 'description'];
+    var sFields = ['id', 'accession', 'name', 'set', 'set_name', 'description', 'genes'];
     $s.cddOpts = Session.getOpts($state, 'cdd') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-cdd'};
 
@@ -165,7 +165,6 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         }},
         {label: 'Accession', key: 'accession'},
         {label: 'Length', key: 'length'},
-        //{label: 'Genes', key: 'genes'},
         //{label: 'Gene Count', key: 'gene_count'},
         {label: 'Full Genes', key: 'fullgenes'},
         //{label: 'Is Full Gene?', key: 'is_full_gene'},
@@ -176,6 +175,20 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
                     ' <i class="fa fa-external-link text-muted"></i></a>';
         }},
         {label: 'Description', key: 'description'},
+        {label: 'Genes', key: 'genes',
+            format: function(row) {
+                if (row.genes) {
+                    var gt = row.genes.length > 5;
+                    var e = gt ? 5 : row.genes.length,
+                        overflow = row.genes.length - e;
+                    return row.genes.slice(0,e).join('<br>')+'<br>'+(gt ?
+                        '<a ui-sref="main.projects.fusionCdd({cdd: \''+row.cdd+'\'})">and '+overflow+' more...</a>' : '');
+                } else {
+                    return '-';
+                }
+            },
+            sortable: false
+        }
     ];
 
 
