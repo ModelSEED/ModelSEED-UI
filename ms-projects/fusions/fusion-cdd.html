@@ -29,33 +29,36 @@
 
             <tr>
                 <td>Length</td>
-                <td>{{result.length ? result.length  : '-'}}</td>
+                <td>{{result.length}}</td>
             </tr>
 
             <tr>
                 <td>Gene Count</td>
-                <td>{{result.gene_count ? result.gene_count : '-'}}</td>
+                <td>{{result.gene_count}}</td>
             </tr>
 
             <tr>
                 <td>Full Genes</td>
-                <td>{{result.full_genes ? result.full_genes : '-'}}</td>
+                <td>{{result.fullgenes}}</td>
             </tr>
 
             <tr>
                 <td>Is Full Gene?</td>
-                <td>{{result.is_full_gene ? result.is_full_gene : '-'}}</td>
+                <td>{{result.is_full_gene}}</td>
             </tr>
 
             <tr>
                 <td>Long Genes</td>
-                <td>{{result.long_genes ? result.long_genes : '-'}}</td>
+                <td>{{result.longgenes}}</td>
             </tr>
 
             <tr>
                 <td>Set</td>
                 <td>
-                    <a href="{{indexUrl}}{{result.set}}" target="_blank">{{result.set}}</a> <span class="text-muted">(NCBI)</span>
+                    <span ng-if="result.set">
+                        <a href="{{indexUrl}}{{result.set}}" target="_blank">{{result.set}}</a> <span class="text-muted">(NCBI)</span>
+                    </span>
+                    <span ng-if="!res.set">-</span>
                 </td>
             </tr>
 
@@ -68,14 +71,14 @@
             <tr ng-if="!loading">
                 <td>Genes</td>
                 <td>
-                    <ul class="list-unstyled">
-                        <ng-table table-header="geneHeader"
-                                  table-data="result.genes"
-                                  table-opts="geneOpts"
-                                  table-loading="loading"
-                                  table-placeholder="Search genes">
-                        </ng-table>
-                    </ul>
+                    <ng-table table-header="geneHeader"
+                              table-data="result.genes"
+                              table-opts="geneOpts"
+                              table-loading="loading"
+                              table-placeholder="Search genes"
+                              ng-if="result.genes">
+                    </ng-table>
+                    <span ng-if="!result.genes">-</span>
                 </td>
             </tr>
         </tbody>

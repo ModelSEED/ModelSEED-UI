@@ -1436,7 +1436,7 @@ function($compile, $stateParams) {
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
             }
-            //console.log('scope', scope.stylingOpts)
+
         }
     }
  })
@@ -1926,7 +1926,7 @@ function($compile, $stateParams) {
     return {
         restrict: 'EA',
         link: function(scope, elem, attrs) {
-            
+
             if (attrs.sortable == 'false' ) return;
 
             if (scope.opts.sort && ('desc' in scope.opts.sort) )

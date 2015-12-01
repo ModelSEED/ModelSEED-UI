@@ -223,7 +223,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         }},
         {label: 'Accession', key: 'accession'},
         {label: 'Length', key: 'length'},
-        {label: 'Gene Count', key: 'gene_count'},
+        {label: 'Gene Count', key: 'genes'},
         {label: 'Full Genes', key: 'fullgenes'},
         {label: 'Is Full Gene?', key: 'is_full_gene'},
         {label: 'CDDs', key: 'cdds'},
@@ -524,8 +524,11 @@ function($s, $stateParams, MSSolr) {
     MSSolr.search('fusion-cdd', {query: $s.cdd, searchFields: ['name']})
         .then(function(data) {
             $s.result = data.docs[0];
-            for (var i=0; i< $s.result.genes.length; i++) {
-                $s.result.genes[i] = {id: $s.result.genes[i]}
+            console.log('result', $s.result)
+            if ($s.result.genes) {
+                for (var i=0; i< $s.result.genes.length; i++) {
+                    $s.result.genes[i] = {id: $s.result.genes[i]}
+                }
             }
             $s.loading = false;
         })
