@@ -23,7 +23,6 @@ md-toolbar-tools {
     transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
 }
 
-
 a {
     color: #30BCCF; /*#00AFD8;*/
 }
@@ -82,30 +81,22 @@ a.disabled {
     font-size: 1.17em;
 }
 
-.zigzag {
-    background-color: #444;
-    position: relative;
+/**
+ * animations
+ */
+.animate-show {
+    -webkit-transition: all linear 0.1s !important;
+    transition: all linear 0.1s !important;
 }
 
-.zigzag:after {
-    background-position: right-top;
-    background-repeat: repeat-y;
-    background-size: 15px 15px;
-    content: " ";
-    display: block;
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 15px;
-    height: 100%;
+.animate-show.ng-hide {
+  opacity: 0 !important;
 }
 
-.zigzag:after{
-    background-image: linear-gradient(-45deg, #00BCD4 5px, transparent 0),
-                      linear-gradient(-135deg, #00BCD4 5px, transparent 0);
 
-}
-
+/**
+ * lists
+ */
 .info-list {
     font-size: 1.2em;
     margin: 0 0 0 10px;
@@ -236,21 +227,6 @@ td[editable] {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 
-/*
-header .login md-input-container.md-default-theme .md-input {
-    color: #666;
-    border-color: #666;
-}
-
-
-header .login md-input-container.md-default-theme label {
-    color: #888;
-}
-
-header .login md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label {
-    color: #888;
-}*/
-
 .md-button {
     text-transform: none;
 }
@@ -302,7 +278,9 @@ header .login md-input-container.md-default-theme:not(.md-input-invalid).md-inpu
     border-radius: 0px !important;
 }
 
-/* navigation mods */
+/**
+ * navigation mods
+ */
 
 md-toolbar,
 .md-toolbar-tools {
@@ -561,7 +539,9 @@ ul.about-toolbar > li.active {
 }
 
 
-/* pages */
+/**
+ * pages
+ */
 .btn-outline {
     margin-top: 10px;
     border: solid 2px #30BCCF;
@@ -622,7 +602,13 @@ ul.about-toolbar > li.active {
     position: relative;
 }
 
-/* tables */
+/**
+ * tables
+ */
+.item-not-found {
+    margin-left: 40px;
+    color: #777;
+}
 
 tr[role=button] {
     cursor: default;
@@ -773,9 +759,9 @@ table md-checkbox {
 }
 
 
-
-/* end tables */
-
+/**
+ * custom tables
+ */
 .expanded-table {
     margin: 10px 0 20px 0;
     padding-left: 10px;
@@ -810,7 +796,19 @@ table md-checkbox {
     opacity: .5;
 }
 
-/* bootstrap mods */
+/**
+ * bootstrap mods
+ */
+ .form-group {
+     margin-left: 0 !important;
+     margin-right: 0 !important;
+ }
+
+ tr .fa-folder-o,
+ tr .fa-file-text-o {
+     opacity: 0.5;
+ }
+
 .popover {
     z-index: 9000;
 }
@@ -839,14 +837,11 @@ table md-checkbox {
     position: fixed;
 }
 
-/* md mods */
-
-/*
-md-tab-content {
-    overflow-x: scroll !important;
-}*/
 
 
+/**
+ *  md mods
+ */
 md-tab-item:hover {
     color: #555;
 }
@@ -881,10 +876,6 @@ md-backdrop {
 .md-scroll-mask {
     background-color: rgba(0, 0, 0, .4);
 }
-/*
-.md-dialog-container {
-    margin-top: 50px;
-}*/
 
 md-input-container {
     padding-bottom: 15px;
@@ -951,7 +942,11 @@ md-card {
     top: 0px !important;
 }
 
-/* my models page */
+
+
+/**
+ *  my models page
+ */
 .my-model-tabs {
     margin: 15px 40px;
 }
@@ -1028,32 +1023,34 @@ md-card {
 }
 
 
-
-/* bootstrap mods */
-
+/**
+ * bootstrap mods
+ */
 .dropdown-menu-visible {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  float: left;
-  min-width: 160px;
-  padding: 5px 0;
-  margin: 2px 0 0;
-  font-size: 14px;
-  text-align: left;
-  list-style: none;
-  background-color: #fff;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0,0,0,.15);
-  border-radius: 4px;
-  -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
 }
 
-/* labels */
+/**
+ *
+ */
 .label-fba {
     color: #5cb85c;
 }
@@ -1076,7 +1073,9 @@ td .label-gapfill {
 }
 
 
-/* browser */
+/**
+ * data browser
+ */
 #data-browser {
     margin-top:60px;
 }
@@ -1169,9 +1168,9 @@ input[name=upload] {
     filter: alpha(opacity=0);
 }
 
-/* end browser */
-
-/* icon mods */
+/**
+ *  icon mods
+ */
 .icon-info {
     line-height: .9em;
 }
@@ -1186,22 +1185,11 @@ input[name=upload] {
 .icon-tools {
     font-weight: 600;
 }
-/* end icon mods */
 
 
-/* override bootstrap */
-.form-group {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
-
-tr .fa-folder-o,
-tr .fa-file-text-o {
-    opacity: 0.5;
-}
-
-
-/* site specific things */
+/**
+ *  site specific things
+ */
 .reconstruct-hover td{
     position: relative;
 }
@@ -1258,7 +1246,9 @@ tr .fa-file-text-o {
 }
 
 
-/* about/status page */
+/**
+ *  about/status page
+ */
 .status-table .success {
     color: #38BD5C;
 }
@@ -1272,7 +1262,9 @@ tr .fa-file-text-o {
 }
 
 
-/* modelseed projects / team / publications */
+/**
+ *  modelseed projects / team / publications
+ */
 .publications li {
     margin: 0 0 30px 0;
 }
@@ -1287,7 +1279,6 @@ tr .fa-file-text-o {
     margin: 0px 40px;
 }
 .publication .author {
-
     font-size: .8em;
     margin-left: 40px;
 }
@@ -1301,7 +1292,6 @@ tr .fa-file-text-o {
     margin: 10px 40px;
 }
 
-
 .citation {
     margin: 10px 40px;
 }
@@ -1312,10 +1302,6 @@ tr .fa-file-text-o {
 .project-nav {
     margin-bottom: 0px;
     font-size: 1.3em;
-}
-
-.project-nav li.active > a{
-    /*color: #444;*/
 }
 
 .team-member {
@@ -1334,9 +1320,9 @@ tr .fa-file-text-o {
 }
 
 
-
-
-/* tour overrides */
+/**
+ *  tour overrides
+ */
 md-toolbar {
     z-index: 9999 !important;
 }
@@ -1367,7 +1353,6 @@ md-toolbar {
 .introjs-tooltip {
     min-width: 600px;
 }
-
 
 /*
 .introjs-fixParent  {
