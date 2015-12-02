@@ -1404,6 +1404,29 @@ function($compile, $stateParams) {
     }
 }])
 
+.directive('dtable', ['$sce', '$compile', function($sce, $compile) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=header',
+            data: '=rows',
+            opts: '=opts',
+            loading: '=loading',
+            rowClick: '=rowClick',
+            hoverClass: '@rowHoverClass',
+            placeholder: '@placeholder',
+            resultText: '@resultText',
+            stylingOpts: '=stylingOpts',
+        },
+        templateUrl: 'app/views/general/dtable.html',
+        link: function(scope, elem, attrs) {
+            var ele = angular.element(elem);
+
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
+        }
+    }
+}])
+
 .directive('dynamic', ['$compile', function ($compile) {
     return {
         restrict: 'A',
@@ -1926,16 +1949,16 @@ function($compile, $stateParams) {
     return {
         restrict: 'EA',
         link: function(scope, elem, attrs) {
+            if (attrs.sortable == 'false') return;
 
-            if (attrs.sortable == 'false' ) return;
-
-            if (scope.opts.sort && ('desc' in scope.opts.sort) )
+            if (scope.opts.sort && 'desc' in scope.opts.sort)
                 scope.opts.sort.desc = scope.opts.sort.desc ? true : false; //fixme: overkill
 
-            var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
-            var field = scope.opts.sort.field
+            var desc = scope.opts && scope.opts.sort ? !scope.opts.sort.desc : false;
+            var field = scope.opts.sort ? scope.opts.sort.field : null
 
-            var colId = attrs.colId;
+            var colId = attrs.colId
+
 
             if (!desc && colId == field) {
                 angular.element(elem).removeClass('sorting-asc')
@@ -1947,19 +1970,21 @@ function($compile, $stateParams) {
 
             // see table styling in core.css for sorting carets
             scope.sortBy = function($event, name) {
+                // if sort order is not set, assume ascending order
+                // otherwise, negate
                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
                 scope.opts.sort = {field: name, desc: desc};
 
-                var tr = angular.element(elem).parent().parent();
+                var tr = angular.element(elem).parent();
                 tr.find('th').removeClass('sorting-asc')
                 tr.find('th').removeClass('sorting-desc')
 
-                if (desc) {
-                    angular.element(elem).removeClass('sorting-asc')
-                    angular.element(elem).addClass('sorting-desc')
+                if (!desc) {
+                    angular.element($event.target).removeClass('sorting-asc')
+                    angular.element($event.target).addClass('sorting-desc')
                 } else {
-                    angular.element(elem).removeClass('sorting-desc')
-                    angular.element(elem).addClass('sorting-asc')
+                    angular.element($event.target).removeClass('sorting-desc')
+                    angular.element($event.target).addClass('sorting-asc')
                 }
             }
         }
@@ -2007,7 +2032,8 @@ function($compile, $stateParams) {
      }
  }])
 
- .directive('search', function() {
+
+.directive('search', function() {
      return {
          restrict: 'EA',
          scope: {
@@ -2016,7 +2042,7 @@ function($compile, $stateParams) {
              searchPlaceholder: '@searchPlaceholder'
          },
          template: '<md-icon class="material-icons">search</md-icon>'+
-                   '<input ng-model="query" ng-model-options="{debounce: {default: 100, blur: 0}}" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()">',
+                   '<input ng-model="query" ng-model-options="{debounce: {default: 100, blur: 0}}" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()" input-clear>',
          link: function(scope, elem, attrs) {
              var lastQuery;
 
@@ -2100,4 +2126,21 @@ function($compile, $stateParams) {
 
         }
     }
+})
+
+.directive('inputClear', function() {
+    return {
+        restrict: 'A',
+        compile: function (element, attrs) {
+            var color = attrs.inputClear;
+            var style = color ? "color:" + color + ";" : "";
+            var action = attrs.ngModel + " = ''";
+            element.after(
+                '<md-button aria-label="clear search" class="animate-show md-icon-button md-accent hover"' +
+                'ng-show="' + attrs.ngModel + '" ng-click="' + action + '"' +
+                'style="position: absolute; bottom: 0px; right: -6px; margin: 18px 0px; color: #777; height: 10px;" >' +
+                '<i class="fa fa-remove"></i>' +
+                '</md-button>');
+        }
+    };
 })
