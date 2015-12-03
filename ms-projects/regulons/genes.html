@@ -14,7 +14,6 @@
         {{data.length}} {{resultText}}
     </div>
 
-
     <md-input-container
         ng-if="!noPagination"
         pagination
@@ -27,46 +26,48 @@
 </div>
 
 <table class="table table-striped table-vertical-center" style="font-size: .8em;">
-    <thead sortable>
+    <thead>
         <tr>
-            <th ng-click="sortBy($event, 'bsu_number')">{{header.bsu_number}}</th>
-            <th ng-click="sortBy($event, 'gene_name')">Gene Name</th>
-            <th ng-click="sortBy($event, 'operon')">{{header.operon}}</th>
-            <th ng-click="sortBy($event, 'sigma_factor')">{{header.sigma_factor}}</th>
-            <th ng-click="sortBy($event, 'regulator_name')">{{header.regulator_name}}</th>
-            <th ng-click="sortBy($event, 'regulation_sign')">{{header.regulation_sign}}</th>
-            <th ng-click="sortBy($event, 'involved_metabolite')">{{header.involved_metabolite}}</th>
-            <th ng-click="sortBy($event, 'metabolite')">{{header.metabolite_sign}}</th>
-            <th ng-click="sortBy($event, 'regulatory_mecanisms')">{{header.regulatory_mecanisms}}</th>
-            <th ng-click="sortBy($event, 'conditioned_rules')">{{header.conditioned_rules}}</th>
-            <th ng-click="sortBy($event, 'annotation')">{{header.annotation}}</th>
+            <th sortable ng-click="sortBy($event, 'bsu_number')" col-id="bsu_number">{{header.bsu_number}}</th>
+            <th sortable ng-click="sortBy($event, 'gene_name')">Gene Name</th>
+            <th sortable ng-click="sortBy($event, 'operon')">{{header.operon}}</th>
+            <th sortable ng-click="sortBy($event, 'sigma_factor')">{{header.sigma_factor}}</th>
+            <th sortable ng-click="sortBy($event, 'regulator_name')">{{header.regulator_name}}</th>
+            <th sortable ng-click="sortBy($event, 'regulation_sign')">{{header.regulation_sign}}</th>
+            <th sortable ng-click="sortBy($event, 'involved_metabolite')">{{header.involved_metabolite}}</th>
+            <th sortable ng-click="sortBy($event, 'metabolite')">{{header.metabolite_sign}}</th>
+            <th sortable ng-click="sortBy($event, 'regulatory_mecanisms')">{{header.regulatory_mecanisms}}</th>
+            <th sortable ng-click="sortBy($event, 'conditioned_rules')">{{header.conditioned_rules}}</th>
+            <th sortable ng-click="sortBy($event, 'annotation')">{{header.annotation}}</th>
         </tr>
     </thead>
 
-    <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
-                    | limitTo : opts.limit : opts.offset)">
-        <td>{{row.bsu_number}}</td>
-        <td>{{row.gene_name}}</td>
-        <td popover="That is an absolute name: in order to know all the genes belonging to this operon, we have to find all the genes with a same absolute name.">
-            {{row.operon}}
+    <tr ng-repeat="row in filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                    | limitTo : opts.limit : opts.offset">
+        <td>
+            <a href="http://subtiwiki.uni-goettingen.de/bank/index.php?gene={{row.bsu_number}}" target="_blank">
+                {{row.bsu_number}} <i class="fa fa-external-link text-muted"></i>
+            </a>
         </td>
-        <td style="vertical-align: middle;" ng-bind-html="formatter(row.sigma_factor)">
+        <td>{{row.gene_name}}</td>
+        <td>{{row.operon}}</td>
+        <td style="vertical-align: middle;" ng-bind-html="format(row.sigma_factor)">
         </td>
         <td>
             <span ng-repeat="name in row.regulator_name.split('|') | limitTo : row.regulator_name.split('|').length-1">
-                <a ui-sref="main.projects.regulons.regulators({q: name})">{{name}}</a><br>
+                <a ui-sref="main.projects.regulons({q: name})">{{name}}</a><br>
             </span>
         </td>
-        <td ng-bind-html="formatter(row.regulation_sign)"></td>
-        <td ng-bind-html="formatter(row.involved_metabolite)"></td>
-        <td ng-bind-html="formatter(row.metabolite_sign)"></td>
-        <td ng-bind-html="formatter(row.regulatory_mecanisms)"></td>
-        <td ng-bind-html="formatter(row.conditioned_rules)"></td>
+        <td ng-bind-html="format(row.regulation_sign)"></td>
+        <td ng-bind-html="format(row.involved_metabolite)"></td>
+        <td ng-bind-html="format(row.metabolite_sign)"></td>
+        <td ng-bind-html="format(row.regulatory_mecanisms)"></td>
+        <td ng-bind-html="format(row.conditioned_rules)"></td>
         <td>{{row.annotation}}</td>
     </tr>
 </table>
 
-<div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+<div ng-if="!loading && filtered.length == 0" class="item-not-found">
     No item found
 </div>
 

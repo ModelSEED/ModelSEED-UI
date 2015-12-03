@@ -20,21 +20,23 @@
 </div>
 
 <table class="table table-striped" style="font-size: .8em;">
-    <thead sortable>
+    <thead>
         <tr>
-            <th ng-click="sortBy($event, 'annotation')">Regulator Name</th>
-            <th ng-click="sortBy($event, 'bsu')">BSU Number</th>
-            <th ng-click="sortBy($event, 'mechanism')">Mechanism</th>
-            <th ng-click="sortBy($event, 'conditioned_rules')">Conditioned Rules</th>
-            <th ng-click="sortBy($event, 'metabolite')">mapetabolite</th>
-            <th ng-click="sortBy($event, 'metabolite_sign')">Metabolite Sign</th>
-
+            <th sortable col-id="regulator_name" ng-click="sortBy($event, 'regulator_name')">Regulator Name</th>
+            <th sortable ng-click="sortBy($event, 'bsu')">BSU Number</th>
+            <th sortable ng-click="sortBy($event, 'mechanism')">Mechanism</th>
+            <th sortable ng-click="sortBy($event, 'conditioned_rules')">Conditioned Rules</th>
+            <th sortable ng-click="sortBy($event, 'metabolite')">Matabolite</th>
+            <th sortable ng-click="sortBy($event, 'metabolite_sign')">Metabolite Sign</th>
         </tr>
     </thead>
 
     <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
                     | limitTo : opts.limit : opts.offset)">
-        <td>{{row.regulator_name}}</td>
+        <td>
+            <a ng-if="row.regulator_name.indexOf('*') == -1" ng-click="showLinks($event, row.regulator_name)">{{row.regulator_name}} <i class="fa fa-external-link text-muted"></i></a>
+            <span ng-if="row.regulator_name.indexOf('*') != -1">{{row.regulator_name}}</span>
+        </td>
         <td>{{row.bsu}}</td>
         <td>{{row.mechanism}}</td>
         <td>{{row.conditioned_rules}}</td>
@@ -43,7 +45,7 @@
     </tr>
 </table>
 
-<div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+<div ng-if="!loading && filtered.length == 0" class="item-not-found">
     No item found
 </div>
 
