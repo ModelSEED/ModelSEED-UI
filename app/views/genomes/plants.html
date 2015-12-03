@@ -1,8 +1,10 @@
 
-<md-tabs ng-if="view == 'Plants'" md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
 
     <md-tab>
-        <md-tab-label>Public Plants</md-tab-label>
+        <md-tab-label>
+            <i class="material-icons tab-icon">public</i> Public
+        </md-tab-label>
 
         <md-tab-body>
 
@@ -54,7 +56,8 @@
     </md-tab>
 
     <md-tab>
-        <md-tab-label>My Plants (<span class="label-gapfill-count">{{myPlants.length}}</span>)</md-tab-label>
+        <md-tab-label>
+            <i class="material-icons tab-icon">assignment_ind</i> Mine (<span class="label-gapfill-count">{{myPlants.length}}</span>)</md-tab-label>
         <md-tab-body>
 
             <div class="table-controls">
@@ -97,7 +100,7 @@
 
 
     <md-tab>
-        <md-tab-label>Annotations</md-tab-label>
+        <md-tab-label><i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Annotations</md-tab-label>
         <md-tab-body>
             <ng-table-two ng-controller="PlantAnnotations" table-header="annoHeader"
                       table-data="annoOverview"
@@ -107,6 +110,4 @@
             </ng-table-two>
         </md-tab-body>
     </md-tab>
-
-
 </div>

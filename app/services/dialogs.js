@@ -306,18 +306,18 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
     }
 
     this.showError = function(msg) {
-       $mdToast.show({
-        controller: 'ToastCtrl',
-        parent: angular.element('.sidebar'),
-        //templateUrl:'app/views/dialogs/notify.html',
-        template: '<md-toast>'+
-                        '<span flex style="margin-right: 30px;">'+
-                          '<span class="ms-color-error">Error</span><br>'+
-                          msg+
-                         '</span>'+
-                    '</md-toast>',
-        hideDelay: 10000
-      });
+        $mdToast.show({
+            controller: 'ToastCtrl',
+            parent: angular.element('.sidebar'),
+            //templateUrl:'app/views/dialogs/notify.html',
+            template: '<md-toast>'+
+                            '<span flex style="margin-right: 30px;">'+
+                              '<span class="ms-color-error">Error</span><br>'+
+                              msg+
+                             '</span>'+
+                        '</md-toast>',
+            hideDelay: 10000
+        });
     }
 
     this.download = function(ev, cols, tbody, filename) {
@@ -389,8 +389,6 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
                 else
                     $s.method = Auth.loginMethod('rast');
 
-
-
                 $s.creds = {};
 
                 // sets method and changes url param
@@ -398,7 +396,6 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
                     $s.method = Auth.loginMethod(method);
                     $state.go($state.current.name, {login: method});
                 }
-
 
                 $s.ok = function(){
                     console.log('logging in', $s.creds)

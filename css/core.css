@@ -842,6 +842,12 @@ table md-checkbox {
 /**
  *  md mods
  */
+.tab-icon {
+    position: relative;
+    top: 4px;
+    font-size: 18px;
+}
+
 md-tab-item:hover {
     color: #555;
 }
