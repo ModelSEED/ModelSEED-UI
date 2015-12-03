@@ -48,7 +48,7 @@
     </div>
 
 
-    <table class="table table-striped table-bordered table-selector">
+    <table class="table table-striped table-bordered table-selector" ng-show="filtered.length">
         <thead>
             <tr>
                 <th></th>
@@ -78,7 +78,7 @@
 
     </table>
 
-    <div ng-if="!loading && filtered.length == 0" class="alert alert-warning">
+    <div ng-if="!loading && filtered.length == 0" class="item-not-found">
         No item found
     </div>
 </div>

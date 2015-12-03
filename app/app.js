@@ -71,9 +71,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/projects',
             templateUrl: '/ms-projects/home.html'
         }).state('main.projects.regulons', {
-            url: '/regulons',
+            url: '/regulons?q',
             templateUrl: '/ms-projects/regulons/overview.html',
-        }).state('main.projects.regulons.genes', {
+            controller: 'Regulons'
+        })
+
+        /*.state('main.projects.regulons.genes', {
             url: '/genes?q',
             templateUrl: '/ms-projects/regulons/genes.html',
             controller: 'Regulons'
@@ -81,7 +84,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/regulators?q',
             templateUrl: '/ms-projects/regulons/regulators.html',
             controller: 'Regulons'
-        })
+        })*/
 
         .state('main.projects.fusions', {
             url: '/fusions',

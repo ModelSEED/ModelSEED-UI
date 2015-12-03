@@ -453,10 +453,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
     // table options
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
     $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
 
     // reaction table spec

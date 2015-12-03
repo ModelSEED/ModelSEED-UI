@@ -28,7 +28,7 @@
 
 <div ng-if="view == 'Microbes'" ng-include="'app/views/genomes/microbes.html'"></div>
 
-<div ng-if="genomes.docs.length == 0 && !loading && view == 'Microbes'" class="alert alert-warning">No genome found</div>
+<div ng-if="genomes.docs.length == 0 && !loading && view == 'Microbes'" class="item-not-found">No genome found</div>
 
 
 <ng-include src="'app/views/genomes/plants.html'" ng-if="view == 'Plants'"></ng-include>

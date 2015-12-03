@@ -29,7 +29,7 @@
 
 
 
-    <table class="table table-striped table-bordered table-hover table-editor" ng-if="data.docs.length">
+    <table class="table table-striped table-bordered table-hover table-editor" ng-show="data.docs.length">
         <thead>
             <tr>
                 <th></th>
@@ -50,7 +50,7 @@
         </tbody>
     </table>
 
-    <div ng-if="!loading && data.numFound == 0" class="alert alert-warning">
+    <div ng-if="!loading && data.numFound == 0" class="item-not-found">
         No item found
     </div>
 

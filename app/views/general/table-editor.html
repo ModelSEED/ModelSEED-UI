@@ -40,13 +40,13 @@
                     <i class="material-icons">undo</i>
                     <md-tooltip>Undo last edit</md-tooltip>
                 </md-button>
-			    <md-button ng-if="onSave" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
+                <md-button ng-if="onSave" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
                 <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
                     {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
-			    <a ng-click="cancel($event)" class="no-link">Cancel</a>
+                <a ng-click="cancel($event)" class="no-link">Cancel</a>
             </md-input-container>
         </div>
     </div>
@@ -89,7 +89,7 @@
         </tr>
     </table>
 
-    <div ng-if="!loading && data.length == 0" class="alert alert-warning">
+    <div ng-if="!loading && data.length == 0" class="item-not-found">
         No {{resultText}} added
     </div>
 </div>

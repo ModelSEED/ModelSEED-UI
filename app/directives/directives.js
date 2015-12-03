@@ -1952,18 +1952,17 @@ function($compile, $stateParams) {
             if (attrs.sortable == 'false') return;
 
             if (scope.opts.sort && 'desc' in scope.opts.sort)
-                scope.opts.sort.desc = scope.opts.sort.desc ? true : false; //fixme: overkill
+                scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
 
             var desc = scope.opts && scope.opts.sort ? !scope.opts.sort.desc : false;
             var field = scope.opts.sort ? scope.opts.sort.field : null
 
-            var colId = attrs.colId
+            var colId = attrs.colId;
 
-
-            if (!desc && colId == field) {
+            if (desc && colId == field) {
                 angular.element(elem).removeClass('sorting-asc')
                 angular.element(elem).addClass('sorting-desc')
-            } else if (desc && colId == field) {
+            } else if (!desc && colId == field) {
                 angular.element(elem).removeClass('sorting-desc')
                 angular.element(elem).addClass('sorting-asc')
             }
@@ -1990,35 +1989,6 @@ function($compile, $stateParams) {
         }
     }
  })
-
- .directive('sortableTest', function() {
-     return {
-         restrict: 'EA',
-         link: function(scope, elem, attrs) {
-
-             if (scope.opts.sort && ('desc' in scope.opts.sort) )
-             scope.opts.sort.desc = scope.opts.sort.desc ? true : false;
-
-
-             // see table styling in core.css for sorting carets
-             scope.sortBy = function($event, name) {
-                 var desc = scope.opts.sort ? !scope.opts.sort.desc : false;
-                 scope.opts.sort = {field: name, desc: desc};
-
-                 angular.element(elem).find('th').removeClass('sorting-asc')
-                 angular.element(elem).find('th').removeClass('sorting-desc')
-
-                 if (desc) {
-                     angular.element($event.target).removeClass('sorting-asc')
-                     angular.element($event.target).addClass('sorting-desc')
-                 } else {
-                     angular.element($event.target).removeClass('sorting-desc')
-                     angular.element($event.target).addClass('sorting-asc')
-                 }
-             }
-         }
-     }
-  })
 
  .directive('autoFocus', ['$timeout', function($timeout) {
      return {
@@ -2132,8 +2102,6 @@ function($compile, $stateParams) {
     return {
         restrict: 'A',
         compile: function (element, attrs) {
-            var color = attrs.inputClear;
-            var style = color ? "color:" + color + ";" : "";
             var action = attrs.ngModel + " = ''";
             element.after(
                 '<md-button aria-label="clear search" class="animate-show md-icon-button md-accent hover"' +
