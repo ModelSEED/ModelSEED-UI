@@ -1,4 +1,9 @@
-
+/**
+ * documentation related to github markdown pages
+ */
+[ms-doc] {
+    position:relative;
+}
 
 #docs h5 {
     font-size: 1.4em;
