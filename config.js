@@ -16,7 +16,8 @@ angular.module('config', []).service('config', function() {
         shock_url: "http://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         solr_url: "https://www.patricbrc.org/api/",
-        ms_support_url: "http://bio-data-1.mcs.anl.gov/services/ms_fba"
+        ms_support_url: "http://bio-data-1.mcs.anl.gov/services/ms_fba",
+        ms_solr_url: "http://modelseed.theseed.org/solr/"
     }
 
     this.paths = {

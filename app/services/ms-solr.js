@@ -7,7 +7,7 @@ function($http, $q, $rootScope, config, Auth) {
 
     var self = this;
 
-    var endpoint = config.services.solr_url;
+    var endpoint = config.services.ms_solr_url;
 
     var liveReqs = {};
 
@@ -32,7 +32,7 @@ function($http, $q, $rootScope, config, Auth) {
 
     this.getUrl = function(core, opts) {
         //var url = "http://0.0.0.0:8983/solr/"+core+'/select?wt=json'
-        var url = "http://modelseed.theseed.org/solr/"+core+'/select?wt=json'
+        var url = endpoint+core+'/select?wt=json'
 
         if (opts) {
             var limit = opts.limit ? opts.limit : null,
@@ -68,10 +68,8 @@ function($http, $q, $rootScope, config, Auth) {
         settings.limit = 100000; // download row limit
         settings.start = 0;
 
-        var url = this.getUrl(core, settings).replace(/wt=json/g, 'wt=csv')
-        return url
+        var url = this.getUrl(core, settings).replace(/wt=json/g, 'wt=csv');
+        return url;
     }
-
-
 
 }])
