@@ -45,18 +45,18 @@
     <tr ng-repeat="row in filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
                     | limitTo : opts.limit : opts.offset">
         <td>
-            <a href="http://subtiwiki.uni-goettingen.de/bank/index.php?gene={{row.bsu_number}}" target="_blank">
+            <a href="http://subtiwiki.uni-goettingen.de/bank/index.php?gene={{row.bsu_number}}" target="_blank" class="nowrap">
                 {{row.bsu_number}} <i class="fa fa-external-link text-muted"></i>
             </a>
         </td>
         <td>{{row.gene_name}}</td>
         <td>{{row.operon}}</td>
-        <td style="vertical-align: middle;" ng-bind-html="format(row.sigma_factor)">
-        </td>
+        <td style="vertical-align: middle;" ng-bind-html="format(row.sigma_factor)"></td>
         <td>
             <span ng-repeat="name in row.regulator_name.split('|') | limitTo : row.regulator_name.split('|').length-1">
                 <a ui-sref="main.projects.regulons({q: name})">{{name}}</a><br>
             </span>
+            <span ng-if="row.regulator_name == '-'">-</span>
         </td>
         <td ng-bind-html="format(row.regulation_sign)"></td>
         <td ng-bind-html="format(row.involved_metabolite)"></td>

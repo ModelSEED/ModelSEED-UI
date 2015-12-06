@@ -605,6 +605,15 @@ ul.about-toolbar > li.active {
 /**
  * tables
  */
+
+.table-hover-btn {
+    /*visibility: hidden;*/
+}
+
+table tr:hover .table-hover-btn {
+    visibility: initial;
+}
+
 .item-not-found {
     margin-left: 40px;
     color: #777;
@@ -755,7 +764,6 @@ table md-checkbox {
 
 .table-vertical-center td {
     vertical-align: middle !important;
-    white-space: nowrap;
 }
 
 
@@ -842,6 +850,10 @@ table md-checkbox {
 /**
  *  md mods
  */
+md-tabs md-ink-bar {
+    background: #30BCCF;
+}
+
 .tab-icon {
     position: relative;
     top: 4px;
@@ -853,7 +865,7 @@ md-tab-item:hover {
 }
 
 md-toast.md-bottom {
-    position: fixed;
+    position: fixed;0
 }
 
 [role="tabpanel"] {

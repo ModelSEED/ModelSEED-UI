@@ -1,4 +1,3 @@
-
 angular.module('Regulons', [])
 .controller('Regulons',
 ['$scope', '$state', '$stateParams', 'Dialogs', 'Session', '$timeout',
@@ -7,7 +6,7 @@ function($s, $state, $stateParams, Dialogs, Session, $timeout) {
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
-    if ($stateParams.q) $s.tabs.tabIndex = 2
+    if ($stateParams.q) $s.tabs.tabIndex = 1
 
 }])
 
@@ -86,5 +85,55 @@ function($s, $http, $state, Dialogs) {
 
     $s.download = function($ev) {
         Dialogs.download($ev, table.cols, table.tbody, $state.current.name.split('.').pop() );
+    }
+
+    var regPreciseMapping = {
+        "*YydK*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10859",
+        "*YybA*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=13294",
+        "*YwrC*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=11138",
+        "*YwbI*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=11459",
+        "*YvfU*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12450",
+        "*YvbF/YvaV*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=32149",
+        "*YtcD*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=13124",
+        "*YrkD*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=41474",
+        "*YisR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12885",
+        "*YhgD*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=13346",
+        "*YhdI/YdeL*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=61947",
+        "*YhcF*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12068",
+        "*YdfL*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12300",
+        "*YdfF*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=13283",
+        "*YdeP*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=13174",
+        "*YczG*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12941",
+        "*YcxD*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=63873",
+        "*YbzH*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=41367",
+        "*YbfI*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=45443",
+        "*RplS*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=25121",
+        "*RplM*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=25004",
+        "*RplJ*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=24887",
+        "*RNA - yybP-ykoY*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=23590",
+        "*RNA - ylbH*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=23473",
+        "*RNA - ykkC-yxkD*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=23824",
+        "*RNA - Cobalamin*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=14072",
+        "*RmgR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12311",
+        "*RhaR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12748",
+        "*RbsR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10815",
+        "*NrdR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10804",
+        "*MurR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10083",
+        "*MsmR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10793",
+        "*MdxR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10848",
+        "*LytT*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=45261",
+        "*L21_leader*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=25355",
+        "*HisR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=10988",
+        "*GlcR*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12726",
+        "*degA*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=12874",
+        "*BglZ*": "http://regprecise.lbl.gov/RegPrecise/regulon.jsp?regulon_id=11329",
+    }
+
+    $s.formatRegPreciseName = function(name) {
+        return name.replace(/\*/g, '')
+    }
+
+    $s.getRegPreciseUrl = function(name) {
+        return regPreciseMapping[name];
     }
 }])

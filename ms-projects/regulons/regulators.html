@@ -35,7 +35,7 @@
                     | limitTo : opts.limit : opts.offset)">
         <td>
             <a ng-if="row.regulator_name.indexOf('*') == -1" ng-click="showLinks($event, row.regulator_name)">{{row.regulator_name}} <i class="fa fa-external-link text-muted"></i></a>
-            <span ng-if="row.regulator_name.indexOf('*') != -1">{{row.regulator_name}}</span>
+            <a ng-if="row.regulator_name.indexOf('*') != -1" href="{{getRegPreciseUrl(row.regulator_name)}}" target="_blank">{{formatRegPreciseName(row.regulator_name)}} <i class="fa fa-external-link text-muted"></i></span>
         </td>
         <td>{{row.bsu}}</td>
         <td>{{row.mechanism}}</td>
