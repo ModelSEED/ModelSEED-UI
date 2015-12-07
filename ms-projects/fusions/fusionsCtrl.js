@@ -275,7 +275,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Complete', key: 'complete'},
         {label: 'Genetic Code', key: 'genetic-code'},
         {label: 'Final Predicted Fusions', key: 'final_predicted_fusions'},
-        {label: 'Fraction of Final Fusioin Predictions', key: 'fraction_final_fusion_predictions'},
+        {label: 'Fraction of Final Fusion Predictions', key: 'fraction_final_fusion_predictions'},
 
         /*{label: 'Genes With CDDs', key: 'genes_with_cdds'},
         {label: 'Total CDD Hits', key: 'total_cdd_hits'},
@@ -579,7 +579,7 @@ function($s, $stateParams, MSSolr) {
         {label: 'Complete', key: 'complete'},
         {label: 'Genetic Code', key: 'genetic-code'},
         {label: 'Final Predicted Fusions', key: 'final_predicted_fusions'},
-        {label: 'Fraction of Final Fusioin Predictions', key: 'fraction_final_fusion_predictions'},
+        {label: 'Fraction of Final Fusion Predictions', key: 'fraction_final_fusion_predictions'},
 
         {label: 'Genes With CDDs', key: 'genes_with_cdds'},
         {label: 'Total CDD Hits', key: 'total_cdd_hits'},
