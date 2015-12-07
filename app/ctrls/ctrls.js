@@ -321,14 +321,6 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
 }])
 
 
-.controller('Proto',
-['$scope', '$stateParams', 'WS', '$http',
-function($scope, $stateParams, WS, $http) {
-
-
-
-}])
-
 
 .controller('SideNav',
 ['$scope', '$mdSidenav',
@@ -383,6 +375,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
     }
 
     this.get = function(key) {
+        if (key === 'organismType') return defaultSettings.organismType;
         return options[key];
     }
 
@@ -478,8 +471,6 @@ function($s, $http, uiTools) {
                         ) ;
                     }
 
-
-
                     //apiSuccess
                 }
 
@@ -510,4 +501,15 @@ function($s, $http, uiTools) {
             return '<span class="' + cls + '">' + match + '</span>';
         });
     }
+}])
+
+
+
+.controller('Proto',
+['$scope', '$stateParams', '$timeout',
+function($scope, $stateParams, $timeout) {
+
+
+
+
 }])

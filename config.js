@@ -5,7 +5,7 @@ angular.module('config', []).service('config', function() {
     this.releaseVersion = 'vAlpha-1.2.1';
 
     // wether or not to include plants UI components
-    this.includePlants = true;
+    this.includePlants = false;  // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods
 
     this.services = {
         auth_url: "http://tutorial.theseed.org/Sessions/Login",
