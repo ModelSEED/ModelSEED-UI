@@ -1509,13 +1509,14 @@ function($scope, $sParams, WS, $http, Biochem) {
                        direction: rxn.direction
                    });
 
-            ids.push(id);
+            ids.push(id.split('_')[0]);
         }
 
         // add equation from biochem
         return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
+
                 if (d === '>' ) dir = '=>';
                 else if (d === '<' ) dir = '<=';
                 else if (d === '=' ) dir = '<=>';
