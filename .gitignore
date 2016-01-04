@@ -5,6 +5,7 @@
 /data/regulons/
 /docs/
 .tmp/
+.DS_Store
 
 img/home/chat.png
 
