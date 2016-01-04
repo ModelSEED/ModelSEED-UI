@@ -1,0 +1,31 @@
+
+
+
+<div layout="column" id="content" class="container">
+
+    <br>
+
+    <h4>Overview</h4>
+
+    <div>
+        There
+            <span ng-if="meta.nUsers == 0">are 0 users</span>
+            <span ng-if="meta.nUsers == 1">is 1 user</span>
+            <span ng-if="meta.nUsers > 1">are {{meta.nUsers}} users</span>
+        on the site.
+
+        <span class="text-muted">({{meta.nClients}} total connections)</span>
+        <br>
+    </div>
+    <br>
+
+    <h4>Users</h4>
+    <ul class="list-unstyled">
+        <li ng-repeat="user in meta.users">
+            {{user.name}} <span class="text-muted">({{user.nClients}} connections)</span>
+        </li>
+    </ul>
+
+
+
+</div>

@@ -1,4 +1,3 @@
-
 angular.module('ms-ctrls', [])
 .controller('Login', ['$scope', '$state', '$stateParams', 'Auth', '$window',
 /**
@@ -46,7 +45,7 @@ function($scope, $state, $stateParams, Auth, $window) {
                 }, 0);
             });
         }).error(function(e, status){
-            console.log('IT FAILED')
+            console.error('LOGIN FAILED')
             $scope.loading = false;
             if (status == 401)
                 $scope.inValid = true;
@@ -610,26 +609,26 @@ function($scope, $state, Patric, $timeout, $http,
 
       // load my plants
       $scope.loadingMyPlants = true;
-      WS.list('/'+Auth.user+'/plantseed/genomes/')
+    WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
-          // remove non-genomes
-          var i = res.length;
-          while (i--) {
-              var obj = res[i];
-              if (obj.name[0] === '.' || obj.type !== 'genome')
-                  res.splice(i,1);
-          }
+            // remove non-genomes
+            var i = res.length;
+            while (i--) {
+                var obj = res[i];
+                if (obj.name[0] === '.' || obj.type !== 'genome')
+                    res.splice(i,1);
+            }
 
-          $scope.myPlants = res;
-          $scope.loadingMyPlants = false;
-      }).catch(function(e) {
-          if (e.error.code === -32603)
-              $scope.error = 'Something seems to have went wrong. '+
+            $scope.myPlants = res;
+            $scope.loadingMyPlants = false;
+        }).catch(function(e) {
+            if (e.error.code === -32603)
+                $scope.error = 'Something seems to have went wrong. '+
                              'Please try logging out and back in again.';
-          else
-              $scope.error = e.error.message;
-          $scope.loadingMyPlantsMicrobes = false;
-      })
+            else
+                $scope.error = e.error.message;
+            $scope.loadingMyPlantsMicrobes = false;
+        })
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -730,6 +729,12 @@ function($scope, $state, Patric, $timeout, $http,
                  if (MS.myPlants) MS.addModel(res, 'plant');
              })
     }
+
+    console.log('checking jobs')
+    $http.rpc('ms', 'CheckJobs', {})
+        .then(function(res) {
+            console.log('res', res)
+        })
 }])
 
 
@@ -1102,23 +1107,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 }])
 
 
-/*
-
-{
-    element: function() {
-        // this is a dummy-step for modal
-        showNextBtn();
-        $timeout(function() {
-            intro.nextStep();
-        })
-
-
-
-        return document.querySelector('input.ng-pristine');
-    },
-    intro: ''
-},
-*/
 
 //var merged = objs1.concat(objs2);
 function mergeObjects(objs1, objs2, key) {

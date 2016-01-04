@@ -91,6 +91,7 @@ function($http, $q, config, $log) {
 
         return $http.get(url)
                     .then(function(res) {
+
                         return Array.isArray(id) ? res.data : res.data[0];
                     })
     }

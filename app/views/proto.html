@@ -1,11 +1,86 @@
-<h5>This is just a prototype page to demonstrate potential new functionality</h5>
+<style>
+
+#drop-area {
+    height: 300px;
+    width: 100%;
+    padding: 100px 20px;
+    border: 3px dashed #aaa;
+    text-align: center;
+    color: #777;
+
+}
+
+</style>
 
 
-<!--<div path-test></div>-->
+<div ng-controller="UploadCtrl">
 
-<ng-table table-header="header"
-               table-data="maps"
-               table-opts="opts"
-               table-loading="loading"
-               table-placeholder="Search maps">
-</ng-table>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="text-muted ts-queued ts">
+                <i class="fa fa-cloud-upload fa-5x pull-left"></i>
+                <div class="h1">{{uploadingCount ? uploadingCount : 0}}</div>
+                <div class="h4">Uploading</div>
+            </div>
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+            <div class="text-muted ts-completed ts">
+                <i class="fa fa-check-square fa-5x pull-left"></i>
+                <div class="h1">{{uploadCount}}</div>
+                <span class="h4">Completed</span>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <!--
+    <form id="upload-form" enctype="multipart/form-data">
+        <input name="upload" type="file" onchange="angular.element(this).scope().uploadFile(this.files)">
+    </form><br><br>
+
+
+    <div ng-if="uploadProgress" class="progress">
+      <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{uploadProgress}}%;">
+        <span>{{upload.uploadProgress}}% Complete</span>
+      </div>
+    </div>
+
+    <div ng-if="uploadComplete">
+        Upload complete.  Now I will run an AWE job to add your data to <b><i>{{selectedWS}}</i></b>... or something like that.
+    </div>-->
+
+    <br>
+    <br>
+
+
+    <!--
+    <input type="file" id="files" name="files[]" multiple />
+    <div id="drop-area">
+        Drop files here
+    </div>
+
+    <output id="list"></output>-->
+
+    <div class="row">
+        <div ng-if="!loading" class="col-md-12">
+            <h3>Completed</h3>
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                </tr>
+                <tr ng-repeat="info in uploads.data">
+                    <td>
+                        <a download ng-click="download(node.id)">
+                            {{info.file.name}}
+                        </a>
+                    </td>
+                    <td><span tooltip="{{info.file.size}} bytes">{{readableSize(info.file.size)}}</span></td>
+                    <td><span tooltip="{{info.created_on}}">{{relativeTime(info.created_on)}}</span></td>
+                </tr>
+            </table>
+        </div>
+        <md-progress-circular ng-if="loading" mode="indeterminate" diameter="40"></md-progress-circular>
+    </div>
+</div>

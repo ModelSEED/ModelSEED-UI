@@ -1,14 +1,20 @@
 /*
- * kbase-auth.js
- * Angular.js module for using KBase authentication services
+ * auth.js
+ * Angular.js module for using authentication services
  *
  * Authors:
  *  https://github.com/nconrad
  *
+ * Notes:
+ * 	$rootScope is used soley to communicate with the socket service,
+ * 	logging the user out of other connnections
+ *
+ *
 */
 
 angular.module('Auth', [])
-.service('Auth', ['$http', 'config', function($http, config) {
+.service('Auth', ['$rootScope', '$http', 'config', 'Socket', '$window',
+function($rootScope, $http, config, Socket, $window) {
     var self = this;
 
     var auth = JSON.parse( localStorage.getItem('auth') );
@@ -60,7 +66,6 @@ angular.module('Auth', [])
      */
     this.loginPatric = function(user, pass) {
         var data = {username: user, password: pass};
-        console.log('param data', $.param(data))
         return $http({method: "POST",
                       url: config.services.patric_auth_url,
                       data: $.param(data),
@@ -78,7 +83,11 @@ angular.module('Auth', [])
     }
 
     this.logout = function() {
+        // order is important here.
+        // once the token is removed, an event refreshes other connections,
+        // effectively notifiying the user that they logged out of other tabs.
         localStorage.removeItem('auth');
+        self.userLogout(self.user);
     }
 
     this.isAuthenticated = function() {
@@ -91,10 +100,56 @@ angular.module('Auth', [])
 
     this.loginMethod = function(method) {
         if (method === 'patric')
-            return {name: 'PATRIC', newAccountURL: 'https://user.patricbrc.org/register/'}
+            return {name: 'PATRIC', newAccountURL: 'https://user.patricbrc.org/register/'};
 
-        return {name: 'RAST', newAccountURL: 'http://rast.nmpdr.org/?page=Register'}
+        return {name: 'RAST', newAccountURL: 'http://rast.nmpdr.org/?page=Register'};
     }
+
+
+    // listen for logout event on root and refresh page when one tab logs out
+    /*
+    $rootScope.$on('logout', function() {
+        console.log('attempting to reload')
+        $window.location.reload();
+    })*/
+
+
+    if (self.token) {
+        var tokenString = self.token.split('|');
+
+        var token = {};
+        var i = tokenString.length;
+        while (i--) {
+            token[tokenString[i].split('=')[0]] = tokenString[i].split('=')[1];
+        }
+    }
+
+    var socket = io.connect('http://0.0.0.0:3000');
+
+    socket.on('connect', function (data) {
+        console.log('connected as', $rootScope.user)
+        self.userConnect($rootScope.user);
+
+        socket.emit('jobs', $rootScope.token, function(data) {
+            console.log('data', data)
+        })
+    })
+
+    // this is not a login method, it is a "connection" method.
+    this.userConnect = function(user) {
+        socket.emit('user connect', user);
+    }
+
+    // this method tells the server to log the user out of all other connections.
+    this.userLogout = function(user) {
+        socket.emit('user logout', user);
+    }
+
+    // tell all the things to "logout"
+    socket.on('logout', function() {
+        //$rootScope.$emit('logout');
+        $window.location.reload();
+    })
 
 
 }]);

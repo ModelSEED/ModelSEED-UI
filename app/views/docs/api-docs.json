@@ -310,17 +310,17 @@
                 },
                 {
                     "tag": "apiSuccess",
-                    "type": "fba object",
-                    "name": "A",
+                    "type": " object",
+                    "name": "Metadata",
                     "optional": false,
-                    "description": "parsed and sanitized fba object",
+                    "description": "on user's models",
                     "line": 8,
-                    "source": "@apiSuccess {fba object} A parsed and sanitized fba object"
+                    "source": "@apiSuccess { object} Metadata on user's models"
                 }
             ],
             "line": 0,
             "description": "",
-            "source": "@api {get} /my-models/:path List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default).\n\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess {fba object} A parsed and sanitized fba object"
+            "source": "@api {get} /my-models/:path List user's models.  If no path is given,\nthe directory /<username>/home/models/ is used (the default).\n\n@apiName getModel\n\n@apiParam {string} path Path to workspace object\n\n@apiSuccess { object} Metadata on user's models"
         }
     ],
     [

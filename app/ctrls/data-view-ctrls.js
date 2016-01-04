@@ -1504,6 +1504,7 @@ function($scope, $sParams, WS, $http, Biochem) {
             var rxn = solutionData[0][i],
                 id = rxn.reaction_ref.split('/').pop();
 
+            console.log('solution', solutionData)
             data.push({rxn: id,
                        compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
                        direction: rxn.direction

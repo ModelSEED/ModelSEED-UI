@@ -432,7 +432,6 @@ function($s, $http, uiTools, config) {
 .controller('API',
 ['$scope', '$http', 'uiTools',
 function($s, $http, uiTools) {
-
     $s.url = 'http://modelseed.theseed.org/api/';
     $s.version = 'v0';
 
@@ -503,6 +502,44 @@ function($s, $http, uiTools) {
     }
 }])
 
+
+
+
+.controller('UserStatus',
+['$scope', '$stateParams', 'Auth',
+function($s, $stateParams, auth) {
+
+
+    console.log('user status controller')
+
+    // join room user-status
+    var socket = io('http://0.0.0.0:3000/user-status');
+
+
+    $s.roomCount;
+
+    console.log('auth.token', auth.token)
+
+    socket.on('connect', function() {
+
+        // initial request for meta data
+        socket.emit('request meta', function(meta) {
+            //console.log('data', meta)
+
+            $s.$apply(function() {
+                $s.meta = meta;
+            })
+        })
+
+        // subsequent count updates
+        socket.on('update meta', function(meta) {
+            //console.log('trying to update to meta', meta)
+            $s.$apply(function() {
+                $s.meta = meta;
+            })
+        })
+    })
+}])
 
 
 .controller('Proto',

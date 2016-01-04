@@ -71,13 +71,11 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
-                <thead >
+            <table class="table table-striped table-vertical-center" ng-hide="filtered && filtered.length == 0">
+                <thead>
                     <tr>
-                        <tr>
-                            <th>Name</th>
-                            <th>Mod Time</th>
-                        </tr>
+                        <th>Name</th>
+                        <th>Mod Time</th>
                     </tr>
                 </thead>
 
@@ -87,7 +85,7 @@
                         <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
                     </td>
                     <td>{{uiTools.relativeTime(row.timestamp)}}
-                        <md-button class="md-secondary pull-right" ng-click="reconstructPlant($event,row)">Reconstruct</md-button>
+                        <a class="md-button md-primary pull-right table-hover-btn  hover no-link" ng-click="reconstructPlant($event,row)"><i class="icon-tools"></i> Reconstruct</a>
                     </td>
                 </tr>
             </table>

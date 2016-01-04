@@ -1,16 +1,14 @@
 
-angular.module('Upload', [])
-.controller('Upload',
+angular.module('UploadCtrl', [])
+.controller('UploadCtrl',
 ['$scope', '$http', 'uiTools', 'config', 'Auth',
 function($scope, $http, uiTools, config, auth) {
-
     var shockURL = config.services.shock_url;
     var nodeURL= shockURL+'/node';
     var authObj = {Authorization: 'OAuth ' + auth.token};
     var header = {headers:  auth }
 
     $scope.uploadFile = function(files) {
-
         $scope.$apply( function() {
             $scope.uploadingCount = 1;
             $scope.uploadComplete = false;
@@ -64,6 +62,8 @@ function($scope, $http, uiTools, config, auth) {
                 console.log('fail', e)
             })
     }
+
+    $scope.getUploads()
 
     //$scope.shock = shock;
     $scope.loading = true;

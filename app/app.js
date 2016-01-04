@@ -24,12 +24,14 @@ angular.module('ModelSEED',
  'WS',
  'MS',
  'Upload',
+ 'UploadCtrl',
  'Biochem',
  'Browser',
  'Regulons',
  'Fusions',
  'Dialogs',
- 'docs-directives'
+ 'docs-directives',
+ 'Socket'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider', '$sceProvider',
@@ -256,7 +258,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('app.proto', {
             url: "/proto",
             templateUrl: 'app/views/proto.html',
-            controller: 'Proto',
+            /*controller: 'Proto',*/
+            authenticate: true
         }).state('app.maps', {
             url: "/maps",
             templateUrl: 'app/views/maps.html',
@@ -275,6 +278,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Image',
         })
 
+
+        .state('app.userStatus', {
+            url: "/user-status",
+            templateUrl: 'app/views/docs/user-status.html',
+            controller: 'UserStatus',
+            authenticate: true
+        })
 
 
         /* only used for testing analysis forms */
@@ -314,25 +324,25 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 .run(['$rootScope', '$state', '$stateParams', '$window',
-      '$location', 'Auth', '$timeout', '$templateCache', 'config', 'AuthDialog',
+      '$location', 'Auth', '$timeout', 'config', 'AuthDialog',
 function($rootScope, $state, $sParams, $window,
-         $location, auth, $timeout, $templateCache, config, AuthDialog) {
+         $location, auth, $timeout, config, AuthDialog) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
-        //$templateCache.removeAll();
 
         // if first load on home and user is authenticated,
         // forward to application page [good UX!]
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state set
             $timeout(function() {
-            $state.transitionTo('app.genomes')
+                $state.transitionTo('app.genomes')
                 event.preventDefault();
             })
         }
 
         // else, if not authenticated and url is private, force login
         else if (toState.authenticate && !auth.isAuthenticated()) {
+            console.log('not logged in')
             AuthDialog.signIn();
         }
 
