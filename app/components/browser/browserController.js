@@ -292,7 +292,6 @@ angular.module('Browser', ['uiTools'])
             }
             $scope.status = value;
 
-            console.log('status', $scope.status)
         })
 
     }, true);
@@ -339,7 +338,7 @@ angular.module('Browser', ['uiTools'])
     }
 
     $scope.goTo = function(item, state) {
-        if (item.type === 'folder')
+        if (item.type === 'folder' || item.type === 'modelfolder')
             $state.go('app.myData', {dir: item.path})
         else {
             if (!state) var state = getState(item);
