@@ -129,6 +129,28 @@ function($scope, $stateParams) {
 }])
 
 
+.controller('Jobs',
+['$scope', 'MS', 'uiTools',
+function($s, MS, uiTools) {
+    $s.jobs;
+    $s.relativeTime = uiTools.relativeTime;
+
+
+    $s.reload = function() {
+        $s.jobs = null;
+        MS.listMyJobs().then(function(jobs) {
+            $s.jobs = jobs;
+        })
+    }
+
+    if (MS.myJobs)
+        $s.jobs = MS.myJobs;
+    else
+        $s.reload();
+
+
+}])
+
 
 .controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
 /**
@@ -730,11 +752,6 @@ function($scope, $state, Patric, $timeout, $http,
              })
     }
 
-    console.log('checking jobs')
-    $http.rpc('ms', 'CheckJobs', {})
-        .then(function(res) {
-            console.log('res', res)
-        })
 }])
 
 

@@ -123,7 +123,7 @@ function($rootScope, $http, config, Socket, $window) {
             token[tokenString[i].split('=')[0]] = tokenString[i].split('=')[1];
         }
     }
-
+    /*
     var socket = io.connect('http://0.0.0.0:3000');
 
     socket.on('connect', function (data) {
@@ -135,6 +135,14 @@ function($rootScope, $http, config, Socket, $window) {
         })
     })
 
+
+    // tell all the things to "logout"
+    socket.on('logout', function() {
+        //$rootScope.$emit('logout');
+        $window.location.reload();
+    })
+
+
     // this is not a login method, it is a "connection" method.
     this.userConnect = function(user) {
         socket.emit('user connect', user);
@@ -144,12 +152,8 @@ function($rootScope, $http, config, Socket, $window) {
     this.userLogout = function(user) {
         socket.emit('user logout', user);
     }
+    */
 
-    // tell all the things to "logout"
-    socket.on('logout', function() {
-        //$rootScope.$emit('logout');
-        $window.location.reload();
-    })
 
 
 }]);

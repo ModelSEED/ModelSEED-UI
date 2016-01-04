@@ -32,6 +32,15 @@
             <i class="icon-folder-open-o"></i> <span hide-sm>Models</span>
         </a>
     </li>
+
+    <li class="divider"></li>
+
+    <li ng-class="{ active: $state.includes('app.jobs') }" style="margin-left: 10px;">
+        <a ui-sref="app.jobs">
+            <i class="fa fa-th-list" style="margin-right: 2px;"></i>
+            <span hide-sm>Jobs</span>
+        </a>
+    </li>
     <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">
         <a ui-sref="app.compare">
             <i class="icon-git-compare"></i>

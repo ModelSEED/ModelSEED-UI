@@ -81,6 +81,14 @@ a.disabled {
     font-size: 1.17em;
 }
 
+.toolbar > li.divider {
+    position: absolute;
+    display: inline;
+    height: 40px;
+    margin: 5px;
+    border-right: 1px solid #444;
+}
+
 /**
  * animations
  */

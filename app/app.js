@@ -190,7 +190,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/my-models.html',
             controller: 'MyModels',
             authenticate: true
+        }).state('app.jobs', {
+            url: "/my-jobs/",
+            templateUrl: 'app/views/my-jobs.html',
+            controller: 'Jobs',
+            authenticate: true
         })
+
 
 
         // data browser

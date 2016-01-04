@@ -1,0 +1,63 @@
+
+
+<div layout="row">
+    <h3 flex>Job Status</h3>
+    <div>
+        <md-button class="md-icon-button md-primary" ng-click="reload()">
+            <i class="material-icons">refresh</i>
+        </md-button>
+    </div>
+</div>
+
+
+
+<div layout="row">
+    <div flex>
+        <div class="text-muted ts-queued ts">
+            <i class="fa fa-tasks fa-5x pull-left"></i>
+            <div class="h1">{{appUI.status.queued}}</div>
+            <div class="h4">Queued</div>
+        </div>
+    </div>
+    <div flex>
+        <div class="text-muted ts-running ts">
+            <i class="fa fa-play-circle  fa-5x pull-left"></i>
+            <div class="h1">{{appUI.status.inprogress}}</div>
+            <div class="h4">Running</div>
+        </div>
+    </div>
+    <div flex>
+        <div class="text-muted ts-completed ts">
+            <i class="fa fa-check-square fa-5x pull-left"></i>
+            <div class="h1">{{appUI.status.completed}}</div>
+            <div class="h4">Completed</div>
+        </div>
+    </div>
+</div>
+
+
+<br>
+<md-progress-circular ng-if="!jobs" md-mode="indeterminate"></md-progress-circular>
+
+<table ng-if="jobs" class="table">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Params</th>
+            <th>Start Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="job in jobs">
+            <td>{{job.parameters.command}}</td>
+            <td>
+                <span ng-repeat="key in job.parameters.arguments">
+                    {{key}}: {{job.parameters.arguments[key]}}
+                </span>
+            </td>
+            <td>{{relativeTime(job.start_time)}}</td>
+            <td>{{job.status}}</td>
+        </tr>
+    </tbody>
+</table>
