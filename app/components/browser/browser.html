@@ -101,7 +101,7 @@
                             {<b>JS</b>} View JSON
                         </span>
 
-                        <span class="ws-opt" ng-if="selected.type != 'folder'">
+                        <span class="ws-opt" ng-if="selected.type != 'folder' && selected.type != 'modelfolder'">
                             <a class="browser-download" href="{{selected.downloadURL}}">
                                 <i class="icon-file-download"></i> Download...
                             </a>
@@ -154,10 +154,10 @@
             context-menu="openMenu($event, $index, item)"
             data-target="context-menu">
 
-            <td ng-if="item.type == 'folder'">
+            <td ng-if="item.type == 'folder' || item.type == 'modelfolder'">
                 <i class="fa fa-folder-o fa-2x soft"></i>
             </td>
-            <td ng-if="item.type != 'folder'">
+            <td ng-if="item.type != 'folder' && item.type != 'modelfolder'">
                 <i class="fa fa-file-text-o fa-2x soft"></i>
             </td>
 
@@ -171,13 +171,13 @@
                     <span ng-if="saving">saving...</span>
                 </form>
 
-                <a ng-if="item.type == 'folder' && edit.index != $index"
+                <a ng-if="(item.type == 'folder' || item.type == 'modelfolder') && edit.index != $index"
                    ui-sref="app.myData({dir: folder+'/'+item.name })"
                    ng-click="prevent($event)">
                     {{item.name}}
                 </a>
 
-                <a ng-if="item.type != 'folder' && item.state && edit.index != $index"
+                <a ng-if="item.type != 'folder' && item.type != 'modelfolder' && item.state && edit.index != $index"
                    ui-sref="{{item.state}}({path: item.path })"
                    ng-click="prevent($event)">
                     {{item.name}}
@@ -185,14 +185,14 @@
 
                 <span ng-if="deleting">deleting...</span>
 
-                <span ng-if="item.type != 'folder' && !item.state && edit.index != $index"
+                <span ng-if="item.type != 'folder' && item.type != 'modelfolder' && !item.state && edit.index != $index"
                       ng-click="prevent($event)">
                     {{item.name}}
                 </span>
             </td>
             <td>{{item.type}}</td>
             <td>{{relativeTime(item.timestamp)}}</td>
-            <td>{{item.type != 'folder' ? readableSize(item.size) : '-'}}</td>
+            <td>{{item.type != 'folder' && item.type != 'modelfolder' ? readableSize(item.size) : '-'}}</td>
             <!--<td>{{item.type == 'folder' && item.files ? item.files : '-'}}</td>-->
         </tr>
     </table>
@@ -217,7 +217,7 @@
                 </a>
             </li>
 
-            <li ng-if="selected.type != 'folder'">
+            <li ng-if="selected.type != 'folder' && selected.type != 'modelfolder'">
                 <a tabindex="4" href="{{selected.downloadURL}}">
                     <i class="icon-file-download"></i> Download...
                 </a>
