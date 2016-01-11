@@ -508,15 +508,11 @@ function($s, $http, uiTools) {
 .controller('UserStatus',
 ['$scope', '$stateParams', 'Auth',
 function($s, $stateParams, auth) {
-
-
     console.log('user status controller')
 
     // join room user-status
-    var socket = io('http://0.0.0.0:3000/user-status');
+    var socket = io.connect('http://0.0.0.0:3000/user-status');
 
-
-    $s.roomCount;
 
     console.log('auth.token', auth.token)
 

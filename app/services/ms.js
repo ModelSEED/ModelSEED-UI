@@ -367,7 +367,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
         console.log('checking jobs')
         return $http.rpc('ms', 'CheckJobs', {})
             .then(function(res) {
-
+                console.log('res', res)
                 self.myJobs = sanitizeJobs(res);
                 console.log('jobs', self.myJobs)
                 return self.myJobs;

@@ -123,16 +123,16 @@ function($rootScope, $http, config, Socket, $window) {
             token[tokenString[i].split('=')[0]] = tokenString[i].split('=')[1];
         }
     }
-    /*
-    var socket = io.connect('http://0.0.0.0:3000');
+
+    var socket = io.connect('http://0.0.0.0:3000', { handshake: {auth: self.token } });
 
     socket.on('connect', function (data) {
         console.log('connected as', $rootScope.user)
         self.userConnect($rootScope.user);
 
-        socket.emit('jobs', $rootScope.token, function(data) {
-            console.log('data', data)
-        })
+        //socket.emit('jobs', $rootScope.token, function(data) {
+        //    console.log('data', data)
+        //})
     })
 
 
@@ -152,8 +152,6 @@ function($rootScope, $http, config, Socket, $window) {
     this.userLogout = function(user) {
         socket.emit('user logout', user);
     }
-    */
-
 
 
 }]);

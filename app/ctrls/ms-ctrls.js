@@ -133,21 +133,49 @@ function($scope, $stateParams) {
 ['$scope', 'MS', 'uiTools',
 function($s, MS, uiTools) {
     $s.jobs;
+    $s.queuedJobs = [];
+    $s.runningJobs = [];
+    $s.completedJobs = [];
+
+
     $s.relativeTime = uiTools.relativeTime;
 
-
     $s.reload = function() {
+        $s.queuedJobs = [];
+        $s.runningJobs = [];
+        $s.completedJobs = [];
         $s.jobs = null;
         MS.listMyJobs().then(function(jobs) {
+
+            groupJobs(jobs);
+
             $s.jobs = jobs;
+            console.log('completed', $s.completedJobs)
+
+            $s.loading = false;
         })
     }
-
-    if (MS.myJobs)
+    $s.loading = true;
+    if (MS.myJobs) {
         $s.jobs = MS.myJobs;
-    else
+        groupJobs($s.jobs)
+        $s.loading = false;
+    } else {
         $s.reload();
+    }
 
+    function groupJobs(jobs) {
+        for (var i=0; i<jobs.length; i++) {
+            var job = jobs[i];
+
+            if (job.status === 'queued')
+                $s.queuedJobs.push(job);
+            else if (job.status === 'in-progress')
+                $s.runningJobs.push(job);
+            else if (job.status === 'completed')
+                $s.completedJobs.push(job);
+        }
+    }
 
 }])
 

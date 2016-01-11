@@ -10,26 +10,25 @@
 </div>
 
 
-
 <div layout="row">
     <div flex>
         <div class="text-muted ts-queued ts">
             <i class="fa fa-tasks fa-5x pull-left"></i>
-            <div class="h1">{{appUI.status.queued}}</div>
+            <div class="h1">{{!loading ? queuedJobs.length: ''}}</div>
             <div class="h4">Queued</div>
         </div>
     </div>
     <div flex>
         <div class="text-muted ts-running ts">
             <i class="fa fa-play-circle  fa-5x pull-left"></i>
-            <div class="h1">{{appUI.status.inprogress}}</div>
-            <div class="h4">Running</div>
+            <div class="h1">{{!loading ? runningJobs.length: ''}}</div>
+            <div class="h4">In Progress</div>
         </div>
     </div>
     <div flex>
         <div class="text-muted ts-completed ts">
             <i class="fa fa-check-square fa-5x pull-left"></i>
-            <div class="h1">{{appUI.status.completed}}</div>
+            <div class="h1">{{!loading ? completedJobs.length : ''}}</div>
             <div class="h4">Completed</div>
         </div>
     </div>
@@ -39,25 +38,35 @@
 <br>
 <md-progress-circular ng-if="!jobs" md-mode="indeterminate"></md-progress-circular>
 
-<table ng-if="jobs" class="table">
+<table ng-if="jobs" class="table  table-vertical-center">
     <thead>
         <tr>
             <th>Task</th>
             <th>Params</th>
+            <th>ID</th>
             <th>Start Time</th>
             <th>Status</th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="job in jobs">
+        <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true">
             <td>{{job.parameters.command}}</td>
             <td>
-                <span ng-repeat="key in job.parameters.arguments">
+                <div ng-repeat="(key, value) in job.parameters.arguments">
                     {{key}}: {{job.parameters.arguments[key]}}
-                </span>
+                </div>
             </td>
-            <td>{{relativeTime(job.start_time)}}</td>
-            <td>{{job.status}}</td>
+            <td>{{job.id}}</td>
+            <td>{{relativeTime(job.timestamp)}}</td>
+            <td>
+                <span ng-if="job.status == 'failed'" class="text-danger">{{job.status}}</span>
+                <span ng-if="job.status == 'completed'" class="text-success">{{job.status}}</span>
+                <span ng-if="job.status != 'completed' && job.status != 'failed'">{{job.status}}</span>
+
+                <a href="https://p3c.theseed.org/services/app_service/task_info/{{job.id}}/stderr" target="_blank" class="pull-right">
+                    <i class="material-icons" style="font-size: 1.0em">info_outline</i>
+                </a>
+            </td>
         </tr>
     </tbody>
 </table>
