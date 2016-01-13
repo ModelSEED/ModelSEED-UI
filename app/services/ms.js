@@ -165,7 +165,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
         //$log.log('list models', params)
         return $http.rpc('ms', 'list_models', params)
                     .then(function(res) {
-                        //console.log('listmodels resp', res)
                         var data = [];
                         for (var i=0; i<res.length; i++) {
                             var obj = res[i];
@@ -173,8 +172,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                         }
 
                         // cache data according to plants/microbes
-                        if (path.split('/')[2] === 'plantseed') self.myPlants = data
-                        else self.myModels = data;
+                        //if (path.split('/')[2] === 'plantseed') self.myPlants = data
+                        //else self.myModels = data;
+                        self.myModels = data;
                         return data;
                     })
     }

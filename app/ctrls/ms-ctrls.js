@@ -141,13 +141,12 @@ function($s, MS, uiTools) {
     $s.relativeTime = uiTools.relativeTime;
 
     $s.reload = function() {
-        $s.loading = true;        
+        $s.loading = true;
         $s.queuedJobs = [];
         $s.runningJobs = [];
         $s.completedJobs = [];
         $s.jobs = null;
         MS.listMyJobs().then(function(jobs) {
-
             groupJobs(jobs);
 
             $s.jobs = jobs;
@@ -929,8 +928,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.myMicrobes = MS.myModels;
     } else {
         $scope.loadingMicrobes = true;
-        MS.listModels('/'+Auth.user+'').then(function(res) {
-            console.log('res', res)
+        MS.listModels().then(function(res) {
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
@@ -939,6 +937,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         })
     }
 
+    /* disabled for now
     if (MS.myPlants) {
         $scope.myPlants = MS.myPlants;
     } else {
@@ -950,7 +949,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.myPlants = [];
             $scope.loadingPlants = false;
         })
-    }
+    }*/
 
 
     $scope.showFBAs = function(item) {
