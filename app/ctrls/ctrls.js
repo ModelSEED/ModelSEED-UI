@@ -420,6 +420,13 @@ function($s, $http, uiTools, config) {
         })
 }])
 
+.controller('Team',
+['$scope', '$stateParams',
+function($s, $stateParams) {
+    console.log('here')
+
+}])
+
 
 .filter('highlight', ['$sce', function($sce) {
     return function(text, phrase) {

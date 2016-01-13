@@ -1,10 +1,10 @@
 
 
-<div layout="row">
+<div layout="row" layout-align="end end" class="fixed">
     <h3 flex>Job Status</h3>
     <div>
-        <md-button class="md-icon-button md-primary" ng-click="reload()">
-            <i class="material-icons">refresh</i>
+        <md-button class="md-icon-button md-primary md-raised" ng-click="reload()">
+            <i class="material-icons" style="margin-top:11px;">refresh</i>
         </md-button>
     </div>
 </div>
@@ -14,21 +14,21 @@
     <div flex>
         <div class="text-muted ts-queued ts">
             <i class="fa fa-tasks fa-5x pull-left"></i>
-            <div class="h1">{{!loading ? queuedJobs.length: ''}}</div>
+            <div class="h1">{{!loading ? queuedJobs.length: '...'}}</div>
             <div class="h4">Queued</div>
         </div>
     </div>
     <div flex>
         <div class="text-muted ts-running ts">
             <i class="fa fa-play-circle  fa-5x pull-left"></i>
-            <div class="h1">{{!loading ? runningJobs.length: ''}}</div>
+            <div class="h1">{{!loading ? runningJobs.length: '...'}}</div>
             <div class="h4">In Progress</div>
         </div>
     </div>
     <div flex>
         <div class="text-muted ts-completed ts">
             <i class="fa fa-check-square fa-5x pull-left"></i>
-            <div class="h1">{{!loading ? completedJobs.length : ''}}</div>
+            <div class="h1">{{!loading ? completedJobs.length : '...'}}</div>
             <div class="h4">Completed</div>
         </div>
     </div>
@@ -42,8 +42,8 @@
     <thead>
         <tr>
             <th>Task</th>
-            <th>Params</th>
-            <th>ID</th>
+            <th hide-md hide-sm>Params</th>
+            <th hide-md hide-sm>ID</th>
             <th>Start Time</th>
             <th>Status</th>
         </tr>
@@ -51,12 +51,12 @@
     <tbody>
         <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true">
             <td>{{job.parameters.command}}</td>
-            <td>
+            <td hide-md hide-sm>
                 <div ng-repeat="(key, value) in job.parameters.arguments">
                     {{key}}: {{job.parameters.arguments[key]}}
                 </div>
             </td>
-            <td>{{job.id}}</td>
+            <td hide-md hide-sm>{{job.id}}</td>
             <td>{{relativeTime(job.timestamp)}}</td>
             <td>
                 <span ng-if="job.status == 'failed'" class="text-danger">{{job.status}}</span>

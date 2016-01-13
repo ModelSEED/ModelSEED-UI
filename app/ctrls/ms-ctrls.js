@@ -141,6 +141,7 @@ function($s, MS, uiTools) {
     $s.relativeTime = uiTools.relativeTime;
 
     $s.reload = function() {
+        $s.loading = true;        
         $s.queuedJobs = [];
         $s.runningJobs = [];
         $s.completedJobs = [];
@@ -156,6 +157,7 @@ function($s, MS, uiTools) {
         })
     }
     $s.loading = true;
+
     if (MS.myJobs) {
         $s.jobs = MS.myJobs;
         groupJobs($s.jobs)
@@ -733,7 +735,7 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.reconstruct = function(ev, item) {
         if ('genome_id' in item)
-            var params = {path: 'PATRICSOLR:'+item.genome_id, name: item.genome_name};
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
         else
             var params = {path: item.path, name: item.name};
 
@@ -927,7 +929,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.myMicrobes = MS.myModels;
     } else {
         $scope.loadingMicrobes = true;
-        MS.listModels('/'+Auth.user+'/home/models').then(function(res) {
+        MS.listModels('/'+Auth.user+'').then(function(res) {
+            console.log('res', res)
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {

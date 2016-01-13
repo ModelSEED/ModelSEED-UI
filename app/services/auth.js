@@ -106,52 +106,26 @@ function($rootScope, $http, config, Socket, $window) {
     }
 
 
-    // listen for logout event on root and refresh page when one tab logs out
-    /*
-    $rootScope.$on('logout', function() {
-        console.log('attempting to reload')
-        $window.location.reload();
-    })*/
+    //var socket = io.connect('http://0.0.0.0:3000');
 
-
-    if (self.token) {
-        var tokenString = self.token.split('|');
-
-        var token = {};
-        var i = tokenString.length;
-        while (i--) {
-            token[tokenString[i].split('=')[0]] = tokenString[i].split('=')[1];
-        }
-    }
-
-    var socket = io.connect('http://0.0.0.0:3000', { handshake: {auth: self.token } });
-
-    socket.on('connect', function (data) {
-        console.log('connected as', $rootScope.user)
-        self.userConnect($rootScope.user);
-
-        //socket.emit('jobs', $rootScope.token, function(data) {
-        //    console.log('data', data)
-        //})
-    })
-
+    //socket.on('connect', function (data) {
+    //    console.log('connected as', $rootScope.user)
+    //    self.userConnect($rootScope.user);
+    //})
 
     // tell all the things to "logout"
-    socket.on('logout', function() {
-        //$rootScope.$emit('logout');
-        $window.location.reload();
-    })
+    //socket.on('logout', function() {
+    //    $window.location.reload();
+    //})
 
 
     // this is not a login method, it is a "connection" method.
-    this.userConnect = function(user) {
-        socket.emit('user connect', user);
-    }
+    //this.userConnect = function(user) {
+    //    socket.emit('user connect', user);
+    //}
 
     // this method tells the server to log the user out of all other connections.
-    this.userLogout = function(user) {
-        socket.emit('user logout', user);
-    }
-
-
+    //this.userLogout = function(user) {
+    //    socket.emit('user logout', user);
+    //}
 }]);

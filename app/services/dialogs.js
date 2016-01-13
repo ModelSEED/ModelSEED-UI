@@ -85,11 +85,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    self.showToast('Reconstructing', item.name)
+                    self.showToast('Reconstructing', item.name, 5000)
                     MS.reconstruct($scope.form)
                       .then(function(r) {
                            cb(r);
-                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                           //self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
@@ -116,11 +116,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                 $scope.form = {genome: item.path};
 
                 $scope.reconstruct = function(){
-                    self.showToast('Reconstructing', item.name)
+                    self.showToast('Reconstructing', item.name, 5000)
                     MS.reconstruct($scope.form, {gapfill: false})
                       .then(function(r) {
                            cb(r);
-                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                           //self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
@@ -154,13 +154,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
-                    self.showToast('Running Flux Balance Analysis', item.name)
+                    self.showToast('Running Flux Balance Analysis', item.name, 5000)
                     MS.runFBA($scope.form)
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          self.showComplete('FBA Complete',
-                                       res.id+' '+res.media_ref.split('/').pop())
+                          //self.showComplete('FBA Complete',
+                          //             res.id+' '+res.media_ref.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -187,12 +187,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                 $scope.form = {model: item.path};
 
                 $scope.gapfill = function(){
-                    self.showToast('Gapfilling', item.name)
+                    self.showToast('Gapfilling', item.name, 5000)
 
                     MS.gapfill($scope.form)
                       .then(function(res) {
                            cb();
-                           self.showComplete('Gapfill Complete', res[0])
+                           //self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {
                           self.showError('Gapfill Error', e.error.message.slice(0,30)+'...')
                       })
@@ -251,7 +251,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
         })
     }
 
-    this.showToast = function(title, name) {
+    this.showToast = function(title, name, duration) {
       $mdToast.show({
         controller: 'ToastCtrl',
         parent: angular.element('.sidebar'),
@@ -264,7 +264,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                         'Hide'+
                       '</md-button>-->'+
                     '</md-toast>',
-        hideDelay: 0,
+        hideDelay: duration,
       });
 
     };

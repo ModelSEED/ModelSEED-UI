@@ -62,6 +62,12 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('main.team', {
             url: "/team",
             templateUrl: 'app/views/docs/team.html',
+        }).state('main.teamMember', {
+            url: "/team/:name",
+            templateUrl: function ($stateParams){
+                console.log('blah', $stateParams.name)
+                return 'app/views/docs/team/'+$stateParams.name+'.html';
+            },
         }).state('main.publications', {
             url: "/publications",
             templateUrl: 'app/views/docs/publications.html',
@@ -141,7 +147,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/docs/sources.html',
         })
         .state('main.api', {
-            url: "/api",
+            url: "/about/api",
             templateUrl: 'app/views/docs/api.html',
             controller: 'API'
         })
