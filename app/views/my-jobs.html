@@ -46,6 +46,7 @@
             <th hide-md hide-sm>ID</th>
             <th>Start Time</th>
             <th>Status</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -62,7 +63,8 @@
                 <span ng-if="job.status == 'failed'" class="text-danger">{{job.status}}</span>
                 <span ng-if="job.status == 'completed'" class="text-success">{{job.status}}</span>
                 <span ng-if="job.status != 'completed' && job.status != 'failed'">{{job.status}}</span>
-
+            </td>
+            <td>
                 <a href="https://p3c.theseed.org/services/app_service/task_info/{{job.id}}/stderr" target="_blank" class="pull-right">
                     <i class="material-icons" style="font-size: 1.0em">info_outline</i>
                 </a>

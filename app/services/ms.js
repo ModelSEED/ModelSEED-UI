@@ -17,7 +17,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.myPlants = null;
     this.myJobs = null;
 
-
     var cache = $cacheFactory('ms');
 
     this.listRastGenomes = function() {
@@ -41,8 +40,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })
     }
 
-
-
     this.uploadData = function(p) {
         var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
         var params = {objects:objs};
@@ -51,7 +48,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     return res;
                 })
     }
-
 
     this.getDownloads = function(path) {
         var jsonPath = path,
@@ -105,8 +101,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.reconstruct = function(form, params) {
-        console.log('form', form)
-        console.log('addtional params', params)
         var params = angular.extend(form, params)
         $log.log('reconstruct form', params)
         return $http.rpc('ms', 'ModelReconstruction', params)
@@ -180,15 +174,16 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.sanitizeModel = function(obj) {
-        return {name: obj.id,
-                path: obj.ref,
-                orgName: obj.name,
-                rxnCount: obj.num_reactions,
-                cpdCount: obj.num_compounds,
-                fbaCount: obj.fba_count,
-                timestamp: Date.parse(obj.rundate+'+0000'),
-                gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills}
-
+        return {
+            name: obj.id,
+            path: obj.ref+'/model',
+            orgName: obj.name,
+            rxnCount: obj.num_reactions,
+            cpdCount: obj.num_compounds,
+            fbaCount: obj.fba_count,
+            timestamp: Date.parse(obj.rundate+'+0000'),
+            gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills
+        }
     }
 
     this.myMedia = null; //cached media data
@@ -363,11 +358,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.listMyJobs = function() {
-
-        console.log('checking jobs')
         return $http.rpc('ms', 'CheckJobs', {})
             .then(function(res) {
-                console.log('res', res)
                 self.myJobs = sanitizeJobs(res);
                 console.log('jobs', self.myJobs)
                 return self.myJobs;

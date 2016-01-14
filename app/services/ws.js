@@ -83,14 +83,12 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
     this.cached = {}
     this.get = function(path, opts) {
-
         if (opts && opts.cache && path in self.cached) return self.cached[path];
 
         //console.log('fetching', path)
         var p = $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        //console.log('get (object) response', res)
-
+                        console.log('raw', res)
                         var meta = res[0][0],
                             node = meta[11];
 
@@ -102,7 +100,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
                             return $http.get(url, header)
                                         .then(function(res) {
-                                            return res.data;
+                                            return {meta: meta, data: res.data};
                                         })
                         } else {
                             // try to parse, if not, assume data is string.

@@ -528,11 +528,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     $scope.loading = true;
     var start = performance.now();
     WS.get(path, {cache:true}).then(function(res) {
-
+        console.log('model', res)
 
         $scope.models = [res.data];
         $scope.orgName = res.data.name;
-
 
         try {
             $scope.data = ModelParser.parse(res.data);
