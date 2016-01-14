@@ -1,5 +1,5 @@
 
-# ModelSEED UI (under dev) [![Build Status](https://travis-ci.org/ModelSEED/ModelSEED-UI.svg?branch=master)](https://travis-ci.org/ModelSEED/ModelSEED-UI)
+# ModelSEED UI <sup>(beta)</sup> [![Build Status](https://travis-ci.org/ModelSEED/ModelSEED-UI.svg?branch=master)](https://travis-ci.org/ModelSEED/ModelSEED-UI)
 
 
 ## Local Installation
