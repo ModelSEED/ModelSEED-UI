@@ -176,7 +176,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.sanitizeModel = function(obj) {
         return {
             name: obj.id,
-            path: obj.ref+'/model',
+            path: obj.ref,
             orgName: obj.name,
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
@@ -248,10 +248,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.getModelFBAs = function(modelPath) {
-        //$log.log('list related fbas!', modelPath)
         return $http.rpc('ms', 'list_fba_studies', {model: modelPath})
                     .then(function(res) {
-                        //console.log('related fbas', res)
                         // select any previously selected
                         var d = [];
 
@@ -276,11 +274,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.getModelGapfills = function(path) {
-        //$log.log('list gapfills', path)
         return $http.rpc('ms', 'list_gapfill_solutions', {model: path})
                     .then(function(res) {
-                        $log.log('related gfs', res)
-
                         var d = [];
                         for (i in res) {
                             var gf = res[i];

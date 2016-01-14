@@ -527,9 +527,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     // fetch object data and parse it.
     $scope.loading = true;
     var start = performance.now();
-    WS.get(path, {cache:true}).then(function(res) {
-        console.log('model', res)
-
+    WS.get(path+'/model', {cache:true}).then(function(res) {
         $scope.models = [res.data];
         $scope.orgName = res.data.name;
 
@@ -541,10 +539,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
         $scope.loading = false;
 
-
         var end = performance.now();
         var duration = end - start;
-        console.log('time:', duration)
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
