@@ -842,10 +842,10 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
 
     // fetch object data and parse it.
     $scope.loading = true;
-    WS.get(path).then(function(res) {
-        FBAParser.parse(res.data)
+    WS.get(path).then(function(obj) {
+        FBAParser.parse(obj.data)
                  .then(function(parsed) {
-                    $scope.fbas = [res.data];
+                    $scope.fbas = [parsed.data];
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
@@ -1239,7 +1239,7 @@ function(WS, ModelParser) {
 
         var modelRef = fbaObj.fbamodel_ref.replace(/\|\|/g, '');
 
-        return WS.get(modelRef).then(function(res) {
+        return WS.get(modelRef+'/model').then(function(res) {
                     this.modelData = res;
                     this.model = ModelParser;
                     var modelObj =  this.model.parse(res.data);
