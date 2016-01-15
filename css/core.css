@@ -1098,6 +1098,17 @@ td .label-gapfill {
     margin-right: 15px;
 }
 
+.toolbar > .jobs-link {
+    margin-left: 10px;
+    position: relative;
+}
+
+.toolbar .job-count {
+    position: absolute;
+    top: 7px;
+    right: 0;
+}
+
 
 /**
  * data browser

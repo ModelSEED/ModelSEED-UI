@@ -35,10 +35,11 @@
 
     <li class="divider"></li>
 
-    <li ng-class="{ active: $state.includes('app.jobs') }" style="margin-left: 10px;">
+    <li ng-class="{ active: $state.includes('app.jobs') }" ng-controller="JobCount" class="jobs-link">
         <a ui-sref="app.jobs">
             <i class="fa fa-th-list" style="margin-right: 2px;"></i>
             <span hide-sm>Jobs</span>
+            <div class="badge job-count">{{remainingJobCount}}</div>
         </a>
     </li>
     <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">

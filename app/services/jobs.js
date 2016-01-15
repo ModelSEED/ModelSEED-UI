@@ -12,8 +12,6 @@ angular.module('Jobs', [])
 function(MS, $rootScope, $timeout) {
     var self = this;
 
-    console.log('Here in jobs service!')
-
     this.jobs = null;
 
     var queuedJobs = [],

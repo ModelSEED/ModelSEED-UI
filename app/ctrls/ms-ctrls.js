@@ -137,12 +137,8 @@ function($s, MS, uiTools, Jobs) {
 
     // if initial jobs status isn't there, listen
     // otherwise, load from cache and listen
-    if (Jobs.getStatus().allJobs === null) {
-        listener();
-    } else {
-        setStatus();
-        listener();
-    }
+    if (Jobs.getStatus().allJobs !== null) setStatus();
+
     function setStatus() {
         var status = Jobs.getStatus()
 
@@ -150,14 +146,32 @@ function($s, MS, uiTools, Jobs) {
         $s.queuedCount = status.queuedCount,
         $s.runningCount = status.runningCount,
         $s.completedCount = status.completedCount;
-        console.log('update')
     }
 
     function listener() {
         $s.$on('Event.JobUpdate', setStatus);
     }
+
+    listener();
 }])
 
+.controller('JobCount',
+['$scope', 'Jobs',
+function($s, Jobs) {
+    if (Jobs.getStatus().allJobs !== null) {
+        var status = Jobs.getStatus();
+        $s.remainingJobCount = status.queuedCount + status.runningCount;
+    }
+
+    function listener() {
+        $s.$on('Event.JobUpdate', function() {
+            var status = Jobs.getStatus();
+            $s.remainingJobCount = status.queuedCount + status.runningCount;
+        });
+    }
+
+    listener();
+}])
 
 .controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
 /**
