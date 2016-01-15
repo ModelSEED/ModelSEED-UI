@@ -39,58 +39,58 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                         console.error('list rast genomes error', e);
                     })
     }
-
+    // download method for model directories
     this.getDownloads = function(path) {
-        var jsonPath = path,
-            hiddenDir = path; //path.slice(0, path.lastIndexOf('/')+1)+'.'+ path.split('/').pop();
+        // get meta on objects in model folder
+        var p1 = WS.list(path, {recursive: true, excludeDirectories: true});
 
-        var p1 = WS.list(hiddenDir, {recursive: true, excludeDirectories: true});
-        var p2 = WS.getObjectMeta(jsonPath).then(function(res) { return res[0]; })
+        // get meta on model
+        var p2 = WS.getObjectMeta(path+'/model')
+                    .then(function(res) {
+                        return res[0];
+                    })
 
+        // get paths and meta, along with download urls
         return $q.all([p1, p2])
-                 .then(function(args) {
-                    var r = args[0], r2 = args[1];
+            .then(function(args) {
+                var r = args[0], r2 = args[1];
+                var paths = [], objs = [];
+                for (var i=0; i<r.length; i++) {
+                    var obj = r[i];
+                    objs.push({path: obj.path+obj.name, size: obj.size, name: obj.name});
+                    paths.push(obj.path);
+                }
 
-                    var paths = [], objs = [];
-                    for (var i=0; i<r.length; i++) {
-                        var obj = r[i];
-                        objs.push({path: obj.path+obj.name, size: obj.size, name: obj.name});
-                        paths.push(obj.path);
-                    }
+                objs.push({path: r2[2]+r2[0], size: r2[6], name: r2[0]});
+                paths.push(r2[2]+r2[0]);
 
-                    // add json download url data
-                    objs.push({path: r2[2]+r2[0], size: r2[6], name: r2[0]});
-                    paths.push(r2[2]+r2[0]);
+                return $http.rpc('ws', 'get_download_url', {objects: paths})
+                            .then(function(urls) {
+                                var downloads = {};
+                                for (var i=0; i<urls.length; i++) {
+                                    var url = urls[i],
+                                        obj = objs[i];
 
-                    console.log('paths', paths)
+                                    var dl = {
+                                        url: url,
+                                        size: obj.size,
+                                        name: obj.name
+                                    };
 
-                    return $http.rpc('ws', 'get_download_url', {objects: paths})
-                                .then(function(urls) {
-                                    var downloads = {};
-                                    for (var i=0; i<urls.length; i++) {
-                                        var url = urls[i],
-                                            obj = objs[i];
+                                    if (i == urls.length-1)
+                                        downloads.json = dl;
+                                    else if (url.indexOf('.sbml') > 0)
+                                        downloads.sbml = dl;
+                                    else if (url.indexOf('.cpdtbl') > 0)
+                                        downloads.cpdTable = dl;
+                                    else if (url.indexOf('.rxntbl') > 0)
+                                        downloads.rxnTable = dl;
+                                }
 
-                                        var dl = {url: url,
-                                                  size: obj.size,
-                                                  name: obj.name};
+                                return downloads;
+                            })
 
-                                        if (i == urls.length-1)
-                                            downloads.json = dl;
-                                        else if (url.indexOf('.sbml') > 0)
-                                            downloads.sbml = dl;
-                                        else if (url.indexOf('.cpdtbl') > 0)
-                                            downloads.cpdTable = dl;
-                                        else if (url.indexOf('.rxntbl') > 0)
-                                            downloads.rxnTable = dl;
-                                    }
-
-                                    return downloads;
-                                })
-
-                 })
-
-
+            })
     }
 
     this.reconstruct = function(form, params) {
