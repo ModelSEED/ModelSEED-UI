@@ -531,16 +531,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         $scope.models = [res.data];
         $scope.orgName = res.data.name;
 
-        try {
-            $scope.data = ModelParser.parse(res.data);
-        } catch(msg) {
-            $scope.error = msg;
-        }
-
+        $scope.data = ModelParser.parse(res.data);
         $scope.loading = false;
 
-        var end = performance.now();
-        var duration = end - start;
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
@@ -1170,15 +1163,13 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
             //  gapfill stuff
             var gfData = rxn.gapfill_data;
-            if (!gfData) {
-                throw 'Sorry, your model is outdated.  Please reconstruct or download instead.';
-            }
 
             var gapfill = null;
             var added = false,
                 reversed = false,
                 summary = null;
-            if (Object.keys(gfData).length > 0) {
+
+            if (gfData && Object.keys(gfData).length > 0) {
                 for (var key in gfData) {
                     if (gfData[key].indexOf('added') !== -1)
                         added = true;
