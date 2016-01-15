@@ -40,18 +40,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })
     }
 
-    this.uploadData = function(p) {
-        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
-        var params = {objects:objs};
-        return $http.rpc('ws', 'create', params).then(function(res) {
-                    $log.log('response', res)
-                    return res;
-                })
-    }
-
     this.getDownloads = function(path) {
         var jsonPath = path,
-            hiddenDir = path.slice(0, path.lastIndexOf('/')+1)+'.'+ path.split('/').pop();
+            hiddenDir = path; //path.slice(0, path.lastIndexOf('/')+1)+'.'+ path.split('/').pop();
 
         var p1 = WS.list(hiddenDir, {recursive: true, excludeDirectories: true});
         var p2 = WS.getObjectMeta(jsonPath).then(function(res) { return res[0]; })
@@ -71,7 +62,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     objs.push({path: r2[2]+r2[0], size: r2[6], name: r2[0]});
                     paths.push(r2[2]+r2[0]);
 
-                    return $http.rpc('ws', 'get_download_url', {objects:paths})
+                    console.log('paths', paths)
+
+                    return $http.rpc('ws', 'get_download_url', {objects: paths})
                                 .then(function(urls) {
                                     var downloads = {};
                                     for (var i=0; i<urls.length; i++) {
@@ -307,33 +300,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })
     }
 
-    /*
-        REQUIRED INPUTS:
-        ref model - reference to model to integrate solutions for
-        mapping<edit_id,gapfill_command> commands - list of edit commands
-
-        OPTIONAL INPUTS:
-        edit_data new_edit - list of new edits to add
-    */
-    this.manage_model_edits = function(p) {
-        //$log.log('manage model edits', p)
-        return $http.rpc('ws', 'get', {model: p.model, commands: p.command})
-                    .then(function(res) {
-                        $log.log('manage model response', res)
-                        return res;
-                    })
-    }
-
-    this.downloadSBML = function(path) {
-        $log.log('export model (download sbml)', path)
-        return $http.rpc('ms', 'export_model', {model: path, format: "sbml", toshock: 1})
-                    .then(function(res) {
-                        $log.log('export model (download sbml) response', res)
-                        return res;
-                    })
-
-    }
-
     this.getFeature = function(genome, feature) {
         //console.log('getting feature', feature)
         return $http.rpc('ms', 'get_feature', {genome: genome, feature: feature})
@@ -344,6 +310,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
     }
 
+    // adds model to local data model (cache)
     this.addModel = function(model, type) {
         //console.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
@@ -384,8 +351,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             return res.data;
         })
     }
-
-
 
     // if new object already exists in cache,
     // delete old, replace with new

@@ -1105,6 +1105,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.loadingDownloads = true;
         MS.getDownloads(item.path)
           .then(function(dls) {
+              console.log('dls', dls)
               $scope.selected.downloads = dls;
               $scope.loadingDownloads = false;
           })

@@ -4,9 +4,8 @@ angular.module('WS', [])
 .service('WS', ['$http', '$q', '$cacheFactory', '$log', 'config', 'Auth',
 function($http, $q, $cacheFactory, $log, config, Auth) {
     "use strict";
-    var self = this;
-    //var cache = $cacheFactory('ws');
 
+    var self = this;
     this.workspaces = [];
 
     this.list = function(path, opts) {
@@ -213,6 +212,16 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
     }
 
+    // Method to upload data directly to workspaces
+    // Not used; here for convenience only
+    this.uploadData = function(p) {
+        var objs = [[p.path, p.type, p.meta ? p.meta : null, p.data ? p.data : null]];
+        var params = {objects:objs};
+        return $http.rpc('ws', 'create', params).then(function(res) {
+                    $log.log('upload response', res)
+                    return res;
+                })
+    }
 
     // takes path of new folder, creates it
     this.createFolder = function(path) {
@@ -251,7 +260,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         return res;
                     })
     }
-
 
     this.getPermissions = function(path) {
         return $http.rpc('ws', 'list_permissions', {objects:[path]})
