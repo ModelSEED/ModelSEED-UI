@@ -87,7 +87,7 @@ function($rootScope, $http, config, Socket, $window) {
         // once the token is removed, an event refreshes other connections,
         // effectively notifiying the user that they logged out of other tabs.
         localStorage.removeItem('auth');
-        self.userLogout(self.user);
+        //self.userLogout(self.user);
     }
 
     this.isAuthenticated = function() {
