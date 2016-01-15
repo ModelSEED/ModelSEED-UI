@@ -130,54 +130,32 @@ function($scope, $stateParams) {
 
 
 .controller('Jobs',
-['$scope', 'MS', 'uiTools',
-function($s, MS, uiTools) {
-    $s.jobs;
-    $s.queuedJobs = [];
-    $s.runningJobs = [];
-    $s.completedJobs = [];
-
+['$scope', 'MS', 'uiTools', 'Jobs',
+function($s, MS, uiTools, Jobs) {
 
     $s.relativeTime = uiTools.relativeTime;
 
-    $s.reload = function() {
-        $s.loading = true;
-        $s.queuedJobs = [];
-        $s.runningJobs = [];
-        $s.completedJobs = [];
-        $s.jobs = null;
-        MS.listMyJobs().then(function(jobs) {
-            groupJobs(jobs);
-
-            $s.jobs = jobs;
-            console.log('completed', $s.completedJobs)
-
-            $s.loading = false;
-        })
-    }
-    $s.loading = true;
-
-    if (MS.myJobs) {
-        $s.jobs = MS.myJobs;
-        groupJobs($s.jobs)
-        $s.loading = false;
+    // if initial jobs status isn't there, listen
+    // otherwise, load from cache and listen
+    if (Jobs.getStatus().allJobs === null) {
+        listener();
     } else {
-        $s.reload();
+        setStatus();
+        listener();
+    }
+    function setStatus() {
+        var status = Jobs.getStatus()
+
+        $s.jobs = status.allJobs,
+        $s.queuedCount = status.queuedCount,
+        $s.runningCount = status.runningCount,
+        $s.completedCount = status.completedCount;
+        console.log('update')
     }
 
-    function groupJobs(jobs) {
-        for (var i=0; i<jobs.length; i++) {
-            var job = jobs[i];
-
-            if (job.status === 'queued')
-                $s.queuedJobs.push(job);
-            else if (job.status === 'in-progress')
-                $s.runningJobs.push(job);
-            else if (job.status === 'completed')
-                $s.completedJobs.push(job);
-        }
+    function listener() {
+        $s.$on('Event.JobUpdate', setStatus);
     }
-
 }])
 
 

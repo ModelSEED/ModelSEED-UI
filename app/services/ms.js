@@ -15,7 +15,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     // model for displayed things
     this.myModels = null;
     this.myPlants = null;
-    this.myJobs = null;
 
     var cache = $cacheFactory('ms');
 
@@ -322,9 +321,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.listMyJobs = function() {
         return $http.rpc('ms', 'CheckJobs', {})
             .then(function(res) {
-                self.myJobs = sanitizeJobs(res);
-                console.log('jobs', self.myJobs)
-                return self.myJobs;
+                return sanitizeJobs(res);;
             })
     }
 

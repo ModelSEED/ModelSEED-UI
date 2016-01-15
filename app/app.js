@@ -31,7 +31,8 @@ angular.module('ModelSEED',
  'Fusions',
  'Dialogs',
  'docs-directives',
- 'Socket'
+ 'Socket',
+ 'Jobs'
  ])
 .config(['$locationProvider', '$stateProvider', '$httpProvider',
          '$urlRouterProvider', '$urlMatcherFactoryProvider', '$sceProvider',
@@ -65,7 +66,6 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('main.teamMember', {
             url: "/team/:name",
             templateUrl: function ($stateParams){
-                console.log('blah', $stateParams.name)
                 return 'app/views/docs/team/'+$stateParams.name+'.html';
             },
         }).state('main.publications', {
@@ -83,16 +83,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: '/ms-projects/regulons/overview.html',
             controller: 'Regulons'
         })
-
-        /*.state('main.projects.regulons.genes', {
-            url: '/genes?q',
-            templateUrl: '/ms-projects/regulons/genes.html',
-            controller: 'Regulons'
-        }).state('main.projects.regulons.regulators', {
-            url: '/regulators?q',
-            templateUrl: '/ms-projects/regulons/regulators.html',
-            controller: 'Regulons'
-        })*/
 
         .state('main.projects.fusions', {
             url: '/fusions',
@@ -132,6 +122,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'FusionSubsystems'
         })
 
+        // about pages
         .state('main.about', {
             url: '/about',
             templateUrl: 'app/views/about.html',
@@ -145,26 +136,18 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('main.about.data', {
             url: "/data-sources",
             templateUrl: 'app/views/docs/sources.html',
-        })
-        .state('main.api', {
+        }).state('main.api', {
             url: "/about/api",
             templateUrl: 'app/views/docs/api.html',
             controller: 'API'
         })
-
-        /*
-        .state('main.about.api', {
-            url: "/api",
-            templateUrl: 'app/views/docs/old-api.html',
-            controller: 'Help',
-        })*/
 
         // main application template
         .state('app', {
             templateUrl: 'app/views/app.html',
         })
 
-
+        // main views
         .state('app.biochem', {
             url: "/biochem/?tab",
             templateUrl: 'app/views/biochem/biochem.html',
@@ -200,10 +183,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/my-jobs/",
             templateUrl: 'app/views/my-jobs.html',
             controller: 'Jobs',
-            authenticate: true
+            authenticate: true,
+            /*resolve: {
+                getStatus: function(Jobs) {
+                    return Jobs.getStatus()
+                }
+            }*/
         })
-
-
 
         // data browser
         .state('app.myData', {
@@ -243,19 +229,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-
-        // Object Editors
+        // object editors (for media editor, see media view)
         .state('app.modelEditor', {
             url: "/model-editor/",
             templateUrl: 'app/views/editor/model-editor.html',
             controller: 'ModelEditor',
             authenticate: true
-        })/*.state('app.media', {
-            url: "/media-editor/",
-            templateUrl: 'app/views/editor/media-editor.html',
-            controller: 'MediaEditor',
-            authenticate: true
-        })*/
+        })
 
         // comparative analysis
         .state('app.compare', {
@@ -298,7 +278,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-
         /* only used for testing analysis forms */
         .state('app.run', {
             url: "/run",
@@ -328,10 +307,6 @@ function($locationProvider, $stateProvider, $httpProvider,
     $mdThemingProvider.theme('default')
         .primaryPalette('cyan')
         .accentPalette('light-blue');
-        //9FA1DE
-        //
-
-
 }])
 
 
@@ -341,20 +316,16 @@ function($rootScope, $state, $sParams, $window,
          $location, auth, $timeout, config, AuthDialog) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
-
         // if first load on home and user is authenticated,
-        // forward to application page [good UX!]
+        // forward to application page.
+        // if not authenticated and url is private, force login.
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state set
             $timeout(function() {
                 $state.transitionTo('app.genomes')
                 event.preventDefault();
             })
-        }
-
-        // else, if not authenticated and url is private, force login
-        else if (toState.authenticate && !auth.isAuthenticated()) {
-            console.log('not logged in')
+        } else if (toState.authenticate && !auth.isAuthenticated()) {
             AuthDialog.signIn();
         }
 
@@ -369,4 +340,12 @@ function($rootScope, $state, $sParams, $window,
     $rootScope.token = auth.token;
 
     $rootScope.includePlants = config.includePlants;
-}]);
+}])
+
+.run(['Jobs', function(Jobs) {
+
+    // Note: the jobs service is invoked here (services/jobs.js)
+    // which kicks of polling if needed.
+    // Order is important so that auth is finished.
+
+}])
