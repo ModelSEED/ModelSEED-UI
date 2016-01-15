@@ -342,8 +342,24 @@ angular.module('Browser', ['uiTools'])
             $state.go('app.myData', {dir: item.path})
         else {
             if (!state) var state = getState(item);
-            if (state) $state.go(state, {path: item.path });
+            if (state) {
+                // models are special in that url is /model/<parent_dir_of_model>
+                if (item.type === 'model') {
+                    var path =  item.path.slice(0, item.path.lastIndexOf('/') );
+                    $state.go(state, {path: path});
+                } else {
+                    $state.go(state, {path: item.path });
+                }
+            }
         }
+    }
+
+    $scope.getUrlPath = function(item) {
+        // models are special in that url is /model/<parent_dir_of_model>
+        if (item.type === 'model')
+            return item.path.slice(0, item.path.lastIndexOf('/') );
+        else
+            return item.path;
     }
 
     function getState(item) {

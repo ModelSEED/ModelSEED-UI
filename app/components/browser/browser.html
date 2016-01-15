@@ -178,7 +178,7 @@
                 </a>
 
                 <a ng-if="item.type != 'folder' && item.type != 'modelfolder' && item.state && edit.index != $index"
-                   ui-sref="{{item.state}}({path: item.path })"
+                   ui-sref="{{item.state}}({path: getUrlPath(item)})"
                    ng-click="prevent($event)">
                     {{item.name}}
                 </a>
