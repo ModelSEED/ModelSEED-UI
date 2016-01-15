@@ -13,7 +13,7 @@
                 <th>Media</th>
                 <th>ID</th>
                 <th>Time</th>
-                <th>Actions</th>
+                <!--<th>Actions</th>-->
             </tr>
         </thead>
         <tbody>
@@ -37,12 +37,12 @@
                     <a ui-sref="app.gfPage({path: gf.ref})" ng-click="$event.stopPropagation()">{{::gf.id}}</a>
                 </td>
                 <td>{{relTime(gf.rundate)}}</td>
-                <td>
+                <!--<td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">
                         <md-tooltip md-delay="800">Unintegrate and delete gapfill</md-tooltip>
                         <i class="icon-highlight-remove"></i>
                     </a>
-                </td>
+                </td>-->
             </tr>
         </tbody>
     </table>
