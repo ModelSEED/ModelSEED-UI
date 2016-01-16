@@ -78,7 +78,8 @@
                 </form>
             </div>
             <br>
-            <!--
+
+            <!-- this fails?
             <div flex="50">
                 <md-checkbox ng-model="form.fva" aria-label="fva checkbox" md-no-ink>
                     FVA?
@@ -86,11 +87,13 @@
             </div>
             -->
 
+            <!--
             <div flex="50">
                 <md-checkbox ng-model="form.simulateko" aria-label="fva checkbox" md-no-ink>
                     Simulate Gene Knockout?
                 </md-checkbox>
             </div>
+            -->
 
             <!--
             <div flex="50">
@@ -98,7 +101,7 @@
                     Minimize Flux?
                 </md-checkbox>
             </div>
-            -->
+
 
             <div flex="50">
                 <md-checkbox ng-model="form.findminmedia" aria-label="find min media checkbox" md-no-ink>
@@ -115,7 +118,7 @@
             <h5>Thermodynamic constraints</label><h5>
             <select ng-model="form.thermo_const_type" placeholder="None" ng-init="form.thermo_const_type='None'">
                 <option value="None">No Thermodynamic Type</option>
-    			<option value="Simple">Simple</option>
+                <option value="Simple">Simple</option>
             </select>
 
             <div layout layout-sm="column">
@@ -186,6 +189,7 @@
                 </md-content>
             </div>
 
+            -->
             <!--
             <md-input-container layout layout-sm="row" flex="50">
                 <label>Objective Fraction</label>
@@ -194,77 +198,77 @@
             -->
 
                 <!--
-        		{
-        			"id":"geneko",
-        			"allow_multiple": true,
-        			"label":"Gene knockouts",
-        			"required":0,
-        			"default":null,
-        			"desc":"List of gene knockouts to simulation in FBA.",
-        			"type":"string"
-        		},-->
+                {
+                    "id":"geneko",
+                    "allow_multiple": true,
+                    "label":"Gene knockouts",
+                    "required":0,
+                    "default":null,
+                    "desc":"List of gene knockouts to simulation in FBA.",
+                    "type":"string"
+                },-->
                 <!--
             <label>Uptake Limit</label>
             <div layout layout-sm="column">
 
-    			<div class="row">
-    				<label for="uptakeLimitC">C</label>
-    				<input name="uptakeLimitC"
-    				    data-dojo-type="dijit/form/NumberTextBox"
-    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
-    				    rangeMessage:'Invalid elevation.'"
-    					style="width: 50px;" />
+                <div class="row">
+                    <label for="uptakeLimitC">C</label>
+                    <input name="uptakeLimitC"
+                        data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props="invalidMessage:'Please enter a numeric value.',
+                        rangeMessage:'Invalid elevation.'"
+                        style="width: 50px;" />
 
-    				<label for="uptakeLimitN">N</label>
-    				<input name="uptakeLimitN"
-    				    data-dojo-type="dijit/form/NumberTextBox"
-    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
-    				    rangeMessage:'Invalid elevation.'"
-    					style="width: 50px;" />
+                    <label for="uptakeLimitN">N</label>
+                    <input name="uptakeLimitN"
+                        data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props="invalidMessage:'Please enter a numeric value.',
+                        rangeMessage:'Invalid elevation.'"
+                        style="width: 50px;" />
 
-    				<label for="uptakeLimitP">P</label>
-    				<input name="uptakeLimitP"
-    				    data-dojo-type="dijit/form/NumberTextBox"
-    					data-dojo-props="smallDelta:10, constraints:{min:10,max:2000,places:0}"
-    					style="width: 50px;" />
+                    <label for="uptakeLimitP">P</label>
+                    <input name="uptakeLimitP"
+                        data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props="smallDelta:10, constraints:{min:10,max:2000,places:0}"
+                        style="width: 50px;" />
 
-    				<label for="atomtype-o">O</label>
-    				<input name="uptakeLimitO"
-    				    data-dojo-type="dijit/form/NumberTextBox"
-    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
-    				    rangeMessage:'Invalid elevation.'"
-    					style="width: 50px;" />
+                    <label for="atomtype-o">O</label>
+                    <input name="uptakeLimitO"
+                        data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props="invalidMessage:'Please enter a numeric value.',
+                        rangeMessage:'Invalid elevation.'"
+                        style="width: 50px;" />
 
-    				<label for="atomtype-s">S</label>
-    				<input name="uptakeLimitS"
-    				    data-dojo-type="dijit/form/NumberTextBox"
-    				    data-dojo-props="invalidMessage:'Please enter a numeric value.',
-    				    rangeMessage:'Invalid elevation.'"
-    					style="width: 50px;" />
-    			</div>
+                    <label for="atomtype-s">S</label>
+                    <input name="uptakeLimitS"
+                        data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props="invalidMessage:'Please enter a numeric value.',
+                        rangeMessage:'Invalid elevation.'"
+                        style="width: 50px;" />
+                </div>
                 -->
 
-    			<!--
-    				ref media - reference to media for FBA study
-    				bool fva;
-    				bool simulateko;
-    				bool minimizeflux;
-    				bool findminmedia;
-    				bool allreversible;
-    				thermotype thermo_const_type;
-    				list<string> media_supplements;
-    				list<string> geneko;
-    				list<string> rxnko;
-    				string output_id;
-    				float maxflux;
-    				float maxuptake;
-    				float minuptake;
-    				float primary_objective_fraction;
-    				mapping<atomtype,float> uptakelim;  atom types in potential uptake limits [C/N/P/O/S]
-    				list<tuple<vartype type,string id,float min,float max>> custom_bounds;
-    				list<tuple<vartype type,string id,float coefficient>> objective;
-    				list<constraint> custom_constraints;
-    			-->
+                <!--
+                    ref media - reference to media for FBA study
+                    bool fva;
+                    bool simulateko;
+                    bool minimizeflux;
+                    bool findminmedia;
+                    bool allreversible;
+                    thermotype thermo_const_type;
+                    list<string> media_supplements;
+                    list<string> geneko;
+                    list<string> rxnko;
+                    string output_id;
+                    float maxflux;
+                    float maxuptake;
+                    float minuptake;
+                    float primary_objective_fraction;
+                    mapping<atomtype,float> uptakelim;  atom types in potential uptake limits [C/N/P/O/S]
+                    list<tuple<vartype type,string id,float min,float max>> custom_bounds;
+                    list<tuple<vartype type,string id,float coefficient>> objective;
+                    list<constraint> custom_constraints;
+                -->
             <!--<ng-include src="'app/views/apps/runFBA.html'"></ng-include>-->
         </div>
     </md-dialog-content>

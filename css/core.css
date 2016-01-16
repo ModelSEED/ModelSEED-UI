@@ -152,6 +152,7 @@ md-toolbar {
 .ms-color-error, .color-error { color: #DA265D; }
 .color-light-purple { color: #E5E4FF !important; }
 
+
 .inline { display: inline; }
 
 .text-highlight {
@@ -948,6 +949,14 @@ md-card {
 
 .md-header-items-container {
     border-bottom: 1px solid #dfdfdf;
+}
+
+md-dialog > md-toolbar h3 > .small {
+    color: #f1f1f1 !important;
+}
+md-dialog .md-actions {
+    border-top: 1px solid #f1f1f1;
+
 }
 
 .md-dialog-container {
