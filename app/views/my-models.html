@@ -60,12 +60,12 @@
             <md-button md-no-ink ng-click="runFBA($event, item)">
                 <i class="fa fa-code-fork"></i>
                 Run FBA
-                (<span class="label-fba-count"><md-tooltip>Number of FBAs</md-tooltip>{{item.fbaCount}}</span>)
+                <!--(<span class="label-fba-count"><md-tooltip>Number of FBAs</md-tooltip>{{item.fbaCount}}</span>)-->
             </md-button>
             <md-button md-no-ink ng-click="gapfill($event, item)">
                 <i class="fa fa-circle"></i>
                 Gapfill
-                (<span class="label-gapfill-count"><md-tooltip>Number of Gapfill solutions</md-tooltip>{{item.gapfillCount}}</span>)
+                <!--(<span class="label-gapfill-count"><md-tooltip>Number of Gapfill solutions</md-tooltip>{{item.gapfillCount}}</span>)-->
             </md-button>
         </div>
 
@@ -98,7 +98,7 @@
             <md-tab>
                 <md-tab-label>
                     FBA Simulations
-                    (<span class="label-fba-count">{{item.fbaCount}}</span>)
+                    (<span class="label-fba-count">{{item.relatedFBAs.length}}</span>)
                 </md-tab-label>
 
                 <md-tab-body>
@@ -109,7 +109,7 @@
             <md-tab>
                 <md-tab-label>
                     Gapfills
-                    (<span class="label-gapfill-count">{{item.gapfillCount}}</span>)
+                    (<span class="label-gapfill-count">{{item.relatedGapfills.length}}</span>)
                 </md-tab-label>
 
                 <md-tab-body>
