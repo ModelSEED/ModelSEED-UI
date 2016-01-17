@@ -318,22 +318,6 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             syncCache(this.myPlants, model)
     }
 
-    this.listMyJobs = function() {
-        return $http.rpc('ms', 'CheckJobs', {})
-            .then(function(res) {
-                return sanitizeJobs(res);;
-            })
-    }
-
-    function sanitizeJobs(jobDict) {
-        var jobs = [];
-        for (var id in jobDict) {
-            jobDict[id].timestamp = Date.parse(jobDict[id].start_time)
-            jobs.push(jobDict[id]);
-        }
-        return jobs;
-    }
-
     var endpoint = config.services.ms_rest_url+'model';
     //var endpoint = 'http://0.0.0.0:3000/v0/'+'model';
     var headers =  {

@@ -633,6 +633,7 @@ function($scope, $state, Patric, $timeout, $http,
           //console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
+    /* ignore plants ofr now
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
           var plants = [];
@@ -649,9 +650,11 @@ function($scope, $state, Patric, $timeout, $http,
 
           $scope.plants = plants;
       })
+      */
 
-      // load my plants
-      $scope.loadingMyPlants = true;
+    // load my plants
+    /*
+    $scope.loadingMyPlants = true;
     WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
             // remove non-genomes
@@ -672,6 +675,7 @@ function($scope, $state, Patric, $timeout, $http,
                 $scope.error = e.error.message;
             $scope.loadingMyPlantsMicrobes = false;
         })
+    */
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -732,8 +736,8 @@ function($scope, $state, Patric, $timeout, $http,
 
         Dialogs.reconstruct(ev, params,
             function(res) {
-                console.log('done reconstructing', res)
-                MS.addModel(res, 'microbe')
+                console.log('queued reconstructing', res)
+                MS.queueJob(res, 'microbe')
             })
     }
 
