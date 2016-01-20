@@ -427,11 +427,6 @@ function($s, $state, $sParams, WS, MS, tools,
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
 
-    // redirect stuff for patric auth
-    if ($sParams.login === 'patric' && !Auth.isAuthenticated()) {
-        $state.transitionTo('home', {redirect: $sParams.path, login: 'patric'});
-    }
-
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
@@ -534,18 +529,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     ]
 
 
-
+    var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
-    var parts = path.split('/')
-    console.log('')
+    var parts = path.split('/');
     if (parts[2] === 'home' && parts[3] === 'models')  {
-        var model = parts.pop();
-        parts.push('.'+model);
-        console.log('parts', parts)
-        var modelPath = parts.join('/')
+        var modelPath = path;
     } else {
         var modelPath = path+'/model';
     }
+
+    console.log('modelPath', modelPath)
 
 
     // fetch object data and parse it.

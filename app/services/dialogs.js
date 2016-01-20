@@ -380,8 +380,6 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
             clickOutsideToClose: false,
             controller: ['$scope', '$state', '$http',
             function($s, $state, $http) {
-                console.log('state params', $rootScope)
-
                 // set login method
                 if ($rootScope.$stateParams.login == 'patric')
                     $s.method = Auth.loginMethod('patric');
@@ -397,10 +395,9 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
                 }
 
                 $s.ok = function(){
-                    console.log('logging in', $s.creds)
                     $s.loading = true;
 
-                    if ($stateParams.login == 'PATRIC')
+                    if ($stateParams.login == 'patric')
                         var prom = Auth.loginPatric($s.creds.user, $s.creds.pass)
                     else
                         var prom = Auth.login($s.creds.user, $s.creds.pass)

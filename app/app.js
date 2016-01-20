@@ -320,13 +320,16 @@ function($rootScope, $state, $sParams, $window,
         // forward to application page.
         // if not authenticated and url is private, force login.
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
-            // wait for state set
+            // wait for state digest
             $timeout(function() {
                 $state.transitionTo('app.genomes')
                 event.preventDefault();
             })
         } else if (toState.authenticate && !auth.isAuthenticated()) {
-            AuthDialog.signIn();
+            // wait for state digest
+            $timeout(function() {
+                AuthDialog.signIn();
+            })
         }
 
         // google analytics
