@@ -56,10 +56,6 @@ function($scope, $state, $stateParams, Auth, $window) {
 
     $scope.logout = function() {
         Auth.logout();
-        $state.transitionTo('main.home', {}, { reload: true, inherit: true, notify: false })
-              .then(function() {
-                  $window.location.reload();
-              });
     }
 }])
 

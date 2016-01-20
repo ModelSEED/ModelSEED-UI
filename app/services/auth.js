@@ -3,32 +3,35 @@
  * Angular.js module for using authentication services
  *
  * Authors:
- *  https://github.com/nconrad
- *
- * Notes:
- * 	$rootScope is used soley to communicate with the socket service,
- * 	logging the user out of other connnections
- *
+ * 		https://github.com/nconrad
  *
 */
 
 angular.module('Auth', [])
-.service('Auth', ['$rootScope', '$http', 'config', 'Socket', '$window',
-function($rootScope, $http, config, Socket, $window) {
+.service('Auth', ['$state', '$http', 'config', '$window',
+function($state, $http, config, $window) {
     var self = this;
 
-    var auth = JSON.parse( localStorage.getItem('auth') );
+    this.user;
+    this.token;
+    this.method; // method used can be either 'rast' or 'patric'
+
+    var auth = getAuthStatus();
 
     // if previously authenticated, set user/token
     if (auth) {
         this.user = auth.user_id;
         this.token = auth.token;
-    } else {
-        this.user;
-        this.token;
+
+        // set auth method used
+        if (this.token.indexOf('rast.nmpdr.org') !== -1)
+            this.method == 'rast';
+        else if (this.token.indexOf('user.patric.org') !== -1)
+            this.method == 'patric';
     }
 
-    console.log(this.token)
+
+    console.log('token', this.token);
     console.log('using service:', config.services.auth_url)
 
     /**
@@ -50,7 +53,7 @@ function($rootScope, $http, config, Socket, $window) {
                     }).success(function(res) {
 
                         // store auth object
-                        localStorage.setItem('auth', JSON.stringify(res));
+                        $window.localStorage.setItem('auth', JSON.stringify(res));
                         self.user = res.user_id;
                         self.token = res.token;
 
@@ -74,28 +77,22 @@ function($rootScope, $http, config, Socket, $window) {
                         var obj = {user_id: user_id, token: token};
 
                         // store username/token
-                        localStorage.setItem('auth', JSON.stringify(obj) );
+                        $window.localStorage.setItem('auth', JSON.stringify(obj) );
                         self.user = obj.user_id;
                         self.token = JSON.stringify(obj.token);
+
 
                         return obj;
                     });
     }
 
     this.logout = function() {
-        // order is important here.
-        // once the token is removed, an event refreshes other connections,
-        // effectively notifiying the user that they logged out of other tabs.
-        localStorage.removeItem('auth');
-        //self.userLogout(self.user);
+        $window.localStorage.removeItem('auth');
+        $window.location.reload();
     }
 
     this.isAuthenticated = function() {
-        return (self.user && getSession()) ? true : false;
-    }
-
-    function getSession() {
-        return JSON.parse( localStorage.getItem('auth') );
+        return (self.user && getAuthStatus()) ? true : false;
     }
 
     this.loginMethod = function(method) {
@@ -105,27 +102,16 @@ function($rootScope, $http, config, Socket, $window) {
         return {name: 'RAST', newAccountURL: 'http://rast.nmpdr.org/?page=Register'};
     }
 
+    function getAuthStatus() {
+        return JSON.parse( localStorage.getItem('auth') );
+    }
 
-    //var socket = io.connect('http://0.0.0.0:3000');
+    function storageEventHandler(e) {
+        // if logout has happened, logout every tab.
+        if (e.key === 'auth' && !e.newValue) self.logout()
+    }
 
-    //socket.on('connect', function (data) {
-    //    console.log('connected as', $rootScope.user)
-    //    self.userConnect($rootScope.user);
-    //})
+    // listen for storage change across tabs/windows
+    $window.addEventListener('storage', storageEventHandler);
 
-    // tell all the things to "logout"
-    //socket.on('logout', function() {
-    //    $window.location.reload();
-    //})
-
-
-    // this is not a login method, it is a "connection" method.
-    //this.userConnect = function(user) {
-    //    socket.emit('user connect', user);
-    //}
-
-    // this method tells the server to log the user out of all other connections.
-    //this.userLogout = function(user) {
-    //    socket.emit('user logout', user);
-    //}
 }]);
