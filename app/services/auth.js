@@ -88,7 +88,10 @@ function($state, $http, config, $window) {
 
     this.logout = function() {
         $window.localStorage.removeItem('auth');
-        $window.location.reload();
+        $state.transitionTo('main.home', {}, { reload: true, inherit: true, notify: false })
+              .then(function() {
+                  $window.location.reload();
+              });
     }
 
     this.isAuthenticated = function() {
@@ -100,7 +103,7 @@ function($state, $http, config, $window) {
             return {
                 name: 'PATRIC',
                 newAccountURL: 'https://user.patricbrc.org/register/',
-                forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'                
+                forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'
             };
 
         return {
