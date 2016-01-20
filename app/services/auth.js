@@ -14,7 +14,6 @@ function($state, $http, config, $window) {
 
     this.user;
     this.token;
-    this.method; // method used can be either 'rast' or 'patric'
 
     var auth = getAuthStatus();
 
@@ -41,11 +40,13 @@ function($state, $http, config, $window) {
      * @return {[object]}      [rast auth object]
      */
     this.login = function(user, pass) {
-        var data = {user_id: user,
-                    password: pass,
-                    status: 1,
-                    cookie:1,
-                    fields: "name,user_id,token"};
+        var data = {
+            user_id: user,
+            password: pass,
+            status: 1,
+            cookie:1,
+            fields: "name,user_id,token"
+        };
 
         return $http({method: "POST",
                       url: config.services.auth_url,
@@ -81,7 +82,6 @@ function($state, $http, config, $window) {
                         self.user = obj.user_id;
                         self.token = JSON.stringify(obj.token);
 
-
                         return obj;
                     });
     }
@@ -97,9 +97,17 @@ function($state, $http, config, $window) {
 
     this.loginMethod = function(method) {
         if (method === 'patric')
-            return {name: 'PATRIC', newAccountURL: 'https://user.patricbrc.org/register/'};
+            return {
+                name: 'PATRIC',
+                newAccountURL: 'https://user.patricbrc.org/register/',
+                forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'                
+            };
 
-        return {name: 'RAST', newAccountURL: 'http://rast.nmpdr.org/?page=Register'};
+        return {
+            name: 'RAST',
+            newAccountURL: 'http://rast.nmpdr.org/?page=Register',
+            forgotPasswordUrl: 'http://rast.nmpdr.org/?page=RequestNewPassword'
+        };
     }
 
     function getAuthStatus() {
