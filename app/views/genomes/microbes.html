@@ -90,7 +90,6 @@
 
         <md-tab-body>
             <div class="table-controls" layout="row">
-
                 <md-input-container md-no-float flex="45"
                     search="myMicrobesOpts.query" search-opts="myMicrobesOpts" search-placeholder="Search my RAST genomes">
                 </md-input-container>
@@ -98,7 +97,7 @@
                 <md-button layout-align="center center"
                            ng-if="selectedPrivate.genome_id"
                            ng-click="reconstructPrivate($event, selectedPrivate)"
-                          class="md-primary" disable>
+                          class="md-primary md-raised" disable>
                     <i class="icon-tools fa-plus"></i>
                     Reconstruct
                 </md-button>
