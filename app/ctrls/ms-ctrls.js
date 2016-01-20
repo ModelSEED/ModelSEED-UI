@@ -725,15 +725,22 @@ function($scope, $state, Patric, $timeout, $http,
     }
 
     $scope.reconstruct = function(ev, item) {
-        if ('genome_id' in item)
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
             var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
-        else
-            var params = {path: item.path, name: item.name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
 
         Dialogs.reconstruct(ev, params,
-            function(res) {
-                console.log('queued reconstructing', res)
-                MS.queueJob(res, 'microbe')
+            function(jobId) {
+                MS.submittedModel({
+                    name: name,
+                    orgName: orgName,
+                    jobId: jobId
+                });
             })
     }
 

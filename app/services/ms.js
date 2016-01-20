@@ -161,6 +161,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                         //if (path.split('/')[2] === 'plantseed') self.myPlants = data
                         //else self.myModels = data;
                         self.myModels = data;
+                        console.log('sefl.myModels', self.myModels)
                         return data;
                     })
     }
@@ -316,6 +317,20 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             syncCache(this.myModels, model)
         else if (type.toLowerCase() === 'plant')
             syncCache(this.myPlants, model)
+    }
+
+    // adds notice to my models cache; only microbes right now
+    this.submittedModel = function(subData) {
+        if (!self.myModels) return;
+
+        var data = {
+            status: 'submitted',
+            name: subData.name,
+            orgName: subData.orgName,
+            jobId: subData.jobId,
+            timestamp: Date.now()
+        }
+        self.myModels.splice(0, 0, data);
     }
 
     var endpoint = config.services.ms_rest_url+'model';

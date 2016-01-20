@@ -460,94 +460,106 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
 
     // reaction table spec
-    $scope.rxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn',
-                            call: function(e, item) {
-                                $scope.toggleView(e, 'rxn', item );
-                            }},
-                         {label: 'Name', key: 'name'},
-                         {label: 'EQ', key: 'eq'},
-                         {label: 'Genes', key: 'genes',
-                             formatter: function(item) {
-                                 if (!item.length) return '-';
+    $scope.rxnHeader = [
+        {label: 'ID', key: 'id', newTab: 'rxn',
+            call: function(e, item) {
+                $scope.toggleView(e, 'rxn', item );
+            }},
+         {label: 'Name', key: 'name'},
+         {label: 'EQ', key: 'eq'},
+         {label: 'Genes', key: 'genes',
+             formatter: function(item) {
+                 if (!item.length) return '-';
 
-                                 var links = [];
-                                 for (var i=0; i<item.length; i++) {
-                                     links.push('<a href="'+
-                                                    featureUrl+item[i]+'" target="_blank">'
-                                                 +item[i]+'</a>')
-                                 }
+                 var links = [];
+                 for (var i=0; i<item.length; i++) {
+                     links.push('<a href="'+
+                                    featureUrl+item[i]+'" target="_blank">'
+                                 +item[i]+'</a>')
+                 }
 
-                                 return links.join('<br>');
-                             }
-                        },
-                        {label: 'Gapfill', key: 'gapfill',
-                            formatter: function(item) {
-                                return item.summary || '-';
-                            }
-                    }];
+                 return links.join('<br>');
+             }
+        },
+        {label: 'Gapfill', key: 'gapfill',
+            formatter: function(item) {
+                return item.summary || '-';
+            }
+    }];
 
-    $scope.cpdHeader = [{label: 'ID', key: 'id', newTab: 'cpd',
-                            call: function(e, item) {
-                                $scope.toggleView(e, 'cpd', item );
-                            }},
-                         {label: 'Name', key: 'name'},
-                         {label: 'Formula', key: 'formula'},
-                         {label: 'Charge', key: 'charge'},
-                         {label: 'Compartment', key: 'compartment'}];
+    $scope.cpdHeader = [{
+        label: 'ID', key: 'id', newTab: 'cpd',
+        call: function(e, item) {
+            $scope.toggleView(e, 'cpd', item );
+        }},
+        {label: 'Name', key: 'name'},
+        {label: 'Formula', key: 'formula'},
+        {label: 'Charge', key: 'charge'},
+        {label: 'Compartment', key: 'compartment'}
+    ];
 
 
-    $scope.geneHeader = [{label: 'Gene', key: 'id'},
-                         {label: 'Reactions', key: 'reactions', newTabList: true,
-                              call: function(e, item) {
-                                  $scope.toggleView(e, 'rxn', item );
-                              }
-                         }];
+    $scope.geneHeader = [
+        {label: 'Gene', key: 'id'},
+        {label: 'Reactions', key: 'reactions', newTabList: true,
+        call: function(e, item) {
+          $scope.toggleView(e, 'rxn', item );
+        }
+        }
+    ];
 
-    $scope.compartmentHeader = [{label: 'Compartment', key: 'id'},
-                                {label: 'Name', key: 'id'},
-                                {label: 'pH', key: 'pH'},
-                                {label: 'Potential', key: 'potential'}]
+    $scope.compartmentHeader = [
+        {label: 'Compartment', key: 'id'},
+        {label: 'Name', key: 'id'},
+        {label: 'pH', key: 'pH'},
+        {label: 'Potential', key: 'potential'}
+    ]
 
-    $scope.biomassHeader = [{label: 'Biomass', key: 'id'},
-                            {label: 'Compound', key: 'cpdID'},
-                            {label: 'Name', key: 'name'},
-                            {label: 'Coefficient', key: 'coefficient'},
-                            {label: 'Compartment', key: 'compartment'}]
+    $scope.biomassHeader = [
+        {label: 'Biomass', key: 'id'},
+        {label: 'Compound', key: 'cpdID'},
+        {label: 'Name', key: 'name'},
+        {label: 'Coefficient', key: 'coefficient'},
+        {label: 'Compartment', key: 'compartment'}
+    ]
 
-    $scope.mapHeader = [{label: 'Name', key: 'name',
-                        click: function(item) {
-                           Tabs.addTab({name: item.name, mapID: item.id});
-                        }},
-                        {label: 'ID', key: 'id'},
-                        {label: 'Rxns', key: 'rxnCount'},
-                        {label: 'Cpds', key: 'cpdCount'}
-                        ]
+    $scope.mapHeader = [
+        {label: 'Name', key: 'name',
+        click: function(item) {
+           Tabs.addTab({name: item.name, mapID: item.id});
+        }},
+        {label: 'ID', key: 'id'},
+        {label: 'Rxns', key: 'rxnCount'},
+        {label: 'Cpds', key: 'cpdCount'}
+    ]
+
+
+
+    // if path is of form '<user>/home/models/'', use old paths
+    var parts = path.split('/')
+    console.log('')
+    if (parts[2] === 'home' && parts[3] === 'models')  {
+        var model = parts.pop();
+        parts.push('.'+model);
+        console.log('parts', parts)
+        var modelPath = parts.join('/')
+    } else {
+        var modelPath = path+'/model';
+    }
 
 
     // fetch object data and parse it.
     $scope.loading = true;
-    var start = performance.now();
-    WS.get(path+'/model', {cache:true}).then(function(res) {
+    WS.get(modelPath).then(function(res) {
         $scope.models = [res.data];
         $scope.orgName = res.data.name;
 
         $scope.data = ModelParser.parse(res.data);
         $scope.loading = false;
-
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
     })
-
-    /*
-    time: 567.46
-    data-view-ctrls.js:551 time: 1063.2150000000001
-    data-view-ctrls.js:551 time: 1275.1100000000006
-    data-view-ctrls.js:551 time: 1005.0100000000002
-    data-view-ctrls.js:551 time: 693.5400000000009
-    data-view-ctrls.js:551 time: 359.7199999999975
-    data-view-ctrls.js:551 time: 981.6450000000004
-    */
 
     /* testing
     MS.getModel(path).then(function(res) {
@@ -560,23 +572,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         console.log('time:', duration)
     })
     */
-
-
-    /*
-    time: 524.0299999999997
-    data-view-ctrls.js:581 time: 707.210000000001
-    data-view-ctrls.js:581 time: 838.0499999999993
-    data-view-ctrls.js:581 time: 467.83000000000175
-    data-view-ctrls.js:581 time: 351.9500000000007
-
-    data-view-ctrls.js:581 time: 402.33500000000276
-
-    data-view-ctrls.js:581 time: 739.885000000002
-    angular.js:12221 related gfs Array[0]
-    data-view-ctrls.js:575 res Object
-    data-view-ctrls.js:581 time: 459.58000000000175
-     */
-
 
     $scope.loadingMaps = true;
     MV.getMaps()

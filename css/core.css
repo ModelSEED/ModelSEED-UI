@@ -1057,6 +1057,10 @@ md-dialog .md-actions {
     text-align: center;
 }
 
+status-item {
+    padding: 15px;
+}
+
 
 /**
  * bootstrap mods
