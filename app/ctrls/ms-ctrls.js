@@ -796,34 +796,37 @@ function($s, $sParams, WS, MS, Auth, $state,
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
     $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};
 
-    $s.mediaHeader = [{label: 'Name', key: 'name',
-                          link: {
-                              state: 'app.mediaPage',
-                              getOpts: function(row) {
-                                  return {path: row.path};
-                              }
-                          }
-                      },
-                      {label: 'Minimal?', key: 'isMinimal'},
-                      {label: 'Defined?', key: 'isDefined'},
-                      {label: 'Type', key: 'type'}];
+    $s.mediaHeader = [
+        {label: 'Name', key: 'name',
+         link: {
+            state: 'app.mediaPage',
+            getOpts: function(row) {
+                return {path: row.path};
+            }
+          }
+        },
+        {label: 'Minimal?', key: 'isMinimal'},
+        {label: 'Defined?', key: 'isDefined'},
+        {label: 'Type', key: 'type'}
+    ];
 
-    $s.myMediaHeader = [{label: 'Name', key: 'name',
-                          link: {
-                              state: 'app.mediaPage',
-                              getOpts: function(row) {
-                                  return {path: row.path};
-                              }
-                          }
-                      },
-                      {label: 'Minimal?', key: 'isMinimal'},
-                      {label: 'Defined?', key: 'isDefined'},
-                      {label: 'Type', key: 'type'},
-                      {label: 'Mod Date', key: 'timestamp',
-                        formatter: function(row) {
-                            return uiTools.relativeTime(row.timestamp);
-                        }
-                      }];
+    $s.myMediaHeader = [
+        {label: 'Name', key: 'name',
+         link: {
+            state: 'app.mediaPage',
+            getOpts: function(row) {
+                return {path: row.path};
+            }
+         }
+        },
+        {label: 'Minimal?', key: 'isMinimal'},
+        {label: 'Defined?', key: 'isDefined'},
+        {label: 'Type', key: 'type'},
+        {label: 'Mod Date', key: 'timestamp',
+            formatter: function(row) {
+                return uiTools.relativeTime(row.timestamp);
+            }
+        }];
 
 
     $s.loading = true;
@@ -875,20 +878,21 @@ function($s, $sParams, WS, MS, Auth, $state,
 
         var destination = '/'+Auth.user+'/media';
         return WS.createFolder(destination)
-                 .then(function(res) {
+             .then(function(res) {
 
-                     WS.copyList(paths, destination)
-                     .then(function(res) {
-                         $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
-                         Dialogs.showComplete('Copied '+res.length+' media formulation'+
-                                                (paths.length>1 ? 's' : ''))
-                     }).catch(function(e) {
-                         if (e.error.code === -32603)
-                             Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
-                                           "Please consider renaming or deleting.")
-                     })
+                WS.copyList(paths, destination)
+                  .then(function(res) {
+                    $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
+                    Dialogs.showComplete('Copied '+res.length+' media formulation'+
+                                            (paths.length>1 ? 's' : ''))
+                    $s.tabs.tabIndex = 1; // 'my media'
+                }).catch(function(e) {
+                    if (e.error.code === -32603)
+                         Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
+                                       "Please consider renaming or deleting.")
+                })
 
-                 })
+             })
     }
 
 }])
