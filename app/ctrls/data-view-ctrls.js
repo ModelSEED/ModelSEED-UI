@@ -427,15 +427,18 @@ function($s, $state, $sParams, WS, MS, tools,
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
 
-    // path and name of object
+    // path and name of "modelfolder"
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
 
     // selected compound, reaction, etc.
     $scope.selected;
 
-    // url used for features
-    var featureUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=";
+    // urls used for features
+    var featureUrl;
+    var patricGeneUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=",
+        rastGeneUrl = "http://rast.nmpdr.org/seedviewer.cgi?page=Annotation&feature=",
+        pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=";
 
     $scope.Tabs = Tabs;
     Tabs.totalTabCount = 7;
@@ -447,11 +450,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     }
 
     // table options
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.geneOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.compartmentOpts = {query: '', limit: 10, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $scope.rxnOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.cpdOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.geneOpts = {query: '', limit: 20, offset: 0, sort: null};
+    $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
 
     // reaction table spec
@@ -469,8 +472,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
                  var links = [];
                  for (var i=0; i<item.length; i++) {
                      links.push('<a href="'+
-                                    featureUrl+item[i]+'" target="_blank">'
-                                 +item[i]+'</a>')
+                                    featureUrl+item[i]+'" target="_blank" class="nowrap" >'
+                                 +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
                  }
 
                  return links.join('<br>');
@@ -538,12 +541,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         var modelPath = path+'/model';
     }
 
-    console.log('modelPath', modelPath)
-
-
     // fetch object data and parse it.
     $scope.loading = true;
     WS.get(modelPath).then(function(res) {
+        $scope.meta = res.meta;
+        setFeatureUrl(res.meta.autoMeta.source);
+
         $scope.models = [res.data];
         $scope.orgName = res.data.name;
 
@@ -553,6 +556,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         $scope.error = e;
         $scope.loading = false;
     })
+
 
     /* testing
     MS.getModel(path).then(function(res) {
@@ -758,8 +762,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         })
     }
 
-
-
+    function setFeatureUrl(source) {
+        if (source === 'RAST')
+            featureUrl = rastGeneUrl;
+        else if (source === 'PubSEED')
+            featureUrl = pubSEEDUrl;
+        else if (source === 'PATRIC')
+            featureUrl = patricGeneUrl;
+        else
+            featureUrl = patricGeneUrl;
+    }
 }])
 
 .controller('FBADataView',

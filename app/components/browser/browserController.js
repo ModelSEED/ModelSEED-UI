@@ -118,7 +118,7 @@ angular.module('Browser', ['uiTools'])
         $scope.saving = true;
         return WS.createFolder( path(name) ).then(function(res) {
                    $scope.saving = false;
-                   $scope.items.push(WS.sanitizeObj(res[0]))
+                   $scope.items.push(WS.sanitizeMeta(res[0]))
                }).catch(function(e){
                     console.log('there was an error', e)
                     $scope.saving = false;

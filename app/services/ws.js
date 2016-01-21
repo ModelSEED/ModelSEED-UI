@@ -20,7 +20,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         // parse into list of dicts
                         var data = [];
                         for (var i in d)
-                            data.push( self.sanitizeObj(d[i]) );
+                            data.push( self.sanitizeMeta(d[i]) );
 
                         return data;
                     })
@@ -65,35 +65,36 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
-    // sanitizeObj: takes workspace info array, returns dict.
-    this.sanitizeObj = function(obj) {
-        return {name: obj[0],
-                type: obj[1],
-                path: obj[2]+obj[0],
-                modDate: obj[3],
-                id: obj[4],
-                owner: obj[5],
-                size: obj[6],
-                files: null, // need
-                folders: null, // need
-                timestamp: Date.parse(obj[3]+'+0000')
-               };
+    // sanitizeMeta: takes workspace info array, returns dict.
+    this.sanitizeMeta = function(obj) {
+        return {
+            name: obj[0],
+            type: obj[1],
+            path: obj[2]+obj[0],
+            modDate: obj[3],
+            id: obj[4],
+            owner: obj[5],
+            size: obj[6],
+            userMeta: obj[7],
+            autoMeta: obj[8],
+            files: null, // need
+            folders: null, // need
+            timestamp: Date.parse(obj[3]+'+0000')
+        };
     }
 
     this.cached = {}
     this.get = function(path, opts) {
         if (opts && opts.cache && path in self.cached) return self.cached[path];
 
-        //console.log('fetching', path)
         var p = $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        console.log('raw', res)
-                        var meta = res[0][0],
-                            node = meta[11];
+                        console.log('res',res)
+                        var meta = self.sanitizeMeta(res[0][0]),
+                            node = res[0][1];
 
                         // if shock node, fetch. Otherwise, return data.
                         if (node.length > 0) {
-                            console.log('getting data from shock', Auth.token);
                             var url = node+'?download&compression=gzip',
                                 header = {headers: {Authorization: 'OAuth '+Auth.token}};
 

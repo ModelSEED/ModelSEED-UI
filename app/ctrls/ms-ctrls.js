@@ -826,7 +826,8 @@ function($s, $sParams, WS, MS, Auth, $state,
             formatter: function(row) {
                 return uiTools.relativeTime(row.timestamp);
             }
-        }];
+        }
+    ];
 
 
     $s.loading = true;
