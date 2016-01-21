@@ -126,14 +126,30 @@ function($scope, $stateParams) {
 
 
 .controller('Jobs',
-['$scope', 'MS', 'uiTools', 'Jobs',
-function($s, MS, uiTools, Jobs) {
+['$scope', '$document', 'uiTools', 'Jobs',
+function($s, $document, uiTools, Jobs) {
 
     $s.relativeTime = uiTools.relativeTime;
 
     // if initial jobs status isn't there, listen
     // otherwise, load from cache and listen
     if (Jobs.getStatus().allJobs !== null) setStatus();
+
+    listener();
+
+    $document.on('click', unselect);
+    $s.$on('$destroy', function(){
+        $document.off('click', unselect);
+    });
+
+    // context-menu
+    $s.openMenu = function($event, job) {
+        $s.selectedJob = job;
+    }
+
+    function unselect() {
+        $s.selectedJob = null;
+    }
 
     function setStatus() {
         var status = Jobs.getStatus()
@@ -147,8 +163,6 @@ function($s, MS, uiTools, Jobs) {
     function listener() {
         $s.$on('Event.JobUpdate', setStatus);
     }
-
-    listener();
 }])
 
 .controller('JobCount',

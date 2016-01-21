@@ -52,7 +52,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true">
+        <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true"
+            context-menu="openMenu($event, job)"
+            ng-class="{active: selectedJob.id == job.id}"            
+            data-target="context-menu">
             <td>{{job.parameters.command}}</td>
             <td hide-md hide-sm>
                 <div ng-repeat="(key, value) in job.parameters.arguments">
@@ -77,3 +80,25 @@
         </tr>
     </tbody>
 </table>
+
+
+<div class="dropdown position-fixed" id="context-menu">
+    <ul class="dropdown-menu" role="menu">
+        <li>
+            <a role="menuitem"
+               tabindex="1"
+               href="https://p3c.theseed.org/services/app_service/task_info/{{selectedJob.id}}/stdout"
+               target="_blank">
+                <i class="fa fa-search"></i> View stdout
+            </a>
+        </li>
+        <li>
+            <a role="menuitem" tabindex="2"
+               ng-click="showMeta($event, selected)"
+               href="https://p3c.theseed.org/services/app_service/task_info/{{selectedJob.id}}/stderr"
+               target="_blank">
+               <i class="icon-info"></i> View stderr
+            </a>
+        </li>
+    </ul>
+</div>
