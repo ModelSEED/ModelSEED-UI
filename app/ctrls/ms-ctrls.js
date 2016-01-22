@@ -1162,11 +1162,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             .targetEvent(ev);
 
         $mdDialog.show(confirm).then(function() {
-            //delete both object and related data
-            var folder = item.path.slice(0, item.path.lastIndexOf('/')+1)+'.'+item.name;
-            var p1 = WS.deleteObj(item.path),
-                p2 = WS.deleteObj(folder, true);
-            $q.all([p1,p2]).then(function(one, two) {
+            WS.deleteFolder(item.path)
+              .then(function(one, two) {
                 if (type.toLowerCase() === 'plant')
                     MS.myPlants.splice(i, 1)
                 else if (type.toLowerCase() === 'microbe')

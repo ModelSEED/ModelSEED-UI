@@ -92,7 +92,6 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         var meta = self.sanitizeMeta(res[0][0]),
                             node = res[0][0][11];
 
-                            console.log('node', node)
                         // if shock node, fetch. Otherwise, return data.
                         if (node.length > 0) {
                             var url = node+'?download&compression=gzip',
@@ -211,6 +210,10 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         $log.error('delete failed', e, path)
                     })
 
+    }
+
+    this.deleteFolder = function(path) {
+        return self.deleteObj(path, true)
     }
 
     // Method to upload data directly to workspaces
