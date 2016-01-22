@@ -137,7 +137,6 @@ function($s, $document, uiTools, Jobs) {
 
     listener();
 
-    $document.on('click', unselect);
     $s.$on('$destroy', function(){
         $document.off('click', unselect);
     });
@@ -145,6 +144,8 @@ function($s, $document, uiTools, Jobs) {
     // context-menu
     $s.openMenu = function($event, job) {
         $s.selectedJob = job;
+        $document.off('click', unselect);
+        $document.on('click', unselect);
     }
 
     function unselect() {
