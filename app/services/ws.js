@@ -89,10 +89,10 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
         var p = $http.rpc('ws', 'get', {objects: [path]})
                     .then(function(res) {
-                        console.log('res',res)
                         var meta = self.sanitizeMeta(res[0][0]),
-                            node = res[0][1];
+                            node = res[0][0][11];
 
+                            console.log('node', node)
                         // if shock node, fetch. Otherwise, return data.
                         if (node.length > 0) {
                             var url = node+'?download&compression=gzip',
