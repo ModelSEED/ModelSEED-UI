@@ -126,8 +126,8 @@ function($scope, $stateParams) {
 
 
 .controller('Jobs',
-['$scope', '$document', 'uiTools', 'Jobs',
-function($s, $document, uiTools, Jobs) {
+['$scope', '$document', 'uiTools', 'Jobs', '$timeout',
+function($s, $document, uiTools, Jobs, $timeout) {
 
     $s.relativeTime = uiTools.relativeTime;
 
@@ -135,7 +135,8 @@ function($s, $document, uiTools, Jobs) {
     // otherwise, load from cache and listen
     if (Jobs.getStatus().allJobs !== null) setStatus();
 
-    listener();
+    // listen and stop listening when context-menu is triggered.
+    var stopListening = listen()
 
     $s.$on('$destroy', function(){
         $document.off('click', unselect);
@@ -144,12 +145,17 @@ function($s, $document, uiTools, Jobs) {
     // context-menu
     $s.openMenu = function($event, job) {
         $s.selectedJob = job;
+        stopListening();
         $document.off('click', unselect);
         $document.on('click', unselect);
     }
 
     function unselect() {
         $s.selectedJob = null;
+        $timeout(function() {
+            setStatus()
+            stopListening = listen();
+        })
     }
 
     function setStatus() {
@@ -161,8 +167,8 @@ function($s, $document, uiTools, Jobs) {
         $s.completedCount = status.completedCount;
     }
 
-    function listener() {
-        $s.$on('Event.JobUpdate', setStatus);
+    function listen() {
+        return $s.$on('Event.JobUpdate', setStatus);
     }
 }])
 

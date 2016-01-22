@@ -54,7 +54,7 @@
     <tbody>
         <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true"
             context-menu="openMenu($event, job)"
-            ng-class="{active: selectedJob.id == job.id}"            
+            ng-class="{active: selectedJob.id == job.id}"
             data-target="context-menu">
             <td>{{job.parameters.command}}</td>
             <td hide-md hide-sm>
