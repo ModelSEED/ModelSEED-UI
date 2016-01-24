@@ -6,16 +6,21 @@
         <div class="h2">Comparative Viewer</div>
     </div>
 
-    <div ng-if="MV.models.length > 0 && topLevelTabs.selectedIndex == 0" }layout="column" layout-align="end center">
+    <!--<div ng-if="MV.models.length > 0 && topLevelTabs.selectedIndex == 0" }layout="column" layout-align="end center">
         <md-radio-group ng-model="VizOpts.flux" ng-change="updateOptions()">
             <md-radio-button ng-value="'absFlux'"> |flux|</md-radio-button>
             <md-radio-button ng-value="'flux'"> flux </md-radio-button>
         </md-radio-group>
     </div>
+    -->
 </div>
 
 <hr class="no-margin">
+<br>
+The Comparative Viewer is currently under construction.
 
+
+<!--
 <div ng-if="MV.models.length == 0">
     <br>
     <div class="text-danger">No data selected</div>
@@ -27,40 +32,50 @@
 <div ng-if="MV.models.length > 0" >
 
     <md-tabs md-selected="topLevelTabs.selectedIndex" md-no-ink md-dynamic-height md-selected="topLevelTabs.selectedIndex" >
-    	<md-tab>
-    		<md-tab-label>Heatmap</md-tab-label>
+        <md-tab>
+            <md-tab-label>Heatmap</md-tab-label>
 
-    		<md-tab-body>
+            <md-tab-body>
                 <div heatmap="heatmapData"></div>
 
                 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-    		</md-tab-body>
+            </md-tab-body>
 
-    	</md-tab>
+        </md-tab>
 
-		<md-tab>
-			<md-tab-label>Pathways</md-tab-label>
-			<md-tab-body>
-				<ng-table-two table-header="mapHeader"
-						table-data="maps"
-						table-opts="mapOpts"
-						table-loading="loadingMaps"
-						table-placeholder="Search maps">
-				</ng-table-two>
-			<md-tab-body>
-		</md-tab>
+        <md-tab>
+            <md-tab-label>Pathways</md-tab-label>
+            <md-tab-body>
+                <ng-table-two table-header="mapHeader"
+                        table-data="maps"
+                        table-opts="mapOpts"
+                        table-loading="loadingMaps"
+                        table-placeholder="Search maps">
+                </ng-table-two>
+            <md-tab-body>
+        </md-tab>
 
-		<md-tab ng-repeat="tab in Tabs.tabs">
-			<md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
-				<span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
-			</md-tab-label>
-			<md-tab-body>
-				<div pathway="tab.mapID" models="models" fbas="fbas"></div>
-				<br>
-			</md-tab-body>
-		</md-tab>
+        <md-tab ng-repeat="tab in Tabs.tabs">
+            <md-tab-label>{{tab.name.length > 19 ? tab.name.slice(0, 20)+'...' : tab.name}}
+                <span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+            </md-tab-label>
+            <md-tab-body>
+                <div pathway="tab.mapID" models="models" fbas="fbas"></div>
+                <br>
+            </md-tab-body>
+        </md-tab>
 
     </md-tabs>
+
+    <div ng-if="MV.models.length && !loading" class="viz-legend" legend min="VizOpts.flux == 'flux' ? minFlux : null" max="maxFlux"></div>
+
+    <div ng-if="MV.models.length && !loading && topLevelTabs.selectedIndex == 0" class="viz-tip text-muted">
+        Use the mouse wheel (or double-click) to zoom. Click and drag to pan.
+    </div>
+
+</div>
+-->
+
 
 
     <!--
@@ -121,12 +136,3 @@
         </md-tab-body>
     </md-tab>
     -->
-
-
-    <div ng-if="MV.models.length && !loading" class="viz-legend" legend min="VizOpts.flux == 'flux' ? minFlux : null" max="maxFlux"></div>
-
-    <div ng-if="MV.models.length && !loading && topLevelTabs.selectedIndex == 0" class="viz-tip text-muted">
-        Use the mouse wheel (or double-click) to zoom. Click and drag to pan.
-    </div>
-
-</div>

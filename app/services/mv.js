@@ -107,16 +107,17 @@ function($http, $q, $rootScope, WS, config) {
                             if (obj[7] === 'core_VR_FBA_Glucose_aerobic')
                                 continue;
 
-                            items.push({name: obj[1],
-                                        ws: obj[7],
-                                        media: meta['Media name'],
-                                        objective: (meta['Objective'] === '10000000' ?
-                                                        0 : meta['Objective']),
-                                        rxnCount: meta['Number reaction variables'],
-                                        cpdCount: meta['Number compound variables'],
-                                        maximized: meta['Maximized'] ? 'true' : 'false',
-                                        biomass: meta['Biomass function']
-                                       })
+                            items.push({
+                                name: obj[1],
+                                ws: obj[7],
+                                media: meta['Media name'],
+                                objective: (meta['Objective'] === '10000000' ?
+                                            0 : meta['Objective']),
+                                rxnCount: meta['Number reaction variables'],
+                                cpdCount: meta['Number compound variables'],
+                                maximized: meta['Maximized'] ? 'true' : 'false',
+                                biomass: meta['Biomass function']
+                            })
                         }
 
                         return items;
@@ -138,6 +139,8 @@ function($http, $q, $rootScope, WS, config) {
         var objPathsByType = {};
         for (var i=0; i<items.length; i++) {
             var item = items[i];
+            self.data
+
 
             for (var type in item) {
                 // skip org and media meta data
@@ -184,12 +187,13 @@ function($http, $q, $rootScope, WS, config) {
 
                     var maps = [];
                     for (var i=0; i < d.length; i++) {
-                        maps.push({id: d[i][0],
-                                   name: d[i][7].name,
-                                   rxnCount: d[i][7].reaction_ids.split(',').length,
-                                   cpdCount: d[i][7].compound_ids.split(',').length,
-                                   source: 'KEGG'
-                                   })
+                        maps.push({
+                            id: d[i][0],
+                            name: d[i][7].name,
+                            rxnCount: d[i][7].reaction_ids.split(',').length,
+                            cpdCount: d[i][7].compound_ids.split(',').length,
+                            source: 'KEGG'
+                        })
                     }
                     return maps
                 })

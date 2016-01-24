@@ -300,6 +300,142 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
 }])
 
+
+.controller('Compare', ['$state', '$scope', '$timeout', 'VizOptions', 'Tabs', 'ModelViewer',
+function($state, $scope, $timeout, VizOpts, Tabs, MV) {
+    $scope.MV = MV;
+    $scope.VizOpts = VizOpts;
+
+    $scope.topLevelTabs = {selectedIndex: 0};
+
+    // secondary tabs
+    $scope.Tabs = Tabs;
+    Tabs.totalTabCount = 2;
+
+    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.mapHeader = [
+        {label: 'Name', key: 'name',
+         click: function(item) {
+             Tabs.addTab({name: item.name, mapID: item.id});
+        }},
+        {label: 'ID', key: 'id'},
+        {label: 'Rxns', key: 'rxnCount'},
+        {label: 'Cpds', key: 'cpdCount'}
+    ]
+
+    $scope.updateOptions = function() {
+        // wait for radio animation
+        $timeout(function() {
+            $scope.$broadcast('Compare.event.absFlux', VizOpts.flux == 'absFlux')
+        }, 100)
+    }
+
+    // fetch maps
+    $scope.loadingMaps = true;
+    MV.getMaps().then(function(d) {
+        $scope.loadingMaps = false;
+        $scope.maps = d;
+    })
+
+    function update() {
+        $scope.loading = true;
+        MV.updateData().then(function(d) {
+            var models = d.modelfolder,
+                fbas = d.fba;
+
+            // regenerates heatmap and kegg maps
+            $scope.heatmapData = parseData(models, fbas);
+            $scope.models = models;
+            $scope.fbas = fbas;
+            $scope.loading = false;
+        })
+    }
+
+    // update data (and rerender) when selected data changes
+    update();
+    $scope.$on('MV.event.change', function() {
+        update()
+    })
+
+    function parseData(models, fbas) {
+        console.log('models', models)
+
+        // create heatmap data
+        var rxnIDs = [],
+            modelNames = [],
+            data = [];
+
+        // first, get union of reactions
+        for (var i=0; i < models.length; i++) {
+            var model = models[i];
+            modelNames.push(model.name);
+
+            var rxns = model.modelreactions;
+            for (var j=0; j < rxns.length; j++) {
+                var rxnID = rxns[j].id;
+                if (rxnIDs.indexOf(rxnID) === -1) rxnIDs.push(rxnID);
+            }
+        }
+
+        var rows = [];
+        var allFluxes = []; //used for stats
+
+        // for each model, get data for box, left to right
+        for (var i=0; i < models.length; i++) {
+            var rxns = models[i].modelreactions;
+
+            // see if there is an fba result
+            // if so, get create rxn hash
+            var hasFBA = false,
+                fbaRXNs = {};
+            if (fbas && fbas[i]) {
+                hasFBA = true;
+                var fbaRxns = fbas[i].FBAReactionVariables;
+
+                for (var j=0; j<fbaRxns.length; j++) {
+                    // oh. man.
+                    var rxnId = fbaRxns[j].modelreaction_ref.split('||')[1].split('/').pop();
+                    fbaRXNs[rxnId] = fbaRxns[j];
+                }
+            }
+
+            var row = [];
+            // for each rxn in union of rxns, try to find rxn for that model
+            for (var j=0; j < rxnIDs.length; j++) {
+                var rxnID = rxnIDs[j];
+
+                var found = false, flux;
+
+                for (var k=0; k<rxns.length; k++) {
+                    if (rxns[k].id === rxnID) {
+                        found = true;
+                        if (hasFBA && fbaRXNs[rxnID]) {
+                            flux = fbaRXNs[rxnID].value;
+                            allFluxes.push(flux);
+                        }
+                        break;
+                    }
+                }
+
+                row.push({present: (found ? 1 : 0), flux: flux});
+            }
+
+            rows.push(row);
+        }
+
+        // rxn000001_c0 => rxn000001[c0]
+        var i = rxnIDs.length;
+        while (i--) rxnIDs[i] = rxnIDs[i].replace('_','[')+']'
+
+        // update min/max for legend
+        $scope.minFlux = Math.min.apply(null, allFluxes);
+        $scope.maxFlux = Math.max.apply(null, allFluxes);
+
+        return {x: rxnIDs, y: modelNames, data: rows};
+    }
+}])
+
+
 .controller('PlantAnnotations',['$scope', 'WS',
 function($s, WS) {
     var url = 'http://pubseed.theseed.org/SubsysEditor.cgi',
