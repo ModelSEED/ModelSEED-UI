@@ -207,19 +207,23 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
-    $s.rxnHeader = [{label: 'Name', key: 'name'},
-                    {label: 'ID', key: 'id'},
-                    {label: 'EQ', key: 'definition'},
-                    {label: 'deltaG', key: 'deltag'},
-                    {label: 'detalGErr', key: 'deltagerr'}];
+    $s.rxnHeader = [
+        {label: 'Name', key: 'name'},
+        {label: 'ID', key: 'id'},
+        {label: 'EQ', key: 'definition'},
+        {label: 'deltaG', key: 'deltag'},
+        {label: 'detalGErr', key: 'deltagerr'}
+    ];
 
-    $s.cpdHeader = [{label: 'Name', key: 'name'},
-                    {label: 'ID', key: 'id'},
-                    {label: 'Formula', key: 'formula'},
-                    {label: 'Abbrev', key: 'abbreviation'},
-                    {label: 'deltaG', key: 'deltag'},
-                    {label: 'detalGErr', key: 'deltagerr'},
-                    {label: 'Charge', key: 'charge'}];
+    $s.cpdHeader = [
+        {label: 'Name', key: 'name'},
+        {label: 'ID', key: 'id'},
+        {label: 'Formula', key: 'formula'},
+        {label: 'Abbrev', key: 'abbreviation'},
+        {label: 'deltaG', key: 'deltag'},
+        {label: 'detalGErr', key: 'deltagerr'},
+        {label: 'Charge', key: 'charge'}
+    ];
 
     function updateRxns() {
         Biochem.get('model_reaction', $s.rxnOpts)
@@ -247,12 +251,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         updateCpds();
     }, true)
 
-    $s.doSomething = function($e, row) {
-        $state.go('app.biochem', {tab: 'compounds'})
-              .then(function() {
-                  $state.go('app.biochemViewer', {cpd: row.id})
-              })
-    }
+    /* table row click (not used as of now)
+    $s.rowClick = function($e, row) {}
+    */
 }])
 
 

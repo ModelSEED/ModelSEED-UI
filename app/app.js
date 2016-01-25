@@ -149,7 +149,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         // main views
         .state('app.biochem', {
-            url: "/biochem/?tab",
+            url: "/biochem",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem',
             authenticate: true,
