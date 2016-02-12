@@ -1,7 +1,7 @@
 
 <div layout="row">
     <div class="content-header" flex>My {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
-        <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
+        <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.  Note that this page does not currently auto refresh.</small>
     </div>
 
     <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
