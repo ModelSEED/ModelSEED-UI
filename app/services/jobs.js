@@ -112,7 +112,6 @@ function($http, $rootScope, $timeout, Dialogs) {
     function updateJobs(jobIds) {
         return $http.rpc('ms', 'CheckJobs', {})
             .then(function(jobsHash) {
-                console.log('updating jobs', jobsHash)
 
                 // if active jobs have change emit event
                 for (var i=0; i<activeIds.length; i++) {
@@ -145,7 +144,6 @@ function($http, $rootScope, $timeout, Dialogs) {
                 self.jobs = sanitizeJobs(jobsHash);
                 self.jobsHash = jobsHash;
                 groupJobs();
-                console.log('active IDs', activeIds)
             })
     }
 
