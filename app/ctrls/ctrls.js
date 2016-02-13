@@ -11,8 +11,8 @@ function($scope, $state) {
 }])
 
 
-.controller('MediaDropdown', ['$scope', 'MS', '$log', 'uiTools',
-function($s, MS, uiTools) {
+.controller('MediaDropdown', ['$scope', 'MS', '$q', 'uiTools',
+function($s, MS, $q, uiTools) {
     var self = this;
 
     $s.relativeTime = uiTools.relativeTime;
@@ -26,15 +26,16 @@ function($s, MS, uiTools) {
     self.searchTextChange = searchTextChange;
 
     MS.listPublicMedia()
-      .then(function(media) {
-          $s.media = media;
-      })
-
+        .then(function(media) {
+            $s.media = media;
+        })
 
     MS.listMyMedia()
-      .then(function(media) {
-          $s.myMedia = media;
-      })
+        .then(function(media) {
+            $s.myMedia = media;
+        }).catch(function(e) {
+            $s.myMedia = []; // media folder may not exist
+        })
 
     function querySearch (query) {
         if (!$s.filterPublic)
