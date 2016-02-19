@@ -340,14 +340,14 @@ function($s, $state, $sParams, WS, MS, tools,
 
         var folder = '/'+Auth.user+'/media/';
         return WS.save(folder+newName, table, {userMeta: {}, overwrite: true})
-              .then(function(res) {
-                  MS.addMyMedia(res);
-                  Dialogs.showComplete('Saved media', newName);
-                  $state.go('app.mediaPage', {path: folder+newName})
-              }).catch(function(e) {
-                  console.log('error', e)
-                  self.showError('Save error', e.error.message.slice(0,30)+'...')
-              })
+            .then(function(res) {
+                MS.addMyMedia(res);
+                Dialogs.showComplete('Saved media', newName);
+                $state.go('app.mediaPage', {path: folder+newName})
+            }).catch(function(e) {
+                console.log('error', e)
+                self.showError('Save error', e.error.message.slice(0,30)+'...')
+            })
     }
 
     $s.addCpds = function(ev) {

@@ -1037,8 +1037,7 @@ function($s, $sParams, WS, MS, Auth, $state,
 
         var destination = '/'+Auth.user+'/media';
         return WS.createFolder(destination)
-             .then(function(res) {
-
+            .then(function(res) {
                 WS.copyList(paths, destination)
                   .then(function(res) {
                     $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
@@ -1047,11 +1046,10 @@ function($s, $sParams, WS, MS, Auth, $state,
                     $s.tabs.tabIndex = 1; // 'my media'
                 }).catch(function(e) {
                     if (e.error.code === -32603)
-                         Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
-                                       "Please consider renaming or deleting.")
+                        Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
+                                      "Please consider renaming or deleting.")
                 })
-
-             })
+            })
     }
 
 }])
