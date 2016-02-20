@@ -64,7 +64,8 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('Version', ['$scope', '$http', 'config', function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config',
+function($s, $http, config) {
 
     $s.release = config.releaseVersion;
 
@@ -112,7 +113,8 @@ function($scope, $stateParams) {
          })
          .catch(function(e) {
              console.error('error', e); $s.msSupport = false;
-          })
+         })
+
     /*
     $http({method: "POST",
            url: config.services.patric_auth_url,
