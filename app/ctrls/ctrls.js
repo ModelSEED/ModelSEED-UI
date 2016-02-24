@@ -293,9 +293,9 @@ function($s, $stateParams) {
 }])
 
 .controller('API',
-['$scope', '$http', 'uiTools',
-function($s, $http, uiTools) {
-    $s.url = 'http://modelseed.theseed.org/api/';
+['$scope', '$http', 'uiTools', 'config',
+function($s, $http, uiTools, config) {
+    $s.url = config.services.ms_rest_url;
     $s.version = 'v0';
 
     $http.get('/app/views/docs/api-docs.json')
@@ -327,7 +327,7 @@ function($s, $http, uiTools) {
 
 
                         var structure = tagObj.description.split('OK')[1];
-                        console.log(structure);
+
                         endpoint.successExample.structure = syntaxHighlight(JSON.stringify(
                             JSON.parse( tagObj.description.split('OK')[1] ), null, 2)
                         ) ;

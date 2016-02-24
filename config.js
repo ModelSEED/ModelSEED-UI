@@ -13,7 +13,7 @@ angular.module('config', []).service('config', function() {
         app_url: "http://p3.theseed.org/services/app_service",
         ws_url: "http://p3.theseed.org/services/Workspace",
         ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
-        ms_rest_url: "http://modelseed.theseed.org/api/v0/",
+        ms_rest_url: "http://api.modelseed.org/v0",
         shock_url: "http://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         solr_url: "https://www.patricbrc.org/api/",

@@ -343,6 +343,13 @@ function($rootScope, $state, $sParams, $window,
     $rootScope.token = auth.token;
 
     $rootScope.includePlants = config.includePlants;
+
+
+    // instantiate user feedback plugin
+    $.feedback({
+        ajaxURL: config.services.ms_rest_url+'/feedback',
+        html2canvasURL: 'lib/feedback/development/html2canvas.min.js',
+    });
 }])
 
 .run(['Jobs', function(Jobs) {

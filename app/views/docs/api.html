@@ -147,6 +147,12 @@
         color: #fff;
     }
 
+    .api-docs .api-warning {
+        background: #FFEDED;
+        border: 1px solid #D4A1A1;
+        padding: 10px;
+    }
+
 </style>
 
 
@@ -168,9 +174,16 @@
             <div layout="row">
                 <div class="docs-left" flex="70">
                     <h2>ModelSEED REST API</h2>
+
+                    <div class="api-warning">
+                        <b>Warning</b>: this API and documentation is pre-beta and should not be
+                        used for workflows or external applications.
+                    </div>
                 </div>
                 <div class="docs-right" flex></div>
             </div>
+
+
 
             <div ng-repeat="endpoint in api" layout="row">
                 <div class="docs-left" flex="70">
@@ -184,7 +197,7 @@
                         </dd>
 
                         <dt>URl</dt>
-                        <dd>{{url}}{{version}}{{endpoint.api.name}}</dd>
+                        <dd>{{url}}{{endpoint.api.name}}</dd>
 
                         <dt>Parameters</dt>
                         <dd api-params>
@@ -206,7 +219,7 @@
                             <a class="active">cURL</a> &middot; <a>CLI</a>
                         </div>
                         <dd api-example>
-                            <span class="code">curl "{{url}}{{version}}{{endpoint.sampleRequest.name}}" -H "Authentication: $token"</span>
+                            <span class="code">curl "{{url}}{{endpoint.sampleRequest.name}}" -H "Authentication: $token"</span>
                         </dd>
                     </dl>
                 </div>
