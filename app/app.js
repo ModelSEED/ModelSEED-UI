@@ -151,20 +151,17 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('app.biochem', {
             url: "/biochem",
             templateUrl: 'app/views/biochem/biochem.html',
-            controller: 'Biochem',
-            authenticate: true,
+            controller: 'Biochem'
         }).state('app.cpd', {
             // WARNING: external services depend on this URL.
             url: "/biochem/compounds/:id",
             templateUrl: 'app/views/biochem/compound.html',
-            controller: 'Compound',
-            authenticate: false,
+            controller: 'Compound'
         }).state('app.rxn', {
             // WARNING: external services depend on this URL.
             url: "/biochem/reactions/:id",
             templateUrl: 'app/views/biochem/reaction.html',
-            controller: 'Reaction',
-            authenticate: false,
+            controller: 'Reaction'
         })
 
         .state('app.plantAnnotations', {
