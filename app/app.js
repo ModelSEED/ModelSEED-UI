@@ -153,13 +153,21 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem',
             authenticate: true,
-            //reloadOnSearch: false
-        }).state('app.biochemViewer', {
-            url: "/biochem-viewer/?cpd?tab",
-            templateUrl: 'app/views/biochem/biochem-viewer.html',
-            controller: 'BiochemViewer',
-            authenticate: true
-        }).state('app.plantAnnotations', {
+        }).state('app.cpd', {
+            // WARNING: external services depend on this URL.
+            url: "/biochem/compounds/:id",
+            templateUrl: 'app/views/biochem/compound.html',
+            controller: 'Compound',
+            authenticate: false,
+        }).state('app.rxn', {
+            // WARNING: external services depend on this URL.
+            url: "/biochem/reactions/:id",
+            templateUrl: 'app/views/biochem/reaction.html',
+            controller: 'Reaction',
+            authenticate: false,
+        })
+
+        .state('app.plantAnnotations', {
             url: "/plant-annotations/",
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',

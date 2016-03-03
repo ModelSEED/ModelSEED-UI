@@ -205,22 +205,32 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry'] };
     $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
+                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'stoichiometry'] };
 
     $s.rxnHeader = [
-        {label: 'Name', key: 'name'},
+        {label: 'Name', key: 'name', format: function(row) {
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.name+'</a>';
+        }},
         {label: 'ID', key: 'id'},
-        {label: 'EQ', key: 'definition'},
-        {label: 'deltaG', key: 'deltag'},
-        {label: 'detalGErr', key: 'deltagerr'}
+        {label: 'EQ', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        //{label: 'deltaG', key: 'deltag'},
+        //{label: 'detalGErr', key: 'deltagerr'}
     ];
 
     $s.cpdHeader = [
-        {label: 'Name', key: 'name'},
+        {label: 'Name', key: 'name', format: function(row) {
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.name+'</a>';
+        }},
+        {label: 'Formula', key: 'formula', format: function(row) {
+            return '<span pretty-formula='+row.formula+'></span>';
+        }},
         {label: 'ID', key: 'id'},
-        {label: 'Formula', key: 'formula'},
         {label: 'Abbrev', key: 'abbreviation'},
         {label: 'deltaG', key: 'deltag'},
         {label: 'detalGErr', key: 'deltagerr'},
@@ -257,6 +267,34 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.rowClick = function($e, row) {}
     */
 }])
+
+
+// WARNING: External resources depend on this.
+.controller('Compound',['$scope', 'Biochem', '$stateParams',
+function($s, Biochem, $stateParams) {
+    $s.id = $stateParams.id;
+
+    $s.loading = true;
+    Biochem.getCpd($s.id)
+        .then(function(data) {
+            $s.cpd = data;
+            $s.loading = false;
+        })
+}])
+
+// WARNING: External resources depend on this.
+.controller('Reaction',['$scope', 'Biochem', '$stateParams',
+function($s, Biochem, $stateParams) {
+    $s.id = $stateParams.id;
+
+    $s.loading = true;
+    Biochem.getRxn($s.id)
+        .then(function(data) {
+            $s.rxn = data;
+            $s.loading = false;
+        })
+}])
+
 
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams', 'Biochem',

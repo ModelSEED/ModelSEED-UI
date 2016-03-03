@@ -1,0 +1,60 @@
+
+<h2>
+    Reaction
+    <small>{{rxn.name}}</small>
+</h2>
+<hr>
+
+<h4>Reaction Details</h4>
+
+<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+<table class="table table-horizontal table-condensed" ng-if="!loading">
+    <thead></thead>
+    <tbody>
+        <tr><td>Name</td><td>{{rxn.name}}</td></tr>
+        <tr><td>ID</td><td>{{rxn.id}}</td></tr>
+        <tr><td>Abbreviation</td><td>{{rxn.abbreviation}}</td></tr>
+        <tr>
+            <td>EQ</td>
+            <td stoichiometry-to-eq="{{rxn.stoichiometry}}" direction="{{rxn.direction}}"></td>
+        </tr>
+        <tr><td>Definition</td><td>{{rxn.definition}}</td></tr>
+        <tr><td>EQ with IDs</td><td>{{rxn.equation}}</td></tr>
+        <tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr>
+        <tr><td>DeltaG</td><td>{{rxn.deltag}}</td></tr>
+        <tr><td>DeltaGErr</td><td>{{rxn.deltagerr}}</td></tr>
+        <tr><td>direction</td><td>{{rxn.direction}}</td></tr>
+        <tr><td>Reversibility</td><td>{{rxn.reversibility}}</td></tr>
+        <tr><td>Is transport?</td><td>{{rxn.is_transport}}</td></tr>
+
+        <tr>
+            <td>Compound IDs</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in rxn.compound_ids">
+                        <a ui-sref="app.cpd({id: id})">{{id}}</a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Pathways</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in rxn.pathways">{{id}}</li>
+                </ul>
+                <span class="text-muted" ng-if="!rxn.pathways.length">(none found)</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Aliases</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in rxn.aliases">{{id}}</li>
+                </ul>
+            </td>
+        </tr>
+    </tr>
+</table>

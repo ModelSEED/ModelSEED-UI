@@ -2112,3 +2112,76 @@ function($compile, $stateParams) {
         }
     };
 })
+
+.directive('stoichiometryToEq', ['$compile', function($compile) {
+    return {
+        restrict: 'A',
+        scope: {
+             stoichiometryToEq: '@',
+             direction: '@'
+        },
+        link: function(scope, elem, attrs) {
+            var stoichString = scope.stoichiometryToEq;
+            if (!stoichString) return;
+
+            var parts = stoichString.split(';');
+            var dir = scope.direction;
+
+            if (dir === '=')
+                var dirClass = 'fa-arrows-h';
+            else if (dir === '>')
+                var dirClass = 'fa-long-arrow-right';
+            else if (dir === '<')
+                var dirClass = 'fa-long-arrow-left';
+
+            var transporter
+
+            // create html for left and right hand sides of equation
+            var lhs = [], rhs = [];
+            for (var i=0; i<parts.length; i++) {
+                var attrs = parts[i].split(':');
+
+                var weight = attrs[0],
+                    id = attrs[1],
+                    compart = attrs[2],
+                    compartNum = attrs[3];
+                    name = attrs[4] ? attrs[4].replace(/^"(.*)"$/, '$1')
+                                   .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
+
+                if (weight < 0)
+                    lhs.push((weight === -1 ? '' : -1*weight) +
+                             ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
+                             ' ['+compart+']');
+                if (weight > 0)
+                    rhs.push((weight === 1 ? '' : weight) +
+                             ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
+                             ' ['+compart+']');
+            }
+
+            var eq = lhs.join(' + ') +
+                    ' <i class="eq-direction fa ' + dirClass + '"></i> ' +
+                     rhs.join(' + ');
+
+            elem.html(eq);
+            $compile(elem.contents())(scope);
+        }
+    }
+}])
+
+
+.directive('prettyFormula', ['$compile', function($compile) {
+    return {
+        restrict: 'A',
+        scope: {
+             formula: '@prettyFormula'
+        },
+        link: function(scope, elem, attrs) {
+            var formula = scope.formula;
+            if (!formula) return;
+
+            var formula = formula.replace(/(\d+)/g, '<sub>$1</sub>');
+            elem.html(formula);
+            $compile(elem.contents())(scope);
+        }
+    }
+}])
