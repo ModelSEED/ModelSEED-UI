@@ -150,8 +150,10 @@ function($http, $rootScope, $timeout, Dialogs) {
     function sanitizeJobs(jobDict) {
         var jobs = [];
         for (var id in jobDict) {
-            jobDict[id].timestamp = Date.parse(jobDict[id].start_time)
-            jobs.push(jobDict[id]);
+            var job = jobDict[id];
+            job.startTimestamp = Date.parse(job.start_time);
+            job.submitTimestamp = Date.parse(job.submit_time);
+            jobs.push(job);
         }
         return jobs;
     }
