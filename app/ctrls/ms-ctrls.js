@@ -207,7 +207,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry'] };
     $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'stoichiometry'] };
+                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
     $s.rxnHeader = [
         {label: 'Name', key: 'name', format: function(row) {
