@@ -20,7 +20,22 @@
 
             <md-tab label="Legend">
                 <md-tab-body>
-                    <h4>Regulator classification</h4>
+
+                    <h4>Regulator Descriptions</h4>
+
+                    The character "<b>@</b>" in a column means that the corresponding relation is absent:<br>
+                    <p style="margin-left: 15px;">
+                    "<b>@</b>" in the column BSU indicates that there is no locustag related to the regulator.<br>
+                    "<b>@</b>" in the column metabolite means that the activity of the regulator is not modulated by a metabolite.
+                        Consequently, the column metabolite_sign is assigned to "nan" in that case.<br><br>
+                    </p>
+                    <ul class="list-unstyled">
+                        <li>"<b>unk</b>" in the column metabolite means that a metabolite may modulate the activity of the regulator but it has not been identified. The corresponding number and sign is thus assigned to "<b>nan</b>".</li>
+                        <li>"<b>nan</b>" in the column metabolite means that the activity of the regulator may be affected by an unknown mechanism. The corresponding number and sign is thus assigned to "<b>nan</b>".</li>
+                    </ul>
+
+                    <br>
+                    <h4>Regulator Classification</h4>
 
                     <div layout="row" flex="70">
                     <table class="table table-stripper table-horizontal table-condensed">
