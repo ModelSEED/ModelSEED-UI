@@ -1451,7 +1451,8 @@ function($compile, $stateParams) {
             loading: '=tableLoading',
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
-            enableDownload: '=enableDownload',
+            enableDownload: '=',
+            enableColumnSearch: '='
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
@@ -1460,6 +1461,17 @@ function($compile, $stateParams) {
                 scope.enableDownload($ev, scope.opts);
             }
 
+            scope.toggleAdvancedOptions = function($ev) {
+                scope.advancedOptsEnabled = !scope.advancedOptsEnabled
+
+                // remove search terms when column search disabled,
+                // and remove general query when enabled
+                if (scope.advancedOptsEnabled == false) {
+                    delete scope.opts.queryColumn;
+                } else {
+                     scope.opts.query = '';
+                }
+            }
         }
     }
  })
@@ -2009,10 +2021,12 @@ function($compile, $stateParams) {
          scope: {
              query: '=search',
              opts: '=searchOpts',
-             searchPlaceholder: '@searchPlaceholder'
+             searchPlaceholder: '@searchPlaceholder',
+             disableSearch: '='
          },
          template: '<md-icon class="material-icons">search</md-icon>'+
-                   '<input ng-model="query" ng-model-options="{debounce: {default: 100, blur: 0}}" type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()" input-clear>',
+                   '<input ng-model="query" ng-disabled="disableSearch" ng-model-options="{debounce: {default: 100, blur: 0}}" '+
+                   'type="text" placeholder="{{searchPlaceholder}}" class="query-input" ng-change="queryChange()" input-clear>',
          link: function(scope, elem, attrs) {
              var lastQuery;
 

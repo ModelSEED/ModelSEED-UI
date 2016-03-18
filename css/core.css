@@ -613,6 +613,11 @@ ul.about-toolbar > li.active {
 /**
  * tables
  */
+
+.table-options > a:not(:first-child) {
+    margin-left: 15px;
+}
+
 .table-hover-btn {
     /*visibility: hidden;*/
 }
@@ -622,7 +627,7 @@ table tr:hover .table-hover-btn {
 }
 
 .item-not-found {
-    margin-left: 40px;
+    margin: 10px 0 0 40px;
     color: #777;
 }
 
@@ -1225,11 +1230,12 @@ input[name=upload] {
     line-height: .9em;
 }
 
-.icon-file-download {
+.tiny-link-icon {
     position: relative;
     text-decoration: none;
-    bottom: -2px;
+    bottom: -4px;
     font-size: 1.2em;
+    color: #888;
 }
 
 .icon-tools {
