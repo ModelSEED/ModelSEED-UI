@@ -339,7 +339,7 @@ function($s, $state, $sParams, WS, MS, tools,
         var table = tools.JSONToTable(head, angular.copy(data));
 
         var folder = '/'+Auth.user+'/media/';
-        return WS.save(folder+newName, table, {userMeta: {}, overwrite: true})
+        return WS.save(folder+newName, table, {userMeta: {}, overwrite: true, type: 'media'})
             .then(function(res) {
                 MS.addMyMedia(res);
                 Dialogs.showComplete('Saved media', newName);
