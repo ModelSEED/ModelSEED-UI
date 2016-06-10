@@ -26,6 +26,13 @@
             </a>
         </li>
 
+        <li ng-class="{ active: $state.includes('main.events') }">
+            <a ui-sref="main.events">
+                Events
+            </a>
+        </li>
+     
+
         <span flex></span>
 
         <li ng-class="{ active: $state.includes('main.about') }">
@@ -33,6 +40,7 @@
                 About
             </a>
         </li>
+
 
         <div>
             <md-button ng-if="!$root.user" class="md-raised md-primary pull-right" ui-sref="app.genomes">

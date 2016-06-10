@@ -122,6 +122,16 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'FusionSubsystems'
         })
 
+        // event pages
+        .state('main.events', {
+            url: '/events',
+            templateUrl: '/docs/events/events.html',
+        }).state('main.events.plantseed2016', {
+            url: '/events/plantseed2016',
+            templateUrl: '/docs/events/plantseed2016/home.html',
+        })
+
+
         // about pages
         .state('main.about', {
             url: '/about',
