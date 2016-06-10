@@ -279,11 +279,13 @@ function($s, $state, $sParams, WS, MS, tools,
     $s.name = path.split('/').pop()
 
     $s.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
-    $s.mediaHeader = [{label: 'Name', key: 'name'},
-                          {label: 'ID', key: 'id'},
-                          {label: 'Concentration', key: 'concentration', editable: true},
-                          {label: 'Max Flux', key: 'minflux', editable: true},
-                          {label: 'Min Flux', key: 'maxflux', editable: true}];
+    $s.mediaHeader = [
+        {label: 'Name', key: 'name'},
+        {label: 'ID', key: 'id'},
+        {label: 'Concentration', key: 'concentration', editable: true},
+        {label: 'Max Flux', key: 'minflux', editable: true},
+        {label: 'Min Flux', key: 'maxflux', editable: true}
+    ];
 
     $s.toggleEdit = function() {
         $s.editInProgress = !$s.editInProgress;
@@ -375,11 +377,13 @@ function($s, $state, $sParams, WS, MS, tools,
                     var newItems = [];
                     for (var i=0; i<items.length; i++) {
                         var cpd = items[i]
-                        newItems.push({id: cpd.id,
-                                       name: cpd.name,
-                                       concentration: 0.001,
-                                       minflux: -100,
-                                       maxflux: 100})
+                        newItems.push({
+                            id: cpd.id,
+                            name: cpd.name,
+                            concentration: 0.001,
+                            minflux: -100,
+                            maxflux: 100
+                        })
                     }
 
                     $s.editableData = newItems.concat($s.editableData);
@@ -393,17 +397,21 @@ function($s, $state, $sParams, WS, MS, tools,
                     $s.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
-                $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
-                              visible: ['name', 'id', 'formula', 'abbreviation',
-                                        'deltag', 'deltagerr', 'charge'] };
+                $s.cpdOpts = {
+                    query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                    visible: ['name', 'id', 'formula', 'abbreviation',
+                            'deltag', 'deltagerr', 'charge']
+                };
 
-                $s.cpdHeader = [{label: 'Name', key: 'name'},
-                                {label: 'ID', key: 'id'},
-                                {label: 'Formula', key: 'formula'},
-                                {label: 'Abbrev', key: 'abbreviation'},
-                                {label: 'deltaG', key: 'deltag'},
-                                {label: 'detalGErr', key: 'deltagerr'},
-                                {label: 'Charge', key: 'charge'}];
+                $s.cpdHeader = [
+                    {label: 'Name', key: 'name'},
+                    {label: 'ID', key: 'id'},
+                    {label: 'Formula', key: 'formula'},
+                    {label: 'Abbrev', key: 'abbreviation'},
+                    {label: 'deltaG', key: 'deltag'},
+                    {label: 'detalGErr', key: 'deltagerr'},
+                    {label: 'Charge', key: 'charge'}
+                ];
 
 
                 function updateCpds() {
