@@ -125,10 +125,10 @@ function($locationProvider, $stateProvider, $httpProvider,
         // event pages
         .state('main.events', {
             url: '/events',
-            templateUrl: '/docs/events/events.html',
+            templateUrl: '/ms-projects/events/events.html',
         }).state('main.events.plantseed2016', {
             url: '/events/plantseed2016',
-            templateUrl: '/docs/events/plantseed2016/home.html',
+            templateUrl: '/ms-projects/events/plantseed2016/home.html',
         })
 
 

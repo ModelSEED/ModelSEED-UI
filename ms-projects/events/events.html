@@ -1,0 +1,48 @@
+
+
+<div ui-view layout="column">
+
+    <div class="container">
+        <br>
+        <h3>ModelSEED Related Events</h3>
+        <hr class="no-margin">
+        <br>
+        
+        <h4>Upcoming:</h4>
+
+        <div layout-margin layout-padding> 
+
+            <h4>
+                <a ui-sref="main.events.plantseed2016">
+                    PlantSEED2016 - The 2016 PlantSEED Metabolic Modeling Workshop
+                </a>
+                <div class="text-muted"><small>August 4th - 5th, 2016</small></div>
+            </h4>
+            Join us at Northwestern University, Evanston, IL for a free two-day workshop on 
+            plant genome annotation, metabolic modeling and reconstruction comprising 
+            formal lectures and hands-on instruction.<br>
+            <br>
+
+        </div>        
+
+        <a ng-init="expand = false" ng-click="expand = !expand">
+            {{expand ? 'Hide' : 'View'}} past events 
+            <i class="fa" ng-class="{'caret': !expand, 'fa-caret-up': expand}"></i>
+        </a>
+
+        <div ng-if="expand" layout-margin layout-padding>
+            
+            <br>
+            <h4>
+                <a href="http://press3.mcs.anl.gov/plantseed2015/participation/" target="_blank">
+                    PlantSEED2015
+                </a>
+                <div class="text-muted"><small>August 13th – 14th, 2015</small></div>                            
+            </h4>
+        </div>
+
+    </div>
+</div>
+
+
+
