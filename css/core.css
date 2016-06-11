@@ -23,6 +23,13 @@ md-toolbar-tools {
     transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
 }
 
+.important-note {
+    padding: 15px;
+    color: #6B1414;
+    background-color: #FFBFBF;
+    border: 2px solid #CE6363;
+}
+
 a {
     color: #30BCCF; /*#00AFD8;*/
 }
