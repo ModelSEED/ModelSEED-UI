@@ -192,7 +192,8 @@ function($s, Jobs) {
     listener();
 }])
 
-.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
+.controller('Biochem',
+['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
 /**
  * [Responsible for options, table specs,
  * 	and updating of reaction/compound tables ]
@@ -490,47 +491,47 @@ function($s, WS) {
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
-                     {label: 'Role', key: 'role'},
-                     {label: 'Subsystems', key: 'subsystems',
-                        formatter: function(row) {
-                            var links = [];
-                            row.subsystems.forEach(function(name) {
-                                links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
-                                                        name.replace(/_/g, ' ')+
-                                                    '</a>');
-                            })
+        {label: 'Role', key: 'role'},
+        {label: 'Subsystems', key: 'subsystems',
+        formatter: function(row) {
+            var links = [];
+            row.subsystems.forEach(function(name) {
+                links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
+                                        name.replace(/_/g, ' ')+
+                                    '</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                     {label: 'Classes', key: 'classes',
-                        formatter: function(row) {
-                            return row.classes.join('<br>') || '-';
-                        }},
-                     {label: 'Pathways', key: 'pathways',
-                        formatter: function(row) {
-                            var links = [];
-                            row.pathways.forEach(function(name) {
-                                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
-                                                name+
-                                           '</a>');
-                            })
+            return links.join('<br>') || '-';
+        }},
+        {label: 'Classes', key: 'classes',
+        formatter: function(row) {
+            return row.classes.join('<br>') || '-';
+        }},
+        {label: 'Pathways', key: 'pathways',
+        formatter: function(row) {
+            var links = [];
+            row.pathways.forEach(function(name) {
+                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
+                                name+
+                            '</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                     {label: 'Reactions', key: 'reactions',
-                        formatter: function(row) {
-                            return row.reactions.join('<br>') || '-';
-                        }},
-                     {label: 'Features', key: 'features',
-                        formatter: function(row) {
-                            var links = [];
-                            row.features.forEach(function(name) {
-                                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
-                            })
+            return links.join('<br>') || '-';
+        }},
+        {label: 'Reactions', key: 'reactions',
+        formatter: function(row) {
+            return row.reactions.join('<br>') || '-';
+        }},
+        {label: 'Features', key: 'features',
+        formatter: function(row) {
+            var links = [];
+            row.features.forEach(function(name) {
+                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                    ];
+            return links.join('<br>') || '-';
+        }},
+    ];
 
     $s.loading = true;
     if (WS.cached.annotations) {
@@ -580,11 +581,13 @@ function($scope, FBA, WS, $dialog, $sce) {
     $scope.FBA = FBA;
 
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.rxnHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Equation', key: 'equation'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
+    $scope.rxnHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'equation'},
+        {label: 'deltaG', key: 'deltaG'},
+        {label: 'detalGErr', key: 'deltaGErr'}
+    ];
 
     $scope.loadingRxns = true;
     var biochem = FBA.getBiochem()
@@ -597,9 +600,11 @@ function($scope, FBA, WS, $dialog, $sce) {
        })
 
     $scope.opts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.modelHeader = [{label: 'ID', key: 'id'},
-                          {label: 'Name', key: 'name'},
-                          {label: 'Equation', key: 'equation'}];
+    $scope.modelHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'equation'}
+    ];
 
     /**
      * [checkedRxns description]
@@ -799,35 +804,43 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
-    $scope.opts = {query: '', limit: 25, offset: 0,
-                   sort: {field: 'genome_name'},
-                   visible: ['genome_name', 'genome_id', 'species', 'contigs']};
+    $scope.opts = {
+        query: '', limit: 25, offset: 0,
+        sort: {field: 'genome_name'},
+        visible: ['genome_name', 'genome_id', 'species', 'contigs']
+    };
 
-    $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0,
-                             sort: {field: 'timestamp'}};
+    $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0, sort: {field: 'timestamp'}};
 
-   $scope.myPlantsOpts = {query: '',
-                          limit: 25,
-                          offset: 0,
-                          sort: {field: 'timestamp'}};
+    $scope.myPlantsOpts = {
+        query: '',
+        limit: 25,
+        offset: 0,
+        sort: {field: 'timestamp'}
+    };
 
 
-    $scope.columns = [{prop: 'genome_name', label: 'Name'},
-                      {prop: 'genome_id', label: 'ID'},
-                      {prop: 'species', label: 'Species'},
-                      {prop: 'contigs', label: 'Contigs'}]
+    $scope.columns = [
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'species', label: 'Species'},
+        {prop: 'contigs', label: 'Contigs'}
+    ]
 
-    $scope.myMicrobesSpec = [{prop: 'genome_name', label: 'Name'},
-                             {prop: 'genome_id', label: 'ID'},
-                             {prop: 'contigs', label: 'Contigs'}]
+    $scope.myMicrobesSpec = [
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'contigs', label: 'Contigs'}
+    ]
 
+    // public rast genome
     MS.listRastGenomes()
       .then(function(data) {
           $scope.myMicrobes = data;
           //console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
-    /* ignore plants ofr now
+    // public plant genomes
     WS.listPlantMetas('/plantseed/Genomes/')
       .then(function(objs) {
           var plants = [];
@@ -844,10 +857,8 @@ function($scope, $state, Patric, $timeout, $http,
 
           $scope.plants = plants;
       })
-      */
 
-    // load my plants
-    /*
+    // private plant genomes
     $scope.loadingMyPlants = true;
     WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
@@ -869,7 +880,6 @@ function($scope, $state, Patric, $timeout, $http,
                 $scope.error = e.error.message;
             $scope.loadingMyPlantsMicrobes = false;
         })
-    */
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -1137,7 +1147,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         })
     }
 
-    /* disabled for now
+    // private plant models
     if (MS.myPlants) {
         $scope.myPlants = MS.myPlants;
     } else {
@@ -1149,39 +1159,46 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.myPlants = [];
             $scope.loadingPlants = false;
         })
-    }*/
-
-
-    $scope.showFBAs = function(item) {
-        $scope.showGapfills(item);
-
-        if (item.relatedFBAs) delete item.relatedFBAs;
-        else updateFBAs(item)
     }
 
-    function updateFBAs(item) {
+
+    $scope.showRelatedData = function(item) {
+        console.log('showing related')
         item.loading = true;
-        return MS.getModelFBAs(item.path)
-            .then(function(fbas) {
-                item.relatedFBAs = fbas;
-                item.loading = false;
+        var gapfillProm = showGapfills(item);
+
+        var fbaProm;
+        if (item.relatedFBAs) 
+            delete item.relatedFBAs;
+        else 
+            fbaProm = updateFBAs(item)
+
+        $q.all([fbaProm, gapfillProm])
+            .then(function() {
+                console.log('done')
+                item.loading = false
             })
     }
 
-    $scope.showGapfills = function(item) {
-        if (item.relatedGapfills)
+    function updateFBAs(item) {
+        return MS.getModelFBAs(item.path)
+            .then(function(fbas) {
+                item.relatedFBAs = fbas;
+            })
+    }
+
+    function showGapfills(item) {
+        if (item.relatedGapfills) {
             delete item.relatedGapfills;
-        else {
-            updateGapfills(item);
+        } else {
+            return updateGapfills(item);
         }
     }
 
     function updateGapfills(item) {
-        item.loading = true;
         return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
-                item.loading = false;
             })
     }
 

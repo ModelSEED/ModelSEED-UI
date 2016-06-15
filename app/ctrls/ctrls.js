@@ -210,10 +210,10 @@ function ($scope, $timeout, $mdSidenav, $log) {
     */
 
     var defaultSettings = {
-                            organismType: 'Microbes',
-                            viewMyGenomes: false,
-                            wsBrowser: {showHidden: false}
-                          };
+        organismType: 'Microbes',
+        viewMyGenomes: false,
+        wsBrowser: {showHidden: false}
+    };
 
     // get stored options
     var options = JSON.parse( localStorage.getItem('ViewOptions') );
