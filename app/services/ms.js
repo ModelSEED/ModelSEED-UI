@@ -26,11 +26,13 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             var job = jobs[i];
                             if (job.type !== 'Genome') continue;
 
-                            genomes.push({timestamp: Date.parse(job.mod_time+'+0000'),
-                                          genome_name: job.genome_name,
-                                          genome_id: job.genome_id,
-                                          id: job.id,
-                                          contigs: job.contig_count});
+                            genomes.push({
+                                timestamp: Date.parse(job.mod_time+'+0000'),
+                                genome_name: job.genome_name,
+                                genome_id: job.genome_id,
+                                id: job.id,
+                                contigs: job.contig_count
+                            });
                         }
 
                         return genomes;
@@ -132,12 +134,14 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             var meta = res[i];
                             var d = meta[8];
 
-                            data.push({name: meta[0],
-                                       timestamp: Date.parse(meta[3]+'+0000'),
-                                       path: meta[2]+meta[0],
-                                       orgName: d.name,
-                                       rxnCount: d.num_reactions,
-                                       cpdCount: d.num_compounds})
+                            data.push({
+                                name: meta[0],
+                                timestamp: Date.parse(meta[3]+'+0000'),
+                                path: meta[2]+meta[0],
+                                orgName: d.name,
+                                rxnCount: d.num_reactions,
+                                cpdCount: d.num_compounds
+                            })
                         }
 
                         return data;
@@ -158,10 +162,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                         }
 
                         // cache data according to plants/microbes
-                        //if (path.split('/')[2] === 'plantseed') self.myPlants = data
-                        //else self.myModels = data;
-                        self.myModels = data;
-                        console.log('sefl.myModels', self.myModels)
+                        if (path && path.split('/')[2] === 'plantseed') self.myPlants = data
+                        else self.myModels = data;
+
                         return data;
                     })
     }

@@ -151,7 +151,7 @@
     <div layout="row"
          ng-repeat-start="item in (filtered = ( myPlants | filter: plantOpts.query)
                                                          | limitTo : plantOpts.limit : plantOpts.offset)"
-         ng-click="showFBAs(item)"
+         ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
 
