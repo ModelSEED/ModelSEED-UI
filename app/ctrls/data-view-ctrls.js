@@ -107,8 +107,12 @@ function($scope, $sParams, WS, $http) {
           }
 
           $scope.features = objs;
+      }).catch(function(error){
+          $scope.error = error;      
+      }).then(function() { 
           $scope.loadingFeatures = false;
       })
+
 
     $scope.loadingAnnotations = true;
     $http.rpc('ms', 'plant_annotation_overview', {genome: path})

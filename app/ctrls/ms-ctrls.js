@@ -840,21 +840,9 @@ function($scope, $state, Patric, $timeout, $http,
           //console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
-    // public plant genomes
-    WS.listPlantMetas('/plantseed/Genomes/')
-      .then(function(objs) {
-          var plants = [];
-          for (var i=0; i<objs.length; i++) {
-              var obj = objs[i];
-
-              // skip any "hidden" directories and test files
-              if (obj.name[0] === '.' ||
-                  obj.name.toLowerCase().indexOf('test') !== -1)
-                  continue;
-
-              plants.push(obj);
-          }
-
+    // public plants for genome view
+    WS.listPublicPlants('/plantseed/Models/')
+      .then(function(plants) { 
           $scope.plants = plants;
       })
 
