@@ -39,26 +39,33 @@ function($http, $q, $rootScope, config, Auth) {
                 offset = opts.offset ? opts.offset : 0,
                 sort = opts.sort ? (opts.sort.desc ? 'desc': 'asc') : null,
                 sortField = opts.sort && 'field' in opts.sort ? opts.sort.field : '',
-                searchFields = 'searchFields' in opts ? opts.searchFields : null,
+                searchFields = 'searchFields' in opts ? opts.searchFields : null, // fields to query against
+                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual column
                 query = 'query' in opts && query != '' ? opts.query : null,
                 cols = opts.visible ? opts.visible : [];
         }
 
+
         if (limit) url += '&rows='+limit+'&start='+offset;
         if (sort && sortField) url += '&sort='+sortField+' '+sort;
 
-        if (query) {
-            if (searchFields) {
+        if (query || queryColumn) {
+            if (queryColumn) {
+                var f = [];
+                for (var field in queryColumn) {
+                    f.push(field+':(*'+queryColumn[field]+'*)');
+                }
+                url += '&q='+f.join(' AND ')
+            } else if (searchFields) {
                 var f = [];
                 for (var i=0; i<searchFields.length; i++) {
                     f.push(searchFields[i]+':(*'+query+'*)');
                 }
                 url += '&q='+f.join(' OR ')
             }
-
-            //cache = false;
-        } else
+        } else {
             url += '&q=*';
+        }
 
         return url;
     }

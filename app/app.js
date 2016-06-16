@@ -122,6 +122,16 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'FusionSubsystems'
         })
 
+        // event pages
+        .state('main.events', {
+            url: '/events',
+            templateUrl: '/ms-projects/events/events.html',
+        }).state('main.events.plantseed2016', {
+            url: '/events/plantseed2016',
+            templateUrl: '/ms-projects/events/plantseed2016/home.html',
+        })
+
+
         // about pages
         .state('main.about', {
             url: '/about',
@@ -151,15 +161,20 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('app.biochem', {
             url: "/biochem",
             templateUrl: 'app/views/biochem/biochem.html',
-            controller: 'Biochem',
-            authenticate: true,
-            //reloadOnSearch: false
-        }).state('app.biochemViewer', {
-            url: "/biochem-viewer/?cpd?tab",
-            templateUrl: 'app/views/biochem/biochem-viewer.html',
-            controller: 'BiochemViewer',
-            authenticate: true
-        }).state('app.plantAnnotations', {
+            controller: 'Biochem'
+        }).state('app.cpd', {
+            // WARNING: external services depend on this URL.
+            url: "/biochem/compounds/:id",
+            templateUrl: 'app/views/biochem/compound.html',
+            controller: 'Compound'
+        }).state('app.rxn', {
+            // WARNING: external services depend on this URL.
+            url: "/biochem/reactions/:id",
+            templateUrl: 'app/views/biochem/reaction.html',
+            controller: 'Reaction'
+        })
+
+        .state('app.plantAnnotations', {
             url: "/plant-annotations/",
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
@@ -343,6 +358,13 @@ function($rootScope, $state, $sParams, $window,
     $rootScope.token = auth.token;
 
     $rootScope.includePlants = config.includePlants;
+
+
+    // instantiate user feedback plugin
+    $.feedback({
+        ajaxURL: config.services.ms_rest_url+'/feedback',
+        html2canvasURL: 'lib/feedback/development/html2canvas.min.js',
+    });
 }])
 
 .run(['Jobs', function(Jobs) {

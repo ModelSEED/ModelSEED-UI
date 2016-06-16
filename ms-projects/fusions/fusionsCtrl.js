@@ -10,8 +10,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     $s.opts = {size: 'condensed', border: false};
 
     // training table
-
-    var sFields = ['id', 'species', 'function', 'fusion_class', 'contig']; // fixme: 'cdds' (still needed?)
+    var sFields = ['id', 'species', 'function', 'fusion_class', 'contig'];
     $s.trainingOpts = Session.getOpts($state, 'training') ||
         {query: '', limit: 25, offset: 0, sort: {}, searchFields: sFields, core: 'fusion-training'};
 
@@ -29,10 +28,10 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
         {label: 'Img', key: 'img'},
         {label: 'Curation', key: 'curation'},
         //{label: 'Contig', key: 'contig'},
-        /*{label: 'Direction', key: 'direction'},
-        {label: 'Start', key: 'start'},
-        {label: 'Stop', key: 'stop'},
-        {label: 'Sequence', key: 'sequence'},*/
+        //{label: 'Direction', key: 'direction'},
+        //{label: 'Start', key: 'start'},
+        //{label: 'Stop', key: 'stop'},
+        //{label: 'Sequence', key: 'sequence'},
     ];
 
     function updateTraining() {
@@ -44,6 +43,7 @@ function($s, $http, $state, uiTools, Dialogs, Session, MSSolr, $compile) {
     }
 
     $s.$watch('trainingOpts', function(after, before) {
+        console.log('after', after)
         $s.loadingTraining = true;
         updateTraining();
         Session.setOpts($state, 'training', after);

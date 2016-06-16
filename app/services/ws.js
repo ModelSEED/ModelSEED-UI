@@ -37,32 +37,41 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
-    this.listPlantMetas = function(path) {
-        return $http.rpc('ws', 'ls', {paths: [path]})
-                    .then(function(d) {
-                        var d = d[path];
+    this.listPublicPlants = function(path) {
+        // first get paths to genomes
+        var prom = $http.rpc('ws', 'ls', {paths: [path]})
+            .then(function(res) {
+                var objs = res[path];
 
-                        var data = [];
-                        for (var i in d) {
-                            var obj = d[i];
+                var genomePaths = [];
+                objs.forEach(function(obj) {
+                    var name = obj[0],
+                        type = obj[1];
 
-                            if ( !('name' in obj[7]) ) continue;
+                    // ignore non modelfolders
+                    if (type !== 'modelfolder') return;                            
 
-                            data.push( {name: obj[0],
-                                        path: obj[2]+obj[0],
-                                        meta: obj[7]});
-                        }
+                    genomePaths.push(obj[2]+obj[0]+'/genome');
+                })
 
-                        data.sort(function(a, b){
-                            if (a.meta.organism.toLowerCase() < b.meta.organism.toLowerCase())
-                                return -1;
-                            if (a.meta.organism.toLowerCase() > b.meta.organism.toLowerCase())
-                                return 1;
-                            return 0;
-                        })
-
-                        return data;
+                return genomePaths;
+            })
+        
+        // next get genome meta, return prom for public plants
+        return prom.then(function(paths) {
+            return self.getObjectMetas(paths)
+                .then(function(metas) {
+                    var plants = metas.map(function(m) {
+                        return {
+                            name: m[0],
+                            path: m[2]+m[0],
+                            meta: m[7]
+                        };
                     })
+
+                    return plants;
+                })
+        })
     }
 
     // sanitizeMeta: takes workspace info array, returns dict.
@@ -88,30 +97,30 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         if (opts && opts.cache && path in self.cached) return self.cached[path];
 
         var p = $http.rpc('ws', 'get', {objects: [path]})
-                    .then(function(res) {
-                        var meta = self.sanitizeMeta(res[0][0]),
-                            node = res[0][0][11];
+                .then(function(res) {
+                    var meta = self.sanitizeMeta(res[0][0]),
+                        node = res[0][0][11];
 
-                        // if shock node, fetch. Otherwise, return data.
-                        if (node.length > 0) {
-                            var url = node+'?download&compression=gzip',
-                                header = {headers: {Authorization: 'OAuth '+Auth.token}};
+                    // if shock node, fetch. Otherwise, return data.
+                    if (node.length > 0) {
+                        var url = node+'?download&compression=gzip',
+                            header = {headers: {Authorization: 'OAuth '+Auth.token}};
 
-                            return $http.get(url, header)
-                                        .then(function(res) {
-                                            return {meta: meta, data: res.data};
-                                        })
-                        } else {
-                            // try to parse, if not, assume data is string.
-                            try {
-                                var data = JSON.parse(res[0][1]);
-                            } catch(e) {
-                                var data = res[0][1];
-                            }
-
-                            return {meta: meta, data: data};
+                        return $http.get(url, header)
+                                    .then(function(res) {
+                                        return {meta: meta, data: res.data};
+                                    })
+                    } else {
+                        // try to parse, if not, assume data is string.
+                        try {
+                            var data = JSON.parse(res[0][1]);
+                        } catch(e) {
+                            var data = res[0][1];
                         }
-                    })
+
+                        return {meta: meta, data: data};
+                    }
+                })
 
         if (opts && opts.cache) self.cached[path] = p;
         return p;
@@ -141,12 +150,19 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
 
     this.getObjectMeta = function(path) {
-        //console.log('retrieving meta', path)
         return $http.rpc('ws', 'get', {objects: [path], metadata_only: 1})
                     .then(function(res) {
                         return res[0];
                     })
     }
+
+    this.getObjectMetas = function(paths) {
+        return $http.rpc('ws', 'get', {objects: paths, metadata_only: 1})
+                    .then(function(res) {             
+                        return res.reduce(function(a,b) { return a.concat(b); }, []); 
+                    })
+    }
+    
 
     this.saveMeta = function(path, data) {
         //$log.log('update meta meta', path)

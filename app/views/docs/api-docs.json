@@ -376,5 +376,77 @@
             "description": "",
             "source": "@api {get} /publications/ List select publications related to ModelSEED. List has no particular order.\n@apiName publications\n\n\n@apiSampleRequest /publications/\n\n@apiSuccess {json} meta List of publication objects.  All values are strings, except 'authors',\n which is a an array of strings and year, which is an int.\n@apiSuccessExample {json} Success-Response:\n    HTTP/1.1 200 OK\n  [{ \"authors\":\n       [ \"Henry, Christopher S\",\n         \"DeJongh, Matthew\",\n         \"Best, Aaron A\",\n         \"Frybarger, Paul M\",\n         \"Linsay, Ben\",\n         \"Stevens, Rick L\"],\n      \"title\": \"High-throughput generation, optimization and analysis of genome-scale metabolic models\",\n      \"publication\": \"Nature biotechnology\",\n      \"volumn\": \"28\",\n      \"number\": \"9\",\n      \"pages\": \"977-982\",\n      \"year\": \"2010\",\n      \"publisher\": \"Nature Publishing Group\"\n   }]"
         }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "post",
+                    "name": "/feedback/",
+                    "optional": false,
+                    "description": "post user feedback",
+                    "line": 1,
+                    "source": "@api {post} /feedback/ post user feedback"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "feedback",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName feedback"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {post} /feedback/ post user feedback\n@apiName feedback"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
+                    "type": "get",
+                    "name": "/test-service/",
+                    "optional": false,
+                    "description": "Way to test simple, unauthenticated GET request.",
+                    "line": 1,
+                    "source": "@api {get} /test-service/  Way to test simple, unauthenticated GET request."
+                },
+                {
+                    "tag": "apiName",
+                    "name": "test-service",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName test-service"
+                },
+                {
+                    "tag": "apiSampleRequest",
+                    "name": "/test-server/",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 4,
+                    "source": "@apiSampleRequest /test-server/"
+                },
+                {
+                    "tag": "apiSuccess",
+                    "type": "json",
+                    "name": "string",
+                    "optional": false,
+                    "description": "Should return code 200 with string \"This is just a test. This is only a test.\"",
+                    "line": 6,
+                    "source": "@apiSuccess {json} string Should return code 200 with string \"This is just a test. This is only a test.\""
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {get} /test-service/  Way to test simple, unauthenticated GET request.\n@apiName test-service\n\n@apiSampleRequest /test-server/\n\n@apiSuccess {json} string Should return code 200 with string \"This is just a test. This is only a test.\""
+        }
     ]
 ]

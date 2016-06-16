@@ -23,6 +23,13 @@ md-toolbar-tools {
     transition: visibility 0s linear 0.23s, opacity 0.5s linear  0.3s;
 }
 
+.important-note {
+    padding: 15px;
+    color: #6B1414;
+    background-color: #FFBFBF;
+    border: 2px solid #CE6363;
+}
+
 a {
     color: #30BCCF; /*#00AFD8;*/
 }
@@ -68,7 +75,8 @@ a.disabled {
     text-decoration: none;
 }
 
-.logo .ms-status {
+.logo .ms-status,
+.ms-new-notify {
     position: absolute;
     right: -20px;
     top: 5px;
@@ -81,12 +89,18 @@ a.disabled {
     font-size: 1.17em;
 }
 
-.toolbar > li.divider {
-    position: absolute;
-    display: inline;
-    height: 40px;
-    margin: 5px;
-    border-right: 1px solid #444;
+indent {
+    display:block;
+    margin-left: 1.8em;
+    line-height: 1.5em;
+}
+
+/**
+ * general styling
+ */
+
+.eq-direction {
+    color: #666;
 }
 
 /**
@@ -190,9 +204,6 @@ a.no-href {
     text-decoration: none;
 }
 
-pre {
-    margin: inherit;
-}
 
 .vertical-center {
     margin-top: auto;
@@ -307,7 +318,9 @@ md-toolbar,
     background-color: #2D224E;
 }
 
-/* toolbars */
+/**
+ * toolbars
+ */
 ul.toolbar {
     padding: 0;
     margin: 0;
@@ -354,6 +367,14 @@ ul.toolbar li > a > i.icon-benzene {
     font-weight: 600;
 }
 
+
+.toolbar > li.divider {
+    position: absolute;
+    display: inline;
+    height: 40px;
+    margin: 5px;
+    border-right: 1px solid #444;
+}
 
 .brand-home {
     background-color: transparent;
@@ -469,19 +490,6 @@ ul.about-toolbar > li.active {
 }
 
 
-/*
-.sidebar {
-    z-index: 50;
-    color: #fff;
-    background-color: #555;
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
-}*/
-
-/*
-.nav .open>a {
-    background-color: #26D3DA !important;
-}*/
-
 .btn-add-model {
     padding: 0px 5px;
 }
@@ -489,7 +497,6 @@ ul.about-toolbar > li.active {
 .btn-rm-model {
     font-size: 1.5em;
 }
-
 
 #selected-models {
     padding: 10px;
@@ -549,7 +556,7 @@ ul.about-toolbar > li.active {
 
 
 /**
- * pages
+ * special buttons
  */
 .btn-outline {
     margin-top: 10px;
@@ -578,6 +585,10 @@ ul.about-toolbar > li.active {
     color: #fff;
 }
 
+
+/**
+ * pages / page layout
+ */
 .content-header {
     font-size: 30px;
     line-height: 0.9em;
@@ -599,7 +610,9 @@ ul.about-toolbar > li.active {
     margin: 10px 0 0 0;
 }
 
-/* pathway stuff */
+/*
+ * pathway stuff
+*/
 .pathway {
     position: absolute;
     top: 0;
@@ -615,6 +628,10 @@ ul.about-toolbar > li.active {
  * tables
  */
 
+.table-options > a:not(:first-child) {
+    margin-left: 15px;
+}
+
 .table-hover-btn {
     /*visibility: hidden;*/
 }
@@ -624,7 +641,7 @@ table tr:hover .table-hover-btn {
 }
 
 .item-not-found {
-    margin-left: 40px;
+    margin: 10px 0 0 40px;
     color: #777;
 }
 
@@ -644,12 +661,13 @@ tr span[role=button] {
     margin-bottom: 0;
 }
 
+
 .table-horizontal > tbody > tr > td:first-child {
     font-weight: 800;
 }
 
-.table-horizontal > tbody > tr:first-child {
-    border-width: 0px;
+.table-horizontal > tbody > tr:first-child > td{
+    border-top: 0px;
 }
 
 .table-loading {
@@ -1226,11 +1244,12 @@ input[name=upload] {
     line-height: .9em;
 }
 
-.icon-file-download {
+.tiny-link-icon {
     position: relative;
     text-decoration: none;
-    bottom: -2px;
+    bottom: -4px;
     font-size: 1.2em;
+    color: #888;
 }
 
 .icon-tools {

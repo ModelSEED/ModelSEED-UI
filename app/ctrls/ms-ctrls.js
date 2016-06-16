@@ -64,7 +64,8 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('Version', ['$scope', '$http', 'config', function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config',
+function($s, $http, config) {
 
     $s.release = config.releaseVersion;
 
@@ -112,7 +113,8 @@ function($scope, $stateParams) {
          })
          .catch(function(e) {
              console.error('error', e); $s.msSupport = false;
-          })
+         })
+
     /*
     $http({method: "POST",
            url: config.services.patric_auth_url,
@@ -190,7 +192,8 @@ function($s, Jobs) {
     listener();
 }])
 
-.controller('Biochem',['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
+.controller('Biochem',
+['$scope', 'Biochem', '$state', '$stateParams', 'MS', 'Session',
 /**
  * [Responsible for options, table specs,
  * 	and updating of reaction/compound tables ]
@@ -203,22 +206,32 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry'] };
     $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                   visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
 
     $s.rxnHeader = [
-        {label: 'Name', key: 'name'},
+        {label: 'Name', key: 'name', format: function(row) {
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.name+'</a>';
+        }},
         {label: 'ID', key: 'id'},
-        {label: 'EQ', key: 'definition'},
-        {label: 'deltaG', key: 'deltag'},
-        {label: 'detalGErr', key: 'deltagerr'}
+        {label: 'EQ', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        //{label: 'deltaG', key: 'deltag'},
+        //{label: 'detalGErr', key: 'deltagerr'}
     ];
 
     $s.cpdHeader = [
-        {label: 'Name', key: 'name'},
+        {label: 'Name', key: 'name', format: function(row) {
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.name+'</a>';
+        }},
+        {label: 'Formula', key: 'formula', format: function(row) {
+            return '<span pretty-formula='+row.formula+'></span>';
+        }},
         {label: 'ID', key: 'id'},
-        {label: 'Formula', key: 'formula'},
         {label: 'Abbrev', key: 'abbreviation'},
         {label: 'deltaG', key: 'deltag'},
         {label: 'detalGErr', key: 'deltagerr'},
@@ -255,6 +268,34 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.rowClick = function($e, row) {}
     */
 }])
+
+
+// WARNING: External resources depend on this.
+.controller('Compound',['$scope', 'Biochem', '$stateParams',
+function($s, Biochem, $stateParams) {
+    $s.id = $stateParams.id;
+
+    $s.loading = true;
+    Biochem.getCpd($s.id)
+        .then(function(data) {
+            $s.cpd = data;
+            $s.loading = false;
+        })
+}])
+
+// WARNING: External resources depend on this.
+.controller('Reaction',['$scope', 'Biochem', '$stateParams',
+function($s, Biochem, $stateParams) {
+    $s.id = $stateParams.id;
+
+    $s.loading = true;
+    Biochem.getRxn($s.id)
+        .then(function(data) {
+            $s.rxn = data;
+            $s.loading = false;
+        })
+}])
+
 
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams', 'Biochem',
@@ -450,47 +491,47 @@ function($s, WS) {
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
-                     {label: 'Role', key: 'role'},
-                     {label: 'Subsystems', key: 'subsystems',
-                        formatter: function(row) {
-                            var links = [];
-                            row.subsystems.forEach(function(name) {
-                                links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
-                                                        name.replace(/_/g, ' ')+
-                                                    '</a>');
-                            })
+        {label: 'Role', key: 'role'},
+        {label: 'Subsystems', key: 'subsystems',
+        formatter: function(row) {
+            var links = [];
+            row.subsystems.forEach(function(name) {
+                links.push('&middot; <a href="'+subsystemUrl+name+'" target="_blank">'+
+                                        name.replace(/_/g, ' ')+
+                                    '</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                     {label: 'Classes', key: 'classes',
-                        formatter: function(row) {
-                            return row.classes.join('<br>') || '-';
-                        }},
-                     {label: 'Pathways', key: 'pathways',
-                        formatter: function(row) {
-                            var links = [];
-                            row.pathways.forEach(function(name) {
-                                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
-                                                name+
-                                           '</a>');
-                            })
+            return links.join('<br>') || '-';
+        }},
+        {label: 'Classes', key: 'classes',
+        formatter: function(row) {
+            return row.classes.join('<br>') || '-';
+        }},
+        {label: 'Pathways', key: 'pathways',
+        formatter: function(row) {
+            var links = [];
+            row.pathways.forEach(function(name) {
+                links.push('<a href="'+pathwayUrl+name+'" target="_blank">'+
+                                name+
+                            '</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                     {label: 'Reactions', key: 'reactions',
-                        formatter: function(row) {
-                            return row.reactions.join('<br>') || '-';
-                        }},
-                     {label: 'Features', key: 'features',
-                        formatter: function(row) {
-                            var links = [];
-                            row.features.forEach(function(name) {
-                                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
-                            })
+            return links.join('<br>') || '-';
+        }},
+        {label: 'Reactions', key: 'reactions',
+        formatter: function(row) {
+            return row.reactions.join('<br>') || '-';
+        }},
+        {label: 'Features', key: 'features',
+        formatter: function(row) {
+            var links = [];
+            row.features.forEach(function(name) {
+                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
+            })
 
-                            return links.join('<br>') || '-';
-                        }},
-                    ];
+            return links.join('<br>') || '-';
+        }},
+    ];
 
     $s.loading = true;
     if (WS.cached.annotations) {
@@ -540,11 +581,13 @@ function($scope, FBA, WS, $dialog, $sce) {
     $scope.FBA = FBA;
 
     $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
-    $scope.rxnHeader = [{label: 'ID', key: 'id'},
-                        {label: 'Name', key: 'name'},
-                        {label: 'Equation', key: 'equation'},
-                        {label: 'deltaG', key: 'deltaG'},
-                        {label: 'detalGErr', key: 'deltaGErr'}];
+    $scope.rxnHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'equation'},
+        {label: 'deltaG', key: 'deltaG'},
+        {label: 'detalGErr', key: 'deltaGErr'}
+    ];
 
     $scope.loadingRxns = true;
     var biochem = FBA.getBiochem()
@@ -557,9 +600,11 @@ function($scope, FBA, WS, $dialog, $sce) {
        })
 
     $scope.opts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.modelHeader = [{label: 'ID', key: 'id'},
-                          {label: 'Name', key: 'name'},
-                          {label: 'Equation', key: 'equation'}];
+    $scope.modelHeader = [
+        {label: 'ID', key: 'id'},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'equation'}
+    ];
 
     /**
      * [checkedRxns description]
@@ -759,54 +804,49 @@ function($scope, $state, Patric, $timeout, $http,
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
-    $scope.opts = {query: '', limit: 25, offset: 0,
-                   sort: {field: 'genome_name'},
-                   visible: ['genome_name', 'genome_id', 'species', 'contigs']};
+    $scope.opts = {
+        query: '', limit: 25, offset: 0,
+        sort: {field: 'genome_name'},
+        visible: ['genome_name', 'genome_id', 'species', 'contigs']
+    };
 
-    $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0,
-                             sort: {field: 'timestamp'}};
+    $scope.myMicrobesOpts = {query: '', limit: 25,  offset: 0, sort: {field: 'timestamp'}};
 
-   $scope.myPlantsOpts = {query: '',
-                          limit: 25,
-                          offset: 0,
-                          sort: {field: 'timestamp'}};
+    $scope.myPlantsOpts = {
+        query: '',
+        limit: 25,
+        offset: 0,
+        sort: {field: 'timestamp'}
+    };
 
 
-    $scope.columns = [{prop: 'genome_name', label: 'Name'},
-                      {prop: 'genome_id', label: 'ID'},
-                      {prop: 'species', label: 'Species'},
-                      {prop: 'contigs', label: 'Contigs'}]
+    $scope.columns = [
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'species', label: 'Species'},
+        {prop: 'contigs', label: 'Contigs'}
+    ]
 
-    $scope.myMicrobesSpec = [{prop: 'genome_name', label: 'Name'},
-                             {prop: 'genome_id', label: 'ID'},
-                             {prop: 'contigs', label: 'Contigs'}]
+    $scope.myMicrobesSpec = [
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'contigs', label: 'Contigs'}
+    ]
 
+    // public rast genome
     MS.listRastGenomes()
       .then(function(data) {
           $scope.myMicrobes = data;
           //console.log('myMicrobes (rast)', $scope.myMicrobes)
       })
 
-
-    WS.listPlantMetas('/plantseed/Genomes/')
-      .then(function(objs) {
-          var plants = [];
-          for (var i=0; i<objs.length; i++) {
-              var obj = objs[i];
-
-              // skip any "hidden" directories and test files
-              if (obj.name[0] === '.' ||
-                  obj.name.toLowerCase().indexOf('test') !== -1)
-                  continue;
-
-              plants.push(obj);
-          }
-
+    // public plants for genome view
+    WS.listPublicPlants('/plantseed/Models/')
+      .then(function(plants) { 
           $scope.plants = plants;
       })
 
-
-    // load my plants
+    // private plant genomes
     $scope.loadingMyPlants = true;
     WS.list('/'+Auth.user+'/plantseed/genomes/')
         .then(function(res) {
@@ -828,7 +868,6 @@ function($scope, $state, Patric, $timeout, $http,
                 $scope.error = e.error.message;
             $scope.loadingMyPlantsMicrobes = false;
         })
-
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -1036,8 +1075,7 @@ function($s, $sParams, WS, MS, Auth, $state,
 
         var destination = '/'+Auth.user+'/media';
         return WS.createFolder(destination)
-             .then(function(res) {
-
+            .then(function(res) {
                 WS.copyList(paths, destination)
                   .then(function(res) {
                     $s.myMedia = mergeObjects($s.myMedia, MS.sanitizeMediaObjs(res), 'path');
@@ -1046,11 +1084,10 @@ function($s, $sParams, WS, MS, Auth, $state,
                     $s.tabs.tabIndex = 1; // 'my media'
                 }).catch(function(e) {
                     if (e.error.code === -32603)
-                         Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
-                                       "Please consider renaming or deleting.")
+                        Dialogs.error("Oh no!", "Can't overwrite your existing media names."+
+                                      "Please consider renaming or deleting.")
                 })
-
-             })
+            })
     }
 
 }])
@@ -1098,6 +1135,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         })
     }
 
+    // private plant models
     if (MS.myPlants) {
         $scope.myPlants = MS.myPlants;
     } else {
@@ -1111,36 +1149,44 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         })
     }
 
-    $scope.showFBAs = function(item) {
-        $scope.showGapfills(item);
 
-        if (item.relatedFBAs) delete item.relatedFBAs;
-        else updateFBAs(item)
-    }
-
-    function updateFBAs(item) {
+    $scope.showRelatedData = function(item) {
+        console.log('showing related')
         item.loading = true;
-        return MS.getModelFBAs(item.path)
-            .then(function(fbas) {
-                item.relatedFBAs = fbas;
-                item.loading = false;
+        var gapfillProm = showGapfills(item);
+
+        var fbaProm;
+        if (item.relatedFBAs) 
+            delete item.relatedFBAs;
+        else 
+            fbaProm = updateFBAs(item)
+
+        $q.all([fbaProm, gapfillProm])
+            .then(function() {
+                console.log('done')
+                item.loading = false
             })
     }
 
-    $scope.showGapfills = function(item) {
-        if (item.relatedGapfills)
+    function updateFBAs(item) {
+        return MS.getModelFBAs(item.path)
+            .then(function(fbas) {
+                item.relatedFBAs = fbas;
+            })
+    }
+
+    function showGapfills(item) {
+        if (item.relatedGapfills) {
             delete item.relatedGapfills;
-        else {
-            updateGapfills(item);
+        } else {
+            return updateGapfills(item);
         }
     }
 
     function updateGapfills(item) {
-        item.loading = true;
         return MS.getModelGapfills(item.path)
             .then(function(gfs) {
                 item.relatedGapfills = gfs;
-                item.loading = false;
             })
     }
 

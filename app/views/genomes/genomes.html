@@ -2,8 +2,12 @@
 <div layout="row">
     <div class="content-header" flex>
         {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
-        <small ng-if="view == 'Microbes'" class="help-text" hide-sm>Select a genome from below to reconstruct</small>
-        <small ng-if="view == 'Plants'" class="help-text" hide-sm>You can reconstruct or upload a genome under 'Mine', or consider copying a genome/model.</small>
+        <small ng-if="view == 'Microbes'" class="help-text" hide-sm>
+            Select a genome from below to reconstruct
+        </small>
+        <small ng-if="view == 'Plants'" class="help-text" hide-sm>
+            You can reconstruct or upload a genome under 'Mine', or consider copying a genome/model.
+        </small>
 
     </div>
 
@@ -18,16 +22,16 @@
     </md-input-container>
     -->
 
-    <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
-        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
-        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>
-
     <div ng-if="tabs.tabIndex == 1" layout-align="center end">
         <br>
         <b>Note:</b> to annotate a genome, you must visit
         <a href="http://rast.nmpdr.org" target="_blank">RAST <i class="fa fa-external-link text-muted"></i></a> at this time.
     </div>
+
+    <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
+        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
+        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
+    </md-radio-group>    
 </div>
 <hr class="no-margin">
 

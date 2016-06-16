@@ -54,7 +54,7 @@ function($http, $q, config, $log) {
             cache = false;
         }
 
-        if (offset === 0) cache = true;
+        if (!offset) cache = true;
 
         // cancel any previous request using defer
         if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
@@ -71,6 +71,7 @@ function($http, $q, config, $log) {
         else if (collection === 'gene')
             geneReq = liveReq;
 
+        console.log('caching?', cache)
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
                         rxnReq = false, cpdReq = false; geneReq = false;
@@ -91,7 +92,6 @@ function($http, $q, config, $log) {
 
         return $http.get(url)
                     .then(function(res) {
-
                         return Array.isArray(id) ? res.data : res.data[0];
                     })
     }

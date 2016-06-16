@@ -1,12 +1,19 @@
 
 <div class="table-controls"  layout="row">
-    <md-input-container md-no-float flex="45"
-        search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+    <md-input-container md-no-float flex="45" disable-search="advancedOptsEnabled"
+        search="opts.query" search-opts="opts" search-placeholder={{::placeholder}}>
     </md-input-container>
 
-    <md-input-container layout-align="start center" layout="row" ng-if="enableDownload" flex>
-        <a ng-click="download($event)"><i class="icon-file-download text-muted"></i> download</a>
+    <md-input-container layout-align="start center" layout="row" class="table-options" flex>
+        <a ng-if="enableColumnSearch" ng-click="toggleAdvancedOptions($event)">
+            <i class="tiny-link-icon material-icons">settings_applications</i> advanced
+        </a>
+
+        <a  ng-if="enableDownload" ng-click="download($event)">
+            <i class="tiny-link-icon material-icons">file_download</i> download
+        </a>
     </md-input-container>
+
 
     <md-progress-circular ng-if="loading"
                           md-mode="indeterminate"
@@ -23,17 +30,27 @@
     </md-input-container>
 </div>
 
-<table class="table table-striped table-hover"
-       ng-class="{'table-small': stylingOpts.size == 'condensed', 'table-bordered': stylingOpts.border != false}"
-       ng-show="data.docs.length">
+<table class="table table-striped"
+       ng-class="{'table-small': stylingOpts.size == 'condensed', 'table-bordered': stylingOpts.border != false}">
     <thead>
         <tr>
-            <th sortable="{{h.sortable}}" ng-repeat="h in header track by $index" col-id="{{h.key}}"
-                ng-click="sortBy($event, h.key)">{{h.label}}</th>
+            <th sortable="{{::h.sortable}}" ng-repeat="h in header track by $index" col-id="{{::h.key}}"
+                ng-click="sortBy($event, h.key)">{{::h.label}}</th>
+        </tr>
+        <tr ng-if="advancedOptsEnabled">
+            <th ng-repeat="h in header track by $index">
+                <input ng-if="opts.searchFields.indexOf(h.key) != -1"
+                       type="text"
+                       placeholder="Search..."
+                       style="width: 100%;"
+                       ng-model="opts.queryColumn[h.key]"
+                       ng-model-options="{debounce: {default: 400, blur: 0}}">
+            </th>
+
         </tr>
     </thead>
 
-    <tbody>
+    <tbody ng-if="data.numFound != 0">
         <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
             <td ng-repeat="h in header">
                 <span ng-if="h.format" bind-html-compile="h.format(item)"></span>
@@ -46,6 +63,8 @@
 <div ng-if="!loading && data.numFound == 0" class="item-not-found">
     No item found
 </div>
+
+
 
 
 <div ng-if="!loading && !data">

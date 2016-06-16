@@ -107,8 +107,12 @@ function($scope, $sParams, WS, $http) {
           }
 
           $scope.features = objs;
+      }).catch(function(error){
+          $scope.error = error;      
+      }).then(function() { 
           $scope.loadingFeatures = false;
       })
+
 
     $scope.loadingAnnotations = true;
     $http.rpc('ms', 'plant_annotation_overview', {genome: path})
@@ -279,11 +283,13 @@ function($s, $state, $sParams, WS, MS, tools,
     $s.name = path.split('/').pop()
 
     $s.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
-    $s.mediaHeader = [{label: 'Name', key: 'name'},
-                          {label: 'ID', key: 'id'},
-                          {label: 'Concentration', key: 'concentration', editable: true},
-                          {label: 'Max Flux', key: 'minflux', editable: true},
-                          {label: 'Min Flux', key: 'maxflux', editable: true}];
+    $s.mediaHeader = [
+        {label: 'Name', key: 'name'},
+        {label: 'ID', key: 'id'},
+        {label: 'Concentration', key: 'concentration', editable: true},
+        {label: 'Max Flux', key: 'minflux', editable: true},
+        {label: 'Min Flux', key: 'maxflux', editable: true}
+    ];
 
     $s.toggleEdit = function() {
         $s.editInProgress = !$s.editInProgress;
@@ -339,15 +345,20 @@ function($s, $state, $sParams, WS, MS, tools,
         var table = tools.JSONToTable(head, angular.copy(data));
 
         var folder = '/'+Auth.user+'/media/';
-        return WS.save(folder+newName, table, {userMeta: {}, overwrite: true})
-              .then(function(res) {
-                  MS.addMyMedia(res);
-                  Dialogs.showComplete('Saved media', newName);
-                  $state.go('app.mediaPage', {path: folder+newName})
-              }).catch(function(e) {
-                  console.log('error', e)
-                  self.showError('Save error', e.error.message.slice(0,30)+'...')
-              })
+        return WS.save(folder+newName, table, {
+            userMeta: {
+                name: newName,
+                isMinimal: 0,
+                isDefined: 0,
+            }, overwrite: true, type: 'media'})
+            .then(function(res) {
+                MS.addMyMedia(res);
+                Dialogs.showComplete('Saved media', newName);
+                $state.go('app.mediaPage', {path: folder+newName})
+            }).catch(function(e) {
+                console.log('error', e)
+                self.showError('Save error', e.error.message.slice(0,30)+'...')
+            })
     }
 
     $s.addCpds = function(ev) {
@@ -370,11 +381,13 @@ function($s, $state, $sParams, WS, MS, tools,
                     var newItems = [];
                     for (var i=0; i<items.length; i++) {
                         var cpd = items[i]
-                        newItems.push({id: cpd.id,
-                                       name: cpd.name,
-                                       concentration: 0.001,
-                                       minflux: -100,
-                                       maxflux: 100})
+                        newItems.push({
+                            id: cpd.id,
+                            name: cpd.name,
+                            concentration: 0.001,
+                            minflux: -100,
+                            maxflux: 100
+                        })
                     }
 
                     $s.editableData = newItems.concat($s.editableData);
@@ -388,17 +401,21 @@ function($s, $state, $sParams, WS, MS, tools,
                     $s.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
-                $s.cpdOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
-                              visible: ['name', 'id', 'formula', 'abbreviation',
-                                        'deltag', 'deltagerr', 'charge'] };
+                $s.cpdOpts = {
+                    query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                    visible: ['name', 'id', 'formula', 'abbreviation',
+                            'deltag', 'deltagerr', 'charge']
+                };
 
-                $s.cpdHeader = [{label: 'Name', key: 'name'},
-                                {label: 'ID', key: 'id'},
-                                {label: 'Formula', key: 'formula'},
-                                {label: 'Abbrev', key: 'abbreviation'},
-                                {label: 'deltaG', key: 'deltag'},
-                                {label: 'detalGErr', key: 'deltagerr'},
-                                {label: 'Charge', key: 'charge'}];
+                $s.cpdHeader = [
+                    {label: 'Name', key: 'name'},
+                    {label: 'ID', key: 'id'},
+                    {label: 'Formula', key: 'formula'},
+                    {label: 'Abbrev', key: 'abbreviation'},
+                    {label: 'deltaG', key: 'deltag'},
+                    {label: 'detalGErr', key: 'deltagerr'},
+                    {label: 'Charge', key: 'charge'}
+                ];
 
 
                 function updateCpds() {

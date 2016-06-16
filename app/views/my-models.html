@@ -1,7 +1,7 @@
 
 <div layout="row">
     <div class="content-header" flex>My {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
-        <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
+        <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.  Note that this page does not currently auto refresh.</small>
     </div>
 
     <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
@@ -29,22 +29,19 @@
     </div>
 
     <div ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
-         ng-click="showFBAs(item)"
+         ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
         <model-item ng-if="!item.status" layout="row">
             <div class="expand-container vertical-center">
-                <i ng-if="!item.loading && !item.relatedFBAs"
+                <i ng-if="!item.relatedFBAs && !item.loading"
                    class="fa fa-caret-right"
                    style="opacity: 0.5;"></i>
-                <i ng-if="item.relatedFBAs"
+                <i ng-if="item.relatedFBAs && !item.loading"
                    class="fa fa-caret-down"
                    style="opacity: 1.0;"></i>
 
-                <img ng-if="item.loading"
-                     src="img/ajax-loader.gif"
-                     width="15" height="15">
-                </img>
+                   <span ng-if="item.loading">...</span>
             </div>
 
             <div flex="35" class="vertical-center">
@@ -154,7 +151,7 @@
     <div layout="row"
          ng-repeat-start="item in (filtered = ( myPlants | filter: plantOpts.query)
                                                          | limitTo : plantOpts.limit : plantOpts.offset)"
-         ng-click="showFBAs(item)"
+         ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
 

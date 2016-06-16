@@ -11,8 +11,8 @@ function($scope, $state) {
 }])
 
 
-.controller('MediaDropdown', ['$scope', 'MS', '$log', 'uiTools',
-function($s, MS, uiTools) {
+.controller('MediaDropdown', ['$scope', 'MS', '$q', 'uiTools',
+function($s, MS, $q, uiTools) {
     var self = this;
 
     $s.relativeTime = uiTools.relativeTime;
@@ -26,15 +26,16 @@ function($s, MS, uiTools) {
     self.searchTextChange = searchTextChange;
 
     MS.listPublicMedia()
-      .then(function(media) {
-          $s.media = media;
-      })
-
+        .then(function(media) {
+            $s.media = media;
+        })
 
     MS.listMyMedia()
-      .then(function(media) {
-          $s.myMedia = media;
-      })
+        .then(function(media) {
+            $s.myMedia = media;
+        }).catch(function(e) {
+            $s.myMedia = []; // media folder may not exist
+        })
 
     function querySearch (query) {
         if (!$s.filterPublic)
@@ -209,10 +210,10 @@ function ($scope, $timeout, $mdSidenav, $log) {
     */
 
     var defaultSettings = {
-                            organismType: 'Microbes',
-                            viewMyGenomes: false,
-                            wsBrowser: {showHidden: false}
-                          };
+        organismType: 'Microbes',
+        viewMyGenomes: false,
+        wsBrowser: {showHidden: false}
+    };
 
     // get stored options
     var options = JSON.parse( localStorage.getItem('ViewOptions') );
@@ -230,7 +231,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
     }
 
     this.get = function(key) {
-        if (key === 'organismType') return defaultSettings.organismType;
+        //if (key === 'organismType') return defaultSettings.organismType;
         return options[key];
     }
 
@@ -265,7 +266,7 @@ function($s, $http, uiTools, config) {
     $s.reversed = false; // sort by year
 
     var url = config.services.ms_rest_url;
-    $http.get(url+'publications')
+    $http.get(url+'/publications')
         .then(function(res) {
             var d = res.data;
             for (var i=0; i<d.length; i++) {
@@ -292,9 +293,9 @@ function($s, $stateParams) {
 }])
 
 .controller('API',
-['$scope', '$http', 'uiTools',
-function($s, $http, uiTools) {
-    $s.url = 'http://modelseed.theseed.org/api/';
+['$scope', '$http', 'uiTools', 'config',
+function($s, $http, uiTools, config) {
+    $s.url = config.services.ms_rest_url;
     $s.version = 'v0';
 
     $http.get('/app/views/docs/api-docs.json')
@@ -326,7 +327,7 @@ function($s, $http, uiTools) {
 
 
                         var structure = tagObj.description.split('OK')[1];
-                        console.log(structure);
+
                         endpoint.successExample.structure = syntaxHighlight(JSON.stringify(
                             JSON.parse( tagObj.description.split('OK')[1] ), null, 2)
                         ) ;

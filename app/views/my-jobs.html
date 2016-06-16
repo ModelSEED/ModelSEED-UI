@@ -45,14 +45,15 @@
         <tr>
             <th>Task</th>
             <th hide-md hide-sm>Params</th>
-            <th hide-md hide-sm>ID</th>
-            <th>Start Time</th>
+            <!--<th>ID</th>-->
+            <th>Submitted</th>
+            <th>Started</th>
             <th>Status</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="job in jobs | orderBy : 'timestamp' : true"
+        <tr ng-repeat="job in jobs | orderBy : 'submitTimestamp' : true"
             context-menu="openMenu($event, job)"
             ng-class="{active: selectedJob.id == job.id}"
             data-target="context-menu">
@@ -62,8 +63,9 @@
                     {{key}}: {{job.parameters.arguments[key]}}
                 </div>
             </td>
-            <td hide-md hide-sm>{{job.id}}</td>
-            <td>{{relativeTime(job.timestamp)}}</td>
+            <!--<td{{job.id}}</td>-->
+            <td>{{relativeTime(job.submitTimestamp)}}</td>
+            <td>{{relativeTime(job.startTimestamp)}}</td>
             <td>
                 <span ng-if="job.status == 'failed'" class="text-danger">{{job.status}}</span>
                 <span ng-if="job.status == 'completed'" class="text-success">{{job.status}}</span>

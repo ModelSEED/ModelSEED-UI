@@ -2,7 +2,7 @@
 /* service endpoint and UI configuration settings */
 angular.module('config', []).service('config', function() {
 
-    this.releaseVersion = 'vAlpha-1.2.1';
+    this.releaseVersion = 'vBeta-1.3.1';
 
     // wether or not to include plants UI components
     // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods
@@ -13,7 +13,7 @@ angular.module('config', []).service('config', function() {
         app_url: "http://p3.theseed.org/services/app_service",
         ws_url: "http://p3.theseed.org/services/Workspace",
         ms_url: "http://p3c.theseed.org/dev1/services/ProbModelSEED", //"https://p3.theseed.org/services/ProbModelSEED/",
-        ms_rest_url: "http://modelseed.theseed.org/api/v0/",
+        ms_rest_url: "http://api.modelseed.org/v0",
         shock_url: "http://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         solr_url: "https://www.patricbrc.org/api/",

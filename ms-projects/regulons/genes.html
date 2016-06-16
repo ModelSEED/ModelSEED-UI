@@ -4,10 +4,12 @@
         search="opts.query" search-opts="opts" search-placeholder="Search table">
     </md-input-container>
 
-    <md-button ng-click="download($event)" class="small-button">
-        <i class="icon-file-download"></i>
-        <md-tooltip>Download table...</md-toolip>
-    </md-button>
+    <md-input-container layout-align="start center" layout="row">
+        <a ng-click="download($event)">
+            <i class="icon-file-download text-muted"></i>
+            download
+        </a>
+    </md-input-container>
 
 
     <div ng-if="noPagination" layout="row" layout-align="end center" flex>
