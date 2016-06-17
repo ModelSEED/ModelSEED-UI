@@ -779,9 +779,9 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 .controller('Genomes',
-['$scope', '$state', 'Patric', '$timeout', '$http',
+['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
-function($scope, $state, Patric, $timeout, $http,
+function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
  Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
     $scope.plantModelsPath = config.paths.plants.models;
 
@@ -976,14 +976,53 @@ function($scope, $state, Patric, $timeout, $http,
              })
     }
 
+
+    $scope.openUploader = function(ev) {
+        $dialog.show({
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            templateUrl: 'app/views/genomes/upload-fasta.html',
+            controller: ['$scope', function($scope) {
+                var $this = $scope;
+
+                // user inputed name and whatever
+                $this.form = {};
+
+                $scope.startUpload = function(files) {
+                    var name = $this.form.name;
+
+                    $dialog.hide();
+                    Dialogs.showToast('Importing "'+name+'"', 
+                        'please be patient', 10000000)
+
+                    Upload.uploadFile(files, null, function(node) {                        
+                        MS.createGenomeFromShock(node, name)
+                            .then(function(res) {
+                                console.log('done importing', res)
+                                Dialogs.showComplete('Import complete', name)
+                            }).catch(function(e) {
+                                Dialogs.showError('something has gone wrong')
+                                console.error(e.error.message)                                
+                            })
+                    })
+                }
+
+                $scope.cancel = function() {
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
 }])
 
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$state',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',
-function($s, $sParams, WS, MS, Auth, $state,
+function($s, $sParams, WS, MS, Auth,
          Session, uiTools, Dialogs, $state) {
 
     $s.tabs = {tabIndex: Session.getTab($state)};

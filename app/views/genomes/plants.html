@@ -66,7 +66,15 @@
                         search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
                     </md-input-container>
 
+                    <md-input-container>
+                        <span class="ws-opt ng-scope" ng-click="openUploader($event)">
+                            <i class="fa fa-cloud-upload"></i>
+                            Upload...
+                        </span>
+                    </md-input-container>                        
+
                     <div layout="row" layout-align="end center" flex>
+
                         {{myPlants.length}} plant genomes
                     </div>
                 </div>

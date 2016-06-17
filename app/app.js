@@ -24,7 +24,6 @@ angular.module('ModelSEED',
  'WS',
  'MS',
  'Upload',
- 'UploadCtrl',
  'Biochem',
  'Browser',
  'Regulons',
@@ -266,7 +265,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/proto",
             templateUrl: 'app/views/proto.html',
             /*controller: 'Proto',*/
-            authenticate: true
+            authenticate: true            
         }).state('app.maps', {
             url: "/maps",
             templateUrl: 'app/views/maps.html',

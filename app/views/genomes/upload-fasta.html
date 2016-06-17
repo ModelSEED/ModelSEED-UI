@@ -1,0 +1,43 @@
+
+<md-dialog flex="80" ">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Upload Fasta File (.fa or .fa.gz)</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content >
+
+        <md-input-container md-no-float>
+            <input ng-model="form.name" placeholder="Genome name (required)">
+        </md-input-container>     
+
+        <form id="upload-form" class="upload-form form-horizontal">
+            <div class="form-group">
+               <label class="control-label">Upload:</label>
+                <md-button class="md-primary md-raised browser-upload" ng-disabled="!form.name">
+                    Choose File...
+                    <input name="upload"
+                        ng-disabled="!form.name"
+                        enctype="multipart/form-data"
+                        type="file"
+                        accept=".fa,.fa.gz"
+                        onchange="angular.element(this).scope().startUpload(this.files)" />
+                </md-button>
+            </div>
+        </form>
+    </md-dialog-content>
+
+    <div class="md-actions" layout="row">
+        <span flex></span>
+        <md-button ng-click="cancel()" type="button">
+            Cancel
+        </md-button>                
+    </div>
+
+</md-dialog>

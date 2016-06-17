@@ -118,6 +118,17 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })
     }
 
+    this.createGenomeFromShock = function(node, name) {
+        var args = {shock_id: node, destname: name}
+        console.log('calling create genome from shock:', args)
+        return $http.rpc('ms', 'create_genome_from_shock', args)
+                    .then(function(res){
+                        console.log('response', res)
+                        return res;
+                    })        
+    }        
+
+
     this.getObjectMetas = function(paths) {
         if ( cache.get('objectmetas') )
             return cache.get('objectmetas');
