@@ -1005,6 +1005,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                                 Dialogs.showError('something has gone wrong')
                                 console.error(e.error.message)                                
                             })
+                    }, function(error) {
+                        console.log('shock error:', error)
+                        Dialogs.showError('Upload to SHOCK failed (see console)')                        
                     })
                 }
 

@@ -28,7 +28,7 @@ angular.module('Upload', [])
                 })
     }
 
-    this.uploadFile = function(files, nodeURL, cb) {
+    this.uploadFile = function(files, nodeURL, cb, errorCB) {
         console.log('uploading...', files, nodeURL)
 
         self.status.count = 1;
@@ -57,6 +57,7 @@ angular.module('Upload', [])
             },
             error: function(e){
                 console.log('failed upload', e)
+                if (errorCB) errorCB(e);
             },
             data: form,
             contentType: false,
