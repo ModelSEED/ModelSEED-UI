@@ -848,14 +848,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     // private plant genomes
     $scope.loadingMyPlants = true;
-    WS.list('/'+Auth.user+'/plantseed/genomes/')
+    WS.list('/'+Auth.user+'/plantseed/')
         .then(function(res) {
-            // remove non-genomes
+            // ignore anything that isn't a modelfolder
             var i = res.length;
             while (i--) {
                 var obj = res[i];
-                if (obj.name[0] === '.' || obj.type !== 'genome')
-                    res.splice(i,1);
+                if (obj.type !== 'modelfolder') res.splice(i,1);
             }
 
             $scope.myPlants = res;
