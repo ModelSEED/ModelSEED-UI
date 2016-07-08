@@ -860,7 +860,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     plants.push(obj);
                 })
 
-                $scope.myPlants = res;
+                $scope.myPlants = plants;
                 $scope.loadingMyPlants = false;
             }).catch(function(e) {
                 if (e.error.code === -32603)
