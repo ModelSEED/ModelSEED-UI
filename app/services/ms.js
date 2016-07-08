@@ -169,6 +169,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                         var data = [];
                         for (var i=0; i<res.length; i++) {
                             var obj = res[i];
+
+                            if (!obj.type) continue; // list models will return non modelfolders :()
+                            
                             data.push(self.sanitizeModel(obj))
                         }
 

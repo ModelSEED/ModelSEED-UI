@@ -841,32 +841,36 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
       })
 
     // public plants for genome view
-    WS.listPublicPlants('/plantseed/Models/')
+    WS.listPublicPlants('/plantseed/plantseed/')
       .then(function(plants) { 
           $scope.plants = plants;
       })
 
     // private plant genomes
-    $scope.loadingMyPlants = true;
-    WS.list('/'+Auth.user+'/plantseed/')
-        .then(function(res) {
-            // ignore anything that isn't a modelfolder
-            var i = res.length;
-            while (i--) {
-                var obj = res[i];
-                if (obj.type !== 'modelfolder') res.splice(i,1);
-            }
 
-            $scope.myPlants = res;
-            $scope.loadingMyPlants = false;
-        }).catch(function(e) {
-            if (e.error.code === -32603)
-                $scope.error = 'Something seems to have went wrong. '+
-                             'Please try logging out and back in again.';
-            else
-                $scope.error = e.error.message;
-            $scope.loadingMyPlantsMicrobes = false;
-        })
+    loadPrivatePlants();
+    function loadPrivatePlants() {
+        $scope.loadingMyPlants = true;        
+        WS.list('/'+Auth.user+'/plantseed/')
+            .then(function(res) {
+                // ignore anything that isn't a modelfolder
+                var i = res.length;
+                while (i--) {
+                    var obj = res[i];
+                    if (obj.type !== 'modelfolder') res.splice(i,1);
+                }
+
+                $scope.myPlants = res;
+                $scope.loadingMyPlants = false;
+            }).catch(function(e) {
+                if (e.error.code === -32603)
+                    $scope.error = 'Something seems to have went wrong. '+
+                                'Please try logging out and back in again.';
+                else
+                    $scope.error = e.error.message;
+                $scope.loadingMyPlantsMicrobes = false;
+            })
+    }
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -987,19 +991,28 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
                 // user inputed name and whatever
                 $this.form = {};
+                $this.selectedFiles; // file objects
 
-                $scope.startUpload = function(files) {
+                $scope.selectFile = function(files) {
+                    // no ng binding suppose for file inputs
+                    $scope.$apply(function() {
+                        $this.selectedFiles = files;
+                    })
+                }
+
+                $scope.startUpload = function() {
                     var name = $this.form.name;
 
                     $dialog.hide();
                     Dialogs.showToast('Importing "'+name+'"', 
                         'please be patient', 10000000)
 
-                    Upload.uploadFile(files, null, function(node) {                        
+                    Upload.uploadFile($this.selectedFiles, null, function(node) {                        
                         MS.createGenomeFromShock(node, name)
                             .then(function(res) {
                                 console.log('done importing', res)
-                                Dialogs.showComplete('Import complete', name)
+                                Dialogs.showComplete('Import complete', name);
+                                loadPrivatePlants();
                             }).catch(function(e) {
                                 Dialogs.showError('something has gone wrong')
                                 console.error(e.error.message)                                
@@ -1181,7 +1194,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.myPlants = MS.myPlants;
     } else {
         $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
+        MS.listModels('/'+Auth.user+'/plantseed').then(function(res) {
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {

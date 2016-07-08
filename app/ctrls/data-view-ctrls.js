@@ -44,59 +44,57 @@ function($scope, $sParams, WS, $http) {
     $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
     $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
 
-    $scope.featureHeader = [{label: 'Feature', key: 'id',
-                        link: {
-                            state: 'app.featurePage',
-                            getOpts: function(row) {
-                                return {feature: row.id, genome: path};
-                            }}
-                         },
-                         {label: 'Function', key: 'function',
-                             formatter: function(row) {
-                                 return row.function || '-';
-                             }},
-                         {label: 'Subsystems', key: 'subsystems',
-                            formatter: function(row) {
-                                return row.subsystems.length ?
-                                       row.subsystems.join('<br>') : '-';
-                            }}
-                         ];
+    $scope.featureHeader = [
+        {label: 'Feature', key: 'id',
+         link: {
+            state: 'app.featurePage',
+            getOpts: function(row) {
+                return {feature: row.id, genome: path};
+            }}
+        },
+        {label: 'Function', key: 'function',
+            formatter: function(row) {
+                return row.function || '-';
+            }},
+        {label: 'Subsystems', key: 'subsystems',
+         formatter: function(row) {
+            return row.subsystems.length ?
+                    row.subsystems.join('<br>') : '-';
+        }}
+    ];
 
-    $scope.annotationHeader = [{label: 'PlantSEED Role', key: 'role'},
-                                {label: 'Features', key: 'kmerFeatures',
-                                    formatter: function(row) {
-                                        var links = [];
-                                        row.kmerFeatures.forEach(function(name, i) {
-                                            var match = row.blastFeatures.indexOf(name);
-                                            links.push('<a href="/feature'+path+'/'+name+'" '+
-                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                                            name+
-                                                        '</a>');
-                                        })
+    $scope.annotationHeader = [
+        {label: 'PlantSEED Role', key: 'role'},
+        {label: 'Features', key: 'kmerFeatures',
+            formatter: function(row) {
+                var links = [];
+                row.kmerFeatures.forEach(function(name, i) {
+                    var match = row.blastFeatures.indexOf(name);
+                    links.push('<a href="/feature'+path+'/'+name+'" '+
+                                    'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                    name+
+                                '</a>');
+                })
 
-                                        return links.join('<br>') || '-';
-                                    }},
-                               {label: 'Exemplar Hits', key: 'blastFeatures',
-                                    formatter: function(row) {
-                                        var links = [];
-                                        row.blastFeatures.forEach(function(name, i) {
-                                            var match = row.kmerFeatures.indexOf(name);
-                                            links.push('<a href="/feature'+path+'/'+name+'" '+
-                                                            'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                                            name+
-                                                        '</a>');
-                                        })
+                return links.join('<br>') || '-';
+            }},
+        {label: 'Exemplar Hits', key: 'blastFeatures',
+         formatter: function(row) {
+            var links = [];
+            row.blastFeatures.forEach(function(name, i) {
+                var match = row.kmerFeatures.indexOf(name);
+                links.push('<a href="/feature'+path+'/'+name+'" '+
+                                'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                name+
+                            '</a>');
+            })
 
-                                        return links.join('<br>') || '-';
-                                    }},
-                               ]
-
-
-
-    var obj = path.slice(0, path.lastIndexOf('/'))+'/.'+$scope.name+'/minimal_genome'
+            return links.join('<br>') || '-';
+        }},
+    ]
 
     $scope.loadingFeatures = true;
-    WS.get(obj)
+    WS.get(path)
       .then(function(res) {
           var objs = res.data.features,
               data = [];
@@ -113,9 +111,11 @@ function($scope, $sParams, WS, $http) {
           $scope.loadingFeatures = false;
       })
 
+    // get genome object path for annotation overview
+    var genomePath = path.split('/').slice(0, -2).join('/')+'/genome'
 
     $scope.loadingAnnotations = true;
-    $http.rpc('ms', 'plant_annotation_overview', {genome: path})
+    $http.rpc('ms', 'plant_annotation_overview', {genome: genomePath})
          .then(function(res) {
              var d = [];
              for (var key in res) {

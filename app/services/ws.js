@@ -64,7 +64,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     var plants = metas.map(function(m) {
                         return {
                             name: m[0],
-                            path: m[2]+m[0],
+                            path: m[2]+'.plantseed_data/minimal_genome',
                             meta: m[7]
                         };
                     })
