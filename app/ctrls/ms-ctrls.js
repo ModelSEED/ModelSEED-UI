@@ -847,18 +847,18 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
       })
 
     // private plant genomes
-
     loadPrivatePlants();
     function loadPrivatePlants() {
         $scope.loadingMyPlants = true;        
         WS.list('/'+Auth.user+'/plantseed/')
             .then(function(res) {
                 // ignore anything that isn't a modelfolder
-                var i = res.length;
-                while (i--) {
-                    var obj = res[i];
-                    if (obj.type !== 'modelfolder') res.splice(i,1);
-                }
+                var plants = []
+                res.forEach(function(obj) {
+                    if (obj.type !== 'modelfolder') return;
+                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
+                    plants.push(obj);
+                })
 
                 $scope.myPlants = res;
                 $scope.loadingMyPlants = false;
