@@ -9,9 +9,7 @@
         <md-tab-body>
 
             <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-
-            <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
-
+            <div ng-repeat="p in plants " layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
                 <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
                 <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
 
@@ -74,7 +72,6 @@
                     </md-input-container>                        
 
                     <div layout="row" layout-align="end center" flex>
-
                         {{myPlants.length}} plant genomes
                     </div>
                 </div>
@@ -83,7 +80,7 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Mod Time</th>
+                        <th>Created</th>
                     </tr>
                 </thead>
 

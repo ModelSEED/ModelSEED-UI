@@ -798,9 +798,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         $scope.view = ViewOptions.set('organismType', view);
     }
 
-    $scope.showMenu = function() {
-      $scope.menuVisible = true;
-    }
+    $scope.showMenu = function() { $scope.menuVisible = true; }
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
@@ -818,7 +816,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         offset: 0,
         sort: {field: 'timestamp'}
     };
-
 
     $scope.columns = [
         {prop: 'genome_name', label: 'Name'},
@@ -843,6 +840,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // public plants for genome view
     WS.listPublicPlants('/plantseed/plantseed/')
       .then(function(plants) { 
+          console.log(plants)
           $scope.plants = plants;
       })
 
