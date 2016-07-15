@@ -783,8 +783,6 @@ function($scope, FBA, WS, $dialog, $sce) {
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
 function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
  Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
-    $scope.plantModelsPath = config.paths.plants.models;
-
     $scope.tabs = {tabIndex: Session.getTab($state)};
     $scope.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
