@@ -6,7 +6,7 @@ angular.module('config', []).service('config', function() {
 
     // wether or not to include plants UI components
     // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods
-    this.includePlants = false;
+    this.includePlants = true;
 
     this.services = {
         auth_url: "http://tutorial.theseed.org/Sessions/Login",

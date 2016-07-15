@@ -999,6 +999,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.startUpload = function() {
                     var name = $this.form.name;
 
+                    // Ensure no overwrites
+                    // Ideally, this would be handled by server responses.
+                    console.log('attempting')
+                    WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+                        .then(function() {
+                            alert('Genome name already exists.  '+
+                            'Please provide a new name or delete the existing genome');                           
+                        }).catch(function(e) {
+                            startUpload(name);
+                        })
+                }
+
+                function startUpload(name) {
                     $dialog.hide();
                     Dialogs.showToast('Importing "'+name+'"', 
                         'please be patient', 10000000)
@@ -1016,7 +1029,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     }, function(error) {
                         console.log('shock error:', error)
                         Dialogs.showError('Upload to SHOCK failed (see console)')                        
-                    })
+                    })                    
                 }
 
                 $scope.cancel = function() {
