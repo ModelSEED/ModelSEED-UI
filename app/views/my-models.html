@@ -130,7 +130,7 @@
 
 
 
-
+<!--
 <div ng-if="view == 'Plants'">
     <div class="table-controls" layout="row">
         <md-input-container md-no-float flex="45">
@@ -234,6 +234,7 @@
 
     <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
 </div>
+-->
 
 <section ng-controller="SideNav">
     <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">
@@ -317,7 +318,8 @@
 
 <div ng-if="myPlants && !myPlants.length && view == 'Plants'">
     <br>
-    You have no plant models.  Consider <a ui-sref="app.genomes">resconstructing a model</a>.
+    Plant modeling capabilities are currently under construction.
+    <!--You have no plant models.  Consider <a ui-sref="app.genomes">resconstructing a model</a>.-->
 </div>
 
 <div ng-if="error" class="ms-color-error">
