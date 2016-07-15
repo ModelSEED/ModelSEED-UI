@@ -1004,7 +1004,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     console.log('attempting')
                     WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                         .then(function() {
-                            alert('Genome name already exists.  '+
+                            alert('Genome name already exists!\n'+
                             'Please provide a new name or delete the existing genome');                           
                         }).catch(function(e) {
                             startUpload(name);

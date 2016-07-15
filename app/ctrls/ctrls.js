@@ -231,7 +231,7 @@ function ($scope, $timeout, $mdSidenav, $log) {
     }
 
     this.get = function(key) {
-        if (key === 'organismType') return defaultSettings.organismType;
+        //if (key === 'organismType') return defaultSettings.organismType;
         return options[key];
     }
 

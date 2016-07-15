@@ -3,9 +3,9 @@
 Below contains a summary of notable changes and deploy date for each release.
 
 
-#### Proposed next version
-- Highlight gapfilled reactions everywhere else
-- Turn on model editing
+####vBeta-1.3.3 (July 15, 2016)
+- Enable plants portion of app (pending service updates).
+- Enable plant upload (pending service updates).
 
 
 ####vBeta-1.3.1 (March 3, 2016)
