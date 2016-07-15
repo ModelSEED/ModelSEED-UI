@@ -29,7 +29,7 @@
   "bugs": {
     "url": "https://github.com/modelseed/modelseed-ui/issues"
   },
-  "homepage": "https://github.com/nconrad/model-viewer",
+  "homepage": "http://modelseed.org",
   "dependencies": {
     "apidoc": "^0.13.1",
     "comment-parser": "^0.3.0",

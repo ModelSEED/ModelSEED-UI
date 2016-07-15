@@ -779,12 +779,10 @@ function($scope, FBA, WS, $dialog, $sce) {
 
 
 .controller('Genomes',
-['$scope', '$state', 'Patric', '$timeout', '$http',
+['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
-function($scope, $state, Patric, $timeout, $http,
+function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
  Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
-    $scope.plantModelsPath = config.paths.plants.models;
-
     $scope.tabs = {tabIndex: Session.getTab($state)};
     $scope.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
@@ -798,9 +796,7 @@ function($scope, $state, Patric, $timeout, $http,
         $scope.view = ViewOptions.set('organismType', view);
     }
 
-    $scope.showMenu = function() {
-      $scope.menuVisible = true;
-    }
+    $scope.showMenu = function() { $scope.menuVisible = true; }
 
     $scope.filters = {myGenomes: ViewOptions.get('viewMyGenomes')};
 
@@ -818,7 +814,6 @@ function($scope, $state, Patric, $timeout, $http,
         offset: 0,
         sort: {field: 'timestamp'}
     };
-
 
     $scope.columns = [
         {prop: 'genome_name', label: 'Name'},
@@ -841,33 +836,37 @@ function($scope, $state, Patric, $timeout, $http,
       })
 
     // public plants for genome view
-    WS.listPublicPlants('/plantseed/Models/')
+    WS.listPublicPlants('/plantseed/plantseed/')
       .then(function(plants) { 
+          console.log(plants)
           $scope.plants = plants;
       })
 
     // private plant genomes
-    $scope.loadingMyPlants = true;
-    WS.list('/'+Auth.user+'/plantseed/genomes/')
-        .then(function(res) {
-            // remove non-genomes
-            var i = res.length;
-            while (i--) {
-                var obj = res[i];
-                if (obj.name[0] === '.' || obj.type !== 'genome')
-                    res.splice(i,1);
-            }
+    loadPrivatePlants();
+    function loadPrivatePlants() {
+        $scope.loadingMyPlants = true;        
+        WS.list('/'+Auth.user+'/plantseed/')
+            .then(function(res) {
+                // ignore anything that isn't a modelfolder
+                var plants = []
+                res.forEach(function(obj) {
+                    if (obj.type !== 'modelfolder') return;
+                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
+                    plants.push(obj);
+                })
 
-            $scope.myPlants = res;
-            $scope.loadingMyPlants = false;
-        }).catch(function(e) {
-            if (e.error.code === -32603)
-                $scope.error = 'Something seems to have went wrong. '+
-                             'Please try logging out and back in again.';
-            else
-                $scope.error = e.error.message;
-            $scope.loadingMyPlantsMicrobes = false;
-        })
+                $scope.myPlants = plants;
+                $scope.loadingMyPlants = false;
+            }).catch(function(e) {
+                if (e.error.code === -32603)
+                    $scope.error = 'Something seems to have went wrong. '+
+                                'Please try logging out and back in again.';
+                else
+                    $scope.error = e.error.message;
+                $scope.loadingMyPlantsMicrobes = false;
+            })
+    }
 
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
@@ -976,14 +975,65 @@ function($scope, $state, Patric, $timeout, $http,
              })
     }
 
+
+    $scope.openUploader = function(ev) {
+        $dialog.show({
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            templateUrl: 'app/views/genomes/upload-fasta.html',
+            controller: ['$scope', function($scope) {
+                var $this = $scope;
+
+                // user inputed name and whatever
+                $this.form = {};
+                $this.selectedFiles; // file objects
+
+                $scope.selectFile = function(files) {
+                    // no ng binding suppose for file inputs
+                    $scope.$apply(function() {
+                        $this.selectedFiles = files;
+                    })
+                }
+
+                $scope.startUpload = function() {
+                    var name = $this.form.name;
+
+                    $dialog.hide();
+                    Dialogs.showToast('Importing "'+name+'"', 
+                        'please be patient', 10000000)
+
+                    Upload.uploadFile($this.selectedFiles, null, function(node) {                        
+                        MS.createGenomeFromShock(node, name)
+                            .then(function(res) {
+                                console.log('done importing', res)
+                                Dialogs.showComplete('Import complete', name);
+                                loadPrivatePlants();
+                            }).catch(function(e) {
+                                Dialogs.showError('something has gone wrong')
+                                console.error(e.error.message)                                
+                            })
+                    }, function(error) {
+                        console.log('shock error:', error)
+                        Dialogs.showError('Upload to SHOCK failed (see console)')                        
+                    })
+                }
+
+                $scope.cancel = function() {
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
 }])
 
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$state',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',
-function($s, $sParams, WS, MS, Auth, $state,
+function($s, $sParams, WS, MS, Auth,
          Session, uiTools, Dialogs, $state) {
 
     $s.tabs = {tabIndex: Session.getTab($state)};
@@ -1140,7 +1190,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.myPlants = MS.myPlants;
     } else {
         $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed/models').then(function(res) {
+        MS.listModels('/'+Auth.user+'/plantseed').then(function(res) {
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {

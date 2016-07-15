@@ -24,7 +24,6 @@ angular.module('ModelSEED',
  'WS',
  'MS',
  'Upload',
- 'UploadCtrl',
  'Biochem',
  'Browser',
  'Regulons',
@@ -127,7 +126,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: '/events',
             templateUrl: '/ms-projects/events/events.html',
         }).state('main.events.plantseed2016', {
-            url: '/events/plantseed2016',
+            url: '/plantseed2016',
             templateUrl: '/ms-projects/events/plantseed2016/home.html',
         })
 
@@ -266,7 +265,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/proto",
             templateUrl: 'app/views/proto.html',
             /*controller: 'Proto',*/
-            authenticate: true
+            authenticate: true            
         }).state('app.maps', {
             url: "/maps",
             templateUrl: 'app/views/maps.html',

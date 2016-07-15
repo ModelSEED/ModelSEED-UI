@@ -40,8 +40,7 @@
                 <i ng-if="item.relatedFBAs && !item.loading"
                    class="fa fa-caret-down"
                    style="opacity: 1.0;"></i>
-
-                   <span ng-if="item.loading">...</span>
+                <span ng-if="item.loading">...</span>
             </div>
 
             <div flex="35" class="vertical-center">
@@ -156,20 +155,13 @@
 
 
         <div class="expand-container vertical-center">
-            <md-tooltip md-direction="left" md-delay="1000" md-autohide="true">
-                {{!item.relatedFBAs ? 'Click row to view FBA and Gapfills' : 'Click row to hide FBA and Gapfills'}}
-            </md-tooltip>
             <i ng-if="!item.loading && !item.relatedFBAs"
                class="fa fa-caret-right"
                style="opacity: 0.5;"></i>
             <i ng-if="item.relatedFBAs"
                class="fa fa-caret-down"
                style="opacity: 1.0;"></i>
-
-            <img ng-if="item.loading"
-                 src="img/ajax-loader.gif"
-                 width="15" height="15">
-            </img>
+            <span ng-if="item.loading">...</span>
         </div>
 
         <div flex="35" class="vertical-center">
@@ -184,12 +176,10 @@
             <md-button md-no-ink ng-click="runFBA($event, item)">
                 <i class="fa fa-code-fork"></i>
                 Run FBA
-                (<span class="label-fba-count"><md-tooltip>Number of FBAs</md-tooltip>{{item.fbaCount}}</span>)
             </md-button>
             <md-button md-no-ink ng-click="gapfill($event, item)">
                 <i class="fa fa-circle"></i>
                 Gapfill
-                (<span class="label-gapfill-count"><md-tooltip>Number of gapfill solutions</md-tooltip>{{item.gapfillCount}}</span>)
             </md-button>
         </div>
 

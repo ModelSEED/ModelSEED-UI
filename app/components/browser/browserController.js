@@ -248,7 +248,7 @@ angular.module('Browser', ['uiTools'])
                       .catch(function(e) {
                           if (e.data.error.code == -32603) {
                               $dialog.show({
-                                  templateUrl: 'app/vicomponents/browser/confirm.html',
+                                  templateUrl: 'app/components/browser/confirm.html',
                                   controller: ['$scope', function($scope) {
                                       $scope.cancel = function(){
                                           $dialog.hide();

@@ -28,7 +28,7 @@ angular.module('Upload', [])
                 })
     }
 
-    this.uploadFile = function(files, nodeURL) {
+    this.uploadFile = function(files, nodeURL, cb, errorCB) {
         console.log('uploading...', files, nodeURL)
 
         self.status.count = 1;
@@ -36,8 +36,8 @@ angular.module('Upload', [])
 
         var form = new FormData($('#upload-form')[0]);
         $.ajax({
-            url: nodeURL,
-            type: 'PUT',
+            url: nodeURL ? nodeURL : shockURL+'/node',
+            type: nodeURL ? 'PUT' : 'POST',
             headers: authObj,
             xhr: function() {
                 var myXhr = $.ajaxSettings.xhr();
@@ -46,8 +46,9 @@ angular.module('Upload', [])
                 }
                 return myXhr;
             },
-            success: function(data) {
-                console.log('upload success', data)
+            success: function(res) {
+                console.log('upload success.  id:', res.data.id)                
+                if (cb) cb(res.data.id);
                 $timeout(function() {
                     self.status.count = 0;
                     self.status.progress = 0;
@@ -56,6 +57,7 @@ angular.module('Upload', [])
             },
             error: function(e){
                 console.log('failed upload', e)
+                if (errorCB) errorCB(e);
             },
             data: form,
             contentType: false,
@@ -71,8 +73,6 @@ angular.module('Upload', [])
                 })
             }
         }
-
-
     }
 
     /*

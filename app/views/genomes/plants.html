@@ -9,9 +9,7 @@
         <md-tab-body>
 
             <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-
             <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
-
                 <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
                 <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
 
@@ -33,18 +31,18 @@
                 </div>
 
                 <div layout-align="center end" class="">
-                    <a ui-sref="app.modelPage({path: plantModelsPath+p.name+'_Model'})" class="pull-right">
+                    <a ui-sref="app.modelPage({path: p.path.split('/').slice(0,-2).join('/') })" class="pull-right">
                         View Model
                     </a>
-                    <br><br>
-                    <br><br>
+                    <!--
 
-                    <a ng-if="!copyInProgress[$index]" ng-click="copy($index, plantModelsPath+p.name+'_Model')">
+                    <a ng-if="!copyInProgress[$index]" ng-click="copy($index, p.path.split('/').slice(0,-2).join('/'))">
                         Copy Genome/Model
                     </a>
                     <span ng-if="copyInProgress[$index]">
                         Copying...
                     </span>
+                    -->
 
                     <!--<md-button class="md-raised md-primary" md-no-ink>
                         <i class="icon-quill"></i> Annotate
@@ -66,16 +64,23 @@
                         search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
                     </md-input-container>
 
+                    <md-input-container>
+                        <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
+                            <i class="fa fa-cloud-upload"></i>
+                            Upload...
+                        </md-button>
+                    </md-input-container>                        
+
                     <div layout="row" layout-align="end center" flex>
                         {{myPlants.length}} plant genomes
                     </div>
                 </div>
             </div>
-            <table class="table table-striped table-vertical-center" ng-hide="filtered && filtered.length == 0">
+            <table class="table table-striped" ng-hide="filtered && filtered.length == 0">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Mod Time</th>
+                        <th>Created</th>
                     </tr>
                 </thead>
 
@@ -85,7 +90,7 @@
                         <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
                     </td>
                     <td>{{uiTools.relativeTime(row.timestamp)}}
-                        <a class="md-button md-primary pull-right table-hover-btn  hover no-link" ng-click="reconstructPlant($event,row)"><i class="icon-tools"></i> Reconstruct</a>
+                        <a class="md-button md-primary pull-right no-link" ng-click="reconstructPlant($event,row)"><i class="icon-tools"></i> Reconstruct</a>
                     </td>
                 </tr>
             </table>
