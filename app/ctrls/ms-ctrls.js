@@ -979,7 +979,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
 
         // first create modelfolder, then copy
-        console.log('calling create folder')
         var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
                 return WS.copy(args).then(function(res) {
@@ -997,7 +996,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                         var destPath = '/'+Auth.user+'/plantseed/'+newName;  
                         copyFolder(newName, path, destPath) 
                     }, function() {
-                        // cancel
+                        Dialogs.showToast('Copy Canceled', null, 100);      
                     }, name + ' already exists.  Please choose a new name.')
                 })
             }).catch(function(e) {

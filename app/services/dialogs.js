@@ -259,7 +259,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
         template: '<md-toast>'+
                       '<span flex style="margin-right: 30px;">'+
                          '<span class="ms-color">'+title+'</span><br>'+
-                         name.slice(0,20)+'...'+'</span>'+
+                         (name ? name.slice(0,20)+'...' : '')+'</span>'+
                       '<!--<md-button offset="33" ng-click="closeToast()">'+
                         'Hide'+
                       '</md-button>-->'+
