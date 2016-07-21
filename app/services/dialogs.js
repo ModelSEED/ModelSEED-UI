@@ -206,14 +206,15 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
         })
     }
 
-    this.saveAs = function(ev, saveCB, cancelCB) {
-        ev.stopPropagation();
+    this.saveAs = function(ev, saveCB, cancelCB, subtext) {
+        if (ev) ev.stopPropagation();
         return $dialog.show({
             templateUrl: 'app/views/dialogs/save-as.html',
-            targetEvent: ev,
+            targetEvent: ev || null,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
+                $scope.subtext = subtext
 
                 $scope.save = function(name){
                     saveCB(name);

@@ -24,6 +24,7 @@ angular.module('config', []).service('config', function() {
     this.paths = {
         media: "/chenry/public/modelsupport/media",
         maps: "/nconrad/public/maps/",
+        publicPlants: "/plantseed/plantseed/",
         plants: {
             models: '/plantseed/Models/',
             genomes: '/plantseed/Genomes/'

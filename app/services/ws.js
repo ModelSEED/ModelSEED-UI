@@ -191,12 +191,24 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                     })
     }
 
-    this.copy = function(src, dest, overwrite) {
-        var params = {objects: [[src, dest]], overwrite: overwrite || false};
+    this.copy = function(src, dest, overwrite, recursive) {
+        if (src instanceof Object) {
+            var params = {
+                objects: [[src.src, src.dest]], 
+                overwrite: src.overwrite || false,
+                recursive: src.recursive || false
+            };
+        } else {
+            var params = {
+                objects: [[src, dest]], 
+                overwrite: overwrite || false,
+                recursive: recursive || false
+            };
+        }
         return $http.rpc('ws', 'copy', params)
-                    .then(function(res) {
-                        return res;
-                    })
+            .then(function(res) {
+                return res;
+            })
     }
 
     this.copyList = function(paths, destFolder, overwrite) {
@@ -247,12 +259,22 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
     this.createFolder = function(path) {
         var params = {objects: [[path, 'Directory']]};
         return $http.rpc('ws', 'create', params).then(function(res) {
-                    $log.log('response', res)
                     return res;
                 }).catch(function(e){
                     console.error('Could not create folder', path, e.data.error)
                 })
     }
+
+    this.createModelFolder = function(path) {
+        var params = {objects: [[path, 'modelfolder']]};
+        return $http.rpc('ws', 'create', params).then(function(res) {
+                    return res;
+                }).catch(function(e){
+                    console.error('Could not create modelfolder', path, e.data.error)
+                })
+    }    
+
+    
 
     this.getModel = function(ws, name) {
         return self.getObject(ws, name)

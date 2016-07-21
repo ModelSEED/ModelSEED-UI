@@ -958,22 +958,54 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     }
 
     $scope.copyInProgress = {};
-    $scope.copy = function(i, model) {
+    $scope.copy = function(i, path) {
         $scope.copyInProgress[i] = true;
-        Dialogs.showToast('Copying...', model.split('/').pop())
-        var params = {model: model, copy_genome: 1, plantseed: 1}
-        $http.rpc('ms', 'copy_model', params)
-             .then(function(res) {
-                 $scope.copyInProgress[i] = false;
-                 Dialogs.showComplete('Copy complete', model.split('/').pop(), model);
 
-                 // remove odd empty object
-                 delete res[model];
+        var name =  path.split('/').pop(),   
+            destPath = '/'+Auth.user+'/plantseed/'+name;    
 
-                 // update cache
-                 if (MS.myPlants) MS.addModel(res, 'plant');
-             })
+        Dialogs.showToast('Copying...', name);            
+        copyFolder(name, path, destPath)
+            .then(function() {
+                $scope.copyInProgress[i] = false;
+            })               
     }
+
+    function copyFolder(name, path, destPath) {                       
+        var args = {
+            src: path,
+            dest: destPath,
+            recursive: true,
+        }
+
+        // first create modelfolder, then copy
+        console.log('calling create folder')
+        var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                return WS.copy(args).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name, path);
+
+                    // remove odd empty object
+                    delete res[path];
+
+                    // update cache
+                    if (MS.myPlants) MS.addModel(res, 'plant');
+                }).catch(function(e) {
+                    // hack: if error is thrown, assume 
+                    // it's because folder already exists.
+                    Dialogs.saveAs('', function(newName) {
+                        var destPath = '/'+Auth.user+'/plantseed/'+newName;  
+                        copyFolder(newName, path, destPath) 
+                    }, function() {
+                        // cancel
+                    }, name + ' already exists.  Please choose a new name.')
+                })
+            }).catch(function(e) {
+                Dialogs.showError('Copy '+name+ ' failed.')           
+            })    
+        
+        return prom;
+    }    
 
 
     $scope.openUploader = function(ev) {
@@ -1204,6 +1236,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     } else {
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').then(function(res) {
+            console.log('path res', res)
             $scope.myPlants = res;
             $scope.loadingPlants = false;
         }).catch(function(e) {
