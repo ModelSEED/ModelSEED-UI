@@ -163,24 +163,25 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
     this.listModels = function(path) {
         var params = path ? {path: path} : {};
-        //$log.log('list models', params)
+        
         return $http.rpc('ms', 'list_models', params)
-                    .then(function(res) {
-                        var data = [];
-                        for (var i=0; i<res.length; i++) {
-                            var obj = res[i];
+            .then(function(res) {
+                var data = [];
+                for (var i=0; i<res.length; i++) {
+                    var obj = res[i];
 
-                            if (!obj.type) continue; // list models will return non modelfolders :()
-                            
-                            data.push(self.sanitizeModel(obj))
-                        }
+                    //if (!obj.type) continue; // list models will return non modelfolders :()
+                    
+                    data.push(self.sanitizeModel(obj))
+                }
 
-                        // cache data according to plants/microbes
-                        if (path && path.split('/')[2] === 'plantseed') self.myPlants = data
-                        else self.myModels = data;
+                // cache data according to plants/microbes
+                if (path && path.split('/')[2] === 'plantseed') self.myPlants = data
+                else self.myModels = data;
 
-                        return data;
-                    })
+                console.log('data', data)
+                return data;
+            })
     }
 
     this.sanitizeModel = function(obj) {
