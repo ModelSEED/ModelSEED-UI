@@ -273,6 +273,8 @@ function($s, $http, uiTools, config) {
                 d[i].authors = d[i].authors.join('; ')
             }
             $s.pubs = d;
+        }).catch(function(e) {
+            $s.pubs = null;
         })
 }])
 

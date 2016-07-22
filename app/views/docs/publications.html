@@ -43,6 +43,9 @@
             No publications found
         </div>
 
-        <md-progress-circular ng-if="!pubs" md-mode="indeterminate" style="margin-left: 50px;"></md-progress-circular>
+        <md-progress-circular ng-if="loading" md-mode="indeterminate" style="margin-left: 50px;"></md-progress-circular>
+
+        <div ng-if="!pubs && !loading">The publications list is currentely unavailable.</div>
    </md-content>
 </div>
+
