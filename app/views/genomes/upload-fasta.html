@@ -15,16 +15,22 @@
 
         <form id="upload-form" class="upload-form form-horizontal">
             <div class="form-group">
-                <label class="control-label">Select fasta file:</label>
-                <md-button class="md-primary md-raised browser-upload">
-                    Choose File...
-                    <input
-                        name="upload"
-                        enctype="multipart/form-data"
-                        type="file"
-                        onchange="angular.element(this).scope().selectFile(this.files)"/>
-                </md-button>
-                {{selectedFiles[0].name}}
+                <!--
+                <span class="upload-box" 
+                    ondrop="angular.element(this).scope().drop(event)" 
+                    ondragenter="angular.element(this).scope().dragenter(event)"
+                    ondragover="angular.element(this).scope().dragover(event)">
+                </span>-->
+                <label>Select fasta file:</label>
+                    <md-button class="md-primary md-raised browser-upload">
+                        Choose File...
+                        <input
+                            name="upload"
+                            enctype="multipart/form-data"
+                            type="file"
+                            onchange="angular.element(this).scope().selectFile(this.files)"/>
+                    </md-button>
+                    {{selectedFiles[0].name}}
             </div>
         </form>
 

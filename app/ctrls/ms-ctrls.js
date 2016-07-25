@@ -940,7 +940,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     }
 
     $scope.reconstructPlant = function(ev, item) {
-        var params = {path: item.path, name: item.name};
+        var path = item.path.split('/').slice(0,-2).join('/')+'/genome';
+        var params = {path: path, name: item.name};
         $scope.selected = item;
         Dialogs.reconstructPlant(ev, params,
             function(res) {
@@ -1007,6 +1008,11 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     }    
 
 
+
+    $scope.drop = function($event) {
+        console.log('drop event', $event)
+    }
+
     $scope.openUploader = function(ev) {
         $dialog.show({
             targetEvent: ev,
@@ -1061,7 +1067,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                         console.log('shock error:', error)
                         Dialogs.showError('Upload to SHOCK failed (see console)')                        
                     })                    
-                }
+                }     
 
                 $scope.cancel = function() {
                     $dialog.hide();

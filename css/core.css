@@ -1315,6 +1315,14 @@ input[name=upload] {
     margin: 0 2px 0 -2px;
 }
 
+/**
+ *  drag and drop
+*/
+.upload-box {
+    padding: 20px 5% 20px 70%;
+    background-color: rgba(0,188,212,.15);
+    border: 2px solid rgba(0,188,212, .5);
+}
 
 /**
  *  about/status page

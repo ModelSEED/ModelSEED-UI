@@ -20,6 +20,7 @@
            If no media is provided, "Plant Heterotrophic Media" will be used.<p>
 
         <h3>Options</h3>
+        <!--
         <div ng-controller="MediaDropdown as ctrl">
             <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
@@ -33,6 +34,7 @@
                     <span ng-if="!filterPublic">Search public media</span>
                 </a>
             </div>
+
 
             <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()">
               <md-autocomplete
@@ -55,14 +57,15 @@
             </form>
         </div>
         <br>
+        -->
 
         <md-input-container md-no-float>
-            <input ng-model="form.output_file" placeholder="Enter optional Name">
+            <input ng-model="form.output_file" placeholder="Enter new name (optional)">
         </md-input-container>
 
-        <md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
+        <!--<md-checkbox md-no-ink ng-model="form.fulldb" aria-label="No Ink Effects">
             Include Full DB?
-        </md-checkbox>
+        </md-checkbox>-->
 
     </md-dialog-content>
 

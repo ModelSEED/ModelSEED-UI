@@ -111,12 +111,16 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
+                console.log('item', item)
                 $scope.item = item;
                 $scope.form = {genome: item.path};
-
+            
                 $scope.reconstruct = function(){
-                    self.showToast('Reconstructing', item.name, 5000)
-                    MS.reconstruct($scope.form, {gapfill: false})
+                    var newName = $scope.form.output_file;
+                    var modelfolder = newName ? newName : item.name; 
+
+                    self.showToast('Reconstructing', item.name, 5000);
+                    MS.reconstruct($scope.form, {gapfill: 0, plant: 1, output_file: modelfolder})
                       .then(function(r) {
                            cb(r);
                            //self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
