@@ -864,7 +864,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                                 'Please try logging out and back in again.';
                 else
                     $scope.error = e.error.message;
-                $scope.loadingMyPlantsMicrobes = false;
+                $scope.loadingMyPlants = false;
             })
     }
 
