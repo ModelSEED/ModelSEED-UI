@@ -247,6 +247,12 @@ td[editable] {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 
+/* hack file upload styling */
+label.md-button {
+    cursor: pointer;
+    margin-bottom: -10px;    
+}
+
 .md-button {
     text-transform: none;
 }
