@@ -64,12 +64,10 @@
                 </md-button>
             </div>
 
-
             <div flex="15" class="vertical-center" layout="column" hide-sm>
-                {{item.rxnCount}} Reactions
-                {{item.cpdCount}} Compounds
+                <div><small>{{item.rxnCount}} Reactions</small></div>
+                <div><small>{{item.cpdCount}} Compounds</small></div>
             </div>
-
 
             <div flex class="timestamp vertical-center">
                 <small>{{relativeTime(item.timestamp)}}</small>

@@ -123,7 +123,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                     MS.reconstruct($scope.form, {gapfill: 0, plant: 1, output_file: modelfolder})
                       .then(function(r) {
                            cb(r);
-                           //self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
+                           self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })

@@ -1020,6 +1020,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             targetEvent: ev,
             scope: $scope.$new(),
             preserveScope: true,
+            clickOutsideToClose: true,            
             templateUrl: 'app/views/genomes/upload-fasta.html',
             controller: ['$scope', function($scope) {
                 var $this = $scope;
