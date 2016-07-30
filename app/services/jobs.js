@@ -18,7 +18,8 @@ function($http, $rootScope, $timeout, Dialogs) {
     var queuedJobs = [],
         runningJobs = [],
         completedJobs = [],
-        activeIds = [];     // activeIds are queued or running job ids
+        activeIds = [],     // activeIds are queued or running job ids
+        error = null;
 
     var period = 4000;      // time to wait after response
 
@@ -27,12 +28,16 @@ function($http, $rootScope, $timeout, Dialogs) {
 
 
     this.getStatus = function() {
-        return {
+        var status =  {
             allJobs: self.jobs,
             queuedCount: queuedJobs.length,
             runningCount: runningJobs.length,
             completedCount: completedJobs.length
         }
+
+        if (error) status.error = error;
+
+        return status;
     }
 
     this.getActiveCount = function() {
@@ -144,6 +149,8 @@ function($http, $rootScope, $timeout, Dialogs) {
                 self.jobs = sanitizeJobs(jobsHash);
                 self.jobsHash = jobsHash;
                 groupJobs();
+            }).catch(function(res) {
+                error = res.error;
             })
     }
 

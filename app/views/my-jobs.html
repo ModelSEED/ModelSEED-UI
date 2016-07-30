@@ -38,7 +38,8 @@
 
 
 <br>
-<md-progress-circular ng-if="!jobs" md-mode="indeterminate"></md-progress-circular>
+<md-progress-circular ng-if="!jobs && !error" md-mode="indeterminate"></md-progress-circular>
+<div ng-if="error" class="alert alert-danger">{{error}}</div>
 
 <table ng-if="jobs" class="table  table-vertical-center">
     <thead>

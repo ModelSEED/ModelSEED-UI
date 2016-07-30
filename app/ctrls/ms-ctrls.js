@@ -167,6 +167,8 @@ function($s, $document, uiTools, Jobs, $timeout) {
         $s.queuedCount = status.queuedCount,
         $s.runningCount = status.runningCount,
         $s.completedCount = status.completedCount;
+
+        if ('error' in status) $s.error = status.error.message;
     }
 
     function listen() {
