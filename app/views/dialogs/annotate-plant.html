@@ -1,0 +1,39 @@
+
+<md-dialog flex="70">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Annotate Plant
+            <i class="color-light-purple small">{{item.name}}</i>
+        </h3>
+
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <form>
+    <md-dialog-content>
+        <p class="text-muted">Annotation subtext<p>
+
+        <h3>Options</h3>
+
+
+        <md-checkbox md-no-ink ng-model="form.kmers" aria-label="No Ink Effects">
+            Kmers?
+        </md-checkbox>
+
+        <md-checkbox md-no-ink ng-model="form.blast" aria-label="No Ink Effects">
+            Blast?
+        </md-checkbox>        
+    </md-dialog-content>
+
+    <div class="md-actions">
+        <md-button ng-click="reconstruct()" type="button">
+            Annotate
+        </md-button>
+    </div>
+    </form>
+</md-dialog>

@@ -119,7 +119,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.createGenomeFromShock = function(node, name) {
-        var args = {shock_id: node, destname: name}
+        var args = {shock_id: node, destname: name};
         console.log('calling create genome from shock:', args)
         return $http.rpc('ms', 'plant_pipeline', args)
                     .then(function(res){
@@ -128,6 +128,30 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })        
     }        
 
+    this.createExpressionFromShock = function(node, modelFolder) {
+        var args = {shock_id: node, destname: modelFolder};
+        console.log('calling create_featurevalues_from_shock:', args)
+        return $http.rpc('ms', 'create_featurevalues_from_shock', args)
+                    .then(function(res){
+                        console.log('featurevalues res:', res)
+                        return res;
+                    })               
+    }
+
+    this.annotatePlant = function(path, opts) {
+        var args = {
+            destmodel: path,
+            kmers: opts.kmers ? opts.kmers : false,
+            blast: opts.kmers ? opts.kmers : false      
+        }
+
+        console.log('calling annotate_plant_genomes:', args)
+        return $http.rpc('ms', 'annotate_plant_genomes', args)
+                    .then(function(res){
+                        console.log('annotate_plant_genomes res:', res)
+                        return res;
+                    })               
+    }
 
     this.getObjectMetas = function(paths) {
         if ( cache.get('objectmetas') )

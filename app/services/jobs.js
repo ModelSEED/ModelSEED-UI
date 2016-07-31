@@ -166,7 +166,7 @@ function($http, $rootScope, $timeout, Dialogs) {
     }
 
     // background polling on start of application
-    poll();
+    //poll();
 }]);
 
 

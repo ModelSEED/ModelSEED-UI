@@ -951,6 +951,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             })
     }
 
+    $scope.annotatePlant = function(ev, item) {
+        Dialogs.annotatePlant(ev, item)
+    }
+
     $scope.reconstructPrivate = function(ev, item) {
         var params = {path: 'RAST:'+item.genome_id, name: item.genome_name};
         Dialogs.reconstruct(ev, params,
@@ -1458,6 +1462,12 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             console.log('not deleting')
         });
     }
+
+
+    $scope.uploadExpression = function(ev, item) {
+        Dialogs.uploadExpression(ev, item)
+    }
+
 }])
 
 

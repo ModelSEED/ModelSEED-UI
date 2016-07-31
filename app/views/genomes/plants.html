@@ -88,7 +88,13 @@
                         <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
                     </td>
                     <td>{{uiTools.relativeTime(row.timestamp)}}
-                        <button class="md-button md-primary pull-right" ng-click="reconstructPlant($event,row)"><i class="icon-tools"></i> Reconstruct</button>
+                        <button class="md-button md-primary pull-right" ng-click="reconstructPlant($event,row)">
+                            <i class="icon-tools"></i> Reconstruct
+                        </button>
+                        <button class="md-button md-primary pull-right" ng-click="annotatePlant($event,row)">
+                            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Re-Annotate
+                        </button>
+                        
                     </td>
                 </tr>
             </table>
@@ -101,7 +107,9 @@
 
 
     <md-tab>
-        <md-tab-label><i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Annotations</md-tab-label>
+        <md-tab-label>
+            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Annotations
+        </md-tab-label>
         <md-tab-body>
             <ng-table-two ng-controller="PlantAnnotations" table-header="annoHeader"
                       table-data="annoOverview"

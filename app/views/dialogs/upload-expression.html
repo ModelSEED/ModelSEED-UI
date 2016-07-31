@@ -1,10 +1,10 @@
 <!-- todo: refactor into upload general upload dialog? -->
 
-<md-dialog flex="80">
+<md-dialog flex="80" >
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
-        <h3>Upload Fasta File</h3>
+        <h3>Upload Expression File</h3>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
           <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
@@ -29,9 +29,11 @@
             </div>
         </form>
 
+        <!--
         <md-input-container md-no-float>
             <input ng-model="form.name" placeholder="Genome name (required)">
-        </md-input-container>    
+        </md-input-container> 
+        -->  
 
         <md-button class="md-primary md-raised" 
             ng-click="startUpload()"
