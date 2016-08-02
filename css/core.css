@@ -591,6 +591,10 @@ ul.about-toolbar > li.active {
     color: #fff;
 }
 
+.btn-sm {
+    height: 29px;
+}
+
 
 /**
  * pages / page layout
@@ -1027,7 +1031,8 @@ md-dialog .md-actions {
     margin-top: 10px;
 }
 
-.my-model button {
+.my-model button,
+.table button  {
     min-width: 29px;
     min-height: inherit;
     margin: 0;

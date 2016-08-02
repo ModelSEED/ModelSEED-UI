@@ -134,7 +134,7 @@
     <div class="table-controls" layout="row">
         <md-input-container md-no-float flex="45">
             <md-icon class="material-icons">search</md-icon>
-            <input ng-model="plantOpts.query" type="text" placeholder="Search models">
+            <input ng-model="plantOpts.query" type="text" placeholder="Search plant models">
         </md-input-container>
 
         <md-input-container pagination
@@ -261,9 +261,22 @@
                     <ng-include src="'app/views/lists/expanded-gapfills.html'">
                 </md-tab-body>
             </md-tab>
-        </md-tabs>
-    </div>
 
+            <md-tab>
+                <md-tab-label>
+                    Expression Data
+                    (<span class="label-fba-count">{{item.expressionCount}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-expression.html'">
+                </md-tab-body>
+            </md-tab>        
+                
+        </md-tabs>
+
+    </div>
+    <br>
     <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
 </div>
 

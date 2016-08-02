@@ -74,7 +74,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-striped" ng-hide="filtered && filtered.length == 0">
+            <table class="table table-striped table-vertical-center" ng-hide="filtered && filtered.length == 0">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -83,17 +83,21 @@
                 </thead>
 
                 <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : '-timestamp')
-                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset) " ng-click="rowClick($event, row)" ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
+                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset) " 
+                    ng-click="rowClick($event, row)" 
+                    ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
                     <td>
                         <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
                     </td>
-                    <td>{{uiTools.relativeTime(row.timestamp)}}
-                        <button class="md-button md-primary pull-right" ng-click="reconstructPlant($event,row)">
+                    <td>
+                        <div class="pull-left" style="margin-top: 8px;">{{uiTools.relativeTime(row.timestamp)}}</div>
+
+                        <md-button class="md-button pull-right" ng-click="reconstructPlant($event,row)">
                             <i class="icon-tools"></i> Reconstruct
-                        </button>
-                        <button class="md-button md-primary pull-right" ng-click="annotatePlant($event,row)">
-                            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Re-Annotate
-                        </button>
+                        </md-button>
+                        <md-button class="md-button pull-right" ng-click="annotatePlant($event,row)">
+                            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Run Annotation
+                        </md-button>
                         
                     </td>
                 </tr>

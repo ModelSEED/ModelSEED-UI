@@ -1,12 +1,13 @@
 /**
  * [module Dialogs]
  *
- * Set of dialogs for analysis (and prompts)
+ * Set of dialogs and toast notifications.
  *
  */
-angular.module('Dialogs', [])
-.service('Dialogs', ['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
+
+angular.module('Dialogs', []).service('Dialogs', 
+['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -396,28 +397,27 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
                 }
 
                 $scope.startUpload = function() {
-                    var name = $this.form.name;
-                    startUpload(name);
+                    startUpload();
                 }
 
                 function startUpload(name) {
                     $dialog.hide();
-                    Dialogs.showToast('Importing "'+name+'"', 
+                    self.showToast('Importing expression data', 
                         'please be patient', 10000000)
 
-                    Upload.createExpressionFromShock($this.selectedFiles, null, function(node) {                        
-                        MS.uplo(node, name)
+                    Upload.uploadFile($this.selectedFiles, null, function(node) {                        
+                        MS.createExpressionFromShock(node, item.name)
                             .then(function(res) {
                                 console.log('done importing', res)
-                                Dialogs.showComplete('Import complete', name);
-                                loadPrivatePlants();
+                                self.showComplete('Import complete', name);
+
                             }).catch(function(e) {
-                                Dialogs.showError('something has gone wrong')
+                                self.showError('something has gone wrong')
                                 console.error(e.error.message)                                
                             })
                     }, function(error) {
                         console.log('shock error:', error)
-                        Dialogs.showError('Upload to SHOCK failed (see console)')                        
+                        self.showError('Upload to SHOCK failed (see console)')                        
                     })                    
                 }     
 
@@ -435,18 +435,25 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout) {
             templateUrl: 'app/views/dialogs/annotate-plant.html',
             targetEvent: ev,
             clickOutsideToClose: true,
+            preserveScope: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                $scope.form = {};
+                $scope.form = {
+                    kmers: false,
+                    blast: false
+                };
 
                 $scope.annotate = function(){
                     self.showToast('Annotating', item.name, 5000)
 
-                    console.log('the form:', $scope.form)
-                    MS.annotatePlant(item.path, $scope.form)
+                    console.log('anno form:', $scope.form)
+        
+                    var path = item.path.split('/').slice(0, -2).join('/')
+                    $scope.form.name = item.name
+                    MS.annotatePlant($scope.form)
                       .then(function(res) {
-                           cb();
-                           //self.showComplete('Gapfill Complete', res[0])
+                           if (cb) cb();
+                           self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {
                           self.showError('Annotation Error', e.error.message.slice(0,30)+'...')
                       })

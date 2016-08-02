@@ -128,8 +128,12 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })        
     }        
 
-    this.createExpressionFromShock = function(node, modelFolder) {
-        var args = {shock_id: node, destname: modelFolder};
+    this.createExpressionFromShock = function(node, modelFolder, name) {
+        var args = {
+            shock_id: node, 
+            destmodel: modelFolder,
+            destname: name
+        };
         console.log('calling create_featurevalues_from_shock:', args)
         return $http.rpc('ms', 'create_featurevalues_from_shock', args)
                     .then(function(res){
@@ -138,15 +142,16 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     })               
     }
 
-    this.annotatePlant = function(path, opts) {
+    this.annotatePlant = function(opts) {
         var args = {
-            destmodel: path,
-            kmers: opts.kmers ? opts.kmers : false,
-            blast: opts.kmers ? opts.kmers : false      
+            //genome: path,
+            destmodel: opts.name,
+            kmers: opts.kmers ? 1 : 0,
+            blast: opts.blast ? 1 : 0      
         }
 
-        console.log('calling annotate_plant_genomes:', args)
-        return $http.rpc('ms', 'annotate_plant_genomes', args)
+        console.log('calling annotate_plant_genome:', args)
+        return $http.rpc('ms', 'annotate_plant_genome', args)
                     .then(function(res){
                         console.log('annotate_plant_genomes res:', res)
                         return res;
@@ -217,7 +222,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,
             timestamp: Date.parse(obj.rundate+'+0000'),
-            gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills
+            gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills,
+            expression: 'expression_data' in obj ? obj.expression_data : []
         }
     }
 

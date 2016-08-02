@@ -1,0 +1,28 @@
+
+<div class="gapfill-table expanded-table">
+    <!--<h5>Gapfills</h5>-->
+
+    <div ng-if="!item.relatedGapfills.length" class="text-muted">
+        You have no expression data.  Consider uploading some.
+    </div>
+
+    <table class="table table-condensed">
+        <thead>
+            <tr ng-if="item.relatedGapfills.length">
+                <th>Expression Name</th>
+                <!--<th>Actions</th>-->
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="gf in item.expression track by $index" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
+                <td>{{item.expression}}</td>
+                <!--<td>
+                    <a ng-click="deleteExpression($index, item)" class="no-link">
+                        <md-tooltip md-delay="800">Delete expression datal</md-tooltip>
+                        <i class="icon-highlight-remove"></i>
+                    </a>
+                </td>-->
+            </tr>
+        </tbody>
+    </table>
+</div>

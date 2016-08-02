@@ -1262,6 +1262,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         console.log('showing related')
         item.loading = true;
         var gapfillProm = showGapfills(item);
+        var expressionProm = showExpression(item);
 
         var fbaProm;
         if (item.relatedFBAs) 
@@ -1269,7 +1270,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         else 
             fbaProm = updateFBAs(item)
 
-        $q.all([fbaProm, gapfillProm])
+        $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
                 console.log('done')
                 item.loading = false
@@ -1289,7 +1290,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         } else {
             return updateGapfills(item);
         }
-    }
+    }    
 
     function updateGapfills(item) {
         return MS.getModelGapfills(item.path)
@@ -1297,6 +1298,15 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
                 item.relatedGapfills = gfs;
             })
     }
+
+    function showExpression(item) {
+        console.log('Item', item)
+        return WS.getObjectMeta(item.path)
+            .then(function(res) {
+                console.log('get modelfolder meta response', res)
+            })
+    }
+
 
     $scope.runFBA = function(ev, item) {
         Dialogs.runFBA(ev, item, function() {

@@ -15,25 +15,30 @@
     </md-toolbar>
 
     <form>
-    <md-dialog-content>
-        <p class="text-muted">Annotation subtext<p>
+        <md-dialog-content>
+            <p class="text-muted">Annotation subtext<p>
 
-        <h3>Options</h3>
+            <h3>Options</h3>
+
+            <md-checkbox md-no-ink ng-model="form.kmers" aria-label="user kmers">
+                Kmers?
+            </md-checkbox>
+
+            <md-checkbox md-no-ink ng-model="form.blast" aria-label="user kmers">
+                Blast?
+            </md-checkbox>
 
 
-        <md-checkbox md-no-ink ng-model="form.kmers" aria-label="No Ink Effects">
-            Kmers?
-        </md-checkbox>
+            <!--<md-input-container md-no-float>
+                <input ng-model="form.name" placeholder="Model/Genome Name (optional)">
+            </md-input-container>--> 
 
-        <md-checkbox md-no-ink ng-model="form.blast" aria-label="No Ink Effects">
-            Blast?
-        </md-checkbox>        
-    </md-dialog-content>
+        </md-dialog-content>
 
-    <div class="md-actions">
-        <md-button ng-click="reconstruct()" type="button">
-            Annotate
-        </md-button>
-    </div>
+        <div class="md-actions">
+            <md-button ng-click="annotate()" type="button">
+                Annotate
+            </md-button>
+        </div>
     </form>
 </md-dialog>
