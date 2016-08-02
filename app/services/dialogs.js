@@ -453,7 +453,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                     MS.annotatePlant($scope.form)
                       .then(function(res) {
                            if (cb) cb();
-                           self.showComplete('Gapfill Complete', res[0])
+                           // fixme: add name
+                           self.showComplete('Annotation Complete')
                       }).catch(function(e) {
                           self.showError('Annotation Error', e.error.message.slice(0,30)+'...')
                       })
