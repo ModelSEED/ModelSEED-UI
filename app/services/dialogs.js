@@ -406,7 +406,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                         'please be patient', 10000000)
 
                     Upload.uploadFile($this.selectedFiles, null, function(node) {                        
-                        MS.createExpressionFromShock(node, item.name)
+                        MS.createExpressionFromShock(node, item.name, $scope.form.name)
                             .then(function(res) {
                                 console.log('done importing', res)
                                 self.showComplete('Import complete', name);
