@@ -132,7 +132,8 @@ function($s, $http, config) {
 function($s, $document, uiTools, Jobs, $timeout) {
 
     $s.relativeTime = uiTools.relativeTime;
-
+    $s.isPolling = Jobs.isPolling();
+    
     // if initial jobs status isn't there, listen
     // otherwise, load from cache and listen
     if (Jobs.getStatus().allJobs !== null) setStatus();

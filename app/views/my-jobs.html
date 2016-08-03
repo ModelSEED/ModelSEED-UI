@@ -38,7 +38,7 @@
 
 
 <br>
-<md-progress-circular ng-if="!jobs && !error" md-mode="indeterminate"></md-progress-circular>
+<md-progress-circular ng-if="!jobs && !error && isPolling"" md-mode="indeterminate"></md-progress-circular>
 <div ng-if="error" class="alert alert-danger">{{error}}</div>
 
 <table ng-if="jobs" class="table  table-vertical-center">
@@ -83,6 +83,11 @@
         </tr>
     </tbody>
 </table>
+
+
+<div ng-if="!isPolling">
+    <b>Note</b>: Job polling has been turned off.
+</div>
 
 
 <div class="dropdown position-fixed" id="context-menu">

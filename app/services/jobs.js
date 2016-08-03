@@ -12,6 +12,8 @@ angular.module('Jobs', [])
 function($http, $rootScope, $timeout, Dialogs) {
     var self = this;
 
+    var polling = false; 
+
     this.jobs = null;
     this.jobsHash = null;
 
@@ -23,7 +25,6 @@ function($http, $rootScope, $timeout, Dialogs) {
 
     var period = 4000;      // time to wait after response
 
-    var polling = false;    // decide when to poll (not used yet)
     var poller;             // poll handle
 
 
@@ -166,7 +167,7 @@ function($http, $rootScope, $timeout, Dialogs) {
     }
 
     // background polling on start of application
-    //poll();
+    if (polling) poll();
 }]);
 
 
