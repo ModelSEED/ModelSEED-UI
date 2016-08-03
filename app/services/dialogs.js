@@ -374,7 +374,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
         })
     }
 
-    this.uploadExpression = function(ev, item) {
+    this.uploadExpression = function(ev, item, cb) {
         ev.stopPropagation();        
         $dialog.show({
             targetEvent: ev,
@@ -410,7 +410,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                             .then(function(res) {
                                 console.log('done importing', res)
                                 self.showComplete('Import complete', name);
-
+                                if (cb) cb();
                             }).catch(function(e) {
                                 self.showError('something has gone wrong')
                                 console.error(e.error.message)                                

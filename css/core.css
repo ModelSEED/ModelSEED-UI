@@ -165,6 +165,7 @@ md-toolbar {
 .ms-color-complete, .color-complete { color: #26DA4A; }
 .ms-color-error, .color-error { color: #DA265D; }
 .color-light-purple { color: #E5E4FF !important; }
+.color-bright-purple { color: rgb(111, 54, 121) !important; }
 
 
 .inline { display: inline; }
@@ -818,13 +819,10 @@ table md-checkbox {
     color: #888;
 }
 
-.fba-table {
-    border-left: 4px solid #5CB85C;
-}
+.fba-table { border-left: 4px solid #5CB85C; }
+.gapfill-table { border-left: 4px solid #25AABB; }
+.expression-table { border-left: 4px solid rgb(111, 54, 121); }
 
-.gapfill-table {
-    border-left: 4px solid #25AABB;;
-}
 
 .fba-table table td,
 .fba-table table th {

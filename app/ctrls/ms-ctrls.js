@@ -1260,7 +1260,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
     $scope.showRelatedData = function(item) {
-        console.log('showing related')
         item.loading = true;
         var gapfillProm = showGapfills(item);
         var expressionProm = showExpression(item);
@@ -1301,11 +1300,20 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 
     function showExpression(item) {
-        console.log('Item', item)
+        return updateExpression(item);      
+    }
+
+    function updateExpression(item) {
         return WS.getObjectMeta(item.path)
             .then(function(res) {
-                console.log('get modelfolder meta response', res)
-            })
+                var expList = [],
+                    dict = res[0][7].expression_data;
+                
+                for (key in dict) 
+                    expList.push({name: key, ids: dict[key]});
+                
+                item.expression = expList;
+            })        
     }
 
 
@@ -1476,7 +1484,9 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
     $scope.uploadExpression = function(ev, item) {
-        Dialogs.uploadExpression(ev, item)
+        Dialogs.uploadExpression(ev, item, function() {
+            updateExpression(item);
+        })
     }
 
 }])
