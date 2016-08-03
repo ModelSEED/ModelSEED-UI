@@ -972,11 +972,41 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         var name =  path.split('/').pop(),   
             destPath = '/'+Auth.user+'/plantseed/'+name;    
 
-        Dialogs.showToast('Copying...', name);            
-        copyFolder(name, path, destPath)
-            .then(function() {
-                $scope.copyInProgress[i] = false;
-            })               
+        Dialogs.showToast('Copying...', name, 2000);            
+        copyModel(name, path, i)
+
+        // old way
+        //copyFolder(name, path, destPath)
+        //    .then(function() {
+        //        $scope.copyInProgress[i] = false;
+        //    })               
+    }
+
+    function copyModel(name, path, i) {
+        var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
+                $scope.copyInProgress[i] = false;                 
+            }).catch(function(e) {
+                $http.rpc('ms', 'copy_model', {
+                    source_model_path: path,
+                    plantseed: 1
+                }).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name);
+                    
+                    // go ahead and reload genomes and models
+                    loadPrivatePlants();     
+                    MS.listModels('/'+Auth.user+'/plantseed')                         
+
+                    $scope.copyInProgress[i] = false;
+                }).catch(function(e) {
+                    Dialogs.showError('Copy '+name+ ' failed.')    
+                    $scope.copyInProgress[i] = false;
+                })                
+            })
+
+        return prom;
+
     }
 
     function copyFolder(name, path, destPath) {                       
