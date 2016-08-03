@@ -1,5 +1,9 @@
 
 <div class="expression-table expanded-table">
+    <div ng-if="!item.expression.length" class="text-muted">
+        No expression data uploaded for <i>{{item.name}}</i>.
+    </div>
+
     <table class="table table-condensed">
         <thead>
             <tr ng-if="item.expression.length">
