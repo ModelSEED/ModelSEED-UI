@@ -138,7 +138,7 @@ function($s, $sParams, MS, $http, config, Auth) {
 
     // path and name of object
     var featureID = $sParams.feature,
-        genome = $sParams.genome;
+        genome = $sParams.genome.split('/').slice(0,-2).join('/');
 
     if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
@@ -150,34 +150,42 @@ function($s, $sParams, MS, $http, config, Auth) {
     $s.seedFeatureUrl = seedFeatureUrl;
 
     // table settings
-    $s.plantSimOpts = {query: '', limit: 20, offset: 0,
-                       visible: ['hit_id', 'e_value', 'bit_score', 'percent_id'] };
+    $s.plantSimOpts = {
+        query: '', limit: 20, offset: 0,
+        visible: ['hit_id', 'e_value', 'bit_score', 'percent_id']
+    };
     $s.prokaryoticSimOpts = angular.copy($s.plantSimOpts);
 
     // table specs
     //ID Genome Function Percent Identity//
-    $s.plantSimSpec = [{label: 'Hit ID', key: 'hit_id',
-                            link: {
-                                state: 'app.featurePage',
-                                getOpts: function(row) {
-                                    return {feature: row.hit_id,
-                                            genome: config.paths.plants.genomes+row.genome};
-                                }},
-                        },
-                       {label: 'Genome', key: 'genome'},
-                       {label: 'Function', key: 'function'},
-                       {label: 'Percent ID', key: 'percent_id'}];
+    $s.plantSimSpec = [
+        {label: 'Hit ID', key: 'hit_id',
+         link: {
+            state: 'app.featurePage',
+            getOpts: function(row) {
+                return {
+                    feature: row.hit_id,
+                    genome: config.paths.plants.genomes+row.genome
+                };
+            }},
+        },
+        {label: 'Genome', key: 'genome'},
+        {label: 'Function', key: 'function'},
+        {label: 'Percent ID', key: 'percent_id'}
+    ];
 
-    $s.prokaryoticSimSpec = [{label: 'Hit ID', key: 'hit_id',
-                                formatter: function(row) {
-                                    return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'+
-                                                row.hit_id+
-                                            '</a>';
-                                }
-                             },
-                             {label: 'Genome', key: 'genome'},
-                             {label: 'Function', key: 'function'},
-                             {label: 'Percent ID', key: 'percent_id'}];
+    $s.prokaryoticSimSpec = [
+        {label: 'Hit ID', key: 'hit_id',
+         formatter: function(row) {
+            return '<a href="'+seedFeatureUrl+row.hit_id+'" target="_blank">'+
+                        row.hit_id+
+                    '</a>';
+        }
+        },
+        {label: 'Genome', key: 'genome'},
+        {label: 'Function', key: 'function'},
+        {label: 'Percent ID', key: 'percent_id'}
+    ];
 
 
     $s.loading = true;
