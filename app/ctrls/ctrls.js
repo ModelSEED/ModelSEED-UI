@@ -61,6 +61,77 @@ function($s, MS, $q, uiTools) {
 
 }])
 
+.controller('ExpressionDropdown', 
+['$scope', 'WS', '$q', 'uiTools',
+function($s, WS, $q, uiTools) {
+    var self = this;
+
+    $s.relativeTime = uiTools.relativeTime;
+    $s.filterPublic = true;
+
+    self.form = $s.form;
+
+    self.isDisabled = false;
+    self.querySearch = querySearch;
+    self.selectedItemChange = selectedItemChange;
+    self.searchTextChange = searchTextChange;
+
+    $s.selectedModel = null; 
+
+    $s.$watch('initialized', function(item) {
+        $s.selectedModel = item;         
+        fetchExpression(item)
+    })
+
+    function fetchExpression(item) {
+        WS.getObjectMeta(item.path)
+            .then(function(res) {
+                var dict = res[0][7].expression_data;                
+                var expList = []
+                for (key in dict) 
+                    expList.push({name: key, ids: dict[key]});
+
+                $s.expressionDict = dict;
+                $s.expression = expList;
+            }).catch(function(e) {
+                $s.expression = []; // media folder may not exist
+            })
+    }
+
+    function querySearch (query) {
+        var results = query ? $s.expression.filter( createFilterFor(query) ) : $s.expression;
+        return results;
+    }
+
+    function searchTextChange(text) {
+    }
+
+    function selectedItemChange(item) {
+        var path = $s.selectedModel.path;
+        self.form.expseries = path+'/.expression_data/'+item.name;
+        $s.subFormIDs = $s.expressionDict[item.name];
+        
+        // set default experiment
+        $s.selectedExperiment = $s.subFormIDs[0];
+        self.form.expression_condition = $s.selectedExperiment;        
+    }
+
+
+    $s.updateExperiment = function() {
+        self.form.expression_condition = $s.selectedExperiment;
+    }
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(state) {
+            console.log('state', state)
+            return (state.value.indexOf(lowercaseQuery) >= 0);
+        };
+    }
+
+}])
+
+
 .controller('CompoundDropdown', ['$scope', 'Biochem',
 function($scope, Biochem) {
     var self = this;

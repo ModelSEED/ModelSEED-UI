@@ -1355,6 +1355,15 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         })
     }
 
+    
+    $scope.runPlantFBA = function(ev, item) {
+        Dialogs.runPlantFBA(ev, item, function() {
+            updateFBAs(item).then(function() {
+                item.fbaCount++;
+            })
+        })
+    }
+
     $scope.gapfill = function(ev, item) {
         Dialogs.gapfill(ev, item, function() {
             updateGapfills(item).then(function() {

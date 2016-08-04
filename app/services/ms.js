@@ -349,10 +349,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.getFeature = function(genome, feature) {
-        //console.log('getting feature', feature)
         return $http.rpc('ms', 'get_feature', {genome: genome, feature: feature})
                     .then(function(res) {
-                        $log.log('feature response', feature)
                         return res;
                     })
 

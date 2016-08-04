@@ -139,6 +139,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
         })
     }
 
+    
+
     /**
      * [function runFBA]
      * @param  {[type]}   ev   [$event object]
@@ -154,7 +156,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($scope, $http) {
-                $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
+                //$scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
@@ -178,6 +180,46 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             }]
         })
     }
+
+    this.runPlantFBA = function(ev, item, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/fba-plant.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($scope, $http) {
+                $scope.item = item;
+                $scope.form = {
+                    model: item.path, 
+                    media_supplement: []
+                };
+
+                $scope.runFBA = function(){
+                    self.showToast('Running Flux Balance Analysis', item.name, 5000)          
+                    
+                    // use default media if none
+                    $scope.form.media = $scope.form.media ? $scope.form.media :
+                         "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
+                    MS.runFBA($scope.form)
+                      .then(function(res) {
+                          console.log('run fba response', res)
+                          cb();
+                          //self.showComplete('FBA Complete',
+                          //             res.id+' '+res.media_ref.split('/').pop())
+                      }).catch(function(e) {
+                          self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
+                      })
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }    
 
     this.gapfill = function(ev, item, cb) {
         ev.stopPropagation();
