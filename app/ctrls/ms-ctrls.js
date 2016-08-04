@@ -489,7 +489,7 @@ function($s, WS) {
         pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
         featurePath = '/feature/plantseed/Genomes/Athaliana-TAIR10/';
 
-    var wsPath = '/plantseed/Genomes/annotation_overview';
+    var wsPath = '/plantseed/Data/annotation_overview';
 
     $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
 
