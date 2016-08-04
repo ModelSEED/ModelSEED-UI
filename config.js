@@ -26,8 +26,8 @@ angular.module('config', []).service('config', function() {
         maps: "/nconrad/public/maps/",
         publicPlants: "/plantseed/plantseed/",
         plants: {
-            models: '/plantseed/Models/',
-            genomes: '/plantseed/Genomes/'
+            models: '/plantseed/',
+            genomes: '/plantseed/'
         }
     }
 })
