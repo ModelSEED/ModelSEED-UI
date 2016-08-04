@@ -2,6 +2,8 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####vBeta-1.5.0 (Aug 4, 2016)
+- Plants: tFBA, annotation, genome view, etc.
 
 ####vBeta-1.3.3 (July 15, 2016)
 - Enable plants portion of app (pending service updates).

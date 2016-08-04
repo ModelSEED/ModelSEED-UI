@@ -12,7 +12,7 @@ angular.module('Jobs', [])
 function($http, $rootScope, $timeout, Dialogs) {
     var self = this;
 
-    var polling = false; 
+    var polling = true; 
 
     this.jobs = null;
     this.jobsHash = null;
