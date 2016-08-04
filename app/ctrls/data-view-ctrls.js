@@ -166,7 +166,7 @@ function($s, $sParams, MS, $http, config, Auth) {
                 return {
                     feature: row.hit_id,
                     genome: config.paths.plants.genomes+row.genome+
-                        '/.plantseed_data/minimal_genome/'
+                        '/.plantseed_data/minimal_genome'
                 };
             }},
         },
