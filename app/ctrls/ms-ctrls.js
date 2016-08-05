@@ -1119,13 +1119,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$location',
  'Session', 'uiTools', 'Dialogs', '$state',
-function($s, $sParams, WS, MS, Auth,
+function($s, $sParams, WS, MS, Auth, $location,
          Session, uiTools, Dialogs, $state) {
+
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
+    
+    if ($sParams.tab == 'mine') {
+        $s.tabs = {tabIndex: 1};
+        $location.search('tab','');
+    }
 
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
     $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};

@@ -287,7 +287,10 @@ function($s, $state, $sParams, WS, MS, tools,
     var path = $sParams.path;
 
     // determine if user can copy this media to their workspace
-    if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
+    if (path.split('/')[1] !== Auth.user) 
+        $s.canCopy = true;
+    else
+        $s.isMine = true;    
 
     $s.name = path.split('/').pop()
 
