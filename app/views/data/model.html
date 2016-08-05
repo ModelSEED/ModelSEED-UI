@@ -1,13 +1,25 @@
-<h4>
+<!--
+    <h4>
     <i class="icon-folder-open-o"></i>
     <span>
         <a ui-sref="app.myModels()">My Models</a>
         / {{name}}
     </span>
 </h4>
-
+-->
+<br>
 <div layout="row">
-    <div class="h2">Model <small>{{orgName}}</small></div>
+	<div ng-if="!isMine" class="h4">
+		Public Models / {{name}} 
+        <small>{{orgName ? orgName : ''}}</small>
+	</div>
+
+	<div ng-if="isMine" class="h4">
+        <i class="icon-folder-open-o"></i>
+		<a ui-sref="app.myModels({tab: 'mine'})">My Models</a> / {{name}} 
+        <small>{{orgName ? orgName : ''}}</small>
+	</div>
+    
 
     <!--<md-input-container layout-align="end end" flex>
         <md-button ng-if="!canCopy && !editInProgress"

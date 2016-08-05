@@ -461,7 +461,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
     // path and name of "modelfolder"
     var path = $sParams.path;
-    $scope.name = path.split('/').pop()
+    $scope.name = path.split('/').pop();
+
+    // determine if user can copy this model to their workspace
+    if (path.split('/')[1] !== Auth.user) 
+        $scope.canCopy = true;
+    else
+        $scope.isMine = true;        
 
     // selected compound, reaction, etc.
     $scope.selected;
