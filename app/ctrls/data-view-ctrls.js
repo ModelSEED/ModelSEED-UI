@@ -37,7 +37,7 @@ function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.split('/').pop()
+    $scope.name = path.split('/').slice(0,-2).pop();
 
     $scope.tabs = {tabIndex : 0};
 
