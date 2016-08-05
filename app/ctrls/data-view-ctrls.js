@@ -326,12 +326,15 @@ function($s, $state, $sParams, WS, MS, tools,
         var destination = '/'+Auth.user+'/media/';
         WS.createFolder(destination)
             .then(function(res) {
-
                 WS.copy(path, destination+$s.name, true)
                     .then(function(res) {
-                        $s.copyInProgress = false;
-                        $state.go('app.media', {tab: 'mine'})
+                        var path = res[0][2]+res[0][0];
+                        $state.go('app.mediaPage', {path: path})
+                    }).catch(function(e) {
+                        $s.copyInProgress = false;                              
+                        Dialogs.showError('Copy media failed')
                     })
+
             })
     }
 

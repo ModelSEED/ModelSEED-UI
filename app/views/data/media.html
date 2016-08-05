@@ -2,15 +2,17 @@
 <div layout="row">
 	<div class="h2">Media {{editInProgress ? 'Editor' : ''}} <small>{{name}}</small></div>
 
-	<!-- let's not do this from the page for now...
+
 	<md-input-container ng-if="canCopy" layout-align="end end" flex>
 		<md-button class="md-raised md-secondary" ng-click="copyMedia()">
-			<span ng-if="!copyInProgress">Copy</span>
+			<span ng-if="!copyInProgress">Copy to edit</span>
 			<span ng-if="copyInProgress">Copying...</span>
-			<md-tooltip md-delay="500">Copy to <i>My Media</i></md-tooltip>
+			<md-tooltip md-delay="500">
+				Copy to <i>My Media</i> to edit
+			</md-tooltip>
 		</md-button>
 	</md-input-container>
-	-->
+	
 </div>
 
 <hr class="no-margin">
@@ -25,7 +27,7 @@
 					   class="pull-right md-secondary"
 					   ng-click="toggleEdit()">Edit
 			</md-button>
-
+		
 			<ng-table-two ng-if="!editInProgress"
 						  table-header="mediaHeader"
 						  table-data="media"
