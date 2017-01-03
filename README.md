@@ -5,13 +5,12 @@
 ## Local Installation
 
 ```
-git clone https://github.com/modelseed/modelseed-ui.git modelseed-ui
-git submodule update --init
+git clone --recursive https://github.com/modelseed/modelseed-ui.git modelseed-ui
+cd modelseed-ui
 bower install
 ```
 
 Notes:
-- `git submodule update --init` installs some submodules in `lib/`
 - `bower install` installs some third-party (front-end) dependencies
 
 
