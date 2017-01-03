@@ -1,6 +1,11 @@
 
 # ModelSEED UI <sup>(beta)</sup> [![Build Status](https://travis-ci.org/ModelSEED/ModelSEED-UI.svg?branch=master)](https://travis-ci.org/ModelSEED/ModelSEED-UI)
 
+## Requirements
+- node (https://nodejs.org/)
+- bower `npm install -g bower`
+
+
 
 ## Local Installation
 
