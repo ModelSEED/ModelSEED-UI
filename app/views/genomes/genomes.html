@@ -1,4 +1,50 @@
 
+
+<div style="background:black;border:1px solid #cccccc;padding: 10px;">
+<ul class="toolbar">
+    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+        <a ng-click="changeView('Microbes')">
+            <span hide-sm>PublicMicrobialModels</span>
+        </a>
+    </li>
+    
+    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+        <a ng-click="changeView('Plants')">
+             <span hide-sm>PublicPlantModels</span>
+        </a>
+    </li>
+    
+    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+        <a ng-click="changeView('Plants')">
+            <span hide-sm>Subsystems</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+        <a ng-click="changeView('Plants')">
+            <span hide-sm>FunctionalRoles</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
+        <a ui-sref="app.biochem">
+            <span hide-sm>Reactions/Compounds</span>
+        </a>
+    </li>
+    
+    <!--
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
+        <a ui-sref="app.biochem">
+            <span hide-sm>Compounds</span>
+        </a>
+    </li>
+     -->
+    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
+        <a ui-sref="app.media">
+            <span hide-sm>Media</span>
+        </a>
+    </li>
+</ul>
+</div>
+    
 <div layout="row">
     <div class="content-header" flex>
         {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
@@ -28,7 +74,7 @@
         <a href="http://rast.nmpdr.org" target="_blank">RAST <i class="fa fa-external-link text-muted"></i></a> at this time.
     </div>
 
-    <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
+    <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
         <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
         <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
     </md-radio-group>    
