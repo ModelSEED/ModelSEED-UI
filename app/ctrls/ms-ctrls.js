@@ -487,7 +487,7 @@ function($s, WS) {
         subsystemUrl = url +'?page=ShowSubsystem&subsystem=',
         roleUrl = url + '?page=FunctionalRolePage&fr=',
         pathwayUrl = 'http://pmn.plantcyc.org/ARA/NEW-IMAGE?type=PATHWAY&object=',
-        featurePath = '/feature/plantseed/plantseed/Athaliana-TAIR10/.plantseed_data/minimal_genome/';
+        featurePath = '/feature/plantseed/Genomes/Athaliana-TAIR10/';
 
     var wsPath = '/plantseed/Data/annotation_overview';
 
@@ -795,8 +795,11 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // microbes / plants view
     $scope.view = ViewOptions.get('organismType');
 
-    $scope.changeView = function(view) {
+    $scope.changeView = function(view, tab) {
         $scope.view = ViewOptions.set('organismType', view);
+        if( tab ) {
+         $scope.tabs.tabIndex = tab;
+        }
     }
 
     $scope.showMenu = function() { $scope.menuVisible = true; }
@@ -1119,19 +1122,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 
 .controller('Media',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth', '$location',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',
-function($s, $sParams, WS, MS, Auth, $location,
+function($s, $sParams, WS, MS, Auth,
          Session, uiTools, Dialogs, $state) {
-
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
-    
-    if ($sParams.tab == 'mine') {
-        $s.tabs = {tabIndex: 1};
-        $location.search('tab','');
-    }
 
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
     $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};

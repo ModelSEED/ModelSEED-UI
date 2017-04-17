@@ -3,40 +3,40 @@
 <div style="background:black;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
     <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
-        <a ng-click="changeView('Microbes')">
+        <a ng-click="changeView('Microbes', '0')">
             <span hide-sm>PublicMicrobialModels</span>
         </a>
     </li>
     
     <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
-        <a ng-click="changeView('Plants')">
+        <a ng-click="changeView('Plants', '0')" >
              <span hide-sm>PublicPlantModels</span>
         </a>
     </li>
-    
     <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
-        <a ng-click="changeView('Plants')">
+        <a ng-click="changeView('Plants', '2')" >
             <span hide-sm>Subsystems</span>
         </a>
     </li>
+    
     <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
         <a ng-click="changeView('Plants')">
             <span hide-sm>FunctionalRoles</span>
         </a>
     </li>
+    
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
         <a ui-sref="app.biochem">
             <span hide-sm>Reactions/Compounds</span>
         </a>
     </li>
-    
     <!--
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
-        <a ui-sref="app.biochem">
+        <a ui-sref="app.biochem" tabIndex='1'>
             <span hide-sm>Compounds</span>
         </a>
     </li>
-     -->
+    --> 
     <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
         <a ui-sref="app.media">
             <span hide-sm>Media</span>
