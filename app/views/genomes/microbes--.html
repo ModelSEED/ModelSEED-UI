@@ -1,0 +1,74 @@
+
+            <div class="table-controls" layout="row">
+                <!--
+                 <md-input-container class="table-settings">
+                 <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                 <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
+                 </button>
+                 <ul class="dropdown-menu dropdown-menu-visible table-settings">
+                 <li ng-repeat="item in columns">
+                 <div ng-click="toggle(item.prop, opts.visible)">
+                 <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
+                 </div>
+                 </li>
+                 </ul>
+                 </md-input-container>
+                 -->
+                
+                <md-input-container md-no-float flex="45"
+                    search="opts.query" search-opts="opts" search-placeholder="Search public genomes">
+                </md-input-container>
+                
+                <md-button layout-align="start center"
+                    ng-if="selectedPublic.genome_id"
+                    ng-click="reconstruct($event, selectedPublic)"
+                    class="md-primary md-raised">
+                    <i class="icon-tools fa-plus"></i>
+                    Reconstruct
+                </md-button>
+                
+                <md-progress-circular ng-if="loading"
+                    class="table-loading"
+                    md-mode="indeterminate"
+                    md-diameter="20">
+                </md-progress-circular>
+                
+                <md-input-container pagination
+                    pagination-offset="opts.offset"
+                    pagination-limit="opts.limit"
+                    pagination-total="genomes.numFound"
+                    layout="row"
+                    layout-align="end center" flex>
+                </md-input-container>
+            </div>
+            
+            <table class="table" ng-if="genomes.docs.length">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th sortable ng-repeat="h in opts.visible"
+                            ng-click="sortBy($event,h)">
+                            {{getLabel(h)}}
+                        </th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr ng-repeat="g in genomes.docs"
+                        ng-click="selectPublic(g)"
+                        class="row-hover">
+                        
+                        <td>
+                            <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
+                        </td>
+                        <td ng-repeat="col in opts.visible">
+                            <a ng-if="col == 'genome_name'"
+                                href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}"
+                                target="_blank"
+                                ng-click="$event.stopPropagation()">{{g[col]}}</a>
+                            <span ng-if="col != 'genome_name'">{{g[col]}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            

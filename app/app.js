@@ -158,7 +158,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         // main views
         .state('app.biochem', {
-            url: "/biochem",
+            url: "/biochem/:chem",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem'
         }).state('app.cpd', {
