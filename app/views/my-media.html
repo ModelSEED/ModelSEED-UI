@@ -6,10 +6,20 @@
             <span hide-sm>MyModels</span>
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
-            <a ui-sref="app.media">    
+    <!-- TODO: Make me my own controller -->
+            <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
+            
+            <a ui-sref="app.media">
                 <span hide-sm>MedMedia</span>
             </a>
+        </li>
+    
+    <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-1">
+        <!-- XXX -->
+        <!-- <a ng-click="changeView('Plants')" > -->
+        <!-- xxx -->
+            <span hide-sm>MedMedia</span>
+        </a>
     </li>    
 </ul>
 </div>
