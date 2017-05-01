@@ -19,10 +19,30 @@
 <div flex="30" class="vertical-center" layout="row" layout-align="start">
 
     <!-- TODO -->
-    <!-- <md-button ui-sref="app.genomes" ng-click="changeView('Plants', '0')">Create New Media</md-button> -->
+    <md-button ui-sref="app.media">Create New Media</md-button>
     <!-- <md-button md-no-ink ng-click="createNewMedia();" >Create New Media</md-button> -->
     <!-- todo -->
 </div>
+
+
+
+<!-- From original \views\media.html: -->
+            <ng-table-selector table-header="myMediaHeader"
+                        table-data="myMedia"
+                        table-opts="myMediaOpts"
+                        table-loading="loadingMyMedia"
+                        on-submit="deleteMedia"
+                        submit-btn-template="Delete $count media"
+                        submit-btn-type="remove"
+                        submit-btn-class="md-warn md-raised"
+                        submit-progress-text="Deleting..."
+                        on-default="newMedia"
+                        default-btn-template="New media"
+                        default-btn-type="add"
+                        default-btn-class="md-primary md-raised"
+                        table-placeholder="Search my media">
+            </ng-table-selector>
+ <!-- end from original... -->
 
 <div layout="row">
     <div class="content-header" flex>My Media<br>
