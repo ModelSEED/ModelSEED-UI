@@ -6,8 +6,8 @@
             <span hide-sm>MyModels</span>
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
-            <a ui-sref="app.media">    
+    <li ng-class="{ active: $state.includes('app.myMedia') }" id="tour-1">
+            <a ui-sref="app.myMedia">    
                 <span hide-sm>MedMedia</span>
             </a>
     </li>    
@@ -24,7 +24,7 @@
 </div>
 
 <div layout="row">
-    <div class="content-header" flex>My {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
+    <div class="content-header" flex>My Models<br>
         <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
     </div>
 
@@ -35,7 +35,6 @@
 </div>
 
 <hr class="no-margin">
-
 
 
 <!-- <div ng-if="view == 'Plants'"> -->

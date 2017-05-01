@@ -188,14 +188,15 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/media.html',
             controller: 'Media',
             authenticate: true
+            
         <!-- TODO: Make new myMedia state/controller -->
-            <!--
+            
             }).state('app.myMedia', {
-            url: "/list-media/?tab",
+            url: "/myMedia/?tab",
             templateUrl: 'app/views/my-media.html',
-            controller: 'Media',
+            controller: 'MyMedia',
             authenticate: true
-            -->
+            
         }).state('app.myModels', {
             url: "/my-models/",
             templateUrl: 'app/views/my-models.html',

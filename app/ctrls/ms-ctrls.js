@@ -1123,6 +1123,24 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 
 
+<!-- TODO: Make new myMedia state/controller -->
+.controller('MyMedia',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
+ 'Session', 'uiTools', 'Dialogs', '$state',
+function($s, $sParams, WS, MS, Auth,
+         Session, uiTools, Dialogs, $state) {
+
+    $s.tabs = {tabIndex: Session.getTab($state)};
+    $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
+
+    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
+    $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};
+
+}])
+<!-- todo: Make new myMedia state/controller -->
+
+
+
 .controller('Media',
 ['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',
