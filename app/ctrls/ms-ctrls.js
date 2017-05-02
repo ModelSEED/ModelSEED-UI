@@ -1133,24 +1133,10 @@ function($s, $sParams, WS, MS, Auth,
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
-    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
     $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};
-    $s.mediaHeader = [
-        {label: 'Name', key: 'name',
-         link: {
-            state: 'app.mediaPage',
-            getOpts: function(row) {
-                return {path: row.path};
-            }
-          }
-        },
-        {label: 'Minimal?', key: 'isMinimal'},
-        {label: 'Defined?', key: 'isDefined'},
-        {label: 'Type', key: 'type'}
-    ];
 
     $s.myMediaHeader = [
-        {label: 'Name', key: 'name',
+        {label: 'Media ID', key: 'name',
          link: {
             state: 'app.mediaPage',
             getOpts: function(row) {
@@ -1158,26 +1144,17 @@ function($s, $sParams, WS, MS, Auth,
             }
          }
         },
-        {label: 'Minimal?', key: 'isMinimal'},
-        {label: 'Defined?', key: 'isDefined'},
-        {label: 'Type', key: 'type'},
-        {label: 'Mod Date', key: 'timestamp',
+        //{label: 'Minimal?', key: 'isMinimal'},
+        //{label: 'Defined?', key: 'isDefined'},
+        //{label: 'Type', key: 'type'},
+        {label: 'Modification Date', key: 'timestamp',
             formatter: function(row) {
                 return uiTools.relativeTime(row.timestamp);
             }
         }
     ];
-
-
-    $s.loading = true;
-    MS.listPublicMedia()
-      .then(function(media) {
-          $s.media = media;
-          $s.loading = false;
-      })
-
-
     $s.loadingMyMedia = true;
+    
     MS.listMyMedia()
       .then(function(media) {
           $s.myMedia = media;
