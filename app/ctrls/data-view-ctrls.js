@@ -37,7 +37,7 @@ function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.split('/').slice(0,-2).pop();
+    $scope.name = path.split('/').pop()
 
     $scope.tabs = {tabIndex : 0};
 
@@ -165,7 +165,7 @@ function($s, $sParams, MS, $http, config, Auth) {
             getOpts: function(row) {
                 return {
                     feature: row.hit_id,
-                    genome: config.publicPlants+row.genome+
+                    genome: config.paths.plants.genomes+row.genome+
                         '/.plantseed_data/minimal_genome'
                 };
             }},
@@ -287,10 +287,7 @@ function($s, $state, $sParams, WS, MS, tools,
     var path = $sParams.path;
 
     // determine if user can copy this media to their workspace
-    if (path.split('/')[1] !== Auth.user) 
-        $s.canCopy = true;
-    else
-        $s.isMine = true;    
+    if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
 
     $s.name = path.split('/').pop()
 
@@ -329,15 +326,12 @@ function($s, $state, $sParams, WS, MS, tools,
         var destination = '/'+Auth.user+'/media/';
         WS.createFolder(destination)
             .then(function(res) {
+
                 WS.copy(path, destination+$s.name, true)
                     .then(function(res) {
-                        var path = res[0][2]+res[0][0];
-                        $state.go('app.mediaPage', {path: path})
-                    }).catch(function(e) {
-                        $s.copyInProgress = false;                              
-                        Dialogs.showError('Copy media failed')
+                        $s.copyInProgress = false;
+                        $state.go('app.media', {tab: 'mine'})
                     })
-
             })
     }
 
@@ -461,13 +455,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
     // path and name of "modelfolder"
     var path = $sParams.path;
-    $scope.name = path.split('/').pop();
-
-    // determine if user can copy this model to their workspace
-    if (path.split('/')[1] !== Auth.user) 
-        $scope.canCopy = true;
-    else
-        $scope.isMine = true;        
+    $scope.name = path.split('/').pop()
 
     // selected compound, reaction, etc.
     $scope.selected;
@@ -1554,3 +1542,277 @@ function($scope, $sParams, WS, $http, Biochem) {
     }
 
 }])
+
+
+// New Test Service Calls Page (experimental test harness only):
+.controller('TestServiceCall',
+['$scope', '$stateParams', 'WS', 'MS',
+function TestServiceCall($s, $sParams, WS, MS) {
+    
+    $s.submit = function( ){
+        var serviceName = $s.selectedService;
+        var parameters = $s.parminput;
+        var methodName = $s.$$childHead.selectedMethod;
+        
+        var returnoutput = "";
+        
+        var call = "";
+
+        if( serviceName=="WS" ) {
+          call += "WS.";   
+          switch(methodName) {
+            case "list":           
+              returnoutput = WS.list(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "list(";
+              break;
+            case "listL":
+              returnoutput = WS.listL(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "listL(";
+              break;              
+            case "listPublicPlants":
+              returnoutput = WS.listPublicPlants(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listPublicPlants(";
+              break;              
+            case "sanitizeMeta":
+              returnoutput = WS.sanitizeMeta(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "sanitizeMeta(";
+              break;
+            case "get":
+              returnoutput = WS.get(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "get(";
+              break;
+            case "getObjects":
+              returnoutput = WS.getObjects(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "getObjects(";
+              break;
+            case "getObjectsMeta":            
+              returnoutput = WS.getObjectsMeta(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectsMeta(";
+              break;
+            case "getObjectsMetas":            
+              returnoutput = WS.getObjectsMetas(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectsMetas(";
+              break;
+            case "saveMeta":            
+              returnoutput = WS.saveMeta(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "saveMeta(";
+              break;              
+            case "mv":            
+              returnoutput = WS.mv(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "mv(";
+              break; 
+            case "copy":            
+              returnoutput = WS.copy(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "copy(";
+              break; 
+            case "deleteObj":            
+              returnoutput = WS.deleteObj(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "deleteObj(";
+            break; 
+            case "deleteFolder":            
+              returnoutput = WS.deleteFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "deleteFolder(";
+            break;               
+            case "uploadData":            
+              returnoutput = WS.uploadData(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "uploadData(";
+            break;              
+            case "createFolder":            
+              returnoutput = WS.createFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createFolder(";
+            break;
+            case "createModelFolder":            
+              returnoutput = WS.createModelFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createModelFolder(";
+            break;
+            case "getModel":            
+              returnoutput = WS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+            break;  
+            case "createNode":            
+              returnoutput = WS.createNode(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createNode(";
+            break;                        
+           case "getDownloadURL":            
+              returnoutput = WS.getDownloadURL(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getDownloadURL(";
+            break;            
+           case "getPermissions":            
+              returnoutput = WS.getPermissions(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getPermissions(";
+            break; 
+           case "save":            
+              returnoutput = WS.save(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "save(";
+            break; 
+
+            default:
+              // text = "Error: Test Service Call";
+              break;  
+            }
+            
+        }
+        else {
+          call += "MS.";               
+          switch(methodName) {
+            case "listRastGenomes":
+              returnoutput = MS.listRastGenomes(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listRastGenomes(";
+              break;
+            case "getDownloads":
+              returnoutput = MS.getDownloads(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getDownloads(";
+                            break;
+            case "reconstruct":
+              returnoutput = MS.reconstruct(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "reconstruct(";
+              break;
+            case "runFBA":
+              returnoutput = MS.runFBA(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "runFBA(";
+              break;
+            case "gapfill":
+              returnoutput = MS.gapfill(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "gapfill(";
+              break;              
+            case "createGenomeFromShock":
+              returnoutput = MS.createGenomeFromShock(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createGenomeFromShock(";
+              break;              
+            case "createExpressionFromShock":
+              returnoutput = MS.createExpressionFromShock(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createExpressionFromShock(";
+              break;                           
+            case "annotatePlant":
+              returnoutput = MS.annotatePlant(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "annotatePlant(";
+              break;              
+            case "getObjectMetas":
+              returnoutput = MS.getObjectMetas(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectMetas(";
+              break;                                                  
+            case "listModels":
+              returnoutput = MS.listModels(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listModels(";
+              break;             
+            case "sanitizeModel":
+              returnoutput = MS.sanitizeModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeModel(";
+              break;
+            case "listMyMedia":
+              returnoutput = MS.listMyMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listMyMedia(";
+              break;
+            case "addMyMedia":
+              returnoutput = MS.addMyMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "addMyMedia(";
+              break;
+            case "listPublicMedia":
+              returnoutput = MS.listPublicMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listPublicMedia(";
+              break;
+            case "sanitizeMedia":
+              returnoutput = MS.sanitizeMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeMedia(";
+              break;
+            case "sanitizeMediaObjs":
+              returnoutput = MS.sanitizeMediaObjs(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeMediaObjs(";
+              break;           
+            case "getModelFBAs":
+              returnoutput = MS.getModelFBAs(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModelFBAs(";
+              break;
+            case "manageGapfills":
+              returnoutput = MS.manageGapfills(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "manageGapfills(";
+              break;
+            case "getModelEdits":
+              returnoutput = MS.getModelEdits(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModelEdits(";
+              break;
+            case "getFeature":
+              returnoutput = MS.getFeature(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getFeature(";
+              break;
+            case "addModel":
+              returnoutput = MS.addModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "addModel(";
+              break;
+            case "submittedModel":
+              returnoutput = MS.submittedModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "submittedModel(";
+              break;              
+            case "getModel":
+              returnoutput = MS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+              break;
+          
+          
+          
+            case "getModel":
+              returnoutput = MS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+              break;
+          
+            default:
+              // text = "Error: Test Service Call";
+              break;  
+            }
+        }
+        call += parameters + ")"; 
+        console.log('Test Called TestServiceCall', serviceName, methodName, parameters);
+        
+        console.log("Call: ", call);
+    
+        // TODO: Switch to map to service calls:
+    
+    };
+    
+}])
+

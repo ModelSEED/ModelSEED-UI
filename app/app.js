@@ -222,6 +222,10 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         }).state('app.modelPage', {
             url: "/model{path:nonURIEncoded}?login",
+            
+            // TEST TEST TEST:
+            // templateUrl: 'app/views/data/test_model.html',
+            
             templateUrl: 'app/views/data/model.html',
             controller: 'ModelDataView',
             authenticate: true
