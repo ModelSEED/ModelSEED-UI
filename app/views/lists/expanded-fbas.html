@@ -1,13 +1,13 @@
 <div class="fba-table expanded-table">
     <!--<h5>FBA Results</h5>-->
 
-    <div ng-if="!item.relatedFBAs.length" class="text-muted">
-        No FBA simulations for <i>{{item.name}}</i>.
+    <div ng-if="!relatedFBAs.length" class="text-muted">
+        No FBA simulations for <i>{{name}}</i>.
     </div>
 
     <table class="table table-condensed">
         <thead>
-            <tr ng-if="item.relatedFBAs.length">
+            <tr ng-if="relatedFBAs.length">
                 <th><i class="fa fa-check-square-o" style="visibility:hidden;"></i></th>
                 <th>Media</th>
                 <th>ID</th>
@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="fba in item.relatedFBAs | orderBy : '-timestamp'"
+            <tr ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'"
                 ng-click="addFBA($event, fba, item)"
                 class="row-hover">
                 <td>

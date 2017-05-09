@@ -20,6 +20,26 @@
 
 
 
+<div layout="column">
+
+<!-- <form ng-submit="submit()" ng-controller="TestServiceCall"> -->
+    
+    <label class="control-label">FBA</label>
+    <select ng-model="selectedService" class="form-control" ng-click="showRelatedData()">
+        <option>FBA</option>
+        <option>Expression</option>        
+    </select>
+    
+    <div>
+    <span ng-if="selectedService=='FBA'">
+        <ng-include src="'app/views/lists/expanded-fbas.html'" ng-click="showRelatedData()">    
+    </span>
+    </div>
+
+</div>
+
+<!-- old navigation below this line -->
+
 <md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
     <md-tab>
         <md-tab-label>Reactions</md-tab-label>

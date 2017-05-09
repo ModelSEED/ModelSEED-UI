@@ -458,6 +458,44 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     $scope.name = path.split('/').pop()
 
     // selected compound, reaction, etc.
+    
+    
+    
+    //arman
+    
+    // showRelatedData();
+    
+    $scope.showRelatedData = function() {
+        // item.loading = true;
+        // var gapfillProm = showGapfills(item);
+        // var expressionProm = showExpression(item);
+
+        var fbaProm;
+        /*
+        if (relatedFBAs) 
+            delete relatedFBAs;
+        else
+        */ 
+            fbaProm = updateFBAs()
+        /*
+        $q.all([fbaProm, gapfillProm, expressionProm])
+            .then(function() {
+                console.log('done')
+                item.loading = false
+            })
+            */
+    }
+
+    function updateFBAs() {
+        return MS.getModelFBAs(path)
+            .then(function(fbas) {
+                $scope.relatedFBAs = fbas;
+            })
+    }
+    //arman
+    
+    
+    
     $scope.selected;
 
     // urls used for features
