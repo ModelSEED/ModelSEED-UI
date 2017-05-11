@@ -23,17 +23,51 @@
 <div layout="column">
 
 <!-- <form ng-submit="submit()" ng-controller="TestServiceCall"> -->
-    
-    <label class="control-label">FBA</label>
-    <select ng-model="selectedService" class="form-control" ng-click="showRelatedData()">
+
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RebuildModel</md-button>    
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">ReAnnotateGenome</md-button>        
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RunFBA</md-button>        
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RunGapFilling</md-button>       
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">UploadData</md-button>
+        
+        <div flex="15" layout="row" layout-align="end center">
+            <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+                <md-tooltip ng-if="!selected">View download options</md-tooltip>
+                <i class="icon-file-download"></i>
+            </md-button>
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
+                <md-tooltip ng-if="!selected">Delete model</md-tooltip>
+                <i class="icon-highlight-remove"></i>
+            </md-button>
+        </div>        
+    </div>    
+
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
+      <select flex="30" ng-model="selectedService" ng-click="showRelatedData()">
         <option>FBA</option>
         <option>Expression</option>        
-    </select>
+        <option>GapFill</option>        
+      </select>
+    </div>
     
     <div>
     <span ng-if="selectedService=='FBA'">
         <ng-include src="'app/views/lists/expanded-fbas.html'" ng-click="showRelatedData()">    
     </span>
+
+    <span ng-if="selectedService=='Expression'">
+        <ng-include src="'app/views/lists/expanded-expression.html'" ng-click="showRelatedData()">    
+    </span>
+
+
+
+    <span ng-if="selectedService=='GapFill'">
+        <ng-include src="'app/views/lists/expanded-gapfills.html'" ng-click="showRelatedData()">    
+    </span>
+
+
+
     </div>
 
 </div>

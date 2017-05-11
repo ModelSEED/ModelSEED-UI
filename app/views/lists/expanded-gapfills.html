@@ -3,12 +3,12 @@
     <!--<h5>Gapfills</h5>-->
 
     <div ng-if="!item.relatedGapfills.length" class="text-muted">
-        No gapfills for <i>{{item.name}}</i>.
+        No gapfills for <i>{{name}}</i>.
     </div>
 
     <table class="table table-condensed">
         <thead>
-            <tr ng-if="item.relatedGapfills.length">
+            <tr ng-if="relatedGapfills.length">
                 <th>Integrated?</th>
                 <th>Media</th>
                 <th>ID</th>
@@ -17,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in item.relatedGapfills track by $index" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
+            <tr ng-repeat="gf in relatedGapfills track by $index" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
                 <td>
                     <img ng-if="gf.loading"
                          src="img/ajax-loader.gif"

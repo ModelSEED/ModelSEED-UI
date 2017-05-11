@@ -463,12 +463,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     
     //arman
     
-    // showRelatedData();
-    
     $scope.showRelatedData = function() {
         // item.loading = true;
-        // var gapfillProm = showGapfills(item);
-        // var expressionProm = showExpression(item);
+        var gapfillProm = showGapfills();
+        var expressionProm = showExpression();
 
         var fbaProm;
         /*
@@ -492,6 +490,40 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
                 $scope.relatedFBAs = fbas;
             })
     }
+    
+    function showExpression() {
+        return updateExpression();      
+    }
+
+    function updateExpression() {
+        return WS.getObjectMeta(path)
+            .then(function(res) {
+                var expList = [],
+                    dict = res[0][7].expression_data;
+                
+                for (key in dict) 
+                    expList.push({name: key, ids: dict[key]});
+                
+                $scope.expression = expList;
+            })        
+    }
+    
+    // Gapfill function Errors in legacy ==>  Could not test debug below:
+        function showGapfills() {
+        if ($scope.relatedGapfills) {
+            delete $scope.relatedGapfills;
+        } else {
+            return updateGapfills();
+        }
+    }    
+
+    function updateGapfills() {
+        return MS.getModelGapfills(path)
+            .then(function(gfs) {
+                $scope.relatedGapfills = gfs;
+            })
+    }
+
     //arman
     
     
