@@ -541,6 +541,25 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
                 $scope.relatedGapfills = gfs;
             })
     }
+    
+    
+    
+    $scope.deleteFBA = function(e, i, model) {
+        e.stopPropagation();
+
+        WS.deleteObj(path)
+
+        // WS.deleteObj(model.relatedFBAs[i].ref)
+        
+          .then(function(res) {
+          
+              $scope.relatedFBAs.splice(i, 1);
+              // model.relatedFBAs.splice(i, 1);
+              
+              model.fbaCount -= 1;
+          })
+    }
+    
 
     //arman
     
