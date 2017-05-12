@@ -448,9 +448,9 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog',
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs',
  'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
+function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
 
     // path and name of "modelfolder"
@@ -507,6 +507,22 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
                 $scope.expression = expList;
             })        
     }
+    
+    
+    
+    $scope.runPlantFBA = function(ev) {
+        var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
+        // item.path = path; 
+        // item.name = $scope.name;
+        // item.fbaCount = $scope.fbaCount;
+        Dialogs.runPlantFBA(ev, item, function() {
+            updateFBAs().then(function() {
+                item.fbaCount++;
+            })
+        })
+    }
+    
+        
     
     // Gapfill function Errors in legacy ==>  Could not test debug below:
         function showGapfills() {
