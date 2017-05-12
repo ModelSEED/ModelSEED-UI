@@ -474,7 +474,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
             delete relatedFBAs;
         else
         */ 
-            fbaProm = updateFBAs()
+            fbaProm = updateFBAs();
+            
+            refreshData();
         /*
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
