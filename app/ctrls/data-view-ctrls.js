@@ -450,7 +450,7 @@ function($s, $state, $sParams, WS, MS, tools,
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs',
  'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
+function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
 
     // path and name of "modelfolder"
@@ -510,8 +510,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
             })        
     }
         
-    $scope.runPlantFBA = function(ev) {
-        var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
+    $scope.runPlantFBA = function(ev, item) {
+        // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
         Dialogs.runPlantFBA(ev, item, function() {
             updateFBAs().then(function() {
@@ -563,6 +563,35 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
           })
     }
     
+
+    $scope.rmModel = function(ev, i, item, type) {
+        // var item = {path: path, name: $scope.name};
+    
+        ev.stopPropagation();
+
+        var confirm = $mdDialog.confirm()
+            .title('WARNING')
+            .content('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ariaLabel('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ok('Delete it all!')
+            .cancel('No')
+            .clickOutsideToClose(true)
+            .targetEvent(ev);
+
+        $mdDialog.show(confirm).then(function() {
+            WS.deleteFolder(item.path)
+              .then(function(one, two) {
+                if (type.toLowerCase() === 'plant')
+                    MS.myPlants.splice(i, 1)
+                else if (type.toLowerCase() === 'microbe')
+                    MS.myModels.splice(i, 1)
+                Dialogs.showComplete('Deleted', item.name)
+            })
+        }, function() {
+            console.log('not deleting', item.name, type);
+        });
+    }
+
 
     //arman
     
