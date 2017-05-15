@@ -509,25 +509,28 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog, Dialogs,
                 $scope.expression = expList;
             })        
     }
-    
-    
-    
+        
     $scope.runPlantFBA = function(ev) {
         var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
-        // item.path = path; 
-        // item.name = $scope.name;
-        // item.fbaCount = $scope.fbaCount;
+
         Dialogs.runPlantFBA(ev, item, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
             })
         })
     }
+           
+    $scope.gapfill = function(ev) {
+        var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
     
-        
+        Dialogs.gapfill(ev, item, function() {
+            updateGapfills(item).then(function() {
+                item.gapfillCount++;
+            })
+        })
+    }    
     
-    // Gapfill function Errors in legacy ==>  Could not test debug below:
-        function showGapfills() {
+    function showGapfills() {
         if ($scope.relatedGapfills) {
             delete $scope.relatedGapfills;
         } else {
