@@ -455,35 +455,33 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
     // path and name of "modelfolder"
     var path = $sParams.path;
+    
+    // $scope.item = this.item;
+    
     $scope.name = path.split('/').pop()
-
-    // selected compound, reaction, etc.
     
-    
-    
-    //arman
-    
-    $scope.showRelatedData = function() {
-        // item.loading = true;
+    $scope.showRelatedData = function( item ) {
+        $scope.item = item;
+        item.loading = true;
         var gapfillProm = showGapfills();
         var expressionProm = showExpression();
 
         var fbaProm;
-        /*
-        if (relatedFBAs) 
-            delete relatedFBAs;
+        
+        if (item.relatedFBAs) 
+            delete item.relatedFBAs;
         else
-        */ 
+         
             fbaProm = updateFBAs();
             
             refreshData();
-        /*
+        
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
                 console.log('done')
                 item.loading = false
             })
-            */
+            
     }
 
     function updateFBAs() {
@@ -550,16 +548,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
 
-        WS.deleteObj(path)
-
-        // WS.deleteObj(model.relatedFBAs[i].ref)
-        
+        WS.deleteObj($scope.relatedFBAs[i].ref)
           .then(function(res) {
           
               $scope.relatedFBAs.splice(i, 1);
               // model.relatedFBAs.splice(i, 1);
               
-              model.fbaCount -= 1;
+              $scope.fbaCount -= 1;
           })
     }
     
@@ -591,9 +586,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             console.log('not deleting', item.name, type);
         });
     }
-
-
-    //arman
     
     
     
