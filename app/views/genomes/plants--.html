@@ -1,6 +1,76 @@
 <div>
+            <div class="table-controls" layout="row">
             
-            <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+                <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+            
+                <md-input-container md-no-float flex="45"
+                    search="opts.query" search-opts="opts" search-placeholder="Search public genomes">
+                </md-input-container>
+
+                <!-- 
+                <md-button layout-align="start center"
+                    ng-if="selectedPublic.genome_id"
+                    ng-click="reconstruct($event, selectedPublic)"
+                    class="md-primary md-raised">
+                    <i class="icon-tools fa-plus"></i>
+                    Reconstruct
+                </md-button>
+                -->
+                
+                <!--
+                <md-input-container pagination
+                    pagination-offset="opts.offset"
+                    pagination-limit="opts.limit"
+                    pagination-total="genomes.numFound"
+                    layout="row"
+                    layout-align="end center" flex>
+                </md-input-container>
+                -->                
+                                                            
+            </div> <!-- div class table-controls -->
+            
+            
+            <div flex>
+            <table class="table" ng-if="genomes.docs.length">
+            
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Organism
+                        </th>                        
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr ng-repeat="p in plants">
+                        
+                        <td>
+                            <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
+                        </td>
+                        
+                        <td>{{p.meta.name}}</td>
+                        
+                        <td><i>{{p.meta.organism}}</i></td>
+                        
+                        <!--
+                        <td ng-repeat="col in opts.visible">
+                            <a>{{p[col]}}</a>
+                            <span>{{p[col]}}</span>
+                        </td>
+                        -->                        
+                        
+                    </tr>
+                </tbody>
+
+            </table>
+            </div> <!-- flex -->
+
+
+
             <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
                 <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
                     <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
@@ -19,8 +89,8 @@
                                     <a href="{{link.url}}" target="_blank">{{link.name}}</a>
                                     {{$index != p.meta.links.length-1 ? '|' : ''}}
                                 </div>
-                            </div>
-                        </div>
+                            </div> <!-- end div ng-if p meta links -->
+                        </div> <!-- end div flex --> 
                         
                         <div layout-align="end">
                             <a ui-sref="app.modelPage({path: p.path.split('/').slice(0,-2).join('/') })" class="pull-right">
@@ -37,6 +107,6 @@
                             <!--<md-button class="md-raised md-primary" md-no-ink>
                              <i class="icon-quill"></i> Annotate
                              </md-button>-->
-                        </div>
-            </div> <!-- end plant row -->
-</div>
+                        </div> <!-- end div layout copy... links -->
+            </div> <!-- end ng-repeat p in plants -->
+</div> <!-- end outer most div -->
