@@ -132,6 +132,26 @@ function($scope, $sParams, WS, $http) {
          })
 }])
 
+
+
+
+
+
+.controller('PlantDataView',
+['$scope', '$stateParams', 'WS', '$http',
+function($scope, $sParams, WS, $http) {
+
+    // path and name of object
+    var path = $sParams.path;
+    $scope.name = path.split('/').pop();
+
+    } ] )
+
+
+
+
+
+
 .controller('FeatureDataView',
 ['$scope', '$stateParams', 'MS', '$http', 'config', 'Auth',
 function($s, $sParams, MS, $http, config, Auth) {
@@ -452,6 +472,8 @@ function($s, $state, $sParams, WS, MS, tools,
  'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
          ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
+         
+    // Start arman's code        
 
     // path and name of "modelfolder"
     var path = $sParams.path;
@@ -559,6 +581,45 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
     
 
+    // XXX: For the Download operation (-->)
+    $scope.toggleOperations = function(e, type, item) {
+        var tar = e.target;
+        e.stopPropagation();
+
+        // set selected item
+        $scope.selected = item;
+
+        $scope.loadingDownloads = true;
+        MS.getDownloads(item.path)
+          .then(function(dls) {
+              console.log('dls', dls)
+              $scope.selected.downloads = dls;
+              $scope.loadingDownloads = false;
+          })
+
+        if (type === 'download') {
+            // XXX: The following two lines get the error (from inside Angular Patches!!!):
+            // No instance found for handle downloadOpts (in the component registry, for side nav... for the controller instance!!!)?
+            // /ModelSeed/components/angular-material/modules/closure/sidenav/sidenav.js ::
+            // function SidenavService($mdComponentRegistry, $q) { ...
+            //   ...// Lookup the controller instance for the specified sidNav instance
+            // Fix: can we use a dialog instead (like Dialog.runPlantFBA just above)?
+            // Responsiveness?
+            if (!$mdSidenav('downloadOpts').isOpen())
+                $mdSidenav('downloadOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('downloadOpts').close()
+                $document.unbind(e)
+                $scope.selected = null;
+            })
+        } else if ($mdSidenav('downloadOpts').isOpen()) {
+            $mdSidenav('downloadOpts').close()
+        }
+    }
+
+
+
     $scope.rmModel = function(ev, i, item, type) {
         // var item = {path: path, name: $scope.name};
     
@@ -588,6 +649,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
     
     
+    // end arman's code
     
     $scope.selected;
 

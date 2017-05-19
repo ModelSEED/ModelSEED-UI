@@ -239,6 +239,18 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/genome.html',
             controller: 'GenomeDataView',
             authenticate: true
+
+
+
+        }).state('app.plantPage', {
+            url: "/plant{path:nonURIEncoded}",
+            templateUrl: 'app/views/data/plant.html',
+            controller: 'PlantDataView',
+            authenticate: true
+
+
+
+
         }).state('app.featurePage', {
             url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',

@@ -1,0 +1,40 @@
+
+<h4>
+    <i class="icon-folder-open-o"></i>
+    <span>
+        <a ui-sref="app.genomes()">Reference Models</a>
+        / {{name}}
+    </span>
+</h4>
+
+<div class="h2">Plant
+    <small>{{name}}</small>
+</div>
+
+<hr class="no-margin">
+
+
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Features">
+        <ng-table-two table-header="featureHeader"
+                  table-data="features"
+                  table-opts="featureOpts"
+                  table-loading="loadingFeatures"
+                  table-placeholder="Search features">
+        </ng-table-two>
+    </md-tab>
+
+    <md-tab label="Annotations">
+        <ng-table-two table-header="annotationHeader"
+                  table-data="annotations"
+                  table-opts="annotationOpts"
+                  table-loading="loadingAnnotations"
+                  table-placeholder="Search annotations">
+        </ng-table-two>
+    </md-tab>
+</md-tabs>
+
+
+
+
+<div ng-if="error" class="alert alert-danger">{{error}}</div>
