@@ -243,7 +243,8 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
         }).state('app.plantPage', {
-            url: "/plant{path:nonURIEncoded}",
+            url: "/plant{path:nonURIEncoded}/:{image:nonURIEncoded}",
+            // url: "/plant{path:nonURIEncoded}?image",
             templateUrl: 'app/views/data/plant.html',
             controller: 'PlantDataView',
             authenticate: true

@@ -62,7 +62,7 @@
 
                         
                         <td>
-                            <a ui-sref="app.plantPage({path: item.path.split('/').slice(0,-2).join('/') })">
+                            <a ui-sref="app.plantPage({path: item.path.split('/').slice(0,-2).join('/'), image: item.meta.image })">
                                 {{item.meta.name}}
                             </a>
                             

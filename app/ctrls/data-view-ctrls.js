@@ -143,6 +143,9 @@ function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
+    
+    $scope.image = $sParams.image;
+    
     $scope.name = path.split('/').pop();
 
     } ] )
