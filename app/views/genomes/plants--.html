@@ -43,6 +43,10 @@
                             Organism
                         </th>
                         
+                        <th>
+                            Copy
+                        </th>
+                        
                         <!-- Debug: Original Path -->
                         <th>
                             Path
@@ -59,20 +63,27 @@
                             <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
                         </td>
                         
-
-                        
                         <td>
                             <a ui-sref="app.plantPage({path: item.path.split('/').slice(0,-2).join('/'), image: item.meta.image })">
                                 {{item.meta.name}}
                             </a>
-                            
-                        
-                 
                         
                         <td><i>{{item.meta.organism}}</i></td>
                         
                         
+
+                        <td>
+                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, p.path.split('/').slice(0,-2).join('/'))">
+                                Copy Genome/Model
+                            </a>
+                            <span ng-if="copyInProgress[$index]">
+                                Copying...
+                            </span>
+                        </td>                        
                         
+                        
+                        
+                                                
                         <!-- Debug: Original Path -->
                         <td>
                             {{item.path}}
