@@ -57,7 +57,7 @@
                 </thead>
 
                 <tbody>
-                    <tr ng-repeat="item in plants">
+                    <tr ng-repeat="item in plants track by $index">
                         
                         <td>
                             <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
