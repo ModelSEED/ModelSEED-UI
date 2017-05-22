@@ -73,7 +73,7 @@
                         
 
                         <td>
-                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, p.path.split('/').slice(0,-2).join('/'))">
+                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
                                 Copy Genome/Model
                             </a>
                             <span ng-if="copyInProgress[$index]">
