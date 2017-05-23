@@ -178,6 +178,17 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
             authenticate: true
+            
+            
+            
+        }).state('app.RefModels', {
+            url: "/genomes/",
+            templateUrl: 'app/views/genomes/genomes.html',
+            controller: 'RefModels',
+            authenticate: true
+
+
+            
         }).state('app.genomes', {
             url: "/genomes/",
             templateUrl: 'app/views/genomes/genomes.html',

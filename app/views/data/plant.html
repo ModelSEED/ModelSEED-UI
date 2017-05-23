@@ -2,7 +2,7 @@
 <h4>
     <i class="icon-folder-open-o"></i>
     <span>
-        <a ui-sref="app.genomes()">Reference Models</a>
+        <a ui-sref="app.RefModels()">Reference Models</a>
         / {{name}}
     </span>
 </h4>
@@ -14,12 +14,184 @@
 <hr class="no-margin">
 
 
+
+<!-- Image broke because model missing meta data ??? ->
+<!--
 <div layout="row">
                 <img ng-if="image" width="100" height="100" src="{{image}}"></img>
                 <img ng-if="!image" src="http://placehold.it/100x100"></img>
 </div>
+-->
 
 
+<div layout="column">
+
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RebuildModel</md-button>    
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">ReAnnotateGenome</md-button>        
+        <md-button class="md-primary md-raised md-button" ng-click="runPlantFBA($event, item)">RunFBA</md-button>        
+        <md-button class="md-primary md-raised md-button" ng-click="gapfill($event)">RunGapFilling</md-button>       
+        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">UploadData</md-button>
+        
+        <div flex="15" layout="row" layout-align="end center">
+            <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+                <md-tooltip ng-if="!selected">View download options</md-tooltip>
+                <i class="icon-file-download"></i>
+            </md-button>
+            <!--
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
+                <md-tooltip ng-if="!selected">Delete model</md-tooltip>
+                <i class="icon-highlight-remove"></i>
+            </md-button>
+            -->
+        </div>        
+    </div>    
+
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
+      <select flex="30" ng-model="selectedService" ng-click="showRelatedData( item )">
+        <option>FBA</option>
+        <option>Expression</option>        
+        <option>GapFill</option>        
+      </select>
+    </div>
+    
+    <div>
+    <span ng-if="selectedService=='FBA'">
+        <ng-include src="'app/views/lists/expanded-fbas.html'" ng-click="showRelatedData()">    
+    </span>
+
+    <span ng-if="selectedService=='Expression'">
+        <ng-include src="'app/views/lists/expanded-expression.html'" ng-click="showRelatedData()">    
+    </span>
+
+    <span ng-if="selectedService=='GapFill'">
+        <ng-include src="'app/views/lists/expanded-gapfills.html'" ng-click="showRelatedData()">    
+    </span>
+
+    </div>
+
+</div>
+
+
+
+<!-- old navigation below this line -->
+
+<md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
+    <md-tab>
+        <md-tab-label>Reactions</md-tab-label>
+        <md-tab-body>
+
+
+            <ng-table ng-if="!editInProgress"
+                        table-header="rxnHeader"
+                        table-data="data.reactions"
+                        table-opts="rxnOpts"
+                        table-loading="loading"
+                        table-placeholder="Search reactions">
+            </ng-table>
+
+            <ng-table-editor2 ng-if="editInProgress"
+                          table-header="editRxnHeader"
+                          table-data="editableRxns"
+                          table-opts="rxnOpts"
+                          table-loading="loading"
+                          disable-pagination
+                          table-result-text="reactions"
+                          table-placeholder="Search reactions"
+                          delete-btn-template="Delete $count reactions"
+                          add-btn-template="Add reactions"
+                          on-save="save"
+                          on-save-as="saveAs"
+                          on-add="addRxns"
+                          save-text="Saving..."
+                          on-cancel="toggleEdit()">
+            </ng-table-editor2>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Compounds</md-tab-label>
+        <md-tab-body>
+            <ng-table table-header="cpdHeader"
+                        table-data="data.compounds"
+                        table-opts="cpdOpts"
+                        table-loading="loading"
+                        table-placeholder="Search compounds">
+            </ng-table>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Genes</md-tab-label>
+        <md-tab-body>
+            <ng-table table-header="geneHeader"
+                        table-data="data.genes"
+                        table-opts="geneOpts"
+                        table-loading="loading"
+                        table-placeholder="Search genes">
+            </ng-table>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Compartments</md-tab-label>
+        <md-tab-body>
+            <ng-table table-header="compartmentHeader"
+                        table-data="data.compartments"
+                        table-opts="compartmentOpts"
+                        table-loading="loading"
+                        table-placeholder="Search compartments">
+            </ng-table>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Biomass</md-tab-label>
+        <md-tab-body>
+            <ng-table table-header="biomassHeader"
+                        table-data="data.biomass"
+                        table-opts="biomassOpts"
+                        table-loading="loading"
+                        table-placeholder="Search biomass eqs">
+            </ng-table>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Gapfilling</md-tab-label>
+        <md-tab-body>
+            <ng-include src="'app/views/lists/expanded-gapfills.html'"></ng-include>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>Pathways</md-tab-label>
+        <md-tab-body>
+            <ng-table-two table-header="mapHeader"
+                    table-data="maps"
+                    table-opts="mapOpts"
+                    table-loading="loadingMaps"
+                    table-placeholder="Search maps">
+            </ng-table-two>
+        <md-tab-body>
+    </md-tab>
+
+    <md-tab ng-repeat="tab in Tabs.tabs">
+        <md-tab-label>{{tab.name.length > 14 ? tab.name.slice(0, 15)+'...' : tab.name}}
+            <span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
+        </md-tab-label>
+        <md-tab-body>
+            <div pathway="tab.mapID" models="models"></div>
+            <br>
+        </md-tab-body>
+    </md-tab>
+</md-tabs>
+
+<div ng-if="error" class="alert alert-warning">{{error}}</div>
+
+
+	
+<!--
 <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
     <md-tab label="Features">
         <ng-table-two table-header="featureHeader"
@@ -39,7 +211,7 @@
         </ng-table-two>
     </md-tab>
 </md-tabs>
-
+-->
 
 
 

@@ -2,13 +2,13 @@
 
 <div style="background:black;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
-    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ng-click="changeView('Microbes')">
             <span hide-sm>PublicMicrobialModels</span>
         </a>
     </li>
     
-    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ng-click="changeView('Plants')" >
              <span hide-sm>PublicPlantModels</span>
         </a>
@@ -47,12 +47,12 @@
     
 <div layout="row">
     <div class="content-header" flex>
-        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
+        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
         <small ng-if="view == 'Microbes'" class="help-text" hide-sm>
-            Select a genome from below to reconstruct
+            <i>Reference Models</i>
         </small>
         <small ng-if="view == 'Plants'" class="help-text" hide-sm>
-            You can reconstruct or upload a genome under 'Mine', or consider copying a genome/model.
+            <i>Reference Models</i>
         </small>
 
     </div>

@@ -30,6 +30,234 @@
             </div> <!-- div class table-controls -->
             
             
+            
+    <!-- HEADER -->
+    <div layout="row">
+        <div class="expand-container vertical-center">
+        </div>
+
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Model ID</b>
+        </div>
+
+
+        <!-- TODO: Species Name -->
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Species Name</b>
+        </div>
+        <!-- todo: Species Name -->
+
+
+        <!-- TODO: Species Domain -->
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Species Domain</b>
+        </div>
+        <!-- todo: Species Domain -->
+
+
+
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Reactions</b></div>
+        </div>
+
+        <!-- TODO: Genes -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Genes</b></div>
+        </div>
+        <!-- todo: Genes -->
+
+        <!-- TODO: FBA -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>FBA</b></div>
+        </div>
+        <!-- todo: FBA -->
+        
+        <!-- TODO: GAPFILLCOUNT -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Gapfilling</b></div>
+        </div>
+        <!-- todo: GAPFILLCOUNT -->        
+
+        <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
+            <div><b>Modification Date</b></div>
+        </div>
+
+        <div flex="15" layout="row" layout-align="center center">
+            <div><b>Commands</b></div>
+        </div>
+    </div>
+
+
+    <div layout="row"
+         ng-repeat-start="item in (filtered = ( plants | filter: plantOpts.query)
+                                                         | limitTo : plantOpts.limit : plantOpts.offset)"
+         ng-click="showRelatedData(item)"
+         class="row-hover my-model">
+
+        <!-- TODO: Eliminate Accordion -->
+        
+        <div class="expand-container vertical-center">
+            <i ng-if="!item.loading && !item.relatedFBAs"
+               class="fa fa-caret-right"
+               style="opacity: 0.5;"></i>
+            <i ng-if="item.relatedFBAs"
+               class="fa fa-caret-down"
+               style="opacity: 1.0;"></i>
+            <span ng-if="item.loading">...</span>
+        </div>
+       
+
+
+        <!-- Image broke because model missing meta data ??? ->
+
+                           <!--
+                           <a ui-sref="app.plantPage({path: item.path.split('/').slice(0,-2).join('/'), image: item.meta.image })">
+                                {{item.meta.name}}
+                            </a>
+                            -->
+
+
+
+        <div flex="10" layout="row" layout-align="start center">
+            <a ui-sref="app.plantPage({path: item.path, image: item.meta.image })" ng-click="$event.stopPropagation()">
+                <md-tooltip  md-delay="800">View Model</md-tooltip>
+                {{item.name}}
+            </a>
+        </div>
+
+
+       <!-- TODO: Species Name -->
+        <div flex="10" layout="row" layout-align="start center">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+                <md-tooltip  md-delay="800">View Model</md-tooltip>
+                {{item.orgName}}
+            </a>
+        </div>
+        <!-- todo: Species Name -->
+
+       <!-- TODO: Species Domain -->
+        <div flex="10" layout="row" layout-align="start center">
+            Plant
+        </div>
+        <!-- todo: Species Domain -->
+                
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div>{{item.rxnCount}}</div> 
+        </div>
+
+        <!-- TODO: Genes -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <!-- <div>{{item.cpdCount}}</div> -->     
+        </div>
+        <!-- todo: Genes -->
+
+       <!-- TODO: FBA -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div>{{item.fbaCount}}</div>     
+        </div>
+        <!-- todo: FBA -->
+
+       <!-- TODO: GAPFILLING -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div>{{item.gapfillCount}}</div>     
+        </div>
+        <!-- todo: GAPFILLING -->
+        
+        <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
+            <div>{{relativeTime(item.timestamp)}}</div>
+        </div>
+
+        <div flex="15" layout="column" layout-align="end center">
+            <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+                <md-tooltip ng-if="!selected">View download options</md-tooltip>
+                <i class="icon-file-download"></i>
+            </md-button>
+            
+            <!-- TODO: Replace Delete with Copy => Done!!! -->
+                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
+                                Copy
+                            </a>
+                            <span ng-if="copyInProgress[$index]">
+                                Copying...
+                            </span>
+
+            
+            <!--
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
+                <md-tooltip ng-if="!selected">Delete model</md-tooltip>
+                <i class="icon-highlight-remove"></i>
+            </md-button>
+            -->
+            
+            <!--
+            <md-button md-no-ink ng-click="runPlantFBA($event, item)">
+                <md-tooltip>Run Flux Balanace Analysis</md-tooltip>                
+                <i class="fa fa-code-fork"></i>
+                Run FBA
+            </md-button>
+            <md-button md-no-ink ng-click="gapfill($event, item)">
+                <md-tooltip>Run Gapfilling</md-tooltip>                   
+                <i class="fa fa-circle"></i>
+                Gapfill
+            </md-button>              
+
+            <md-button md-no-ink ng-click="uploadExpression($event, item)">
+                <md-tooltip>Upload Expression Data</md-tooltip>                   
+                <i class="fa fa-cloud-upload"></i>
+                Expression
+            </md-button>          
+            <span style="border: 1px solid #f1f1f1; height: 100%;"></span>
+            -->
+                                 
+        </div>
+    </div>
+
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
+            <md-tab>
+                <md-tab-label>
+                    FBA Simulations
+                    (<span class="label-fba-count">{{item.fbaCount}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-fbas.html'">
+                </md-tab-body>
+            </md-tab>
+
+            <md-tab>
+                <md-tab-label>
+                    Gapfills
+                    (<span class="label-gapfill-count">{{item.gapfillCount}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-gapfills.html'">
+                </md-tab-body>
+            </md-tab>
+
+            <md-tab>
+                <md-tab-label>
+                    Expression Data
+                    (<span class="color-bright-purple">{{item.expression.length}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-expression.html'">
+                </md-tab-body>
+            </md-tab>        
+                
+        </md-tabs>
+
+    </div>
+    
+    <br>
+    <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
+</div>
+
+            
+            
+            <!--
             <div flex>
             <table class="table" ng-if="genomes.docs.length">
             
@@ -42,17 +270,13 @@
                         <th>
                             Organism
                         </th>
-                        
                         <th>
                             Copy
                         </th>
-                        
-                        <!-- Debug: Original Path -->
+                       
                         <th>
                             Path
-                        </th>                        
-                        
-                                                
+                        </th>                                                 
                     </tr>
                 </thead>
 
@@ -69,9 +293,7 @@
                             </a>
                         
                         <td><i>{{item.meta.organism}}</i></td>
-                        
-                        
-
+                       
                         <td>
                             <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
                                 Copy Genome/Model
@@ -80,24 +302,19 @@
                                 Copying...
                             </span>
                         </td>                        
-                        
-                        
-                        
-                                                
-                        <!-- Debug: Original Path -->
+    
                         <td>
                             {{item.path}}
                             </td>
-                                                
-                        
+                                                            
                     </tr>
                 </tbody>
 
             </table>
-            </div> <!-- flex -->
+            </div>
+            -->
 
-
-
+            <!--
             <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
                 <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
                     <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
@@ -116,8 +333,8 @@
                                     <a href="{{link.url}}" target="_blank">{{link.name}}</a>
                                     {{$index != p.meta.links.length-1 ? '|' : ''}}
                                 </div>
-                            </div> <!-- end div ng-if p meta links -->
-                        </div> <!-- end div flex --> 
+                            </div>
+                        </div>
                         
                         <div layout-align="end">
                             <a ui-sref="app.modelPage({path: p.path.split('/').slice(0,-2).join('/') })" class="pull-right">
@@ -131,9 +348,7 @@
                                 Copying...
                             </span>
                             
-                            <!--<md-button class="md-raised md-primary" md-no-ink>
-                             <i class="icon-quill"></i> Annotate
-                             </md-button>-->
-                        </div> <!-- end div layout copy... links -->
-            </div> <!-- end ng-repeat p in plants -->
+                        </div>
+            </div>
+            -->
 </div> <!-- end outer most div -->

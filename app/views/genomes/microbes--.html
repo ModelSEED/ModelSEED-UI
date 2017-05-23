@@ -1,24 +1,11 @@
 
             <div class="table-controls" layout="row">
-                <!--
-                 <md-input-container class="table-settings">
-                 <button ng-click="showMenu()" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                 <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
-                 </button>
-                 <ul class="dropdown-menu dropdown-menu-visible table-settings">
-                 <li ng-repeat="item in columns">
-                 <div ng-click="toggle(item.prop, opts.visible)">
-                 <i class="fa {{exists(item.prop, opts.visible) ? 'fa-check-square-o' : 'fa-square-o'}}"></i>{{item.label}}
-                 </div>
-                 </li>
-                 </ul>
-                 </md-input-container>
-                 -->
                 
                 <md-input-container md-no-float flex="45"
                     search="opts.query" search-opts="opts" search-placeholder="Search public genomes">
                 </md-input-container>
                 
+                <!--
                 <md-button layout-align="start center"
                     ng-if="selectedPublic.genome_id"
                     ng-click="reconstruct($event, selectedPublic)"
@@ -40,8 +27,131 @@
                     layout="row"
                     layout-align="end center" flex>
                 </md-input-container>
+                -->
             </div>
-            
+
+
+
+<div ng-if="myMicrobes.length">
+    <!-- && view == 'Microbes'"> -->
+    
+    <div class="table-controls" layout="row">
+        <md-input-container md-no-float flex="45">
+            <md-icon class="material-icons">search</md-icon>
+            <input ng-model="opts.query" type="text" placeholder="Search models">
+        </md-input-container>
+
+        <md-input-container pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
+        </md-input-container>
+    </div>
+
+    <div ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+         ng-click="showRelatedData(item)"
+         class="row-hover my-model">
+
+        <model-item ng-if="!item.status" layout="row">
+            <div class="expand-container vertical-center">
+                <i ng-if="!item.relatedFBAs && !item.loading"
+                   class="fa fa-caret-right"
+                   style="opacity: 0.5;"></i>
+                <i ng-if="item.relatedFBAs && !item.loading"
+                   class="fa fa-caret-down"
+                   style="opacity: 1.0;"></i>
+                <span ng-if="item.loading">...</span>
+            </div>
+
+            <div flex="35" class="vertical-center">
+                <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+                    <md-tooltip md-delay="800">View Model</md-tooltip>
+                    {{item.name}}
+                </a><br>
+                {{item.orgName}}
+            </div>
+
+            <div flex="30" class="vertical-center" layout="row" layout-align="start">
+                <md-button md-no-ink ng-click="runFBA($event, item)">
+                    <i class="fa fa-code-fork"></i>
+                    Run FBA
+                    <!--(<span class="label-fba-count"><md-tooltip>Number of FBAs</md-tooltip>{{item.fbaCount}}</span>)-->
+                </md-button>
+                <md-button md-no-ink ng-click="gapfill($event, item)">
+                    <i class="fa fa-circle"></i>
+                    Gapfill
+                    <!--(<span class="label-gapfill-count"><md-tooltip>Number of Gapfill solutions</md-tooltip>{{item.gapfillCount}}</span>)-->
+                </md-button>
+            </div>
+
+            <div flex="15" class="vertical-center" layout="column" hide-sm>
+                <div><small>{{item.rxnCount}} Reactions</small></div>
+                <div><small>{{item.cpdCount}} Compounds</small></div>
+            </div>
+
+            <div flex class="timestamp vertical-center">
+                <small>{{relativeTime(item.timestamp)}}</small>
+            </div>
+
+            <div flex layout="column" layout-align="end end">
+                <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
+                    <md-tooltip md-direction="left" ng-if="!selected">Delete model</md-tooltip>
+                    <i class="icon-highlight-remove"></i>
+                </md-button>
+                <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+                    <md-tooltip md-direction="left" ng-if="!selected">View download options</md-tooltip>
+                    <i class="icon-file-download"></i>
+                </md-button>
+            </div>
+        </model-item>
+
+
+        <status-item ng-if="item.status" layout="row">
+            <div>
+                Model {{item.name}} ({{item.orgName}}) is reconstructing...
+            </div>
+
+            <div flex class="timestamp vertical-center">
+                <small>{{relativeTime(item.timestamp)}}</small>
+            </div>
+        </status-item>
+    </div>
+
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
+            <md-tab>
+                <md-tab-label>
+                    FBA Simulations
+                    (<span class="label-fba-count">{{item.relatedFBAs.length}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-fbas.html'">
+                </md-tab-body>
+            </md-tab>
+
+            <md-tab>
+                <md-tab-label>
+                    Gapfills
+                    (<span class="label-gapfill-count">{{item.relatedGapfills.length}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-gapfills.html'">
+                </md-tab-body>
+            </md-tab>
+        </md-tabs>
+    </div>
+
+    <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
+</div> <!-- end microbes view -->
+
+
+
+
+            <!__            
             <table class="table" ng-if="genomes.docs.length">
                 <thead>
                     <tr>
@@ -71,4 +181,4 @@
                     </tr>
                 </tbody>
             </table>
-            
+            -->

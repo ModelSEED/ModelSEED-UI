@@ -1327,6 +1327,282 @@ function($s, $sParams, WS, MS, Auth,
 
 }])
 
+
+
+
+.controller('RefModels',
+['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
+function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
+MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
+	
+    var $self = $scope;
+
+    $scope.MS = MS;
+    $scope.uiTools = uiTools;
+    $scope.relativeTime = uiTools.relativeTime;
+
+    $scope.relTime = function(datetime) {
+        return $scope.relativeTime(Date.parse(datetime));
+    }
+
+    // microbes / plants view
+    $scope.view = ViewOptions.get('organismType');
+
+    $scope.changeView = function(view) {
+        $scope.view = ViewOptions.set('organismType', view);
+    }
+
+    // table options
+    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
+    $scope.plantOpts = {query: '', limit: 10, offset: 0, sort: {}};
+
+    // the selected item for operations such as download, delete.
+    $scope.selected = null;
+    
+    $scope.copyInProgress = {};
+
+    // load models
+    // TODO: Fetch real reference model data instead of these placeholdrs:
+    if (MS.myModels) {
+        $scope.myMicrobes = MS.myModels;
+    } else {
+        $scope.loadingMicrobes = true;
+        MS.listModels().then(function(res) {
+            $scope.myMicrobes = res;
+            $scope.loadingMicrobes = false;
+        }).catch(function(e) {
+            $scope.myMicrobes = [];
+            $scope.loadingMicrobes = false;
+        })
+    }
+
+    // public plant models
+    // TODO: Plant Image broke because model missing meta data ??? ->
+
+    $scope.loadingPlants = true;
+    MS.listModels( '/plantseed' + '/plantseed' ).
+        then(function(res) {
+        console.log('path res', res)
+                   
+        $scope.plants = res;
+        $scope.loadingPlants = false;
+    }).catch(function(e) {
+        $scope.plants = [];
+        $scope.loadingPlants = false;
+    })
+    
+    
+    
+    /*
+    if (MS.myPlants) {
+        $scope.myPlants = MS.myPlants;
+    } else {
+        $scope.loadingPlants = true;
+        MS.listModels('/'+Auth.user+'/plantseed').
+            // join(MS.listModels('/'+Auth.user+'/modelseed')).
+            then(function(res) {
+            console.log('path res', res)
+            // TODO: Replace next line with itself array-concatinated with result of a similar call w/ last parm: '/modelseed'
+            //  Below did not work:
+            //    $scope.myPlants = res.join(MS.listModels().toString());            
+            $scope.myPlants = res;
+            $scope.loadingPlants = false;
+        }).catch(function(e) {
+            $scope.myPlants = [];
+            $scope.loadingPlants = false;
+        })
+    }
+    */
+
+    $scope.showRelatedData = function(item) {
+        item.loading = true;
+        var gapfillProm = showGapfills(item);
+        var expressionProm = showExpression(item);
+
+        var fbaProm;
+        if (item.relatedFBAs) 
+            delete item.relatedFBAs;
+        else 
+            fbaProm = updateFBAs(item)
+
+        $q.all([fbaProm, gapfillProm, expressionProm])
+            .then(function() {
+                console.log('done')
+                item.loading = false
+            } )
+    }
+
+    function updateFBAs(item) {
+        return MS.getModelFBAs(item.path)
+            .then(function(fbas) {
+                item.relatedFBAs = fbas;
+            })
+    }
+
+    function showGapfills(item) {
+        if (item.relatedGapfills) {
+            delete item.relatedGapfills;
+        } else {
+            return updateGapfills(item);
+        }
+    }    
+
+    function updateGapfills(item) {
+        return MS.getModelGapfills(item.path)
+            .then(function(gfs) {
+                item.relatedGapfills = gfs;
+            })
+    }
+
+    function showExpression(item) {
+        return updateExpression(item);      
+    }
+
+    function updateExpression(item) {
+        return WS.getObjectMeta(item.path)
+            .then(function(res) {
+                var expList = [],
+                    dict = res[0][7].expression_data;
+                
+                for (key in dict) 
+                    expList.push({name: key, ids: dict[key]});
+                
+                item.expression = expList;
+            })        
+    }
+
+
+    $scope.runFBA = function(ev, item) {
+        Dialogs.runFBA(ev, item, function() {
+            updateFBAs(item).then(function() {
+                item.fbaCount++;
+            })
+        })
+    }
+
+    
+    $scope.runPlantFBA = function(ev, item) {
+        Dialogs.runPlantFBA(ev, item, function() {
+            updateFBAs(item).then(function() {
+                item.fbaCount++;
+            })
+        })
+    }
+
+    $scope.gapfill = function(ev, item) {
+        Dialogs.gapfill(ev, item, function() {
+            updateGapfills(item).then(function() {
+                item.gapfillCount++;
+            })
+        })
+    }
+
+    $scope.addFBA = function(e, fba, model) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var data = {model: model.path,
+                    fba: fba.path,
+                    org: model.orgName,
+                    media: fba.media};
+
+
+        if (fba.checked) {
+            MV.rm(data, true);
+            fba.checked = false;
+        } else {
+            MV.add(data);
+            fba.checked = true;
+        }
+    }
+
+    
+    $scope.copy = function(i, path) {
+        $scope.copyInProgress[i] = true;
+        
+        
+        // TODO: Fix this path:
+        // But it might be ok as is (is copy destination path)
+        var name =  path.split('/').pop(),   
+            destPath = '/'+Auth.user+'/plantseed/'+name;    
+
+        Dialogs.showToast('Copying...', name, 2000);            
+        copyModel(name, path, i)
+
+        // old way
+        //copyFolder(name, path, destPath)
+        //    .then(function() {
+        //        $scope.copyInProgress[i] = false;
+        //    })               
+    }
+
+    function copyModel(name, path, i) {
+        var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
+                $scope.copyInProgress[i] = false;                 
+            }).catch(function(e) {
+                $http.rpc('ms', 'copy_model', {
+                    source_model_path: path,
+                    plantseed: 1
+                }).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name);
+                    
+                    // go ahead and reload genomes and models
+                    loadPrivatePlants();     
+                    MS.listModels('/'+Auth.user+'/plantseed')                         
+
+                    $scope.copyInProgress[i] = false;
+                }).catch(function(e) {
+                    Dialogs.showError('Copy '+name+ ' failed.')    
+                    $scope.copyInProgress[i] = false;
+                })                
+            })
+
+        return prom;
+
+    }
+
+    function copyFolder(name, path, destPath) {                       
+        var args = {
+            src: path,
+            dest: destPath,
+            recursive: true,
+        }
+
+        // first create modelfolder, then copy
+        var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                return WS.copy(args).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name, path);
+
+                    // remove odd empty object
+                    delete res[path];
+
+                    // update cache
+                    if (MS.myPlants) MS.addModel(res, 'plant');
+                }).catch(function(e) {
+                    // hack: if error is thrown, assume 
+                    // it's because folder already exists.
+                    Dialogs.saveAs('', function(newName) {
+                        var destPath = '/'+Auth.user+'/plantseed/'+newName;  
+                        copyFolder(newName, path, destPath) 
+                    }, function() {
+                        Dialogs.showToast('Copy Canceled', null, 100);      
+                    }, name + ' already exists.  Please choose a new name.')
+                })
+            }).catch(function(e) {
+                Dialogs.showError('Copy '+name+ ' failed.')           
+            })    
+        
+        return prom;
+    }    
+
+    
+} ] )    
+    
+    
 .controller('MyModels',
 ['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
