@@ -27,30 +27,70 @@
                     layout="row"
                     layout-align="end center" flex>
                 </md-input-container>
-                -->
-            </div>
+                -->                
+                                                            
+            </div> <!-- div class table-controls -->
+            
+            
+            
+    <!-- HEADER -->
+    <div layout="row">
+        <div class="expand-container vertical-center">
+        </div>
+
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Model ID</b>
+        </div>
+
+
+        <!-- TODO: Species Name -->
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Species Name</b>
+        </div>
+        <!-- todo: Species Name -->
+
+
+        <!-- TODO: Species Domain -->
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Species Domain</b>
+        </div>
+        <!-- todo: Species Domain -->
 
 
 
-<div ng-if="myMicrobes.length">
-    <!-- && view == 'Microbes'"> -->
-    
-    <div class="table-controls" layout="row">
-        <md-input-container md-no-float flex="45">
-            <md-icon class="material-icons">search</md-icon>
-            <input ng-model="opts.query" type="text" placeholder="Search models">
-        </md-input-container>
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Reactions</b></div>
+        </div>
 
-        <md-input-container pagination
-            pagination-offset="opts.offset"
-            pagination-limit="opts.limit"
-            pagination-total="filtered.length"
-            layout="row"
-            layout-align="end center" flex>
-        </md-input-container>
+        <!-- TODO: Genes -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Genes</b></div>
+        </div>
+        <!-- todo: Genes -->
+
+        <!-- TODO: FBA -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>FBA</b></div>
+        </div>
+        <!-- todo: FBA -->
+        
+        <!-- TODO: GAPFILLCOUNT -->
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Gapfilling</b></div>
+        </div>
+        <!-- todo: GAPFILLCOUNT -->        
+
+        <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
+            <div><b>Modification Date</b></div>
+        </div>
+
+        <div flex="15" layout="row" layout-align="center center">
+            <div><b>Commands</b></div>
+        </div>
     </div>
 
-    <div ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+
+    <div ng-repeat-start="item in (filtered = ( microbes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 

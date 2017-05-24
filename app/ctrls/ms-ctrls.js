@@ -1337,7 +1337,12 @@ function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 	
     var $self = $scope;
+    
+    // refreshData();
 
+    $scope.microbes = [];
+    $scope.plants = [];
+    
     $scope.MS = MS;
     $scope.uiTools = uiTools;
     $scope.relativeTime = uiTools.relativeTime;
@@ -1363,19 +1368,17 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     $scope.copyInProgress = {};
 
     // load models
-    // TODO: Fetch real reference model data instead of these placeholdrs:
-    if (MS.myModels) {
-        $scope.myMicrobes = MS.myModels;
-    } else {
         $scope.loadingMicrobes = true;
-        MS.listModels().then(function(res) {
-            $scope.myMicrobes = res;
+        MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
+            console.log('path res', res)
+
+            $scope.microbes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
-            $scope.myMicrobes = [];
+            $scope.microbes = [];
             $scope.loadingMicrobes = false;
         })
-    }
+
 
     // public plant models
     // TODO: Plant Image broke because model missing meta data ??? ->
@@ -1609,6 +1612,9 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     var $self = $scope;
+
+    $scope.myPlants = [];
+    $scope.myMicrobes = [];
 
     $scope.MS = MS;
     $scope.uiTools = uiTools;
