@@ -1,11 +1,13 @@
-
+<div>
             <div class="table-controls" layout="row">
-                
+            
+                <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+            
                 <md-input-container md-no-float flex="45"
                     search="opts.query" search-opts="opts" search-placeholder="Search public genomes">
                 </md-input-container>
-                
-                <!--
+
+                <!-- 
                 <md-button layout-align="start center"
                     ng-if="selectedPublic.genome_id"
                     ng-click="reconstruct($event, selectedPublic)"
@@ -13,13 +15,9 @@
                     <i class="icon-tools fa-plus"></i>
                     Reconstruct
                 </md-button>
+                -->
                 
-                <md-progress-circular ng-if="loading"
-                    class="table-loading"
-                    md-mode="indeterminate"
-                    md-diameter="20">
-                </md-progress-circular>
-                
+                <!--
                 <md-input-container pagination
                     pagination-offset="opts.offset"
                     pagination-limit="opts.limit"
@@ -164,7 +162,7 @@
             <md-tab>
                 <md-tab-label>
                     FBA Simulations
-                    (<span class="label-fba-count">{{item.relatedFBAs.length}}</span>)
+                    (<span class="label-fba-count">{{item.fbaCount}}</span>)
                 </md-tab-label>
 
                 <md-tab-body>
@@ -175,50 +173,127 @@
             <md-tab>
                 <md-tab-label>
                     Gapfills
-                    (<span class="label-gapfill-count">{{item.relatedGapfills.length}}</span>)
+                    (<span class="label-gapfill-count">{{item.gapfillCount}}</span>)
                 </md-tab-label>
 
                 <md-tab-body>
                     <ng-include src="'app/views/lists/expanded-gapfills.html'">
                 </md-tab-body>
             </md-tab>
+
+            <md-tab>
+                <md-tab-label>
+                    Expression Data
+                    (<span class="color-bright-purple">{{item.expression.length}}</span>)
+                </md-tab-label>
+
+                <md-tab-body>
+                    <ng-include src="'app/views/lists/expanded-expression.html'">
+                </md-tab-body>
+            </md-tab>        
+                
         </md-tabs>
+
     </div>
-
+    
+    <br>
     <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
-</div> <!-- end microbes view -->
+</div>
 
-
-
-
-            <!__            
+            
+            
+            <!--
+            <div flex>
             <table class="table" ng-if="genomes.docs.length">
+            
                 <thead>
                     <tr>
                         <th></th>
-                        <th sortable ng-repeat="h in opts.visible"
-                            ng-click="sortBy($event,h)">
-                            {{getLabel(h)}}
+                        <th>
+                            Name
                         </th>
+                        <th>
+                            Organism
+                        </th>
+                        <th>
+                            Copy
+                        </th>
+                       
+                        <th>
+                            Path
+                        </th>                                                 
                     </tr>
                 </thead>
-                
+
                 <tbody>
-                    <tr ng-repeat="g in genomes.docs"
-                        ng-click="selectPublic(g)"
-                        class="row-hover">
+                    <tr ng-repeat="item in plants track by $index">
                         
                         <td>
                             <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i>
                         </td>
-                        <td ng-repeat="col in opts.visible">
-                            <a ng-if="col == 'genome_name'"
-                                href="https://www.patricbrc.org/portal/portal/patric/Genome?cType=genome&cId={{g['genome_id']}}"
-                                target="_blank"
-                                ng-click="$event.stopPropagation()">{{g[col]}}</a>
-                            <span ng-if="col != 'genome_name'">{{g[col]}}</span>
-                        </td>
+                        
+                        <td>
+                            <a ui-sref="app.plantPage({path: item.path.split('/').slice(0,-2).join('/'), image: item.meta.image })">
+                                {{item.meta.name}}
+                            </a>
+                        
+                        <td><i>{{item.meta.organism}}</i></td>
+                       
+                        <td>
+                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
+                                Copy Genome/Model
+                            </a>
+                            <span ng-if="copyInProgress[$index]">
+                                Copying...
+                            </span>
+                        </td>                        
+    
+                        <td>
+                            {{item.path}}
+                            </td>
+                                                            
                     </tr>
                 </tbody>
+
             </table>
+            </div>
             -->
+
+            <!--
+            <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
+                <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
+                    <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
+                        
+                        <div flex>
+                            <a ui-sref="app.genomePage({path: p.path})">
+                                <md-tooltip md-direction="right">View Genome</md-tooltip>
+                                {{p.meta.name}}
+                            </a>
+                            <br>
+                            
+                            <i>{{p.meta.organism}}</i><br>
+                            <div ng-if="p.meta.links" class="links" hide-sm>
+                                Links:
+                                <div ng-repeat="link in p.meta.links track by $index" class="inline">
+                                    <a href="{{link.url}}" target="_blank">{{link.name}}</a>
+                                    {{$index != p.meta.links.length-1 ? '|' : ''}}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div layout-align="end">
+                            <a ui-sref="app.modelPage({path: p.path.split('/').slice(0,-2).join('/') })" class="pull-right">
+                                View Model
+                            </a>
+                            <br><br><br><br>
+                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, p.path.split('/').slice(0,-2).join('/'))">
+                                Copy Genome/Model
+                            </a>
+                            <span ng-if="copyInProgress[$index]">
+                                Copying...
+                            </span>
+                            
+                        </div>
+            </div>
+            -->
+</div> <!-- end outer most div -->

@@ -1396,27 +1396,23 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     })
     
     
-    
-    /*
-    if (MS.myPlants) {
-        $scope.myPlants = MS.myPlants;
-    } else {
-        $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed').
-            // join(MS.listModels('/'+Auth.user+'/modelseed')).
-            then(function(res) {
-            console.log('path res', res)
-            // TODO: Replace next line with itself array-concatinated with result of a similar call w/ last parm: '/modelseed'
-            //  Below did not work:
-            //    $scope.myPlants = res.join(MS.listModels().toString());            
-            $scope.myPlants = res;
-            $scope.loadingPlants = false;
-        }).catch(function(e) {
-            $scope.myPlants = [];
-            $scope.loadingPlants = false;
-        })
+
+    // TODO:
+    $scope.getMeta = function ( path ) {
+    	
+    	WS.getObjectMeta ( path ).
+    	    then( function( res ) {
+    	    	console.log( 'meta for path', path, ': ', res );
+    	    	$scope.meta = res;
+    	    } ).catch( function( e ){
+    	    	$scope.meta = [];
+    	    	
+    	    } )
     }
-    */
+    
+    
+    
+
 
     $scope.showRelatedData = function(item) {
         item.loading = true;
@@ -1611,6 +1607,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
 function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
+	
     var $self = $scope;
 
     $scope.myPlants = [];

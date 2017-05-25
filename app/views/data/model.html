@@ -1,3 +1,5 @@
+
+<!--
 <h4>
     <i class="icon-folder-open-o"></i>
     <span>
@@ -5,24 +7,24 @@
         / {{name}}
     </span>
 </h4>
+-->
 
 <div layout="row">
     <div class="h2">Model <small>{{orgName}}</small></div>
 
-    <!--<md-input-container layout-align="end end" flex>
+    <!--
+    <md-input-container layout-align="end end" flex>
         <md-button ng-if="!canCopy && !editInProgress"
                    class="pull-right md-secondary"
                    ng-click="toggleEdit()">Edit
         </md-button>
-    </md-input-container>-->
+    </md-input-container>
+    -->
 </div>
+
 <hr class="no-margin">
 
-
-
 <div layout="column">
-
-<!-- <form ng-submit="submit()" ng-controller="TestServiceCall"> -->
 
     <div flex="30" class="vertical-center" layout="row" layout-align="start">
         <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RebuildModel</md-button>    
@@ -36,10 +38,12 @@
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
             </md-button>
-            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
+            <!--
+            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
                 <md-tooltip ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
             </md-button>
+            -->
         </div>        
     </div>    
 
