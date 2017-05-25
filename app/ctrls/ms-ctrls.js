@@ -1650,24 +1650,23 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 
     // private plant models
-    if (MS.myPlants) {
-        $scope.myPlants = MS.myPlants;
-    } else {
+    // if (MS.myPlants) {
+        // $scope.myPlants = MS.myPlants;
+    // } else {
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
-            // join(MS.listModels('/'+Auth.user+'/modelseed')).
+
             then(function(res) {
-            console.log('path res', res)
-            // TODO: Replace next line with itself array-concatinated with result of a similar call w/ last parm: '/modelseed'
-            //  Below did not work:
-            //    $scope.myPlants = res.join(MS.listModels().toString());            
-            $scope.myPlants = res;
-            $scope.loadingPlants = false;
+                console.log('path res', res)
+            
+                $scope.myPlants = res;
+            
+                $scope.loadingPlants = false;
         }).catch(function(e) {
-            $scope.myPlants = [];
-            $scope.loadingPlants = false;
+                $scope.myPlants = [];
+                $scope.loadingPlants = false;
         })
-    }
+    // }
 
 
     $scope.showRelatedData = function(item) {
