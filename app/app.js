@@ -253,17 +253,22 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 
-        }).state('app.plantPage', {
-            url: "/plant{path:nonURIEncoded}/:{image:nonURIEncoded}",
-            // url: "/plant{path:nonURIEncoded}?image",
+        //     <!-- TODO Build New Model -->
+     
+        } ).state('app.plantPage', {
+        
+            url: "/plant{path:nonURIEncoded}",
+
             templateUrl: 'app/views/data/plant.html',
-            controller: 'PlantDataView',
+            
+            controller: 'BuildPlant',
+            
             authenticate: true
 
 
 
 
-        }).state('app.featurePage', {
+        } ).state('app.featurePage', {
             url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',
             controller: 'FeatureDataView',

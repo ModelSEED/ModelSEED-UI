@@ -17,8 +17,8 @@
 
 <div flex="30" class="vertical-center" layout="row" layout-align="start">
 
-    <!-- TODO -->
-    <button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">Build New Model</button>
+    <!-- TODO Build New Model -->
+    <button class="md-primary md-raised md-button" ui-sref="app.plantPage" ng-click="changeView('Plants', '0')">Build New Model</button>
     <!-- todo -->
 </div>
 
@@ -26,17 +26,10 @@
     <div class="content-header" flex>My Models<br>
         <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
     </div>
-
-    <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
-        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
-        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>
 </div>
 
 <hr class="no-margin">
 
-
-<!-- <div ng-if="view == 'Plants'"> -->
 <div>
     <!-- CONTROLS -->
     <div class="table-controls" layout="row">
@@ -63,43 +56,29 @@
             <b>Model ID</b>
         </div>
 
-
-        <!-- TODO: Species Name -->
         <div flex="10" layout="row" layout-align="start center">
             <b>Species Name</b>
         </div>
-        <!-- todo: Species Name -->
 
-
-        <!-- TODO: Species Domain -->
         <div flex="10" layout="row" layout-align="start center">
             <b>Species Domain</b>
         </div>
-        <!-- todo: Species Domain -->
-
-
 
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>Reactions</b></div>
         </div>
 
-        <!-- TODO: Genes -->
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>Genes</b></div>
         </div>
-        <!-- todo: Genes -->
 
-        <!-- TODO: FBA -->
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>FBA</b></div>
         </div>
-        <!-- todo: FBA -->
         
-        <!-- TODO: GAPFILLCOUNT -->
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>Gapfilling</b></div>
-        </div>
-        <!-- todo: GAPFILLCOUNT -->        
+        </div>        
 
         <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
             <div><b>Modification Date</b></div>

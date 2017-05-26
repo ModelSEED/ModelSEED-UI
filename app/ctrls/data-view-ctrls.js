@@ -136,17 +136,22 @@ function($scope, $sParams, WS, $http) {
 
 
 
-
-.controller('PlantDataView',
+<!-- TODO Build New Model -->
+.controller('BuildPlant',
 ['$scope', '$stateParams', 'WS', '$http',
 function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
     
-    $scope.image = $sParams.image;
+    $scope.submit = function() {
     
-    $scope.name = path.split('/').pop();
+        console.log( "TODO Build New Model for \n", $scope.name );
+    };
+    
+    // $scope.image = $sParams.image;
+    
+    // $scope.name = path.split('/').pop();
 
     } ] )
 

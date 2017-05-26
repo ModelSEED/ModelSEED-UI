@@ -1381,7 +1381,10 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
     // public plant models
+        
     // TODO: Plant Image broke because model missing meta data ??? ->
+    //    <!-- Add plant pic -- Started work: added "...$scope.getMeta = function ( path ) {... ", to the controller -->
+    // for:
 
     $scope.loadingPlants = true;
     MS.listModels( '/plantseed' + '/plantseed' ).
