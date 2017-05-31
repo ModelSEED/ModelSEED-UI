@@ -101,7 +101,7 @@
 
 <div class="container">
 
-<form ng-submit="submit()">
+<!-- <form ng-submit="submit()"> -->
     
   <span layout-align="start"><i>Select Genome to build a model for</i></span>
     
@@ -197,11 +197,11 @@
     </div>
        
     <div>
-        <button type="submit" class="md-primary md-raised md-button" >Build Model</button>
-        <!-- <button type="submit" class="md-primary md-raised md-button" ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">Build Model</button> -->
+        <button class="md-primary md-raised md-button" ng-click="copy( )" >Build Model</button>
+        <!-- <button type="submit" class="md-primary md-raised md-button" ng-if="!copyInProgress[$index]" ng-click="copy( )">Build Model</button> -->
     </div>
     
-</form>
+<!-- </form> -->
 
 </div>
 

@@ -215,7 +215,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
 
     
-    
+    // XXX: Never called:
     $scope.submit = function() {
     
         // TODO:  Make it selectable:
@@ -228,13 +228,18 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     
     $scope.copy = function(i, path, name) {
-        $scope.copyInProgress[i] = true;
-               
-        // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;    
+    
+        // $scope.copyInProgress[i] = true;               
+        // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;
+        // XXX: Hard coded:  Select the head of the list of myPlants (method parms ignored):        
+        // TODO:  Make it selectable:
+        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;    
+        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );        
+        // $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox ); 
 
         Dialogs.showToast('Copying...', name, 2000);            
          
-        copyModel(name, path, i);
+        copyModel( $scope.genomeNameBox, $scope.genomeNameBox.path, 0);
 
     };    
 
