@@ -1,18 +1,93 @@
 
+<head>
+  <title>ngDraggable</title>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/2.3.1/spruce/bootstrap.min.css">
+  <style>
+
+    *{
+        -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    }
+    [ng-drag]{
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    [ng-drag]{
+        width: 100px;
+        height: 100px;
+        background:rgba(149, 66, 224, 0.5);
+        color:white;
+        text-align: center;
+        padding-top:40px;
+        display: inline-block;
+        margin:0 10px;
+        cursor: move;
+    }
+    ul.draggable-objects:after{
+        display: block;
+        content:"";
+        clear:both;
+    }
+    .draggable-objects li{
+        float:left;
+        display: block;
+        width: 120px;
+        height:100px;
+    }
+    [ng-drag].drag-over{
+        border:solid 1px green;
+    }
+    [ng-drag].dragging{
+        opacity: 0.5;
+    }
+    [ng-drop]{
+        background: rgba(183, 167, 160, 0.23);
+        text-align: center;
+        width: 600px;
+        height: 200px;
+        padding-top:90px;
+        display: block;
+        margin:20px auto;
+        position: relative;
+    }
+    [ng-drop].drag-enter{
+        border:solid 5px red;
+    }
+    [ng-drop] span.title{
+        display: block;
+        position: absolute;
+        top:50%;
+        left:50%;
+        width: 200px;
+        height: 20px;
+        margin-left: -100px;
+        margin-top: -10px;
+    }
+    [ng-drop] div{
+        position: relative;
+        z-index: 2;
+    }
+
+  </style>
+</head>
+
+
+
+
+<body ng-app="ExampleApp">
+
 <h4>
     <i class="icon-folder-open-o"></i>
     <span>
         <a ui-sref="app.plantPage()">Build Model</a>
-        <!--
+        {{draggableObjects[0].name}}
         / {{name}}
-        -->
+        
     </span>
     
-    <hr class="no-margin">
-    
-    <span><i>Select Genomes to build a model for</i></span> 
-    
-    
+    <hr class="no-margin"> 
 </h4>
 
 <br class="no-margin">
@@ -24,19 +99,109 @@
 <!-- TODO Build New Model -->
 
 
+<div class="container">
+
+<form ng-submit="submit()">
+    
+  <span layout-align="start"><i>Select Genome to build a model for</i></span>
+    
+  <div layout="row">    
+
+    <div>
+        <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
+            <li  ng-repeat="obj in myPlants" >
+                <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
+            </li>
+        </ul>
+    </div>
+
+
+    <div layout="column">
+    
+    <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
+          <div>
+              <span class="title"></span>
+              <!-- <span class="title">Genomes</span> -->
+          </div>
+
+          <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
+              {{obj.name}}
+              
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+                            
+          </div>
+          <!--
+          <label class="control-label">GenomeName:</label>          
+          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
+          -->
+          
+          <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
+              <i class="fa fa-cloud-upload"></i>
+              Upload...
+          </md-button>          
+          
+          
+    </div>
+        
+    </div>
+    
+  </div>
+    
+</div>
+
+      
+<div>
+  <br class="no-margin"/>
+  <br class="no-margin"/>
+</div>     
+      
+   
+<div class="container" ng-controller="BuildPlant">
+    
+  <span layout-align="start"><i>Select Media for GapFilling</i></span>
+    
+  <div layout="row">    
+
+    <div>
+        <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
+            <li  ng-repeat="obj in myMedia" >
+                <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
+            </li>
+        </ul>
+    </div>
+
+
+    <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
+          <div>
+              <span class="title">Media</span>
+          </div>
+
+          <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
+              {{obj.name}}
+          </div>
+    </div>
+    
+  </div>
+    
+</div>
+
+
+
 <div>
 
-<form ng-submit="submit()" ng-controller="BuildPlant">
+  <span layout-align="start"><i>Select Template Model</i></span>
 
     <div>
         <input type="text" ng-model="name" required/>
     </div>
-    
-    
-    
-    
+       
     <div>
-        <button type="submit" >Build Model</button>
+        <button type="submit" class="md-primary md-raised md-button" ng-click="submit()">Build Model</button>
+        <!-- <button type="submit" class="md-primary md-raised md-button" ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">Build Model</button> -->
     </div>
     
 </form>
@@ -45,3 +210,6 @@
 
 
 <div ng-if="error" class="alert alert-danger">{{error}}</div>
+
+
+</body>

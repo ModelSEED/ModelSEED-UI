@@ -256,8 +256,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         //     <!-- TODO Build New Model -->
      
         } ).state('app.plantPage', {
-        
-            url: "/plant{path:nonURIEncoded}",
+            url: "/plant",       
+            // url: "/plant{path:nonURIEncoded}",
 
             templateUrl: 'app/views/data/plant.html',
             

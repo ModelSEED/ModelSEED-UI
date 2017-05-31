@@ -138,11 +138,83 @@ function($scope, $sParams, WS, $http) {
 
 <!-- TODO Build New Model -->
 .controller('BuildPlant',
-['$scope', '$stateParams', 'WS', '$http',
-function($scope, $sParams, WS, $http) {
+['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
+function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
+ Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
 
     // path and name of object
-    var path = $sParams.path;
+    // var path = $sParams.path;
+    
+    $scope.myPlants = [];
+    $scope.myMedia = [];
+    
+    // the selected item for the build operations
+    $scope.selected = null;
+    
+    $scope.copyInProgress = {};
+        
+    
+        $scope.loadingPlants = true;
+        MS.listModels('/'+Auth.user+'/plantseed').
+
+            then(function(res) {
+                console.log('path res', res)
+            
+                $scope.myPlants = res;
+            
+                $scope.loadingPlants = false;
+        }).catch(function(e) {
+                $scope.myPlants = [];
+                $scope.loadingPlants = false;
+        })
+        
+    $scope.loadingMyMedia = true;    
+    MS.listMyMedia()
+      .then(function(media) {
+          $scope.myMedia = media;
+          $scope.loadingMyMedia = false;
+      }).catch(function(e) {
+          $scope.loadingMyMedia = false;
+          $scope.myMedia = [];
+      })
+        
+            
+        $scope.centerAnchor = true;
+        $scope.toggleCenterAnchor = function () {$scope.centerAnchor = !$scope.centerAnchor}
+        // $scope.draggableObjects1 = [{name:'genome1'}, {name:'genome2'}, {name:'genome3'}];
+        // $scope.draggableObjects2 = [{name:'media1'}, {name:'media2'}, {name:'media3'}];
+        $scope.droppedObjects1 = [];
+        $scope.droppedObjects2= [];
+        $scope.onDropComplete1=function(data,evt){
+            var index = $scope.droppedObjects1.indexOf(data);
+            if (index == -1)
+            $scope.droppedObjects1.push(data);
+        }
+        $scope.onDragSuccess1=function(data,evt){
+            console.log("133","$scope","onDragSuccess1", "", evt);
+            var index = $scope.droppedObjects1.indexOf(data);
+            if (index > -1) {
+                $scope.droppedObjects1.splice(index, 1);
+            }
+        }
+        $scope.onDragSuccess2=function(data,evt){
+            var index = $scope.droppedObjects2.indexOf(data);
+            if (index > -1) {
+                $scope.droppedObjects2.splice(index, 1);
+            }
+        }
+        $scope.onDropComplete2=function(data,evt){
+            var index = $scope.droppedObjects2.indexOf(data);
+            if (index == -1) {
+                $scope.droppedObjects2.push(data);
+            }
+        }
+        var inArray = function(array, obj) {
+            var index = array.indexOf(obj);
+        }
+
+    
     
     $scope.submit = function() {
     
@@ -152,6 +224,186 @@ function($scope, $sParams, WS, $http) {
     // $scope.image = $sParams.image;
     
     // $scope.name = path.split('/').pop();
+    
+    
+    
+    $scope.copy = function(i, path) {
+        $scope.copyInProgress[i] = true;
+        
+        
+        // TODO: Fix this path:
+        var name = "";
+        // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;    
+
+        Dialogs.showToast('Copying...', name, 2000);            
+        
+        // TODO... 
+        // copyModel(name, path, i);
+
+    };    
+
+
+
+    function copyModel(name, path, i) {
+        var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
+                $scope.copyInProgress[i] = false;                 
+            }).catch(function(e) {
+                $http.rpc('ms', 'copy_model', {
+                    source_model_path: path,
+                    plantseed: 1
+                }).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name);
+                    
+                    // go ahead and reload genomes and models
+                    loadPrivatePlants();     
+                    MS.listModels('/'+Auth.user+'/plantseed')                         
+
+                    $scope.copyInProgress[i] = false;
+                }).catch(function(e) {
+                    Dialogs.showError('Copy '+name+ ' failed.')    
+                    $scope.copyInProgress[i] = false;
+                })                
+            })
+
+        return prom;
+
+    }
+
+    function copyFolder(name, path, destPath) {                       
+        var args = {
+            src: path,
+            dest: destPath,
+            recursive: true,
+        }
+
+        // first create modelfolder, then copy
+        var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                return WS.copy(args).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name, path);
+
+                    // remove odd empty object
+                    delete res[path];
+
+                    // update cache
+                    if (MS.myPlants) MS.addModel(res, 'plant');
+                }).catch(function(e) {
+                    // hack: if error is thrown, assume 
+                    // it's because folder already exists.
+                    Dialogs.saveAs('', function(newName) {
+                        var destPath = '/'+Auth.user+'/plantseed/'+newName;  
+                        copyFolder(newName, path, destPath) 
+                    }, function() {
+                        Dialogs.showToast('Copy Canceled', null, 100);      
+                    }, name + ' already exists.  Please choose a new name.')
+                })
+            }).catch(function(e) {
+                Dialogs.showError('Copy '+name+ ' failed.')           
+            })    
+        
+        return prom;
+    }    
+
+
+
+    function loadPrivatePlants() {
+        $scope.loadingMyPlants = true;        
+        WS.list('/'+Auth.user+'/plantseed/')
+            .then(function(res) {
+                // ignore anything that isn't a modelfolder
+                var plants = []
+                res.forEach(function(obj) {
+                    if (obj.type !== 'modelfolder') return;
+                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
+                    plants.push(obj);
+                })
+
+                $scope.myPlants = plants;
+                $scope.loadingMyPlants = false;
+            }).catch(function(e) {
+                if (e.error.code === -32603)
+                    $scope.error = 'Something seems to have went wrong. '+
+                                'Please try logging out and back in again.';
+                else
+                    $scope.error = e.error.message;
+                $scope.loadingMyPlants = false;
+            })
+    }
+
+
+
+    
+    $scope.openUploader = function(ev) {
+        $dialog.show({
+            targetEvent: ev,
+            scope: $scope.$new(),
+            preserveScope: true,
+            clickOutsideToClose: true,            
+            templateUrl: 'app/views/genomes/upload-fasta.html',
+            controller: ['$scope', function($scope) {
+                
+                var $this = $scope;
+                
+                // user inputed name and whatever
+                $this.form = {};
+                
+                $this.selectedFiles; // file objects
+
+                $scope.selectFile = function(files) {
+                    // no ng binding suppose for file inputs
+                    $scope.$apply(function() {
+                        $this.selectedFiles = files;
+                    })
+                }
+                
+                $scope.startUpload = function() {
+                    var name = $this.form.name;
+
+                    // Ensure no overwrites
+                    // Ideally, this would be handled by server responses.
+                    console.log('attempting')
+                    WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+                        .then(function() {
+                            alert('Genome name already exists!\n'+
+                            'Please provide a new name or delete the existing genome');                           
+                        }).catch(function(e) {
+                            startUpload(name);
+                        })
+                }
+
+                function startUpload(name) {
+                    $dialog.hide();
+                    Dialogs.showToast('Importing "'+name+'"', 
+                        'please be patient', 10000000)
+
+                    Upload.uploadFile($this.selectedFiles, null, function(node) {                        
+                        MS.createGenomeFromShock(node, name)
+                            .then(function(res) {
+                                console.log('done importing', res)
+                                Dialogs.showComplete('Import complete', name);
+                                loadPrivatePlants();
+                            }).catch(function(e) {
+                                Dialogs.showError('something has gone wrong')
+                                console.error(e.error.message)                                
+                            })
+                    }, function(error) {
+                        console.log('shock error:', error)
+                        Dialogs.showError('Upload to SHOCK failed (see console)')                        
+                    })                    
+                }     
+
+                $scope.cancel = function() {
+                    $dialog.hide();
+                }
+                
+            }]
+        })
+    }
+    
+
+
 
     } ] )
 
