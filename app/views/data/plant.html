@@ -134,10 +134,6 @@
               <br>
                             
           </div>
-          <!--
-          <label class="control-label">GenomeName:</label>          
-          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
-          -->
           
           <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
               <i class="fa fa-cloud-upload"></i>
@@ -146,6 +142,13 @@
           
           
     </div>
+    
+
+
+          <div>
+              <label class="control-label">GenomeName:</label>          
+              <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
+          </div>    
         
     </div>
     
@@ -189,11 +192,12 @@
   <span layout-align="start"><i>Select Template Model</i></span>
 
     <div>
-        <input type="text" ng-model="name" required/>
+        <input type="text" ng-model="name" />
+        <!-- <input type="text" ng-model="name" required/> -->
     </div>
        
     <div>
-        <button type="submit" class="md-primary md-raised md-button" ng-click="submit()">Build Model</button>
+        <button type="submit" class="md-primary md-raised md-button" >Build Model</button>
         <!-- <button type="submit" class="md-primary md-raised md-button" ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">Build Model</button> -->
     </div>
     

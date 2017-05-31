@@ -154,7 +154,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.copyInProgress = {};
         
-    
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
 
@@ -186,6 +185,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         // $scope.draggableObjects2 = [{name:'media1'}, {name:'media2'}, {name:'media3'}];
         $scope.droppedObjects1 = [];
         $scope.droppedObjects2= [];
+            
         $scope.onDropComplete1=function(data,evt){
             var index = $scope.droppedObjects1.indexOf(data);
             if (index == -1)
@@ -218,27 +218,23 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.submit = function() {
     
-        console.log( "TODO Build New Model for \n", $scope.name );
+        // TODO:  Make it selectable:
+        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;    
+        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );
+        
+        $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox.name ); 
     };
     
-    // $scope.image = $sParams.image;
-    
-    // $scope.name = path.split('/').pop();
     
     
-    
-    $scope.copy = function(i, path) {
+    $scope.copy = function(i, path, name) {
         $scope.copyInProgress[i] = true;
-        
-        
-        // TODO: Fix this path:
-        var name = "";
+               
         // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;    
 
         Dialogs.showToast('Copying...', name, 2000);            
-        
-        // TODO... 
-        // copyModel(name, path, i);
+         
+        copyModel(name, path, i);
 
     };    
 
@@ -247,6 +243,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     function copyModel(name, path, i) {
         var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
+                // Case: Already copied:
                 Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
                 $scope.copyInProgress[i] = false;                 
             }).catch(function(e) {
