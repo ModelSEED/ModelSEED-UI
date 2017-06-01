@@ -214,8 +214,47 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             var index = array.indexOf(obj);
         }
 
+
+
+    $scope.reconstruct = function(ev, item) {
     
-    // XXX: Never called:
+        // Temp:
+        // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parms ignored):        
+        // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
+        
+        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
+        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
+
+        Dialogs.showToast('Creating Model...', name, 2000);
+        
+        item = $scope.myPlants[ 0 ];
+        var name = $scope.genomeNameBox;
+        var path = $scope.myPlants[ 0 ].path;
+
+        
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+
+        Dialogs.reconstruct(ev, params,
+            function(jobId) {
+                MS.submittedModel({
+                    name: name,
+                    orgName: orgName,
+                    jobId: jobId
+                });
+            })
+    }
+
+
+    
+    // XXX: Below methods are Never called:
     $scope.submit = function() {
     
         // TODO:  Make it selectable:
@@ -223,28 +262,30 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         console.log( "TODO Build New Model for \n", $scope.genomeNameBox );
         
         $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox.name ); 
-    };
-    
-    
-    
+    };    
     $scope.copy = function(i, path, name) {
     
         // $scope.copyInProgress[i] = true;               
         // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;
         // XXX: Hard coded:  Select the head of the list of myPlants (method parms ignored):        
-        // TODO:  Make it selectable:
-        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;    
+        // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
+        
+        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
         console.log( "TODO Build New Model for \n", $scope.genomeNameBox );        
         // $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox ); 
 
-        Dialogs.showToast('Copying...', name, 2000);            
+        Dialogs.showToast('Copying...', name, 2000);
+        
+        var name = $scope.genomeNameBox;
+        var path = $scope.myPlants[ 0 ].path;
+        
+        var fakeDestination = '/'+Auth.user+'/plantseed/'+name + '/temp';           
          
-        copyModel( $scope.genomeNameBox, $scope.genomeNameBox.path, 0);
+        copyFolder( name, path, fakeDestination );        
+        // copyModel( name, $scope.genomeNameBox.path, 0);
 
     };    
-
-
-
     function copyModel(name, path, i) {
         var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
@@ -272,14 +313,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         return prom;
 
     }
-
     function copyFolder(name, path, destPath) {                       
         var args = {
             src: path,
             dest: destPath,
             recursive: true,
         }
-
         // first create modelfolder, then copy
         var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
@@ -303,13 +342,15 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 })
             }).catch(function(e) {
                 Dialogs.showError('Copy '+name+ ' failed.')           
-            })    
-        
+            })            
         return prom;
     }    
+    // End of Never called methods
+    
+    
+    
 
-
-
+    // Functionality for Uploading a FASTA file: 
     function loadPrivatePlants() {
         $scope.loadingMyPlants = true;        
         WS.list('/'+Auth.user+'/plantseed/')
@@ -333,9 +374,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.loadingMyPlants = false;
             })
     }
-
-
-
     
     $scope.openUploader = function(ev) {
         $dialog.show({
