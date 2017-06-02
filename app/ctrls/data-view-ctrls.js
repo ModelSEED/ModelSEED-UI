@@ -168,6 +168,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.loadingPlants = false;
         })
         
+        // $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+        
+        
     $scope.loadingMyMedia = true;    
     MS.listMyMedia()
       .then(function(media) {
@@ -221,15 +224,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         // Temp:
         // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parms ignored):        
         // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
-        
-        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            
-        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
+             
+        // console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
 
         Dialogs.showToast('Creating Model...', name, 2000);
         
         item = $scope.myPlants[ 0 ];
-        var name = $scope.genomeNameBox;
+        var name = $scope.myPlants[ 0 ].name;
         var path = $scope.myPlants[ 0 ].path;
 
         
@@ -351,8 +352,42 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
 
     // Functionality for Uploading a FASTA file: 
-    function loadPrivatePlants() {
-        $scope.loadingMyPlants = true;        
+    function loadPrivatePlants( res ) {
+        $scope.loadingMyPlants = true;
+
+
+
+        $scope.myPlants = [];
+        $scope.loadingPlants = true;
+        MS.listModels('/'+Auth.user+'/plantseed').
+
+            then(function(res) {
+                console.log('path res', res)
+            
+                $scope.myPlants = res;
+            
+                $scope.loadingPlants = false;
+        }).catch(function(e) {
+                $scope.myPlants = [];
+                $scope.loadingPlants = false;
+        })
+        
+        
+        /*        
+                res.forEach(function(obj) {
+                    if (obj.type !== 'modelfolder') return;
+                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
+                    plants.push(obj);
+                })
+                $scope.myPlants = plants;
+        */        
+                $scope.loadingMyPlants = false;
+
+
+
+        
+        
+        /*                
         WS.list('/'+Auth.user+'/plantseed/')
             .then(function(res) {
                 // ignore anything that isn't a modelfolder
@@ -373,6 +408,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     $scope.error = e.error.message;
                 $scope.loadingMyPlants = false;
             })
+            */
     }
     
     $scope.openUploader = function(ev) {
@@ -423,7 +459,14 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                             .then(function(res) {
                                 console.log('done importing', res)
                                 Dialogs.showComplete('Import complete', name);
-                                loadPrivatePlants();
+                                
+                                
+                                
+                                loadPrivatePlants( res );
+                                // loadPrivatePlants();
+                                
+                                
+                                
                             }).catch(function(e) {
                                 Dialogs.showError('something has gone wrong')
                                 console.error(e.error.message)                                
