@@ -167,10 +167,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.myPlants = [];
                 $scope.loadingPlants = false;
         })
-        
-        // $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-        
-        
+                
     $scope.loadingMyMedia = true;    
     MS.listMyMedia()
       .then(function(media) {
@@ -180,8 +177,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
           $scope.loadingMyMedia = false;
           $scope.myMedia = [];
       })
-        
-            
+                    
         $scope.centerAnchor = true;
         $scope.toggleCenterAnchor = function () {$scope.centerAnchor = !$scope.centerAnchor}
         // $scope.draggableObjects1 = [{name:'genome1'}, {name:'genome2'}, {name:'genome3'}];
@@ -354,9 +350,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // Functionality for Uploading a FASTA file: 
     function loadPrivatePlants( res ) {
         $scope.loadingMyPlants = true;
-
-
-
         $scope.myPlants = [];
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
@@ -371,8 +364,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.myPlants = [];
                 $scope.loadingPlants = false;
         })
-        
-        
+                
         /*        
                 res.forEach(function(obj) {
                     if (obj.type !== 'modelfolder') return;
@@ -382,10 +374,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 $scope.myPlants = plants;
         */        
                 $scope.loadingMyPlants = false;
-
-
-
-        
         
         /*                
         WS.list('/'+Auth.user+'/plantseed/')
@@ -436,6 +424,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 
                 $scope.startUpload = function() {
                     var name = $this.form.name;
+                    
+                    var taxonomy = $this.form.selectedTaxa;
 
                     // Ensure no overwrites
                     // Ideally, this would be handled by server responses.
