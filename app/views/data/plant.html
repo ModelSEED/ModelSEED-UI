@@ -191,10 +191,16 @@
 
   <span layout-align="start"><i>Select Template Model</i></span>
 
-    <div>
-        <input type="text" ng-model="name" />
-        <!-- <input type="text" ng-model="name" required/> -->
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
+      <select flex="30" ng-model="selectedTemplate">
+        <option value="auto">Automatically select</option>
+        <option value="grampos">Gram positive template</option>        
+        <option value="gramneg">Gram negative template</option>
+        <option value="core">Core template</option>        
+        <option value="plant">Plant template</option>                
+      </select>
     </div>
+
        
     <div>
         <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
