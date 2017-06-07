@@ -101,7 +101,18 @@
 
 <div class="container">
 
-<!-- <form ng-submit="submit()"> -->
+  <span layout-align="start"><i>Select Template Model</i></span>
+
+    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
+      <select flex="30" ng-model="selectedTemplate" ng-click="templateSelected( )">
+        <option value="auto">Automatically select</option>
+        <option value="grampos">Gram positive template</option>        
+        <option value="gramneg">Gram negative template</option>
+        <option value="core">Core template</option>        
+        <option value="plant">Plant template</option>                
+      </select>
+    </div>
+
     
   <span layout-align="start"><i>Select Genome to build a model for</i></span>
     
@@ -118,49 +129,41 @@
 
     <div layout="column">
     
-    <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
+      <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
           <div>
               <span class="title"></span>
-              <!-- <span class="title">Genomes</span> -->
           </div>
-
+          <!--
           <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
-              {{obj.name}}
-              
+              {{obj.name}}              
               <br>
               <br>
               <br>
               <br>
-              <br>
-                            
+              <br>                        
           </div>
-          
+          -->
           <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
               <i class="fa fa-cloud-upload"></i>
               Upload...
-          </md-button>          
-          
-          
-    </div>
-    
+          </md-button>                  
+      </div>
 
-
-          <div>
-              <label class="control-label">GenomeName:</label>          
-              <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
-          </div>    
+      <div>
+          <label class="control-label">GenomeName:</label>          
+          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
+      </div>    
         
     </div>
     
   </div>
-
-
       
-    <div>
-      <br class="no-margin"/>
-      <br class="no-margin"/>
-    </div>     
+  <div>
+    <br class="no-margin"/>
+    <br class="no-margin"/>
+  </div>     
       
+ 
     
   <span layout-align="start"><i>Select Media for GapFilling</i></span>
     
@@ -174,32 +177,83 @@
         </ul>
     </div>
 
+    <div layout="column">
 
     <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
           <div>
               <span class="title">Media</span>
           </div>
-
+          <!--
           <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
               {{obj.name}}
           </div>
+          -->
+    </div>
+
+
+
+      <div ng-controller="MediaDropdown as ctrl">
+            <div layout="row" layout-align="end end">
+                <md-progress-circular ng-if="!myMedia || !media"
+                                      md-mode="indeterminate"
+                                      md-diameter="10">
+                </md-progress-circular>
+                <a ng-click="filterPublic = !filterPublic">
+                    <span ng-if="filterPublic">Search my media
+                        <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
+                    </span>
+                    <span ng-if="!filterPublic">Search public media</span>
+                </a>
+            </div>
+
+            <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-if="filterPublic"
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="ctrl.selectedItemChange(item)"
+                  md-items="item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search for public media formulation (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+
+            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="ctrl.selectedItemChange(item)"
+                  md-items="item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search my media (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+    </div>
+
+
+    
     </div>
     
   </div>
     
-
-
-  <span layout-align="start"><i>Select Template Model</i></span>
-
-    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
-      <select flex="30" ng-model="selectedTemplate">
-        <option value="auto">Automatically select</option>
-        <option value="grampos">Gram positive template</option>        
-        <option value="gramneg">Gram negative template</option>
-        <option value="core">Core template</option>        
-        <option value="plant">Plant template</option>                
-      </select>
-    </div>
 
        
     <div>
@@ -207,7 +261,6 @@
         <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
     </div>
     
-<!-- </form> -->
 
 </div>
 

@@ -178,8 +178,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
           $scope.myMedia = [];
       })
                     
-        $scope.centerAnchor = true;
-        $scope.toggleCenterAnchor = function () {$scope.centerAnchor = !$scope.centerAnchor}
+        // $scope.centerAnchor = true;
+        // $scope.toggleCenterAnchor = function () {$scope.centerAnchor = !$scope.centerAnchor}
         // $scope.draggableObjects1 = [{name:'genome1'}, {name:'genome2'}, {name:'genome3'}];
         // $scope.draggableObjects2 = [{name:'media1'}, {name:'media2'}, {name:'media3'}];
         $scope.droppedObjects1 = [];
@@ -223,12 +223,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
              
         // console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
 
-        Dialogs.showToast('Creating Model...', name, 2000);
-        
-        item = $scope.myPlants[ 0 ];
-        var name = $scope.myPlants[ 0 ].name;
-        var path = $scope.myPlants[ 0 ].path;
-
+    	if( $scope.myPlants.length > 0 ) {
+    		item = $scope.myPlants[ 0 ];
+    		var name = $scope.myPlants[ 0 ].name;
+    		var path = $scope.myPlants[ 0 ].path;
+    		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            Dialogs.showToast('Creating Model...', name, 2000);
+    	}
         
         if ('genome_id' in item) {
             var name = item.genome_id,
@@ -238,7 +239,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             var name = item.name;
             var params = {path: item.path, name: name};
         }
-
+        /*
         Dialogs.reconstruct(ev, params,
             function(jobId) {
                 MS.submittedModel({
@@ -247,9 +248,49 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     jobId: jobId
                 });
             })
+            */
+        ev.stopPropagation();
+        
+        // $dialog.show({
+            // templateUrl: 'app/views/dialogs/reconstruct.html',
+            // targetEvent: ev,
+            // clickOutsideToClose: true,
+            // controller: ['$scope', '$http',
+            // function($scope, $http) {
+                // $scope.item = item;
+        
+                $scope.form = {genome: item.path};
+
+                // $scope.reconstruct = function(){
+                    // self.showToast('Reconstructing', item.name, 5000)
+                
+                    MS.reconstruct($scope.form)
+                      .then(function(r) {
+                           cb(r);
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                          // self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
+                      })
+
+                    // $dialog.hide();
+                // }
+
+                // $scope.cancel = function(){
+                    // $dialog.hide();
+                // }
+            // }]
+        // })
+        
     }
 
 
+    
+    $scope.templateSelected = function( ) {
+    	if( $scope.myPlants.length > 0 ) {
+            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
+    	}
+    }    
     
     // XXX: Below methods are Never called:
     $scope.submit = function() {
@@ -347,7 +388,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     
 
-    // Functionality for Uploading a FASTA file: 
+    // Deferred Functionality for Uploading a FASTA file: 
     function loadPrivatePlants( res ) {
         $scope.loadingMyPlants = true;
         $scope.myPlants = [];
@@ -358,7 +399,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 console.log('path res', res)
             
                 $scope.myPlants = res;
-            
+            	if( $scope.myPlants.length > 0 ) {
+                    $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+                    
+            	}
                 $scope.loadingPlants = false;
         }).catch(function(e) {
                 $scope.myPlants = [];
@@ -411,6 +455,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 var $this = $scope;
                 
                 // user inputed name and whatever
+                // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct) 
                 $this.form = {};
                 
                 $this.selectedFiles; // file objects
@@ -423,6 +468,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 }
                 
                 $scope.startUpload = function() {
+                    // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct) 
                     var name = $this.form.name;
                     
                     var taxonomy = $this.form.selectedTaxa;
