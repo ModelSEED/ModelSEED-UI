@@ -75,7 +75,6 @@
 
 
 
-
 <body ng-app="ExampleApp">
 
 <h4>
@@ -96,22 +95,28 @@
 <br class="no-margin">
 
 
-<!-- TODO Build New Model -->
-
-
 <div class="container">
 
-  <span layout-align="start"><i>Select Template Model</i></span>
+  <div layout="row">    
 
-    <div flex="30" class="vertical-center" layout="row" layout-align="start">    
-      <select flex="30" ng-model="selectedTemplate" ng-click="templateSelected( )">
-        <option value="auto">Automatically select</option>
-        <option value="grampos">Gram positive template</option>        
-        <option value="gramneg">Gram negative template</option>
-        <option value="core">Core template</option>        
-        <option value="plant">Plant template</option>                
-      </select>
-    </div>
+    <span layout-align="start"><i>Select Template Model</i></span>
+
+      <div flex="45" class="vertical-center" layout="row" layout-align="start">    
+        <select flex="45" ng-model="selectedTemplate" ng-click="templateSelected( )">
+          <option value="auto">Automatically select</option>
+          <option value="grampos">Gram positive template</option>        
+          <option value="gramneg">Gram negative template</option>
+          <option value="core">Core template</option>        
+          <option value="plant">Plant template</option>                
+        </select>
+      </div>
+      
+      <div>
+          <label class="control-label">GenomeName:</label>          
+          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
+      </div>          
+      
+  </div>
 
     
   <span layout-align="start"><i>Select Genome to build a model for</i></span>
@@ -126,7 +131,6 @@
         </ul>
     </div>
 
-
     <div layout="column">
     
       <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
@@ -135,24 +139,51 @@
           </div>
           <!--
           <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
-              {{obj.name}}              
-              <br>
-              <br>
-              <br>
-              <br>
-              <br>                        
+              {{obj.name}}                                     
           </div>
           -->
-          <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
-              <i class="fa fa-cloud-upload"></i>
-              Upload...
-          </md-button>                  
-      </div>
+          
+        <form id="upload-form" class="upload-form form-horizontal">
+            <div class="form-group">
+                <label class="control-label">Select fasta file:</label>
+                <label class="md-button md-primary md-raised">
+                    Choose File...
+                    <input
+                        name="upload"
+                        enctype="multipart/form-data"
+                        type="file"
+                        onchange="angular.element(this).scope().selectFile(this.files)"/>
+                </label>
+                {{selectedFiles[0].name}}
+            </div>
+        </form>
+        
 
-      <div>
-          <label class="control-label">GenomeName:</label>          
-          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
-      </div>    
+        <div flex="30" class="vertical-center" layout="row" layout-align="start">            
+		<md-input-container md-no-float >        
+		    <!-- <label class="control-label">Choose Service</label> -->
+		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
+		        <option>Plant</option>
+		        <option>Microbe</option>        
+		    </select>        
+		</md-input-container>
+        </div>
+    
+        <div flex="40" class="vertical-center" layout="row" layout-align="start">
+          <label flex class="control-label"><b>Required:</b></label>    
+          <md-input-container flex md-no-float>
+              <input flex ng-model="form.name" placeholder="Name Genome to upload">
+          </md-input-container>
+                    
+          <md-button class="md-primary md-raised"
+            ng-click="startUpload(  )"
+            ng-disabled="!(selectedFiles && form.name)">
+            Start Upload
+          </md-button>                 
+          
+        </div>    
+                 
+      </div>
         
     </div>
     
@@ -161,9 +192,7 @@
   <div>
     <br class="no-margin"/>
     <br class="no-margin"/>
-  </div>     
-      
- 
+  </div> 
     
   <span layout-align="start"><i>Select Media for GapFilling</i></span>
     
@@ -189,8 +218,6 @@
           </div>
           -->
     </div>
-
-
 
       <div ng-controller="MediaDropdown as ctrl">
             <div layout="row" layout-align="end end">
@@ -247,19 +274,15 @@
               </md-autocomplete>
             </form>
     </div>
-
-
     
     </div>
     
   </div>
-    
-
        
-    <div>
+  <div>
         <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
         <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
-    </div>
+  </div>
     
 
 </div>

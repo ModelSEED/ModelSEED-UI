@@ -149,6 +149,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.myPlants = [];
     $scope.myMedia = [];
     
+    $scope.selectedFiles = [];
+    
     // the selected item for the build operations
     $scope.selected = null;
     
@@ -217,8 +219,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     $scope.reconstruct = function(ev, item) {
     
-        // Temp:
-        // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parms ignored):        
+        // Temp:  method parm item is not wired (came from selectedPublic from Ref Genomes page)
+        // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parm 'item' is ignored):        
         // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
              
         // console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
@@ -292,102 +294,52 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     	}
     }    
     
-    // XXX: Below methods are Never called:
-    $scope.submit = function() {
     
-        // TODO:  Make it selectable:
-        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;    
-        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );
-        
-        $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox.name ); 
-    };    
-    $scope.copy = function(i, path, name) {
     
-        // $scope.copyInProgress[i] = true;               
-        // var name =  path.split('/').pop(), destPath = '/'+Auth.user+'/plantseed/'+name;
-        // XXX: Hard coded:  Select the head of the list of myPlants (method parms ignored):        
-        // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
-        
-        $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            
-        console.log( "TODO Build New Model for \n", $scope.genomeNameBox );        
-        // $scope.copy( 0, $scope.genomeNameBox.path, $scope.genomeNameBox ); 
-
-        Dialogs.showToast('Copying...', name, 2000);
-        
-        var name = $scope.genomeNameBox;
-        var path = $scope.myPlants[ 0 ].path;
-        
-        var fakeDestination = '/'+Auth.user+'/plantseed/'+name + '/temp';           
-         
-        copyFolder( name, path, fakeDestination );        
-        // copyModel( name, $scope.genomeNameBox.path, 0);
-
-    };    
-    function copyModel(name, path, i) {
-        var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
-            .then(function(res) {
-                // Case: Already copied:
-                Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
-                $scope.copyInProgress[i] = false;                 
-            }).catch(function(e) {
-                $http.rpc('ms', 'copy_model', {
-                    source_model_path: path,
-                    plantseed: 1
-                }).then(function(res) {
-                    Dialogs.showComplete('Copy complete', name);
-                    
-                    // go ahead and reload genomes and models
-                    loadPrivatePlants();     
-                    MS.listModels('/'+Auth.user+'/plantseed')                         
-
-                    $scope.copyInProgress[i] = false;
-                }).catch(function(e) {
-                    Dialogs.showError('Copy '+name+ ' failed.')    
-                    $scope.copyInProgress[i] = false;
-                })                
-            })
-
-        return prom;
-
-    }
-    function copyFolder(name, path, destPath) {                       
-        var args = {
-            src: path,
-            dest: destPath,
-            recursive: true,
+    $scope.startUpload = function() {
+    	var name = "";
+        if( $scope.form ) {
+           name = $scope.form.name;        	
         }
-        // first create modelfolder, then copy
-        var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
-            .then(function(res) {
-                return WS.copy(args).then(function(res) {
-                    Dialogs.showComplete('Copy complete', name, path);
+        if( name.length > 0 ) {
+        
+            var taxonomy = $scope.form.selectedTaxa;
 
-                    // remove odd empty object
-                    delete res[path];
-
-                    // update cache
-                    if (MS.myPlants) MS.addModel(res, 'plant');
-                }).catch(function(e) {
-                    // hack: if error is thrown, assume 
-                    // it's because folder already exists.
-                    Dialogs.saveAs('', function(newName) {
-                        var destPath = '/'+Auth.user+'/plantseed/'+newName;  
-                        copyFolder(newName, path, destPath) 
-                    }, function() {
-                        Dialogs.showToast('Copy Canceled', null, 100);      
-                    }, name + ' already exists.  Please choose a new name.')
-                })
+            // Ensure no overwrites
+            console.log('attempting upload')
+            WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+                .then(function() {
+                    alert('Genome name already exists!\n'+
+                    'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
-                Dialogs.showError('Copy '+name+ ' failed.')           
-            })            
-        return prom;
-    }    
-    // End of Never called methods
-    
-    
-    
+                startUpload(name);
+            })
+        }
+    }
 
+    function startUpload(name) {
+        // $dialog.hide();
+        // Dialogs.showToast('Importing "'+name+'"', 'please be patient', 10000000)
+
+        Upload.uploadFile($scope.selectedFiles, null, function(node) {                        
+            MS.createGenomeFromShock(node, name)
+                .then(function(res) {
+                    console.log('done importing', res)
+                    Dialogs.showComplete('Import complete', name);
+                                                    
+                    loadPrivatePlants( res );
+                    // loadPrivatePlants();
+                    
+                }).catch(function(e) {
+                    // Dialogs.showError('something has gone wrong')
+                    console.error(e.error.message)                                
+                })
+        }, function(error) {
+            console.log('shock error:', error)
+            // Dialogs.showError('Upload to SHOCK failed (see console)')                        
+        })                    
+    }     
+    
     // Deferred Functionality for Uploading a FASTA file: 
     function loadPrivatePlants( res ) {
         $scope.loadingMyPlants = true;
@@ -442,33 +394,43 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             })
             */
     }
-    
+        
+    $scope.selectFile = function(files) {
+
+        $scope.$apply(function() {
+            $scope.selectedFiles = files;
+        })
+    }
+    // Next function is deprecated:
     $scope.openUploader = function(ev) {
-        $dialog.show({
-            targetEvent: ev,
-            scope: $scope.$new(),
-            preserveScope: true,
-            clickOutsideToClose: true,            
-            templateUrl: 'app/views/genomes/upload-fasta.html',
-            controller: ['$scope', function($scope) {
+        // $dialog.show({
+            // targetEvent: ev,
+            // scope: $scope.$new(),
+            // preserveScope: true,
+            // clickOutsideToClose: true,            
+            // templateUrl: 'app/views/genomes/upload-fasta.html',
+            // controller: ['$scope', function($scope) {
                 
                 var $this = $scope;
                 
-                // user inputed name and whatever
-                // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct) 
+                // 'form' to contain user inputed name and selected file from this dialog, as per the markup
+                // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct)
+                // Appears we are resetting $scope.form in the next line
                 $this.form = {};
                 
-                $this.selectedFiles; // file objects
-
+                // $this.selectedFiles;
+                /*
                 $scope.selectFile = function(files) {
-                    // no ng binding suppose for file inputs
+
                     $scope.$apply(function() {
                         $this.selectedFiles = files;
                     })
                 }
+                */
                 
+                /*
                 $scope.startUpload = function() {
-                    // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct) 
+ 
                     var name = $this.form.name;
                     
                     var taxonomy = $this.form.selectedTaxa;
@@ -486,45 +448,37 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 }
 
                 function startUpload(name) {
-                    $dialog.hide();
-                    Dialogs.showToast('Importing "'+name+'"', 
-                        'please be patient', 10000000)
+                    // $dialog.hide();
+                    // Dialogs.showToast('Importing "'+name+'"', 'please be patient', 10000000)
 
                     Upload.uploadFile($this.selectedFiles, null, function(node) {                        
                         MS.createGenomeFromShock(node, name)
                             .then(function(res) {
                                 console.log('done importing', res)
                                 Dialogs.showComplete('Import complete', name);
-                                
-                                
-                                
+                                                                
                                 loadPrivatePlants( res );
                                 // loadPrivatePlants();
                                 
-                                
-                                
                             }).catch(function(e) {
-                                Dialogs.showError('something has gone wrong')
+                                // Dialogs.showError('something has gone wrong')
                                 console.error(e.error.message)                                
                             })
                     }, function(error) {
                         console.log('shock error:', error)
-                        Dialogs.showError('Upload to SHOCK failed (see console)')                        
+                        // Dialogs.showError('Upload to SHOCK failed (see console)')                        
                     })                    
                 }     
-
-                $scope.cancel = function() {
-                    $dialog.hide();
-                }
+                */
+                // $scope.cancel = function() {
+                    // $dialog.hide();
+                // }
                 
-            }]
-        })
+            // }]
+        // })
     }
     
-
-
-
-    } ] )
+} ] )
 
 
 
