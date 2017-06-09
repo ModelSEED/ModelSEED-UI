@@ -253,8 +253,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 
-        //     <!-- TODO Build New Model -->
-     
+        // Build New Model     
         } ).state('app.plantPage', {
             url: "/plant",       
             // url: "/plant{path:nonURIEncoded}",
@@ -267,7 +266,21 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 
+            //     <!-- TODO ReBuild New Model -->
+            
+               } ).state('app.replantPage', {
+                   url: "/replant",       
+                   // url: "/replant{path:nonURIEncoded}",
 
+                   templateUrl: 'app/views/data/replant.html',
+                   
+                   controller: 'ReBuildPlant',
+                   
+                   authenticate: true
+
+            
+            
+            
         } ).state('app.featurePage', {
             url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',

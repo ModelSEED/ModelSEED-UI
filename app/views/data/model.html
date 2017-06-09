@@ -29,7 +29,14 @@
 <div layout="column">
 
     <div flex="30" class="vertical-center" layout="row" layout-align="start">
-        <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">RebuildModel</md-button>    
+    
+    
+
+        <!-- TODO ui-sref to (new ) controller,  and ng-click need to invoke redirect to new BuildModel page as will be modified as re-entrant:  -->  
+        <md-button class="md-primary md-raised md-button" ui-sref="app.replantPage" >RebuildModel</md-button>
+        
+        
+            
         <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">ReAnnotateGenome</md-button>        
         <md-button class="md-primary md-raised md-button" ng-click="runPlantFBA($event, item)">RunFBA</md-button>        
         <md-button class="md-primary md-raised md-button" ng-click="gapfill($event)">RunGapFilling</md-button>       
