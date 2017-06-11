@@ -269,8 +269,8 @@ function($locationProvider, $stateProvider, $httpProvider,
             //     <!-- TODO ReBuild New Model -->
             
                } ).state('app.replantPage', {
-                   url: "/replant",       
-                   // url: "/replant{path:nonURIEncoded}",
+                   // url: "/replant",       
+                   url: "/replant{path:nonURIEncoded}",
 
                    templateUrl: 'app/views/data/replant.html',
                    

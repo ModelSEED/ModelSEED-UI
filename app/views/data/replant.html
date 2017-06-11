@@ -80,8 +80,7 @@
 <h4>
     <i class="icon-folder-open-o">...</i>
     <span>
-        <a ui-sref="app.plantPage()">ReBuild Model</a>
-        {{name}}        
+        ReBuild Model {{name}}        
     </span>
     
     <hr class="no-margin"> 
@@ -95,19 +94,7 @@
 
 <div class="container">
 
-  <div layout="row">    
-
-    <span layout-align="start"><i>Select Template Model</i></span>
-
-      <div flex="45" class="vertical-center" layout="row" layout-align="start">    
-        <select flex="45" ng-model="selectedTemplate" ng-click="templateSelected( )">
-          <option value="auto">Automatically select</option>
-          <option value="grampos">Gram positive template</option>        
-          <option value="gramneg">Gram negative template</option>
-          <option value="core">Core template</option>        
-          <option value="plant">Plant template</option>                
-        </select>
-      </div>
+  <div layout="row">
       
       <div>
           <label class="control-label">GenomeName:</label>          
@@ -116,8 +103,7 @@
       
   </div>
 
-    
-  <span layout-align="start"><i>Select Genome to build a model for or model to rebuild</i></span>
+  <!-- <span layout-align="start"><i>Select Genome to build a model for or model to rebuild</i></span>  -->
     
   <div layout="row">    
 

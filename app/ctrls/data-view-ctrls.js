@@ -446,13 +446,16 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 <!-- TODO: ReBuild New Model -->
 .controller('ReBuildPlant',
-['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
+['$scope', '$state', '$stateParams', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
-function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
+function($scope, $state, $sParams, Patric, $timeout, $http, Upload, $dialog,
  Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
-
-    // path and name of object
-    // var path = $sParams.path;
+	
+    var path = $sParams.path;
+    
+    $scope.name = path.split('/').pop()
+    
+    $scope.genomeNameBox = $scope.name;
     
     $scope.myPlants = [];
     $scope.myMedia = [];
@@ -460,24 +463,21 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selectedFiles = [];
     
     // the selected item for the build operations (not used yet)
-    $scope.selected = null;
+    // $scope.selected = null;
     
-    $scope.copyInProgress = {};
-        
+    // $scope.copyInProgress = {};
+    /*    
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
-
             then(function(res) {
                 console.log('path res', res)
-            
                 $scope.myPlants = res;
-            
                 $scope.loadingPlants = false;
         }).catch(function(e) {
                 $scope.myPlants = [];
                 $scope.loadingPlants = false;
         })
-                
+    */    
     $scope.loadingMyMedia = true;    
     MS.listMyMedia()
       .then(function(media) {
@@ -491,8 +491,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     var inArray = function(array, obj) {
             var index = array.indexOf(obj);
         }
-
-
 
     $scope.reconstruct = function(ev, item) {
     
@@ -975,8 +973,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
     // path and name of "modelfolder"
     var path = $sParams.path;
-    
-    // $scope.item = this.item;
     
     $scope.name = path.split('/').pop()
     
