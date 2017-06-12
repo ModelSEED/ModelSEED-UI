@@ -129,7 +129,8 @@
           
         <form id="upload-form" class="upload-form form-horizontal">
             <div class="form-group">
-                <label class="control-label">Select fasta file:</label>
+                <label class="control-label">Select file:</label>
+                <!-- <label class="control-label">Select fasta file:</label>  -->
                 <label class="md-button md-primary md-raised">
                     Choose File...
                     <input
@@ -154,9 +155,9 @@
         </div>
     
         <div flex="40" class="vertical-center" layout="row" layout-align="start">
-          <label flex class="control-label"><b>Required:</b></label>    
+          <!-- <label flex class="control-label"><b>Required:</b></label> -->   
           <md-input-container flex md-no-float>
-              <input flex ng-model="form.name" placeholder="Name Genome to upload">
+              <input flex ng-model="form.name" placeholder="Genome name:">
           </md-input-container>
                     
           <md-button class="md-primary md-raised"

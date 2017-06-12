@@ -641,7 +641,6 @@ function($scope, $state, $sParams, Patric, $timeout, $http, Upload, $dialog,
     }
     
     
-
     
 } ] )
 
@@ -986,17 +985,17 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         
         if (item.relatedFBAs) 
             delete item.relatedFBAs;
-        else
-         
+        else         
             fbaProm = updateFBAs();
             
-            refreshData();
-        
+            // refreshData();
+        /*
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
                 console.log('done')
                 item.loading = false
-            })
+            } );
+        */
             
     }
 
@@ -1012,6 +1011,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
+    	// TODO: Fix below service call (path)
         return WS.getObjectMeta(path)
             .then(function(res) {
                 var expList = [],
@@ -1023,6 +1023,17 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 $scope.expression = expList;
             })        
     }
+    
+    
+    
+
+    $scope.uploadExpression = function(ev, item) {
+        Dialogs.uploadExpression(ev, item, function() {
+            updateExpression(item);
+        })
+    }
+
+    
         
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
