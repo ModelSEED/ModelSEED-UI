@@ -275,6 +275,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             var taxonomy = $scope.form.selectedTaxa;
 
             // Ensure no overwrites
+            // TODO: Add function to ms.js such that makes the below checks and balances like MS.modelExists('/'+Auth.user+'/plantseed/'+name)
             console.log('attempting upload')
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
@@ -1011,7 +1012,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
-    	// TODO: Fix below service call (path)
+    	// TODO: Fix below service call
+        // TODO: Add function to ms.js such that returns the expressions for this path like MS.getExpressions(path)
         return WS.getObjectMeta(path)
             .then(function(res) {
                 var expList = [],

@@ -1639,18 +1639,19 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     $scope.selected = null;
 
     // load models
-    if (MS.myModels) {
-        $scope.myMicrobes = MS.myModels;
-    } else {
+    // if (MS.myModels) {
+        // $scope.myMicrobes = MS.myModels;
+    // } else {
         $scope.loadingMicrobes = true;
-        MS.listModels().then(function(res) {
+        MS.listModels('/'+Auth.user+'/modelseed').
+            then(function(res) {
             $scope.myMicrobes = res;
             $scope.loadingMicrobes = false;
         }).catch(function(e) {
             $scope.myMicrobes = [];
             $scope.loadingMicrobes = false;
         })
-    }
+    // }
 
     // private plant models
     // if (MS.myPlants) {
@@ -1658,12 +1659,9 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     // } else {
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
-
             then(function(res) {
                 console.log('path res', res)
-            
                 $scope.myPlants = res;
-            
                 $scope.loadingPlants = false;
         }).catch(function(e) {
                 $scope.myPlants = [];
