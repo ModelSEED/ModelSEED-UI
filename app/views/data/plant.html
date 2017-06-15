@@ -149,11 +149,13 @@
  
           
         <!-- Dropzone -->
+        <!--
           <form action="/file-upload" class="dropzone">
               <div class="fallback">
                 <input name="file" type="file" onchange="angular.element(this).scope().selectFile(this.files)"/>
               </div>
           </form>
+        -->
         <!-- dropzone -->
  
  
@@ -175,9 +177,8 @@
         </form>
         
 
-        <div flex="30" class="vertical-center" layout="row" layout-align="start">            
-		<md-input-container md-no-float >        
-		    <!-- <label class="control-label">Choose Service</label> -->
+        <div flex="30"  class="hidden" layout="row" layout-align="start">            
+		<md-input-container md-no-float >
 		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
 		        <option>Plant</option>
 		        <option>Microbe</option>        
