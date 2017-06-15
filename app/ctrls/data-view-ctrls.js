@@ -2212,6 +2212,7 @@ function($scope, $sParams, WS, $http, Biochem) {
     function parseSolution(solutionData) {
         var data = [], ids = [];
 
+      if( solutionData ) {  
         for (var i=0; i<solutionData[0].length; i++) {
             var rxn = solutionData[0][i],
                 id = rxn.reaction_ref.split('/').pop();
@@ -2224,6 +2225,7 @@ function($scope, $sParams, WS, $http, Biochem) {
 
             ids.push(id.split('_')[0]);
         }
+      }
 
         // add equation from biochem
         return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
