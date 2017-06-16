@@ -1095,7 +1095,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
         // set selected item
         $scope.selected = item;
-
+        
         $scope.loadingDownloads = true;
         MS.getDownloads(item.path)
           .then(function(dls) {
@@ -1103,7 +1103,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
               $scope.selected.downloads = dls;
               $scope.loadingDownloads = false;
           })
-
+        
         if (type === 'download') {
             // XXX: The following two lines get the error (from inside Angular Patches!!!):
             // No instance found for handle downloadOpts (in the component registry, for side nav... for the controller instance!!!)?
