@@ -134,6 +134,113 @@ function($scope, $sParams, WS, $http) {
 
 
 
+.controller('GenomeDataView--',
+['$scope', '$stateParams', 'WS', '$http',
+function($scope, $sParams, WS, $http) {
+
+    // path and name of object
+    var short_path = $sParams.path;
+    var path = $sParams.path + '/.plantseed_data/minimal_genome';
+    // var path = '/genome' + $sParams.path;
+    // var path = '/genome' + $sParams.path + '/.plantseed_data/minimal_genome';
+    $scope.name = short_path.split('/').pop()
+
+    // $scope.tabs = {tabIndex : 0};
+
+    $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
+    // $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+
+    $scope.featureHeader = [
+        {label: 'Feature', key: 'id',
+         link: {
+            state: 'app.featurePage',
+            getOpts: function(row) {
+                return {feature: row.id, genome: short_path};
+            }}
+        },
+        {label: 'Function', key: 'function',
+            formatter: function(row) {
+                return row.function || '-';
+            }},
+        {label: 'Subsystems', key: 'subsystems',
+         formatter: function(row) {
+            return row.subsystems.length ?
+                    row.subsystems.join('<br>') : '-';
+        }}
+    ];
+    /*
+    $scope.annotationHeader = [
+        {label: 'PlantSEED Role', key: 'role'},
+        {label: 'Features', key: 'kmerFeatures',
+            formatter: function(row) {
+                var links = [];
+                row.kmerFeatures.forEach(function(name, i) {
+                    var match = row.blastFeatures.indexOf(name);
+                    links.push('<a href="/feature'+path+'/'+name+'" '+
+                                    'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                    name+
+                                '</a>');
+                })
+
+                return links.join('<br>') || '-';
+            }},
+        {label: 'Exemplar Hits', key: 'blastFeatures',
+         formatter: function(row) {
+            var links = [];
+            row.blastFeatures.forEach(function(name, i) {
+                var match = row.kmerFeatures.indexOf(name);
+                links.push('<a href="/feature'+path+'/'+name+'" '+
+                                'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                name+
+                            '</a>');
+            })
+
+            return links.join('<br>') || '-';
+        }},
+    ]
+    */
+    $scope.loadingFeatures = true;
+    WS.get(path)
+      .then(function(res) {
+          var objs = res.data.features,
+              data = [];
+
+          for (var i=0; i<objs.length; i++) {
+              data.push({id: objs[i].id,
+                         function: objs[i].function})
+          }
+
+          $scope.features = objs;
+      }).catch(function(error){
+          $scope.error = error;      
+      }).then(function() { 
+          $scope.loadingFeatures = false;
+      })
+
+    // get genome object path for annotation overview
+    // var genomePath = path.split('/').slice(0, -2).join('/')+'/genome'
+    /*
+    $scope.loadingAnnotations = true;
+    $http.rpc('ms', 'plant_annotation_overview', {genome: genomePath})
+         .then(function(res) {
+             var d = [];
+             for (var key in res) {
+                 d.push({role: key,
+                         blastFeatures: res[key]['blast-features'],
+                         kmerFeatures: res[key]['kmer-features']})
+             }
+
+             $scope.annotations = d;
+             $scope.loadingAnnotations = false;
+         }).catch(function(e) {
+             $scope.error = e;
+             $scope.loadingAnnotations = false;
+         })
+    */
+}])
+
+
+
 
 
 <!-- Build New Model -->
@@ -1088,7 +1195,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
     
 
-    // XXX: For the Download operation (-->)
+    // For the Download operation (-->)
     $scope.toggleOperations = function(e, type, item) {
         var tar = e.target;
         e.stopPropagation();
@@ -1105,13 +1212,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
           })
         
         if (type === 'download') {
-            // XXX: The following two lines get the error (from inside Angular Patches!!!):
-            // No instance found for handle downloadOpts (in the component registry, for side nav... for the controller instance!!!)?
-            // /ModelSeed/components/angular-material/modules/closure/sidenav/sidenav.js ::
-            // function SidenavService($mdComponentRegistry, $q) { ...
-            //   ...// Lookup the controller instance for the specified sidNav instance
-            // Fix: can we use a dialog instead (like Dialog.runPlantFBA just above)?
-            // Responsiveness?
+
             if (!$mdSidenav('downloadOpts').isOpen())
                 $mdSidenav('downloadOpts').open();
 

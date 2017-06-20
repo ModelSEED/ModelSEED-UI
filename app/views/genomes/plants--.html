@@ -94,8 +94,8 @@
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
-        <!-- TODO: Eliminate Accordion -->
-        
+        <!-- Eliminate Accordion -->
+        <!--
         <div class="expand-container vertical-center">
             <i ng-if="!item.loading && !item.relatedFBAs"
                class="fa fa-caret-right"
@@ -105,7 +105,7 @@
                style="opacity: 1.0;"></i>
             <span ng-if="item.loading">...</span>
         </div>
-       
+        -->
 
 
         <!-- Image broke because model missing meta data ??? ->
@@ -119,7 +119,12 @@
 
 
         <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">        
+
+            <a ui-sref="app.genomePage--({path: item.path})">
+        
+            <!-- changed from next line for Sam before first workshop in June -->
+            <!-- <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()"> -->
+            <!-- Next line is attempt to preserve the image (pic of the plant) -->        
             <!-- <a ui-sref="app.plantPage({path: item.path, image: item.meta.image })" ng-click="$event.stopPropagation()"> -->
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}

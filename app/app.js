@@ -231,6 +231,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/components/browser/browser.html',
             controller: 'MyData',
             authenticate: true
+            
         }).state('app.modelPage', {
             url: "/model{path:nonURIEncoded}?login",
             
@@ -245,14 +246,24 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/fba.html',
             controller: 'FBADataView',
             authenticate: true
+        /*    
         }).state('app.genomePage', {
             url: "/genome{path:nonURIEncoded}",
             templateUrl: 'app/views/data/genome.html',
             controller: 'GenomeDataView',
             authenticate: true
+        */
 
 
+        }).state('app.genomePage--', {
+            url: "/genome{path:nonURIEncoded}",
+            templateUrl: 'app/views/genomes/genome.html',
+            controller: 'GenomeDataView--',
+            authenticate: true
 
+            
+            
+            
         // Build New Model     
         } ).state('app.plantPage', {
             url: "/plant",       
@@ -266,8 +277,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 
-            //     <!-- TODO ReBuild New Model -->
-            
+            //     <!-- ReBuild New Model -->            
                } ).state('app.replantPage', {
                    // url: "/replant",       
                    url: "/replant{path:nonURIEncoded}",
