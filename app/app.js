@@ -252,14 +252,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/genome.html',
             controller: 'GenomeDataView',
             authenticate: true
-        */
-
-
+        
         }).state('app.genomePage--', {
             url: "/genome{path:nonURIEncoded}",
             templateUrl: 'app/views/genomes/genome.html',
             controller: 'GenomeDataView--',
             authenticate: true
+        */
 
             
             

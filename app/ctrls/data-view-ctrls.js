@@ -134,115 +134,6 @@ function($scope, $sParams, WS, $http) {
 
 
 
-.controller('GenomeDataView--',
-['$scope', '$stateParams', 'WS', '$http',
-function($scope, $sParams, WS, $http) {
-
-    // path and name of object
-    var short_path = $sParams.path;
-    var path = $sParams.path + '/.plantseed_data/minimal_genome';
-    // var path = '/genome' + $sParams.path;
-    // var path = '/genome' + $sParams.path + '/.plantseed_data/minimal_genome';
-    $scope.name = short_path.split('/').pop()
-
-    // $scope.tabs = {tabIndex : 0};
-
-    $scope.featureOpts = {query: '', limit: 20, offset: 0, sort: null };
-    // $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
-
-    $scope.featureHeader = [
-        {label: 'Feature', key: 'id',
-         link: {
-            state: 'app.featurePage',
-            getOpts: function(row) {
-                return {feature: row.id, genome: short_path};
-            }}
-        },
-        {label: 'Function', key: 'function',
-            formatter: function(row) {
-                return row.function || '-';
-            }},
-        {label: 'Subsystems', key: 'subsystems',
-         formatter: function(row) {
-            return row.subsystems.length ?
-                    row.subsystems.join('<br>') : '-';
-        }}
-    ];
-    /*
-    $scope.annotationHeader = [
-        {label: 'PlantSEED Role', key: 'role'},
-        {label: 'Features', key: 'kmerFeatures',
-            formatter: function(row) {
-                var links = [];
-                row.kmerFeatures.forEach(function(name, i) {
-                    var match = row.blastFeatures.indexOf(name);
-                    links.push('<a href="/feature'+path+'/'+name+'" '+
-                                    'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                    name+
-                                '</a>');
-                })
-
-                return links.join('<br>') || '-';
-            }},
-        {label: 'Exemplar Hits', key: 'blastFeatures',
-         formatter: function(row) {
-            var links = [];
-            row.blastFeatures.forEach(function(name, i) {
-                var match = row.kmerFeatures.indexOf(name);
-                links.push('<a href="/feature'+path+'/'+name+'" '+
-                                'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                name+
-                            '</a>');
-            })
-
-            return links.join('<br>') || '-';
-        }},
-    ]
-    */
-    $scope.loadingFeatures = true;
-    WS.get(path)
-      .then(function(res) {
-          var objs = res.data.features,
-              data = [];
-
-          for (var i=0; i<objs.length; i++) {
-              data.push({id: objs[i].id,
-                         function: objs[i].function})
-          }
-
-          $scope.features = objs;
-      }).catch(function(error){
-          $scope.error = error;      
-      }).then(function() { 
-          $scope.loadingFeatures = false;
-      })
-
-    // get genome object path for annotation overview
-    // var genomePath = path.split('/').slice(0, -2).join('/')+'/genome'
-    /*
-    $scope.loadingAnnotations = true;
-    $http.rpc('ms', 'plant_annotation_overview', {genome: genomePath})
-         .then(function(res) {
-             var d = [];
-             for (var key in res) {
-                 d.push({role: key,
-                         blastFeatures: res[key]['blast-features'],
-                         kmerFeatures: res[key]['kmer-features']})
-             }
-
-             $scope.annotations = d;
-             $scope.loadingAnnotations = false;
-         }).catch(function(e) {
-             $scope.error = e;
-             $scope.loadingAnnotations = false;
-         })
-    */
-}])
-
-
-
-
-
 <!-- Build New Model -->
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
@@ -1265,7 +1156,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     var featureUrl;
     var patricGeneUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=",
         rastGeneUrl = "http://rast.nmpdr.org/seedviewer.cgi?page=Annotation&feature=",
-        pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=";
+        pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=",
+        modelSEEDURL = "http:/modelseed.org/feature/"
+        ;
 
     $scope.Tabs = Tabs;
     Tabs.totalTabCount = 7;
@@ -1298,9 +1191,21 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
                  var links = [];
                  for (var i=0; i<item.length; i++) {
+                	 
+                     links.push('<a href="/feature' + path + 
+             		        '/.plantseed_data/minimal_genome/' +
+                             item[i] + '" >'
+                          + item[i] + ' </a>' )                	 
+                     /*
+                     links.push('<a href="http:/modelseed.org/feature' + path + 
+                    		        '/.plantseed_data/minimal_genome/' +
+                                    item[i] + '" target="_blank" class="nowrap" >'
+                                 +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
+                	 
                      links.push('<a href="'+
                                     featureUrl+item[i]+'" target="_blank" class="nowrap" >'
                                  +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
+                                 */
                  }
 
                  return links.join('<br>');
@@ -1500,8 +1405,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
                                  var links = [];
                                  for (var i=0; i<row.genes.length; i++) {
-                                     links.push('<a href="'+
-                                                    featureUrl+row.genes[i]+'" target="_blank">'
+                                     links.push('<a href="' +
+                                                    featureUrl + row.genes[i] + '" target="_blank">'
                                                  +row.genes[i]+'</a>')
                                  }
 
@@ -1590,6 +1495,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function setFeatureUrl(source) {
+    	/*
         if (source === 'RAST')
             featureUrl = rastGeneUrl;
         else if (source === 'PubSEED')
@@ -1598,6 +1504,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             featureUrl = patricGeneUrl;
         else
             featureUrl = patricGeneUrl;
+        */
+    	featureURL = modelSEEDURL;
     }
 }])
 
