@@ -965,9 +965,7 @@ function($s, $state, $sParams, WS, MS, tools,
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs',
  'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
-         
-    // Start arman's code        
+         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
     // path and name of "modelfolder"
     var path = $sParams.path;
@@ -1024,16 +1022,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             })        
     }
     
-    
-    
-
     $scope.uploadExpression = function(ev, item) {
         Dialogs.uploadExpression(ev, item, function() {
             updateExpression(item);
         })
     }
-
-    
         
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
@@ -1069,9 +1062,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 $scope.relatedGapfills = gfs;
             })
     }
-    
-    
-    
+        
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
 
@@ -1083,8 +1074,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
               
               $scope.fbaCount -= 1;
           })
-    }
-    
+    }    
 
     // For the Download operation (-->)
     $scope.toggleOperations = function(e, type, item) {
@@ -1117,8 +1107,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         }
     }
 
-
-
     $scope.rmModel = function(ev, i, item, type) {
         // var item = {path: path, name: $scope.name};
     
@@ -1147,18 +1135,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         });
     }
     
-    
-    // end arman's code
+    // end of code for new mockup widgets 2017
     
     $scope.selected;
 
-    // urls used for features
+    // External urls used for features (deprecated)
     var featureUrl;
     var patricGeneUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=",
         rastGeneUrl = "http://rast.nmpdr.org/seedviewer.cgi?page=Annotation&feature=",
         pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=",
-        modelSEEDURL = "http:/modelseed.org/feature/"
-        ;
+        modelSEEDURL = "http:/modelseed.org/feature/";
 
     $scope.Tabs = Tabs;
     Tabs.totalTabCount = 7;
@@ -1195,7 +1181,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                      links.push('<a href="/feature' + path + 
              		        '/.plantseed_data/minimal_genome/' +
                              item[i] + '" >'
-                          + item[i] + ' </a>' )                	 
+                          + item[i] + ' </a>' );                	 
                      /*
                      links.push('<a href="http:/modelseed.org/feature' + path + 
                     		        '/.plantseed_data/minimal_genome/' +
@@ -1230,7 +1216,25 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
 
     $scope.geneHeader = [
-        {label: 'Gene', key: 'id'},
+        {label: 'Gene', key: 'id',
+
+        	formatter: function(item) {
+                if (!item.length) return '-';
+
+                var links = [];
+                for (var i=0; i<item.length; i++) {
+               	 
+                    links.push('<a href="/feature' + path + 
+            		        '/.plantseed_data/minimal_genome/' +
+                            item[i] + '" >'
+                         + item[i] + ' </a>' );                	 
+
+                }
+                return links;
+                // return links.join('<br>');
+            }
+                
+        },
         {label: 'Reactions', key: 'reactions', newTabList: true,
         call: function(e, item) {
           $scope.toggleView(e, 'rxn', item );
@@ -1494,6 +1498,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         })
     }
 
+    // Deprecated:
     function setFeatureUrl(source) {
     	/*
         if (source === 'RAST')
