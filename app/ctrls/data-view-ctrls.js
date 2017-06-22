@@ -149,6 +149,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.selectedFiles = [];
     
+    $scope.genomeNameBox = "";
+    
     // the selected item for the build operations (not used yet)
     $scope.selected = null;
     
@@ -251,17 +253,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                       })
         
     }
-
-
     
     $scope.templateSelected = function( ) {
     	if( $scope.myPlants.length > 0 ) {
             $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
             
     	}
-    }    
-    
-    
+    }        
     
     $scope.startUpload = function() {
     	var name = "";

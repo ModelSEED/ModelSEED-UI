@@ -77,25 +77,13 @@
 
 
 
-<body ng-app="ExampleApp">
+<body>
 
-<h4>
-    <i class="icon-folder-open-o"></i>
-    <span>
-        <a ui-sref="app.plantPage()">Build Model</a>
-        {{draggableObjects[0].name}}
-        / {{name}}
-        
-    </span>
-    
-    <hr class="no-margin"> 
-</h4>
+<div class="content-header" flex>
 
-<br class="no-margin">
-<br class="no-margin">
-<br class="no-margin">
-<br class="no-margin">
-
+    Build Model
+    <br><br>
+</div>    
 
 <div class="container">
 
@@ -113,41 +101,27 @@
         </select>
       </div>
       
-      <div>
-          <label class="control-label">GenomeName:</label>          
-          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
-      </div>          
-      
   </div>
-
     
-  <span layout-align="start"><i>Select Genome to build a model for</i></span>
+  <!-- <span layout-align="start"><i>Select Genome to build a model for</i></span> -->
     
   <div layout="row">    
-
+    <!-- 
     <div>
-        <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
+        <ul class="draggable-objects" >
             <li  ng-repeat="obj in myPlants" >
                 <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
             </li>
         </ul>
     </div>
-
+    -->
     <div layout="column">
     
       <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
           <div>
               <span class="title"></span>
           </div>
-          <!--
-          <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
-              {{obj.name}}                                     
-          </div>
-          -->
  
- 
- 
-          
         <!-- Dropzone -->
         <!--
           <form action="/file-upload" class="dropzone">
@@ -156,14 +130,11 @@
               </div>
           </form>
         -->
-        <!-- dropzone -->
- 
- 
- 
+        <!-- dropzone --> 
           
         <form id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
-                <label class="control-label">Select fasta file:</label>
+                <label class="control-label"> <i>Select fasta file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
                     <input
@@ -198,23 +169,32 @@
             Start Upload
           </md-button>                 
           
-        </div>    
+        </div>             
                  
       </div>
         
     </div>
+
     
   </div>
       
   <div>
     <br class="no-margin"/>
     <br class="no-margin"/>
-  </div> 
+  </div>
+  
+  
+  
+  <div>
+      <label class="control-label">UploadedGenome: <b>{{genomeNameBox}}</b> </label>
+      <br class="no-margin"/>          
+          <!-- <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input> -->
+  </div>  
     
   <span layout-align="start"><i>Select Media for GapFilling</i></span>
     
   <div layout="row">    
-
+    <!-- 
     <div>
         <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
             <li  ng-repeat="obj in myMedia" >
@@ -222,20 +202,19 @@
             </li>
         </ul>
     </div>
-
+    -->
     <div layout="column">
-
+    <!--
     <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
           <div>
               <span class="title">Media</span>
-          </div>
-          <!--
+          </div>         
           <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
               {{obj.name}}
-          </div>
-          -->
+          </div>        
     </div>
-
+    -->
+    
       <div ng-controller="MediaDropdown as ctrl">
             <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
