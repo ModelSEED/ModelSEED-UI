@@ -75,22 +75,13 @@
 
 
 
-<body ng-app="ExampleApp">
+<body>
 
-<h4>
-    <i class="icon-folder-open-o">...</i>
-    <span>
-        ReBuild Model {{name}}        
-    </span>
-    
-    <hr class="no-margin"> 
-</h4>
+<div class="content-header" flex>
 
-<br class="no-margin">
-<br class="no-margin">
-<br class="no-margin">
-<br class="no-margin">
-
+    ReBuild Model
+    <br><br>
+</div>    
 
 <div class="container">
 
@@ -106,15 +97,15 @@
   <!-- <span layout-align="start"><i>Select Genome to build a model for or model to rebuild</i></span>  -->
     
   <div layout="row">    
-
+    <!-- 
     <div>
-        <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
+        <ul class="draggable-objects" >
             <li  ng-repeat="obj in myPlants" >
                 <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
             </li>
         </ul>
     </div>
-
+    -->
     <div layout="column">
     
       <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
@@ -144,9 +135,8 @@
         </form>
         
 
-        <div flex="30" class="vertical-center" layout="row" layout-align="start">            
-		<md-input-container md-no-float >        
-		    <!-- <label class="control-label">Choose Service</label> -->
+        <div flex="30"  class="hidden" layout="row" layout-align="start">            
+		<md-input-container md-no-float >
 		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
 		        <option>Plant</option>
 		        <option>Microbe</option>        
@@ -182,7 +172,7 @@
   <span layout-align="start"><i>Select Media for GapFilling</i></span>
     
   <div layout="row">    
-
+    <!-- 
     <div>
         <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
             <li  ng-repeat="obj in myMedia" >
@@ -190,20 +180,19 @@
             </li>
         </ul>
     </div>
-
+    -->
     <div layout="column">
-
+    <!--
     <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
           <div>
               <span class="title">Media</span>
-          </div>
-          <!--
+          </div>         
           <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
               {{obj.name}}
-          </div>
-          -->
+          </div>        
     </div>
-
+    -->
+    
       <div ng-controller="MediaDropdown as ctrl">
             <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
