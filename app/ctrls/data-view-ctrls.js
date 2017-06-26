@@ -972,7 +972,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
-        item.loading = true;
+        item.loading = true;        
+        
         var gapfillProm = showGapfills();
         var expressionProm = showExpression();
 
@@ -1058,6 +1059,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         return MS.getModelGapfills(path)
             .then(function(gfs) {
                 $scope.relatedGapfills = gfs;
+                Tabs.selectedIndex = 5;
             })
     }
         
