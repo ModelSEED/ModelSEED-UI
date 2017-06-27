@@ -1398,9 +1398,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.loadingPlants = false;
     })
     
-    
-
-    // TODO:
+    /*
     $scope.getMeta = function ( path ) {
     	
     	WS.getObjectMeta ( path ).
@@ -1412,10 +1410,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     	    	
     	    } )
     }
-    
-    
-    
-
+    */
 
     $scope.showRelatedData = function(item) {
         item.loading = true;

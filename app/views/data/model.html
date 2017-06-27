@@ -24,7 +24,11 @@
 
 <hr class="no-margin">
 
-<!-- Add plant pic -- Started work: added "...$scope.getMeta = function ( path ) {... ", to the controller -->
+<!-- Add plant pic -->
+<img ng-if="meta.image" width="100" height="100" src="{{meta.image}}">
+<!-- meta endsup with different contents here, because a different service call is made now for getting the meta data: -->
+<!-- Use to call WS.getObjectMeta; now  WS.get(modelPath)... then $scope.meta = res.meta (latter seems to work but contains no img!) -->
+
 
 <div layout="column">
 
