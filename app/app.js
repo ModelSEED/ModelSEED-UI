@@ -236,7 +236,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/model{path:nonURIEncoded}?login",
             
             // TEST TEST TEST:
-            // templateUrl: 'app/views/data/test_model.html',
+            // templateUrl: 'app/views/data/test_calls.html',
             
             templateUrl: 'app/views/data/model.html',
             controller: 'ModelDataView',
