@@ -110,14 +110,14 @@
        -->
 
         <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.name}}
             </a>
         </div>
 
         <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.orgName}}
             </a>

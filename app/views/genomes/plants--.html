@@ -118,7 +118,7 @@
 
         <div flex="10" layout="row" layout-align="start center">
         
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
             <!-- Next line is attempt to preserve the image (pic of the plant) -->        
             <!-- <a ui-sref="app.plantPage({path: item.path, image: item.meta.image })" ng-click="$event.stopPropagation()"> -->
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
@@ -126,21 +126,16 @@
             </a>
         </div>
 
-
-       <!-- TODO: Species Name -->
         <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.orgName}}
             </a>
         </div>
-        <!-- todo: Species Name -->
 
-       <!-- TODO: Species Domain -->
         <div flex="10" layout="row" layout-align="start center">
             Plant
         </div>
-        <!-- todo: Species Domain -->
                 
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.rxnCount}}</div> 
