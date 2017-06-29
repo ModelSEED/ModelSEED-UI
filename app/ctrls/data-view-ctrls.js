@@ -999,6 +999,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         return MS.getModelFBAs(path)
             .then(function(fbas) {
                 $scope.relatedFBAs = fbas;
+                
+                Tabs.selectedIndex = 0;
             })
     }
     
@@ -1007,8 +1009,20 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
-    	// TODO: Fix below service call
-        // TODO: Add function to ms.js such that returns the expressions for this path like MS.getExpressions(path)
+    	// TODO: Fix one of the below service calls
+
+    	// TODO: Set                 Tabs.selectedIndex = 2;
+    	
+        // XXX: This service call has an anomaly: corrupts the path!!!    	
+    	return MS.getModel(path)
+    	    .then( function(res) {
+                console.log('res',res)
+                // $scope.data = res.data;
+                // $scope.loading = false;
+            } );        
+
+        // XXX: This service call has an anomaly: The contents of Meta no longer supports expression data!!!            
+        /*    
         return WS.getObjectMeta(path)
             .then(function(res) {
                 var expList = [],
@@ -1018,7 +1032,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                     expList.push({name: key, ids: dict[key]});
                 
                 $scope.expression = expList;
-            })        
+            })
+            */
     }
     
     $scope.uploadExpression = function(ev, item) {
@@ -1059,7 +1074,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         return MS.getModelGapfills(path)
             .then(function(gfs) {
                 $scope.relatedGapfills = gfs;
-                Tabs.selectedIndex = 5;
+                Tabs.selectedIndex = 0;
             })
     }
         
@@ -1196,12 +1211,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
                  return links.join('<br>');
              }
-        },
+        }
+        /* 
+         ,
         {label: 'Gapfill', key: 'gapfill',
             formatter: function(item) {
                 return item.summary || '-';
             }
-    }];
+        }
+        */ 
+        ];
 
     $scope.cpdHeader = [{
         label: 'ID', key: 'id', newTab: 'cpd',

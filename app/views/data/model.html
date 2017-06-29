@@ -34,7 +34,7 @@
 
     <div flex="30" class="vertical-center" layout="row" layout-align="start">
      
-        <md-button class="md-primary md-raised md-button" ui-sref="app.replantPage( {path: item.path} )" >RebuildModel</md-button>              
+        <!-- <md-button class="md-primary md-raised md-button" ui-sref="app.replantPage( {path: item.path} )" >RebuildModel</md-button> -->              
         <md-button class="md-primary md-raised md-button" ui-sref="app.genomes" ng-click="changeView('Plants', '0')">Rebuild&ReAnnotateModel</md-button>        
         <md-button class="md-primary md-raised md-button" ng-click="runPlantFBA($event, item)">RunFBA</md-button>        
         <md-button class="md-primary md-raised md-button" ng-click="gapfill($event)">RunGapFilling</md-button>       
@@ -163,14 +163,14 @@
             </ng-table>
         </md-tab-body>
     </md-tab>
-
+    <!-- 
     <md-tab>
         <md-tab-label>Gapfilling</md-tab-label>
         <md-tab-body>
             <ng-include src="'app/views/lists/expanded-gapfills.html'"></ng-include>
         </md-tab-body>
     </md-tab>
-
+    -->
     <md-tab>
         <md-tab-label>Pathways</md-tab-label>
         <md-tab-body>
