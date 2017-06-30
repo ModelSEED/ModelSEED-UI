@@ -95,12 +95,16 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.reconstruct = function(form, params) {
-        var params = angular.extend(form, params)
-        $log.log('reconstruct form', params)
-        return $http.rpc('ms', 'ModelReconstruction', params)
+    	var parameters = angular.extend(form, {loadingPlants: true});
+        // var params = angular.extend(form, params);
+        console.log('reconstruct form:', form, ' parameters: ', parameters, ' params: ', params);
+        return $http.rpc('ms', 'ModelReconstruction', parameters)
                     .then(function(res){
                         return res;
-                    })
+                    } ).catch(function(e) {
+                  	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                  	  return e;
+                    } );
     }
 
     this.runFBA = function(form) {

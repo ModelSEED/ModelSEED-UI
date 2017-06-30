@@ -243,9 +243,16 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         $scope.form = {genome: item.path};
 
         // self.showToast('Reconstructing', item.name, 5000)
-                
-                    MS.reconstruct($scope.form)
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
                       .then(function(r) {
+                    	  // This block will be executed at callback
+                    	  //   Wether success or not...
+                    	  // TODO: redirect page to parent from right here
+                    	  // $http.
+                          $state.go('app.myModels');
                            cb(r);
                       }).catch(function(e) {
                     	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
@@ -519,9 +526,16 @@ function($scope, $state, $sParams, Patric, $timeout, $http, Upload, $dialog,
         $scope.form = {genome: item.path};
 
         // self.showToast('Reconstructing', item.name, 5000)
+        $scope.loadingPlants = true;
                 
-                    MS.reconstruct($scope.form)
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
                       .then(function(r) {
+                    	  // This block will be executed at callback
+                    	  //   Wether success or not...
+                    	  // TODO: redirect page to parent from right here
+                    	  // $http.
+                    	  app.myModels();
                            cb(r);
                       }).catch(function(e) {
                     	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
