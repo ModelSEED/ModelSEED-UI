@@ -1,0 +1,54 @@
+<div class="fba-table expanded-table">
+    <!--<h5>FBA Results</h5>-->
+
+    <div ng-if="!relatedFBAs.length" class="text-muted">
+        No FBA simulations for <i>{{name}}</i>.
+    </div>
+
+    <table class="table table-condensed">
+        <thead>
+            <tr ng-if="relatedFBAs.length">
+                <th><i class="fa fa-check-square-o" style="visibility:hidden;"></i></th>
+                <th>Media</th>
+                <th>ID</th>
+                <th>Objective</th>
+                <th>Objective Function</th>
+                <th>Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'"
+                ng-click="addFBA($event, fba, item)"
+                class="row-hover">
+                <td>
+                
+                
+                
+                    <i class="fa {{fba.checked ? 'fa-check-square-o' : 'fa-square-o'}}"></i>
+                    
+                    
+                    
+                </td>
+                <td>
+                    <a ui-sref="app.mediaPage({path: fba.media})"
+                       ng-click="$event.stopPropagation()">{{::fba.media.split('/').pop()}}</a>
+                </td>
+                <td>
+                    <a ui-sref="app.fbaPage({path: fba.path})"
+                       ng-click="$event.stopPropagation()">{{::fba.id}}</a>
+
+                </td>
+                <td>{{fba.objective === '10000000' ? 0 : fba.objective}}</td>
+                <td>{{fba.objective_function ? fba.objective_function : 'N/A'}}</td>
+                <td>{{relativeTime(fba.timestamp)}}</td>
+                <td>
+                    <a ng-click="deleteFBA($event, $index, item)" class="no-link">
+                        <md-tooltip md-delay="800">Delete FBA</md-tooltip>
+                        <i class="icon-highlight-remove"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

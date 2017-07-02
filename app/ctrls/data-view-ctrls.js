@@ -1065,6 +1065,30 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             })
         })
     }
+    
+    
+    
+    // FBA selection for data viewing
+    $scope.addFBA = function(e, fba, model) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var data = {model: model.path,
+                    fba: fba.path,
+                    org: model.orgName,
+                    media: fba.media};
+
+
+        if (fba.checked) {
+            MV.rm(data, true);
+            fba.checked = false;
+        } else {
+            MV.add(data);
+            fba.checked = true;
+        }
+    }
+
+    
            
     $scope.gapfill = function(ev) {
         var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
