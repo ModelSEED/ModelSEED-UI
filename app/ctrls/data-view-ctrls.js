@@ -1023,11 +1023,15 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
-    	// TODO: Fix one of the below service calls
-
     	// TODO: Set                 Tabs.selectedIndex = 2;
+
     	
-        // XXX: This service call has an anomaly: corrupts the path!!!    	
+    	
+    	// TODO: Fix the below service call(s)
+    	
+        // XXX: This service call has an anomaly: corrupts the path!!!
+    	// $scope.data will be needed for:
+        // TODO: converge orthogonal Flux data:        
     	return MS.getModel(path)
     	    .then( function(res) {
                 console.log('res',res)
@@ -1249,9 +1253,19 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
                  return links.join('<br>');
              }
-        }
+        } ,
+        
+        
+        
+        // TODO: converge orthogonal Flux data:        
+        {label: 'Flux', key: 'flux'},
+        {label: 'Min', key: 'min'},
+        {label: 'Max', key: 'max'},
+        {label: 'Class', key: 'class'}
+        
+        
+        
         /* 
-         ,
         {label: 'Gapfill', key: 'gapfill',
             formatter: function(item) {
                 return item.summary || '-';
