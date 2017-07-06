@@ -1288,7 +1288,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                                  +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
                                  */
                  }
-
                  return links.join('<br>');
              }
         } ,
@@ -1296,7 +1295,18 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         
         
         // TODO: converge orthogonal Flux data:        
-        {label: 'Flux', key: 'flux'},
+        {label: 'Flux', key: 'flux',
+            formatter: function() {
+                var fbas = [];
+                if( $scope.rxnFluxes ) {
+                    for (var i=0; i < $scope.rxnFluxes.length; i++) {
+                    fbas.push( $scope.rxnFluxes[ i ].id );   
+               	  }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
         {label: 'Min', key: 'min'},
         {label: 'Max', key: 'max'},
         {label: 'Class', key: 'class'}
