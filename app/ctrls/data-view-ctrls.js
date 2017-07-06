@@ -155,6 +155,18 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selected = null;
     
     $scope.copyInProgress = {};
+
+    // For constructing models based on Patric genomes:
+    MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
+        console.log('path res', res)
+
+        $scope.microbes = res;
+        $scope.loadingMicrobes = false;
+    }).catch(function(e) {
+        $scope.microbes = [];
+        $scope.loadingMicrobes = false;
+    })
+
         
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
@@ -975,9 +987,9 @@ function($s, $state, $sParams, WS, MS, tools,
 
 .controller('ModelDataView',
 ['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
+ 'ModelParser', 'FBAParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
+         ModelParser, FBAParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
     // path and name of "modelfolder"
     var path = $sParams.path;
@@ -1013,6 +1025,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         return MS.getModelFBAs(path)
             .then(function(fbas) {
                 $scope.relatedFBAs = fbas;
+
+                
+                $scope.rxnFluxes = fbas;
+
+                
                 
                 Tabs.selectedIndex = 0;
             })
@@ -1219,6 +1236,27 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    
+    
+    
+    $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+
+    
+    /*
+    WS.get(path).then(function(obj) {
+        FBAParser.parse(obj.data)
+                 .then(function(parsed) {
+                    $scope.fbas = [parsed.data];
+                    $scope.models = [parsed.rawModel];
+                    $scope.rxnFluxes = parsed.fba.reaction_fluxes;
+                    $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
+
+                    $scope.loading = false;
+                 });
+    })
+    */
+    
+    
 
     // reaction table spec
     $scope.rxnHeader = [
