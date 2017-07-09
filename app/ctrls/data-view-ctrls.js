@@ -999,11 +999,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             // refreshData();
 
         // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
-        $scope.getRxnFluxes();        
-
-        
-        // Call function to set selected fba reaction fluxes:
-        $scope.getRxnFluxes();        
+        $scope.getRxnFluxes();               
         
 
         /*
@@ -1247,12 +1243,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                         $scope.fbas = [parsed.data];
                         $scope.models = [parsed.rawModel];
                         $scope.rxnFluxes = parsed.fba.reaction_fluxes;
-
-                        
                         
                         $scope.rxnFluxHash = parsed.fba.rxnhash;
-
-                        
                         
                         // $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 
@@ -1261,10 +1253,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         })
     }
             
-    // TODO: Filter RXN Fluxes by RxnId
-    // Maybe add a dictionary to scope with:
-    //     key: rxn id
-    //     value: array of fbas (fbaId, flux, min, max, class) applicable to the key rxn
 
     // reaction table spec
     $scope.rxnHeader = [
