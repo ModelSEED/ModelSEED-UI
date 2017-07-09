@@ -223,8 +223,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             var index = array.indexOf(obj);
         }
 
-
-
     $scope.reconstruct = function(ev, item) {
     
         // Temp:  method parm item is not wired (came from selectedPublic from Ref Genomes page)
@@ -261,11 +259,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         	MS.reconstruct($scope.form)
                       .then(function(r) {
                     	  // This block will be executed at callback
-                    	  //   Wether success or not...
-                    	  // TODO: redirect page to parent from right here
-                    	  // $http.
+                    	  //   Whether success or not...
+                    	  // redirect page to parent from right here
                           $state.go('app.myModels');
-                           cb(r);
+                          
+                          // Next call was Jobs related?
+                          // cb(r);
                       }).catch(function(e) {
                     	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
                           // self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
@@ -304,14 +303,22 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     function startUpload(name) {
 
-        Upload.uploadFile($scope.selectedFiles, null, function(node) {                        
+        Upload.uploadFile($scope.selectedFiles, null, function(node) {
+        	
+            Dialogs.showComplete('Import in progress...');
+
             MS.createGenomeFromShock(node, name)
                 .then(function(res) {
-                    console.log('done importing', res)
+                    console.log('done importing', res);
+                    
+              	  // This block will be executed at callback
+              	  //   Whether success or not...
+              	  // redirect page to parent from right here
+                  $state.go('app.myModels');                    
+                    
                     Dialogs.showComplete('Import complete', name);
                                                     
-                    loadPrivatePlants( res );
-                    // loadPrivatePlants();
+                    // loadPrivatePlants( res );
                     
                 }).catch(function(e) {
                     // Dialogs.showError('something has gone wrong')
@@ -323,7 +330,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         })                    
     }     
     
-    // Deferred Functionality for Uploading a FASTA file: 
+    // Deferred Functionality for Uploading a FASTA file (no longer called):
+    // Redirected to Parent now
     function loadPrivatePlants( res ) {
         $scope.loadingMyPlants = true;
         $scope.myPlants = [];
@@ -346,28 +354,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                   
             $scope.loadingMyPlants = false;
         
-        /*                
-        WS.list('/'+Auth.user+'/plantseed/')
-            .then(function(res) {
-                // ignore anything that isn't a modelfolder
-                var plants = []
-                res.forEach(function(obj) {
-                    if (obj.type !== 'modelfolder') return;
-                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
-                    plants.push(obj);
-                })
-
-                $scope.myPlants = plants;
-                $scope.loadingMyPlants = false;
-            }).catch(function(e) {
-                if (e.error.code === -32603)
-                    $scope.error = 'Something seems to have went wrong. '+
-                                'Please try logging out and back in again.';
-                else
-                    $scope.error = e.error.message;
-                $scope.loadingMyPlants = false;
-            })
-            */
     }
         
     $scope.selectFile = function(files) {
@@ -1011,6 +997,15 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             fbaProm = updateFBAs();
             
             // refreshData();
+
+        // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
+        $scope.getRxnFluxes();        
+
+        
+        // Call function to set selected fba reaction fluxes:
+        $scope.getRxnFluxes();        
+        
+
         /*
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
@@ -1024,12 +1019,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     function updateFBAs() {
         return MS.getModelFBAs(path)
             .then(function(fbas) {
-                $scope.relatedFBAs = fbas;
-
-                
-                $scope.rxnFluxes = fbas;
-
-                
+                $scope.relatedFBAs = fbas;               
                 
                 Tabs.selectedIndex = 0;
             })
@@ -1089,10 +1079,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     
     
     
-    // FBA selection for data viewing
+    // FBA selection for data viewing (enables determine which FBA is selected via check boxes)
     $scope.addFBA = function(e, fba, model) {
         e.preventDefault();
         e.stopPropagation();
+        
+        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );
 
         var data = {model: model.path,
                     fba: fba.path,
@@ -1102,14 +1094,21 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
         if (fba.checked) {
             MV.rm(data, true);
+            
+            $scope.selectedFBA = "";
+
             fba.checked = false;
         } else {
             MV.add(data);
+            
+            $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+            
+            // Call function to set selected fba reaction fluxes:
+            $scope.getRxnFluxes(); 
+
             fba.checked = true;
         }
-    }
-
-    
+    }    
            
     $scope.gapfill = function(ev) {
         var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
@@ -1209,8 +1208,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         });
     }
     
-    // end of code for new mockup widgets 2017
-    
     $scope.selected;
 
     // External urls used for features (deprecated)
@@ -1237,26 +1234,37 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     
+    // TODO: converge orthogonal Flux data:
+        
+    // $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     
-    
-    $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.getRxnFluxes = function( ) {
+        // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
+        var fbaPath = path + '/fba/' + $scope.selectedFBA; 
+        WS.get( fbaPath ).then(function(obj) {
+            FBAParser.parse(obj.data)
+                     .then(function(parsed) {
+                        $scope.fbas = [parsed.data];
+                        $scope.models = [parsed.rawModel];
+                        $scope.rxnFluxes = parsed.fba.reaction_fluxes;
 
-    
-    /*
-    WS.get(path).then(function(obj) {
-        FBAParser.parse(obj.data)
-                 .then(function(parsed) {
-                    $scope.fbas = [parsed.data];
-                    $scope.models = [parsed.rawModel];
-                    $scope.rxnFluxes = parsed.fba.reaction_fluxes;
-                    $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
+                        
+                        
+                        $scope.rxnFluxHash = parsed.fba.rxnhash;
 
-                    $scope.loading = false;
-                 });
-    })
-    */
-    
-    
+                        
+                        
+                        // $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
+
+                        $scope.loading = false;
+                     });
+        })
+    }
+            
+    // TODO: Filter RXN Fluxes by RxnId
+    // Maybe add a dictionary to scope with:
+    //     key: rxn id
+    //     value: array of fbas (fbaId, flux, min, max, class) applicable to the key rxn
 
     // reaction table spec
     $scope.rxnHeader = [
@@ -1294,22 +1302,99 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         
         
         
-        // TODO: converge orthogonal Flux data:        
-        {label: 'Flux', key: 'flux',
-            formatter: function() {
+        // TODO: converge orthogonal Flux data:
+        {label: 'Flux', key: 'id',
+
+            formatter: function( row ) {
+
                 var fbas = [];
-                if( $scope.rxnFluxes ) {
-                    for (var i=0; i < $scope.rxnFluxes.length; i++) {
-                    fbas.push( $scope.rxnFluxes[ i ].id );   
-               	  }
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs ) {
+                	
+                    fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].value );
+                            }
+                        }
                 }
                 return fbas.join('<br>');
             }
 
         },
-        {label: 'Min', key: 'min'},
-        {label: 'Max', key: 'max'},
-        {label: 'Class', key: 'class'}
+        {label: 'Min', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs ) {
+                	
+                    fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].min );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Max', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs ) {
+                	
+                    fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].max );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Class', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs ) {
+                	
+                    fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].class );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        }
         
         
         
@@ -2288,6 +2373,12 @@ function(WS, ModelParser) {
         var fbaObj = {reaction_fluxes: reaction_fluxes,
                       exchange_fluxes: exchange_fluxes,
                       genes: genes,
+                      
+                      
+                      
+                      rxnhash: rxnhash,
+                      
+                      
                       biomass: biomass}
 
         return fbaObj
