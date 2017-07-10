@@ -980,7 +980,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     // path and name of "modelfolder"
     var path = $sParams.path;
     
-    $scope.name = path.split('/').pop()
+    $scope.name = path.split('/').pop();
+    
+    $scope.selectedFBA = "";
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
@@ -1236,6 +1238,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     
     $scope.getRxnFluxes = function( ) {
         // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
+    	if( $scope.selectedFBA.length>0 ) {
         var fbaPath = path + '/fba/' + $scope.selectedFBA; 
         WS.get( fbaPath ).then(function(obj) {
             FBAParser.parse(obj.data)
@@ -1251,6 +1254,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                         $scope.loading = false;
                      });
         })
+      }
     }
             
 
@@ -1300,7 +1304,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 var fbaPath = "";
                 
                 
-                if( $scope.relatedFBAs ) {
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     fbas.push( $scope.selectedFBA );
                         
@@ -1323,7 +1327,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 var fbaPath = "";
                 
                 
-                if( $scope.relatedFBAs ) {
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     fbas.push( $scope.selectedFBA );
                         
@@ -1346,7 +1350,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 var fbaPath = "";
                 
                 
-                if( $scope.relatedFBAs ) {
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     fbas.push( $scope.selectedFBA );
                         
@@ -1369,7 +1373,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 var fbaPath = "";
                 
                 
-                if( $scope.relatedFBAs ) {
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     fbas.push( $scope.selectedFBA );
                         
