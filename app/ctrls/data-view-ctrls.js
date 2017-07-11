@@ -977,6 +977,9 @@ function($s, $state, $sParams, WS, MS, tools,
 function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
          ModelParser, FBAParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
+    $scope.Tabs = Tabs;
+    Tabs.totalTabCount = 6;
+    
     // path and name of "modelfolder"
     var path = $sParams.path;
     
@@ -1028,7 +1031,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
-    	// TODO: Set                 Tabs.selectedIndex = 2;
+    	Tabs.selectedIndex = 2;
 
     	
     	
@@ -1214,9 +1217,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         rastGeneUrl = "http://rast.nmpdr.org/seedviewer.cgi?page=Annotation&feature=",
         pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=",
         modelSEEDURL = "http:/modelseed.org/feature/";
-
-    $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 7;
 
     $scope.relativeTime = uiTools.relativeTime;
 
