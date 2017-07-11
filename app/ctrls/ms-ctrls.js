@@ -1359,8 +1359,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 
     // table options
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
-    $scope.plantOpts = {query: '', limit: 10, offset: 0, sort: {}};
+    $scope.opts = {query: '', limit: 100, offset: 0, sort: {}};
+    $scope.plantOpts = {query: '', limit: 100, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
     $scope.selected = null;
@@ -1634,7 +1634,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
 
     // table options
-    $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
+    $scope.opts = {query: '', limit: 100, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
     $scope.selected = null;
