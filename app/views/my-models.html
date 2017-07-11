@@ -16,31 +16,28 @@
 
 
 <div flex="30" class="vertical-center" layout="row" layout-align="start">
-
-    <!-- TODO Build New Model -->
     <button class="md-primary md-raised md-button" ui-sref="app.plantPage" ng-click="changeView('Plants', '0')">Build New Model</button>
-    <!-- todo -->
 </div>
 
 <div layout="row">
     <div class="content-header" flex>My Models<br>
-        <small class="help-text" hide-sm>Click on a model row to view associated FBA, Gapfill data, and more.</small>
+        <!-- <small class="help-text" hide-sm>Click on a model row to view FBA, Gapfill, and the associated data.</small> -->
     </div>
 </div>
 
 <hr class="no-margin">
 
-<div ng-if="myPlants.length">
+<div ng-if="myModels.length">
     <!-- CONTROLS -->
     <div class="table-controls" layout="row">
         <md-input-container md-no-float flex="45">
             <md-icon class="material-icons">search</md-icon>
-            <input ng-model="plantOpts.query" type="text" placeholder="Search plant models">
+            <input ng-model="opts.query" type="text" placeholder="Search models">
         </md-input-container>
 
         <md-input-container pagination
-            pagination-offset="plantOpts.offset"
-            pagination-limit="plantOpts.limit"
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
             pagination-total="filtered.length"
             layout="row"
             layout-align="end center" flex>
@@ -56,7 +53,7 @@
             <b>Model ID</b>
         </div>
 
-        <div flex="10" layout="row" layout-align="start center">
+        <div flex="15" layout="row" layout-align="start center">
             <b>Species Name</b>
         </div>
 
@@ -90,24 +87,12 @@
     </div>
 
 
-    <div layout="row"
-         ng-repeat-start="item in (filtered = ( myPlants | filter: plantOpts.query)
+ 
+ 
+ <div layout="row"
+         ng-repeat-start="item in (filtered = ( myModels | filter: plantOpts.query)
                                                          | limitTo : plantOpts.limit : plantOpts.offset)"
-         ng-click="showRelatedData(item)"
          class="row-hover my-model">
-
-        <!-- Eliminate Accordion -->
-        <!--
-        <div class="expand-container vertical-center">
-            <i ng-if="!item.loading && !item.relatedFBAs"
-               class="fa fa-caret-right"
-               style="opacity: 0.5;"></i>
-            <i ng-if="item.relatedFBAs"
-               class="fa fa-caret-down"
-               style="opacity: 1.0;"></i>
-            <span ng-if="item.loading">...</span>
-        </div>
-       -->
 
         <div flex="10" layout="row" layout-align="start center">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
@@ -116,7 +101,7 @@
             </a>
         </div>
 
-        <div flex="10" layout="row" layout-align="start center">
+        <div flex="15" layout="row" layout-align="start center">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
                 {{item.orgName}}
@@ -124,7 +109,7 @@
         </div>
 
         <div flex="10" layout="row" layout-align="start center">
-            Plant
+            {{isPlant(item.path)}}
         </div>
                 
         <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
@@ -204,168 +189,6 @@
 
 
 
-<!-- TODO Merge Microbes with Plants -->
-<div ng-if="myMicrobes.length">
-    <!-- CONTROLS -->    
-    <div class="table-controls" layout="row">
-        <md-input-container md-no-float flex="45">
-            <md-icon class="material-icons">search</md-icon>
-            <input ng-model="opts.query" type="text" placeholder="Search microbial models">
-        </md-input-container>
-
-        <md-input-container pagination
-            pagination-offset="opts.offset"
-            pagination-limit="opts.limit"
-            pagination-total="filtered.length"
-            layout="row"
-            layout-align="end center" flex>
-        </md-input-container>
-    </div>
-
-    <!-- HEADER -->
-    <div layout="row">
-        <div class="expand-container vertical-center">
-        </div>
-
-        <div flex="10" layout="row" layout-align="start center">
-            <b>Model ID</b>
-        </div>
-
-        <div flex="10" layout="row" layout-align="start center">
-            <b>Species Name</b>
-        </div>
-
-        <div flex="10" layout="row" layout-align="start center">
-            <b>Species Domain</b>
-        </div>
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>Reactions</b></div>
-        </div>
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>Genes</b></div>
-        </div>
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>FBA</b></div>
-        </div>
-        
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>Gapfilling</b></div>
-        </div>        
-
-        <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
-            <div><b>Modification Date</b></div>
-        </div>
-
-        <div flex="15" layout="row" layout-align="center center">
-            <div><b>Commands</b></div>
-        </div>
-    </div>
-    
-    <div layout="row" ng-repeat-start="item in (filtered = ( myMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
-         ng-click="showRelatedData(item)"
-         class="row-hover my-model">
-
-        <!-- Eliminated Accordion -->
-        <!-- 
-        <model-item ng-if="!item.status" layout="row">
-            <div class="expand-container vertical-center">
-                <i ng-if="!item.relatedFBAs && !item.loading"
-                   class="fa fa-caret-right"
-                   style="opacity: 0.5;"></i>
-                <i ng-if="item.relatedFBAs && !item.loading"
-                   class="fa fa-caret-down"
-                   style="opacity: 1.0;"></i>
-                <span ng-if="item.loading">...</span>
-            </div>
-        -->
-
-        <div flex="10" layout="row" layout-align="start center">
-                <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
-                    <md-tooltip md-delay="800">View Model</md-tooltip>
-                    {{item.name}}
-                </a>
-        </div>
-            
-        <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="$event.stopPropagation()">
-                <md-tooltip  md-delay="800">View Model</md-tooltip>
-                {{item.orgName}}
-            </a>
-        </div>
-
-        <div flex="10" layout="row" layout-align="start center">
-            Microbe
-        </div>
-                            
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.rxnCount}}</div> 
-        </div>
-
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <!-- TODO: Genes count -->    
-        </div>
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.fbaCount}}</div>   
-        </div>
-
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.gapfillCount}}</div>    
-        </div>
-            
-            
-        <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{relativeTime(item.timestamp)}}</div>
-        </div>
-
-        <div flex="15" layout="column" layout-align="end center">
-            <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
-                <md-tooltip ng-if="!selected">View download options</md-tooltip>
-                <i class="icon-file-download"></i>
-            </md-button>
-            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
-                <md-tooltip ng-if="!selected">Delete model</md-tooltip>
-                <i class="icon-highlight-remove"></i>
-            </md-button>         
-        </div>            
-                    
-    </div>
-
-    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
-        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
-            <md-tab>
-                <md-tab-label>
-                    FBA Simulations
-                    (<span class="label-fba-count">{{item.relatedFBAs.length}}</span>)
-                </md-tab-label>
-
-                <md-tab-body>
-                    <ng-include src="'app/views/lists/expanded-fbas.html'">
-                </md-tab-body>
-            </md-tab>
-
-            <md-tab>
-                <md-tab-label>
-                    Gapfills
-                    (<span class="label-gapfill-count">{{item.relatedGapfills.length}}</span>)
-                </md-tab-label>
-
-                <md-tab-body>
-                    <ng-include src="'app/views/lists/expanded-gapfills.html'">
-                </md-tab-body>
-            </md-tab>
-        </md-tabs>
-    </div>
-
-    <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
-</div> <!-- end microbes view -->
-
-
-
 <section ng-controller="SideNav">
     <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">
         <md-toolbar class="md-theme-light">
@@ -436,23 +259,20 @@
 
 
 
-<md-progress-circular ng-if="loadingMicrobes && view == 'Microbes'" md-mode="indeterminate">
+<md-progress-circular ng-if="loadingMicrobes" md-mode="indeterminate">
 </md-progress-circular>
-<md-progress-circular ng-if="loadingPlants && view == 'Plants'" md-mode="indeterminate">
+<md-progress-circular ng-if="loadingPlants" md-mode="indeterminate">
 </md-progress-circular>
 
 
 <div ng-if="myMicrobes && !myMicrobes.length" > 
-    <!-- && view == 'Microbes'"> -->
     <br>
-    You have no microbial models.  Consider <a ui-sref="app.genomes" ng-click="changeView('Microbes')">resconstructing a model</a>.
+    You have no microbial models.  Consider resconstructing a model.
 </div>
 
 <div ng-if="myPlants && !myPlants.length" >
-    <!-- && view == 'Plants'"> -->
     <br>
-    <!--Plant modeling capabilities are currently under construction.-->
-    You have no plant models.  Consider <a ui-sref="app.genomes">resconstructing a model</a>.
+    You have no plant models.  Consider resconstructing a model.
 </div>
 
 <div ng-if="error" class="ms-color-error">

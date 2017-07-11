@@ -1610,6 +1610,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     $scope.myPlants = [];
     $scope.myMicrobes = [];
+    $scope.myModels = [];
 
     $scope.MS = MS;
     $scope.uiTools = uiTools;
@@ -1617,6 +1618,12 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     $scope.relTime = function(datetime) {
         return $scope.relativeTime(Date.parse(datetime));
+    }
+    
+    $scope.isPlant = function( modelPath ) {
+    	var domain = modelPath.split('/')[ 2 ];
+    	 var speciesDomain = ( domain == 'plantseed' ) ? 'Plant' : 'Microbe';
+    	 return speciesDomain;
     }
 
     // microbes / plants view
@@ -1628,7 +1635,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
     // table options
     $scope.opts = {query: '', limit: 10, offset: 0, sort: {}};
-    $scope.plantOpts = {query: '', limit: 10, offset: 0, sort: {}};
 
     // the selected item for operations such as download, delete.
     $scope.selected = null;
@@ -1638,30 +1644,47 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         // $scope.myMicrobes = MS.myModels;
     // } else {
         $scope.loadingMicrobes = true;
+        $scope.loadingPlants = true;
+
         MS.listModels('/'+Auth.user+'/modelseed').
-            then(function(res) {
-            $scope.myMicrobes = res;
+            then(function(resMicrobes) {
+            $scope.myMicrobes = resMicrobes;
             $scope.loadingMicrobes = false;
+        }).then(function(){
+        	MS.listModels('/'+Auth.user+'/plantseed').
+            then(function(resPlants) {
+                $scope.myPlants = resPlants;
+                $scope.loadingPlants = false;
+                
+                $scope.myModels = $scope.myPlants.concat( $scope.myMicrobes );    	                
+            } )
         }).catch(function(e) {
             $scope.myMicrobes = [];
             $scope.loadingMicrobes = false;
+            $scope.myPlants = [];
+            $scope.loadingPlants = false;
+            $scope.myModels = [];
         })
     // }
+        
 
     // private plant models
     // if (MS.myPlants) {
         // $scope.myPlants = MS.myPlants;
     // } else {
+        /*
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
             then(function(res) {
                 console.log('path res', res)
-                $scope.myPlants = res;
+                $scope.myPlants = res;                
+                $scope.myModels = $scope.myPlants.concat( $scope.myMicrobes )
                 $scope.loadingPlants = false;
         }).catch(function(e) {
                 $scope.myPlants = [];
                 $scope.loadingPlants = false;
         })
+        */
     // }
 
 
