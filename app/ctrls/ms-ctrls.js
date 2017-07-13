@@ -35,7 +35,7 @@ function($scope, $state, $stateParams, Auth, $window) {
             // If coming from home page, go to genomes.
             // Otherwise go to current page.
             if ($state.current.name === 'main.home') {
-                var p = $state.transitionTo('app.genomes', {}, {reload: true, inherit: true, notify: false});
+                var p = $state.transitionTo('app.RefModels', {}, {reload: true, inherit: true, notify: false});
             } else
                 var p = $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false});
 
@@ -1358,16 +1358,50 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
         $scope.view = ViewOptions.set('organismType', view);
     }
 
-    // table options
-    $scope.opts = {query: '', limit: 100, offset: 0, sort: {}};
-    $scope.plantOpts = {query: '', limit: 100, offset: 0, sort: {}};
+    $scope.showMenu = function() { $scope.menuVisible = true; }
 
+    $scope.opts = {
+            query: '', limit: 25, offset: 0,
+            sort: {field: 'genome_name'},
+            visible: ['genome_name', 'species', 'species_domain', 'rxns', 'genes', 'fbas', 'gfs', 'mod_date']
+        };
+
+        $scope.columns = [
+            {prop: 'genome_name', label: 'ModelID'},
+            {prop: 'species', label: 'Species'},
+            {prop: 'species_domain', label: 'SpeciesDomain'},
+            {prop: 'rxns', label: 'Reactions'},
+            {prop: 'genes', label: 'Genes'},
+            {prop: 'fbas', label: 'FBA'},
+            {prop: 'gfs', label: 'Gapfilling'},
+            {prop: 'mod_date', label: 'ModificationDate'}
+            
+        ]
+
+        
+        
+        $scope.myModelsSpec = [
+            {prop: 'genome_name', label: 'ModelID'},
+            {prop: 'species', label: 'Species'},
+            {prop: 'species_domain', label: 'SpeciesDomain'},
+            {prop: 'rxns', label: 'Reactions'},
+            {prop: 'genes', label: 'Genes'},
+            {prop: 'fbas', label: 'FBA'},
+            {prop: 'gfs', label: 'Gapfilling'},
+            {prop: 'mod_date', label: 'ModificationDate'}
+
+        ]
+        
+        
+        
     // the selected item for operations such as download, delete.
     $scope.selected = null;
+
     
     $scope.copyInProgress = {};
 
     // load models
+    /*
         $scope.loadingMicrobes = true;
         MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
             console.log('path res', res)
@@ -1378,13 +1412,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             $scope.microbes = [];
             $scope.loadingMicrobes = false;
         })
-
-
-    // public plant models
-        
-    // TODO: Plant Image broke because model missing meta data ??? ->
-    //    <!-- Add plant pic -- Started work: added "...$scope.getMeta = function ( path ) {... ", to the controller -->
-    // for:
+*/
 
     $scope.loadingPlants = true;
     MS.listModels( '/plantseed' + '/plantseed' ).
@@ -1412,6 +1440,62 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
     */
 
+    
+    
+    $scope.getLabel = function(prop) {
+        for (var i=0; i<$scope.columns.length; i++) {
+            var col = $scope.columns[i];
+            if (col.prop === prop) return col.label;
+        }
+        return '';
+    }
+
+    $scope.exists = function(item, visible) {
+      return visible.indexOf(item) > -1;
+    }
+
+    $scope.toggle = function(item, visible) {
+        var idx = visible.indexOf(item);
+        if (idx > -1) visible.splice(idx, 1);
+        else visible.push(item);
+    };
+
+    $scope.$watch('opts', function(value){
+        update()
+    }, true)
+
+    $scope.toggleMyGenomes = function() {
+        // timeout for prom
+        $timeout(function() {
+            ViewOptions.set('viewMyGenomes', $scope.filters.myGenomes);
+            update()
+        });
+    }
+
+    // update visible genomes
+    function update() {
+        $scope.loading = true;
+
+/*        Patric.listGenomes( $scope.opts )
+              .then(function(genomes) {
+                  $scope.genomes = genomes;
+                  $timeout(function() {
+                      $scope.loading = false;
+                  })
+              })
+*/
+        $scope.loading = true;
+    
+    }
+
+    $scope.selectPublic = function(item) {
+        $scope.selectedPublic = item;
+    }
+
+
+
+
+    
     $scope.showRelatedData = function(item) {
         item.loading = true;
         var gapfillProm = showGapfills(item);

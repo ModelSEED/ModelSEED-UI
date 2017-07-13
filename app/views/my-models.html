@@ -96,17 +96,7 @@
          class="row-hover my-model">
 
         <model-item ng-if="!item.status" layout="row">
-            <!--  
-            <div class="expand-container vertical-center">
-                <i ng-if="!item.relatedFBAs && !item.loading"
-                   class="fa fa-caret-right"
-                   style="opacity: 0.5;"></i>
-                <i ng-if="item.relatedFBAs && !item.loading"
-                   class="fa fa-caret-down"
-                   style="opacity: 1.0;"></i>
-                <span ng-if="item.loading">...</span>
-            </div>
-            -->
+
             <div flex="10" class="vertical-center">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                     <md-tooltip md-delay="800">View Model</md-tooltip>
@@ -144,10 +134,7 @@
         <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{relativeTime(item.timestamp)}}</div>
         </div>
-        
-        
-        
-        
+              
         <div flex="15" layout="column" layout-align="end center">
             <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
@@ -158,10 +145,7 @@
                 <i class="icon-highlight-remove"></i>
             </md-button>         
         </div>
-        
-
-
-        
+              
        </model-item>
 
 

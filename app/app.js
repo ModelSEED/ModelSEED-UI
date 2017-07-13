@@ -188,12 +188,15 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
 
 
-            
+
+        /*    
         }).state('app.genomes', {
             url: "/genomes/",
             templateUrl: 'app/views/genomes/genomes.html',
             controller: 'Genomes',
             authenticate: true
+        */    
+            
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
@@ -400,7 +403,7 @@ function($rootScope, $state, $sParams, $window,
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state digest
             $timeout(function() {
-                $state.transitionTo('app.genomes')
+                $state.transitionTo('app.RefModels')
                 event.preventDefault();
             })
         } else if (toState.authenticate && !auth.isAuthenticated()) {
