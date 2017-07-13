@@ -28,8 +28,7 @@
 <hr class="no-margin">
 
 <div ng-if="myModels.length">
-    <!-- CONTROLS -->
-    <div class="table-controls" layout="row">
+    <div class="table-controls" layout="row" >
         <md-input-container md-no-float flex="45">
             <md-icon class="material-icons">search</md-icon>
             <input ng-model="opts.query" type="text" placeholder="Search models">
@@ -44,6 +43,9 @@
         </md-input-container>
     </div>
 
+
+
+
     <!-- HEADER -->
     <div layout="row">
         <div class="expand-container vertical-center">
@@ -57,7 +59,7 @@
             <b>Species Name</b>
         </div>
 
-        <div flex="10" layout="row" layout-align="start center">
+        <div flex="5" layout="row" layout-align="start center">
             <b>Species Domain</b>
         </div>
 
@@ -87,19 +89,30 @@
     </div>
 
 
+
  
- 
- <div layout="row"
-         ng-repeat-start="item in (filtered = ( myModels | filter: plantOpts.query)
-                                                         | limitTo : plantOpts.limit : plantOpts.offset)"
+    <div ng-repeat-start="item in (filtered = ( myModels | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+	     ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
-        <div flex="10" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
-                <md-tooltip  md-delay="800">View Model</md-tooltip>
-                {{item.name}}
-            </a>
-        </div>
+        <model-item ng-if="!item.status" layout="row">
+            <!--  
+            <div class="expand-container vertical-center">
+                <i ng-if="!item.relatedFBAs && !item.loading"
+                   class="fa fa-caret-right"
+                   style="opacity: 0.5;"></i>
+                <i ng-if="item.relatedFBAs && !item.loading"
+                   class="fa fa-caret-down"
+                   style="opacity: 1.0;"></i>
+                <span ng-if="item.loading">...</span>
+            </div>
+            -->
+            <div flex="10" class="vertical-center">
+                <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
+                    <md-tooltip md-delay="800">View Model</md-tooltip>
+                    {{item.name}}
+                </a><br>
+            </div>
 
         <div flex="15" layout="row" layout-align="start center">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
@@ -108,30 +121,33 @@
             </a>
         </div>
 
-        <div flex="10" layout="row" layout-align="start center">
+        <div flex="5" layout="row" layout-align="start center">
             {{isPlant(item.path)}}
         </div>
                 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.rxnCount}}</div> 
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <!-- <div>{{item.cpdCount}}</div> -->     
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+            0    
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.fbaCount}}</div>     
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.gapfillCount}}</div>     
         </div>
         
         <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{relativeTime(item.timestamp)}}</div>
         </div>
-
+        
+        
+        
+        
         <div flex="15" layout="column" layout-align="end center">
             <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
@@ -142,9 +158,26 @@
                 <i class="icon-highlight-remove"></i>
             </md-button>         
         </div>
+        
+
+
+        
+       </model-item>
+
+
+        <status-item ng-if="item.status" layout="row">
+            <div>
+                Model {{item.name}} ({{item.orgName}}) is reconstructing...
+            </div>
+
+            <div flex class="timestamp vertical-center">
+                <small>{{relativeTime(item.timestamp)}}</small>
+            </div>
+        </status-item>
     </div>
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+        <!-- 
         <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
             <md-tab>
                 <md-tab-label>
@@ -180,7 +213,7 @@
             </md-tab>        
                 
         </md-tabs>
-
+        -->
     </div>
     
     <br>
