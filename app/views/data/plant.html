@@ -92,19 +92,41 @@
 
   </md-tab>
 
+
+
   <md-tab>
+  
   <md-tab-label>
       PATRIC
   </md-tab-label>
+  
   <md-tab-body>
   <br><br>
   
-  
-  
-    <div layout="row">    
+
+   <div layout="row">    
 
     <span layout-align="start"><i>Select Genome</i></span>
+  
+        <div class="table-controls" layout="row" >
+            <md-input-container md-no-float flex="45">
+                <md-icon class="material-icons">search</md-icon>
+                <input ng-model="opts.query" type="text" placeholder="Search models">
+            </md-input-container>
+        <!-- 
+        <md-input-container pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
+        </md-input-container>
+         -->
+        
+        </div>
 
+  
+      <!--  
       <div flex="45" class="vertical-center" layout="row" layout-align="start">    
         <select flex="45" ng-model="selectedGenome" ng-click="genomeSelected( )">
         
@@ -112,8 +134,11 @@
                 
         </select>
       </div>
-      
+      -->
   </div>
+  
+  
+  
   <div>
         <br><br>
         <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
