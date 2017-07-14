@@ -1,4 +1,6 @@
-<div ng-if="plants.length">
+<div>
+
+  <div ng-if="plants.length">
     <div class="table-controls" layout="row" >
         <md-input-container md-no-float flex="45">
             <md-icon class="material-icons">search</md-icon>
@@ -108,58 +110,23 @@
                 <i class="icon-file-download"></i>
             </md-button>
             
-                            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
-                                Copy
-                            </a>
-                            <span ng-if="copyInProgress[$index]">
-                                Copying...
-                            </span>
+            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
+                Copy
+            </a>
+            <span ng-if="copyInProgress[$index]">
+               Copying...
+            </span>
+         </div>
+         
          </model-item>                        
         </div>
-    </div>
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
-        <!-- 
-        <md-tabs md-selected="tabs.selectedIndex" md-no-ink md-dynamic-height>
-            <md-tab>
-                <md-tab-label>
-                    FBA Simulations
-                    (<span class="label-fba-count">{{item.fbaCount}}</span>)
-                </md-tab-label>
-
-                <md-tab-body>
-                    <ng-include src="'app/views/lists/expanded-fbas.html'">
-                </md-tab-body>
-            </md-tab>
-
-            <md-tab>
-                <md-tab-label>
-                    Gapfills
-                    (<span class="label-gapfill-count">{{item.gapfillCount}}</span>)
-                </md-tab-label>
-
-                <md-tab-body>
-                    <ng-include src="'app/views/lists/expanded-gapfills.html'">
-                </md-tab-body>
-            </md-tab>
-
-            <md-tab>
-                <md-tab-label>
-                    Expression Data
-                    (<span class="color-bright-purple">{{item.expression.length}}</span>)
-                </md-tab-label>
-
-                <md-tab-body>
-                    <ng-include src="'app/views/lists/expanded-expression.html'">
-                </md-tab-body>
-            </md-tab>        
-                
-        </md-tabs>
-    -->
     </div>
     
-    <br>
-    <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
+    </div>
+    
 </div>
+    
+<div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
 
- </div> <!-- end outer most div -->

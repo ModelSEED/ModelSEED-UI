@@ -27,7 +27,7 @@
     
   <!-- <span layout-align="start"><i>Select Genome to build a model for</i></span> -->
   
-  
+  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->  
   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
 
@@ -93,6 +93,7 @@
   </md-tab>
 
 
+  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
 
   <md-tab>
   
@@ -102,18 +103,15 @@
   
   <md-tab-body>
   <br><br>
-  
 
-   <div layout="row">    
+  <div>
 
-    <span layout-align="start"><i>Select Genome</i></span>
-  
-        <div class="table-controls" layout="row" >
-            <md-input-container md-no-float flex="45">
-                <md-icon class="material-icons">search</md-icon>
-                <input ng-model="opts.query" type="text" placeholder="Search models">
-            </md-input-container>
-        <!-- 
+    <div class="table-controls" layout="row" >
+        <md-input-container md-no-float flex="45">
+            <md-icon class="material-icons">search</md-icon>
+            <input ng-model="opts.query" type="text" placeholder="Search models">
+        </md-input-container>
+        
         <md-input-container pagination
             pagination-offset="opts.offset"
             pagination-limit="opts.limit"
@@ -121,24 +119,28 @@
             layout="row"
             layout-align="end center" flex>
         </md-input-container>
-         -->
         
-        </div>
+    </div>
 
-  
-      <!--  
-      <div flex="45" class="vertical-center" layout="row" layout-align="start">    
-        <select flex="45" ng-model="selectedGenome" ng-click="genomeSelected( )">
-        
-          <option ng-repeat="genome in $scope.microbes">{{genome.name}}</option>
+    <div ng-repeat-start="item in (filtered = ( myPlants | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+         ng-click="showRelatedData(item)"
+         class="row-hover my-model">
+
+        <model-item layout="row">
+
+            <div flex="10" class="vertical-center">
+                    {{item.name}}
+                <br>
+            </div>
+
+        </model-item>                        
+    </div>
                 
-        </select>
-      </div>
-      -->
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+    </div>
+    
   </div>
-  
-  
-  
+    
   <div>
         <br><br>
         <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
@@ -149,16 +151,55 @@
     
   </md-tab>
 
-
+  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
 
   <md-tab>
   <md-tab-label>
       RAST
   </md-tab-label>
-  <md-tab-body>
-  <br><br>
   
+    <md-tab-body>
+  <br><br>
+
   <div>
+
+    <div class="table-controls" layout="row" >
+        <md-input-container md-no-float flex="45">
+            <md-icon class="material-icons">search</md-icon>
+            <input ng-model="opts.query" type="text" placeholder="Search models">
+        </md-input-container>
+        
+        <md-input-container pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
+        </md-input-container>
+        
+    </div>
+
+    <div ng-repeat-start="item in (filtered = ( myPlants | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+         ng-click="showRelatedData(item)"
+         class="row-hover my-model">
+
+        <model-item layout="row">
+
+            <div flex="10" class="vertical-center">
+                    {{item.name}}
+                <br>
+            </div>
+
+        </model-item>                        
+    </div>
+                
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+    </div>
+    
+  </div>
+    
+  <div>
+        <br><br>
         <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
         <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
   </div>
@@ -166,98 +207,13 @@
   </md-tab-body>
     
   </md-tab>
-
-
-
+  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
 
 </md-tabs>
+    
 
-      
-  <div>
-    <br class="no-margin"/>
-    <br class="no-margin"/>
-  </div>
-  
-  
-  <!--
-  <div>
-      <label class="control-label">UploadedGenome: <b>{{genomeNameBox}}</b> </label>
-      <br class="no-margin"/>          
-  </div>
-  -->  
-  <!--   
-  <span layout-align="start"><i>Select Media for GapFilling</i></span>
-    
-  <div layout="row">    
-
-    <div layout="column">
-    
-      <div ng-controller="MediaDropdown as ctrl">
-            <div layout="row" layout-align="end end">
-                <md-progress-circular ng-if="!myMedia || !media"
-                                      md-mode="indeterminate"
-                                      md-diameter="10">
-                </md-progress-circular>
-                <a ng-click="filterPublic = !filterPublic">
-                    <span ng-if="filterPublic">Search my media
-                        <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
-                    </span>
-                    <span ng-if="!filterPublic">Search public media</span>
-                </a>
-            </div>
-
-            <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
-              <md-autocomplete
-                  ng-if="filterPublic"
-                  ng-disabled="ctrl.isDisabled"
-                  md-selected-item="ctrl.selectedItem"
-                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                  md-search-text="ctrl.searchText"
-                  md-selected-item-change="ctrl.selectedItemChange(item)"
-                  md-items="item in ctrl.querySearch(ctrl.searchText)"
-                  md-item-text="item.name"
-                  md-min-length="0"
-                  placeholder="Search for public media formulation (optional)...">
-                <md-item-template>
-                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
-                </md-item-template>
-                <md-not-found>
-                  No matches found for "{{ctrl.searchText}}".
-                </md-not-found>
-              </md-autocomplete>
-            </form>
-
-            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
-              <md-autocomplete
-                  ng-disabled="ctrl.isDisabled"
-                  md-selected-item="ctrl.selectedItem"
-                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                  md-search-text="ctrl.searchText"
-                  md-selected-item-change="ctrl.selectedItemChange(item)"
-                  md-items="item in ctrl.querySearch(ctrl.searchText)"
-                  md-item-text="item.name"
-                  md-min-length="0"
-                  placeholder="Search my media (optional)...">
-                <md-item-template>
-                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
-                </md-item-template>
-                <md-not-found>
-                  No matches found for "{{ctrl.searchText}}".
-                </md-not-found>
-              </md-autocomplete>
-            </form>
-    </div>
-    
-    </div>
-    
-  </div>
-  -->
-    
+<div ng-if="error" class="alert alert-danger">{{error}}</div>
 
 </div>
 
 
-<div ng-if="error" class="alert alert-danger">{{error}}</div>
-
-
-</body>

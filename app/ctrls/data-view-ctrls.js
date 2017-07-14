@@ -155,6 +155,16 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selected = null;
     
     $scope.copyInProgress = {};
+    
+    $scope.columns = [
+        {prop: 'genome_name', label: 'ModelID'}
+        
+    ]    
+    $scope.opts = {
+            query: '', limit: 3, offset: 0,
+            sort: {},
+            visible: ['genome_name']
+        };
 
     // For constructing models based on Patric genomes:
     MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
