@@ -1678,7 +1678,38 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
             })    
         
         return prom;
-    }    
+    }
+    
+    
+    $scope.toggleOperations = function(e, type, item) {
+        var tar = e.target;
+        e.stopPropagation();
+
+        // set selected item
+        $scope.selected = item;
+
+        $scope.loadingDownloads = true;
+        MS.getDownloads(item.path)
+          .then(function(dls) {
+              console.log('dls', dls)
+              $scope.selected.downloads = dls;
+              $scope.loadingDownloads = false;
+          })
+
+        if (type === 'download') {
+            if (!$mdSidenav('downloadOpts').isOpen())
+                $mdSidenav('downloadOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('downloadOpts').close()
+                $document.unbind(e)
+                $scope.selected = null;
+            })
+        } else if ($mdSidenav('downloadOpts').isOpen()) {
+            $mdSidenav('downloadOpts').close()
+        }
+    }
+    
 
     
 } ] )    
