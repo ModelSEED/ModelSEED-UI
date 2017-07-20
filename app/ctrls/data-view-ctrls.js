@@ -1445,16 +1445,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 if (!item.length) return '-';
 
                 var links = [];
-                for (var i=0; i<item.length; i++) {
+                // for (var i=0; i<item.length; i++) {
                	 
                     links.push('<a href="/feature' + path + 
             		        '/.plantseed_data/minimal_genome/' +
-                            item[i] + '" >'
-                         + item[i] + ' </a>' );                	 
+                            item + '">'
+                         + item + ' </a>' );                	 
 
-                }
-                return links;
-                // return links.join('<br>');
+                //}
+                // return links;
+                return links.join('<br>');
             }
                 
         },
