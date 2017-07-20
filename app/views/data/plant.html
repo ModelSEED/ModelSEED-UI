@@ -27,7 +27,7 @@
     
   <!-- <span layout-align="start"><i>Select Genome to build a model for</i></span> -->
   
-  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->  
+  <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->  
   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
 
@@ -93,7 +93,7 @@
   </md-tab>
 
 
-  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
+  <!-- --------------------------------------------------------- PATRIC -------------------------------------------------------------- -->
 
   <md-tab>
   
@@ -122,7 +122,7 @@
         
     </div>
 
-    <div ng-repeat-start="item in (filtered = ( myPlants | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+    <div ng-repeat-start="item in (filtered = ( microbes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
@@ -151,7 +151,7 @@
     
   </md-tab>
 
-  <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
+  <!-- --------------------------------------------------------- RAST -------------------------------------------------------------- -->
 
   <md-tab>
   <md-tab-label>
@@ -179,7 +179,7 @@
         
     </div>
 
-    <div ng-repeat-start="item in (filtered = ( myPlants | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+    <div ng-repeat-start="item in (filtered = ( rastMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 

@@ -165,6 +165,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             sort: {},
             visible: ['genome_name']
         };
+    
+    
+
+    // public rast genome
+    // Below needs to get refactored with a new call appropriate with the new app arch
+    MS.listRastGenomes()
+      .then(function(data) {
+          $scope.rastMicrobes = data;
+          //console.log('myMicrobes (rast)', $scope.myMicrobes)
+      })
+
+      
+      
 
     // For constructing models based on Patric genomes:
     MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
@@ -1049,16 +1062,20 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     	
         // XXX: This service call has an anomaly: corrupts the path!!!
     	// $scope.data will be needed for:
-        // TODO: converge orthogonal Flux data:        
+        // TODO: converge orthogonal Flux data:
+    	/*
     	return MS.getModel(path)
     	    .then( function(res) {
                 console.log('res',res)
+                */
                 // $scope.data = res.data;
                 // $scope.loading = false;
-            } );        
+    	/*
+            } );
+            */        
 
         // XXX: This service call has an anomaly: The contents of Meta no longer supports expression data!!!            
-        /*    
+           
         return WS.getObjectMeta(path)
             .then(function(res) {
                 var expList = [],
@@ -1069,7 +1086,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 
                 $scope.expression = expList;
             })
-            */
+            
     }
     
     $scope.uploadExpression = function(ev, item) {
