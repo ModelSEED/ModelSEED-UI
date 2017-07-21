@@ -440,7 +440,9 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 $scope.startUpload = function() {
                 	var name = "";
                 	if( ! item.name ) {
-                		var name = item.path.split('/').slice( -1 ); 
+                		var name = item.path.split('/').slice( -1 )[ 0 ]; 
+                	} else {
+                		var name = item.name;
                 	}
                     startUpload( name );
                 }
@@ -451,7 +453,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                         'please be patient', 10000000)
 
                     Upload.uploadFile($this.selectedFiles, null, function(node) {                        
-                        MS.createExpressionFromShock(node, ( item.name || name ), $scope.form.name)
+                        MS.createExpressionFromShock(node, name, $scope.form.name)
                             .then(function(res) {
                                 console.log('done importing', res)
                                 self.showComplete('Import complete', name);
