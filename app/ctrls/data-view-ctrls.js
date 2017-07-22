@@ -1027,7 +1027,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             // refreshData();
 
         // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
-        $scope.getRxnFluxes();               
+        $scope.getRxnFluxes();
+        
+        
+        
+        $scope.getCpdFluxes();               
+
         
 
         /*
@@ -1045,7 +1050,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             .then(function(fbas) {
                 $scope.relatedFBAs = fbas;               
                 
-                Tabs.selectedIndex = 0;
+                // Tabs.selectedIndex = 0;
             })
     }
     
@@ -1054,27 +1059,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     }
 
     function updateExpression() {
-    	Tabs.selectedIndex = 2;
-
-    	
-    	
-    	// TODO: Fix the below service call(s)
-    	
-        // XXX: This service call has an anomaly: corrupts the path!!!
-    	// $scope.data will be needed for:
-        // TODO: converge orthogonal Flux data:
-    	/*
-    	return MS.getModel(path)
-    	    .then( function(res) {
-                console.log('res',res)
-                */
-                // $scope.data = res.data;
-                // $scope.loading = false;
-    	/*
-            } );
-            */        
-
-        // XXX: This service call has an anomaly: The contents of Meta no longer supports expression data!!!            
+    	// Tabs.selectedIndex = 2;                    
            
         return WS.getObjectMeta(path)
             .then(function(res) {
@@ -1103,9 +1088,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 item.fbaCount++;
             })
         })
-    }
-    
-    
+    }   
     
     // FBA selection for data viewing (enables determine which FBA is selected via check boxes)
     $scope.addFBA = function(e, fba, model) {
@@ -1131,8 +1114,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
             
             $scope.selectedFBA = fba.path.split( "/").slice( -1 );
             
-            // Call function to set selected fba reaction fluxes:
-            $scope.getRxnFluxes(); 
+            // Call functions to set selected fba fluxes:
+            $scope.getRxnFluxes();
+            $scope.getCpdFluxes();
 
             fba.checked = true;
         }
@@ -1160,7 +1144,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         return MS.getModelGapfills(path)
             .then(function(gfs) {
                 $scope.relatedGapfills = gfs;
-                Tabs.selectedIndex = 0;
+                // Tabs.selectedIndex = 0;
             })
     }
         
@@ -1259,10 +1243,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     
-    // TODO: converge orthogonal Flux data:
-        
+    // TODO: converge orthogonal Flux data:        
     // $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    
     $scope.getRxnFluxes = function( ) {
         // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
     	if( $scope.selectedFBA.length>0 ) {
@@ -1283,8 +1265,26 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         })
       }
     }
-            
+    
+    $scope.getCpdFluxes = function( ) {
+        // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
+    	if( $scope.selectedFBA.length>0 ) {
+        var fbaPath = path + '/fba/' + $scope.selectedFBA; 
+        WS.get( fbaPath ).then(function(obj) {
+            FBAParser.parse(obj.data)
+                     .then(function(parsed) {
+                        $scope.fbas = [parsed.data];
+                        $scope.models = [parsed.rawModel];
+                        // $scope.cpdFluxes = parsed.fba.compoundFluxes;
+                        
+                        $scope.cpdFluxHash = parsed.fba.cpdhash;
 
+                        $scope.loading = false;
+                     });
+        })
+      }
+    }
+    
     // reaction table spec
     $scope.rxnHeader = [
         {label: 'ID', key: 'id', newTab: 'rxn',
@@ -1413,10 +1413,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                 return fbas.join('<br>');
             }
 
-        }
-        
-        
-        
+        }        
         /* 
         {label: 'Gapfill', key: 'gapfill',
             formatter: function(item) {
@@ -1434,7 +1431,78 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula'},
         {label: 'Charge', key: 'charge'},
-        {label: 'Compartment', key: 'compartment'}
+        {label: 'Compartment', key: 'compartment'},
+        
+        // TODO: converge orthogonal Flux data:
+        {label: 'Flux', key: 'id',
+
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    fbas.push( $scope.selectedFBA );                        
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                                fbas.push( $scope.cpdFluxHash[ row ].value );
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Min', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";               
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    fbas.push( $scope.selectedFBA );                       
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                                fbas.push( $scope.cpdFluxHash[ row ].min );
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Max', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    fbas.push( $scope.selectedFBA );
+                        
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                                fbas.push( $scope.cpdFluxHash[ row ].max );
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+        },
+        {label: 'Class', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {               	
+                    fbas.push( $scope.selectedFBA );                       
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                                fbas.push( $scope.cpdFluxHash[ row ].class );
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+        }
+        
     ];
 
 
@@ -2394,7 +2462,8 @@ function(WS, ModelParser) {
                       genes: genes,
                       
                       
-                      
+                      cpdhash: cpdhash,
+                     
                       rxnhash: rxnhash,
                       
                       
