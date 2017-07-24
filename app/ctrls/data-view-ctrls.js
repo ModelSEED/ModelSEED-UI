@@ -995,9 +995,9 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs',
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs', 'GenomeParser',
  'ModelParser', 'FBAParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
+function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, GenomeParser,
          ModelParser, FBAParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
     $scope.Tabs = Tabs;
@@ -1007,6 +1007,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
     var path = $sParams.path;
     
     $scope.name = path.split('/').pop();
+    
+    $scope.selected;
     
     $scope.selectedFBA = "";
     
@@ -1028,10 +1030,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
 
         // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
         $scope.getRxnFluxes();
-        
-        
-        
         $scope.getCpdFluxes();               
+        
+        
+
+        // TODO July 24: Consider ALL the genes
+        $scope.getAllGenesForGenome();       
 
         
 
@@ -1220,7 +1224,27 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
         });
     }
     
-    $scope.selected;
+    
+
+    // TODO July 24: Consider ALL the genes
+    $scope.getAllGenesForGenome = function( ) {
+
+        var genomePath = path + '/genome';
+        
+        var dictionary = {};
+ 
+        WS.get( genomePath ).then(function(obj) {
+        	dictionary = GenomeParser.parse(obj.data)
+                 // .then(function(parsed) {
+                                         	 
+                  // })
+                  ;
+        });
+      
+    }
+    
+    
+    
 
     // External urls used for features (deprecated)
     var featureUrl;
@@ -1444,7 +1468,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                     fbas.push( $scope.selectedFBA );                        
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
-                                fbas.push( $scope.cpdFluxHash[ row ].value );
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].value );
+                            	}
                             }
                         // }
                 }
@@ -1461,7 +1487,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                     fbas.push( $scope.selectedFBA );                       
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
-                                fbas.push( $scope.cpdFluxHash[ row ].min );
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].min );
+                            	}
                             }
                         // }
                 }
@@ -1479,7 +1507,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                         
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
-                                fbas.push( $scope.cpdFluxHash[ row ].max );
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].max );
+                            	}
                             }
                         // }
                 }
@@ -1495,7 +1525,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs,
                     fbas.push( $scope.selectedFBA );                       
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
-                                fbas.push( $scope.cpdFluxHash[ row ].class );
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].class );
+                            	}
                             }
                         // }
                 }
@@ -1947,6 +1979,52 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
     }
 
 }])
+
+
+
+
+.service('GenomeParser', ['MS', function(MS) {
+    var self = this;
+    
+    this.genehash = {};
+    // this.cpdhash = {};
+    // this.biohash = {};
+    // this.rxnhash = {};
+    // this.cmphash = {};
+    // this.gfhash = {};
+
+    
+    this.parse = function (data) {
+        var modelGenes = []
+        //,
+        // reactions = [],
+        // compounds = [],
+        // compartments = [],
+        // biomasses = [],
+        // gapfilling = []
+        ;
+
+        var modelTables =  {
+            genes: modelGenes
+        		// ,
+                // reactions: reactions,
+                // compounds: compounds,
+                // compartments: compartments,
+                // biomass: biomasses
+        };
+
+        
+        
+        return modelTables;
+        }
+        
+        return {parse: this.parse}
+        
+        
+
+}])
+
+
 
 
 .service('ModelParser', ['MS', function(MS) {
