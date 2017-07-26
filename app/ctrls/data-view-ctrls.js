@@ -1995,25 +1995,25 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     
     this.parse = function (data) {
-        var modelGenes = []
-        //,
-        // reactions = [],
-        // compounds = [],
-        // compartments = [],
-        // biomasses = [],
-        // gapfilling = []
-        ;
+        var modelGenes = [];
+
+	for (var i=0; i< data.features.length; i++) {
+	    var ftr = data.features[i];
+
+	    modelGenes.push({
+		             id: ftr.id,
+			     function: ftr.function
+			   });
+	}
 
         var modelTables =  {
             genes: modelGenes
-        		// ,
-                // reactions: reactions,
-                // compounds: compounds,
-                // compartments: compartments,
-                // biomass: biomasses
+	    // Not sure if these should be instantiated here
+	    //	    reactions: [],
+	    //            compounds: [],
+	    //            compartments: [],
+	    //            biomass: []
         };
-
-        
         
         return modelTables;
         }
@@ -2260,6 +2260,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                     foundGenes.push(item.id)
                 })
 
+		    //Can we add a new column to the genes table: "function"?
                 if (foundGenes.indexOf(gene) == -1)
                     modelGenes.push( { id: gene, reactions: [id] } );
                 else
@@ -2310,7 +2311,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         var modelTables =  {reactions: reactions,
                             compounds: compounds,
-                            genes: modelGenes,
+                            genes: modelGenes, // doesn't this over-ride line 2010?
                             compartments: compartments,
                             biomass: biomasses};
 
