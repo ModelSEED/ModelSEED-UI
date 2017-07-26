@@ -1567,7 +1567,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
     $scope.compartmentHeader = [
         {label: 'Compartment', key: 'id'},
-        {label: 'Name', key: 'id'},
+        {label: 'Name', key: 'name'},
         {label: 'pH', key: 'pH'},
         {label: 'Potential', key: 'potential'}
     ]
@@ -2043,6 +2043,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         "x":"Peroxisome",
         "v":"Vacuole",
         "w":"Cell wall",
+	"j":"Mitochondrial intermembrane space"
     };
 
     this.cpdhash = {};
