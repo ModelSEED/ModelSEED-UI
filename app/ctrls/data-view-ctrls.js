@@ -1004,13 +1004,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     Tabs.totalTabCount = 6;
     
     // path and name of "modelfolder"
-    var path = $sParams.path;
-    
+    var path = $sParams.path;  
     $scope.name = path.split('/').pop();
     
-    $scope.selected;
-    
+    $scope.selected;    
     $scope.selectedFBA = "";
+    
+      
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
@@ -1026,7 +1026,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         else         
             fbaProm = updateFBAs();
             
-            // refreshData();
 
         // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
         $scope.getRxnFluxes();
@@ -1234,11 +1233,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         var dictionary = {};
  
         WS.get( genomePath ).then(function(obj) {
-        	dictionary = GenomeParser.parse(obj.data)
+        	dictionary = GenomeParser.parse(obj.data);
+        	$scope.geneFunctions = dictionary;
                  // .then(function(parsed) {
                                          	 
                   // })
-                  ;
+                  // ;
         });
       
     }
@@ -1345,7 +1345,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         
         
         
-        // TODO: converge orthogonal Flux data:
+        // converge orthogonal Flux data:
         {label: 'Flux', key: 'id',
 
             formatter: function( row ) {
@@ -1457,7 +1457,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         {label: 'Charge', key: 'charge'},
         {label: 'Compartment', key: 'compartment'},
         
-        // TODO: converge orthogonal Flux data:
+        // converge orthogonal Flux data:
         {label: 'Flux', key: 'id',
 
             formatter: function( row ) {
@@ -1561,7 +1561,29 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         {label: 'Reactions', key: 'reactions', newTabList: true,
         call: function(e, item) {
           $scope.toggleView(e, 'rxn', item );
-        }
+            }
+        },
+        
+        
+        
+        {label: 'Functions', key: 'id',
+            formatter: function( item ) {
+                var fncns = [];
+
+            	if( $scope.geneFunctions ){
+                
+            		fncns.push( $scope.geneFunctions[ item ] );
+            		
+            		// fncns.push( $scope.geneFunctions[ item ].function );
+            		
+            	// } else {
+            	    // getAllGenesForGenome();       
+            		// fncns.push( $scope.geneFunctions[ item ] );
+	
+            	}                
+                return fncns.join('<br>');
+
+            }
         }
     ];
 
@@ -1995,28 +2017,29 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
     
     this.parse = function (data) {
-        var modelGenes = [];
+    	
+        var modelGenes = { };
+        // var modelGenes = [];
 
-	for (var i=0; i< data.features.length; i++) {
-	    var ftr = data.features[i];
-
-	    modelGenes.push({
-		             id: ftr.id,
-			     function: ftr.function
-			   });
-	}
-
+        for (var i=0; i< data.features.length; i++) {
+            var ftr = data.features[ i ];
+	        modelGenes[ ftr.id ] = ftr.function;
+            /*
+	        modelGenes.push( {
+                id: ftr.id,
+                function: ftr.function
+            } );
+	        */
+	    }
+	return modelGenes;
+        /*
         var modelTables =  {
             genes: modelGenes
-	    // Not sure if these should be instantiated here
-	    //	    reactions: [],
-	    //            compounds: [],
-	    //            compartments: [],
-	    //            biomass: []
-        };
-        
+        };        
         return modelTables;
-        }
+        */
+	
+    }
         
         return {parse: this.parse}
         

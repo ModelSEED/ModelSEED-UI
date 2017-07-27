@@ -58,7 +58,8 @@
       <select flex="30" ng-model="selectedService" ng-click="showRelatedData( item )">
         <option>FBA</option>
         <option>Expression</option>        
-        <option>GapFill</option>        
+        <option>GapFill</option>
+        <option>Functions</option>             
       </select>
     </div>
     
@@ -73,6 +74,11 @@
 
     <span ng-if="selectedService=='GapFill'">
         <ng-include src="'app/views/lists/expanded-gapfills.html'" >    
+    </span>
+        
+    <span ng-if="selectedService=='Functions'">
+        <!-- Next call would wreak havoc -->
+        <!--  {{getAllGenesForGenome()}} -->   
     </span>
 
     </div>
