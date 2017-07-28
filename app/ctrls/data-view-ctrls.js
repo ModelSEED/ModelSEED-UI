@@ -1231,16 +1231,42 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         var genomePath = path + '/genome';
         
         var dictionary = {};
+        var genomeGenes = [];
  
         WS.get( genomePath ).then(function(obj) {
-        	dictionary = GenomeParser.parse(obj.data);
+        	dictionary = GenomeParser.parse(obj.data).dictionary;
+        	genomeGenes = GenomeParser.parse(obj.data).genomeGenes;
+        	
         	$scope.geneFunctions = dictionary;
-                 // .then(function(parsed) {
-                                         	 
-                  // })
-                  // ;
+        	
+            // Merge Functions and Genes without reactions:
+            if( $scope.geneFunctions ){
+                var foundGenes = [];
+                var gene;
+                
+                $scope.data.genes.forEach(function(item) {
+                    foundGenes.push(item.id)
+                })
+                
+
+                for ( var i = 0; i <  genomeGenes.length; i++ ) {
+                	gene = genomeGenes[ i ];
+                	// If gene is not in foundGenes then add gene to $scope.data.genes
+                    if (foundGenes.indexOf(gene) == -1) {
+                    	$scope.data.genes.push( { id: gene, reactions: [] } );
+                    	console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    // else
+                        // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
+
+                }        	
+            	
+            }        	
+        	
+        	
         });
-      
+        
+        
     }
     
     
@@ -1571,12 +1597,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
             	if( $scope.geneFunctions ){
                 
             		fncns.push( $scope.geneFunctions[ item ] );
-            		
-            		// fncns.push( $scope.geneFunctions[ item ].function );
-            		
-            	// } else {
-            	    // getAllGenesForGenome();       
-            		// fncns.push( $scope.geneFunctions[ item ] );
 	
             	}                
                 return fncns.join('<br>');
@@ -1630,6 +1650,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         $scope.orgName = res.data.name;
 
         $scope.data = ModelParser.parse(res.data);
+                
         $scope.loading = false;
     }).catch(function(e) {
         $scope.error = e;
@@ -1955,7 +1976,6 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
 .service('Tabs', ['$timeout', 'MS', '$stateParams', 'uiTools', 'ModelParser',
 function ($timeout, MS, $sParams, uiTools, ModelParser) {
     var self = this;
-
     /**
      * tabs = [
      *    { name: 'new tab', otherData: 'foo'},
@@ -1993,7 +2013,6 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             }
         }
     };
-
     this.clearTabs = function() {
         self.tabs = [];
     }
@@ -2006,21 +2025,16 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 .service('GenomeParser', ['MS', function(MS) {
     var self = this;
     
-    this.genehash = {};
-    // this.cpdhash = {};
-    // this.biohash = {};
-    // this.rxnhash = {};
-    // this.cmphash = {};
-    // this.gfhash = {};
-
+    // this.genehash = {};
     
-    this.parse = function (data) {
-    	
+    this.parse = function (data) {    	
         var modelGenes = { };
-        // var modelGenes = [];
+        var genomeGenes = [];
 
         for (var i=0; i< data.features.length; i++) {
             var ftr = data.features[ i ];
+            
+            genomeGenes.push( ftr.id );
 	        modelGenes[ ftr.id ] = ftr.function;
             /*
 	        modelGenes.push( {
@@ -2029,22 +2043,20 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             } );
 	        */
 	    }
-	return modelGenes;
+	return {
+        genomeGenes: genomeGenes,
+        dictionary: modelGenes
+	};
         /*
         var modelTables =  {
             genes: modelGenes
         };        
         return modelTables;
-        */
-	
+        */	
     }
         
-        return {parse: this.parse}
-        
-        
-
+    return {parse: this.parse}
 }])
-
 
 
 
@@ -2075,9 +2087,6 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
     this.gfhash = {};
 
     this.parse = function (data) {
-        // this.modelreactions = data.modelreactions;
-        // this.modelcompounds = data.modelcompounds;
-        // this.modelcompartments = data.modelcompartments;
 
         var reactions = [],
             compounds = [],
