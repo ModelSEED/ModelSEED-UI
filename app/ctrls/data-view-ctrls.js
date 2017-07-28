@@ -1014,7 +1014,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
-        item.loading = true;        
+        // item.loading = true;        
         
         var gapfillProm = showGapfills();
         var expressionProm = showExpression();
@@ -1267,7 +1267,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     
-    // TODO: converge orthogonal Flux data:        
+    // converge orthogonal Flux data:        
     // $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.getRxnFluxes = function( ) {
         // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
@@ -1563,9 +1563,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
           $scope.toggleView(e, 'rxn', item );
             }
         },
-        
-        
-        
+                
         {label: 'Functions', key: 'id',
             formatter: function( item ) {
                 var fncns = [];
