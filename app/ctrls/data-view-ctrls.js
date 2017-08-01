@@ -1009,8 +1009,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.selected;    
     $scope.selectedFBA = "";
-    
-      
+       
+    var genomePath = path + '/genome';
+    var dictionary = {};
+    var genomeGenes = [];   
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
@@ -1026,18 +1028,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         else         
             fbaProm = updateFBAs();
             
-
         // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
         $scope.getRxnFluxes();
         $scope.getCpdFluxes();               
         
-        
-
-        // TODO July 24: Consider ALL the genes
-        $scope.getAllGenesForGenome();       
-
-        
-
         /*
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
@@ -1223,15 +1217,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         });
     }
     
-    
-
-    // TODO July 24: Consider ALL the genes
+    // Consider ALL the genes (deprecated)
     $scope.getAllGenesForGenome = function( ) {
 
-        var genomePath = path + '/genome';
+        // var genomePath = path + '/genome';
         
-        var dictionary = {};
-        var genomeGenes = [];
+        // var dictionary = {};
+        // var genomeGenes = [];
  
         WS.get( genomePath ).then(function(obj) {
         	dictionary = GenomeParser.parse(obj.data).dictionary;
@@ -1248,7 +1240,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     foundGenes.push(item.id)
                 })
                 
-
                 for ( var i = 0; i <  genomeGenes.length; i++ ) {
                 	gene = genomeGenes[ i ];
                 	// If gene is not in foundGenes then add gene to $scope.data.genes
@@ -1258,19 +1249,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     }
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
-
-                }        	
-            	
-            }        	
-        	
-        	
-        });
-        
-        
-    }
-    
-    
-    
+                }        	            	
+            }        	       	
+        } );
+                
+    }    
 
     // External urls used for features (deprecated)
     var featureUrl;
@@ -1651,13 +1634,44 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
         $scope.data = ModelParser.parse(res.data);
                 
-        $scope.loading = false;
+        $scope.loading = false;        
+        
+    }).then( function () {
+        WS.get( genomePath ).then(function(obj) {
+        	dictionary = GenomeParser.parse(obj.data).dictionary;
+        	genomeGenes = GenomeParser.parse(obj.data).genomeGenes;
+        	
+        	$scope.geneFunctions = dictionary;
+        	
+            // Merge Functions and Genes without reactions:
+            if( $scope.geneFunctions ){
+                var foundGenes = [];
+                var gene;
+                
+                $scope.data.genes.forEach(function(item) {
+                    foundGenes.push(item.id)
+                })
+                
+                for ( var i = 0; i <  genomeGenes.length; i++ ) {
+                	gene = genomeGenes[ i ];
+                	// If gene is not in foundGenes then add gene to $scope.data.genes
+                    if (foundGenes.indexOf(gene) == -1) {
+                    	$scope.data.genes.push( { id: gene, reactions: [] } );
+                    	console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    // else
+                        // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
+                }        	            	
+            }        	       	
+        } );    	
+    	   
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
     })
 
-
+    
+    
     /* testing
     MS.getModel(path).then(function(res) {
         console.log('res',res)
