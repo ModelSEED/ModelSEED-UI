@@ -1377,7 +1377,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
-                    fbas.push( $scope.selectedFBA );
+                    // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
@@ -1400,7 +1400,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
-                    fbas.push( $scope.selectedFBA );
+                    // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
@@ -1423,7 +1423,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
-                    fbas.push( $scope.selectedFBA );
+                    // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
@@ -1446,7 +1446,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
-                    fbas.push( $scope.selectedFBA );
+                    // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
@@ -1485,7 +1485,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var fba = "";
                 var fbaPath = "";                                
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
-                    fbas.push( $scope.selectedFBA );                        
+                    // fbas.push( $scope.selectedFBA );                        
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
                             	if( $scope.cpdFluxHash[ row ] ){
@@ -1504,7 +1504,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var fba = "";
                 var fbaPath = "";               
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
-                    fbas.push( $scope.selectedFBA );                       
+                    // fbas.push( $scope.selectedFBA );                       
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
                             	if( $scope.cpdFluxHash[ row ] ){
@@ -1523,7 +1523,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var fba = "";
                 var fbaPath = "";                
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
-                    fbas.push( $scope.selectedFBA );
+                    // fbas.push( $scope.selectedFBA );
                         
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
@@ -1542,7 +1542,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var fba = "";
                 var fbaPath = "";                
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {               	
-                    fbas.push( $scope.selectedFBA );                       
+                    // fbas.push( $scope.selectedFBA );                       
                         // if( $scope.cpdFluxes ) {
                             if( $scope.cpdFluxHash ) {
                             	if( $scope.cpdFluxHash[ row ] ){

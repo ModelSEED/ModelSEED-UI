@@ -222,6 +222,13 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             name: obj.id,
             path: obj.ref,
             orgName: obj.name,
+            
+            
+            
+            geneCount: obj.num_genes,
+            
+            
+            
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,

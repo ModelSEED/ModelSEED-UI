@@ -1,5 +1,5 @@
 
-<div style="background:black;border:1px solid #cccccc;padding: 10px;">
+<div style="background:purple;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
     <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-1">
             <a ng-click="changeView('Plants')" >
@@ -120,7 +120,8 @@
         </div>
 
         <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
-            0    
+            <div>{{item.geneCount}}</div>     
+    
         </div>
 
         <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>

@@ -1,6 +1,6 @@
 
 
-<div style="background:black;border:1px solid #cccccc;padding: 10px;">
+<div style="background:purple;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
     <!--  
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
@@ -12,22 +12,22 @@
     
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ng-click="changeView('Plants')" >
-             <span hide-sm>PublicPlantModels</span>
+             <span hide-sm>Public Plant Models</span>
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ng-click="changeView('Annotations')" >
             <span hide-sm>Subsystems</span>
         </a>
     </li>
     
-    <!-- ??? -->
-    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-1">
+    <!-- 
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ng-click="changeView('Annotations')">
             <span hide-sm>FunctionalRoles</span>
         </a>
     </li>
-    
+     -->
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
         <a ui-sref="app.biochem({chem: 'reactions'})">
             <span hide-sm>Reactions</span>
