@@ -110,7 +110,7 @@
                 <i class="icon-file-download"></i>
             </md-button>
             
-            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path.split('/').slice(0,-2).join('/'))">
+            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path)">
                 Copy
             </a>
             <span ng-if="copyInProgress[$index]">

@@ -1332,9 +1332,9 @@ function($s, $sParams, WS, MS, Auth,
 
 .controller('RefModels',
 ['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http',
 function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
-MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
+MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 	
     var $self = $scope;
     
@@ -1631,8 +1631,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
                     Dialogs.showComplete('Copy complete', name);
                     
                     // go ahead and reload genomes and models
-                    loadPrivatePlants();     
-                    MS.listModels('/'+Auth.user+'/plantseed')                         
+                    // loadPrivatePlants();     
+                    // MS.listModels('/'+Auth.user+'/plantseed')                         
 
                     $scope.copyInProgress[i] = false;
                 }).catch(function(e) {
