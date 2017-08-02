@@ -1012,7 +1012,18 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
        
     var genomePath = path + '/genome';
     var dictionary = {};
-    var genomeGenes = [];   
+    var genomeGenes = [];
+    
+ 
+    
+    var parsedPath = path.split('/').slice(0,-2);
+    if( parsedPath.indexOf('plantseed') == -1 && parsedPath.indexOf('modelseed') == -1 ) {
+    	$scope.isRef = false;
+    } else {
+    	$scope.isRef = true;    	
+    }
+    
+    
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
@@ -1657,7 +1668,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 	// If gene is not in foundGenes then add gene to $scope.data.genes
                     if (foundGenes.indexOf(gene) == -1) {
                     	$scope.data.genes.push( { id: gene, reactions: [] } );
-                    	console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    	// console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
                     }
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
@@ -2037,14 +2048,13 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
 
 .service('GenomeParser', ['MS', function(MS) {
-    var self = this;
-    
+    var self = this;   
     // this.genehash = {};
     
     this.parse = function (data) {    	
-        var modelGenes = { };
-        var genomeGenes = [];
-
+      var modelGenes = { };
+      var genomeGenes = [];
+      if( data.features ) {
         for (var i=0; i< data.features.length; i++) {
             var ftr = data.features[ i ];
             
@@ -2057,10 +2067,11 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             } );
 	        */
 	    }
-	return {
+      }
+	  return {
         genomeGenes: genomeGenes,
         dictionary: modelGenes
-	};
+	  };
         /*
         var modelTables =  {
             genes: modelGenes
