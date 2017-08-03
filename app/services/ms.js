@@ -94,6 +94,20 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             })
     }
 
+    
+    
+    this.reconstructionPipeline = function(name, annotate) {
+        var args = {destname: name, annotate: annotate};
+        console.log('calling pipeline:', args)
+        return $http.rpc('ms', 'plant_pipeline', args)
+                    .then(function(res){
+                        console.log('response', res)
+                        return res;
+                    })
+    }
+    
+    
+    
     this.reconstruct = function(form, params) {
     	var parameters = angular.extend(form, {loadingPlants: true});
         // var params = angular.extend(form, params);

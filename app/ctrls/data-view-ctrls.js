@@ -1087,7 +1087,39 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
             updateExpression(item);
         })
     }
-        
+    
+    
+    
+    $scope.reconstructPipeline = function(ev, item) {
+    	var reconstructpromise =             
+        	MS.reconstructionPipeline( $scope.name, 0 )
+                      .then(function(r) {
+
+                      }).catch(function(e) {
+                    	  console.log( 'ReconstructPipeline Error', e.error.message );
+
+                      })    	
+    	
+    }
+    
+    
+    
+
+    $scope.reconstructPipelineAnnotate = function(ev, item) {
+    	var reconstructpromise =             
+        	MS.reconstructionPipeline( $scope.name, 1 )
+                      .then(function(r) {
+
+                      }).catch(function(e) {
+                    	  console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
+
+                      })    	
+    	
+    }
+
+    
+    
+    
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
