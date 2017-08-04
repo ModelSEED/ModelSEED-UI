@@ -2,13 +2,13 @@
 <div style="background:purple;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
     <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-1">
-            <a ng-click="changeView('Plants')" >
-            <span hide-sm>MyModels</span>
+            <a ui-sref="app.myModels">    
+            <span hide-sm>My Models</span>
         </a>
     </li>
     <li ng-class="{ active: $state.includes('app.myMedia') }" id="tour-1">
             <a ui-sref="app.myMedia">    
-                <span hide-sm>MedMedia</span>
+                <span hide-sm>Med Media</span>
             </a>
     </li>    
 </ul>

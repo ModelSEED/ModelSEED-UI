@@ -182,7 +182,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             
             
         }).state('app.RefModels', {
-            url: "/genomes/",
+            url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
             controller: 'RefModels',
             authenticate: true

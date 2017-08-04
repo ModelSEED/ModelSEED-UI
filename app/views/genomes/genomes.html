@@ -11,12 +11,12 @@
     -->
     
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
-        <a ng-click="changeView('Plants')" >
+        <a ui-sref="app.RefModels({ref: 'Plants'})">
              <span hide-sm>Public Plant Models</span>
         </a>
     </li>
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
-        <a ng-click="changeView('Annotations')" >
+        <a ui-sref="app.RefModels({ref: 'Annotations'})">
             <span hide-sm>Subsystems</span>
         </a>
     </li>
@@ -85,8 +85,8 @@
 
 
 
-<ng-include ng-if="view == 'Microbes'" src="'app/views/genomes/microbes--.html'"></ng-include>
+<ng-include ng-if="ref == 'Microbes'" src="'app/views/genomes/microbes--.html'" ></ng-include>
 
-<ng-include ng-if="view == 'Plants'" src="'app/views/genomes/plants--.html'"></ng-include>
+<ng-include ng-if="ref == 'Plants'" src="'app/views/genomes/plants--.html'"></ng-include>
 
-<ng-include ng-if="view == 'Annotations'" src="'app/views/genomes/annotations.html'"></ng-include>
+<ng-include ng-if="ref == 'Annotations'" src="'app/views/genomes/annotations.html'"></ng-include>

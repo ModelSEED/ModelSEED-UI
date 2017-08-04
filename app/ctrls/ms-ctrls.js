@@ -1331,14 +1331,16 @@ function($s, $sParams, WS, MS, Auth,
 
 
 .controller('RefModels',
-['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
+['$scope', '$stateParams', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http',
-function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
+function($scope, $stateParams, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 	
     var $self = $scope;
     
     // refreshData();
+    
+    $scope.ref = $stateParams.ref;
 
     $scope.microbes = [];
     $scope.plants = [];

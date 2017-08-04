@@ -10,12 +10,12 @@
         -->
         
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
-            <a ui-sref="app.RefModels" ng-click="changeView('Plants', '0')">
+            <a ui-sref="app.RefModels({ref: 'Plants'})">
                 <span hide-sm>Public Plant Models</span>
             </a>
         </li>
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
-            <a ui-sref="app.RefModels" ng-click="changeView('Annotations', '2')">
+            <a ui-sref="app.RefModels({ref: 'Annotations'})">
                 <span hide-sm>Subsystems</span>
             </a>
         </li>

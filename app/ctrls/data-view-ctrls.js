@@ -143,6 +143,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     // path and name of object
     // var path = $sParams.path;
+	
+	$scope.selectedTemplate;
     
     $scope.myPlants = [];
     $scope.myMedia = [];
@@ -155,7 +157,31 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selected = null;
     
     $scope.copyInProgress = {};
+
     
+    // Template dropdown options
+    $scope.options = [{
+    	   name: 'plant', 
+    	   value: 'Plant template'
+    	}, {
+    	   name: 'auto',
+    	   value: 'Automatically select'
+    	}, {
+           name: 'core', 
+           value: 'Core template'            
+    	}, {
+            name: 'plant', 
+            value: 'Plant template'
+    	}, {
+            name: 'grampos', 
+            value: 'Gram positive template'
+    	}, {
+            name: 'gramneg', 
+            value: 'Gram negative template'
+            	
+    	}];
+    
+      
     $scope.columns = [
         {prop: 'genome_name', label: 'ModelID'}
         
@@ -166,7 +192,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             visible: ['genome_name']
         };
     
-    
+    $scope.setDefaultTemplate = function(){
+    	$scope.selectedTemplate.selected = "plant";
+    }
 
     // public rast genome
     // Below needs to get refactored with a new call appropriate with the new app arch

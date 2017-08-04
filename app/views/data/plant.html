@@ -13,20 +13,21 @@
 
     <span layout-align="start"><i>Select Template Model</i></span>
 
-      <div flex="45" class="vertical-center" layout="row" layout-align="start">    
-        <select flex="45" ng-model="selectedTemplate" ng-click="templateSelected( )" >
-          <option value="auto">Automatically select</option>
-          <option value="grampos">Gram positive template</option>        
-          <option value="gramneg">Gram negative template</option>
-          <option value="core">Core template</option>        
-          <option value="plant" selected>Plant template</option>                
-        </select>
+      <div flex="45" class="vertical-center" layout="row" layout-align="start">
+      
+    
+        <select ng-init="selectedTemplate = options[0]" 
+            ng-model="selectedTemplate" 
+            ng-options="option.value for option in options">
+    
+        </select>       
+        
       </div>
       
   </div>
     
-  <!-- <span layout-align="start"><i>Select Genome to build a model for</i></span> -->
-  
+  <div>{{$scope.setDefaultTemplate()}}</div>
+   
   <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->  
   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
