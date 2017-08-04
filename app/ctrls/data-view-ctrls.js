@@ -1128,10 +1128,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
                       })    	
     	
-    }
-    
-    
-    
+    }    
 
     $scope.reconstructPipelineAnnotate = function(ev, item) {
     	var reconstructpromise =             
@@ -1145,7 +1142,23 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     	
     }
 
-    
+    $scope.annotatePlant = function(ev, item) {
+    	var opts = {
+    		destmodel: $scope.name,
+    		kmers: 0,
+    		blast: 1
+    	};
+    	var annotatePlantpromise =             
+        	MS.annotatePlant( opts )
+                      .then(function(r) {
+
+                      }).catch(function(e) {
+                    	  console.log( 'BlastAnnotate Error', e.error.message );
+
+                      })    	
+    	
+    }
+        
     
     
     $scope.runPlantFBA = function(ev, item) {
