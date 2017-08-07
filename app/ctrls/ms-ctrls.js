@@ -35,7 +35,7 @@ function($scope, $state, $stateParams, Auth, $window) {
             // If coming from home page, go to genomes.
             // Otherwise go to current page.
             if ($state.current.name === 'main.home') {
-                var p = $state.transitionTo('app.RefModels', {}, {reload: true, inherit: true, notify: false});
+                var p = $state.transitionTo('app.RefModels', {ref: 'Plants'}, {reload: true, inherit: true, notify: false});
             } else
                 var p = $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false});
 
@@ -1340,7 +1340,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     
     // refreshData();
     
-    $scope.ref = $stateParams.ref;
+    $scope.ref = ( $stateParams.ref )? $stateParams.ref: 'Plants';
 
     $scope.microbes = [];
     $scope.plants = [];
