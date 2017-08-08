@@ -163,7 +163,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.annotatePlant = function(opts) {
         var args = {
             //genome: path,
-            destmodel: opts.name,
+            destmodel: opts.destmodel,
             kmers: opts.kmers ? 1 : 0,
             blast: opts.blast ? 1 : 0      
         }
