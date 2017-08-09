@@ -198,6 +198,25 @@
             </ng-table-two>
         <md-tab-body>
     </md-tab>
+    
+    
+    
+        
+    <md-tab ng-if="! isRef">
+        <md-tab-label>Predictions</md-tab-label>
+        <md-tab-body>
+           <ng-table-two table-header="predictionsHeader"
+                table-data="annotations"
+                table-opts="annotationOpts"
+                table-loading="loadingAnnotations"
+                table-placeholder="Search annotations">
+           </ng-table-two>
+         </md-tab-body>
+    </md-tab>
+    
+ 
+ 
+ 
 
     <md-tab ng-repeat="tab in Tabs.tabs">
         <md-tab-label>{{tab.name.length > 14 ? tab.name.slice(0, 15)+'...' : tab.name}}

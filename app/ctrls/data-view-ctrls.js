@@ -309,8 +309,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         var reconstructpromise =             
         	MS.reconstruct($scope.form)
                       .then(function(r) {
+                    	  
                     	  // This block will be executed at callback
                     	  //   Whether success or not...
+ 
+                    	  // TODO: Map key of new name to give genome to the value of true
+                          // $scope.copyInProgress[ name ] = true;
+
                     	  // redirect page to parent from right here
                           $state.go('app.myModels');
                           
@@ -357,6 +362,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
             Dialogs.showComplete('Import in progress...');
+            
+      	  // TODO: Map key of new name to give genome to the value of true
+            // $scope.copyInProgress[ name ] = true;
+
 
             MS.createGenomeFromShock(node, name)
                 .then(function(res) {
@@ -1359,6 +1368,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+    
     
     // converge orthogonal Flux data:        
     // $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
@@ -1697,6 +1708,44 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         {label: 'Cpds', key: 'cpdCount'}
     ]
 
+    
+    
+    $scope.predictionsHeader = [
+        {label: 'Role', key: 'role'},
+        {label: 'Kmer Features', key: 'kmerFeatures',
+            formatter: function(row) {
+                var links = [];
+                
+                if( row.kmerFeatures ) {
+                  row.kmerFeatures.forEach(function(name, i) {
+                    var match = row.blastFeatures.indexOf(name);
+                    links.push('<a href="/feature'+path+'/'+name+'" '+
+                                    'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                    name+
+                                '</a>');
+                  });
+                }
+                return links.join('<br>') || '-';
+            }},
+        {label: 'Blast Features', key: 'blastFeatures',
+         formatter: function(row) {
+            var links = [];
+            
+            if( row.kmerFeatures ) {            
+              row.blastFeatures.forEach(function(name, i) {
+                var match = row.kmerFeatures.indexOf(name);
+                links.push('<a href="/feature'+path+'/'+name+'" '+
+                                'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
+                                name+
+                            '</a>');
+              });
+            }
+            return links.join('<br>') || '-';
+        }},
+    ]
+
+    
+    
 
     var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
@@ -1752,7 +1801,26 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
-    })
+    });
+    
+    
+    
+    $scope.loadingAnnotations = true;
+    $http.rpc('ms', 'plant_annotation_overview', {genome: genomePath})
+         .then(function(res) {
+             var d = [];
+             for (var key in res) {
+                 d.push({role: key,
+                         blastFeatures: res[key]['blast-features'],
+                         kmerFeatures: res[key]['kmer-features']})
+             }
+
+             $scope.annotations = d;
+             $scope.loadingAnnotations = false;
+         }).catch(function(e) {
+             $scope.error = e;
+             $scope.loadingAnnotations = false;
+         });    
 
     
     
