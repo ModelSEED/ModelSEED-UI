@@ -1201,21 +1201,25 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
 
     if (fba.checked) {
+    	// Oops: fba.checked does not really exist yet?
+    	
         MV.rm(data, true);
-        
-        $scope.selectedFBA = "";
+        // $scope.selectedFBA = "";
 
-        fba.checked = false;
+        
+        
+        // ToDo: Iterate other radios and set:
+        // fba.checked = false;
+
+        
+        
     } else {
-        MV.add(data);
-        
-        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );
-        
+        // MV.add(data);        
+        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );        
         // Call functions to set selected fba fluxes:
         // $scope.getRxnFluxes();
         // $scope.getCpdFluxes();
-
-        fba.checked = true;
+        // fba.checked = true;
     }
         
     }    
