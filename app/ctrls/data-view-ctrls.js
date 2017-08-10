@@ -1051,7 +1051,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     var dictionary = {};
     var genomeGenes = [];
     
- 
+    $scope.uiTools = uiTools; 
     
     var parsedPath = path.split('/').slice(0,-2);
     if( parsedPath.indexOf('plantseed') == -1 && parsedPath.indexOf('modelseed') == -1 ) {
@@ -1092,9 +1092,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
     function updateFBAs() {
         return MS.getModelFBAs(path)
-            .then(function(fbas) {
-                $scope.relatedFBAs = fbas;               
+            .then(function(fbas) {                
                 
+                $scope.relatedFBAs = fbas;
+                                
                 // Tabs.selectedIndex = 0;
             })
     }
@@ -1178,9 +1179,51 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 item.fbaCount++;
             })
         })
-    }   
+    }
     
-    // FBA selection for data viewing (enables determine which FBA is selected via check boxes)
+    
+    
+    // FBA selection for data viewing (enables determine which FBA is selected via radios)
+    $scope.setFBA = function(e, fba, model) {
+        // e.preventDefault();
+        // e.stopPropagation();        
+        
+        $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+        $scope.getRxnFluxes();
+        $scope.getCpdFluxes();
+        
+
+        
+        var data = {model: model.path,
+                fba: fba.path,
+                org: model.orgName,
+                media: fba.media};
+
+
+    if (fba.checked) {
+        MV.rm(data, true);
+        
+        $scope.selectedFBA = "";
+
+        fba.checked = false;
+    } else {
+        MV.add(data);
+        
+        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+        
+        // Call functions to set selected fba fluxes:
+        // $scope.getRxnFluxes();
+        // $scope.getCpdFluxes();
+
+        fba.checked = true;
+    }
+        
+    }    
+
+    
+    
+    
+    // FBA selection for data viewing (deprecated: check boxes)
     $scope.addFBA = function(e, fba, model) {
         e.preventDefault();
         e.stopPropagation();
