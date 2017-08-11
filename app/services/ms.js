@@ -137,7 +137,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.createGenomeFromShock = function(node, name) {
-        var args = {shock_id: node, destname: name};
+        var args = {shock_id: node, destname: name, annotate: 1};
         console.log('calling create genome from shock:', args)
         return $http.rpc('ms', 'plant_pipeline', args)
                     .then(function(res){

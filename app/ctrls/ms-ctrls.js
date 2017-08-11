@@ -1627,7 +1627,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
                 $scope.copyInProgress[i] = false;                 
             }).catch(function(e) {
                 $http.rpc('ms', 'copy_model', {
-                    source_model_path: path,
+                    model: path,
                     plantseed: 1
                 }).then(function(res) {
                     Dialogs.showComplete('Copy complete', name);
