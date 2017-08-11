@@ -1760,7 +1760,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.predictionsHeader = [
         {label: 'Role', key: 'role'},
-        {label: 'Kmer Features', key: 'kmerFeatures',
+        {label: 'Original Predictions', key: 'kmerFeatures',
             formatter: function(row) {
                 var links = [];
                 
