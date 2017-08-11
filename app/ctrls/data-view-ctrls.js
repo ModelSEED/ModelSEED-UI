@@ -1202,6 +1202,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
     if (fba.checked) {
     	// Oops: fba.checked does not really exist yet?
+    	// Try calling the JS join function?
     	
         MV.rm(data, true);
         // $scope.selectedFBA = "";
@@ -1774,7 +1775,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 }
                 return links.join('<br>') || '-';
             }},
-        {label: 'Blast Features', key: 'blastFeatures',
+        {label: 'Blast Predictions', key: 'blastFeatures',
          formatter: function(row) {
             var links = [];
             
