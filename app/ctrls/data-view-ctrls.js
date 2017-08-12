@@ -1192,7 +1192,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         $scope.getRxnFluxes();
         $scope.getCpdFluxes();
         
-
+        $scope.showRelatedData( $scope.item );
         
         var data = {model: model.path,
                 fba: fba.path,
