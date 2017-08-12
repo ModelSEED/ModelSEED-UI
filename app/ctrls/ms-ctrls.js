@@ -1738,9 +1738,9 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     }
     
     $scope.isPlant = function( modelPath ) {
-    	var domain = modelPath.split('/')[ 2 ];
-    	 var speciesDomain = ( domain == 'plantseed' ) ? 'Plant' : 'Microbe';
-    	 return speciesDomain;
+    	var domain = modelPath?modelPath.split('/')[ 2 ]:"";
+    	var speciesDomain = ( domain == 'plantseed' ) ? 'Plant' : 'Microbe';
+    	return speciesDomain;
     }
 
     // microbes / plants view
