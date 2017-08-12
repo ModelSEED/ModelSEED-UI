@@ -217,7 +217,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 for (var i=0; i<res.length; i++) {
                     var obj = res[i];
 
-                    //if (!obj.type) continue; // list models will return non modelfolders :()
+                    if (!obj.type) continue; // list models will return non modelfolders :()
                     
                     data.push(self.sanitizeModel(obj))
                 }
@@ -239,10 +239,12 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             
             
             
+            status: obj.status,
+            
+            
+            
             geneCount: obj.num_genes,
-            
-            
-            
+  
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,

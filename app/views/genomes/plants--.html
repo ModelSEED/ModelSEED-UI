@@ -64,7 +64,9 @@
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
-        <model-item ng-if="!item.status" layout="row">
+        <model-item layout="row">
+
+        <!-- <model-item ng-if="!item.status" layout="row">  -->
 
             <div flex="10" class="vertical-center">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">

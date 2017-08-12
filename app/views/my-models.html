@@ -95,7 +95,15 @@
 	     ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
-        <model-item ng-if="!item.status" layout="row">
+
+
+
+        <model-item ng-if="item.status && item.status=='complete'" layout="row">
+        <!-- <model-item ng-if="!item.status" layout="row">  -->
+
+
+
+
 
             <div flex="10" class="vertical-center">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
@@ -150,15 +158,37 @@
        </model-item>
 
 
-        <status-item ng-if="item.status" layout="row">
+
+
+        <status-item ng-if="item.status && item.status=='constructing'" layout="row">
+        <!-- <status-item ng-if="item.status" layout="row"> -->
             <div>
                 Model {{item.name}} ({{item.orgName}}) is reconstructing...
             </div>
-
             <div flex class="timestamp vertical-center">
                 <small>{{relativeTime(item.timestamp)}}</small>
             </div>
         </status-item>
+        
+        <status-item ng-if="item.status && item.status=='queued'" layout="row">
+            <div>
+                Model {{item.name}} ({{item.orgName}}) is queueing...
+            </div>
+            <div flex class="timestamp vertical-center">
+                <small>{{relativeTime(item.timestamp)}}</small>
+            </div>
+        </status-item>
+        
+        <status-item ng-if="item.status && item.status=='failed'" layout="row">
+            <div>
+                Model {{item.name}} ({{item.orgName}}) construction failed...
+            </div>
+            <div flex class="timestamp vertical-center">
+                <small>{{relativeTime(item.timestamp)}}</small>
+            </div>
+        </status-item>        
+        
+                
     </div>
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
