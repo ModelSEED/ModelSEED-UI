@@ -25,11 +25,11 @@
                 
                                 
                 <td>
-                  <md-radio-group md-no-ink class="plants-toggle">
+                  <md-radio-group md-no-ink ng-model="relatedFBAs" class="plants-toggle">
  
 
 
-                    <md-radio-button ng-checked="false"></md-radio-button>                
+                    <md-radio-button ng-checked="false" value="fba.id" name="relatedFBAs" ></md-radio-button>                
                     <!-- <md-radio-button ng-checked="fba.checked"></md-radio-button>  -->
                     
                     
@@ -63,4 +63,7 @@
             </tr>
         </tbody>
     </table>
+    
+    <div class="h4"><small>Visualizing FBA data for FBA:{{selectedFBA}}</small></div>        
+    
 </div>
