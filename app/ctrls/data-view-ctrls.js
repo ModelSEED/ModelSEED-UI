@@ -1774,10 +1774,15 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 if( row.kmerFeatures ) {
                   row.kmerFeatures.forEach(function(name, i) {
                     var match = row.blastFeatures.indexOf(name);
-                    links.push('<a href="/feature'+path+'/'+name+'" '+
-                                    'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                    name+
-                                '</a>');
+                    links.push('<a href="/feature' + path +
+                    		'/.plantseed_data/minimal_genome/' +
+                    		name +
+                    		'" ' +
+                            'class="' +
+                            (match > 0 ? 'feature-highlight' : '') +
+                            '">' +
+                            name +
+                            '</a>');
                   });
                 }
                 return links.join('<br>') || '-';
@@ -1789,10 +1794,15 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
             if( row.kmerFeatures ) {            
               row.blastFeatures.forEach(function(name, i) {
                 var match = row.kmerFeatures.indexOf(name);
-                links.push('<a href="/feature'+path+'/'+name+'" '+
-                                'class="'+(match > 0 ? 'feature-highlight' : '')+'">'+
-                                name+
-                            '</a>');
+                links.push('<a href="/feature' + path +
+                		'/.plantseed_data/minimal_genome/' +
+                		name +
+                		'" ' +
+                        'class="' +
+                        (match > 0 ? 'feature-highlight' : '') +
+                        '">' +
+                        name+
+                        '</a>');
               });
             }
             return links.join('<br>') || '-';
