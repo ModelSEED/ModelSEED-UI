@@ -115,45 +115,55 @@
 
 
             <div flex="10" class="vertical-center">
+              <div ng-if="item.status && item.status=='complete'">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                     <md-tooltip md-delay="800">View Model</md-tooltip>
                     {{item.name}}
                 </a><br>
+              </div>
+              <div ng-if="item.status && item.status!='complete'">
+                  -
+              </div>
+              
             </div>
 
-        <div flex="15" layout="row" layout-align="start center">
-            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
+            <div flex="15" layout="row" layout-align="start center">
+              <div ng-if="item.status && item.status=='complete'">              
+                <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
-                {{item.orgName}}
-            </a>
-        </div>
+                    {{item.orgName}}
+                </a>
+              </div>
+              <div ng-if="item.status && item.status!='complete'">
+                  -
+              </div>              
+            </div>
 
-        <div flex="5" layout="row" layout-align="start center">
-            {{isPlant(item.path)}}
-        </div>
+            <div flex="5" layout="row" layout-align="start center">
+                    {{( item.status && item.status=='complete' )?isPlant(item.path):'-'}}
+            </div>
                 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.rxnCount}}</div> 
-        </div>
+            <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+                    {{( item.status && item.status=='complete' )?item.rxnCount:'0'}} 
+            </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.geneCount}}</div>     
-    
-        </div>
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                    {{( item.status && item.status=='complete' )?item.geneCount:'0'}}    
+            </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.fbaCount}}</div>     
-        </div>
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                    {{( item.status && item.status=='complete' )?item.fbaCount:'0'}}      
+            </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.gapfillCount}}</div>     
-        </div>
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                    {{( item.status && item.status=='complete' )?item.gapfillCount:'0'}}    
+            </div>
  
  
  
-       <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+           <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.status}}</div>     
-        </div> 
+           </div> 
  
  
  
@@ -163,6 +173,7 @@
         </div>
               
         <div flex="15" layout="column" layout-align="end center">
+          <div ng-if="item.status && item.status=='complete'">                      
             <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
@@ -170,16 +181,19 @@
             <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
                 <md-tooltip ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
-            </md-button>         
+            </md-button>
+          </div>
+          <div ng-if="item.status && item.status!='complete'">
+                  -
+          </div>                     
         </div>
               
        </model-item>
 
 
 
-
+        <!-- 
         <status-item ng-if="item.status && item.status=='constructing'" layout="row">
-        <!-- <status-item ng-if="item.status" layout="row"> -->
             <div>
                 Model {{item.name}} ({{item.orgName}}) is reconstructing...
             </div>
@@ -205,7 +219,7 @@
                 <small>{{relativeTime(item.timestamp)}}</small>
             </div>
         </status-item>        
-        
+         -->
                 
     </div>
 
