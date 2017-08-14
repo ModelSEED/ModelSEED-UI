@@ -67,17 +67,26 @@
             <div><b>Reactions</b></div>
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>Genes</b></div>
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>FBA</b></div>
         </div>
         
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div><b>Gapfilling</b></div>
         </div>        
+
+
+
+       <div flex="10" layout="row" layout-align="end center" hide-md hide-sm >
+            <div><b>Status</b></div>
+        </div>
+
+
+
 
         <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
             <div><b>Modification Date</b></div>
@@ -98,8 +107,8 @@
 
 
 
-        <model-item ng-if="item.status && item.status=='complete'" layout="row">
-        <!-- <model-item ng-if="!item.status" layout="row">  -->
+        <!-- <model-item ng-if="item.status && item.status=='complete'" layout="row">  -->
+        <model-item ng-if="item.status" layout="row">
 
 
 
@@ -123,7 +132,7 @@
             {{isPlant(item.path)}}
         </div>
                 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.rxnCount}}</div> 
         </div>
 
@@ -139,6 +148,15 @@
         <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{item.gapfillCount}}</div>     
         </div>
+ 
+ 
+ 
+       <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div>{{item.status}}</div>     
+        </div> 
+ 
+ 
+ 
         
         <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
             <div>{{relativeTime(item.timestamp)}}</div>

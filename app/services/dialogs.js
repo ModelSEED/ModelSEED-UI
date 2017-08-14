@@ -205,7 +205,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          self.showComplete('FBA Complete', res.id)
+                          // self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })

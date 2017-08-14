@@ -95,11 +95,11 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     
-    
-    this.reconstructionPipeline = function(name, annotate) {
-        var args = {destname: name, annotate: annotate};
-        console.log('calling pipeline:', args)
-        return $http.rpc('ms', 'plant_pipeline', args)
+    this.reconstructionPipeline = function( args ) {    
+    // this.reconstructionPipeline = function(name, annotate) {
+        // var args = {destname: name, annotate: annotate};
+        console.log('calling reconstruction pipeline:', args)
+        return $http.rpc('ms', 'ModelReconstruction', args)
                     .then(function(res){
                         console.log('response', res)
                         return res;

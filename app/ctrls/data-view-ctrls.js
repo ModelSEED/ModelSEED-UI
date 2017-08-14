@@ -365,23 +365,23 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             
       	  // TODO: Map key of new name to give genome to the value of true
             // $scope.copyInProgress[ name ] = true;
+            
+            
+           var parameters = { shock_id: node, genome: name, genome_type: "plant" };
+           MS.reconstructionPipeline( parameters )
+               ,then( function (res) {
+            	   
+                   $state.go('app.myModels');                    
+                   // Dialogs.showComplete('Import complete', name);
+           
 
-
+            /*
             MS.createGenomeFromShock(node, name)
                 .then(function(res) {
-                    console.log('done importing', res);
-                    
-              	  // This block will be executed at callback
-              	  //   Whether success or not...
-              	  // redirect page to parent from right here
                   $state.go('app.myModels');                    
-                    
                     Dialogs.showComplete('Import complete', name);
-                                                    
-                    // loadPrivatePlants( res );
-                    
+                  */  
                 }).catch(function(e) {
-                    // Dialogs.showError('something has gone wrong')
                     console.error(e.error.message)                                
                 })
         }, function(error) {
@@ -1129,9 +1129,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     
     $scope.reconstructPipeline = function(ev, item) {
+    	var parameters = { genome: $scope.name, genome_type: "plant" };
     	var reconstructpromise =             
-        	MS.reconstructionPipeline( $scope.name, 0 )
+        	MS.reconstructionPipeline( parameters )
+        	
                       .then(function(r) {
+            	          Dialogs.showComplete('Reconstructing Model...', name);
+
 
                       }).catch(function(e) {
                     	  console.log( 'ReconstructPipeline Error', e.error.message );
@@ -1141,9 +1145,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     }    
 
     $scope.reconstructPipelineAnnotate = function(ev, item) {
+    	var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };    	
     	var reconstructpromise =             
-        	MS.reconstructionPipeline( $scope.name, 1 )
+        	MS.reconstructionPipeline( parameters )
                       .then(function(r) {
+            	          Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', name);
 
                       }).catch(function(e) {
                     	  console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
@@ -1161,6 +1167,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     	var annotatePlantpromise =             
         	MS.annotatePlant( opts )
                       .then(function(r) {
+            	          Dialogs.showComplete('Blasting Genome...', name);
 
                       }).catch(function(e) {
                     	  console.log( 'BlastAnnotate Error', e.error.message );
