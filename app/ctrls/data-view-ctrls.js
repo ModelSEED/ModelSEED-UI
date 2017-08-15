@@ -1779,7 +1779,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     		name +
                     		'" ' +
                             'class="' +
-                            (match > 0 ? 'feature-highlight' : '') +
+                            (match > -1 ? 'feature-highlight' : '') +
                             '">' +
                             name +
                             '</a>');
@@ -1799,7 +1799,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 		name +
                 		'" ' +
                         'class="' +
-                        (match > 0 ? 'feature-highlight' : '') +
+                        (match > -1 ? 'feature-highlight' : '') +
                         '">' +
                         name+
                         '</a>');
