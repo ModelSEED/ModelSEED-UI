@@ -115,13 +115,13 @@
 
 
             <div flex="10" class="vertical-center">
-              <div ng-if="item.status && item.status=='complete'">
+              <div ng-if="item.status && item.name">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                     <md-tooltip md-delay="800">View Model</md-tooltip>
                     {{item.name}}
                 </a><br>
               </div>
-              <div ng-if="item.status && item.status!='complete'">
+              <div ng-if="!item.status || !item.name">
                   -
               </div>
               
@@ -162,7 +162,13 @@
  
  
            <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div>{{item.status}}</div>     
+             <div ng-if="item.status">
+                 <div>{{item.status}}</div>
+             </div>
+             <div ng-if="! item.status">
+                 None
+             </div>
+                  
            </div> 
  
  
@@ -173,7 +179,6 @@
         </div>
               
         <div flex="15" layout="column" layout-align="end center">
-          <div ng-if="item.status && item.status=='complete'">                      
             <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
@@ -181,11 +186,7 @@
             <md-button md-no-ink ng-click="rmModel($event, $index, item, 'plant')" aria-label="delete model">
                 <md-tooltip ng-if="!selected">Delete model</md-tooltip>
                 <i class="icon-highlight-remove"></i>
-            </md-button>
-          </div>
-          <div ng-if="item.status && item.status!='complete'">
-                  -
-          </div>                     
+            </md-button>         
         </div>
               
        </model-item>
