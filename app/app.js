@@ -203,7 +203,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Media',
             authenticate: true
             
-        <!-- TODO: Make new myMedia state/controller -->
             
             }).state('app.myMedia', {
             url: "/myMedia/?tab",

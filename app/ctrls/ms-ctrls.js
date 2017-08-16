@@ -1211,7 +1211,6 @@ function($s, $sParams, WS, MS, Auth,
     }
 
 }])
-<!-- todo: Make new myMedia state/controller -->
 
 
 

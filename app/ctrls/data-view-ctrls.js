@@ -880,8 +880,8 @@ function($s, $state, $sParams, WS, MS, tools,
         {label: 'Name', key: 'name'},
         {label: 'ID', key: 'id'},
         {label: 'Concentration', key: 'concentration', editable: true},
-        {label: 'Max Flux', key: 'minflux', editable: true},
-        {label: 'Min Flux', key: 'maxflux', editable: true}
+        {label: 'Min Flux', key: 'minflux', editable: true},
+        {label: 'Max Flux', key: 'maxflux', editable: true}
     ];
 
     $s.toggleEdit = function() {
