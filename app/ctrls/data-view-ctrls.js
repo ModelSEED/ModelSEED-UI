@@ -2329,7 +2329,12 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         this.biomasses = data.biomasses;
         this.biomasscpds = [];
-        this.gapfillings = data.gapfillings;
+        
+        if( data.gapfillings &&  data.gapfillings.length > 0 ){
+            this.gapfillings = data.gapfillings;
+        } else {
+        	this.gapfillings = [];
+        }
 
         // create gapfilling hash
         for (var i=0; i < this.gapfillings.length; i++) {
