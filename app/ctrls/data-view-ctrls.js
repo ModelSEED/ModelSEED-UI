@@ -338,7 +338,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.startUpload = function() {
     	var name = "";
         if( $scope.form ) {
-           name = $scope.form.name;        	
+           var temp = $scope.form.name;
+           name = temp.replace(/\s/g, "");
         }
         if( name.length > 0 ) {
         
@@ -369,7 +370,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             
            var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
-               ,then( function (res) {
+               .then( function (res) {
             	   
                    $state.go('app.myModels');                    
                    // Dialogs.showComplete('Import complete', name);
