@@ -338,10 +338,11 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.startUpload = function() {
     	var name = "";
         if( $scope.form ) {
-           var temp = $scope.form.name;
-           name = temp.replace(/\s/g, "");
+           name = $scope.form.name;
+           // var temp = $scope.form.name;
+           // name = temp.replace(/\s/g, "");
         }
-        if( name.length > 0 ) {
+        if( name.length > 0 && ! name.includes( '\s' ) ) {
         
             var taxonomy = $scope.form.selectedTaxa;
 
@@ -355,6 +356,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             }).catch(function(e) {
                 startUpload(name);
             })
+        } else {
+            Dialogs.showError( 'Invalid Input' );
+            $scope.form.name = "";
         }
     }
 
