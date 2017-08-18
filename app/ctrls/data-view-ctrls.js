@@ -339,10 +339,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     	var name = "";
         if( $scope.form ) {
            name = $scope.form.name;
-           // var temp = $scope.form.name;
-           // name = temp.replace(/\s/g, "");
         }
-        if( name.length > 0 && ! name.includes( '\s' ) ) {
+
+        if( name.length > 0 && name.match("[^\s\/\\\[\]\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {
         
             var taxonomy = $scope.form.selectedTaxa;
 
