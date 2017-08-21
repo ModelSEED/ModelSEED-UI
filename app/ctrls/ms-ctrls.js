@@ -1337,8 +1337,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 	
     var $self = $scope;
     
-    // refreshData();
-    
     $scope.ref = ( $stateParams.ref )? $stateParams.ref: 'Plants';
 
     $scope.microbes = [];
@@ -1381,7 +1379,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 
         
         
-        $scope.myModelsSpec = [
+        $scope.microbesSpec = [
             {prop: 'genome_name', label: 'ModelID'},
             {prop: 'species', label: 'Species'},
             {prop: 'species_domain', label: 'SpeciesDomain'},
@@ -1402,7 +1400,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     $scope.copyInProgress = {};
 
     // load models
-    /*
+
         $scope.loadingMicrobes = true;
         MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
             console.log('path res', res)
@@ -1413,7 +1411,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
             $scope.microbes = [];
             $scope.loadingMicrobes = false;
         })
-*/
+
 
     $scope.loadingPlants = true;
     MS.listModels( '/plantseed' + '/plantseed' ).

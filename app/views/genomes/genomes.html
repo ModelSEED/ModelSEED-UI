@@ -2,13 +2,13 @@
 
 <div style="background:#4B0082;border:1px solid #cccccc;padding: 10px;">
 <ul class="toolbar">
-    <!--  
+      
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
-        <a ng-click="changeView('Microbes')">
+        <a ui-sref="app.RefModels({ref: 'Microbes'})">
             <span hide-sm>PublicMicrobialModels</span>
         </a>
     </li>
-    -->
+    
     
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ui-sref="app.RefModels({ref: 'Plants'})">
@@ -49,14 +49,16 @@
     
 <div layout="row">
     <div class="content-header" flex>
-        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
+        {{ref == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
+        
+        <!-- 
         <small ng-if="view == 'Microbes'" class="help-text" hide-sm>
             <i>Reference Models</i>
         </small>
         <small ng-if="view == 'Plants'" class="help-text" hide-sm>
             <i>Reference Models</i>
         </small>
-
+         -->
     </div>
 
     <!--
@@ -68,7 +70,6 @@
             View my genomes
         </md-switch>
     </md-input-container>
-    -->
 
     <div ng-if="tabs.tabIndex == 1 && view == 'Microbes'" layout-align="center end">
         <br>
@@ -79,7 +80,8 @@
     <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
         <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
         <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>    
+    </md-radio-group>
+    -->    
 </div>
 <hr class="no-margin">
 

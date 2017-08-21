@@ -1,11 +1,15 @@
 <div>
 
   <div ng-if="microbes.length">
-            <div class="table-controls" layout="row">            
+            <div class="table-controls" layout="row">
+                        
                 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-                <md-input-container md-no-float flex="45"
-                    search="opts.query" search-opts="opts" search-placeholder="Search public models">
+                
+                <md-input-container md-no-float flex="45">
+                   <md-icon class="material-icons">search</md-icon>
+                   <input ng-model="opts.query" type="text" placeholder="Search models">
                 </md-input-container>
+                
                 <md-input-container pagination
                     pagination-offset="opts.offset"
                     pagination-limit="opts.limit"
@@ -125,9 +129,14 @@
     
     </div>        
 
+    
+    <div ng-if="!microbes || microbes.length == 0" class="alert alert-warning">No model found</div>
+    <!-- <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>  -->    
+    
+
 </div>
 
-<div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>
+
 
             
 
