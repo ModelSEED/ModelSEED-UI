@@ -157,7 +157,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selected = null;
     
     $scope.copyInProgress = {};
-
+    $scope.uploading = false;
     
     // Template dropdown options
     $scope.options = [{
@@ -336,12 +336,18 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     }        
     
     $scope.startUpload = function() {
+    	if( $scope.uploading ){
+    		return;
+    	} else {
+    		$scope.uploading = true;
+    	}
     	var name = "";
         if( $scope.form ) {
            name = $scope.form.name;
         }
 
-        if( name.length > 0 && name.match("[^\s\/\\\[\]\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {
+        if( name.length > 0 && name.match("[^\s\/\\\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {        
+        // if( name.length > 0 && name.match("[^\s\/\\\[\]\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {
         
             var taxonomy = $scope.form.selectedTaxa;
 
@@ -358,6 +364,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         } else {
             Dialogs.showError( 'Invalid Input' );
             $scope.form.name = "";
+            $scope.uploading = false;
         }
     }
 
@@ -374,6 +381,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
+            	   
+            	   $scope.uploading = false;
             	   
                    $state.go('app.myModels');                    
                    // Dialogs.showComplete('Import complete', name);
