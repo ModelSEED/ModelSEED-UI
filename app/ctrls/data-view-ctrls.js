@@ -145,6 +145,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // var path = $sParams.path;
 	
 	$scope.selectedTemplate;
+	$scope.selectedTaxa;
     
     $scope.myPlants = [];
     $scope.myMedia = [];
@@ -177,9 +178,21 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             value: 'Gram positive template'
     	}, {
             name: 'gramneg', 
-            value: 'Gram negative template'
-            	
+            value: 'Gram negative template'            	
     	}];
+    
+    // Taxonomy dropdown options
+    $scope.taxaOptions = [{
+    	   name: 'plant', 
+    	   value: 'Plant feature sequences'
+    	}, {
+    	   name: 'full',
+    	   value: 'Full microbial genome'
+    	}, {
+           name: 'microbes', 
+           value: 'Microbial feature sequences'            
+            	
+    	}];    
     
       
     $scope.columns = [
@@ -194,6 +207,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.setDefaultTemplate = function(){
     	$scope.selectedTemplate.selected = "plant";
+    }
+    
+    $scope.setDefaultTaxa = function(){
+    	$scope.selectedTaxa.selected = "plant";
     }
 
     // public rast genome
@@ -348,11 +365,11 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
         if( name.length > 0 && name.match("[^\s\/\\\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {        
         // if( name.length > 0 && name.match("[^\s\/\\\[\]\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {
-        
-            var taxonomy = $scope.form.selectedTaxa;
+
+        	// TODO: MODELSEED-47: Do we need checks and balances for the following parameter:
+            // var taxonomy = $scope.selectedTaxa;
 
             // Ensure no overwrites
-            // TODO: Add function to ms.js such that makes the below checks and balances like MS.modelExists('/'+Auth.user+'/plantseed/'+name)
             console.log('attempting upload')
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
@@ -373,11 +390,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
             Dialogs.showComplete('Import in progress...');
-            
-      	  // TODO: Map key of new name to give genome to the value of true
             // $scope.copyInProgress[ name ] = true;
             
             
+            
+            
+           // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters: 
            var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
@@ -470,7 +488,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
  
                     var name = $this.form.name;
                     
-                    var taxonomy = $this.form.selectedTaxa;
+                    var taxonomy = $this.selectedTaxa;
 
                     // Ensure no overwrites
                     // Ideally, this would be handled by server responses.
@@ -1073,6 +1091,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     	$scope.isRef = true;    	
     }
     
+
+    
+    $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
+
+
     
     
     $scope.showRelatedData = function( item ) {

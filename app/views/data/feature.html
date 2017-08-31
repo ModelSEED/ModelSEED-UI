@@ -109,12 +109,11 @@
 
     <h4>Protein Sequence</h4>
     
-    
-    
-    <!-- TODO break the next element down to 80 char lines -->
     <pre style="white-space: pre-wrap" class="feature-item">{{proteinSequence ? proteinSequence : 'No protein sequence'}}</pre>
 
 
+
+    <!-- TODO: MODELSEED-48: Hide below tabs if got here from Microbes -->
     <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
         <md-tab label="Plant Similarities">
             <ng-table-two table-header="plantSimSpec"

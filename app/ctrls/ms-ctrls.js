@@ -1358,7 +1358,10 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     }
 
     $scope.showMenu = function() { $scope.menuVisible = true; }
-
+    
+    
+    
+    // FIXME: Revise following (opts...) per field names per santizeModel calle by listModels in MS
     $scope.opts = {
             query: '', limit: 25, offset: 0,
             sort: {field: 'genome_name'},

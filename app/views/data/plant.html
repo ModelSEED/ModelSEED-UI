@@ -4,27 +4,21 @@
 <div class="content-header" flex>
 
     Build Model
-    <br><br>
+    <br>
 </div>    
 
 <div class="container">
-
-  <div layout="row">    
-
-    <span layout-align="start"><i>Select Template Model</i></span>
-
+  
       <div flex="45" class="vertical-center" layout="row" layout-align="start">
-      
-    
-        <select ng-init="selectedTemplate = options[0]" 
+       Select Template Model:    
+        <select 
             ng-model="selectedTemplate" 
             ng-options="option.value for option in options">
-    
-        </select>       
-        
-      </div>
-      
-  </div>
+            
+        </select>
+                      
+      </div>     
+      <br><br><br>
     
   <div>{{$scope.setDefaultTemplate()}}</div>
    
@@ -37,15 +31,27 @@
       UPLOAD FASTA
     </md-tab-label>
 
-  <md-tab-body>
-    
-  <div layout="row">    
+    <md-tab-body>    
+    <div flex layout="row">    
 
-    <div layout="column">
-          
-        <form id="upload-form" class="upload-form form-horizontal">        
+      <div layout="column">
+      
+        <br>
+      
+        <div>
+          Choose Taxonomy:
+		    <select
+		      ng-model="selectedTaxa"
+		      ng-options="optionTaxa.value for optionTaxa in taxaOptions">        
+		    </select>
+        </div>
+        <div>{{$scope.setDefaultTaxa()}}</div>
+              
+       <br>
+                
+       <form id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
-                <br><br>
+                <br>
                 <label class="control-label"> <i>Select fasta file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
@@ -58,17 +64,6 @@
                 {{selectedFiles[0].name}}
             </div>
         </form>
-        
-        <!--  
-        <div flex="30"  class="hidden" layout="row" layout-align="start">            
-		  <md-input-container md-no-float >
-		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
-		        <option>Plant</option>
-		        <option>Microbe</option>        
-		    </select>        
-		  </md-input-container>
-        </div>
-        -->
         
         <div flex="65" class="vertical-center" layout="row" layout-align="start">
           <form>    
@@ -83,16 +78,13 @@
             <br>
           </md-button>                 
           </form>
-        </div>             
+        </div>                     
         
-    </div>
-    
-  </div>
-  
+      </div>
+             
+  </div> 
   </md-tab-body>
-
   </md-tab>
-
 
   <!-- --------------------------------------------------------- PATRIC -------------------------------------------------------------- -->
 
