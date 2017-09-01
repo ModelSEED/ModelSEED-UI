@@ -159,7 +159,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // the selected item for the build operations (not used yet)
     $scope.selected = null;
     
-    $scope.copyInProgress = {};
+    $scope.copyInProgress = false;
     $scope.uploading = false;
     
     // Template dropdown options
@@ -198,14 +198,24 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
       
     $scope.columns = [
-        {prop: 'genome_name', label: 'ModelID'}
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'species', label: 'Species'},
+        {prop: 'contigs', label: 'Contigs'}
         
     ]    
     $scope.opts = {
-            query: '', limit: 3, offset: 0,
-            sort: {},
-            visible: ['genome_name']
+            query: '', limit: 25, offset: 0,
+            sort: {field: 'genome_name'},
+            visible: ['genome_name', 'genome_id', 'species', 'contigs']
         };
+    
+    $scope.templateSelected = function( ) {
+    	if( $scope.myPlants.length > 0 ) {
+            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
+    	}
+    } 
     
     $scope.setDefaultTemplate = function(){
     	$scope.selectedTemplate.selected = "plant";
@@ -218,46 +228,41 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
 
     // TODO: MODELSEED-47: load Patric Genomes for user to select for modeling
+
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
         $scope.genomes = genomes;
+        /*
         $timeout(function() {
             $scope.loading = false;
         })
+        */
     })    
     
     
 
-    // TODO: MODELSEED-47: load RAST Genomes for user to select for modeling    
+    // TODO: MODELSEED-47: load RAST Genomes for user to select for modeling
+    // XXX: Merge callbacks with the last one!!!
+    /*
     MS.listRastGenomes()
       .then(function(data) {
           $scope.rastMicrobes = data;
-          //console.log('myMicrobes (rast)', $scope.myMicrobes)
    })
 
-      
-      
-
-    // For constructing models based on Patric genomes:
     MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
         console.log('path res', res)
-
         $scope.microbes = res;
         $scope.loadingMicrobes = false;
     }).catch(function(e) {
         $scope.microbes = [];
         $scope.loadingMicrobes = false;
     })
-
         
         $scope.loadingPlants = true;
         MS.listModels('/'+Auth.user+'/plantseed').
-
             then(function(res) {
                 console.log('path res', res)
-            
                 $scope.myPlants = res;
-            
                 $scope.loadingPlants = false;
         }).catch(function(e) {
                 $scope.myPlants = [];
@@ -304,23 +309,26 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         var inArray = function(array, obj) {
             var index = array.indexOf(obj);
         }
-
-    $scope.reconstruct = function(ev, item) {
+    */
     
-        // Temp:  method parm item is not wired (came from selectedPublic from Ref Genomes page)
-        // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parm 'item' is ignored):        
-        // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
-             
-        // console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
+    
+    
+    $scope.reconstruct = function(ev, item) {        
+    	$scope.copyInProgress = true;
+    	// TODO: Is called when Build Model button pressed in PATRIC/RAST tabs
+    	
+    }
 
+    // This version of $scope.reconstruct is deprecated:
+    /*
+    $scope.reconstruct = function(ev, item) {        
     	if( $scope.myPlants.length > 0 ) {
     		item = $scope.myPlants[ 0 ];
     		var name = $scope.myPlants[ 0 ].name;
     		var path = $scope.myPlants[ 0 ].path;
     		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
             Dialogs.showToast('Creating Model...', name, 2000);
-    	}
-        
+    	}        
         if ('genome_id' in item) {
             var name = item.genome_id,
                 orgName = item.genome_name;
@@ -329,42 +337,23 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             var name = item.name;
             var params = {path: item.path, name: name};
         }
-
         ev.stopPropagation();
         
         $scope.form = {genome: item.path};
 
-        // self.showToast('Reconstructing', item.name, 5000)
         $scope.loadingPlants = true;
         
         var reconstructpromise =             
         	MS.reconstruct($scope.form)
                       .then(function(r) {
-                    	  
-                    	  // This block will be executed at callback
-                    	  //   Whether success or not...
- 
-                    	  // TODO: Map key of new name to give genome to the value of true
-                          // $scope.copyInProgress[ name ] = true;
 
-                    	  // redirect page to parent from right here
                           $state.go('app.myModels');
                           
-                          // Next call was Jobs related?
-                          // cb(r);
                       }).catch(function(e) {
                     	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
-                          // self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
-        
     }
-    
-    $scope.templateSelected = function( ) {
-    	if( $scope.myPlants.length > 0 ) {
-            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            
-    	}
-    }        
+    */       
     
     $scope.startUpload = function() {
     	if( $scope.uploading ){
@@ -404,11 +393,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
-            Dialogs.showComplete('Import in progress...');
-            // $scope.copyInProgress[ name ] = true;
-            
-            
-            
+            Dialogs.showComplete('Import in progress...');            
             
            // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters: 
            var parameters = { shock_id: node, genome: name, genome_type: "plant" };
@@ -418,8 +403,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             	   $scope.uploading = false;
             	   
                    $state.go('app.myModels');                    
-                   // Dialogs.showComplete('Import complete', name);
-           
+                   // Dialogs.showComplete('Import complete', name);           
 
             /*
             MS.createGenomeFromShock(node, name)
@@ -436,119 +420,28 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             console.log('shock error:', error)
             // Dialogs.showError('Upload to SHOCK failed (see console)')                        
         })                    
-    }     
-    
-    // Deferred Functionality for Uploading a FASTA file (no longer called):
-    // Redirected to Parent now
-    function loadPrivatePlants( res ) {
-        $scope.loadingMyPlants = true;
-        $scope.myPlants = [];
-        $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed').
-
-            then(function(res) {
-                console.log('path res', res)
-            
-                $scope.myPlants = res;
-            	if( $scope.myPlants.length > 0 ) {
-                    $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-                    
-            	}
-                $scope.loadingPlants = false;
-            }).catch(function(e) {
-                $scope.myPlants = [];
-                $scope.loadingPlants = false;
-            })
-                  
-            $scope.loadingMyPlants = false;
-        
     }
-        
+    
+    
     $scope.selectFile = function(files) {
-
         $scope.$apply(function() {
             $scope.selectedFiles = files;
         })
     }
+         
     
-    
-    
-    // Next functions in this controller are deprecated:
-    $scope.openUploader = function(ev) {
-        // $dialog.show({
-            // targetEvent: ev,
-            // scope: $scope.$new(),
-            // preserveScope: true,
-            // clickOutsideToClose: true,            
-            // templateUrl: 'app/views/genomes/upload-fasta.html',
-            // controller: ['$scope', function($scope) {
-                
-                var $this = $scope;
-                
-                // 'form' to contain user inputed name and selected file from this dialog, as per the markup
-                // XXX: Beware of scope collision for 'form' ('form' is also used in reconstruct)
-                // Appears we are resetting $scope.form in the next line
-                $this.form = {};
-                
-                // $this.selectedFiles;
-                /*
-                $scope.selectFile = function(files) {
-
-                    $scope.$apply(function() {
-                        $this.selectedFiles = files;
-                    })
-                }
-                */
-                
-                /*
-                $scope.startUpload = function() {
- 
-                    var name = $this.form.name;
-                    
-                    var taxonomy = $this.selectedTaxa;
-
-                    // Ensure no overwrites
-                    // Ideally, this would be handled by server responses.
-                    console.log('attempting')
-                    WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
-                        .then(function() {
-                            alert('Genome name already exists!\n'+
-                            'Please provide a new name or delete the existing genome');                           
-                        }).catch(function(e) {
-                            startUpload(name);
-                        })
-                }
-
-                function startUpload(name) {
-                    // $dialog.hide();
-                    // Dialogs.showToast('Importing "'+name+'"', 'please be patient', 10000000)
-
-                    Upload.uploadFile($this.selectedFiles, null, function(node) {                        
-                        MS.createGenomeFromShock(node, name)
-                            .then(function(res) {
-                                console.log('done importing', res)
-                                Dialogs.showComplete('Import complete', name);
-                                                                
-                                loadPrivatePlants( res );
-                                // loadPrivatePlants();
-                                
-                            }).catch(function(e) {
-                                // Dialogs.showError('something has gone wrong')
-                                console.error(e.error.message)                                
-                            })
-                    }, function(error) {
-                        console.log('shock error:', error)
-                        // Dialogs.showError('Upload to SHOCK failed (see console)')                        
-                    })                    
-                }     
-                */
-                // $scope.cancel = function() {
-                    // $dialog.hide();
-                // }
-                
-            // }]
-        // })
+    $scope.getLabel = function(prop) {
+        for (var i=0; i<$scope.columns.length; i++) {
+            var col = $scope.columns[i];
+            if (col.prop === prop) return col.label;
+        }
+        return '';
     }
+
+    $scope.exists = function(item, visible) {
+      return visible.indexOf(item) > -1;
+    }   
+   
     
 } ] )
 
@@ -1110,7 +1003,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
 
     
-    // $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
+    $scope.isPlant = path.split('/')[2] === 'plantseed' ? true : false;
 
 
     
