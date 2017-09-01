@@ -10,13 +10,14 @@
 <div class="container">
   
       <div flex="45" class="vertical-center" layout="row" layout-align="start">
+       <label>
        Select Template Model:    
         <select 
             ng-model="selectedTemplate" 
             ng-options="option.value for option in options">
             
         </select>
-                      
+        </label>              
       </div>     
       <br><br><br>
     
@@ -39,11 +40,13 @@
         <br>
       
         <div>
+        <label>
           Choose Taxonomy:
 		    <select
 		      ng-model="selectedTaxa"
 		      ng-options="optionTaxa.value for optionTaxa in taxaOptions">        
 		    </select>
+		</label>
         </div>
         <div>{{$scope.setDefaultTaxa()}}</div>
               
@@ -115,7 +118,9 @@
         
     </div>
 
-    <div ng-repeat-start="item in (filtered = ( microbes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+
+
+    <div ng-repeat-start="item in (filtered = ( genomes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
@@ -128,6 +133,8 @@
 
         </model-item>                        
     </div>
+    
+    
                 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
     </div>

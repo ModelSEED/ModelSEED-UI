@@ -146,7 +146,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 	
 	$scope.selectedTemplate;
 	$scope.selectedTaxa;
-    
+	
+	
+    $scope.genomes = [];
     $scope.myPlants = [];
     $scope.myMedia = [];
     
@@ -212,14 +214,26 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.setDefaultTaxa = function(){
     	$scope.selectedTaxa.selected = "plant";
     }
+    
+    
 
-    // public rast genome
-    // Below needs to get refactored with a new call appropriate with the new app arch
+    // TODO: MODELSEED-47: load Patric Genomes for user to select for modeling
+    Patric.listGenomes( $scope.opts )
+    .then(function(genomes) {
+        $scope.genomes = genomes;
+        $timeout(function() {
+            $scope.loading = false;
+        })
+    })    
+    
+    
+
+    // TODO: MODELSEED-47: load RAST Genomes for user to select for modeling    
     MS.listRastGenomes()
       .then(function(data) {
           $scope.rastMicrobes = data;
           //console.log('myMicrobes (rast)', $scope.myMicrobes)
-      })
+   })
 
       
       
@@ -363,7 +377,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            name = $scope.form.name;
         }
 
-        if( name.length > 0 && name.match("[^\s\/\\\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {        
+       
+        if( name.length > 0 && !name.match("[\s\W]") ) {        
         // if( name.length > 0 && name.match("[^\s\/\\\[\]\{\}\(\)\!\@\#\$\%\^\&\*]+") ) {
 
         	// TODO: MODELSEED-47: Do we need checks and balances for the following parameter:
@@ -413,7 +428,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     Dialogs.showComplete('Import complete', name);
                   */  
                 }).catch(function(e) {
-                    console.error(e.error.message)                                
+                   console.error(e.error.message)
+             	   $scope.uploading = false;
+
                 })
         }, function(error) {
             console.log('shock error:', error)
@@ -1093,7 +1110,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
 
     
-    $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
+    // $scope.isPlant = item.path.split('/')[2] === 'plantseed' ? true : false;
 
 
     
