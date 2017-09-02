@@ -231,7 +231,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
-        $scope.genomes = genomes;
+        $scope.genomes = genomes.docs;
         /*
         $timeout(function() {
             $scope.loading = false;

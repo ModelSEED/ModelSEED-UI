@@ -71,14 +71,14 @@
             <div flex="10" class="vertical-center">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                     <md-tooltip md-delay="800">View Model</md-tooltip>
-                    {{item.name}}
+                    {{item.genome_name}}
                 </a><br>
             </div>
 
             <div flex="15" layout="row" layout-align="start center">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                 <md-tooltip  md-delay="800">View Model</md-tooltip>
-                {{item.orgName}}
+                {{item.species}}
             </a>
             </div>
 

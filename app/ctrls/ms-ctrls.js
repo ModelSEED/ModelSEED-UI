@@ -1330,9 +1330,9 @@ function($s, $sParams, WS, MS, Auth,
 
 
 .controller('RefModels',
-['$scope', '$stateParams', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
+['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http',
-function($scope, $stateParams, WS, MS, uiTools, $mdDialog, Dialogs, config,
+function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 	
     var $self = $scope;
@@ -1393,17 +1393,14 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
             {prop: 'mod_date', label: 'ModificationDate'}
 
         ]
-        
-        
-        
+                
     // the selected item for operations such as download, delete.
     $scope.selected = null;
-
     
     $scope.copyInProgress = {};
 
-    // load models
-
+    // Instead of below, fetch genomes from Patric:
+       /*
         $scope.loadingMicrobes = true;
         MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
             console.log('path res', res)
@@ -1414,7 +1411,30 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
             $scope.microbes = [];
             $scope.loadingMicrobes = false;
         })
+        */
 
+    
+
+    $scope.loadingMicrobes = true;    
+    Patric.listGenomes( $scope.opts )
+    .then(function(genomes) {
+        console.log('path res', genomes)
+
+        $scope.microbes = genomes.docs;
+        
+        $scope.loadingMicrobes = false;
+        /*
+        $timeout(function() {
+            $scope.loading = false;
+        })
+        */
+    }).catch(function(e) {
+        $scope.microbes = [];
+        $scope.loadingMicrobes = false;
+    })
+    
+    
+    
 
     $scope.loadingPlants = true;
     MS.listModels( '/plantseed' + '/plantseed' ).
