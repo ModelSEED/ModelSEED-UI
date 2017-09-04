@@ -205,7 +205,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         
     ]    
     $scope.opts = {
-            query: '', limit: 25, offset: 0,
+            query: '', limit: 20, offset: 0,
             sort: {field: 'genome_name'},
             visible: ['genome_name', 'genome_id', 'species', 'contigs']
         };
@@ -315,12 +315,35 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.reconstruct = function(ev, item) {        
     	$scope.copyInProgress = true;
-    	// TODO: Is called when Build Model button pressed in PATRIC/RAST tabs
+    	// TODO: MODELSEED-47: Is called when Build Model button pressed in PATRIC/RAST tabs:
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+        ev.stopPropagation();
+        
+        $scope.form = {genome: item.path};
+
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
+                      .then(function(r) {
+
+                          $state.go('app.myModels');
+                          
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                      })
     	
     }
 
     // This version of $scope.reconstruct is deprecated:
-    /*
+/*    
     $scope.reconstruct = function(ev, item) {        
     	if( $scope.myPlants.length > 0 ) {
     		item = $scope.myPlants[ 0 ];
@@ -353,7 +376,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
                       })
     }
-    */       
+*/           
     
     $scope.startUpload = function() {
     	if( $scope.uploading ){
@@ -441,7 +464,94 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.exists = function(item, visible) {
       return visible.indexOf(item) > -1;
     }   
-   
+
+    
+    
+    
+    $scope.copy = function(i, genome) {
+        $scope.copyInProgress[i] = true;
+        
+        
+        // TODO: MODELSEED-47 Copy destination?
+        var name =  genome.genome_id,   
+            destPath = '/'+Auth.user+'/modelseed/'+name;    
+
+        Dialogs.showToast('Copying...', name, 2000);            
+        copyModel(name, genome, i)
+
+        // old way
+        //copyFolder(name, path, destPath)
+        //    .then(function() {
+        //        $scope.copyInProgress[i] = false;
+        //    })               
+    }
+
+    function copyModel(name, path, i) {
+        var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
+                $scope.copyInProgress[i] = false;                 
+            }).catch(function(e) {
+                $http.rpc('ms', 'copy_model', {
+                    model: genome,
+                    plantseed: 1
+                }).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name);
+                    
+                    // go ahead and reload genomes and models
+                    // loadPrivatePlants();     
+                    // MS.listModels('/'+Auth.user+'/plantseed')                         
+
+                    $scope.copyInProgress[i] = false;
+                }).catch(function(e) {
+                    Dialogs.showError('Copy '+name+ ' failed.')    
+                    $scope.copyInProgress[i] = false;
+                })                
+            })
+
+        return prom;
+
+    }
+
+    // Not called yet:
+    function copyFolder(name, path, destPath) {                       
+        var args = {
+            src: path,
+            dest: destPath,
+            recursive: true,
+        }
+
+        // first create modelfolder, then copy
+        var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
+            .then(function(res) {
+                return WS.copy(args).then(function(res) {
+                    Dialogs.showComplete('Copy complete', name, path);
+
+                    // remove odd empty object
+                    delete res[path];
+
+                    // update cache
+                    if (MS.myPlants) MS.addModel(res, 'plant');
+                }).catch(function(e) {
+                    // hack: if error is thrown, assume 
+                    // it's because folder already exists.
+                    Dialogs.saveAs('', function(newName) {
+                        var destPath = '/'+Auth.user+'/plantseed/'+newName;  
+                        copyFolder(newName, path, destPath) 
+                    }, function() {
+                        Dialogs.showToast('Copy Canceled', null, 100);      
+                    }, name + ' already exists.  Please choose a new name.')
+                })
+            }).catch(function(e) {
+                Dialogs.showError('Copy '+name+ ' failed.')           
+            })    
+        
+        return prom;
+    }
+
+    
+    
+    
     
 } ] )
 
