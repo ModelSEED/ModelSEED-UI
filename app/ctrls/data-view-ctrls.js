@@ -237,7 +237,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             $scope.loading = false;
         })
         */
-    })    
+    } ).then(function(){
+        MS.listRastGenomes()
+        .then(function(data) {
+            $scope.rastMicrobes = data;
+        } )
+    	
+    } ).catch(function(e) {
+        $scope.myMicrobes = [];
+        $scope.loadingMicrobes = false;
+        $scope.myPlants = [];
+        $scope.loadingPlants = false;
+        $scope.myModels = [];
+    } )    
     
     
 

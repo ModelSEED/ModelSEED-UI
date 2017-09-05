@@ -132,11 +132,11 @@
             </div>
             
             
-               <a ng-if="!copyInProgress[$index] && selectedPublic.genome_id" ng-click="reconstruct($event, item)">            
+               <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
                <!-- <a ng-if="!copyInProgress[$index] && selectedPublic.genome_id" ng-click="reconstruct($event, selectedPublic)">  -->
                 Copy
                 </a>
-                <span ng-if="copyInProgress[$index]">
+                <span ng-if="copyInProgress">
                Copying...
                 </span>
                             
