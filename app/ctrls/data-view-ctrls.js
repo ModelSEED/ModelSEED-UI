@@ -486,7 +486,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         //    })               
     }
 
-    function copyModel(name, path, i) {
+    function copyModel(name, genome, i) {
         var prom = WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
                 Dialogs.showToast('Copy canceled: <i>'+name+'</i> already exists', null, 2000);  
@@ -494,7 +494,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             }).catch(function(e) {
                 $http.rpc('ms', 'copy_model', {
                     model: genome,
-                    plantseed: 1
+                    plantseed: 0
                 }).then(function(res) {
                     Dialogs.showComplete('Copy complete', name);
                     
