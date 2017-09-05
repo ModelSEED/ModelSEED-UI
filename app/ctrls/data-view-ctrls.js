@@ -312,7 +312,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     */
     
     
-    
+    // Called from the Build Model button (or Copy hyperlink) of PATRIC tab
     $scope.reconstruct = function(ev, item) {        
     	$scope.copyInProgress = true;
     	// TODO: MODELSEED-47: Is called when Build Model button pressed in PATRIC/RAST tabs:
@@ -467,7 +467,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     
     
-    
+    // All below 'copy' functions are deprecated
+    // Calling Reconstruct instead of Copy:
     $scope.copy = function(i, genome) {
         $scope.copyInProgress[i] = true;
         
@@ -513,23 +514,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     }
 
-    // Not called yet:
     function copyFolder(name, path, destPath) {                       
         var args = {
             src: path,
             dest: destPath,
             recursive: true,
         }
-
         // first create modelfolder, then copy
         var prom = WS.createModelFolder('/'+Auth.user+'/plantseed/'+name)
             .then(function(res) {
                 return WS.copy(args).then(function(res) {
                     Dialogs.showComplete('Copy complete', name, path);
-
                     // remove odd empty object
                     delete res[path];
-
                     // update cache
                     if (MS.myPlants) MS.addModel(res, 'plant');
                 }).catch(function(e) {
@@ -544,14 +541,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                 })
             }).catch(function(e) {
                 Dialogs.showError('Copy '+name+ ' failed.')           
-            })    
-        
+            })            
         return prom;
     }
-
-    
-    
-    
     
 } ] )
 
