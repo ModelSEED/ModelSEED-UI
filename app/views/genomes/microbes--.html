@@ -3,7 +3,7 @@
   <div ng-if="microbes.length">
             <div class="table-controls" layout="row">
                         
-                <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+                <md-progress-circular ng-if="loadingMicrobes" md-mode="indeterminate"></md-progress-circular>
                 
                 <md-input-container md-no-float flex="45">
                    <md-icon class="material-icons">search</md-icon>
@@ -103,7 +103,7 @@
             </div>
         
             <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
-                <div>{{relativeTime(item.timestamp)}}</div>
+                <!-- <div>{{relativeTime(item.timestamp)}}</div>  -->
             </div>
 
             <div flex="15" layout="column" layout-align="end center">
@@ -111,13 +111,10 @@
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
                 </md-button>
-            
-                <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path)">
-                Copy
-                </a>
-                <span ng-if="copyInProgress[$index]">
-               Copying...
-                </span>
+                <!--
+                <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path)">Copy</a>
+                <span ng-if="copyInProgress[$index]">Copying...</span>
+                -->
             </div>            
             
             
