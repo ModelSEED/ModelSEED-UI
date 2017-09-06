@@ -41,7 +41,7 @@
       
         <div>
         <label>
-          Choose Taxonomy:
+          Genome Type:
 		    <select
 		      ng-model="selectedTaxa"
 		      ng-options="optionTaxa.value for optionTaxa in taxaOptions">        
@@ -134,7 +134,7 @@
             
                <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
                <!-- <a ng-if="!copyInProgress[$index] && selectedPublic.genome_id" ng-click="reconstruct($event, selectedPublic)">  -->
-                Copy
+                Build Model
                 </a>
                 <span ng-if="copyInProgress">
                Copying...
