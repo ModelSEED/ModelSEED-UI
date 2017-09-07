@@ -133,16 +133,12 @@
             
             
                <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
-               <!-- <a ng-if="!copyInProgress[$index] && selectedPublic.genome_id" ng-click="reconstruct($event, selectedPublic)">  -->
                 Build Model
                 </a>
                 <span ng-if="copyInProgress">
                Copying...
                 </span>
-                            
-            
-                  
-             <!-- <i class="fa {{selectedPublic.genome_id == g.genome_id ? 'fa-circle' : 'fa-circle-o'}}"></i> -->
+                      
         </model-item>                        
     </div>
     
@@ -196,24 +192,29 @@
         <md-input-container pagination
             pagination-offset="opts.offset"
             pagination-limit="opts.limit"
-            pagination-total="filtered.length"
+            pagination-total="results.length"
             layout="row"
             layout-align="end center" flex>
         </md-input-container>
         
     </div>
 
-    <div ng-repeat-start="item in (filtered = ( rastMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+    <div ng-repeat-start="item in (results = ( rastMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
         <model-item layout="row">
 
-            <div flex="10" class="vertical-center">
-                    {{item.name}}
+            <div flex="50" class="vertical-center">
+                    {{item.genome_id}}
                 <br>
             </div>
-
+              <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
+                Build Model
+                </a>
+                <span ng-if="copyInProgress">
+               Copying...
+                </span>
         </model-item>                        
     </div>
                 
@@ -224,7 +225,7 @@
     
   <div>
         <br><br>
-        <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
+        <button class="md-primary md-raised md-button" ng-click="reconstruct($event, item)" >Build Model</button>
         <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
   </div>
   

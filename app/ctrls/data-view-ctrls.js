@@ -338,7 +338,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
         ev.stopPropagation();
         
-        $scope.form = {genome: item.path};
+        $scope.form = {genome: item.genome_id};
 
         $scope.loadingPlants = true;
         
