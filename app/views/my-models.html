@@ -109,10 +109,6 @@
         <!-- <model-item ng-if="item.status && item.status=='complete'" layout="row">  -->
         <!-- <model-item ng-if="item.status" layout="row">  -->
 
-
-
-
-
             <div flex="10" class="vertical-center">
               <div ng-if="item.status && item.name">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
@@ -162,7 +158,9 @@
  
            <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
              <div ng-if="item.status">
-                 <div>{{item.status}}</div>
+                 <div ng-if="item.status=='queued'"><b>{{item.status}}</b></div>
+                 <div ng-if="!(item.status=='queued')">{{item.status}}</div>                  
+                 <!-- <div>{{item.status}}</div>  -->
              </div>
              <div ng-if="! item.status">
                  None
