@@ -321,7 +321,7 @@ md-toolbar,
 }
 
 .md-toolbar-tools {
-    font-size: 1em;
+    font-size: 2em;
     background-color: #2D224E;
 }
 
@@ -350,7 +350,7 @@ ul.toolbar > li:not(.active):hover {
 
 ul.toolbar > li > a {
     display: block;
-    font-size: 8pt;
+    font-size: 18pt;
     line-height: 1.1em;
     margin: 0 7px;
     text-align: center;
