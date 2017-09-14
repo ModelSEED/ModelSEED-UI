@@ -225,10 +225,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     	$scope.selectedTaxa.selected = "plant";
     }
     
-    
 
-    // TODO: MODELSEED-47: load Patric Genomes for user to select for modeling
-
+    // MODELSEED-47: load Patric Genomes for user to select for modeling
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
         $scope.genomes = genomes.docs;
@@ -251,10 +249,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         $scope.myModels = [];
     } )    
     
-    
-
-    // TODO: MODELSEED-47: load RAST Genomes for user to select for modeling
-    // XXX: Merge callbacks with the last one!!!
+    // Merged following callbacks with the last one!!!
     /*
     MS.listRastGenomes()
       .then(function(data) {
@@ -323,11 +318,64 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
     */
     
+
     
-    // Called from the Build Model button of PATRIC tab
+
+	// TODO: MODELSEED-47: To be called when Build Model button pressed in PATRIC tabs:
+    $scope.reconstruct = function(ev, item) {
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+
+        Dialogs.reconstruct(ev, params,
+            function(jobId) {
+                MS.submittedModel({
+                    name: name,
+                    orgName: orgName,
+                    jobId: jobId
+                });
+                
+                
+                $state.go('app.myModels');
+
+                
+                
+            })
+    }    
+    
+    
+    
+    
+    // Called from the Build Model button of RAST tab    
+    $scope.reconstructPrivate = function(ev, item) {
+        var params = {path: 'RAST:' + item.genome_id, name: item.genome_name};
+        Dialogs.reconstruct(ev, params,
+            function(res) {
+                console.log('done reconstructing', res);
+                MS.addModel(res, 'microbe');
+                
+                
+                $state.go('app.myModels');
+
+                
+                
+                
+            })
+    }    
+    
+
+    
+
+    // The following versions of $scope.reconstruct are deprecated:
+    // Deprecated:
+    /*
     $scope.reconstruct = function(ev, item) {        
     	$scope.copyInProgress = true;
-    	// TODO: MODELSEED-47: Is called when Build Model button pressed in PATRIC/RAST tabs:
         if ('genome_id' in item) {
             var name = item.genome_id,
                 orgName = item.genome_name;
@@ -353,8 +401,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                       })
     	
     }
-
-    // This version of $scope.reconstruct is deprecated:
+    */
 /*    
     $scope.reconstruct = function(ev, item) {        
     	if( $scope.myPlants.length > 0 ) {

@@ -109,7 +109,10 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     
     
     this.reconstruct = function(form, params) {
+    	// TODO: MODELSEED-47: Handle the cases for PATRIC/RAST genome reconstruction, in below line/parameter    	
+    	// var parameters = angular.extend(form, {loadingPlants: false});
     	var parameters = angular.extend(form, {loadingPlants: true});
+    	    	
         // var params = angular.extend(form, params);
         console.log('reconstruct form:', form, ' parameters: ', parameters, ' params: ', params);
         return $http.rpc('ms', 'ModelReconstruction', parameters)
@@ -120,6 +123,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                   	  return e;
                     } );
     }
+    
+    
 
     this.runFBA = function(form) {
         $log.log('run fba params', form)
@@ -388,9 +393,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.addModel = function(model, type) {
         //console.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
-            syncCache(this.myModels, model)
+            syncCache(this.myModels, model);
         else if (type.toLowerCase() === 'plant')
-            syncCache(this.myPlants, model)
+            syncCache(this.myPlants, model);
     }
 
     // adds notice to my models cache; only microbes right now
