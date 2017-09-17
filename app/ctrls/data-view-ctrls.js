@@ -222,11 +222,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     	$scope.selectedTemplate.selected = "plant";
     }
     
+    // Deprecated:
     $scope.setDefaultTaxa = function(){
         if( this.selectedTaxa && this.selectedTaxa.selected ) {
             // NOOP
         } else {
-        	this.selectedTaxa.selected = true;
+        	// this.selectedTaxa.selected = true;
         	this.selectedTaxa["name"] = "plant";
         }
     }
@@ -466,12 +467,13 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
         else {
         	
+
         	
           	var genome_type = "";
-            if( this.selectedTaxa.selected ) {
+            if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
+            	this.selectedTaxa["name"] = "plant";
                 genome_type = this.selectedTaxa["name"];
             } else {
-            	this.selectedTaxa["name"] = "plant";
                 genome_type = this.selectedTaxa["name"];
             }
             
