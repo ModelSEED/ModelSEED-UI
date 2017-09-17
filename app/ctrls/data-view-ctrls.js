@@ -145,7 +145,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // var path = $sParams.path;
 	
 	$scope.selectedTemplate;
-	$scope.selectedTaxa;
+	$scope.selectedTaxa = [];
 	
 	
     $scope.genomes = [];
@@ -183,7 +183,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             value: 'Gram negative template'            	
     	}];
     
-    // Taxonomy dropdown options
+    // Genome Type dropdown options
     $scope.taxaOptions = [{
     	   name: 'plant', 
     	   value: 'Plant feature sequences'
@@ -194,7 +194,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            name: 'microbes', 
            value: 'Microbial feature sequences'            
             	
-    	}];    
+    	}];
+    $scope.taxaOption = $scope.taxaOptions[0];
     
       
     $scope.columns = [
@@ -442,12 +443,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     		return;
     	} else {
     		$scope.uploading = true;
-    	}
+    	}   	
+    	
     	var name = "";
         if( $scope.form ) {
            name = $scope.form.name;
         }
-        
         var regex = /[^\w]/gi;
         if(regex.test( name ) == true) {
         	Dialogs.showError( 'Invalid Input' );
@@ -456,24 +457,36 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
         else {
         	
+        	
+          	var genome_type = "";
+            if( $scope.form ) {
+            	genome_type = "plant";
+                // genome_type = $scope.selectedTaxa[0]["name"];
+            }
+            
+            
+            
+            
+        	
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
                     alert('Genome name already exists!\n'+
                     'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
-                startUpload(name);
+                startUpload(name, genome_type);
             })
         }
     }
 
-    function startUpload(name) {
+    function startUpload(name, genome_type) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
-            Dialogs.showComplete('Import in progress...');            
-            
-           // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters: 
-           var parameters = { shock_id: node, genome: name, genome_type: "plant" };
+            Dialogs.showComplete('Import in progress...');
+                        
+           // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters:
+           var parameters = { shock_id: node, genome: name, genome_type };
+           // var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   
@@ -522,216 +535,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
     
 } ] )
-
-
-
-<!-- TODO: ReBuild New Model -->
-.controller('ReBuildPlant',
-['$scope', '$state', '$stateParams', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
- 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
-function($scope, $state, $sParams, Patric, $timeout, $http, Upload, $dialog,
- Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
-	
-    var path = $sParams.path;
-    
-    $scope.name = path.split('/').pop()
-    
-    $scope.genomeNameBox = $scope.name;
-    
-    $scope.myPlants = [];
-    $scope.myMedia = [];
-    
-    $scope.selectedFiles = [];
-    
-    // the selected item for the build operations (not used yet)
-    // $scope.selected = null;
-    
-    // $scope.copyInProgress = {};
-    /*    
-        $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed').
-            then(function(res) {
-                console.log('path res', res)
-                $scope.myPlants = res;
-                $scope.loadingPlants = false;
-        }).catch(function(e) {
-                $scope.myPlants = [];
-                $scope.loadingPlants = false;
-        })
-    */    
-    $scope.loadingMyMedia = true;    
-    MS.listMyMedia()
-      .then(function(media) {
-          $scope.myMedia = media;
-          $scope.loadingMyMedia = false;
-      }).catch(function(e) {
-          $scope.loadingMyMedia = false;
-          $scope.myMedia = [];
-      })
-
-    var inArray = function(array, obj) {
-            var index = array.indexOf(obj);
-        }
-
-    $scope.reconstruct = function(ev, item) {
-    
-        // Temp:  method parm item is not wired (came from selectedPublic from Ref Genomes page)
-        // XXX: Hard coded:  Always Selects the head of the list of myPlants (method parm 'item' is ignored):        
-        // TODO:  Make it selectable instead of always $scope.myPlants[ 0 ]:
-             
-        // console.log( "TODO Build New Model for \n", $scope.genomeNameBox );         
-
-    	if( $scope.myPlants.length > 0 ) {
-    		item = $scope.myPlants[ 0 ];
-    		var name = $scope.myPlants[ 0 ].name;
-    		var path = $scope.myPlants[ 0 ].path;
-    		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            Dialogs.showToast('Creating Model...', name, 2000);
-    	}
-        
-        if ('genome_id' in item) {
-            var name = item.genome_id,
-                orgName = item.genome_name;
-            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
-        } else {
-            var name = item.name;
-            var params = {path: item.path, name: name};
-        }
-
-        ev.stopPropagation();
-        
-        $scope.form = {genome: item.path};
-
-        // self.showToast('Reconstructing', item.name, 5000)
-        $scope.loadingPlants = true;
-                
-        var reconstructpromise =             
-        	MS.reconstruct($scope.form)
-                      .then(function(r) {
-                    	  // This block will be executed at callback
-                    	  //   Wether success or not...
-                    	  // TODO: redirect page to parent from right here
-                    	  // $http.
-                    	  app.myModels();
-                           cb(r);
-                      }).catch(function(e) {
-                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
-                          // self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
-                      })
-        
-    }
-
-
-    
-    $scope.templateSelected = function( ) {
-    	if( $scope.myPlants.length > 0 ) {
-            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            
-    	}
-    }    
-    
-    
-    
-    $scope.startUpload = function() {
-    	var name = "";
-        if( $scope.form ) {
-           name = $scope.form.name;        	
-        }
-        if( name.length > 0 ) {
-        
-            var taxonomy = $scope.form.selectedTaxa;
-
-            // Ensure no overwrites
-            console.log('attempting upload')
-            WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
-                .then(function() {
-                    alert('Genome name already exists!\n'+
-                    'Please provide a new name or delete the existing genome');                           
-            }).catch(function(e) {
-                startUpload(name);
-            })
-        }
-    }
-
-    function startUpload(name) {
-
-        Upload.uploadFile($scope.selectedFiles, null, function(node) {                        
-            MS.createGenomeFromShock(node, name)
-                .then(function(res) {
-                    console.log('done importing', res)
-                    Dialogs.showComplete('Import complete', name);
-                                                    
-                    loadPrivatePlants( res );
-                    // loadPrivatePlants();
-                    
-                }).catch(function(e) {
-                    // Dialogs.showError('something has gone wrong')
-                    console.error(e.error.message)                                
-                })
-        }, function(error) {
-            console.log('shock error:', error)
-            // Dialogs.showError('Upload to SHOCK failed (see console)')                        
-        })                    
-    }     
-    
-    // Deferred Functionality for Uploading a FASTA file: 
-    function loadPrivatePlants( res ) {
-        $scope.loadingMyPlants = true;
-        $scope.myPlants = [];
-        $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed').
-
-            then(function(res) {
-                console.log('path res', res)
-            
-                $scope.myPlants = res;
-            	if( $scope.myPlants.length > 0 ) {
-                    $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-                    
-            	}
-                $scope.loadingPlants = false;
-            }).catch(function(e) {
-                $scope.myPlants = [];
-                $scope.loadingPlants = false;
-            })
-                  
-            $scope.loadingMyPlants = false;
-        
-        /*                
-        WS.list('/'+Auth.user+'/plantseed/')
-            .then(function(res) {
-                // ignore anything that isn't a modelfolder
-                var plants = []
-                res.forEach(function(obj) {
-                    if (obj.type !== 'modelfolder') return;
-                    obj.path =  obj.path + '/.plantseed_data/minimal_genome';
-                    plants.push(obj);
-                })
-
-                $scope.myPlants = plants;
-                $scope.loadingMyPlants = false;
-            }).catch(function(e) {
-                if (e.error.code === -32603)
-                    $scope.error = 'Something seems to have went wrong. '+
-                                'Please try logging out and back in again.';
-                else
-                    $scope.error = e.error.message;
-                $scope.loadingMyPlants = false;
-            })
-            */
-    }
-        
-    $scope.selectFile = function(files) {
-
-        $scope.$apply(function() {
-            $scope.selectedFiles = files;
-        })
-    }
-    
-    
-    
-} ] )
-
 
 
 

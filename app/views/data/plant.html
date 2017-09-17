@@ -15,46 +15,29 @@
         <select 
             ng-model="selectedTemplate" 
             ng-options="option.value for option in options">
-            
         </select>
         </label>              
       </div>     
       <br><br><br>
     
-  <div>{{$scope.setDefaultTemplate()}}</div>
-   
-  <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->  
-  
+  <!--  <div>{{$scope.setDefaultTemplate()}}</div> -->  
+  <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-
   <md-tab>
     <md-tab-label>
       UPLOAD FASTA
     </md-tab-label>
 
-    <md-tab-body>    
-    <div flex layout="row">    
+    <md-tab-body>       
 
-      <div layout="column">
-      
+      <div layout="column">     
         <br>
-      
-        <div>
-        <label>
-          Genome Type:
-		    <select
-		      ng-model="selectedTaxa"
-		      ng-options="optionTaxa.value for optionTaxa in taxaOptions">        
-		    </select>
-		</label>
-        </div>
-        <div>{{$scope.setDefaultTaxa()}}</div>
-              
+        <!-- <div>{{$scope.setDefaultTaxa()}}</div> -->             
        <br>
                 
-       <form id="upload-form" class="upload-form form-horizontal">        
+       <form name="upload_form" id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
-                <br>
+                <br>		
                 <label class="control-label"> <i>Select fasta file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
@@ -68,11 +51,28 @@
             </div>
         </form>
         
+        <br>
+        
         <div flex="65" class="vertical-center" layout="row" layout-align="start">
           <form>    
-          <md-input-container flex md-no-float>
-              <input flex ng-model="form.name" placeholder="Name Model to build" required/>
-          </md-input-container>
+          <!-- <md-input-container flex md-no-float>  -->
+              <input flex ng-model="form.name" placeholder="Name Model to build" required/>          
+          
+              <br><br>
+          
+              <label>
+              Genome Type:
+		      <select flex ng-model="selectedTaxa"
+		          ng-options="optionTaxa.value for optionTaxa in taxaOptions"
+		          required>
+		      </select>
+		     </label>
+             <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span>  -->
+             <br>
+        <!--  </md-input-container> -->
+             
+             
+                       
                     
           <md-button class="md-primary md-raised"
             ng-click="startUpload(  )"
@@ -82,10 +82,11 @@
           </md-button>                 
           </form>
         </div>                     
+
+
         
       </div>
              
-  </div> 
   </md-tab-body>
   </md-tab>
 

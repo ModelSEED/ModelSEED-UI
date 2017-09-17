@@ -277,20 +277,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
 
 
-
-            //     <!-- ReBuild New Model -->            
-               } ).state('app.replantPage', {
-                   // url: "/replant",       
-                   url: "/replant{path:nonURIEncoded}",
-
-                   templateUrl: 'app/views/data/replant.html',
-                   
-                   controller: 'ReBuildPlant',
-                   
-                   authenticate: true
-
-            
-            
             
         } ).state('app.featurePage', {
             url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
