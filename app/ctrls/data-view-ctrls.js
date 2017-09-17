@@ -223,7 +223,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     }
     
     $scope.setDefaultTaxa = function(){
-    	$scope.selectedTaxa.selected = "plant";
+        if( this.selectedTaxa && this.selectedTaxa.selected ) {
+            // NOOP
+        } else {
+        	this.selectedTaxa.selected = true;
+        	this.selectedTaxa["name"] = "plant";
+        }
     }
     
 
@@ -445,23 +450,29 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     		$scope.uploading = true;
     	}   	
     	
-    	var name = "";
-        if( $scope.form ) {
-           name = $scope.form.name;
-        }
+    	var name = this.modelName;
+    	if(name.length==0){
+        	Dialogs.showError( 'Invalid Input' );
+            $scope.modelName = "";
+            $scope.uploading = false;
+            return;
+    	}
+        
         var regex = /[^\w]/gi;
         if(regex.test( name ) == true) {
         	Dialogs.showError( 'Invalid Input' );
-            $scope.form.name = "";
+            $scope.modelName = "";
             $scope.uploading = false;
         }
         else {
         	
         	
           	var genome_type = "";
-            if( $scope.form ) {
-            	genome_type = "plant";
-                // genome_type = $scope.selectedTaxa[0]["name"];
+            if( this.selectedTaxa.selected ) {
+                genome_type = this.selectedTaxa["name"];
+            } else {
+            	this.selectedTaxa["name"] = "plant";
+                genome_type = this.selectedTaxa["name"];
             }
             
             

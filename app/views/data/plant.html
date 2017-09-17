@@ -19,8 +19,7 @@
         </label>              
       </div>     
       <br><br><br>
-    
-  <!--  <div>{{$scope.setDefaultTemplate()}}</div> -->  
+     
   <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
   <md-tab>
@@ -31,9 +30,7 @@
     <md-tab-body>       
 
       <div layout="column">     
-        <br>
-        <!-- <div>{{$scope.setDefaultTaxa()}}</div> -->             
-       <br>
+        <br><br>
                 
        <form name="upload_form" id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
@@ -49,42 +46,39 @@
                 </label>
                 {{selectedFiles[0].name}}
             </div>
-        </form>
-        
         <br>
         
-        <div flex="65" class="vertical-center" layout="row" layout-align="start">
-          <form>    
-          <!-- <md-input-container flex md-no-float>  -->
-              <input flex ng-model="form.name" placeholder="Name Model to build" required/>          
+        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
+          <div flex="35" layout="row">                                              
+              <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
+          </div>          
           
-              <br><br>
+          <br><br>
           
-              <label>
+          <label>
               Genome Type:
 		      <select flex ng-model="selectedTaxa"
 		          ng-options="optionTaxa.value for optionTaxa in taxaOptions"
+		          ng-init="setDefaultTaxa()"
 		          required>
+		          <option value="" selected="selected">Plant feature sequences</option>
 		      </select>
-		     </label>
-             <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span>  -->
-             <br>
-        <!--  </md-input-container> -->
-             
-             
-                       
-                    
+		  </label>
+             <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span> -->
+          <br>
+          
+          <div flex="10" layout="row">                                 
           <md-button class="md-primary md-raised"
             ng-click="startUpload(  )"
-            ng-disabled="!(selectedFiles && form.name)">
+            ng-disabled="!selectedFiles">
                Build Model
             <br>
-          </md-button>                 
+          </md-button>
+          </div>
+                           
           </form>
         </div>                     
-
-
-        
+       
       </div>
              
   </md-tab-body>
