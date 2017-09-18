@@ -498,7 +498,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             Dialogs.showComplete('Import in progress...');
                         
            // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters:
-           var parameters = { shock_id: node, genome: name, genome_type };
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type };
            // var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
