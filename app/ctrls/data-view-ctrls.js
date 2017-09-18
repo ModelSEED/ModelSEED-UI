@@ -183,6 +183,21 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             value: 'Gram negative template'            	
     	}];
     
+    
+    
+    // Kingdom dropdown options
+    $scope.kingdomOptions = [{
+    	   name: 'plants', 
+    	   value: 'Plants'
+    	}, {
+           name: 'microbes', 
+           value: 'Microbial'            
+            	
+    	}];
+    
+    
+    
+    
     // Genome Type dropdown options
     $scope.taxaOptions = [{
     	   name: 'plant', 
@@ -195,7 +210,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            value: 'Microbial feature sequences'            
             	
     	}];
-    $scope.taxaOption = $scope.taxaOptions[0];
+    // $scope.taxaOption = $scope.taxaOptions[0];
     
       
     $scope.columns = [
@@ -471,6 +486,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         	
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
+            	// Set the default:
             	this.selectedTaxa["name"] = "plant";
                 genome_type = this.selectedTaxa["name"];
             } else {

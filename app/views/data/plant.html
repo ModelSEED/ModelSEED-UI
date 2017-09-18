@@ -48,14 +48,26 @@
             </div>
         <br>
         
-        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
-          <div flex="35" layout="row">                                              
-              <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
-          </div>          
+        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">          
           
           <br><br>
           
-          <label>
+          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px; rounded">                                                        
+
+
+
+          <label style="margin: 10px">
+              Kingdom:
+		      <select flex ng-model="selectedKingdom"
+		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions"
+		          required>
+		          <option value="">Plants</option>
+		      </select>
+		  </label>
+		  
+		  
+		            
+          <label style="margin: 10px">
               Genome Type:
 		      <select flex ng-model="selectedTaxa"
 		          ng-options="optionTaxa.value for optionTaxa in taxaOptions"
@@ -64,6 +76,18 @@
 		      </select>
 		  </label>
              <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span> -->
+          
+            
+          </div>
+          
+          <br><br>   
+             
+          <div flex="35" layout="row">                                              
+              <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
+          </div>
+          
+          
+                       
           <br>
           
           <div flex="10" layout="row">                                 
