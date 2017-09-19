@@ -144,10 +144,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // path and name of object
     // var path = $sParams.path;
 	
-	$scope.selectedTemplate;
+	$scope.selectedKingdom = [];
 	$scope.selectedTaxa = [];
-	
-	
+	$scope.selectedTemplate = [];	
+		
     $scope.genomes = [];
     $scope.myPlants = [];
     $scope.myMedia = [];
@@ -161,6 +161,29 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     $scope.copyInProgress = false;
     $scope.uploading = false;
+    
+    
+    // Kingdom dropdown options
+    $scope.kingdomOptions = [{
+	   name: 'plants', 
+	   value: 'Plants'
+	}, {
+       name: 'microbes', 
+       value: 'Microbial'                    	
+	}];
+    
+    // Genome Type dropdown options
+    $scope.taxaOptions = [{
+    	   name: 'plant', 
+    	   value: 'Plant feature sequences'
+    	}, {
+    	   name: 'full',
+    	   value: 'Full microbial genome'
+    	}, {
+           name: 'microbes', 
+           value: 'Microbial feature sequences'            
+            	
+    	}];
     
     // Template dropdown options
     $scope.options = [{
@@ -183,35 +206,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             value: 'Gram negative template'            	
     	}];
     
-    
-    
-    // Kingdom dropdown options
-    $scope.kingdomOptions = [{
-    	   name: 'plants', 
-    	   value: 'Plants'
-    	}, {
-           name: 'microbes', 
-           value: 'Microbial'            
-            	
-    	}];
-    
-    
-    
-    
-    // Genome Type dropdown options
-    $scope.taxaOptions = [{
-    	   name: 'plant', 
-    	   value: 'Plant feature sequences'
-    	}, {
-    	   name: 'full',
-    	   value: 'Full microbial genome'
-    	}, {
-           name: 'microbes', 
-           value: 'Microbial feature sequences'            
-            	
-    	}];
-    // $scope.taxaOption = $scope.taxaOptions[0];
-    
       
     $scope.columns = [
         {prop: 'genome_name', label: 'Name'},
@@ -225,27 +219,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             sort: {field: 'genome_name'},
             visible: ['genome_name', 'genome_id', 'species', 'contigs']
         };
-    
-    $scope.templateSelected = function( ) {
-    	if( $scope.myPlants.length > 0 ) {
-            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            
-    	}
-    } 
-    
-    $scope.setDefaultTemplate = function(){
-    	$scope.selectedTemplate.selected = "plant";
-    }
-    
-    // Deprecated:
-    $scope.setDefaultTaxa = function(){
-        if( this.selectedTaxa && this.selectedTaxa.selected ) {
-            // NOOP
-        } else {
-        	// this.selectedTaxa.selected = true;
-        	this.selectedTaxa["name"] = "plant";
-        }
-    }
     
 
     // MODELSEED-47: load Patric Genomes for user to select for modeling
@@ -308,42 +281,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
           $scope.myMedia = [];
       })
 
-        $scope.droppedObjects1 = [];
-        $scope.droppedObjects2= [];
-            
-        $scope.onDropComplete1=function(data,evt){
-            var index = $scope.droppedObjects1.indexOf(data);
-            if (index == -1)
-            $scope.droppedObjects1.push(data);
-        }
-        $scope.onDragSuccess1=function(data,evt){
-            console.log("133","$scope","onDragSuccess1", "", evt);
-            var index = $scope.droppedObjects1.indexOf(data);
-            if (index > -1) {
-                $scope.droppedObjects1.splice(index, 1);
-            }
-        }
-        $scope.onDragSuccess2=function(data,evt){
-            var index = $scope.droppedObjects2.indexOf(data);
-            if (index > -1) {
-                $scope.droppedObjects2.splice(index, 1);
-            }
-        }
-        $scope.onDropComplete2=function(data,evt){
-            var index = $scope.droppedObjects2.indexOf(data);
-            if (index == -1) {
-                $scope.droppedObjects2.push(data);
-            }
-        }
-        var inArray = function(array, obj) {
-            var index = array.indexOf(obj);
-        }
     */
     
-
-    
-
-	// TODO: MODELSEED-47: To be called when Build Model button pressed in PATRIC tabs:
+	// MODELSEED-47: To be called when Build Model button pressed in PATRIC tabs:
     $scope.reconstruct = function(ev, item) {
         if ('genome_id' in item) {
             var name = item.genome_id,
@@ -361,37 +301,26 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     orgName: orgName,
                     jobId: jobId
                 });
-                
-                
+                                
                 $state.go('app.myModels');
 
-                
-                
             })
     }    
     
     
-    
-    
-    // Called from the Build Model button of RAST tab    
+    // MODELSEED-47: Called from the Build Model button of RAST tab    
     $scope.reconstructPrivate = function(ev, item) {
         var params = {path: 'RAST:' + item.genome_id, name: item.genome_name};
         Dialogs.reconstruct(ev, params,
             function(res) {
                 console.log('done reconstructing', res);
                 MS.addModel(res, 'microbe');
-                
-                
+                                
                 $state.go('app.myModels');
 
-                
-                
-                
             })
     }    
-    
-
-    
+        
 
     // The following versions of $scope.reconstruct are deprecated:
     // Deprecated:
@@ -480,9 +409,17 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             $scope.modelName = "";
             $scope.uploading = false;
         }
+        
         else {
-        	
-
+        	        	
+          	var kingdom = "";
+            if( this.selectedKingdom && this.selectedKingdom.length==0 ) {
+            	// Set the default:
+            	this.selectedKingdom["name"] = "plants";
+                kingdom = this.selectedKingdom["name"];
+            } else {
+                kingdom = this.selectedKingdom["name"];
+            }
         	
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
@@ -492,28 +429,35 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 genome_type = this.selectedTaxa["name"];
             }
-            
-            
-            
-            
+                    	
+          	var template = "";
+            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
+            	// Set the default:
+            	this.selectedTemplate["name"] = "plant";
+            	template = this.selectedTemplate["name"];
+            } else {
+            	template = this.selectedTemplate["name"];
+            }
+                        
         	
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
                     alert('Genome name already exists!\n'+
                     'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
-                startUpload(name, genome_type);
+            	
+                startUpload( name, kingdom, genome_type, template );
             })
         }
     }
 
-    function startUpload(name, genome_type) {
+    function startUpload( name, kingdom, genome_type, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
             Dialogs.showComplete('Import in progress...');
                         
-           // TODO: MODELSEED-47: Add $scope.selectedTaxa to the following parameters:
+           // TODO: MODELSEED-47: Add $scope.selectedTaxa... to the following parameters:
            var parameters = { shock_id: node, genome: name, genome_type: genome_type };
            // var parameters = { shock_id: node, genome: name, genome_type: "plant" };
            MS.reconstructionPipeline( parameters )
@@ -535,6 +479,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
              	   $scope.uploading = false;
 
                 })
+           
         }, function(error) {
             console.log('shock error:', error);
             // Dialogs.showError('Upload to SHOCK failed (see console)')                        
@@ -548,7 +493,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         })
     }
          
-    
+    // Not used:
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
             var col = $scope.columns[i];
@@ -557,11 +502,34 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         return '';
     }
 
+    // Not used:
     $scope.exists = function(item, visible) {
       return visible.indexOf(item) > -1;
     }   
 
 
+    // Deprecated:
+    $scope.templateSelected = function( ) {
+    	if( $scope.myPlants.length > 0 ) {
+            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
+    	}
+    }
+    
+    // Deprecated:
+    $scope.setDefaultTemplate = function(){
+    	$scope.selectedTemplate.selected = "plant";
+    }
+    
+    // Deprecated:
+    $scope.setDefaultTaxa = function(){
+        if( this.selectedTaxa && this.selectedTaxa.selected ) {
+            // NOOP
+        } else {
+        	// this.selectedTaxa.selected = true;
+        	this.selectedTaxa["name"] = "plant";
+        }
+    }
     
 } ] )
 

@@ -8,7 +8,7 @@
 </div>    
 
 <div class="container">
-  
+      <!--
       <div flex="45" class="vertical-center" layout="row" layout-align="start">
        <label>
        Select Template Model:    
@@ -16,8 +16,10 @@
             ng-model="selectedTemplate" 
             ng-options="option.value for option in options">
         </select>
-        </label>              
-      </div>     
+        </label>
+      </div>
+      -->              
+           
       <br><br><br>
      
   <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->   
@@ -75,9 +77,18 @@
 		          <option value="">Plant feature sequences</option>
 		      </select>
 		  </label>
+		     <!-- Next line causes the SHOCK Upload service to error (does not like DOM names)! -->
              <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span> -->
           
-            
+
+          <label style="margin: 10px">
+           Select Template Model:    
+            <select 
+                ng-model="selectedTemplate" 
+                ng-options="option.value for option in options">
+            </select>
+          </label> 
+                            
           </div>
           
           <br><br>   
@@ -86,9 +97,9 @@
               <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
           </div>
           
-          
-                       
+                                
           <br>
+          
           
           <div flex="10" layout="row">                                 
           <md-button class="md-primary md-raised"
@@ -100,6 +111,7 @@
           </div>
                            
           </form>
+          
         </div>                     
        
       </div>
