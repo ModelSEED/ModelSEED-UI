@@ -170,13 +170,14 @@
     <div ng-if="$root.user" mega-dropdown id="login-dd" ng-controller="Login" style="position: relative;">
         <div class="cursor" layout="row">
             <div layout="column">
+                <!--
                 <div>{{$root.user.split('@')[0]}}
                 <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
                 </div>
-                <!--              
+                -->              
                 <div>{{$root.user.split('@')[0]}}</div>
                 <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
-                -->
+                
             </div>
         </div>
 
