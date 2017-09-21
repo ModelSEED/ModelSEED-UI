@@ -144,8 +144,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // path and name of object
     // var path = $sParams.path;
 	
-	$scope.selectedKingdom = [];
-	$scope.selectedTaxa = [];
+	$scope.selectedKingdom = []; // Plants or Microbes
+	$scope.selectedSeqType = []; // protein or DNA
+	$scope.selectedTaxa = []; // genome_type: features or contigs
 	$scope.selectedTemplate = [];	
 		
     $scope.genomes = [];
@@ -171,16 +172,22 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
        name: 'microbes', 
        value: 'Microbial'                    	
 	}];
+
+    // Sequence Type dropdown options
+    $scope.seqTypeOptions = [{
+    	name: 'dna', 
+        value: 'DNA'
+	}, {
+		name: 'protein', 
+		value: 'Protein'                           	
+	}];
     
     // Genome Type dropdown options
     $scope.taxaOptions = [{
-    	   name: 'plant', 
-    	   value: 'Plant feature sequences'
+    	   name: 'contigs',
+    	   value: 'Contigs'
     	}, {
-    	   name: 'full',
-    	   value: 'Full microbial genome'
-    	}, {
-           name: 'microbes', 
+           name: 'features', 
            value: 'Microbial feature sequences'            
             	
     	}];
@@ -195,9 +202,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     	}, {
            name: 'core', 
            value: 'Core template'            
-    	}, {
-            name: 'plant', 
-            value: 'Plant template'
     	}, {
             name: 'grampos', 
             value: 'Gram positive template'
@@ -395,9 +399,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     		$scope.uploading = true;
     	}   	
     	
-    	var name = this.modelName;
+    	var name = this.modelName || "";
     	if(name.length==0){
-        	Dialogs.showError( 'Invalid Input' );
+        	Dialogs.showError( 'Invalid Model Name' );
             $scope.modelName = "";
             $scope.uploading = false;
             return;
@@ -405,7 +409,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         
         var regex = /[^\w]/gi;
         if(regex.test( name ) == true) {
-        	Dialogs.showError( 'Invalid Input' );
+        	Dialogs.showError( 'Invalid Model Name' );
             $scope.modelName = "";
             $scope.uploading = false;
         }
@@ -420,6 +424,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 kingdom = this.selectedKingdom["name"];
             }
+            
+            
+            
+          	var seq_type = "";
+            if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
+            	// Set the default:
+            	this.selectedSeqType["name"] = "dna";
+                seq_type = this.selectedSeqType["name"];
+            } else {
+                seq_type = this.selectedSeqType["name"];
+            }
+            
+            
         	
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
@@ -446,12 +463,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
             	
-                startUpload( name, kingdom, genome_type, template );
+                startUpload( name, kingdom, seq_type, genome_type, template );
             })
         }
     }
 
-    function startUpload( name, kingdom, genome_type, template ) {
+    function startUpload( name, kingdom, sequence_type, genome_type, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	

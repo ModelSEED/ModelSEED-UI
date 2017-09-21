@@ -45,25 +45,27 @@
           
           <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px; rounded">                                                        
 
-
-
           <label style="margin: 10px">
               Kingdom:
 		      <select flex ng-model="selectedKingdom"
-		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions"
-		          required>
+		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions">
 		          <option value="">Plants</option>
 		      </select>
 		  </label>
-		  
-		  
-		            
+
+          <label style="margin: 10px">
+              Sequence Type:
+		      <select flex ng-model="selectedSeqType"
+		          ng-options="optionSeqType.value for optionSeqType in seqTypeOptions">
+		          <option value="">DNA</option>
+		      </select>
+		  </label>
+		  		            
           <label style="margin: 10px">
               Genome Type:
 		      <select flex ng-model="selectedTaxa"
-		          ng-options="optionTaxa.value for optionTaxa in taxaOptions"
-		          required>
-		          <option value="">Plant feature sequences</option>
+		          ng-options="optionTaxa.value for optionTaxa in taxaOptions">
+		          <option value="">Contigs</option>
 		      </select>
 		  </label>
 		     <!-- Next line causes the SHOCK Upload service to error (does not like DOM names)! -->
