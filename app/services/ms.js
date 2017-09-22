@@ -95,29 +95,28 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     
+    
+    // MODELSEED-47: Called from the Upload FASTA function of the Build Model page: 
     this.reconstructionPipeline = function( args ) {    
     // this.reconstructionPipeline = function(name, annotate) {
         // var args = {destname: name, annotate: annotate};
-        console.log('calling reconstruction pipeline:', args)
+        console.log('Making ModelReconstruction RPC call, from MS.reconstructionPipeline, with args:', args);
         return $http.rpc('ms', 'ModelReconstruction', args)
-                    .then(function(res){
-                        console.log('response', res)
-                        return res;
+                    .then(function(jobId){
+                        console.log('response', jobId);
+                        return jobId;
                     })
     }
     
     
-    
-    this.reconstruct = function(form, params) {
-    	// TODO: MODELSEED-47: Handle the cases for PATRIC/RAST genome reconstruction, in below line/parameter    	
-    	// var parameters = angular.extend(form, {loadingPlants: false});
-    	var parameters = angular.extend(form, {loadingPlants: true});
-    	    	
+	// MODELSEED-47: Handle the cases for PATRIC/RAST genome reconstruction
+    this.reconstruct = function(args, params) {
+    	// var parameters = angular.extend(form, {loadingPlants: true});  	    	
         // var params = angular.extend(form, params);
-        console.log('reconstruct form:', form, ' parameters: ', parameters, ' params: ', params);
-        return $http.rpc('ms', 'ModelReconstruction', parameters)
-                    .then(function(res){
-                        return res;
+        console.log('Making ModelReconstruction RPC call, from MS.reconstruct, with parameters: ', args);
+        return $http.rpc('ms', 'ModelReconstruction', args)
+                    .then(function(jobId){
+                        return jobId;
                     } ).catch(function(e) {
                   	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
                   	  return e;
@@ -242,15 +241,10 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             name: obj.id,
             path: obj.ref,
             orgName: obj.name,
-            
-            
-            
+                        
             status: obj.status,
             
-            
-            
             geneCount: obj.num_genes,
-  
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,

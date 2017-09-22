@@ -81,27 +81,128 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
-            function($scope, $http) {
+              function($scope, $http) {
                 $scope.item = item;
                 $scope.form = {genome: item.path};
+                
+                
+                
+            	$scope.selectedKingdom = []; // Plants or Microbes
+            	$scope.selectedSeqType = []; // protein or DNA
+            	$scope.selectedTaxa = []; // genome_type: features or contigs
+            	$scope.selectedTemplate = [];
+            	
+                // Kingdom dropdown options
+                $scope.kingdomOptions = [{
+            	   name: 'plants', 
+            	   value: 'Plants'
+            	}, {
+                   name: 'microbes', 
+                   value: 'Microbial'                    	
+            	}];
+
+                // Sequence Type dropdown options
+                $scope.seqTypeOptions = [{
+                	name: 'dna', 
+                    value: 'DNA'
+            	}, {
+            		name: 'protein', 
+            		value: 'Protein'                           	
+            	}];
+                
+                // Genome Type dropdown options
+                $scope.taxaOptions = [{
+                	   name: 'contigs',
+                	   value: 'Contigs'
+                	}, {
+                       name: 'features', 
+                       value: 'Microbial feature sequences'            
+                        	
+                	}];
+                
+                // Template dropdown options
+                $scope.options = [{
+                	   name: 'plant', 
+                	   value: 'Plant template'
+                	}, {
+                	   name: 'auto',
+                	   value: 'Automatically select'
+                	}, {
+                       name: 'core', 
+                       value: 'Core template'            
+                	}, {
+                        name: 'grampos', 
+                        value: 'Gram positive template'
+                	}, {
+                        name: 'gramneg', 
+                        value: 'Gram negative template'            	
+                	}];
+                            	
+            	
 
                 $scope.reconstruct = function(){
                     self.showToast('Reconstructing', item.name, 5000)
-                    MS.reconstruct($scope.form)
-                      .then(function(r) {
-                           cb(r);
+                    
+                    
+                    /*
+		         	var kingdom = "";
+		            if( this.selectedKingdom && this.selectedKingdom.length==0 ) {
+		            	// Set the default:
+		            	this.selectedKingdom["name"] = "plants";
+		                kingdom = this.selectedKingdom["name"];
+		            } else {
+		                kingdom = this.selectedKingdom["name"];
+		            }
+		            */
+		                        
+		          	var seq_type = "";
+		            if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
+		            	// Set the default:
+		            	this.selectedSeqType["name"] = "dna";
+		                seq_type = this.selectedSeqType["name"];
+		            } else {
+		                seq_type = this.selectedSeqType["name"];
+		            }
+		                    	
+		          	var genome_type = "";
+		            if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
+		            	// Set the default:
+		            	this.selectedTaxa["name"] = "contigs";
+		                genome_type = this.selectedTaxa["name"];
+		            } else {
+		                genome_type = this.selectedTaxa["name"];
+		            }
+		                    	
+		          	var template = "";
+		            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
+		            	// Set the default:
+		            	this.selectedTemplate["name"] = "core";
+		            	template = this.selectedTemplate["name"];
+		            } else {
+		            	template = this.selectedTemplate["name"];
+		            }
+                        
+                     
+		            var parameters = { genome: item.path, sequence_type: seq_type, genome_type: genome_type };
+
+                    
+                    
+                    MS.reconstruct( parameters )
+                    // MS.reconstruct($scope.form)
+                      .then(function(jobId) {
+                           cb(jobId);
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
 
                     $dialog.hide();
-                }
+                };
 
                 $scope.cancel = function(){
                     $dialog.hide();
-                }
-            }]
-        })
+                };
+              }]
+        });
     }
 
     this.reconstructPlant = function(ev, item, cb) {
@@ -111,8 +212,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
-            function($scope, $http) {
-                console.log('item', item)
+              function($scope, $http) {
+                console.log('Construct Dialog controller function item:', item);
                 $scope.item = item;
                 $scope.form = {genome: item.path};
             
@@ -130,12 +231,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       })
 
                     $dialog.hide();
-                }
+                };
 
                 $scope.cancel = function(){
                     $dialog.hide();
-                }
-            }]
+                };
+              }]
         })
     }
 

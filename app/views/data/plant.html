@@ -26,7 +26,7 @@
        <form name="upload_form" id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
                 <br>		
-                <label class="control-label"> <i>Select fasta file: </i> </label>
+                <label class="control-label"> <i>Select FAST-A file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
                     <input
@@ -43,7 +43,7 @@
           
           <br><br>
           
-          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px; rounded">                                                        
+          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px">                                                        
 
           <label style="margin: 10px">
               Kingdom:
@@ -71,7 +71,6 @@
 		     <!-- Next line causes the SHOCK Upload service to error (does not like DOM names)! -->
              <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span> -->
           
-
           <label style="margin: 10px">
            Select Template Model:    
             <select 
@@ -87,10 +86,8 @@
           <div flex="35" layout="row">                                              
               <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
           </div>
-          
-                                
+                                          
           <br>
-          
           
           <div flex="10" layout="row">                                 
           <md-button class="md-primary md-raised"
@@ -140,9 +137,7 @@
     </div>
 
 
-
     <div ng-repeat-start="item in (filtered = ( genomes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
-         ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
         <model-item layout="row">
@@ -151,43 +146,22 @@
                     {{item.genome_name}}
                 <br>
             </div>
-            
-            
+                        
                <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
                 Build Model
-                </a>
-                <span ng-if="copyInProgress">
+               </a>
+               
+               <span ng-if="copyInProgress">
                Copying...
-                </span>
+               </span>
                       
         </model-item>                        
-    </div>
-    
-    
-                
-    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
-    </div>
+    </div>                  
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs"></div>
     
   </div>
     
-  <div>
-        <br>
-        <br>
-        
-        
-                <!--
-                <md-button layout-align="start center"
-                           ng-if="selectedPublic.genome_id"
-                           ng-click="reconstruct($event, selectedPublic)"
-                          class="md-primary md-raised">
-                    <i class="icon-tools fa-plus"></i>
-                    Build Model
-                </md-button>
-                -->                        
-        <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>  -->
-        <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
-  </div>
-  
+  <br><br>  
   </md-tab-body>
     
   </md-tab>
@@ -199,7 +173,7 @@
       RAST
   </md-tab-label>
   
-    <md-tab-body>
+  <md-tab-body>
   <br><br>
 
   <div>
@@ -221,7 +195,6 @@
     </div>
 
     <div ng-repeat-start="item in (results = ( rastMicrobes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
-         ng-click="showRelatedData(item)"
          class="row-hover my-model">
 
         <model-item layout="row">
@@ -238,20 +211,12 @@
                 </span>
         </model-item>                        
     </div>
-                
-    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
-    </div>
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs"></div>
     
   </div>
     
-  <div>
-        <br><br>
-        <button class="md-primary md-raised md-button" ng-click="reconstruct($event, item)" >Build Model</button>
-        <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
-  </div>
-  
-  </md-tab-body>
-    
+  <br><br>  
+  </md-tab-body>    
   </md-tab>
   <!-- ----------------------------------------------------------------------------------------------------------------------------- -->
 

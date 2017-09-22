@@ -248,150 +248,45 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         $scope.myModels = [];
     } )    
     
-    // Merged following callbacks with the last one!!!
-    /*
-    MS.listRastGenomes()
-      .then(function(data) {
-          $scope.rastMicrobes = data;
-   })
-
-    MS.listModels( '/modelseed' + '/modelseed' ).then(function(res) {
-        console.log('path res', res)
-        $scope.microbes = res;
-        $scope.loadingMicrobes = false;
-    }).catch(function(e) {
-        $scope.microbes = [];
-        $scope.loadingMicrobes = false;
-    })
-        
-        $scope.loadingPlants = true;
-        MS.listModels('/'+Auth.user+'/plantseed').
-            then(function(res) {
-                console.log('path res', res)
-                $scope.myPlants = res;
-                $scope.loadingPlants = false;
-        }).catch(function(e) {
-                $scope.myPlants = [];
-                $scope.loadingPlants = false;
-        })
-                
-    $scope.loadingMyMedia = true;    
-    MS.listMyMedia()
-      .then(function(media) {
-          $scope.myMedia = media;
-          $scope.loadingMyMedia = false;
-      }).catch(function(e) {
-          $scope.loadingMyMedia = false;
-          $scope.myMedia = [];
-      })
-
-    */
     
-	// MODELSEED-47: To be called when Build Model button pressed in PATRIC tabs:
+	// MODELSEED-47: called when Build Model button pressed in PATRIC tab:
     $scope.reconstruct = function(ev, item) {
         if ('genome_id' in item) {
             var name = item.genome_id,
                 orgName = item.genome_name;
             var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
         } else {
+        	Dialogs.showError( 'Genome object missing genome_id' );
+        	return;
+        	/*
             var name = item.name;
             var params = {path: item.path, name: name};
+            */
         }
-
         Dialogs.reconstruct(ev, params,
             function(jobId) {
-                MS.submittedModel({
-                    name: name,
-                    orgName: orgName,
-                    jobId: jobId
-                });
-                                
+                console.log('done reconstructing', jobId);
+                // for cache that resides in MS:
+                // MS.submittedModel({name: name, orgName: orgName, jobId: jobId});
+                                                
                 $state.go('app.myModels');
-
-            })
+            });
     }    
     
     
     // MODELSEED-47: Called from the Build Model button of RAST tab    
     $scope.reconstructPrivate = function(ev, item) {
         var params = {path: 'RAST:' + item.genome_id, name: item.genome_name};
+        
         Dialogs.reconstruct(ev, params,
-            function(res) {
-                console.log('done reconstructing', res);
-                MS.addModel(res, 'microbe');
+            function(jobId) {
+                console.log('done reconstructing', jobId);               
+                // for cache that resides in MS:
+                // MS.addModel(jobId, 'microbe');
                                 
                 $state.go('app.myModels');
-
-            })
-    }    
-        
-
-    // The following versions of $scope.reconstruct are deprecated:
-    // Deprecated:
-    /*
-    $scope.reconstruct = function(ev, item) {        
-    	$scope.copyInProgress = true;
-        if ('genome_id' in item) {
-            var name = item.genome_id,
-                orgName = item.genome_name;
-            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
-        } else {
-            var name = item.name;
-            var params = {path: item.path, name: name};
-        }
-        ev.stopPropagation();
-        
-        $scope.form = {genome: item.genome_id};
-
-        $scope.loadingPlants = true;
-        
-        var reconstructpromise =             
-        	MS.reconstruct($scope.form)
-                      .then(function(r) {
-
-                          $state.go('app.myModels');
-                          
-                      }).catch(function(e) {
-                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
-                      })
-    	
-    }
-    */
-/*    
-    $scope.reconstruct = function(ev, item) {        
-    	if( $scope.myPlants.length > 0 ) {
-    		item = $scope.myPlants[ 0 ];
-    		var name = $scope.myPlants[ 0 ].name;
-    		var path = $scope.myPlants[ 0 ].path;
-    		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
-            Dialogs.showToast('Creating Model...', name, 2000);
-    	}        
-        if ('genome_id' in item) {
-            var name = item.genome_id,
-                orgName = item.genome_name;
-            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
-        } else {
-            var name = item.name;
-            var params = {path: item.path, name: name};
-        }
-        ev.stopPropagation();
-        
-        $scope.form = {genome: item.path};
-
-        $scope.loadingPlants = true;
-        
-        var reconstructpromise =             
-        	MS.reconstruct($scope.form)
-                      .then(function(r) {
-
-                          $state.go('app.myModels');
-                          
-                      }).catch(function(e) {
-                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
-                      })
-    }
-*/           
-    
+            });
+    }        
     $scope.startUpload = function() {
     	if( $scope.uploading ){
     		return;
@@ -424,9 +319,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 kingdom = this.selectedKingdom["name"];
             }
-            
-            
-            
+                        
           	var seq_type = "";
             if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
             	// Set the default:
@@ -435,13 +328,11 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 seq_type = this.selectedSeqType["name"];
             }
-            
-            
-        	
+                    	
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
-            	this.selectedTaxa["name"] = "plant";
+            	this.selectedTaxa["name"] = "contigs";
                 genome_type = this.selectedTaxa["name"];
             } else {
                 genome_type = this.selectedTaxa["name"];
@@ -547,7 +438,73 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         	this.selectedTaxa["name"] = "plant";
         }
     }
-    
+
+    // The following versions of $scope.reconstruct are deprecated:
+    // Deprecated:
+    /*
+    $scope.reconstruct = function(ev, item) {        
+    	$scope.copyInProgress = true;
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+        ev.stopPropagation();
+        
+        $scope.form = {genome: item.genome_id};
+
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
+                      .then(function(r) {
+
+                          $state.go('app.myModels');
+                          
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                      })
+    	
+    }
+    */
+/*    
+    $scope.reconstruct = function(ev, item) {        
+    	if( $scope.myPlants.length > 0 ) {
+    		item = $scope.myPlants[ 0 ];
+    		var name = $scope.myPlants[ 0 ].name;
+    		var path = $scope.myPlants[ 0 ].path;
+    		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            Dialogs.showToast('Creating Model...', name, 2000);
+    	}        
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+        ev.stopPropagation();
+        
+        $scope.form = {genome: item.path};
+
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
+                      .then(function(r) {
+
+                          $state.go('app.myModels');
+                          
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                      })
+    }
+*/           
+
 } ] )
 
 
@@ -895,13 +852,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     } else {
     	$scope.isRef = true;    	
     }
-    
-
-    
+        
     $scope.isPlant = path.split('/')[2] === 'plantseed' ? true : false;
-
-
-    
     
     $scope.showRelatedData = function( item ) {
         $scope.item = item;
