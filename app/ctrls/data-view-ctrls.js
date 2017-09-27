@@ -1681,6 +1681,21 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
          });    
 
     
+
+    // MODELSEED-50: Need the images... of plants
+    if( $scope.isPlant && $scope.isRef) {
+		WS.getObjectMeta ( genomePath ).
+	    then( function( res ) {
+	    	console.log( 'meta for path', genomePath, ': ', res );
+	    	$scope.image = res[0][7].image;
+	    	$scope.organism = res[0][7].organism;
+            $scope.links = res[0][7].links;
+	    } ).catch( function( e ){
+	    	console.log( 'Error getting meta for path', genomePath, ': ', res );	    	
+	    } );
+	}
+	
+    
     
     /* testing
     MS.getModel(path).then(function(res) {

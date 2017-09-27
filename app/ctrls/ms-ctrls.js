@@ -1447,20 +1447,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.plants = [];
         $scope.loadingPlants = false;
     })
-    
-    /*
-    $scope.getMeta = function ( path ) {
-    	
-    	WS.getObjectMeta ( path ).
-    	    then( function( res ) {
-    	    	console.log( 'meta for path', path, ': ', res );
-    	    	$scope.meta = res;
-    	    } ).catch( function( e ){
-    	    	$scope.meta = [];
-    	    	
-    	    } )
-    }
-    */
+
 
     
     

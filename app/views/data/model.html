@@ -24,10 +24,25 @@
 
 <hr class="no-margin">
 
-<!-- Add plant pic -->
-<img ng-if="meta.image" width="100" height="100" src="{{meta.image}}">
-<!-- meta endsup with different contents here, because a different service call is made now for getting the meta data: -->
-<!-- Use to call WS.getObjectMeta; now  WS.get(modelPath)... then $scope.meta = res.meta (latter seems to work but contains no img!) -->
+
+
+<div flex layout="row">
+    <img ng-if="image" width="100" height="100" src="{{image}}">
+    <div layout="column">
+        <span ng-if="organism"><i>{{organism}}</i></span>
+        <br><br>
+    
+        <div ng-if="links" class="links" hide-sm>
+            Links:
+            <div ng-repeat="link in links track by $index" class="inline">
+                <a href="{{link.url}}" target="_blank">{{link.name}}</a>
+                    {{$index != links.length-1 ? '|' : ''}}
+            </div>
+        </div>
+     
+     </div>
+</div>
+
 
 
 <div layout="column">
