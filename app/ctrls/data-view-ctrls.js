@@ -288,7 +288,17 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                                 
                 $state.go('app.myModels');
             });
-    }        
+    }
+    
+    
+    
+    
+    // MODELSEED-47: Called from the Build Model button of Upload tab        
+    $scope.selectedItemChange = function(item) {
+        $scope.media = item.path;
+    }
+    
+        
     $scope.startUpload = function() {
     	if( $scope.uploading ){
     		return;
@@ -369,7 +379,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                         
            // TODO: MODELSEED-47: Add $scope.selectedTaxa... to the following parameters:
            var parameters = { shock_id: node, genome: name, genome_type: genome_type };
-           // var parameters = { shock_id: node, genome: name, genome_type: "plant" };
+           // var parameters = { shock_id: node, genome: name, genome_type: "plant", media: $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   
