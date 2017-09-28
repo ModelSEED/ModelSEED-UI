@@ -144,6 +144,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // path and name of object
     // var path = $sParams.path;
 	
+	$scope.isPlant = true;
+	
 	$scope.selectedKingdom = []; // Plants or Microbes
 	$scope.selectedSeqType = []; // protein or DNA
 	$scope.selectedTaxa = []; // genome_type: features or contigs
@@ -400,6 +402,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             $scope.selectedFiles = files;
         })
     }
+       
+    $scope.setKingdom = function( ) {
+        $scope.isPlant = this.selectedKingdom["name"] == "plants";
+    }
+    
+    
          
     // Not used:
     $scope.getLabel = function(prop) {

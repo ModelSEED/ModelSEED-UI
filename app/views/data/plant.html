@@ -40,11 +40,23 @@
           
           <br><br>
           
-    
-    
+        
         <h3>Options</h3>
 
-        <div ng-controller="MediaDropdown as ctrl">
+        <br><br>    
+    
+          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px">                                                        
+
+          <label style="margin: 10px">
+              Kingdom:
+		      <select flex ng-model="selectedKingdom"
+		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions"
+		          ng-change="setKingdom()">
+		          <option value="">Plants</option>
+		      </select>
+		  </label>
+		 		  
+          <div ng-if="!isPlant" ng-controller="MediaDropdown as ctrl">
             <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
                                       md-mode="indeterminate"
@@ -98,23 +110,9 @@
                 </md-not-found>
               </md-autocomplete>
             </form>
-        </div>
-        <br><br>
-
-    
-    
-    
-    
-          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px">                                                        
-
-          <label style="margin: 10px">
-              Kingdom:
-		      <select flex ng-model="selectedKingdom"
-		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions">
-		          <option value="">Plants</option>
-		      </select>
-		  </label>
-
+          </div>
+		  
+		  
           <label style="margin: 10px">
               Sequence Type:
 		      <select flex ng-model="selectedSeqType"
