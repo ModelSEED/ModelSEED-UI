@@ -4,19 +4,19 @@
 <div class="content-header" flex>
     <h1>Build Model</h1><br>
 </div>    
-
-<div class="container">                        
+                        
       <br><br><br>
      
   <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-  <md-tab>
+  
+  <md-tab md-on-select="setDomain('plants')" name="PlantUploadTab" ng-disabled="plantTabIsLocked">
     <md-tab-label>
-      UPLOAD FASTA
+      UPLOAD Plants FASTA
     </md-tab-label>
 
     <md-tab-body>       
-
+     <div ng-if="isPlant"> 
       <div layout="column">     
         <br><br>
                 
@@ -37,27 +37,105 @@
         <br>
         
         <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">          
+          <br><br>        
+          <!--        
+          <label style="margin: 10px">
+           Select Template Model:    
+            <select 
+                ng-model="selectedTemplate" 
+                ng-options="option.value for option in options">
+                <option value="">Automatically select</option>
+            </select>
+          </label>
+          -->           
+          <br><br><br>   
+             
+          <div flex="35" layout="row">                                              
+              <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
+          </div>
+                                          
+          <br>
           
+          <div flex="10" layout="row">                                 
+          <md-button class="md-primary md-raised"
+            ng-click="startUpload(  )"
+            ng-disabled="!selectedFiles">
+               Build Model
+            <br>
+          </md-button>
+          </div>
+          
+          </div>
+                           
+          </form>
+          
+        </div>                     
+       
+      </div> 
+             
+  </md-tab-body>
+  </md-tab>
+  
+  
+  
+  <!-- --------------------------------------------------------- FAST A Microbes----------------------------------------------------------- -->   
+  <md-tab md-on-select="setDomain('microbes')" name="MicrobeUploadTab" ng-disabled="microbeTabIsLocked">
+    <md-tab-label>
+      UPLOAD Microbes FASTA
+    </md-tab-label>
+
+    <md-tab-body>
+    
+
+
+     <div ng-if="!isPlant"> 
+       <div layout="column">     
+        <br><br>
+                
+         <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
+
+            <div class="form-group">
+                <br>		
+                <label class="control-label"> <i>Select FAST-A file: </i> </label>
+                <label class="md-button md-primary md-raised">
+                    Choose File...
+                    <input
+                        name="upload"
+                        enctype="multipart/form-data"
+                        type="file"
+                        onchange="angular.element(this).scope().selectFile(this.files)"/>
+                </label>
+                {{selectedFiles[0].name}}
+            </div>
+
+
+
+        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">          
+          <br><br>        
+                  
+          <label style="margin: 10px">
+           Select Template Model:    
+            <select 
+                ng-model="selectedTemplate" 
+                ng-options="option.value for option in options">
+                <option value="">Automatically select</option>
+            </select>
+          </label>           
           <br><br>
           
-        
-        <h3>Options</h3>
-
-        <br><br>    
-    
-          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px">                                                        
-
           <label style="margin: 10px">
-              Kingdom:
-		      <select flex ng-model="selectedKingdom"
-		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions"
-		          ng-change="setKingdom()">
-		          <option value="">Plants</option>
+              Genome Type:
+		      <select flex ng-model="selectedTaxa"
+		          ng-options="optionTaxa.value for optionTaxa in taxaOptions">
+		          <option value="">Contigs</option>
 		      </select>
 		  </label>
-		 		  
-          <div ng-if="!isPlant" ng-controller="MediaDropdown as ctrl">
-            <div layout="row" layout-align="end end">
+		  <br><br>
+		            
+          
+          <div ng-controller="MediaDropdown as ctrl">
+          
+           <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
                                       md-mode="indeterminate"
                                       md-diameter="10">
@@ -70,10 +148,10 @@
                     <span ng-if="!filterPublic">Search public media</span>
                 </a>
                  -->
-            </div>
-
-            <!-- <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" > -->
-            <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+           </div>
+          
+          
+           <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
               <md-autocomplete
 
                   ng-disabled="ctrl.isDisabled"
@@ -92,60 +170,12 @@
                   No matches found for "{{ctrl.searchText}}".
                 </md-not-found>
               </md-autocomplete>
-            </form>
-            <!-- 
-            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
-              <md-autocomplete
-                  ng-disabled="ctrl.isDisabled"
-                  md-selected-item="ctrl.selectedItem"
-                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                  md-search-text="ctrl.searchText"
-                  md-selected-item-change="ctrl.selectedItemChange(item)"
-                  md-items="item in ctrl.querySearch(ctrl.searchText)"
-                  md-item-text="item.name"
-                  md-min-length="0"
-                  placeholder="Search my media (optional)...">
-                <md-item-template>
-                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
-                </md-item-template>
-                <md-not-found>
-                  No matches found for "{{ctrl.searchText}}".
-                </md-not-found>
-              </md-autocomplete>
-            </form>
-            -->
-          </div>
-		   
-		  
-          <label style="margin: 10px">
-              Sequence Type:
-		      <select flex ng-model="selectedSeqType"
-		          ng-options="optionSeqType.value for optionSeqType in seqTypeOptions">
-		          <option value="">DNA</option>
-		      </select>
-		  </label>
-		  		            
-          <label style="margin: 10px">
-              Genome Type:
-		      <select flex ng-model="selectedTaxa"
-		          ng-options="optionTaxa.value for optionTaxa in taxaOptions">
-		          <option value="">Contigs</option>
-		      </select>
-		  </label>
-		     <!-- Next line causes the SHOCK Upload service to error (does not like DOM names)! -->
-             <!-- <span ng-if="upload_form.taxa_select.$error.required">Please select a value</span> -->
+           </form>          
           
-          <label style="margin: 10px">
-           Select Template Model:    
-            <select 
-                ng-model="selectedTemplate" 
-                ng-options="option.value for option in options">
-            </select>
-          </label> 
-                            
-          </div>
           
-          <br><br><br>   
+          </div>          
+          <br><br><br>
+             
              
           <div flex="35" layout="row">                                              
               <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
@@ -161,14 +191,16 @@
             <br>
           </md-button>
           </div>
-                           
-          </form>
           
-        </div>                     
-       
-      </div>
+          </div>
+          
+          
+                 
+         </form>
+       </div>
+     </div>
              
-  </md-tab-body>
+    </md-tab-body>    
   </md-tab>
 
   <!-- --------------------------------------------------------- PATRIC -------------------------------------------------------------- -->
@@ -176,7 +208,7 @@
   <md-tab>
   
   <md-tab-label>
-      PATRIC
+      PATRIC Microbes
   </md-tab-label>
   
   <md-tab-body>
@@ -234,7 +266,7 @@
 
   <md-tab>
   <md-tab-label>
-      RAST
+      RAST Microbes
   </md-tab-label>
   
   <md-tab-body>

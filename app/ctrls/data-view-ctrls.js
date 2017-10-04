@@ -137,15 +137,20 @@ function($scope, $sParams, WS, $http) {
 <!-- Build New Model -->
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
- 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'MS', 'Session', 'config',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'config',
 function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
- Dialogs, ViewOptions, WS, Auth, uiTools, MS, Session, config) {
+ Dialogs, ViewOptions, WS, Auth, uiTools, Tabs, MS, Session, config) {
 
     // path and name of object
     // var path = $sParams.path;
 	
 	$scope.isPlant = true;
 	
+	$scope.microbeTabIsLocked = false;
+	$scope.plantTabIsLocked = false;
+    // $scope.Tabs = Tabs;
+    // Tabs.totalTabCount = 4;
+    
 	$scope.selectedKingdom = []; // Plants or Microbes
 	$scope.selectedSeqType = []; // protein or DNA
 	$scope.selectedTaxa = []; // genome_type: features or contigs
@@ -293,7 +298,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     
     
-    // MODELSEED-47: Called from the Build Model button of Upload tab        
+    // MODELSEED-47: Called from the Media widget, in the Upload Microbe FAST tab        
     $scope.selectedItemChange = function(item) {
         $scope.media = item.path;
     }
@@ -322,7 +327,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         }
         
         else {
-        	        	
+        	/*        	
           	var kingdom = "";
             if( this.selectedKingdom && this.selectedKingdom.length==0 ) {
             	// Set the default:
@@ -340,7 +345,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 seq_type = this.selectedSeqType["name"];
             }
-                    	
+            */        	
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -353,33 +358,32 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
           	var template = "";
             if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
             	// Set the default:
-            	this.selectedTemplate["name"] = "plant";
+            	this.selectedTemplate["name"] = "auto";
             	template = this.selectedTemplate["name"];
             } else {
             	template = this.selectedTemplate["name"];
             }
                         
-        	
+            // MODELSEED-47: if is not plant: Need checks and balances to prevent model name duplication
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
                     alert('Genome name already exists!\n'+
                     'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
             	
-                startUpload( name, kingdom, seq_type, genome_type, template );
+                startUpload( name, template );
             })
         }
     }
 
-    function startUpload( name, kingdom, sequence_type, genome_type, template ) {
+    function startUpload( name, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
             Dialogs.showComplete('Import in progress...');
                         
-           // TODO: MODELSEED-47: Add $scope.selectedTaxa... to the following parameters:
-           var parameters = { shock_id: node, genome: name, genome_type: genome_type };
-           // var parameters = { shock_id: node, genome: name, genome_type: "plant", media: $scope.media };
+           // TODO: MODELSEED-47: Add $scope.selectedTemplate... to the following parameters:
+           var parameters = { shock_id: node, genome: name, genome_type: "plant", media: $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   
@@ -410,15 +414,29 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selectFile = function(files) {
         $scope.$apply(function() {
             $scope.selectedFiles = files;
-        })
+        });
+        if( $scope.isPlant ){
+        	$scope.microbeTabIsLocked = true;
+        } else {
+        	$scope.plantTabIsLocked = true;
+        }
     }
-       
+        
+    $scope.setDomain = function( domain ) {
+    	if( domain == 'plants' ) {
+    		$scope.isPlant = true;
+    	} else {
+    		$scope.isPlant = false;
+    	}
+    }
+    
+    
+     
+    // Deprecated:
     $scope.setKingdom = function( ) {
         $scope.isPlant = this.selectedKingdom["name"] == "plants";
     }
-    
-    
-         
+          
     // Not used:
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {

@@ -153,7 +153,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
 		            } else {
 		                kingdom = this.selectedKingdom["name"];
 		            }
-		            */
 		                        
 		          	var seq_type = "";
 		            if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
@@ -172,18 +171,18 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
 		            } else {
 		                genome_type = this.selectedTaxa["name"];
 		            }
-		                    	
+		            */        	
 		          	var template = "";
 		            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
 		            	// Set the default:
-		            	this.selectedTemplate["name"] = "core";
+		            	this.selectedTemplate["name"] = "auto";
 		            	template = this.selectedTemplate["name"];
 		            } else {
 		            	template = this.selectedTemplate["name"];
 		            }
                         
-                     
-		            var parameters = { genome: item.path, sequence_type: seq_type, genome_type: genome_type };
+		            var parameters = { genome: item.path };                     
+		            // var parameters = { genome: item.path, sequence_type: seq_type, genome_type: genome_type };
 
                     
                     

@@ -90,7 +90,7 @@
 		          <option value="">Plants</option>
 		      </select>
 		  </label>
-           -->
+           
           <label style="margin: 10px">
               Sequence Type:
 		      <select flex ng-model="selectedSeqType"
@@ -106,12 +106,14 @@
 		          <option value="">Contigs</option>
 		      </select>
 		  </label>
+		  -->
 		  
           <label style="margin: 10px">
            Select Template Model:    
             <select 
                 ng-model="selectedTemplate" 
                 ng-options="option.value for option in options">
+                <option value="">Automatically select</option>               
             </select>
           </label> 
                             
