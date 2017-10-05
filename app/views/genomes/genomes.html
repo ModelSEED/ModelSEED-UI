@@ -7,19 +7,19 @@
       
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ui-sref="app.RefModels({ref: 'Microbes'})">
-            <span hide-sm>Public Microbial Models</span>
+            Public Microbial Models
         </a>
     </li>
     
     
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ui-sref="app.RefModels({ref: 'Plants'})">
-             <span hide-sm>Public Plant Models</span>
+             Public Plant Models
         </a>
     </li>
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1">
         <a ui-sref="app.RefModels({ref: 'Annotations'})">
-            <span hide-sm>Subsystems</span>
+            Subsystems
         </a>
     </li>
     
@@ -32,18 +32,18 @@
      -->
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
         <a ui-sref="app.biochem({chem: 'reactions'})">
-            <span hide-sm>Reactions</span>
+            Reactions
         </a>
     </li>    
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
         <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
-            <span hide-sm>Compounds</span>
+            Compounds
         </a>
     </li>
      
     <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
         <a ui-sref="app.media">
-            <span hide-sm>Media</span>
+            Media
         </a>
     </li>
 </ul>
@@ -51,7 +51,8 @@
     
 <div layout="row">
     <div class="content-header" flex>
-        {{ref == 'Microbes' ? 'Microbial' : 'Plant'}} Models<br>
+        {{ref == 'Microbes' ? 'Microbial Models' : (ref == 'Plants' ? 'Plant Models' : 'Subsystems')}}
+        <br>
         
         <!-- 
         <small ng-if="view == 'Microbes'" class="help-text" hide-sm>

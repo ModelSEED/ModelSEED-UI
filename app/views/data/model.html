@@ -28,10 +28,13 @@
 
 <div flex layout="row" layout-align="end">
     <img ng-if="image" width="100" height="100" src="{{image}}">
-    <div layout="column">
-        <span ng-if="organism"><i>{{organism}}</i></span>
-        <br><br>
-    
+</div>
+
+<div flex layout="row" layout-align="end">
+    <span ng-if="organism"><i>{{organism}}</i></span>
+</div>
+
+<div flex layout="row" layout-align="end">    
         <div ng-if="links" class="links" hide-sm>
             Links:
             <div ng-repeat="link in links track by $index" class="inline">
@@ -39,10 +42,7 @@
                     {{$index != links.length-1 ? '|' : ''}}
             </div>
         </div>
-     
-     </div>
 </div>
-
 
 
 <div layout="column">
