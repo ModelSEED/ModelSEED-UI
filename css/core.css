@@ -335,14 +335,6 @@ ul.toolbar {
     list-style: none;
 }
 
-
-ul.toolbar > li > a:active {
-    color: yellow;
-    background-color: transparent;
-    text-decoration: underline;
-}
-
-
 ul.toolbar > li {
     color: #EBEBEB;
     height: 100%;
@@ -359,7 +351,7 @@ ul.toolbar > li:not(.active):hover {
 */
 
 
-ul.toolbar > li > a:not(.active) {
+ul.toolbar > li > a {
     display: block;
     font-size: 18pt;
     line-height: 1.1em;
@@ -373,7 +365,6 @@ ul.toolbar > li > a:not(.active) {
 ul.toolbar > li:hover > a,
 ul.toolbar > li.active > a {
     color: #EBEBEB;
-
 }
 */
 ul.toolbar > li > a >i:not(.fa-caret-down) {
@@ -395,6 +386,7 @@ ul.toolbar li > a > i.icon-benzene {
     margin: 5px;
     border-right: 1px solid #444;
 }
+
 
 .brand-home {
     background-color: transparent;

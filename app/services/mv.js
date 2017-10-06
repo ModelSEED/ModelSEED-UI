@@ -6,6 +6,16 @@ function($http, $q, $rootScope, WS, config) {
     var key = "selectedModels";
 
     var self = this;
+    
+    
+    
+    this.isInPublicDomain = true;
+    
+    this.makePublic = function( truism ) {
+        this.isInPublicDomain = truism;    	
+    }
+    
+    
 
     // models that are displayed in sidebar
     var current = localStorage.getItem(key);

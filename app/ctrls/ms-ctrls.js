@@ -1343,7 +1343,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     $scope.plants = [];
     
     $scope.MS = MS;
+    $scope.MV = MV;
     $scope.uiTools = uiTools;
+    
+    MV.makePublic( true );
+    
     $scope.relativeTime = uiTools.relativeTime;
 
     $scope.relTime = function(datetime) {
@@ -1737,7 +1741,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     $scope.myModels = [];
 
     $scope.MS = MS;
+    $scope.MV = MV;
     $scope.uiTools = uiTools;
+    
+    MV.makePublic( false );
+    
     $scope.relativeTime = uiTools.relativeTime;
 
     $scope.relTime = function(datetime) {
