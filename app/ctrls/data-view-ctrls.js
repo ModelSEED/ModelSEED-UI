@@ -309,16 +309,19 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     		return;
     	} else {
     		$scope.uploading = true;
-    	}   	
+    	}
     	
+    	// MODELSEED-54 TODO: Validate selected files: filename extension; content start with >
+    	// validateFASTa();  // returns true if file name extension is 'fa'    	
+    	
+    	// Validate name to assign to the new model
     	var name = this.modelName || "";
     	if(name.length==0){
         	Dialogs.showError( 'Invalid Model Name' );
             $scope.modelName = "";
             $scope.uploading = false;
             return;
-    	}
-        
+    	}        
         var regex = /[^\w]/gi;
         if(regex.test( name ) == true) {
         	Dialogs.showError( 'Invalid Model Name' );
@@ -421,7 +424,23 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         	$scope.plantTabIsLocked = true;
         }
     }
+    
+    
+    var validFaFormats = ['fa', 'fasta'];    
+    function validateFASTa () {
+    	
         
+           var ext = $scope.selectedFiles[0].name.substring(
+        		   $scope.selectedFiles[0].name.lastIndexOf('.') + 1).toLowerCase();   
+
+           return validFaFormats.indexOf(ext) !== -1;
+            	
+    	
+        // return true;    	
+    }
+        
+    
+    
     $scope.setDomain = function( domain ) {
     	if( domain == 'plants' ) {
     		$scope.isPlant = true;

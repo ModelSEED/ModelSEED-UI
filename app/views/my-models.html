@@ -110,12 +110,24 @@
         <!-- <model-item ng-if="item.status" layout="row">  -->
 
             <div flex="10" class="vertical-center">
-              <div ng-if="item.status && item.name">
+              <div ng-if="item.status && item.name && item.status=='complete'">
                 <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
                     <md-tooltip md-delay="800">View Model</md-tooltip>
                     {{item.name}}
                 </a><br>
               </div>
+              
+              
+              
+              <div ng-if="item.status && item.name && item.status!='complete'">
+
+                    {{item.name}}
+                    
+                <br>
+              </div>
+                            
+              
+              
               <div ng-if="!item.status || !item.name">
                   -
               </div>
