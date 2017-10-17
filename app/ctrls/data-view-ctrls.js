@@ -191,10 +191,10 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     // Genome Type dropdown options
     $scope.taxaOptions = [{
-    	   name: 'contigs',
+    	   name: 'microbial_contigs',
     	   value: 'Contigs'
     	}, {
-           name: 'features', 
+           name: 'microbial_features', 
            value: 'Microbial feature sequences'            
             	
     	}];
@@ -352,7 +352,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
-            	this.selectedTaxa["name"] = "contigs";
+            	this.selectedTaxa["name"] = "microbial_contigs";
                 genome_type = this.selectedTaxa["name"];
             } else {
                 genome_type = this.selectedTaxa["name"];
@@ -374,19 +374,22 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                     'Please provide a new name or delete the existing genome');                           
             }).catch(function(e) {
             	
-                startUpload( name, template );
+                startUpload( name, genome_type, template );
             })
         }
     }
 
-    function startUpload( name, template ) {
+    function startUpload( name, genome_type, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
         	
             Dialogs.showComplete('Import in progress...');
                         
            // TODO: MODELSEED-47: Add $scope.selectedTemplate... to the following parameters:
-           var parameters = { shock_id: node, genome: name, genome_type: "plant", media: $scope.media };
+           if( $scope.isPlant ) {
+        	   genome_type = "plant";
+           }
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   

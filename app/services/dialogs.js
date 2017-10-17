@@ -112,10 +112,10 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 
                 // Genome Type dropdown options
                 $scope.taxaOptions = [{
-                	   name: 'contigs',
+                	   name: 'microbial_contigs',
                 	   value: 'Contigs'
                 	}, {
-                       name: 'features', 
+                       name: 'microbial_features', 
                        value: 'Microbial feature sequences'            
                         	
                 	}];
@@ -162,16 +162,16 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
 		            } else {
 		                seq_type = this.selectedSeqType["name"];
 		            }
-		                    	
+		            */        	
 		          	var genome_type = "";
 		            if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
 		            	// Set the default:
-		            	this.selectedTaxa["name"] = "contigs";
+		            	this.selectedTaxa["name"] = "microbial_contigs";
 		                genome_type = this.selectedTaxa["name"];
 		            } else {
 		                genome_type = this.selectedTaxa["name"];
 		            }
-		            */        	
+		                    	
 		          	var template = "";
 		            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
 		            	// Set the default:
@@ -180,10 +180,14 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
 		            } else {
 		            	template = this.selectedTemplate["name"];
 		            }
+		            
+		            
                         
-		            var parameters = { genome: item.path };                     
+		            // var parameters = { genome: item.path };                     
 		            // var parameters = { genome: item.path, sequence_type: seq_type, genome_type: genome_type };
+		            var parameters = { genome: item.path, genome_type: genome_type };
 
+		            
                     
                     
                     MS.reconstruct( parameters )
