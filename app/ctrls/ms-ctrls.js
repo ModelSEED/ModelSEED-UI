@@ -59,6 +59,36 @@ function($scope, $state, $stateParams, Auth, $window) {
     }
 }])
 
+
+
+.controller('FrontPage', ['$scope', '$stateParams', '$mdSidenav',
+function($scope, $stateParams, $mdSidenav) {
+	// TODO MODELSEED-59: KBASE trap
+    $scope.toggleOperations = function(e, type) {
+        var tar = e.target;
+        e.stopPropagation();
+
+        if (type === 'kbase') {
+            if (!$mdSidenav('kbaseOpts').isOpen()) {
+                $mdSidenav('kbaseOpts').open();
+
+            // $document.bind('click', function(e) {
+                // $mdSidenav('kbaseOpts').close();
+                // $document.unbind(e)
+                // $scope.selected = null;
+            // })
+            } else if ($mdSidenav('kbaseOpts').isOpen()) {
+                $mdSidenav('kbaseOpts').close();
+            }
+        }
+    }
+ 
+
+}])
+
+
+
+
 .controller('Home', ['$scope', '$stateParams',
 function($scope, $stateParams) {
 
@@ -1505,9 +1535,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.selectedPublic = item;
     }
 
-
-
-
     
     $scope.showRelatedData = function(item) {
         item.loading = true;
@@ -1526,6 +1553,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
                 item.loading = false
             } )
     }
+    
 
     function updateFBAs(item) {
         return MS.getModelFBAs(item.path)

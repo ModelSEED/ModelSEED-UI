@@ -9,3 +9,38 @@
         <md-content ui-view></md-content>
     </div>
 </div>
+
+
+
+<!-- TODO MODELSEED-59: KBASE trap -->
+<section ng-controller="SideNav">
+    <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="kbaseOpts">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">KBase Analysis Options</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center center">
+            <md-progress-circular ng-if="true"
+                                  md-mode="indeterminate"
+                                  md-diameter="30">
+            </md-progress-circular>
+
+
+
+                <a href="http://kbase.us" target="_blank">Explore KBase Analysis</a>
+
+
+
+            <md-progress-circular ng-if="true"
+                                  md-mode="indeterminate"
+                                  md-diameter="30">
+            </md-progress-circular>
+
+            <!-- <md-button ng-click="close()" class="md-primary"> -->
+            <md-button ng-click="toggleOperations($event, 'kbase')" class="md-primary">
+            
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+</section>
+ 
