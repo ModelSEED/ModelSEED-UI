@@ -182,10 +182,43 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
 		            }
 		            
 		            
-                        
-		            // var parameters = { genome: item.path };                     
-		            // var parameters = { genome: item.path, sequence_type: seq_type, genome_type: genome_type };
-		            var parameters = { genome: item.path, genome_type: genome_type };
+
+		        	var name = $scope.form.output_file || "";
+		        	if( name.length == 0 ) {
+		        		
+		        		
+		        		
+		                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
+
+		                
+		                
+
+		        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
+		                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
+		        	} else {
+		        		// Enable entering the optional model name
+		            	// Validate name to assign to the new model
+		                var regex = /[^\w]/gi;
+		                if( regex.test( name ) == true ) {
+		                
+		                	$scope.form.output_file = "Invalid Model Name, using the default!";
+		                	
+		                	
+
+			                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
+
+			                
+			                
+			        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
+			                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
+		                } else {
+		                	
+		                	
+		                	
+		                	// Assert: Optional name was entered and was validated
+		                    var parameters = { genome: item.path, genome_type: genome_type, output_file: name };
+		                }
+		        	}
 
 		            
                     
