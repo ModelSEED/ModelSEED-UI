@@ -2201,7 +2201,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         	this.gapfillings = [];
         }
 
-        // create gapfilling hash
+        // create gap filling hash
         for (var i=0; i < this.gapfillings.length; i++) {
 
             this.gapfillings[i].simpid = "gf."+(i+1);
@@ -2414,11 +2414,13 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
             if (gfData && Object.keys(gfData).length > 0) {
                 for (var key in gfData) {
-                    if (gfData[key].indexOf('added') !== -1)
+                  if( gfData[key] && gfData[key][0] ) {
+                    if (gfData[key][0].indexOf('added') !== -1)
                         added = true;
-                    if (gfData[key].indexOf('reversed') !== -1) {
+                    if (gfData[key][0].indexOf('reversed') !== -1) {
                         reversed = true;
                     }
+                  }
                 }
 
                 if (added && reversed) {
@@ -2443,7 +2445,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         var modelTables =  {reactions: reactions,
                             compounds: compounds,
-                            genes: modelGenes, // doesn't this over-ride line 2010?
+                            genes: modelGenes,
                             compartments: compartments,
                             biomass: biomasses};
 
