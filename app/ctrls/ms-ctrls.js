@@ -1757,9 +1757,9 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     
     
 .controller('MyModels',
-['$scope', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
+['$scope', '$state', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth',
-function($scope, WS, MS, uiTools, $mdDialog, Dialogs, config,
+function($scope, $state, WS, MS, uiTools, $mdDialog, Dialogs, config,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 	
     var $self = $scope;
@@ -2157,6 +2157,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
                 else if (type.toLowerCase() === 'microbe')
                     MS.myModels.splice(i, 1)
                 Dialogs.showComplete('Deleted', item.name)
+                
+                $state.reload();                                    
             })
         }, function() {
             console.log('not deleting')
