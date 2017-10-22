@@ -113,7 +113,8 @@
 
 
 
-    <!-- TODO: MODELSEED-48: Hide below tabs if got here from Microbes -->
+    <!-- MODELSEED-48: Hide below tabs if got here from Microbes -->
+    <div ng-if="isPlant">
     <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
         <md-tab label="Plant Similarities">
             <ng-table-two table-header="plantSimSpec"
@@ -133,6 +134,7 @@
             </ng-table-two>
         </md-tab>
     </md-tabs>
+    </div>
 </div>
 
 

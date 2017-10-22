@@ -574,6 +574,16 @@ function($s, $sParams, MS, $http, config, Auth) {
     // path and name of object
     var featureID = $sParams.feature,
         genome = $sParams.genome.split('/').slice(0,-2).join('/');
+    
+    
+    
+	$s.isPlant = true;
+    if (genome.split('/')[ 2 ] === 'modelseed') {
+		$s.isPlant = false;
+    }
+
+	
+	
 
     if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
@@ -659,6 +669,18 @@ function($s, $sParams, MS, $http, config, Auth) {
 
         return a;
     }
+    
+    
+    
+    function setDomain ( domain ) {
+    	if( domain == 'plants' ) {
+    		$s.isPlant = true;
+    	} else {
+    		$s.isPlant = false;
+    	}
+    }
+    
+    
 
     /*
     $s.editable = {};
