@@ -116,7 +116,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 	   value: 'Contigs'
                 	}, {
                        name: 'microbial_features', 
-                       value: 'Microbial feature sequences'            
+                       value: 'Microbial feature or Protein sequences'            
                         	
                 	}];
                 
