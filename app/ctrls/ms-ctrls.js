@@ -309,6 +309,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 .controller('Compound',['$scope', 'Biochem', '$stateParams',
 function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
+    $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
     Biochem.getCpd($s.id)
@@ -322,6 +323,7 @@ function($s, Biochem, $stateParams) {
 .controller('Reaction',['$scope', 'Biochem', '$stateParams',
 function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
+    $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
     Biochem.getRxn($s.id)

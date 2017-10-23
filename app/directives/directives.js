@@ -2182,6 +2182,63 @@ function($compile, $stateParams) {
     }
 }])
 
+.directive('stoichiometryToImgs', ['$compile', 'Biochem', function($compile, Biochem) {
+    return {
+        restrict: 'A',
+        scope: {
+             stoichiometryToImgs: '@',
+             direction: '@'
+        },
+        link: function(scope, elem, attrs) {
+            var stoichString = scope.stoichiometryToImgs;
+            if (!stoichString) return;
+
+            var parts = stoichString.split(';');
+            var dir = scope.direction;
+
+            if (dir === '=')
+                var dirClass = 'fa-arrows-h';
+            else if (dir === '>')
+                var dirClass = 'fa-long-arrow-right';
+            else if (dir === '<')
+                var dirClass = 'fa-long-arrow-left';
+
+            var transporter
+
+            // create html for left and right hand sides of equation
+            var lhs = [], rhs = [];
+            for (var i=0; i<parts.length; i++) {
+                var attrs = parts[i].split(':');
+
+                var weight = attrs[0],
+                    id = attrs[1],
+                    compart = attrs[2],
+                    compartNum = attrs[3];
+                    name = attrs[4] ? attrs[4].replace(/^"(.*)"$/, '$1')
+                                   .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
+
+                var fig = function(stoich){
+                    return '<figure><img src='+Biochem.getImagePath(id)+' height=100px>' +
+                           '<figcaption>'+stoich+' <a ui-sref="app.cpd({id: \''
+                           +id+'\'})"><i>'+name+'</i></a> ['+compart+']' +
+                           '</figcaption></figure>';
+                }
+
+                if (weight < 0)
+                    lhs.push(fig(weight === -1 ? '' : -1*weight));
+                if (weight > 0)
+                    rhs.push(fig(weight === 1 ? '' : weight));
+            }
+
+            var eq = '<div class="reactant">'+ lhs.join(' + ') +
+                    ' <i class="eq-direction fa ' + dirClass + '"></i> ' +
+                     rhs.join(' + ') + '</div>';
+
+            elem.html(eq);
+            $compile(elem.contents())(scope);
+        }
+    }
+}])
 
 .directive('prettyFormula', ['$compile', function($compile) {
     return {
