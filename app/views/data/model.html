@@ -48,15 +48,19 @@
 <div layout="column">
 
     <div ng-if="! isRef" flex="30" class="vertical-center" layout="row" layout-align="start">
-     
-        <md-button class="md-primary md-raised md-button" ng-click="reconstructPipeline($event, item)">Rebuild Model</md-button>        
-        <md-button class="md-primary md-raised md-button" ng-click="reconstructPipelineAnnotate($event, item)">ReAnnotate & Rebuild Model</md-button>
-        <div ng-if="isPlant">        
+        <div ng-if="isPlant">     
+            <md-button class="md-primary md-raised md-button" ng-click="reconstructPipeline($event, item)">Rebuild Model</md-button>        
+            <md-button class="md-primary md-raised md-button" ng-click="reconstructPipelineAnnotate($event, item)">ReAnnotate & Rebuild Model</md-button>        
             <md-button class="md-primary md-raised md-button" ng-click="annotatePlant($event, item)">Blast Genome</md-button>
         </div>        
         <md-button class="md-primary md-raised md-button" ng-click="runPlantFBA($event, item)">Run FBA</md-button>        
         <md-button class="md-primary md-raised md-button" ng-click="gapfill($event)">Run GapFilling</md-button>       
         <md-button class="md-primary md-raised md-button" ng-click="uploadExpression( $event, item )" >Add Expression</md-button>
+        
+        <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+            <md-tooltip>View download options</md-tooltip>
+            <i class="icon-file-download"></i>
+        </md-button>        
                 
     </div>
     
@@ -70,20 +74,6 @@
           <option>Expression</option>        
           <option>GapFill</option>             
         </select>
-      </div>
-      
-      
-      <div flex="15" layout="row" layout-align="end center">
-            <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
-                <md-tooltip ng-if="!selected">View download options</md-tooltip>
-                <i class="icon-file-download"></i>
-            </md-button>
-            <!--
-            <md-button md-no-ink ng-click="rmModel($event, $index, item, 'microbe')" aria-label="delete model">
-                <md-tooltip ng-if="!selected">Delete model</md-tooltip>
-                <i class="icon-highlight-remove"></i>
-            </md-button>
-            -->
       </div>        
             
     </div>    
