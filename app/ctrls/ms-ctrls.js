@@ -1798,7 +1798,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
     
     $scope.opts = {
             query: '', limit: 25, offset: 0,
-            sort: {field: 'genome_name'},
+            
+            // MODELSEED-67:
+            sort: {field: 'mod_date'},
+            // sort: {field: 'genome_name'},
+
             visible: ['genome_name', 'species', 'species_domain', 'rxns', 'genes', 'fbas', 'gfs', 'mod_date']
         };
 
