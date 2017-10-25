@@ -25,6 +25,7 @@ function($http, $q, $rootScope, config, Auth) {
                 cols = opts.visible ? opts.visible : [];
         }
 
+        // MODELSEED-70:
         if (limit) url += '&limit('+limit+ (offset ? ','+offset : '') +')';
         if (sort) url += '&sort('+(opts.sort.desc ? '-': '+')+opts.sort.field+')';
 

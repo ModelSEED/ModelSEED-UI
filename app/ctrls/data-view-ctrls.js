@@ -226,7 +226,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         
     ]    
     $scope.opts = {
-            query: '', limit: 20, offset: 0,
+    		/* MODELSEED-70 */
+            query: '', limit: 120000, offset: 0,
             sort: {field: 'genome_name'},
             visible: ['genome_name', 'genome_id', 'species', 'contigs']
         };
