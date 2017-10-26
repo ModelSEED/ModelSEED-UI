@@ -175,7 +175,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     
     // MODELSEED-70:
-    $scope.selectPublicAndRTeconstruct = function(ev, item) {
+    $scope.selectPublicAndReconstruct = function(ev, item) {
         $scope.selectedPublic = item;
         $scope.reconstruct(ev, $scope.selectedPublic);
     }
