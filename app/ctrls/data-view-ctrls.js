@@ -144,6 +144,14 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // path and name of object
     // var path = $sParams.path;
 	
+	
+	
+	// MODELSEED-70	
+    $scope.$watch('opts', function(value){
+        update();
+    }, true);	
+	
+	
 	$scope.isPlant = true;
 	
 	$scope.microbeTabIsLocked = false;
@@ -163,6 +171,16 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selectedFiles = [];
     
     $scope.genomeNameBox = "";
+    
+    
+    
+    // MODELSEED-70:
+    $scope.selectPublicAndRTeconstruct = function(ev, item) {
+        $scope.selectedPublic = item;
+        $scope.reconstruct(ev, $scope.selectedPublic);
+    }
+    
+    
     
     // the selected item for the build operations (not used yet)
     $scope.selected = null;
@@ -227,16 +245,37 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     ]    
     $scope.opts = {
     		/* MODELSEED-70 */
-            query: '', limit: 120000, offset: 0,
+            query: '', limit: 25, offset: 0,
             sort: {field: 'genome_name'},
             visible: ['genome_name', 'genome_id', 'species', 'contigs']
         };
+    
+    
+    
+    // MODELSEED-70
+    // update visible genomes
+    
+    function update() {
+        $scope.loading = true;
+        Patric.listGenomes( $scope.opts )
+              .then(function(genomes) {
+                  $scope.genomes = genomes;
+                  $timeout(function() {
+                      $scope.loading = false;
+                  })
+              })
+    }
+    
+    
     
 
     // MODELSEED-47: load Patric Genomes for user to select for modeling
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
-        $scope.genomes = genomes.docs;
+    	
+        // MODELSEED-70
+        $scope.genomes = genomes;
+        // $scope.genomes = genomes.docs;
         /*
         $timeout(function() {
             $scope.loading = false;

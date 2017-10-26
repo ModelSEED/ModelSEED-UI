@@ -236,15 +236,19 @@
   <div>
 
     <div class="table-controls" layout="row" >
-        <md-input-container md-no-float flex="45">
+    
+        <!-- MODELSEED-70 -->
+        <md-input-container md-no-float flex="45"
+            search="opts.query" search-opts="opts" search-placeholder="Search Genomes">
+        <!-- <md-input-container md-no-float flex="45"> -->
             <md-icon class="material-icons">search</md-icon>
-            <input ng-model="opts.query" type="text" placeholder="Search models">
+            <!-- <input ng-model="opts.query" type="text" placeholder="Search models">  -->
         </md-input-container>
         
         <md-input-container pagination
-            pagination-offset="200"
-            pagination-limit="200"
-            pagination-total="filtered.length"
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="genomes.numFound"
             layout="row"
             layout-align="end center" flex>
         </md-input-container>
@@ -252,27 +256,52 @@
     </div>
 
 
-    <div ng-repeat-start="item in (filtered = ( genomes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
-         class="row-hover my-model">
 
+   <!-- MODELSEED-70 -->
+            <table class="table" ng-if="genomes.docs.length">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th sortable ng-repeat="h in opts.visible"
+                            ng-click="sortBy($event,h)">
+                            {{getLabel(h)}}
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr ng-repeat="g in genomes.docs" class="row-hover">
+                    
+                        <td>
+                          <a ng-click="selectPublicAndRTeconstruct($event, g)">                                                                        
+			                Build Model:
+			              </a>                                       
+                        </td>
+
+                        <td ng-repeat="col in opts.visible">
+                            <span ng-if="col == 'genome_name'">{{g[col]}}</span>
+                            <span ng-if="col != 'genome_name'">{{g[col]}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>   
+    <!--
+    <div ng-repeat-start="item in (filtered = ( genomes | filter: opts.query) | limitTo : opts.limit : opts.offset)" class="row-hover my-model">
         <model-item layout="row">
-
             <div flex="50" class="vertical-center">
                     {{item.genome_name}}
                 <br>
-            </div>
-                        
+            </div>                        
                <a ng-if="!copyInProgress" ng-click="reconstruct($event, item)">            
                 Build Model
-               </a>
-               
+               </a>              
                <span ng-if="copyInProgress">
                Copying...
-               </span>
-                      
+               </span>                      
         </model-item>                        
     </div>                  
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs"></div>
+    -->
     
   </div>
     
