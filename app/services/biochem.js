@@ -113,5 +113,16 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
+    this.getImagePath = function (id) {
+            if (id) {
+                var img_root = config.services.cpd_img_url;
+                var dir_depth = 0;
+                var ext = '.png';
+                for (var i = 0; i < dir_depth; i++) {
+                    img_root += id[i] + "/";
+                }
+                return img_root + id + ext
+            }
+    }
 
 }])

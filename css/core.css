@@ -1410,7 +1410,16 @@ input[name=upload] {
     -webkit-box-shadow: 0 0 3px #aaa;
     box-shadow: 0 0 2px #aaa;
 }
-
+#compound-image {
+    display: block;
+    margin: auto;
+}
+.reactant {
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 5px
+}
 
 /**
  *  tour overrides
