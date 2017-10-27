@@ -1,0 +1,179 @@
+<h4>
+    <span>
+        Test a Workspace Query
+    </span>
+</h4>
+
+<hr class="no-margin">
+
+<div ng-if="error" class="alert alert-warning">{{error}}</div>
+
+<div layout="column">
+
+<form ng-submit="submit()" ng-controller="TestServiceCall">
+
+    <label class="control-label">Choose Service</label>
+    <select ng-model="selectedService" class="form-control">
+        <option>WS</option>
+        <option>MS</option>        
+    </select>
+    
+    <div>
+    <span ng-if="selectedService=='WS'">
+        <label class="control-label">Choose Method</label>
+        <select ng-model="selectedMethod" class="form-control">
+            <option>list</option>
+            <option>listL</option> 
+            <option>listPublicPlants</option>
+            <option>sanitizeMeta</option>
+            <option>get</option>
+            <option>getObjects</option>
+            <option>getObjectMeta</option>
+            <option>getObjectMetas</option>
+            <option>saveMeta</option>
+            <option>mv</option>
+            <option>copy</option>
+            <option>copyList</option>
+            <option>deleteObj</option>
+            <option>deleteFolder</option>
+            <option>uploadData</option>
+            <option>createFolder</option>
+            <option>createModelFolder</option>
+            <option>getModel</option>
+            <option>createNode</option>
+            <option>getDownloadURL</option>
+            <option>getPermissions</option>
+            <option>save</option>
+        </select>
+    </span>
+
+    <span ng-if="selectedService=='MS'">
+        <label class="control-label">Choose Method</label>
+        <select ng-model="selectedMethod" class="form-control">
+            <option>listRastGenomes</option>
+            <option>getDownloads</option>
+            <option>reconstruct</option>
+            <option>runFBA</option>              
+            <option>gapfill</option>                    
+            <option>createGenomeFromShock</option>
+            <option>createExpressionFromShock</option>                    
+            <option>annotatePlant</option>        
+            <option>getObjectMetas</option>
+            <option>listModels</option>
+            <option>sanitizeModel</option>        
+            <option>listMyMedia</option>        
+            <option>addMyMedia</option>        
+            <option>listPublicMedia</option>        
+            <option>sanitizeMedia</option>        
+            <option>sanitizeMediaObjs</option>        
+            <option>getModelFBAs</option>
+            <option>getModelGapfills</option>
+            <option>manageGapfills</option>                    
+            <option>getModelEdits</option>                
+            <option>getFeature</option>
+            <option>addModel</option>                   
+            <option>submittedModel</option>                    
+            <option>getModel</option>
+        </select>
+    </span>
+    </div>
+    
+    <div>  
+    <input type="text" ng-model="parminput" placeholder="Parameters">
+    </div>
+    
+    <div>
+    <button type="submit">Call Service</button>
+    <input type="text" id=13 ng-model="returnoutput">
+    </div>
+
+</form>
+
+</div>
+    
+        
+    <!--
+    <div ng-show="!loading" class="col-md-8">
+        <br>
+        Workspace
+        <dd-filter
+             dd-id="ws-selector"
+             dd-data="wsList"
+             dd-title="Workspaces"
+             dd-placeholder="Service to Call"
+             ng-model="selectedWS">
+        </dd-filter>
+
+        Model
+        <dd-filter
+             dd-id="model-selector"
+             dd-data="models"
+             dd-title="Models"
+             dd-placeholder="Search models"
+             ng-model="selectedModel">
+        </dd-filter>
+    </div>
+    -->
+
+
+
+<!--
+<ul>
+    <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">
+        <a ui-sref="app.compare">
+            <span hide-sm>Service</span>
+            <i class="caret" style="margin-top: 10px;"></i>
+        </a>
+        <mega-dropdown-content id="selected-models" class="compare-dd" ng-controller="SelectedData">
+            <div class="header">
+                <i class="icon-git-compare" style="font-size: 25px !important;"></i>
+                Comparative Analysis
+                <span class="model-count">({{MV.models.length}})</span>
+            </div>
+            <hr class="no-margin">
+            <ul ng-if="MV.models.length" class="list-unstyled">
+                <li ng-repeat="item in MV.models track by $index" class="selected-model">
+                    <div>
+                        <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
+                            <a ui-sref=".modelPage({path: item.model})"
+                               class="model">
+                               {{item.org}}
+                            </a>
+                        </div>
+                        <div class="sub-item selected-model-list ellipsis">
+                             &middot; <a ui-sref=".mediaPage({path: item.media})">
+                               {{item.media.split('/').pop()}} (<span class="label-media">Media</span>)
+                            </a><br>
+                             &middot; <a ui-sref=".fbaPage({path: item.fba})">
+                               {{item.fba.split('/').pop()}} (<span class="label-fba">FBA</span>)
+                           </a>
+                        </div>
+                    </div>
+                    <div class="selected-model-options">
+                        <i class="icon-close hover pointer" ng-click="MV.rm($index)">
+                            <md-tooltip md-direction="right" md-delay="600">Remove model</md-tooltip>
+                        </i>
+                        <br>
+                        <i class="glyphicon glyphicon-cog hover pointer"
+                           ng-click="openFBAView($event, $index, item)">
+                             <md-tooltip md-direction="right" md-delay="600">Modify selected FBA</md-tooltip>
+                        </i>
+                    </div>
+                </li>
+            </ul>
+            <br>
+            <div layout="row" layout-align="end center">
+                <a ng-if="MV.models.length" ng-click="MV.rmAll()">
+                    Clear All
+                </a>
+                <md-button ng-if="MV.models.length && !$state.includes('app.compare')" class="md-secondary" ui-sref="app.compare">
+                    Compare
+                </md-button>
+            </div>
+            <div ng-if="!MV.models.length" class="warning-msg">
+                You have no models selected
+            </div>
+        </mega-dropdown-content>
+    </li>
+</ul>
+-->

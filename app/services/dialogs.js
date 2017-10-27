@@ -81,27 +81,164 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
-            function($scope, $http) {
+              function($scope, $http) {
                 $scope.item = item;
                 $scope.form = {genome: item.path};
+                
+                
+                
+            	$scope.selectedKingdom = []; // Plants or Microbes
+            	$scope.selectedSeqType = []; // protein or DNA
+            	$scope.selectedTaxa = []; // genome_type: features or contigs
+            	$scope.selectedTemplate = [];
+            	
+                // Kingdom dropdown options
+                $scope.kingdomOptions = [{
+            	   name: 'plants', 
+            	   value: 'Plants'
+            	}, {
+                   name: 'microbes', 
+                   value: 'Microbial'                    	
+            	}];
+
+                // Sequence Type dropdown options
+                $scope.seqTypeOptions = [{
+                	name: 'dna', 
+                    value: 'DNA'
+            	}, {
+            		name: 'protein', 
+            		value: 'Protein'                           	
+            	}];
+                
+                // Genome Type dropdown options
+                $scope.taxaOptions = [{
+                	   name: 'microbial_contigs',
+                	   value: 'Contigs'
+                	}, {
+                       name: 'microbial_features', 
+                       value: 'Microbial feature or Protein sequences'            
+                        	
+                	}];
+                
+                // Template dropdown options
+                $scope.options = [{
+                	   name: 'plant', 
+                	   value: 'Plant template'
+                	}, {
+                	   name: 'auto',
+                	   value: 'Automatically select'
+                	}, {
+                       name: 'core', 
+                       value: 'Core template'            
+                	}, {
+                        name: 'grampos', 
+                        value: 'Gram positive template'
+                	}, {
+                        name: 'gramneg', 
+                        value: 'Gram negative template'            	
+                	}];
+                            	
+            	
 
                 $scope.reconstruct = function(){
                     self.showToast('Reconstructing', item.name, 5000)
-                    MS.reconstruct($scope.form)
-                      .then(function(r) {
-                           cb(r);
+                    
+                    
+                    /*
+		         	var kingdom = "";
+		            if( this.selectedKingdom && this.selectedKingdom.length==0 ) {
+		            	// Set the default:
+		            	this.selectedKingdom["name"] = "plants";
+		                kingdom = this.selectedKingdom["name"];
+		            } else {
+		                kingdom = this.selectedKingdom["name"];
+		            }
+		                        
+		          	var seq_type = "";
+		            if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
+		            	// Set the default:
+		            	this.selectedSeqType["name"] = "dna";
+		                seq_type = this.selectedSeqType["name"];
+		            } else {
+		                seq_type = this.selectedSeqType["name"];
+		            }
+		            */        	
+		          	var genome_type = "";
+		            if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
+		            	// Set the default:
+		            	this.selectedTaxa["name"] = "microbial_contigs";
+		                genome_type = this.selectedTaxa["name"];
+		            } else {
+		                genome_type = this.selectedTaxa["name"];
+		            }
+		                    	
+		          	var template = "";
+		            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
+		            	// Set the default:
+		            	this.selectedTemplate["name"] = "auto";
+		            	template = this.selectedTemplate["name"];
+		            } else {
+		            	template = this.selectedTemplate["name"];
+		            }
+		            
+		            
+
+		        	var name = $scope.form.output_file || "";
+		        	if( name.length == 0 ) {
+		        		
+		        		
+		        		
+		                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
+
+		                
+		                
+
+		        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
+		                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
+		        	} else {
+		        		// Enable entering the optional model name
+		            	// Validate name to assign to the new model
+		                var regex = /[^\w]/gi;
+		                if( regex.test( name ) == true ) {
+		                
+		                	$scope.form.output_file = "Invalid Model Name, using the default!";
+		                	
+		                	
+
+			                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
+
+			                
+			                
+			        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
+			                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
+		                } else {
+		                	
+		                	
+		                	
+		                	// Assert: Optional name was entered and was validated
+		                    var parameters = { genome: item.path, genome_type: genome_type, output_file: name };
+		                }
+		        	}
+
+		            
+                    
+                    
+                    MS.reconstruct( parameters )
+                    // MS.reconstruct($scope.form)
+                      .then(function(jobId) {
+                           cb(jobId);
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
                       })
 
                     $dialog.hide();
-                }
+                };
 
                 $scope.cancel = function(){
                     $dialog.hide();
-                }
-            }]
-        })
+                };
+              }]
+        });
     }
 
     this.reconstructPlant = function(ev, item, cb) {
@@ -111,8 +248,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
-            function($scope, $http) {
-                console.log('item', item)
+              function($scope, $http) {
+                console.log('Construct Dialog controller function item:', item);
                 $scope.item = item;
                 $scope.form = {genome: item.path};
             
@@ -130,12 +267,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       })
 
                     $dialog.hide();
-                }
+                };
 
                 $scope.cancel = function(){
                     $dialog.hide();
-                }
-            }]
+                };
+              }]
         })
     }
 
@@ -205,7 +342,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          self.showComplete('FBA Complete', res.id)
+                          // self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -438,7 +575,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 }
 
                 $scope.startUpload = function() {
-                    startUpload();
+                	var name = "";
+                	if( ! item.name ) {
+                		var name = item.path.split('/').slice( -1 )[ 0 ]; 
+                	} else {
+                		var name = item.name;
+                	}
+                    startUpload( name );
                 }
 
                 function startUpload(name) {
@@ -447,7 +590,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                         'please be patient', 10000000)
 
                     Upload.uploadFile($this.selectedFiles, null, function(node) {                        
-                        MS.createExpressionFromShock(node, item.name, $scope.form.name)
+                        MS.createExpressionFromShock(node, name, $scope.form.name)
                             .then(function(res) {
                                 console.log('done importing', res)
                                 self.showComplete('Import complete', name);

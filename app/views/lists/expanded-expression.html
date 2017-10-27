@@ -1,18 +1,18 @@
 
 <div class="expression-table expanded-table">
-    <div ng-if="!item.expression.length" class="text-muted">
-        No expression data uploaded for <i>{{item.name}}</i>.
+    <div ng-if="!expression.length" class="text-muted">
+        No expression data uploaded for <i>{{name}}</i>.
     </div>
 
     <table class="table table-condensed">
         <thead>
-            <tr ng-if="item.expression.length">
+            <tr ng-if="expression.length">
                 <th>Expression Name</th>
                 <th>IDs</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="exp in item.expression track by $index" class=""> 
+            <tr ng-repeat="exp in expression track by $index" class=""> 
                 <td>{{exp.name}}</td>
                 <td>
                     <small ng-repeat="id in exp.ids track by $index">

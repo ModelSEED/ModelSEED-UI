@@ -2,14 +2,14 @@
 <div hide-sm style="margin: 0 40px 0 10px;" class="logo">
     <a ui-sref="main.home">
         <img src="img/ModelSEED-logo.png" width="174">
-        <div class="ms-status">(beta)</div>
+        <!-- <div class="ms-status">(beta)</div>  -->
     </a>
 </div>
 
-<ul class="toolbar">
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1">
-        <a ui-sref="app.biochem">
-            <i class="icon-benzene"></i> <span hide-sm>Biochemistry</span>
+<ul style="font-size: 18pt; list-style-type: none; ">
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="display: inline; padding: 30px;">
+        <a ui-sref="app.RefModels">
+            <i class="icon-tools"></i>Reference Data
         </a>
     </li>
     <!--<li ng-if="$root.includePlants" ng-class="{ active: $state.includes('app.plantAnnotations') }">
@@ -17,11 +17,12 @@
             <i class="icon-quill"></i> <span hide-sm>Annotations</span>
         </a>
     </li>-->
-    <li ng-class="{ active: $state.includes('app.media') }">
-        <a ui-sref="app.media">
-            <i class="icon-lab2"></i> <span hide-sm>Media</span>
+    <li ng-class="{ active: $state.includes('app.myModels') }" style="display: inline;">
+        <a ui-sref="app.myModels">
+            <i class="icon-folder-open-o"></i>User Data
         </a>
     </li>
+    <!--
     <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-2">
         <a ui-sref="app.genomes">
             <i class="icon-tools"></i> <span hide-sm>Genomes</span>
@@ -32,6 +33,8 @@
             <i class="icon-folder-open-o"></i> <span hide-sm>Models</span>
         </a>
     </li>
+     
+    
 
     <li class="divider"></li>
 
@@ -44,6 +47,9 @@
             </div>
         </a>
     </li>
+    -->
+
+<!--
     <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">
         <a ui-sref="app.compare">
             <i class="icon-git-compare"></i>
@@ -115,10 +121,12 @@
         </mega-dropdown-content>
 
     </li>
+ 
+ -->
 </ul>
 
 <span flex></span>
-
+ 
 <div class="toolbar-right" layout="row">
     <div mega-dropdown id="more-dd" style="position: relative;">
         <a class="cursor">More <i class="fa fa-caret-down"></i></a>
@@ -162,8 +170,14 @@
     <div ng-if="$root.user" mega-dropdown id="login-dd" ng-controller="Login" style="position: relative;">
         <div class="cursor" layout="row">
             <div layout="column">
+                <!--
+                <div>{{$root.user.split('@')[0]}}
+                <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
+                </div>
+                -->              
                 <div>{{$root.user.split('@')[0]}}</div>
                 <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
+                
             </div>
         </div>
 

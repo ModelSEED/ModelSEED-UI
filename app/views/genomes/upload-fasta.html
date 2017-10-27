@@ -28,13 +28,27 @@
                 {{selectedFiles[0].name}}
             </div>
         </form>
+        
+
+        <div flex="30" class="vertical-center" layout="row" layout-align="start">            
+		<md-input-container md-no-float >        
+		    <!-- <label class="control-label">Choose Service</label> -->
+		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
+		        <option>Plant</option>
+		        <option>Microbe</option>        
+		    </select>        
+		</md-input-container>
+        </div>
+    
 
         <md-input-container md-no-float>
             <input ng-model="form.name" placeholder="Genome name (required)">
         </md-input-container>    
 
-        <md-button class="md-primary md-raised" 
-            ng-click="startUpload()"
+        <md-button class="md-primary md-raised"
+        
+            ng-click="startUpload(  )"
+                
             ng-disabled="!(selectedFiles && form.name)">
             Start
         </md-button>                 

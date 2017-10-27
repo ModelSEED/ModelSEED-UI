@@ -1,14 +1,67 @@
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
 
+<!-- Indigo: -->
+<!-- <div style="background:#4B0082;border:1px solid #cccccc;padding: 10px;">  -->
+
+<ul class="toolbar">
+    <!--   
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.RefModels({ref: 'Microbes'})">
+            Public Microbial Models
+        </a>
+    </li>
+     -->
+    
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.RefModels({ref: 'Plants'})">
+             Public Plant Models
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.RefModels({ref: 'Annotations'})">
+            Subsystems
+        </a>
+    </li>
+    
+    <!-- 
+    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ng-click="changeView('Annotations')">
+            <span hide-sm>FunctionalRoles</span>
+        </a>
+    </li>
+     -->
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'reactions'})">
+            Reactions
+        </a>
+    </li>    
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+            Compounds
+        </a>
+    </li>
+     
+    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
+        <a ui-sref="app.media">
+            Media
+        </a>
+    </li>
+</ul>
+</div>
+    
 <div layout="row">
     <div class="content-header" flex>
-        {{view == 'Microbes' ? 'Microbial' : 'Plant'}} Genomes<br>
+        {{ref == 'Microbes' ? 'Microbial Models' : (ref == 'Plants' ? 'Plant Models' : 'Subsystems')}}
+        <br>
+        
+        <!-- 
         <small ng-if="view == 'Microbes'" class="help-text" hide-sm>
-            Select a genome from below to reconstruct
+            <i>Reference Models</i>
         </small>
         <small ng-if="view == 'Plants'" class="help-text" hide-sm>
-            You can reconstruct or upload a genome under 'Mine', or consider copying a genome/model.
+            <i>Reference Models</i>
         </small>
-
+         -->
     </div>
 
     <!--
@@ -20,7 +73,6 @@
             View my genomes
         </md-switch>
     </md-input-container>
-    -->
 
     <div ng-if="tabs.tabIndex == 1 && view == 'Microbes'" layout-align="center end">
         <br>
@@ -28,15 +80,18 @@
         <a href="http://rast.nmpdr.org" target="_blank">RAST <i class="fa fa-external-link text-muted"></i></a> at this time.
     </div>
 
-    <md-radio-group ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
+    <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
         <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
         <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>    
+    </md-radio-group>
+    -->    
 </div>
 <hr class="no-margin">
 
 
 
-<ng-include ng-if="view == 'Microbes'" src="'app/views/genomes/microbes.html'"></ng-include>
+<ng-include ng-if="ref == 'Microbes'" src="'app/views/genomes/microbes--.html'" ></ng-include>
 
-<ng-include ng-if="view == 'Plants'" src="'app/views/genomes/plants.html'"></ng-include>
+<ng-include ng-if="ref == 'Plants'" src="'app/views/genomes/plants--.html'"></ng-include>
+
+<ng-include ng-if="ref == 'Annotations'" src="'app/views/genomes/annotations.html'"></ng-include>

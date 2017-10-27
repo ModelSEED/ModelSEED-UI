@@ -1,4 +1,55 @@
 
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
+    <ul class="toolbar">
+       <!-- 
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Microbes'})">
+                <span hide-sm>Public Microbial Models</span>
+            </a>
+        </li>
+        -->
+        
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Plants'})" >
+                <span hide-sm>Public Plant Models</span>
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Annotations'})" >
+                <span hide-sm>Subsystems</span>
+            </a>
+        </li>
+        <!-- 
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels" tabIndex='0'>
+                <span hide-sm>FunctionalRoles</span>
+            </a>
+        </li>
+         -->
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'reactions'})">
+            <span hide-sm>Reactions</span>
+        </a>
+    </li>    
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+            <span hide-sm>Compounds</span>
+        </a>
+    </li>
+    
+        <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
+            <a ui-sref="app.media">
+                <span hide-sm>Media</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+<ng-include ng-if="chem == 'reactions'" src="'app/views/biochem/biochem-reaction.html'"></ng-include>
+<ng-include ng-if="chem == 'compounds'" src="'app/views/biochem/biochem-compound.html'"></ng-include>
+
+<!--
 <div class="h2">Biochemistry</div>
 <hr class="no-margin">
 
@@ -26,40 +77,7 @@
         </md-tab-body>
     </md-tab>
 
-    <!--
-    <md-tab label="Genes">
-        <md-content>
-            <ng-table-solr table-header="geneHeader"
-                           table-data="genes"
-                           table-opts="geneOpts"
-                           table-loading="loadingGenes"
-                           table-placeholder="Search genes">
-            </ng-table-solr>
-        </md-content>
-    </md-tab>-->
 
-    <!-- waiting on API
-    <md-tab>
-        <md-tab-label>Biomass Compounds</md-tab-label>
-        <md-tab-template>
-            Coming soon!
-        </md-tab-template>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>Genes</md-tab-label>
-        <md-tab-template>
-            Coming soon!
-        </md-tab-template>
-    </md-tab>
-
-
-    <md-tab>
-        <md-tab-label>Media Formulations</md-tab-label>
-        <md-tab-template>
-            Coming soon!
-        </md-tab-template>
-    </md-tab>
-    -->
 
 </md-tabs>
+-->

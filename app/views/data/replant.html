@@ -1,0 +1,268 @@
+
+<head>
+  <title>RePlant Model</title>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootswatch/2.3.1/spruce/bootstrap.min.css">
+  <style>
+
+    *{
+        -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    }
+    [ng-drag]{
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    [ng-drag]{
+        width: 100px;
+        height: 100px;
+        background:rgba(149, 66, 224, 0.5);
+        color:white;
+        text-align: center;
+        padding-top:40px;
+        display: inline-block;
+        margin:0 10px;
+        cursor: move;
+    }
+    ul.draggable-objects:after{
+        display: block;
+        content:"";
+        clear:both;
+    }
+    .draggable-objects li{
+        float:left;
+        display: block;
+        width: 120px;
+        height:100px;
+    }
+    [ng-drag].drag-over{
+        border:solid 1px green;
+    }
+    [ng-drag].dragging{
+        opacity: 0.5;
+    }
+    [ng-drop]{
+        background: rgba(183, 167, 160, 0.23);
+        text-align: center;
+        width: 600px;
+        height: 200px;
+        padding-top:90px;
+        display: block;
+        margin:20px auto;
+        position: relative;
+    }
+    [ng-drop].drag-enter{
+        border:solid 5px red;
+    }
+    [ng-drop] span.title{
+        display: block;
+        position: absolute;
+        top:50%;
+        left:50%;
+        width: 200px;
+        height: 20px;
+        margin-left: -100px;
+        margin-top: -10px;
+    }
+    [ng-drop] div{
+        position: relative;
+        z-index: 2;
+    }
+
+  </style>
+</head>
+
+
+
+<body>
+
+<div class="content-header" flex>
+
+    ReBuild Model
+    <br><br>
+</div>    
+
+<div class="container">
+
+  <div layout="row">
+      
+      <div>
+          <label class="control-label">GenomeName:</label>          
+          <input type="text" ng-model="genomeNameBox" placeholder="GenomeName"></input>
+      </div>          
+      
+  </div>
+
+  <!-- <span layout-align="start"><i>Select Genome to build a model for or model to rebuild</i></span>  -->
+    
+  <div layout="row">    
+    <!-- 
+    <div>
+        <ul class="draggable-objects" >
+            <li  ng-repeat="obj in myPlants" >
+                <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
+            </li>
+        </ul>
+    </div>
+    -->
+    <div layout="column">
+    
+      <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
+          <div>
+              <span class="title"></span>
+          </div>
+          <!--
+          <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
+              {{obj.name}}                                     
+          </div>
+          -->
+          
+        <form id="upload-form" class="upload-form form-horizontal">
+            <div class="form-group">
+                <label class="control-label">Select file:</label>
+                <!-- <label class="control-label">Select fasta file:</label>  -->
+                <label class="md-button md-primary md-raised">
+                    Choose File...
+                    <input
+                        name="upload"
+                        enctype="multipart/form-data"
+                        type="file"
+                        onchange="angular.element(this).scope().selectFile(this.files)"/>
+                </label>
+                {{selectedFiles[0].name}}
+            </div>
+        </form>
+        
+
+        <div flex="30"  class="hidden" layout="row" layout-align="start">            
+		<md-input-container md-no-float >
+		    <select flex="30" ng-model="form.selectedTaxa" class="form-control">
+		        <option>Plant</option>
+		        <option>Microbe</option>        
+		    </select>        
+		</md-input-container>
+        </div>
+    
+        <div flex="40" class="vertical-center" layout="row" layout-align="start">
+          <!-- <label flex class="control-label"><b>Required:</b></label> -->   
+          <md-input-container flex md-no-float>
+              <input flex ng-model="form.name" placeholder="Genome name:">
+          </md-input-container>
+                    
+          <md-button class="md-primary md-raised"
+            ng-click="startUpload(  )"
+            ng-disabled="!(selectedFiles && form.name)">
+            Start Upload
+          </md-button>                 
+          
+        </div>    
+                 
+      </div>
+        
+    </div>
+    
+  </div>
+      
+  <div>
+    <br class="no-margin"/>
+    <br class="no-margin"/>
+  </div> 
+    
+  <span layout-align="start"><i>Select Media for GapFilling</i></span>
+    
+  <div layout="row">    
+    <!-- 
+    <div>
+        <ul class="draggable-objects" style="padding: 0; margin: 0 0 24.5px 256px;">
+            <li  ng-repeat="obj in myMedia" >
+                <div ng-drag="true" ng-drag-data="obj" data-allow-transform="true"> {{obj.name}} </div>
+            </li>
+        </ul>
+    </div>
+    -->
+    <div layout="column">
+    <!--
+    <div ng-drop="true" ng-drop-success="onDropComplete1($data,$event)">
+          <div>
+              <span class="title">Media</span>
+          </div>         
+          <div ng-repeat="obj in droppedObjects1" ng-drag="true" ng-drag-data="obj" ng-drag-success="onDragSuccess1($data,$event)" ng-center-anchor="{{centerAnchor}}">
+              {{obj.name}}
+          </div>        
+    </div>
+    -->
+    
+      <div ng-controller="MediaDropdown as ctrl">
+            <div layout="row" layout-align="end end">
+                <md-progress-circular ng-if="!myMedia || !media"
+                                      md-mode="indeterminate"
+                                      md-diameter="10">
+                </md-progress-circular>
+                <a ng-click="filterPublic = !filterPublic">
+                    <span ng-if="filterPublic">Search my media
+                        <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
+                    </span>
+                    <span ng-if="!filterPublic">Search public media</span>
+                </a>
+            </div>
+
+            <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-if="filterPublic"
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="ctrl.selectedItemChange(item)"
+                  md-items="item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search for public media formulation (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+
+            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="ctrl.selectedItemChange(item)"
+                  md-items="item in ctrl.querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search my media (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+    </div>
+    
+    </div>
+    
+  </div>
+       
+  <div>
+        <button class="md-primary md-raised md-button" ng-click="reconstruct($event)" >Build Model</button>
+        <!-- <button class="md-primary md-raised md-button" ng-click="reconstruct($event, selectedPublic)" >Build Model</button> -->
+  </div>
+    
+
+</div>
+
+
+<div ng-if="error" class="alert alert-danger">{{error}}</div>
+
+
+</body>

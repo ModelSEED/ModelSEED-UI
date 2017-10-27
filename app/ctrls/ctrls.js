@@ -281,7 +281,8 @@ function ($scope, $timeout, $mdSidenav, $log) {
     */
 
     var defaultSettings = {
-        organismType: 'Microbes',
+        organismType: 'Plants',    		
+        // organismType: 'Microbes',
         viewMyGenomes: false,
         wsBrowser: {showHidden: false}
     };

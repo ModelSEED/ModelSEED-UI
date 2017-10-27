@@ -341,28 +341,32 @@ ul.toolbar > li {
     display: inline-block;
     transition: border-width 100ms;
 }
+/*
 ul.toolbar > li.active {
     border-bottom: 3px solid #ddd;
 }
 ul.toolbar > li:not(.active):hover {
-    border-bottom: 3px solid #ddd; /*#30BCCF;/* /*#9FA1DE;*/
+    border-bottom: 3px solid #ddd;
 }
+*/
+
 
 ul.toolbar > li > a {
     display: block;
-    font-size: 8pt;
+    font-size: 18pt;
     line-height: 1.1em;
     margin: 0 7px;
     text-align: center;
     height: 100%;
+            color: #EBEBEB;
+    
 }
-
+/*
 ul.toolbar > li:hover > a,
 ul.toolbar > li.active > a {
     color: #EBEBEB;
-
 }
-
+*/
 ul.toolbar > li > a >i:not(.fa-caret-down) {
     display: inline-block;
     padding-top: 10px;
@@ -382,6 +386,7 @@ ul.toolbar li > a > i.icon-benzene {
     margin: 5px;
     border-right: 1px solid #444;
 }
+
 
 .brand-home {
     background-color: transparent;

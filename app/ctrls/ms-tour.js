@@ -35,7 +35,7 @@ function($s, $state, Auth, $timeout, $dialog, $http, Dialogs, WS) {
             }, {
                 // step 3
                 element: function() {
-                    $timeout(function() { $state.go('app.genomes'); })
+                    $timeout(function() { $state.go('app.RefModels'); })
                     showOverlay();
                     return document.querySelector('#tour-2');
                 },
@@ -149,7 +149,7 @@ function($s, $state, Auth, $timeout, $dialog, $http, Dialogs, WS) {
         intro.setOptions(options)
 
         //$state.go('app.biochem')
-        $state.go('app.genomes')
+        $state.go('app.RefModels')
         .then(function() {
             $timeout(function() {
                 intro.goToStep(3).start();

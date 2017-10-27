@@ -54,7 +54,14 @@ function($locationProvider, $stateProvider, $httpProvider,
 
     $stateProvider
         .state('main', {
+        	
             templateUrl: 'app/views/main.html',
+            
+            
+            controller: "FrontPage"
+            	
+            	
+            	
         }).state('main.home', {
             url: "/?login&redirect",
             templateUrl: 'app/views/home.html',
@@ -158,7 +165,7 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         // main views
         .state('app.biochem', {
-            url: "/biochem",
+            url: "/biochem/:chem",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem'
         }).state('app.cpd', {
@@ -178,16 +185,38 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
             authenticate: true
+            
+            
+            
+        }).state('app.RefModels', {
+            url: "/genomes/:ref",
+            templateUrl: 'app/views/genomes/genomes.html',
+            controller: 'RefModels',
+            authenticate: true
+
+
+
+        /*    
         }).state('app.genomes', {
             url: "/genomes/",
             templateUrl: 'app/views/genomes/genomes.html',
             controller: 'Genomes',
             authenticate: true
+        */    
+            
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
             controller: 'Media',
             authenticate: true
+            
+            
+            }).state('app.myMedia', {
+            url: "/myMedia/?tab",
+            templateUrl: 'app/views/my-media.html',
+            controller: 'MyMedia',
+            authenticate: true
+            
         }).state('app.myModels', {
             url: "/my-models/",
             templateUrl: 'app/views/my-models.html',
@@ -211,8 +240,13 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/components/browser/browser.html',
             controller: 'MyData',
             authenticate: true
+            
         }).state('app.modelPage', {
             url: "/model{path:nonURIEncoded}?login",
+            
+            // TEST TEST TEST:
+            // templateUrl: 'app/views/data/test_calls.html',
+            
             templateUrl: 'app/views/data/model.html',
             controller: 'ModelDataView',
             authenticate: true
@@ -221,12 +255,37 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/data/fba.html',
             controller: 'FBADataView',
             authenticate: true
+        /*    
         }).state('app.genomePage', {
             url: "/genome{path:nonURIEncoded}",
             templateUrl: 'app/views/data/genome.html',
             controller: 'GenomeDataView',
             authenticate: true
-        }).state('app.featurePage', {
+        
+        }).state('app.genomePage--', {
+            url: "/genome{path:nonURIEncoded}",
+            templateUrl: 'app/views/genomes/genome.html',
+            controller: 'GenomeDataView--',
+            authenticate: true
+        */
+
+            
+            
+            
+        // Build New Model     
+        } ).state('app.plantPage', {
+            url: "/plant",       
+            // url: "/plant{path:nonURIEncoded}",
+
+            templateUrl: 'app/views/data/plant.html',
+            
+            controller: 'BuildPlant',
+            
+            authenticate: true
+
+
+            
+        } ).state('app.featurePage', {
             url: "/feature{genome:nonURIEncoded}/{feature:nonURIEncoded}",
             templateUrl: 'app/views/data/feature.html',
             controller: 'FeatureDataView',
@@ -336,7 +395,7 @@ function($rootScope, $state, $sParams, $window,
         if (fromState.name === '' && toState.name === "main.home" && auth.isAuthenticated()) {
             // wait for state digest
             $timeout(function() {
-                $state.transitionTo('app.genomes')
+                $state.transitionTo('app.RefModels')
                 event.preventDefault();
             })
         } else if (toState.authenticate && !auth.isAuthenticated()) {

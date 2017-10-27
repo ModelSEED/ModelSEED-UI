@@ -31,6 +31,18 @@
                 Events
             </a>
         </li>
+        
+        
+        
+        <!-- TODO MODELSEED-59: KBASE trap -->
+            <md-button md-no-ink ng-click="toggleOperations($event, 'kbase')" 
+                class="md-raised md-primary pull-right" aria-label="view analysis options">
+                 KBase
+                <md-tooltip ng-if="!selected">View Analysis options</md-tooltip>
+            </md-button>
+            
+            
+                    
      
 
         <span flex></span>
@@ -43,10 +55,10 @@
 
 
         <div>
-            <md-button ng-if="!$root.user" class="md-raised md-primary pull-right" ui-sref="app.genomes">
+            <md-button ng-if="!$root.user" class="md-raised md-primary pull-right" ui-sref="app.RefModels">
                 Sign In
             </md-button>
-            <md-button ng-if="$root.user"  class="md-raised md-primary pull-right" ui-sref="app.genomes">
+            <md-button ng-if="$root.user"  class="md-raised md-primary pull-right" ui-sref="app.RefModels">
                 ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;">input</md-icon>
             </md-button>
         </div>

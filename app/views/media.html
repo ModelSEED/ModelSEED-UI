@@ -1,12 +1,55 @@
 
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
+    <ul class="toolbar">
+       <!-- 
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Microbes'})">
+                <span hide-sm>Public Microbial Models</span>
+            </a>
+        </li>
+        -->
+        
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Plants'})">
+                <span hide-sm>Public Plant Models</span>
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Annotations'})">
+                <span hide-sm>Subsystems</span>
+            </a>
+        </li>
+        <!-- 
+        <li ng-class="{ active: $state.includes('app.app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels" tabIndex='0'>
+                <span hide-sm>FunctionalRoles</span>
+            </a>
+        </li>
+         -->
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'reactions'})">
+            <span hide-sm>Reactions</span>
+        </a>
+    </li>    
+    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+            <span hide-sm>Compounds</span>
+        </a>
+    </li>
+    
+        
+        <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
+            <a ui-sref="app.media">
+                <span hide-sm>Media</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
 <div class="h2">Media</div>
 <hr class="no-margin">
 
-
-<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    <md-tab>
-        <md-tab-label><i class="material-icons tab-icon">public</i> Public</md-tab-label>
-        <md-tab-body>
             <ng-table-selector table-header="mediaHeader"
                        table-data="media"
                        table-opts="mediaOpts"
@@ -18,30 +61,3 @@
                        submit-btn-template="Copy $count media"
                        submit-progress-text="Copying...">
             </ng-table-selector>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>
-            <i class="material-icons tab-icon">assignment_ind</i> My Media
-            (<span class="label-gapfill-count">{{myMedia.length}}</span>)
-        </md-tab-label>
-        <md-tab-body>
-            <ng-table-selector table-header="myMediaHeader"
-                        table-data="myMedia"
-                        table-opts="myMediaOpts"
-                        table-loading="loadingMyMedia"
-                        on-submit="deleteMedia"
-                        submit-btn-template="Delete $count media"
-                        submit-btn-type="remove"
-                        submit-btn-class="md-warn md-raised"
-                        submit-progress-text="Deleting..."
-                        on-default="newMedia"
-                        default-btn-template="New media"
-                        default-btn-type="add"
-                        default-btn-class="md-primary md-raised"
-                        table-placeholder="Search my media">
-            </ng-table-selector>
-        </md-tab-body>
-    </md-tab>
-</md-tabs>

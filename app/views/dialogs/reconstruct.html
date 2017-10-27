@@ -77,8 +77,51 @@
               </md-autocomplete>
             </form>
         </div>
-        <br>
-        <br>
+        <br><br>
+        
+ 
+        
+          <div flex="25" layout="column" style="border-style: dotted; border-width: 0.0001px">                                                        
+          <!-- 
+          <label style="margin: 10px">
+              Kingdom:
+		      <select flex ng-model="selectedKingdom"
+		          ng-options="optionKingdom.value for optionKingdom in kingdomOptions">
+		          <option value="">Plants</option>
+		      </select>
+		  </label>
+           
+          <label style="margin: 10px">
+              Sequence Type:
+		      <select flex ng-model="selectedSeqType"
+		          ng-options="optionSeqType.value for optionSeqType in seqTypeOptions">
+		          <option value="">DNA</option>
+		      </select>
+		  </label>
+		  		            
+          <label style="margin: 10px">
+              Genome Type:
+		      <select flex ng-model="selectedTaxa"
+		          ng-options="optionTaxa.value for optionTaxa in taxaOptions">
+		          <option value="">Contigs</option>
+		      </select>
+		  </label>
+		  -->
+		  
+          <label style="margin: 10px">
+           Select Template Model:    
+            <select 
+                ng-model="selectedTemplate" 
+                ng-options="option.value for option in options">
+                <option value="">Automatically select</option>               
+            </select>
+          </label> 
+                            
+          </div>        
+        
+        
+        
+        <br><br>
         <md-input-container md-no-float >
             <input ng-model="form.output_file" placeholder="Model name (optional)">
         </md-input-container>

@@ -1,0 +1,242 @@
+<div>
+
+  <div ng-if="microbes.length">
+            <div class="table-controls" layout="row">
+                        
+                <md-progress-circular ng-if="loadingMicrobes" md-mode="indeterminate"></md-progress-circular>
+                
+                <md-input-container md-no-float flex="45">
+                   <md-icon class="material-icons">search</md-icon>
+                   <input ng-model="opts.query" type="text" placeholder="Search models">
+                </md-input-container>
+                
+                <md-input-container pagination
+                    pagination-offset="opts.offset"
+                    pagination-limit="opts.limit"
+                    pagination-total="filtered.length"
+                    layout="row"
+                    layout-align="end center" flex>
+                </md-input-container>                                                            
+            </div>            
+                        
+    <!-- HEADER -->
+    <div layout="row">
+        <div class="expand-container vertical-center">
+        </div>
+
+        <div flex="10" layout="row" layout-align="start center">
+            <b>Model ID</b>
+        </div>
+
+        <div flex="15" layout="row" layout-align="start center">
+            <b>Species Name</b>
+        </div>
+
+        <div flex="5" layout="row" layout-align="start center">
+            <b>Species Domain</b>
+        </div>
+
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Reactions</b></div>
+        </div>
+
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Genes</b></div>
+        </div>
+
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>FBA</b></div>
+        </div>
+        
+        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+            <div><b>Gapfilling</b></div>
+        </div>
+
+        <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
+            <div><b>Modification Date</b></div>
+        </div>
+
+        <div flex="15" layout="row" layout-align="center center">
+            <div><b>Commands</b></div>
+        </div>
+    </div>
+
+
+    <div ng-repeat-start="item in (filtered = ( microbes | filter: opts.query) | limitTo : opts.limit : opts.offset)"
+         ng-click="showRelatedData(item)"
+         class="row-hover my-model">
+
+        <model-item layout="row">
+
+            <div flex="10" class="vertical-center">
+                <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
+                    <md-tooltip md-delay="800">View Model</md-tooltip>
+                    {{item.genome_name}}
+                </a><br>
+            </div>
+
+            <div flex="15" layout="row" layout-align="start center">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
+                <md-tooltip  md-delay="800">View Model</md-tooltip>
+                {{item.species}}
+            </a>
+            </div>
+
+            <div flex="5" layout="row" layout-align="start center">
+                Microbe
+            </div>
+                
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                <div>{{item.rxnCount}}</div> 
+            </div>
+
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                <div>{{item.geneCount}}</div>     
+            </div>
+
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                <div>{{item.fbaCount}}</div>     
+            </div>
+
+            <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+                <div>{{item.gapfillCount}}</div>     
+            </div>
+        
+            <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
+                <!-- <div>{{relativeTime(item.timestamp)}}</div>  -->
+            </div>
+
+            <div flex="15" layout="column" layout-align="end center">
+                <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+                <md-tooltip ng-if="!selected">View download options</md-tooltip>
+                <i class="icon-file-download"></i>
+                </md-button>
+                <!--
+                <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path)">Copy</a>
+                <span ng-if="copyInProgress[$index]">Copying...</span>
+                -->
+            </div>            
+            
+            
+        </model-item>
+        </div>
+ 
+    <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
+    </div>
+    
+    </div>        
+
+    
+    <div ng-if="!microbes || microbes.length == 0" class="alert alert-warning">No model found</div>
+    <!-- <div ng-if="filtered.length == 0 && !loading" class="alert alert-warning">No model found</div>  -->    
+    
+
+</div>
+
+
+
+            
+
+<section ng-controller="SideNav">
+
+    <md-sidenav class="rxn-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="rxnView" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';">
+        <md-toolbar class="md-light-theme">
+            <h1 class="md-toolbar-tools md-primary">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center center">
+            <ng-include src="'app/views/lists/rxn-page.html'"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+    <md-sidenav  class="cpd-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="cpdView">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools md-primary">{{selected.id}}</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center left">
+            <ng-include src="'app/views/lists/cpd-page.html'"></ng-include>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+
+
+    <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">
+        <md-toolbar class="md-theme-light">
+            <h1 class="md-toolbar-tools">Download</h1>
+        </md-toolbar>
+        <md-content layout-padding layout="column" layout-align="center left">
+            <md-progress-circular ng-if="loadingDownloads"
+                                  md-mode="indeterminate"
+                                  md-diameter="30">
+            </md-progress-circular>
+
+            <table ng-if="!loadingDownloads" class="table">
+                <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Type</td>
+                        <td>Size</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i> <a href="{{selected.downloads.sbml.url}}">{{selected.downloads.sbml.name}}</a>
+                        </td>
+                        <td>
+                            <img src="img/sbml-logo-32.png" height="18">
+                        </td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.sbml.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i>  <a href="{{selected.downloads.json.url}}">{{selected.downloads.json.name}}</a>
+                        </td>
+                        <td>JSON</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.json.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i>  <a href="{{selected.downloads.rxnTable.url}}">{{selected.downloads.rxnTable.name}}</a>
+                        </td>
+                        <td>Tab-separated</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.rxnTable.size )}}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="icon-file-download"></i> <a href="{{selected.downloads.cpdTable.url}}">{{selected.downloads.cpdTable.name}}</a>
+                        </td>
+                        <td>Tab-separated</td>
+                        <td class="text-light">
+                            <small>{{uiTools.readableSize( selected.downloads.cpdTable.size )}}</small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <md-button ng-click="close()" class="md-primary">
+                Close
+            </md-button>
+        </md-content>
+    </md-sidenav>
+
+
+
+</section>
+
+
+       
+</div> <!-- end outer most div -->

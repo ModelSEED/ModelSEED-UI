@@ -94,14 +94,36 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             })
     }
 
-    this.reconstruct = function(form, params) {
-        var params = angular.extend(form, params)
-        $log.log('reconstruct form', params)
-        return $http.rpc('ms', 'ModelReconstruction', params)
-                    .then(function(res){
-                        return res;
+    
+    
+    // MODELSEED-47: Called from the Upload FASTA function of the Build Model page: 
+    this.reconstructionPipeline = function( args ) {    
+    // this.reconstructionPipeline = function(name, annotate) {
+        // var args = {destname: name, annotate: annotate};
+        console.log('Making ModelReconstruction RPC call, from MS.reconstructionPipeline, with args:', args);
+        return $http.rpc('ms', 'ModelReconstruction', args)
+                    .then(function(jobId){
+                        console.log('response', jobId);
+                        return jobId;
                     })
     }
+    
+    
+	// MODELSEED-47: Handle the cases for PATRIC/RAST genome reconstruction
+    this.reconstruct = function(args, params) {
+    	// var parameters = angular.extend(form, {loadingPlants: true});  	    	
+        // var params = angular.extend(form, params);
+        console.log('Making ModelReconstruction RPC call, from MS.reconstruct, with parameters: ', args);
+        return $http.rpc('ms', 'ModelReconstruction', args)
+                    .then(function(jobId){
+                        return jobId;
+                    } ).catch(function(e) {
+                  	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                  	  return e;
+                    } );
+    }
+    
+    
 
     this.runFBA = function(form) {
         $log.log('run fba params', form)
@@ -119,7 +141,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.createGenomeFromShock = function(node, name) {
-        var args = {shock_id: node, destname: name};
+        var args = {shock_id: node, destname: name, annotate: 1};
         console.log('calling create genome from shock:', args)
         return $http.rpc('ms', 'plant_pipeline', args)
                     .then(function(res){
@@ -145,7 +167,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.annotatePlant = function(opts) {
         var args = {
             //genome: path,
-            destmodel: opts.name,
+            destmodel: opts.destmodel,
             kmers: opts.kmers ? 1 : 0,
             blast: opts.blast ? 1 : 0      
         }
@@ -199,7 +221,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 for (var i=0; i<res.length; i++) {
                     var obj = res[i];
 
-                    //if (!obj.type) continue; // list models will return non modelfolders :()
+                    // if (!obj.type) continue;
+                    // XXX: list models will return non modelfolders???
                     
                     data.push(self.sanitizeModel(obj))
                 }
@@ -218,6 +241,10 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             name: obj.id,
             path: obj.ref,
             orgName: obj.name,
+                        
+            status: obj.status,
+            
+            geneCount: obj.num_genes,
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,
@@ -360,9 +387,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     this.addModel = function(model, type) {
         //console.log('adding model', model)
         if (type.toLowerCase() === 'microbe')
-            syncCache(this.myModels, model)
+            syncCache(this.myModels, model);
         else if (type.toLowerCase() === 'plant')
-            syncCache(this.myPlants, model)
+            syncCache(this.myPlants, model);
     }
 
     // adds notice to my models cache; only microbes right now

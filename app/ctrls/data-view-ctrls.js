@@ -37,7 +37,7 @@ function($scope, $sParams, WS, $http) {
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.split('/').slice(0,-2).pop();
+    $scope.name = path.split('/').pop()
 
     $scope.tabs = {tabIndex : 0};
 
@@ -132,6 +132,481 @@ function($scope, $sParams, WS, $http) {
          })
 }])
 
+
+
+<!-- Build New Model -->
+.controller('BuildPlant',
+['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'config',
+function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
+ Dialogs, ViewOptions, WS, Auth, uiTools, Tabs, MS, Session, config) {
+
+    // path and name of object
+    // var path = $sParams.path;
+	
+	
+	
+	// MODELSEED-70	
+    $scope.$watch('opts', function(value){
+        update();
+    }, true);	
+	
+	
+	$scope.isPlant = true;
+	
+	$scope.microbeTabIsLocked = false;
+	$scope.plantTabIsLocked = false;
+    // $scope.Tabs = Tabs;
+    // Tabs.totalTabCount = 4;
+    
+	$scope.selectedKingdom = []; // Plants or Microbes
+	$scope.selectedSeqType = []; // protein or DNA
+	$scope.selectedTaxa = []; // genome_type: features or contigs
+	$scope.selectedTemplate = [];	
+		
+    $scope.genomes = [];
+    $scope.myPlants = [];
+    $scope.myMedia = [];
+    
+    $scope.selectedFiles = [];
+    
+    $scope.genomeNameBox = "";
+    
+    
+    
+    // MODELSEED-70:
+    $scope.selectPublicAndReconstruct = function(ev, item) {
+        $scope.selectedPublic = item;
+        $scope.reconstruct(ev, $scope.selectedPublic);
+    }
+    
+    
+    
+    // the selected item for the build operations (not used yet)
+    $scope.selected = null;
+    
+    $scope.copyInProgress = false;
+    $scope.uploading = false;
+    
+    
+    // Kingdom dropdown options
+    $scope.kingdomOptions = [{
+	   name: 'plants', 
+	   value: 'Plants'
+	}, {
+       name: 'microbes', 
+       value: 'Microbial'                    	
+	}];
+
+    // Sequence Type dropdown options
+    $scope.seqTypeOptions = [{
+    	name: 'dna', 
+        value: 'DNA'
+	}, {
+		name: 'protein', 
+		value: 'Protein'                           	
+	}];
+    
+    // Genome Type dropdown options
+    $scope.taxaOptions = [{
+    	   name: 'microbial_contigs',
+    	   value: 'Contigs'
+    	}, {
+           name: 'microbial_features', 
+           value: 'Microbial feature or Protein sequences'            
+            	
+    	}];
+    
+    // Template dropdown options
+    $scope.options = [{
+    	   name: 'plant', 
+    	   value: 'Plant template'
+    	}, {
+    	   name: 'auto',
+    	   value: 'Automatically select'
+    	}, {
+           name: 'core', 
+           value: 'Core template'            
+    	}, {
+            name: 'grampos', 
+            value: 'Gram positive template'
+    	}, {
+            name: 'gramneg', 
+            value: 'Gram negative template'            	
+    	}];
+    
+      
+    $scope.columns = [
+        {prop: 'genome_name', label: 'Name'},
+        {prop: 'genome_id', label: 'ID'},
+        {prop: 'species', label: 'Species'},
+        {prop: 'contigs', label: 'Contigs'}
+        
+    ]    
+    $scope.opts = {
+    		/* MODELSEED-70 */
+            query: '', limit: 25, offset: 0,
+            sort: {field: 'genome_name'},
+            visible: ['genome_name', 'genome_id', 'species', 'contigs']
+        };
+    
+    
+    
+    // MODELSEED-70
+    // update visible genomes
+    
+    function update() {
+        $scope.loading = true;
+        Patric.listGenomes( $scope.opts )
+              .then(function(genomes) {
+                  $scope.genomes = genomes;
+                  $timeout(function() {
+                      $scope.loading = false;
+                  })
+              })
+    }
+    
+    
+    
+
+    // MODELSEED-47: load Patric Genomes for user to select for modeling
+    Patric.listGenomes( $scope.opts )
+    .then(function(genomes) {
+    	
+        // MODELSEED-70
+        $scope.genomes = genomes;
+        // $scope.genomes = genomes.docs;
+        /*
+        $timeout(function() {
+            $scope.loading = false;
+        })
+        */
+    } ).then(function(){
+        MS.listRastGenomes()
+        .then(function(data) {
+            $scope.rastMicrobes = data;
+        } )
+    	
+    } ).catch(function(e) {
+        $scope.myMicrobes = [];
+        $scope.loadingMicrobes = false;
+        $scope.myPlants = [];
+        $scope.loadingPlants = false;
+        $scope.myModels = [];
+    } )    
+    
+    
+	// MODELSEED-47: called when Build Model button pressed in PATRIC tab:
+    $scope.reconstruct = function(ev, item) {
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+        	Dialogs.showError( 'Genome object missing genome_id' );
+        	return;
+        	/*
+            var name = item.name;
+            var params = {path: item.path, name: name};
+            */
+        }
+        Dialogs.reconstruct(ev, params,
+            function(jobId) {
+                console.log('done reconstructing', jobId);
+                // for cache that resides in MS:
+                // MS.submittedModel({name: name, orgName: orgName, jobId: jobId});
+                                                
+                $state.go('app.myModels');
+            });
+    }    
+    
+    
+    // MODELSEED-47: Called from the Build Model button of RAST tab    
+    $scope.reconstructPrivate = function(ev, item) {
+        var params = {path: 'RAST:' + item.genome_id, name: item.genome_name};
+        
+        Dialogs.reconstruct(ev, params,
+            function(jobId) {
+                console.log('done reconstructing', jobId);               
+                // for cache that resides in MS:
+                // MS.addModel(jobId, 'microbe');
+                                
+                $state.go('app.myModels');
+            });
+    }
+    
+    
+    
+    
+    // MODELSEED-47: Called from the Media widget, in the Upload Microbe FAST tab        
+    $scope.selectedItemChange = function(item) {
+        $scope.media = item.path;
+    }
+    
+        
+    $scope.startUpload = function() {
+    	if( $scope.uploading ){
+    		return;
+    	} else {
+    		$scope.uploading = true;
+    	}
+    	
+    	// MODELSEED-54 TODO: Validate selected files: filename extension; content start with >
+    	// validateFASTa();  // returns true if file name extension is 'fa'    	
+    	
+    	// Validate name to assign to the new model
+    	var name = this.modelName || "";
+    	if(name.length==0){
+        	Dialogs.showError( 'Invalid Model Name' );
+            $scope.modelName = "";
+            $scope.uploading = false;
+            return;
+    	}        
+        var regex = /[^\w]/gi;
+        if(regex.test( name ) == true) {
+        	Dialogs.showError( 'Invalid Model Name' );
+            $scope.modelName = "";
+            $scope.uploading = false;
+        }
+        
+        else {
+        	/*        	
+          	var kingdom = "";
+            if( this.selectedKingdom && this.selectedKingdom.length==0 ) {
+            	// Set the default:
+            	this.selectedKingdom["name"] = "plants";
+                kingdom = this.selectedKingdom["name"];
+            } else {
+                kingdom = this.selectedKingdom["name"];
+            }
+                        
+          	var seq_type = "";
+            if( this.selectedSeqType && this.selectedSeqType.length==0 ) {
+            	// Set the default:
+            	this.selectedSeqType["name"] = "dna";
+                seq_type = this.selectedSeqType["name"];
+            } else {
+                seq_type = this.selectedSeqType["name"];
+            }
+            */        	
+          	var genome_type = "";
+            if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
+            	// Set the default:
+            	this.selectedTaxa["name"] = "microbial_contigs";
+                genome_type = this.selectedTaxa["name"];
+            } else {
+                genome_type = this.selectedTaxa["name"];
+            }
+                    	
+          	var template = "";
+            if( this.selectedTemplate && this.selectedTemplate.length==0 ) {
+            	// Set the default:
+            	this.selectedTemplate["name"] = "auto";
+            	template = this.selectedTemplate["name"];
+            } else {
+            	template = this.selectedTemplate["name"];
+            }
+                        
+            // MODELSEED-47: if is not plant: Need checks and balances to prevent model name duplication
+            WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
+                .then(function() {
+                    alert('Genome name already exists!\n'+
+                    'Please provide a new name or delete the existing genome');                           
+            }).catch(function(e) {
+            	
+                startUpload( name, genome_type, template );
+            })
+        }
+    }
+
+    function startUpload( name, genome_type, template ) {
+
+        Upload.uploadFile($scope.selectedFiles, null, function(node) {
+        	
+            Dialogs.showComplete('Import in progress...');
+                        
+           // TODO: MODELSEED-47: Add $scope.selectedTemplate... to the following parameters:
+           if( $scope.isPlant ) {
+        	   genome_type = "plant";
+           }
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
+           MS.reconstructionPipeline( parameters )
+               .then( function (res) {
+            	   
+            	   $scope.uploading = false;
+            	   
+                   $state.go('app.myModels');                    
+                   // Dialogs.showComplete('Import complete', name);           
+
+            /*
+            MS.createGenomeFromShock(node, name)
+                .then(function(res) {
+                  $state.go('app.myModels');                    
+                    Dialogs.showComplete('Import complete', name);
+                  */  
+                }).catch(function(e) {
+                   console.error(e.error.message)
+             	   $scope.uploading = false;
+
+                })
+           
+        }, function(error) {
+            console.log('shock error:', error);
+            // Dialogs.showError('Upload to SHOCK failed (see console)')                        
+        });                    
+    }
+    
+    
+    $scope.selectFile = function(files) {
+        $scope.$apply(function() {
+            $scope.selectedFiles = files;
+        });
+        if( $scope.isPlant ){
+        	$scope.microbeTabIsLocked = true;
+        } else {
+        	$scope.plantTabIsLocked = true;
+        }
+    }
+    
+    
+    var validFaFormats = ['fa', 'fasta'];    
+    function validateFASTa () {
+    	
+        
+           var ext = $scope.selectedFiles[0].name.substring(
+        		   $scope.selectedFiles[0].name.lastIndexOf('.') + 1).toLowerCase();   
+
+           return validFaFormats.indexOf(ext) !== -1;
+            	
+    	
+        // return true;    	
+    }
+        
+    
+    
+    $scope.setDomain = function( domain ) {
+    	if( domain == 'plants' ) {
+    		$scope.isPlant = true;
+    	} else {
+    		$scope.isPlant = false;
+    	}
+    }
+    
+    
+     
+    // Deprecated:
+    $scope.setKingdom = function( ) {
+        $scope.isPlant = this.selectedKingdom["name"] == "plants";
+    }
+          
+    // Not used:
+    $scope.getLabel = function(prop) {
+        for (var i=0; i<$scope.columns.length; i++) {
+            var col = $scope.columns[i];
+            if (col.prop === prop) return col.label;
+        }
+        return '';
+    }
+
+    // Not used:
+    $scope.exists = function(item, visible) {
+      return visible.indexOf(item) > -1;
+    }   
+
+
+    // Deprecated:
+    $scope.templateSelected = function( ) {
+    	if( $scope.myPlants.length > 0 ) {
+            $scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            
+    	}
+    }
+    
+    // Deprecated:
+    $scope.setDefaultTemplate = function(){
+    	$scope.selectedTemplate.selected = "plant";
+    }
+    
+    // Deprecated:
+    $scope.setDefaultTaxa = function(){
+        if( this.selectedTaxa && this.selectedTaxa.selected ) {
+            // NOOP
+        } else {
+        	// this.selectedTaxa.selected = true;
+        	this.selectedTaxa["name"] = "plant";
+        }
+    }
+
+    // The following versions of $scope.reconstruct are deprecated:
+    // Deprecated:
+    /*
+    $scope.reconstruct = function(ev, item) {        
+    	$scope.copyInProgress = true;
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+        ev.stopPropagation();
+        
+        $scope.form = {genome: item.genome_id};
+
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
+                      .then(function(r) {
+
+                          $state.go('app.myModels');
+                          
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                      })
+    	
+    }
+    */
+/*    
+    $scope.reconstruct = function(ev, item) {        
+    	if( $scope.myPlants.length > 0 ) {
+    		item = $scope.myPlants[ 0 ];
+    		var name = $scope.myPlants[ 0 ].name;
+    		var path = $scope.myPlants[ 0 ].path;
+    		$scope.genomeNameBox = $scope.myPlants[ 0 ].name;
+            Dialogs.showToast('Creating Model...', name, 2000);
+    	}        
+        if ('genome_id' in item) {
+            var name = item.genome_id,
+                orgName = item.genome_name;
+            var params = {path: 'PATRIC:'+item.genome_id, name: item.genome_name};
+        } else {
+            var name = item.name;
+            var params = {path: item.path, name: name};
+        }
+        ev.stopPropagation();
+        
+        $scope.form = {genome: item.path};
+
+        $scope.loadingPlants = true;
+        
+        var reconstructpromise =             
+        	MS.reconstruct($scope.form)
+                      .then(function(r) {
+
+                          $state.go('app.myModels');
+                          
+                      }).catch(function(e) {
+                    	  console.log( 'BuildPlant ctrls Reconstruct Error', e.error.message );
+                      })
+    }
+*/           
+
+} ] )
+
+
+
 .controller('FeatureDataView',
 ['$scope', '$stateParams', 'MS', '$http', 'config', 'Auth',
 function($s, $sParams, MS, $http, config, Auth) {
@@ -139,6 +614,16 @@ function($s, $sParams, MS, $http, config, Auth) {
     // path and name of object
     var featureID = $sParams.feature,
         genome = $sParams.genome.split('/').slice(0,-2).join('/');
+    
+    
+    
+	$s.isPlant = true;
+    if (genome.split('/')[ 2 ] === 'modelseed') {
+		$s.isPlant = false;
+    }
+
+	
+	
 
     if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
@@ -165,7 +650,7 @@ function($s, $sParams, MS, $http, config, Auth) {
             getOpts: function(row) {
                 return {
                     feature: row.hit_id,
-                    genome: config.publicPlants+row.genome+
+                    genome: config.paths.publicPlants+row.genome+
                         '/.plantseed_data/minimal_genome'
                 };
             }},
@@ -224,6 +709,18 @@ function($s, $sParams, MS, $http, config, Auth) {
 
         return a;
     }
+    
+    
+    
+    function setDomain ( domain ) {
+    	if( domain == 'plants' ) {
+    		$s.isPlant = true;
+    	} else {
+    		$s.isPlant = false;
+    	}
+    }
+    
+    
 
     /*
     $s.editable = {};
@@ -287,10 +784,7 @@ function($s, $state, $sParams, WS, MS, tools,
     var path = $sParams.path;
 
     // determine if user can copy this media to their workspace
-    if (path.split('/')[1] !== Auth.user) 
-        $s.canCopy = true;
-    else
-        $s.isMine = true;    
+    if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
 
     $s.name = path.split('/').pop()
 
@@ -299,8 +793,8 @@ function($s, $state, $sParams, WS, MS, tools,
         {label: 'Name', key: 'name'},
         {label: 'ID', key: 'id'},
         {label: 'Concentration', key: 'concentration', editable: true},
-        {label: 'Max Flux', key: 'minflux', editable: true},
-        {label: 'Min Flux', key: 'maxflux', editable: true}
+        {label: 'Min Flux', key: 'minflux', editable: true},
+        {label: 'Max Flux', key: 'maxflux', editable: true}
     ];
 
     $s.toggleEdit = function() {
@@ -329,15 +823,12 @@ function($s, $state, $sParams, WS, MS, tools,
         var destination = '/'+Auth.user+'/media/';
         WS.createFolder(destination)
             .then(function(res) {
+
                 WS.copy(path, destination+$s.name, true)
                     .then(function(res) {
-                        var path = res[0][2]+res[0][0];
-                        $state.go('app.mediaPage', {path: path})
-                    }).catch(function(e) {
-                        $s.copyInProgress = false;                              
-                        Dialogs.showError('Copy media failed')
+                        $s.copyInProgress = false;
+                        $state.go('app.media', {tab: 'mine'})
                     })
-
             })
     }
 
@@ -454,32 +945,383 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog',
- 'ModelParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
-         ModelParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {
+['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs', 'GenomeParser',
+ 'ModelParser', 'FBAParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
+function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, GenomeParser,
+         ModelParser, FBAParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
+    $scope.Tabs = Tabs;
+    Tabs.totalTabCount = 6;
+    
     // path and name of "modelfolder"
-    var path = $sParams.path;
+    var path = $sParams.path;  
     $scope.name = path.split('/').pop();
+    
+    $scope.selected;    
+    $scope.selectedFBA = "";
+       
+    var genomePath = path + '/genome';
+    var dictionary = {};
+    var genomeGenes = [];
+    
+    $scope.uiTools = uiTools; 
+    
+    var parsedPath = path.split('/').slice(0,-2);
+    if( parsedPath.indexOf('plantseed') == -1 && parsedPath.indexOf('modelseed') == -1 ) {
+    	$scope.isRef = false;
+    } else {
+    	$scope.isRef = true;    	
+    }
+        
+    $scope.isPlant = path.split('/')[2] === 'plantseed' ? true : false;
+    
+    $scope.showRelatedData = function( item ) {
+        $scope.item = item;
+        // item.loading = true;        
+        
+        var gapfillProm = showGapfills();
+        var expressionProm = showExpression();
 
-    // determine if user can copy this model to their workspace
-    if (path.split('/')[1] !== Auth.user) 
-        $scope.canCopy = true;
-    else
-        $scope.isMine = true;        
+        var fbaProm;
+        
+        if (item.relatedFBAs) 
+            delete item.relatedFBAs;
+        else         
+            fbaProm = updateFBAs();
+            
+        // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
+        $scope.getRxnFluxes();
+        $scope.getCpdFluxes();               
+        
+        /*
+        $q.all([fbaProm, gapfillProm, expressionProm])
+            .then(function() {
+                console.log('done')
+                item.loading = false
+            } );
+        */
+            
+    }
 
-    // selected compound, reaction, etc.
-    $scope.selected;
+    function updateFBAs() {
+        return MS.getModelFBAs(path)
+            .then(function(fbas) {                
+                
+                $scope.relatedFBAs = fbas;
+                                
+                // Tabs.selectedIndex = 0;
+            })
+    }
+    
+    function showExpression() {
+        return updateExpression();      
+    }
 
-    // urls used for features
+    function updateExpression() {
+    	// Tabs.selectedIndex = 2;                    
+           
+        return WS.getObjectMeta(path)
+            .then(function(res) {
+                var expList = [],
+                    dict = res[0][7].expression_data;
+                
+                for (key in dict) 
+                    expList.push({name: key, ids: dict[key]});
+                
+                $scope.expression = expList;
+            })
+            
+    }
+    
+    $scope.uploadExpression = function(ev, item) {
+        Dialogs.uploadExpression(ev, item, function() {
+            updateExpression(item);
+        })
+    }
+    
+    
+    
+    $scope.reconstructPipeline = function(ev, item) {
+    	var parameters = { genome: $scope.name, genome_type: "plant" };
+    	var reconstructpromise =             
+        	MS.reconstructionPipeline( parameters )
+        	
+                      .then(function(r) {
+            	          Dialogs.showComplete('Reconstructing Model...', name);
+
+
+                      }).catch(function(e) {
+                    	  console.log( 'ReconstructPipeline Error', e.error.message );
+
+                      })    	
+    	
+    }    
+
+    $scope.reconstructPipelineAnnotate = function(ev, item) {
+    	var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };    	
+    	var reconstructpromise =             
+        	MS.reconstructionPipeline( parameters )
+                      .then(function(r) {
+            	          Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', name);
+
+                      }).catch(function(e) {
+                    	  console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
+
+                      })    	
+    	
+    }
+
+    $scope.annotatePlant = function(ev, item) {
+    	var opts = {
+    		destmodel: $scope.name,
+    		kmers: 0,
+    		blast: 1
+    	};
+    	var annotatePlantpromise =             
+        	MS.annotatePlant( opts )
+                      .then(function(r) {
+            	          Dialogs.showComplete('Blasting Genome...', name);
+
+                      }).catch(function(e) {
+                    	  console.log( 'BlastAnnotate Error', e.error.message );
+
+                      })    	
+    	
+    }
+        
+    
+    
+    $scope.runPlantFBA = function(ev, item) {
+        // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
+
+        Dialogs.runPlantFBA(ev, item, function() {
+            updateFBAs().then(function() {
+                item.fbaCount++;
+            })
+        })
+    }
+    
+    
+    
+    // FBA selection for data viewing (enables determine which FBA is selected via radios)
+    $scope.setFBA = function(e, fba, model) {
+        // e.preventDefault();
+        // e.stopPropagation();        
+        
+        $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+        $scope.getRxnFluxes();
+        $scope.getCpdFluxes();
+        
+        $scope.showRelatedData( $scope.item );
+        
+        var data = {model: model.path,
+                fba: fba.path,
+                org: model.orgName,
+                media: fba.media};
+
+
+    if (fba.checked) {
+    	// Oops: fba.checked does not really exist yet?
+    	// Try calling the JS join function?
+    	
+        MV.rm(data, true);
+        // $scope.selectedFBA = "";
+
+        
+        
+        // ToDo: Iterate other radios and set:
+        // fba.checked = false;
+
+        
+        
+    } else {
+        // MV.add(data);        
+        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );        
+        // Call functions to set selected fba fluxes:
+        // $scope.getRxnFluxes();
+        // $scope.getCpdFluxes();
+        // fba.checked = true;
+    }
+        
+    }    
+
+    
+    
+    
+    // FBA selection for data viewing (deprecated: check boxes)
+    $scope.addFBA = function(e, fba, model) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+
+        var data = {model: model.path,
+                    fba: fba.path,
+                    org: model.orgName,
+                    media: fba.media};
+
+
+        if (fba.checked) {
+            MV.rm(data, true);
+            
+            $scope.selectedFBA = "";
+
+            fba.checked = false;
+        } else {
+            MV.add(data);
+            
+            $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+            
+            // Call functions to set selected fba fluxes:
+            $scope.getRxnFluxes();
+            $scope.getCpdFluxes();
+
+            fba.checked = true;
+        }
+    }    
+           
+    $scope.gapfill = function(ev) {
+        var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
+    
+        Dialogs.gapfill(ev, item, function() {
+            updateGapfills(item).then(function() {
+                item.gapfillCount++;
+            })
+        })
+    }    
+    
+    function showGapfills() {
+        if ($scope.relatedGapfills) {
+            delete $scope.relatedGapfills;
+        } else {
+            return updateGapfills();
+        }
+    }    
+
+    function updateGapfills() {
+        return MS.getModelGapfills(path)
+            .then(function(gfs) {
+                $scope.relatedGapfills = gfs;
+                // Tabs.selectedIndex = 0;
+            })
+    }
+        
+    $scope.deleteFBA = function(e, i, model) {
+        e.stopPropagation();
+
+        WS.deleteObj($scope.relatedFBAs[i].ref)
+          .then(function(res) {
+          
+              $scope.relatedFBAs.splice(i, 1);
+              // model.relatedFBAs.splice(i, 1);
+              
+              $scope.fbaCount -= 1;
+          })
+    }    
+
+    // For the Download operation (-->)
+    $scope.toggleOperations = function(e, type, item) {
+        var tar = e.target;
+        e.stopPropagation();
+
+        // set selected item
+        $scope.selected = item;
+        
+        $scope.loadingDownloads = true;
+        MS.getDownloads(item.path)
+          .then(function(dls) {
+              console.log('dls', dls)
+              $scope.selected.downloads = dls;
+              $scope.loadingDownloads = false;
+          })
+        
+        if (type === 'download') {
+
+            if (!$mdSidenav('downloadOpts').isOpen())
+                $mdSidenav('downloadOpts').open();
+
+            $document.bind('click', function(e) {
+                $mdSidenav('downloadOpts').close()
+                $document.unbind(e)
+                $scope.selected = null;
+            })
+        } else if ($mdSidenav('downloadOpts').isOpen()) {
+            $mdSidenav('downloadOpts').close()
+        }
+    }
+
+    $scope.rmModel = function(ev, i, item, type) {
+        // var item = {path: path, name: $scope.name};
+    
+        ev.stopPropagation();
+
+        var confirm = $mdDialog.confirm()
+            .title('WARNING')
+            .content('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ariaLabel('Are you sure you want to delete '+item.name+' and all associated data?')
+            .ok('Delete it all!')
+            .cancel('No')
+            .clickOutsideToClose(true)
+            .targetEvent(ev);
+
+        $mdDialog.show(confirm).then(function() {
+            WS.deleteFolder(item.path)
+              .then(function(one, two) {
+                if (type.toLowerCase() === 'plant')
+                    MS.myPlants.splice(i, 1)
+                else if (type.toLowerCase() === 'microbe')
+                    MS.myModels.splice(i, 1)
+                Dialogs.showComplete('Deleted', item.name)
+            })
+        }, function() {
+            console.log('not deleting', item.name, type);
+        });
+    }
+    
+    // Consider ALL the genes (deprecated)
+    $scope.getAllGenesForGenome = function( ) {
+
+        // var genomePath = path + '/genome';
+        
+        // var dictionary = {};
+        // var genomeGenes = [];
+ 
+        WS.get( genomePath ).then(function(obj) {
+        	dictionary = GenomeParser.parse(obj.data).dictionary;
+        	genomeGenes = GenomeParser.parse(obj.data).genomeGenes;
+        	
+        	$scope.geneFunctions = dictionary;
+        	
+            // Merge Functions and Genes without reactions:
+            if( $scope.geneFunctions ){
+                var foundGenes = [];
+                var gene;
+                
+                $scope.data.genes.forEach(function(item) {
+                    foundGenes.push(item.id)
+                })
+                
+                for ( var i = 0; i <  genomeGenes.length; i++ ) {
+                	gene = genomeGenes[ i ];
+                	// If gene is not in foundGenes then add gene to $scope.data.genes
+                    if (foundGenes.indexOf(gene) == -1) {
+                    	$scope.data.genes.push( { id: gene, reactions: [] } );
+                    	console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    // else
+                        // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
+                }        	            	
+            }        	       	
+        } );
+                
+    }    
+
+    // External urls used for features (deprecated)
     var featureUrl;
     var patricGeneUrl = "https://www.patricbrc.org/portal/portal/patric/Feature?cType=feature&cId=",
         rastGeneUrl = "http://rast.nmpdr.org/seedviewer.cgi?page=Annotation&feature=",
-        pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=";
-
-    $scope.Tabs = Tabs;
-    Tabs.totalTabCount = 7;
+        pubSEEDUrl = "http://pubseed.theseed.org/seedviewer.cgi?page=Annotation&feature=",
+        modelSEEDURL = "http:/modelseed.org/feature/";
 
     $scope.relativeTime = uiTools.relativeTime;
 
@@ -494,7 +1336,51 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
     $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
     $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
     $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+    
+    
+    // converge orthogonal Flux data:        
+    // $scope.rxnFluxesOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.getRxnFluxes = function( ) {
+        // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
+    	if( $scope.selectedFBA.length>0 ) {
+        var fbaPath = path + '/fba/' + $scope.selectedFBA; 
+        WS.get( fbaPath ).then(function(obj) {
+            FBAParser.parse(obj.data)
+                     .then(function(parsed) {
+                        $scope.fbas = [parsed.data];
+                        $scope.models = [parsed.rawModel];
+                        $scope.rxnFluxes = parsed.fba.reaction_fluxes;
+                        
+                        $scope.rxnFluxHash = parsed.fba.rxnhash;
+                        
+                        // $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 
+                        $scope.loading = false;
+                     });
+        })
+      }
+    }
+    
+    $scope.getCpdFluxes = function( ) {
+        // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
+    	if( $scope.selectedFBA.length>0 ) {
+        var fbaPath = path + '/fba/' + $scope.selectedFBA; 
+        WS.get( fbaPath ).then(function(obj) {
+            FBAParser.parse(obj.data)
+                     .then(function(parsed) {
+                        $scope.fbas = [parsed.data];
+                        $scope.models = [parsed.rawModel];
+                        // $scope.cpdFluxes = parsed.fba.compoundFluxes;
+                        
+                        $scope.cpdFluxHash = parsed.fba.cpdhash;
+
+                        $scope.loading = false;
+                     });
+        })
+      }
+    }
+    
     // reaction table spec
     $scope.rxnHeader = [
         {label: 'ID', key: 'id', newTab: 'rxn',
@@ -509,19 +1395,129 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
                  var links = [];
                  for (var i=0; i<item.length; i++) {
+                	 
+                     links.push('<a href="/feature' + path + 
+             		        '/.plantseed_data/minimal_genome/' +
+                             item[i] + '" >'
+                          + item[i] + ' </a>' );                	 
+                     /*
+                     links.push('<a href="http:/modelseed.org/feature' + path + 
+                    		        '/.plantseed_data/minimal_genome/' +
+                                    item[i] + '" target="_blank" class="nowrap" >'
+                                 +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
+                	 
                      links.push('<a href="'+
                                     featureUrl+item[i]+'" target="_blank" class="nowrap" >'
                                  +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
+                                 */
                  }
-
                  return links.join('<br>');
              }
+        } ,
+        
+        
+        
+        // converge orthogonal Flux data:
+        {label: 'Flux', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
+                	
+                    // fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].value );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
         },
+        {label: 'Min', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
+                	
+                    // fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].min );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Max', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
+                	
+                    // fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].max );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Class', key: 'id',
+
+            formatter: function( row ) {
+
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";
+                
+                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
+                	
+                    // fbas.push( $scope.selectedFBA );
+                        
+                        if( $scope.rxnFluxes ) {
+                            if( $scope.rxnFluxHash ) {
+                                fbas.push( $scope.rxnFluxHash[ row ].class );
+                            }
+                        }
+                }
+                return fbas.join('<br>');
+            }
+
+        }        
+        /* 
         {label: 'Gapfill', key: 'gapfill',
             formatter: function(item) {
                 return item.summary || '-';
             }
-    }];
+        }
+        */ 
+        ];
 
     $scope.cpdHeader = [{
         label: 'ID', key: 'id', newTab: 'cpd',
@@ -531,22 +1527,133 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula'},
         {label: 'Charge', key: 'charge'},
-        {label: 'Compartment', key: 'compartment'}
+        {label: 'Compartment', key: 'compartment'},
+        
+        // converge orthogonal Flux data:
+        {label: 'Flux', key: 'id',
+
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    // fbas.push( $scope.selectedFBA );                        
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].value );
+                            	}
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Min', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";               
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    // fbas.push( $scope.selectedFBA );                       
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].min );
+                            	}
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+
+        },
+        {label: 'Max', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {                	
+                    // fbas.push( $scope.selectedFBA );
+                        
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].max );
+                            	}
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+        },
+        {label: 'Class', key: 'id',
+            formatter: function( row ) {
+                var fbas = [];
+                var fba = "";
+                var fbaPath = "";                
+                if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {               	
+                    // fbas.push( $scope.selectedFBA );                       
+                        // if( $scope.cpdFluxes ) {
+                            if( $scope.cpdFluxHash ) {
+                            	if( $scope.cpdFluxHash[ row ] ){
+                                    fbas.push( $scope.cpdFluxHash[ row ].class );
+                            	}
+                            }
+                        // }
+                }
+                return fbas.join('<br>');
+            }
+        }
+        
     ];
 
 
     $scope.geneHeader = [
-        {label: 'Gene', key: 'id'},
+        {label: 'Gene', key: 'id',
+
+        	formatter: function(item) {
+                if (!item.length) return '-';
+
+                var links = [];
+                // for (var i=0; i<item.length; i++) {
+               	 
+                    links.push('<a href="/feature' + path + 
+            		        '/.plantseed_data/minimal_genome/' +
+                            item + '">'
+                         + item + ' </a>' );                	 
+
+                //}
+                // return links;
+                return links.join('<br>');
+            }
+                
+        },
         {label: 'Reactions', key: 'reactions', newTabList: true,
         call: function(e, item) {
           $scope.toggleView(e, 'rxn', item );
-        }
+            }
+        },
+                
+        {label: 'Functions', key: 'id',
+            formatter: function( item ) {
+                var fncns = [];
+
+            	if( $scope.geneFunctions ){
+                
+            		fncns.push( $scope.geneFunctions[ item ] );
+	
+            	}                
+                return fncns.join('<br>');
+
+            }
         }
     ];
 
     $scope.compartmentHeader = [
         {label: 'Compartment', key: 'id'},
-        {label: 'Name', key: 'id'},
+        {label: 'Name', key: 'name'},
         {label: 'pH', key: 'pH'},
         {label: 'Potential', key: 'potential'}
     ]
@@ -569,6 +1676,54 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         {label: 'Cpds', key: 'cpdCount'}
     ]
 
+    
+    
+    $scope.predictionsHeader = [
+        {label: 'Role', key: 'role'},
+        {label: 'Original Predictions', key: 'kmerFeatures',
+            formatter: function(row) {
+                var links = [];
+                
+                if( row.kmerFeatures ) {
+                  row.kmerFeatures.forEach(function(name, i) {
+                    var match = row.blastFeatures.indexOf(name);
+                    links.push('<a href="/feature' + path +
+                    		'/.plantseed_data/minimal_genome/' +
+                    		name +
+                    		'" ' +
+                            'class="' +
+                            (match > -1 ? 'feature-highlight' : '') +
+                            '">' +
+                            name +
+                            '</a>');
+                  });
+                }
+                return links.join('<br>') || '-';
+            }},
+        {label: 'Blast Predictions', key: 'blastFeatures',
+         formatter: function(row) {
+            var links = [];
+            
+            if( row.kmerFeatures ) {            
+              row.blastFeatures.forEach(function(name, i) {
+                var match = row.kmerFeatures.indexOf(name);
+                links.push('<a href="/feature' + path +
+                		'/.plantseed_data/minimal_genome/' +
+                		name +
+                		'" ' +
+                        'class="' +
+                        (match > -1 ? 'feature-highlight' : '') +
+                        '">' +
+                        name+
+                        '</a>');
+              });
+            }
+            return links.join('<br>') || '-';
+        }},
+    ]
+
+    
+    
 
     var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
@@ -589,13 +1744,79 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         $scope.orgName = res.data.name;
 
         $scope.data = ModelParser.parse(res.data);
-        $scope.loading = false;
+                
+        $scope.loading = false;        
+        
+    }).then( function () {
+        WS.get( genomePath ).then(function(obj) {
+        	dictionary = GenomeParser.parse(obj.data).dictionary;
+        	genomeGenes = GenomeParser.parse(obj.data).genomeGenes;
+        	
+        	$scope.geneFunctions = dictionary;
+        	
+            // Merge Functions and Genes without reactions:
+            if( $scope.geneFunctions ){
+                var foundGenes = [];
+                var gene;
+                
+                $scope.data.genes.forEach(function(item) {
+                    foundGenes.push(item.id)
+                })
+                
+                for ( var i = 0; i <  genomeGenes.length; i++ ) {
+                	gene = genomeGenes[ i ];
+                	// If gene is not in foundGenes then add gene to $scope.data.genes
+                    if (foundGenes.indexOf(gene) == -1) {
+                    	$scope.data.genes.push( { id: gene, reactions: [] } );
+                    	// console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    // else
+                        // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
+                }        	            	
+            }        	       	
+        } );    	
+    	   
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;
-    })
+    });
+    
+    
+    
+    $scope.loadingAnnotations = true;
+    $http.rpc('ms', 'plant_annotation_overview', {genome: genomePath})
+         .then(function(res) {
+             var d = [];
+             for (var key in res) {
+                 d.push({role: key,
+                         blastFeatures: res[key]['blast-features'],
+                         kmerFeatures: res[key]['kmer-features']})
+             }
 
+             $scope.annotations = d;
+             $scope.loadingAnnotations = false;
+         }).catch(function(e) {
+             $scope.error = e;
+             $scope.loadingAnnotations = false;
+         });    
 
+    
+
+    // MODELSEED-50: Need the images... of plants
+    if( $scope.isPlant && $scope.isRef) {
+		WS.getObjectMeta ( genomePath ).
+	    then( function( res ) {
+	    	console.log( 'meta for path', genomePath, ': ', res );
+	    	$scope.image = res[0][7].image;
+	    	$scope.organism = res[0][7].organism;
+            $scope.links = res[0][7].links;
+	    } ).catch( function( e ){
+	    	console.log( 'Error getting meta for path', genomePath, ': ', res );	    	
+	    } );
+	}
+	
+    
+    
     /* testing
     MS.getModel(path).then(function(res) {
         console.log('res',res)
@@ -711,8 +1932,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
 
                                  var links = [];
                                  for (var i=0; i<row.genes.length; i++) {
-                                     links.push('<a href="'+
-                                                    featureUrl+row.genes[i]+'" target="_blank">'
+                                     links.push('<a href="' +
+                                                    featureUrl + row.genes[i] + '" target="_blank">'
                                                  +row.genes[i]+'</a>')
                                  }
 
@@ -800,7 +2021,9 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
         })
     }
 
+    // Deprecated:
     function setFeatureUrl(source) {
+    	/*
         if (source === 'RAST')
             featureUrl = rastGeneUrl;
         else if (source === 'PubSEED')
@@ -809,6 +2032,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $dialog,
             featureUrl = patricGeneUrl;
         else
             featureUrl = patricGeneUrl;
+        */
+    	featureURL = modelSEEDURL;
     }
 }])
 
@@ -910,7 +2135,6 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
 .service('Tabs', ['$timeout', 'MS', '$stateParams', 'uiTools', 'ModelParser',
 function ($timeout, MS, $sParams, uiTools, ModelParser) {
     var self = this;
-
     /**
      * tabs = [
      *    { name: 'new tab', otherData: 'foo'},
@@ -948,12 +2172,51 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
             }
         }
     };
-
     this.clearTabs = function() {
         self.tabs = [];
     }
 
 }])
+
+
+
+
+.service('GenomeParser', ['MS', function(MS) {
+    var self = this;   
+    // this.genehash = {};
+    
+    this.parse = function (data) {    	
+      var modelGenes = { };
+      var genomeGenes = [];
+      if( data.features ) {
+        for (var i=0; i< data.features.length; i++) {
+            var ftr = data.features[ i ];
+            
+            genomeGenes.push( ftr.id );
+	        modelGenes[ ftr.id ] = ftr.function;
+            /*
+	        modelGenes.push( {
+                id: ftr.id,
+                function: ftr.function
+            } );
+	        */
+	    }
+      }
+	  return {
+        genomeGenes: genomeGenes,
+        dictionary: modelGenes
+	  };
+        /*
+        var modelTables =  {
+            genes: modelGenes
+        };        
+        return modelTables;
+        */	
+    }
+        
+    return {parse: this.parse}
+}])
+
 
 
 .service('ModelParser', ['MS', function(MS) {
@@ -972,6 +2235,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
         "x":"Peroxisome",
         "v":"Vacuole",
         "w":"Cell wall",
+	"j":"Mitochondrial intermembrane space"
     };
 
     this.cpdhash = {};
@@ -982,9 +2246,6 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
     this.gfhash = {};
 
     this.parse = function (data) {
-        // this.modelreactions = data.modelreactions;
-        // this.modelcompounds = data.modelcompounds;
-        // this.modelcompartments = data.modelcompartments;
 
         var reactions = [],
             compounds = [],
@@ -995,9 +2256,14 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
         this.biomasses = data.biomasses;
         this.biomasscpds = [];
-        this.gapfillings = data.gapfillings;
+        
+        if( data.gapfillings &&  data.gapfillings.length > 0 ){
+            this.gapfillings = data.gapfillings;
+        } else {
+        	this.gapfillings = [];
+        }
 
-        // create gapfilling hash
+        // create gap filling hash
         for (var i=0; i < this.gapfillings.length; i++) {
 
             this.gapfillings[i].simpid = "gf."+(i+1);
@@ -1188,6 +2454,7 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
                     foundGenes.push(item.id)
                 })
 
+		    //Can we add a new column to the genes table: "function"?
                 if (foundGenes.indexOf(gene) == -1)
                     modelGenes.push( { id: gene, reactions: [id] } );
                 else
@@ -1209,11 +2476,13 @@ function ($timeout, MS, $sParams, uiTools, ModelParser) {
 
             if (gfData && Object.keys(gfData).length > 0) {
                 for (var key in gfData) {
-                    if (gfData[key].indexOf('added') !== -1)
+                  if( gfData[key] && gfData[key][0] ) {
+                    if (gfData[key][0].indexOf('added') !== -1)
                         added = true;
-                    if (gfData[key].indexOf('reversed') !== -1) {
+                    if (gfData[key][0].indexOf('reversed') !== -1) {
                         reversed = true;
                     }
+                  }
                 }
 
                 if (added && reversed) {
@@ -1467,6 +2736,13 @@ function(WS, ModelParser) {
         var fbaObj = {reaction_fluxes: reaction_fluxes,
                       exchange_fluxes: exchange_fluxes,
                       genes: genes,
+                      
+                      
+                      cpdhash: cpdhash,
+                     
+                      rxnhash: rxnhash,
+                      
+                      
                       biomass: biomass}
 
         return fbaObj
@@ -1524,6 +2800,7 @@ function($scope, $sParams, WS, $http, Biochem) {
     function parseSolution(solutionData) {
         var data = [], ids = [];
 
+      if( solutionData ) {  
         for (var i=0; i<solutionData[0].length; i++) {
             var rxn = solutionData[0][i],
                 id = rxn.reaction_ref.split('/').pop();
@@ -1536,6 +2813,7 @@ function($scope, $sParams, WS, $http, Biochem) {
 
             ids.push(id.split('_')[0]);
         }
+      }
 
         // add equation from biochem
         return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
@@ -1554,3 +2832,277 @@ function($scope, $sParams, WS, $http, Biochem) {
     }
 
 }])
+
+
+// New Test Service Calls Page (experimental test harness only):
+.controller('TestServiceCall',
+['$scope', '$stateParams', 'WS', 'MS',
+function TestServiceCall($s, $sParams, WS, MS) {
+    
+    $s.submit = function( ){
+        var serviceName = $s.selectedService;
+        var parameters = $s.parminput;
+        var methodName = $s.$$childHead.selectedMethod;
+        
+        var returnoutput = "";
+        
+        var call = "";
+
+        if( serviceName=="WS" ) {
+          call += "WS.";   
+          switch(methodName) {
+            case "list":           
+              returnoutput = WS.list(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "list(";
+              break;
+            case "listL":
+              returnoutput = WS.listL(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "listL(";
+              break;              
+            case "listPublicPlants":
+              returnoutput = WS.listPublicPlants(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listPublicPlants(";
+              break;              
+            case "sanitizeMeta":
+              returnoutput = WS.sanitizeMeta(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "sanitizeMeta(";
+              break;
+            case "get":
+              returnoutput = WS.get(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "get(";
+              break;
+            case "getObjects":
+              returnoutput = WS.getObjects(parameters);
+              document.getElementById(13).value = returnoutput;
+              call += "getObjects(";
+              break;
+            case "getObjectsMeta":            
+              returnoutput = WS.getObjectsMeta(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectsMeta(";
+              break;
+            case "getObjectsMetas":            
+              returnoutput = WS.getObjectsMetas(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectsMetas(";
+              break;
+            case "saveMeta":            
+              returnoutput = WS.saveMeta(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "saveMeta(";
+              break;              
+            case "mv":            
+              returnoutput = WS.mv(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "mv(";
+              break; 
+            case "copy":            
+              returnoutput = WS.copy(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "copy(";
+              break; 
+            case "deleteObj":            
+              returnoutput = WS.deleteObj(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "deleteObj(";
+            break; 
+            case "deleteFolder":            
+              returnoutput = WS.deleteFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "deleteFolder(";
+            break;               
+            case "uploadData":            
+              returnoutput = WS.uploadData(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "uploadData(";
+            break;              
+            case "createFolder":            
+              returnoutput = WS.createFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createFolder(";
+            break;
+            case "createModelFolder":            
+              returnoutput = WS.createModelFolder(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createModelFolder(";
+            break;
+            case "getModel":            
+              returnoutput = WS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+            break;  
+            case "createNode":            
+              returnoutput = WS.createNode(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createNode(";
+            break;                        
+           case "getDownloadURL":            
+              returnoutput = WS.getDownloadURL(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getDownloadURL(";
+            break;            
+           case "getPermissions":            
+              returnoutput = WS.getPermissions(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getPermissions(";
+            break; 
+           case "save":            
+              returnoutput = WS.save(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "save(";
+            break; 
+
+            default:
+              // text = "Error: Test Service Call";
+              break;  
+            }
+            
+        }
+        else {
+          call += "MS.";               
+          switch(methodName) {
+            case "listRastGenomes":
+              returnoutput = MS.listRastGenomes(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listRastGenomes(";
+              break;
+            case "getDownloads":
+              returnoutput = MS.getDownloads(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getDownloads(";
+                            break;
+            case "reconstruct":
+              returnoutput = MS.reconstruct(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "reconstruct(";
+              break;
+            case "runFBA":
+              returnoutput = MS.runFBA(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "runFBA(";
+              break;
+            case "gapfill":
+              returnoutput = MS.gapfill(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "gapfill(";
+              break;              
+            case "createGenomeFromShock":
+              returnoutput = MS.createGenomeFromShock(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createGenomeFromShock(";
+              break;              
+            case "createExpressionFromShock":
+              returnoutput = MS.createExpressionFromShock(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "createExpressionFromShock(";
+              break;                           
+            case "annotatePlant":
+              returnoutput = MS.annotatePlant(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "annotatePlant(";
+              break;              
+            case "getObjectMetas":
+              returnoutput = MS.getObjectMetas(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getObjectMetas(";
+              break;                                                  
+            case "listModels":
+              returnoutput = MS.listModels(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listModels(";
+              break;             
+            case "sanitizeModel":
+              returnoutput = MS.sanitizeModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeModel(";
+              break;
+            case "listMyMedia":
+              returnoutput = MS.listMyMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listMyMedia(";
+              break;
+            case "addMyMedia":
+              returnoutput = MS.addMyMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "addMyMedia(";
+              break;
+            case "listPublicMedia":
+              returnoutput = MS.listPublicMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "listPublicMedia(";
+              break;
+            case "sanitizeMedia":
+              returnoutput = MS.sanitizeMedia(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeMedia(";
+              break;
+            case "sanitizeMediaObjs":
+              returnoutput = MS.sanitizeMediaObjs(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "sanitizeMediaObjs(";
+              break;           
+            case "getModelFBAs":
+              returnoutput = MS.getModelFBAs(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModelFBAs(";
+              break;
+            case "manageGapfills":
+              returnoutput = MS.manageGapfills(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "manageGapfills(";
+              break;
+            case "getModelEdits":
+              returnoutput = MS.getModelEdits(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModelEdits(";
+              break;
+            case "getFeature":
+              returnoutput = MS.getFeature(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getFeature(";
+              break;
+            case "addModel":
+              returnoutput = MS.addModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "addModel(";
+              break;
+            case "submittedModel":
+              returnoutput = MS.submittedModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "submittedModel(";
+              break;              
+            case "getModel":
+              returnoutput = MS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+              break;
+          
+          
+          
+            case "getModel":
+              returnoutput = MS.getModel(parameters);
+              document.getElementById(13).value = returnoutput;              
+              call += "getModel(";
+              break;
+          
+            default:
+              // text = "Error: Test Service Call";
+              break;  
+            }
+        }
+        call += parameters + ")"; 
+        console.log('Test Called TestServiceCall', serviceName, methodName, parameters);
+        
+        console.log("Call: ", call);
+    
+        // TODO: Switch to map to service calls:
+    
+    };
+    
+}])
+
