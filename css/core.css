@@ -1411,7 +1411,6 @@ input[name=upload] {
     box-shadow: 0 0 2px #aaa;
 }
 #compound-image {
-    height: 300px;
     display: block;
     margin: auto;
 }

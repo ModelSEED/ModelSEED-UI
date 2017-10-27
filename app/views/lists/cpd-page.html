@@ -2,6 +2,7 @@
     <thead>
     </thead>
     <tbody>
+        <tr><img id="compound-image" ng-src="{{getImagePath(selected.modelCpd.id.split('_')[0])}}" height="150" ></tr>
         <tr><td><b>Compound</b></td><td>{{selected.modelCpd.id.split('_')[0]}}</td></tr>
         <tr><td><b>Name</b></td><td>{{selected.modelCpd.name.split('_')[0]}}</td></tr>
         <tr><td><b>Formula</b></td><td>{{selected.cpd.formula}}</td></tr>

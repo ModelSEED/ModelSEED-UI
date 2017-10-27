@@ -902,7 +902,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     var dictionary = {};
     var genomeGenes = [];
     
-    $scope.uiTools = uiTools; 
+    $scope.uiTools = uiTools;
+    $scope.getImagePath = Biochem.getImagePath;
     
     var parsedPath = path.split('/').slice(0,-2);
     if( parsedPath.indexOf('plantseed') == -1 && parsedPath.indexOf('modelseed') == -1 ) {
@@ -1326,7 +1327,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 $scope.toggleView(e, 'rxn', item );
             }},
          {label: 'Name', key: 'name'},
-         {label: 'EQ', key: 'eq'},
+         {label: 'Equation', key: 'eq'},
          {label: 'Genes', key: 'genes',
              formatter: function(item) {
                  if (!item.length) return '-';
@@ -1863,7 +1864,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     // edit stuff
     $scope.editRxnHeader = [{label: 'ID', key: 'id', newTab: 'rxn'},
                          {label: 'Name', key: 'name'},
-                         {label: 'EQ', key: 'eq'},
+                         {label: 'Equation', key: 'eq'},
                          {label: 'Genes', key: 'genes',
                              formatter: function(row) {
                                  if (!row.genes.length) return '-';
@@ -1937,7 +1938,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
                 $scope.bioRxnHeader = [{label: 'Name', key: 'name'},
                                 {label: 'ID', key: 'id'},
-                                {label: 'EQ', key: 'definition'},
+                                {label: 'Equation', key: 'definition'},
                                 {label: 'deltaG', key: 'deltag'},
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
