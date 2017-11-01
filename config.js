@@ -19,7 +19,8 @@ angular.module('config', []).service('config', function() {
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         solr_url: "https://www.patricbrc.org/api/",
         ms_support_url: "http://bio-data-1.mcs.anl.gov/services/ms_fba",
-        ms_solr_url: "http://modelseed.theseed.org/solr/"
+        ms_solr_url: "http://modelseed.theseed.org/solr/",
+        cpd_img_url: "http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"
     }
 
     this.paths = {
