@@ -27,7 +27,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             if (job.type !== 'Genome') continue;
 
                             genomes.push({
-                                timestamp: Date.parse(job.mod_time+'+0000'),
+                                timestamp: Date.parse(job.mod_time),
                                 genome_name: job.genome_name,
                                 genome_id: job.genome_id,
                                 id: job.id,
@@ -198,7 +198,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
                             data.push({
                                 name: meta[0],
-                                timestamp: Date.parse(meta[3]+'+0000'),
+                                timestamp: Date.parse(meta[3]),
                                 path: meta[2]+meta[0],
                                 orgName: d.name,
                                 rxnCount: d.num_reactions,
@@ -248,7 +248,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             rxnCount: obj.num_reactions,
             cpdCount: obj.num_compounds,
             fbaCount: obj.fba_count,
-            timestamp: Date.parse(obj.rundate+'+0000'),
+            timestamp: Date.parse(obj.rundate),
             gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills,
             expression: 'expression_data' in obj ? obj.expression_data : []
         }
@@ -305,7 +305,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 isMinimal: obj[7].isMinimal ? true : false,
                 isDefined: obj[7].isDefined ? true : false,
                 type: obj[7].type ? obj[7].type : 'unspecified',
-                timestamp: Date.parse(obj[3]+'+0000'),
+                timestamp: Date.parse(obj[3]),
                 value: obj[0].toLowerCase() }
     }
 
@@ -331,7 +331,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             fba.path = fba.ref;
 
                             fba.media = fba.media_ref
-                            fba.timestamp = Date.parse(fba.rundate+'+0000');
+                            fba.timestamp = Date.parse(fba.rundate);
 
                             d.push(res[i]);
                         }
