@@ -959,6 +959,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.selected;    
     $scope.selectedFBA = "";
+    
+    
+    $scope.selectedGF = "";
+
+    
        
     var genomePath = path + '/genome';
     var dictionary = {};
@@ -1183,12 +1188,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
     // MODELSEED-68: Make display of gapfilling data orthogonal as well!
     // Gapfill selection for data viewing (enables determine which GF is selected via radios)
-    // TBD: This function may not be necessary for gapfills (see the ticket comments)
     $scope.setSelectedGapfilling = function(e, gf, model) {
         // e.preventDefault();
         // e.stopPropagation();        
+        
+        // $scope.selectedGF = gf.path.split( "/").slice( -1 );
+        
         /*
-        $scope.selectedFBA = fba.path.split( "/").slice( -1 );
         $scope.getRxnFluxes();
         $scope.getCpdFluxes();        
         $scope.showRelatedData( $scope.item );        
