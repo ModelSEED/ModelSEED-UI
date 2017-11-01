@@ -88,7 +88,7 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
             autoMeta: obj[8],
             files: null, // need
             folders: null, // need
-            timestamp: Date.parse(obj[3]+'+0000')
+            timestamp: Date.parse(obj[3])
         };
     }
 
