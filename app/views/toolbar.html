@@ -1,131 +1,45 @@
 
-<div hide-sm style="margin: 0 40px 0 10px;" class="logo">
-    <a ui-sref="main.home">
-        <img src="img/ModelSEED-logo.png" width="174">
-        <!-- <div class="ms-status">(beta)</div>  -->
-    </a>
+<div class="md-toolbar-tools">
+
+	<div hide-sm style="margin: 0 40px 0 10px;" class="logo">
+	    <a ui-sref="main.home">
+	        <img src="img/ModelSEED-logo.png" width="174">
+	    </a>
+	</div>
+	
+	<md-button flex="22" ui-sref="app.RefModels">
+        <span style="font-size: 18pt;">Reference Data</span>	
+	</md-button>
+	
+	<md-button flex="12" ui-sref="app.myModels">
+        <span style="font-size: 18pt;">User Data</span>	
+	</md-button>
+	
+	<md-button flex="12" ui-sref="app.plantPage">
+        <span style="font-size: 18pt;">Build Model</span>
+	</md-button>
+    <!-- 
+	<ul style="font-size: 18pt; list-style-type: none; ">
+	    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="display: inline; padding: 30px;">
+	        <a ui-sref="app.RefModels">
+	            Reference Data
+	        </a>
+	    </li>
+	       
+	    <li ng-class="{ active: $state.includes('app.myModels') }" style="display: inline;">
+	        <a ui-sref="app.myModels">
+	            User Data
+	        </a>
+	    </li>
+	        
+	    <li ng-class="{ active: $state.includes('app.plantPage') }" id="tour-1" style="display: inline; padding: 30px;">    
+	        <a ui-sref="app.plantPage">
+	            Build Model
+	        </a>
+	    </li>
+	</ul>
+     -->
 </div>
-
-<ul style="font-size: 18pt; list-style-type: none; ">
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="display: inline; padding: 30px;">
-        <a ui-sref="app.RefModels">
-            <i class="icon-tools"></i>Reference Data
-        </a>
-    </li>
-    <!--<li ng-if="$root.includePlants" ng-class="{ active: $state.includes('app.plantAnnotations') }">
-        <a ui-sref="app.plantAnnotations">
-            <i class="icon-quill"></i> <span hide-sm>Annotations</span>
-        </a>
-    </li>-->
-    <li ng-class="{ active: $state.includes('app.myModels') }" style="display: inline;">
-        <a ui-sref="app.myModels">
-            <i class="icon-folder-open-o"></i>User Data
-        </a>
-    </li>
-    <!--
-    <li ng-class="{ active: $state.includes('app.genomes') }" id="tour-2">
-        <a ui-sref="app.genomes">
-            <i class="icon-tools"></i> <span hide-sm>Genomes</span>
-        </a>
-    </li>
-    <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-3">
-        <a ui-sref="app.myModels">
-            <i class="icon-folder-open-o"></i> <span hide-sm>Models</span>
-        </a>
-    </li>
-     
-    
-
-    <li class="divider"></li>
-
-    <li ng-class="{ active: $state.includes('app.jobs') }" class="jobs-link">
-        <a ui-sref="app.jobs">
-            <i class="fa fa-th-list" style="margin-right: 2px;"></i>
-            <span hide-sm>Jobs</span>
-            <div class="job-count" ng-controller="JobCount" >
-                (<span class="{{remainingJobCount ? 'ms-color-complete' : ''}}">{{remainingJobCount}}</span>)
-            </div>
-        </a>
-    </li>
-    -->
-
-<!--
-    <li ng-class="{ active: $state.includes('app.compare') }" mega-dropdown style="position: relative;">
-        <a ui-sref="app.compare">
-            <i class="icon-git-compare"></i>
-            <span hide-sm>Compare</span>
-
-            <div class="job-count" ng-controller="ModelCount" style="margin: 2px 10px 0 0;">
-                (<span class="model-count">{{MV.models.length}}</span>)
-            </div>
-
-            <i class="caret" style="margin-top: 10px;"></i>
-        </a>
-
-        <mega-dropdown-content id="selected-models" class="compare-dd" ng-controller="SelectedData">
-            <div class="header">
-                <i class="icon-git-compare" style="font-size: 25px !important;"></i>
-                Comparative Analysis
-                <span class="model-count">({{MV.models.length}})</span>
-            </div>
-
-            <hr class="no-margin">
-
-            <ul ng-if="MV.models.length" class="list-unstyled">
-                <li ng-repeat="item in MV.models track by $index" class="selected-model">
-
-                    <div>
-                        <div class="ellipsis selected-data-item" ng-click="makeActive($event)">
-                            <a ui-sref=".modelPage({path: item.model})"
-                               class="model">
-                               {{item.org}}
-                            </a>
-                        </div>
-
-                        <div class="sub-item selected-model-list ellipsis">
-                             &middot; <a ui-sref=".mediaPage({path: item.media})">
-                               {{item.media.split('/').pop()}} (<span class="label-media">Media</span>)
-                            </a><br>
-                             &middot; <a ui-sref=".fbaPage({path: item.fba})">
-                               {{item.fba.split('/').pop()}} (<span class="label-fba">FBA</span>)
-                           </a>
-                        </div>
-                    </div>
-
-                    <div class="selected-model-options">
-                        <i class="icon-close hover pointer" ng-click="MV.rm($index)">
-                            <md-tooltip md-direction="right" md-delay="600">Remove model</md-tooltip>
-                        </i>
-                        <br>
-                        <i class="glyphicon glyphicon-cog hover pointer"
-                           ng-click="openFBAView($event, $index, item)">
-                             <md-tooltip md-direction="right" md-delay="600">Modify selected FBA</md-tooltip>
-                        </i>
-                    </div>
-
-                </li>
-            </ul>
-            <br>
-            <div layout="row" layout-align="end center">
-                <a ng-if="MV.models.length" ng-click="MV.rmAll()">
-                    Clear All
-                </a>
-                <md-button ng-if="MV.models.length && !$state.includes('app.compare')" class="md-secondary" ui-sref="app.compare">
-                    Compare
-                </md-button>
-            </div>
-
-            <div ng-if="!MV.models.length" class="warning-msg">
-                You have no models selected
-            </div>
-        </mega-dropdown-content>
-
-    </li>
- 
- -->
-</ul>
-
-<span flex></span>
  
 <div class="toolbar-right" layout="row">
     <div mega-dropdown id="more-dd" style="position: relative;">
