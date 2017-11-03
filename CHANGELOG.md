@@ -2,6 +2,9 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.0 (Nov 3, 2017)
+- Major refactor of ModelSEED.org interface and functionality
+
 ####vBeta-1.5.0 (Aug 4, 2016)
 - Plants: tFBA, annotation, genome view, etc.
 
