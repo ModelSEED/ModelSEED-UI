@@ -959,6 +959,11 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.selected;    
     $scope.selectedFBA = "";
+    
+    
+    $scope.selectedGF = "";
+
+    
        
     var genomePath = path + '/genome';
     var dictionary = {};
@@ -1119,35 +1124,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 fba: fba.path,
                 org: model.orgName,
                 media: fba.media};
-
-
-    if (fba.checked) {
-    	// Oops: fba.checked does not really exist yet?
-    	// Try calling the JS join function?
-    	
-        MV.rm(data, true);
-        // $scope.selectedFBA = "";
-
-        
-        
-        // ToDo: Iterate other radios and set:
-        // fba.checked = false;
-
-        
-        
-    } else {
-        // MV.add(data);        
-        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );        
-        // Call functions to set selected fba fluxes:
-        // $scope.getRxnFluxes();
-        // $scope.getCpdFluxes();
-        // fba.checked = true;
-    }
         
     }    
-
-    
-    
     
     // FBA selection for data viewing (deprecated: check boxes)
     $scope.addFBA = function(e, fba, model) {
@@ -1160,7 +1138,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     fba: fba.path,
                     org: model.orgName,
                     media: fba.media};
-
 
         if (fba.checked) {
             MV.rm(data, true);
@@ -1206,6 +1183,29 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 // Tabs.selectedIndex = 0;
             })
     }
+    
+    
+
+    // MODELSEED-68: Make display of gapfilling data orthogonal as well!
+    // Gapfill selection for data viewing (enables determine which GF is selected via radios)
+    $scope.setSelectedGapfilling = function(e, gf, model) {
+        // e.preventDefault();
+        // e.stopPropagation();        
+        
+        // $scope.selectedGF = gf.path.split( "/").slice( -1 );
+        
+        /*
+        $scope.getRxnFluxes();
+        $scope.getCpdFluxes();        
+        $scope.showRelatedData( $scope.item );        
+        var data = {model: model.path,
+                fba: fba.path,
+                org: model.orgName,
+                media: fba.media};
+        */
+    } 
+    
+    
         
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();

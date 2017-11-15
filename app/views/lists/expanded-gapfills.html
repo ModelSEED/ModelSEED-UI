@@ -17,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in relatedGapfills track by $index" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
+            <tr ng-repeat="gf in relatedGapfills track by $index" ng-click="setSelectedGapfilling($event, gf, item)" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
                 <td>
                     <img ng-if="gf.loading"
                          src="img/ajax-loader.gif"
