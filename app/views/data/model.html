@@ -45,8 +45,10 @@
        
 
 	<div layout-align="end">
-	    <div layout="column">
-	        <img ng-if="image" width="150" height="150" src="{{image}}" style="float: right; text-align: right;">
+	    <div flex layout="column">
+	      	<div layout-align="end">
+	        <img flex="1" ng-if="image" width="150" height="150" src="{{image}}" style="float: right;">
+	        </div>
 	
 	        <span ng-if="organism" style="float: right; text-align: right;"><i>{{organism}}</i></span>
 	    
