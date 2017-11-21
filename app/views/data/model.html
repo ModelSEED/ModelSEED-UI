@@ -45,17 +45,19 @@
        
 
 	<div layout-align="end">
-	    <img ng-if="image" width="100" height="100" src="{{image}}">
+	    <div layout="column">
+	        <img ng-if="image" width="100" height="100" src="{{image}}">
 	
-	    <span ng-if="organism"><i>{{organism}}</i></span>
+	        <span ng-if="organism"><i>{{organism}}</i></span>
 	    
-	        <div ng-if="links" class="links" hide-sm>
+	            <div ng-if="links" class="links" hide-sm>
 	            Links:
 	            <div ng-repeat="link in links track by $index" class="inline">
 	                <a href="{{link.url}}" target="_blank">{{link.name}}</a>
 	                    {{$index != links.length-1 ? '|' : ''}}
 	            </div>
-	        </div>    
+	            </div>
+	    </div>    
 	</div>   
 
 </div>
