@@ -7,6 +7,3 @@
 [submodule "lib/intro.js"]
     path = lib/intro.js
     url = https://github.com/nconrad/intro.js
-[submodule "lib/feedback"]
-	path = lib/feedback
-	url = https://github.com/nconrad/feedback.git
