@@ -421,7 +421,7 @@ function($rootScope, $state, $sParams, $window,
     // instantiate user feedback plugin
     $.feedback({
         ajaxURL: config.services.ms_rest_url+'/feedback',
-        html2canvasURL: 'lib/feedback/development/html2canvas.min.js',
+        html2canvasURL: 'components/html2canvas/build/html2canvas.js'
     });
 }])
 
