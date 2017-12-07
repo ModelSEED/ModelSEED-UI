@@ -1,0 +1,15 @@
+/alt_target_spec.rb
+/app_spec.rb
+/binary_spec.rb
+/generic_artifact_spec.rb
+/nested_container_spec.rb
+/pkg_spec.rb
+/postflight_block_spec.rb
+/preflight_block_spec.rb
+/suite_spec.rb
+/two_apps_correct_spec.rb
+/two_apps_incorrect_spec.rb
+/uninstall_no_zap_spec.rb
+/uninstall_spec.rb
+/uninstall_zap_shared_examples.rb
+/zap_spec.rb

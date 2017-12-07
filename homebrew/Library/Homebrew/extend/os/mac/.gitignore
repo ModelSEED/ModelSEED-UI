@@ -1,0 +1,10 @@
+/caveats.rb
+/cleaner.rb
+/dependency_collector.rb
+/development_tools.rb
+/diagnostic.rb
+/emoji.rb
+/formula_cellar_checks.rb
+/keg_relocate.rb
+/missing_formula.rb
+/system_config.rb
