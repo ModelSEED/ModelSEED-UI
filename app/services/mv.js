@@ -7,7 +7,7 @@ function($http, $q, $rootScope, WS, config) {
 
     var self = this;
     
-    
+    this.selectedMedium = "Complete";
     
     this.isInPublicDomain = true;
     

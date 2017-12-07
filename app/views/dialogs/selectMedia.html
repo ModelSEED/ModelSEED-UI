@@ -1,0 +1,84 @@
+
+<md-dialog flex="70">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Select Media</h3>
+
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <form>
+    <md-dialog-content>
+
+        <div ng-controller="SelectMedia as ctrl">
+            <div layout="row" layout-align="end end">
+                <md-progress-circular ng-if="!myMedia || !media"
+                                      md-mode="indeterminate"
+                                      md-diameter="10">
+                </md-progress-circular>
+                <a ng-click="filterPublic = !filterPublic">
+                    <span ng-if="filterPublic">Search my media
+                        <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
+                    </span>
+                    <span ng-if="!filterPublic">Search public media</span>
+                </a>
+            </div>
+
+            <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-if="filterPublic"
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="selectedItemChange(item)"
+                  md-items="item in querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search for public media formulation (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+
+            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+              <md-autocomplete
+                  ng-disabled="ctrl.isDisabled"
+                  md-selected-item="ctrl.selectedItem"
+                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                  md-search-text="ctrl.searchText"
+                  md-selected-item-change="selectedItemChange(item)"
+                  md-items="item in querySearch(ctrl.searchText)"
+                  md-item-text="item.name"
+                  md-min-length="0"
+                  placeholder="Search my media (optional)...">
+                <md-item-template>
+                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                  No matches found for "{{ctrl.searchText}}".
+                </md-not-found>
+              </md-autocomplete>
+            </form>
+            
+        </div>
+        <br><br><br><br><br>
+
+    </md-dialog-content>
+
+    <div class="md-actions">
+        <md-button ng-click="select( medium )" type="button">
+            Select
+        </md-button>
+    </div>
+    </form>
+</md-dialog>

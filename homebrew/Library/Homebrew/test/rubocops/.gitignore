@@ -1,0 +1,14 @@
+/bottle_block_cop_spec.rb
+/caveats_cop_spec.rb
+/checksum_cop_spec.rb
+/class_cop_spec.rb
+/components_order_cop_spec.rb
+/components_redundancy_cop_spec.rb
+/conflicts_cop_spec.rb
+/formula_desc_cop_spec.rb
+/homepage_cop_spec.rb
+/lines_cop_spec.rb
+/options_cop_spec.rb
+/patches_cop_spec.rb
+/text_cop_spec.rb
+/urls_cop_spec.rb

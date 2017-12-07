@@ -11,6 +11,73 @@ function($scope, $state) {
 }])
 
 
+
+.controller('SelectMedia', ['$scope', 'MS', '$q', 'ModelViewer', 'uiTools',
+function($s, MS, $q, MV, uiTools) {
+    var self = this;
+
+    $s.relativeTime = uiTools.relativeTime;
+    $s.filterPublic = true;
+
+    self.form = $s.form;
+    
+    $s.myMedia = [];
+    $s.media = [];
+    
+    // $s.medium = "Complete";
+    /*
+    $s.isDisabled = false;
+    self.querySearch = querySearch;
+    self.selectedItemChange = selectedItemChange;
+    self.searchTextChange = searchTextChange;
+    */
+    
+    
+    MS.listMyMedia()
+    .then(function(media) {
+        $s.myMedia = media;
+    })
+    .then(function() {
+        MS.listPublicMedia()
+        .then(function(pub_media){
+        	$s.media = pub_media;
+        } )
+        
+    } ).catch(function(e) {
+        $s.myMedia = []; // media folder may not exist
+        $s.media = [];
+    })    
+
+    $s.querySearch = function (query) {
+        if (!$s.filterPublic)
+            var results = query ? $s.myMedia.filter( createFilterFor(query) ) : $s.myMedia;
+        else
+            var results = query ? $s.media.filter( createFilterFor(query) ) : $s.media;
+        return results.slice(0, 50);
+    }
+
+    $s.searchTextChange = function(text) {
+
+    }
+    $s.selectedItemChange = function(item) {
+        // self.form.media = item.path;
+    	// $s.medium = $s.searchText;
+    	MV.selectedMedium = item.name;
+    }
+    
+    
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(state) {
+            return (state.value.indexOf(lowercaseQuery) >= 0);
+        };
+    }
+
+}])
+
+
+
 .controller('MediaDropdown', ['$scope', 'MS', '$q', 'uiTools',
 function($s, MS, $q, uiTools) {
     var self = this;
