@@ -1,3 +1,0 @@
-[submodule "lib/ms-rpc"]
-    path = lib/ms-rpc
-    url = https://github.com/nconrad/ms-rpc.git
