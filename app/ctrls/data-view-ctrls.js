@@ -137,9 +137,9 @@ function($scope, $sParams, WS, $http) {
 <!-- Build New Model -->
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
- 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'config',
+ 'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
 function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
- Dialogs, ViewOptions, WS, Auth, uiTools, Tabs, MS, Session, config) {
+ Dialogs, ViewOptions, WS, Auth, uiTools, Tabs, MS, Session, MV, config) {
 
     // path and name of object
     // var path = $sParams.path;
@@ -171,13 +171,21 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     $scope.selectedFiles = [];
     
     $scope.genomeNameBox = "";
-    
-    
-    
+        
     // MODELSEED-70:
     $scope.selectPublicAndReconstruct = function(ev, item) {
         $scope.selectedPublic = item;
         $scope.reconstruct(ev, $scope.selectedPublic);
+    }
+    
+    
+
+    $scope.selectMedia = function(ev) {
+        
+        Dialogs.selectMedia(ev);
+        
+        $scope.selectedItemChange( MV.selectedMedium );
+        	          
     }
     
     
@@ -341,6 +349,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // MODELSEED-47: Called from the Media widget, in the Upload Microbe FAST tab        
     $scope.selectedItemChange = function(item) {
         $scope.media = item.path;
+
     }
     
         

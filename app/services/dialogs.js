@@ -73,6 +73,36 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             }]
         })
     }
+    
+    
+    
+    this.selectMedia = function(ev) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/selectMedia.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+              function($scope, $http) {
+                // $scope.item = item;
+                // $scope.form = {genome: item.path};            	
+
+                $scope.select = function( media ){
+                    // self.showToast('Reconstructing', item.name, 5000)                	
+                    // $scope.media = media;
+                	
+                    $dialog.hide();
+                    
+                };
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                };
+              }]
+        });
+    }
+
+    
 
     this.reconstruct = function(ev, item, cb) {
         ev.stopPropagation();
