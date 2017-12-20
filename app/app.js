@@ -14,7 +14,6 @@ angular.module('ModelSEED',
  'ngAnimate',       // angular animate.  ngMaterial dependency.
  'ms-rpc',          // module for simplifying with the KBase type compilier RPC requests
  'Auth',            // module for Auth-related requests and state
- 'dd-filter',       // custom module for creating searchable dropdowns.
  'mega-dropdown',   // custom module for hover-over dropdowns
  'ng-context-menu', // module for right-click menus (see workspace browser)
  'FBA',
