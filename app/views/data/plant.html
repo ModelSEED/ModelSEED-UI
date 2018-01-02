@@ -5,7 +5,7 @@
     <h1>Build Model</h1><br>
 </div>    
                         
-      <br><br><br>
+      <br><br>
      
   <!-- --------------------------------------------------------- FAST A ----------------------------------------------------------- -->   
   <md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
@@ -23,7 +23,7 @@
        <form name="upload_form" id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
                 <br>		
-                <label class="control-label"> <i>Select FAST-A file: </i> </label>
+                <label class="control-label"> <i>Select FASTA file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
                     <input
@@ -107,7 +107,7 @@
 
             <div class="form-group">
                 <br>		
-                <label class="control-label"> <i>Select FAST-A file: </i> </label>
+                <label class="control-label"> <i>Select FASTA file: </i> </label>
                 <label class="md-button md-primary md-raised">
                     Choose File...
                     <input
@@ -142,26 +142,29 @@
 		      </select>
 		  </label>
 		  <br><br>
+
+            
+                 
+                
+         <a ng-click="selectMedia($event)">                                                                        
+			  Select Media (Optional)
+         </a>
+        
+			              
 		            
           
-          <div ng-controller="MediaDropdown as ctrl">
-          
+          <!-- <div ng-controller="MediaDropdown as ctrl">  -->
+           <!-- 
            <div layout="row" layout-align="end end">
                 <md-progress-circular ng-if="!myMedia || !media"
                                       md-mode="indeterminate"
                                       md-diameter="10">
-                </md-progress-circular>
-                <!-- 
-                <a ng-click="filterPublic = !filterPublic">
-                    <span ng-if="filterPublic">Search my media
-                        <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
-                    </span>
-                    <span ng-if="!filterPublic">Search public media</span>
-                </a>
-                 -->
+                </md-progress-circular>                 
            </div>
+            -->			              
+			              
           
-          
+          <!-- 
            <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
               <md-autocomplete
 
@@ -182,9 +185,9 @@
                 </md-not-found>
               </md-autocomplete>
            </form>          
+           -->
           
-          
-          </div>          
+          <!-- </div>  -->          
           <br><br><br>
              
              
@@ -201,20 +204,14 @@
                Build Model
             <br>
           </md-button>
-          
-          
-          
+                   
           <md-progress-circular ng-if="uploading" md-mode="indeterminate">
           </md-progress-circular>
-                    
-          
-          
+                              
           </div>
           
           </div>
-          
-          
-                 
+                           
          </form>
        </div>
      </div>

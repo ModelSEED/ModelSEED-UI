@@ -2,6 +2,11 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.1 (Jan 2, 2018)
+- Minor stylistic modifications for major release
+- Moved "Build Model" to main toolbar
+- Improved media selection for Model Construction
+
 ####v2.0 (Nov 3, 2017)
 - Major refactor of ModelSEED.org interface and functionality
 
