@@ -164,18 +164,18 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         // main views
         .state('app.biochem', {
-            url: "/biochem/:chem",
-            templateUrl: 'app/views/biochem/biochem.html',
+            url: "/reference/biochemistry/:chem",
+            templateUrl: 'app/views/reference/biochemistry/biochemistry.html',
             controller: 'Biochem'
         }).state('app.cpd', {
             // WARNING: external services depend on this URL.
-            url: "/biochem/compounds/:id",
-            templateUrl: 'app/views/biochem/compound.html',
+            url: "/reference/biochemistry/compounds/:id",
+            templateUrl: 'app/views//reference/biochemistry/compound.html',
             controller: 'Compound'
         }).state('app.rxn', {
             // WARNING: external services depend on this URL.
-            url: "/biochem/reactions/:id",
-            templateUrl: 'app/views/biochem/reaction.html',
+            url: "/reference/biochemistry/reactions/:id",
+            templateUrl: 'app/views/reference/biochemistry/reaction.html',
             controller: 'Reaction'
         })
 
