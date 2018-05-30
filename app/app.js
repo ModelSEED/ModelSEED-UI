@@ -184,14 +184,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
             authenticate: true
-            
-            
-            
+                   
         }).state('app.RefModels', {
-            url: "/genomes/:ref",
-            templateUrl: 'app/views/genomes/genomes.html',
+            url: "/reference/:ref", //url: "/genomes/:ref",--qz
+            templateUrl: 'app/views/reference/reference_data.html',//templateUrl: 'app/views/genomes/genomes.html',--qz
             controller: 'RefModels',
-            authenticate: true
+            authenticate: false //true--qz
 
 
 
@@ -209,8 +207,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Media',
             authenticate: true
             
-            
-            }).state('app.myMedia', {
+        }).state('app.myMedia', {
             url: "/myMedia/?tab",
             templateUrl: 'app/views/my-media.html',
             controller: 'MyMedia',

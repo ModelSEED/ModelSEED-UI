@@ -32,7 +32,7 @@ function($scope, $state, $stateParams, Auth, $window) {
         prom.success(function(data) {
             // see https://github.com/angular-ui/ui-router/issues/582
 
-            // If coming from home page, go to genomes.
+            // If coming from home page, go to reference.
             // Otherwise go to current page.
             if ($state.current.name === 'main.home') {
                 var p = $state.transitionTo('app.RefModels', {ref: 'Plants'}, {reload: true, inherit: true, notify: false});
@@ -1483,8 +1483,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.plants = [];
         $scope.loadingPlants = false;
     })
-
-
     
     
     $scope.getLabel = function(prop) {

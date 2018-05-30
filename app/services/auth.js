@@ -27,12 +27,12 @@ function($state, $http, config, $window) {
             this.method == 'rast';
         else if (this.token.indexOf('user.patric.org') !== -1)
             this.method == 'patric';
-    }
+    //}
 
 
     console.log('token', this.token);
     console.log('using service:', config.services.auth_url)
-
+    }
     /**
      * [Authentication against RAST]
      * @param  {[string]} user [rast username]
@@ -95,7 +95,11 @@ function($state, $http, config, $window) {
     }
 
     this.isAuthenticated = function() {
-        return (self.user && getAuthStatus()) ? true : false;
+        //return (self.user && getAuthStatus()) ? true : false;
+        if (!self.user)
+            return false;
+        else
+            return (self.user && getAuthStatus()) ? true : false;
     }
 
     this.loginMethod = function(method) {
