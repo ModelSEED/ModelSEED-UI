@@ -1,0 +1,126 @@
+
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+
+    <md-tab>
+        <md-tab-label>
+            <i class="material-icons tab-icon">public</i> Public
+        </md-tab-label>
+
+        <md-tab-body>
+
+            <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+            <div ng-repeat="p in plants track by $index" layout="row" class="plant-row md-whiteframe-z1 plant-row-hover">
+                <img ng-if="p.meta.image" width="100" height="100" src="{{p.meta.image}}">
+                <img ng-if="!p.meta.image" src="http://placehold.it/100x100">
+
+                <div flex>
+                    <a ui-sref="app.genomePage({path: p.path})">
+                        <md-tooltip md-direction="right">View Genome</md-tooltip>
+                        {{p.meta.name}}
+                    </a>
+                    <br>
+
+                    <i>{{p.meta.organism}}</i><br>
+                    <div ng-if="p.meta.links" class="links" hide-sm>
+                        Links:
+                        <div ng-repeat="link in p.meta.links track by $index" class="inline">
+                            <a href="{{link.url}}" target="_blank">{{link.name}}</a>
+                            {{$index != p.meta.links.length-1 ? '|' : ''}}
+                        </div>
+                    </div>
+                </div>
+
+                <div layout-align="end">
+                    <a ui-sref="app.modelPage({path: p.path.split('/').slice(0,-2).join('/') })" class="pull-right">
+                        View Model
+                    </a>
+                    <br><br><br><br>
+                    <a ng-if="!copyInProgress[$index]" ng-click="copy($index, p.path.split('/').slice(0,-2).join('/'))">
+                        Copy Genome/Model
+                    </a>
+                    <span ng-if="copyInProgress[$index]">
+                        Copying...
+                    </span>
+                    
+                    <!--<md-button class="md-raised md-primary" md-no-ink>
+                        <i class="icon-quill"></i> Annotate
+                    </md-button>-->
+                </div>
+            </div> <!-- end plant row -->
+        </md-tab-body>
+
+    </md-tab>
+
+    <md-tab>
+        <md-tab-label>
+            <i class="material-icons tab-icon">assignment_ind</i> My Plants (<span class="label-gapfill-count">{{myPlants.length}}</span>)</md-tab-label>
+        <md-tab-body>
+
+            <div class="table-controls">
+                <div class="table-controls" layout="row">
+                    <md-input-container md-no-float flex="45"
+                        search="myPlantsOpts.query" search-opts="myPlantsOpts" search-placeholder="Search my plants">
+                    </md-input-container>
+
+                    <md-input-container>
+                        <md-button class="ws-opt md-raised md-primary" ng-click="openUploader($event)">
+                            <i class="fa fa-cloud-upload"></i>
+                            Upload...
+                        </md-button>
+                    </md-input-container>                        
+
+                    <div layout="row" layout-align="end center" flex>
+                        {{myPlants.length}} plant genomes
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-vertical-center" ng-hide="filtered && filtered.length == 0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tr ng-repeat="row in (filtered = ( myPlants | filter: myPlantsOpts.query | orderBy : '-timestamp')
+                                | limitTo : myPlantsOpts.limit : myPlantsOpts.offset) " 
+                    ng-click="rowClick($event, row)" 
+                    ng-class="{'row-hover': rowClick}" class="{{hoverClass}}">
+                    <td>
+                        <a ui-sref="app.genomePage({path: row.path})">{{row.name}}</a>
+                    </td>
+                    <td>
+                        <div class="pull-left" style="margin-top: 8px;">{{uiTools.relativeTime(row.timestamp)}}</div>
+
+                        <md-button class="md-button pull-right" ng-click="reconstructPlant($event,row)">
+                            <i class="icon-tools"></i> Reconstruct
+                        </md-button>
+                        <md-button class="md-button pull-right" ng-click="annotatePlant($event,row)">
+                            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Run Annotation
+                        </md-button>
+                        
+                    </td>
+                </tr>
+            </table>
+
+        </md-tab-body>
+
+        <div ng-if="myPlants.length == 0 && !loadingMyPlants" class="alert alert-warning">No private plants found</div>
+
+    </md-tab>
+
+
+    <md-tab>
+        <md-tab-label>
+            <i class="icon-quill tab-icon" style="font-size: 16px; top:1px;"></i> Annotations
+        </md-tab-label>
+        <md-tab-body>
+            <ng-table-two ng-controller="PlantAnnotations" table-header="annoHeader"
+                      table-data="annoOverview"
+                      table-opts="annoOpts"
+                      table-loading="loading"
+                      table-placeholder="Search annotations">
+            </ng-table-two>
+        </md-tab-body>
+    </md-tab>
+</div>
