@@ -40,7 +40,11 @@
             Compounds
         </a>
     </li>
-     
+    <!--li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'media'})" tabIndex='2'>
+            Media
+        </a>
+    </li-->
     <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
         <a ui-sref="app.media">
             Media
@@ -63,38 +67,10 @@
         </small>
          -->
     </div>
-
-    <!--
-    <md-input-container layout-align="center center">
-        <md-switch md-no-ink
-                   ng-model="filters.myGenomes"
-                   aria-label="view my genomes"
-                   ng-click="toggleMyGenomes()">
-            View my genomes
-        </md-switch>
-    </md-input-container>
-
-    <div ng-if="tabs.tabIndex == 1 && view == 'Microbes'" layout-align="center end">
-        <br>
-        <b>Note:</b> to annotate a genome, you must visit
-        <a href="http://rast.nmpdr.org" target="_blank">RAST <i class="fa fa-external-link text-muted"></i></a> at this time.
-    </div>
-
-    <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
-        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
-        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>
-    -->    
+  
 </div>
 <hr class="no-margin">
 
-<!--
-<ng-include ng-if="ref == 'Microbes'" src="'app/views/genomes/microbes--.html'" ></ng-include>
-
-<ng-include ng-if="ref == 'Plants'" src="'app/views/genomes/plants--.html'"></ng-include>
-
-<ng-include ng-if="ref == 'Annotations'" src="'app/views/genomes/annotations.html'"></ng-include>
--->
 <ng-include ng-if="ref == 'Microbes'" src="'app/views/reference/microbes--.html'" ></ng-include>
 
 <ng-include ng-if="ref == 'Plants'" src="'app/views/reference/plants--.html'"></ng-include>

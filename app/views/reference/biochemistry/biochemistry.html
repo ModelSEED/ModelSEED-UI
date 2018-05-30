@@ -1,26 +1,26 @@
 
 <div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
     <ul class="toolbar">
-       
+       <!---->
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Microbes'})">
                 <span hide-sm>Public Microbial Models</span>
             </a>
         </li>
-    
+        <!---->
         
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
-            <a ui-sref="app.RefModels({ref: 'Plants'})">
+            <a ui-sref="app.RefModels({ref: 'Plants'})" >
                 <span hide-sm>Public Plant Models</span>
             </a>
         </li>
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
-            <a ui-sref="app.RefModels({ref: 'Annotations'})">
+            <a ui-sref="app.RefModels({ref: 'Annotations'})" >
                 <span hide-sm>Subsystems</span>
             </a>
         </li>
         <!-- 
-        <li ng-class="{ active: $state.includes('app.app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels" tabIndex='0'>
                 <span hide-sm>FunctionalRoles</span>
             </a>
@@ -37,7 +37,6 @@
         </a>
     </li>
     
-        
         <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
             <a ui-sref="app.media">
                 <span hide-sm>Media</span>
@@ -47,17 +46,38 @@
 </div>
 
 
-<div class="h2">Media</div>
+<ng-include ng-if="chem == 'reactions'" src="'app/views/biochem/biochem-reaction.html'"></ng-include>
+<ng-include ng-if="chem == 'compounds'" src="'app/views/biochem/biochem-compound.html'"></ng-include>
+
+<!--
+<div class="h2">Biochemistry</div>
 <hr class="no-margin">
 
-            <ng-table-selector table-header="mediaHeader"
-                       table-data="media"
-                       table-opts="mediaOpts"
-                       table-loading="loading"
-                       table-placeholder="Search media"
-                       on-submit="submit"
-                       submit-btn-class="md-raised md-primary"
-                       submit-btn-type="add"
-                       submit-btn-template="Copy $count media"
-                       submit-progress-text="Copying...">
-            </ng-table-selector>
+
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Reactions">
+        <md-tab-body>
+            <ng-table-solr table-header="rxnHeader"
+                           table-data="rxns"
+                           table-opts="rxnOpts"
+                           table-loading="loadingRxns"
+                           table-placeholder="Search reactions">
+            </ng-table-solr>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab label="Compounds">
+        <md-tab-body>
+            <ng-table-solr table-header="cpdHeader"
+                           table-data="cpds"
+                           table-opts="cpdOpts"
+                           table-loading="loadingCpds"
+                           table-placeholder="Search compounds">
+            </ng-table-solr>
+        </md-tab-body>
+    </md-tab>
+
+
+
+</md-tabs>
+-->

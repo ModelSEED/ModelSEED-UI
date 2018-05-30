@@ -1,0 +1,81 @@
+
+<div class="h2">
+    Compound
+    <small>{{cpd.name}} (<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
+</div>
+<hr class="no-margin">
+<br>
+
+
+<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+
+<table class="table table-horizontal table-condensed" ng-if="!loading">
+    <thead></thead>
+    <tbody>
+        <tr>
+            <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
+                 height="325" data-toggle="modal" data-target="#modal"
+                 tooltip-trigger tooltip="Click to expand.">
+		</tr>
+		<tr>
+        <tr><td>Name</td><td>{{cpd.name}}</td></tr>
+        <tr>
+            <td>Formula</td>
+            <td pretty-formula={{cpd.formula}}></td>
+        </tr>
+        <tr><td>ID</td><td>{{cpd.id}}</td></tr>
+        <tr><td>Abbreviation</td><td>{{cpd.abbreviation}}</td></tr>
+        <tr><td>Source</td><td>{{cpd.source}}</td>
+        <tr><td>Mass</td><td>{{cpd.mass}}</td></tr>
+        <tr><td>Charge</td><td>{{cpd.charge}}</td></tr>
+        <tr><td>DeltaG</td><td>{{cpd.deltag === 10000000 ? 'unspecified' : cpd.deltag}}</td></tr>
+        <tr><td>DeltaGErr</td><td>{{cpd.deltagerr === 10000000 ? 'unspecified' : cpd.deltagerr}}</td></tr>
+        <tr><td>Is cofactor?</td><td>{{cpd.is_cofactor}}</td></tr>
+        <tr><td>Is core?</td><td>{{cpd.is_core}}</td></tr>
+        <tr><td>Is obsolete?</td><td>{{cpd.is_obsolete}}</td></tr>
+
+        <tr>
+            <td>PKA IDs</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in cpd.pka">{{::id}}</li>
+                </ul>
+            </td>
+        </tr>
+
+        <tr>
+            <td>PKB IDs</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in cpd.pkb">{{::id}}</li>
+                </ul>
+            </td>
+        </tr>
+
+        <tr><td>structure</td><td>{{::cpd.structure}}</td></tr>
+
+        <tr>
+            <td>Aliases</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in cpd.aliases">{{::id}}</li>
+                </ul>
+            </td>
+        </tr>
+    </tr>
+</table>
+<div id='modal' class="modal fade">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		</button>
+        <h4 class="modal-title">Compound {{data.MINE_id}}</h4>
+      </div>
+      <div class="modal-body">
+		  <img ng-src="{{getImagePath(cpd.id)}}" width="100%">
+	  </div>
+    </div>
+  </div>
+</div>

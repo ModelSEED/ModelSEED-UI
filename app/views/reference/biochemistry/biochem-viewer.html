@@ -1,0 +1,64 @@
+
+<div class="h2">Biochem Explorer</div>
+<hr class="no-margin">
+<br>
+
+Found {{totalFound}} compound {{totalFounnd.length > 1 ? 'matches' : 'match'}} for <b>{{cpd.name}}</b><br>
+<b>{{cpd.name}}</b> | {{cpd.id}} | {{cpd.formula}} | {{cpd.abbreviation}}
+
+<hr>
+
+
+<b>{{cpd.name}}</b> is present in<br>
+
+
+<div style="margin: 10px 40px;">
+    {{reactionCount}} reactions | {{substrateCount}} substrates | {{productCount}} products
+</div>
+
+
+
+
+<div class="table-controls">
+    <div class="table-controls"  layout="row">
+        <md-input-container md-no-float flex="45"
+            search="opts.query" search-opts="opts" search-placeholder="Search reactions that have {{cpd.name}}">
+        </md-input-container>
+
+        <md-progress-circular ng-if="loading"
+                              md-mode="indeterminate"
+                              class="table-loading"
+                              md-diameter="20">
+        </md-progress-circular>
+
+        <md-input-container pagination
+            pagination-offset="opts.offset"
+            pagination-limit="opts.limit"
+            pagination-total="filtered.length"
+            layout="row"
+            layout-align="end center" flex>
+        </md-input-container>
+    </div>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>ID</th>
+            <th>EQ</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="rxn in (filtered = ( data | filter: opts.query
+                                                 | orderBy : opts.sort.field : opts.sort.desc)
+                                                 | limitTo : opts.limit : opts.offset)">
+            <td>{{::rxn.name}}</td>
+            <td>{{::rxn.id}}</td>
+            <td linkable-eq="{{rxn.equation}}" highlight="{{rxn.definition}}"
+                highlight-term="cpd.name">
+            </td>
+        </tr>
+    </tbody>
+</table>
