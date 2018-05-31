@@ -4,8 +4,9 @@
       <div class="md-toolbar-tools md-toolbar-accent">
         <h3>Please Signin</h3>
         <span flex></span>
-        <md-button class="md-icon-button" ng-click="cancel()" ui-sref="main.home" tabindex="1">
-          <md-icon class="material-icons" aria-label="Close signin dialog, go to homepage">close</md-icon>
+        <!--md-button class="md-icon-button" ng-click="cancel()" ui-sref="main.home" tabindex="1"-->
+        <md-button class="md-icon-button" ng-click="cancel()" ui-sref=app.RefModels({ref: 'Plants'}) tabindex="1">
+          <md-icon class="material-icons" aria-label="Close signin dialog, go to Reference page">close</md-icon>
         </md-button>
       </div>
     </md-toolbar>
@@ -77,11 +78,11 @@
 
 
         <div class="md-actions" layout="row">
-            <md-button class="md-button md-default" ng-click="cancel()" ui-sref="main.home">
-                Go to homepage
+            <md-button class="md-button md-default" ng-click="cancel()" ui-sref=app.RefModels({ref: 'Plants'})>
+                Go to Reference page
             </md-button>
 
-            <!--
+        <!--
             <md-button type="submit" class="md-raised md-primary">
                 Signin
             </md-button>
