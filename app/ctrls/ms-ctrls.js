@@ -1475,11 +1475,12 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     $scope.loadingPlants = true;
     MS.listModels( '/plantseed' + '/plantseed' ).
         then(function(res) {
-        console.log('path res', res)
+        console.log('path res', res);
                    
         $scope.plants = res;
         $scope.loadingPlants = false;
     }).catch(function(e) {
+        console.log('loadingPlants by calling listModels errored:\n', JSON.stringify(e));
         $scope.plants = [];
         $scope.loadingPlants = false;
     })

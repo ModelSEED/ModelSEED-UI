@@ -233,6 +233,9 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
                 console.log('data', data)
                 return data;
+            }).catch(function(error) {
+                console.log('rpc call to list_models failed', JSON.stringify(error));
+                return deferred.reject(error.data);
             })
     }
 
