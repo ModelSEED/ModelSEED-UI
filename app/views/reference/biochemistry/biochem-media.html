@@ -1,0 +1,15 @@
+
+<div class="h2">Media</div>
+<hr class="no-margin">
+
+            <ng-table-selector table-header="mediaHeader"
+                       table-data="media"
+                       table-opts="mediaOpts"
+                       table-loading="loading"
+                       table-placeholder="Search media"
+                       on-submit="submit"
+                       submit-btn-class="md-raised md-primary"
+                       submit-btn-type="add"
+                       submit-btn-template="Copy $count media"
+                       submit-progress-text="Copying...">
+            </ng-table-selector>

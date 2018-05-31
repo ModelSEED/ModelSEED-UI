@@ -6,7 +6,7 @@
                 <span hide-sm>Public Microbial Models</span>
             </a>
         </li>
-    
+        
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Plants'})">
                 <span hide-sm>Public Plant Models</span>
@@ -34,27 +34,55 @@
             <span hide-sm>Compounds</span>
         </a>
     </li>
-        
+    <!--li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'media'})" tabIndex='2'>
+            <span hide-sm>Media</span>
+        </a>
+    </li-->
+    
         <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
             <a ui-sref="app.media">
                 <span hide-sm>Media</span>
             </a>
         </li>
+    
     </ul>
 </div>
 
 
-<div class="h2">Media</div>
+<ng-include ng-if="chem == 'reactions'" src="'app/views/reference/biochemistry/biochem-reaction.html'"></ng-include>
+<ng-include ng-if="chem == 'compounds'" src="'app/views/reference/biochemistry/biochem-compound.html'"></ng-include>
+<!--ng-include ng-if="chem == 'media'" src="'app/views/reference/biochemistry/biochem-media.html'"></ng-include-->
+
+<!--
+<div class="h2">Biochemistry</div>
 <hr class="no-margin">
 
-            <ng-table-selector table-header="mediaHeader"
-                       table-data="media"
-                       table-opts="mediaOpts"
-                       table-loading="loading"
-                       table-placeholder="Search media"
-                       on-submit="submit"
-                       submit-btn-class="md-raised md-primary"
-                       submit-btn-type="add"
-                       submit-btn-template="Copy $count media"
-                       submit-progress-text="Copying...">
-            </ng-table-selector>
+
+<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
+    <md-tab label="Reactions">
+        <md-tab-body>
+            <ng-table-solr table-header="rxnHeader"
+                           table-data="rxns"
+                           table-opts="rxnOpts"
+                           table-loading="loadingRxns"
+                           table-placeholder="Search reactions">
+            </ng-table-solr>
+        </md-tab-body>
+    </md-tab>
+
+    <md-tab label="Compounds">
+        <md-tab-body>
+            <ng-table-solr table-header="cpdHeader"
+                           table-data="cpds"
+                           table-opts="cpdOpts"
+                           table-loading="loadingCpds"
+                           table-placeholder="Search compounds">
+            </ng-table-solr>
+        </md-tab-body>
+    </md-tab>
+
+
+
+</md-tabs>
+-->
