@@ -200,10 +200,10 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Genomes',
             authenticate: true
         */    
-            
+         
         }).state('app.media', {
             url: "/list-media/?tab",
-            templateUrl: 'app/views/media.html',
+            templateUrl: 'app/views/reference/biochemistry/media.html',
             controller: 'Media',
             authenticate: true
             
