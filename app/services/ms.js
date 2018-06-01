@@ -417,7 +417,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
         }
     }
 
-    //console.log('header', headers)
+    console.log('header', headers)
     this.getModel = function(path) {
         return $http.get(endpoint+path, headers).then(function(res) {
             return res.data;
