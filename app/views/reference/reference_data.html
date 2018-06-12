@@ -1,35 +1,33 @@
-<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 6px;">
 
 <!-- Indigo: -->
 <!-- <div style="background:#4B0082;border:1px solid #cccccc;padding: 10px;">  -->
 
 <ul class="toolbar">
-      
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels') && ref=='Microbes'}" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Microbes'})">
-            Public Microbial Models
+            Microbial Models
         </a>
     </li>
 
     
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels') && ref=='Plants' }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Plants'})">
-             Public Plant Models
+             Plant Models
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels') && ref=='Annotations' }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Annotations'})">
             Subsystems
         </a>
     </li>
     
-    <!-- 
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <!--li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ng-click="changeView('Annotations')">
             <span hide-sm>FunctionalRoles</span>
         </a>
-    </li>
-     -->
+    </li-->
+
     <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.biochem({chem: 'reactions'})">
             Reactions
@@ -40,39 +38,24 @@
             Compounds
         </a>
     </li>
-    <!--li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'media'})" tabIndex='2'>
-            Media
-        </a>
-    </li-->
-    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
+
+    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.media">
             Media
         </a>
     </li>
 </ul>
 </div>
-    
+
 <div layout="row">
     <div class="content-header" flex>
         {{ref == 'Microbes' ? 'Microbial Models' : (ref == 'Plants' ? 'Plant Models' : 'Subsystems')}}
         <br>
-        
-        <!-- 
-        <small ng-if="view == 'Microbes'" class="help-text" hide-sm>
-            <i>Reference Models</i>
-        </small>
-        <small ng-if="view == 'Plants'" class="help-text" hide-sm>
-            <i>Reference Models</i>
-        </small>
-         -->
     </div>
   
 </div>
 <hr class="no-margin">
 
-<ng-include ng-if="ref == 'Microbes'" src="'app/views/reference/microbes--.html'" ></ng-include>
-
-<ng-include ng-if="ref == 'Plants'" src="'app/views/reference/plants--.html'"></ng-include>
-
-<ng-include ng-if="ref == 'Annotations'" src="'app/views/reference/annotations.html'"></ng-include>
+<ng-include ng-if="ref=='Microbes'" src="'app/views/reference/microbes--.html'" ></ng-include>
+<ng-include ng-if="ref=='Plants'" src="'app/views/reference/plants--.html'"></ng-include>
+<ng-include ng-if="ref=='Annotations'" src="'app/views/reference/annotations.html'"></ng-include>

@@ -563,7 +563,7 @@ function($s, WS) {
         formatter: function(row) {
             var links = [];
             row.features.forEach(function(name) {
-                links.push('<a href="'+featurePath+name+'">'+name+'</a>');
+                links.push('<a href="'+featurePath+name+'" target="_blank">'+name+'</a>');
             })
 
             return links.join('<br>') || '-';

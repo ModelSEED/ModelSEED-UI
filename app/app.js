@@ -170,7 +170,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.cpd', {
             // WARNING: external services depend on this URL.
             url: "/reference/biochemistry/compounds/:id",
-            templateUrl: 'app/views//reference/biochemistry/compound.html',
+            templateUrl: 'app/views/reference/biochemistry/compound.html',
             controller: 'Compound'
         }).state('app.rxn', {
             // WARNING: external services depend on this URL.

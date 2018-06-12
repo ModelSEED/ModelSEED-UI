@@ -341,10 +341,11 @@ ul.toolbar > li {
     display: inline-block;
     transition: border-width 100ms;
 }
-/*
+
 ul.toolbar > li.active {
     border-bottom: 3px solid #ddd;
 }
+/*
 ul.toolbar > li:not(.active):hover {
     border-bottom: 3px solid #ddd;
 }
