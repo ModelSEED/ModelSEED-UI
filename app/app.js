@@ -202,7 +202,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         */    
          
         }).state('app.media', {
-            url: "/reference/biochemistry/media",
+            url: "/reference/media/media",
             templateUrl: 'app/views/reference/biochemistry/media.html',
             controller: 'Media',
             authenticate: true
