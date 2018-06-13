@@ -420,7 +420,11 @@ function($rootScope, $state, $sParams, $window,
         html2canvasURL: 'components/html2canvas/build/html2canvas.js'
     });
 }])
-
+/* commented out by QZ per Sam's suggestion--
+'you know how the ModelSEED JS is making repeated calls to the job server?
+Can you comment that out, I remembered this morning that we're not using the job server any more'
+*/
+/*
 .run(['Jobs', function(Jobs) {
 
     // Note: the jobs service is invoked here (services/jobs.js)
@@ -428,3 +432,4 @@ function($rootScope, $state, $sParams, $window,
     // Order is important so that auth is finished.
 
 }])
+*/
