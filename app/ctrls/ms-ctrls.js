@@ -302,6 +302,31 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     /* table row click (not used as of now)
     $s.rowClick = function($e, row) {}
     */
+
+
+    $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
+
+    $s.mediaHeader = [
+        {label: 'Name', key: 'name',
+         link: {
+            state: 'app.mediaPage',
+            getOpts: function(row) {
+                return {path: row.path};
+            }
+          }
+        },
+        {label: 'Minimal?', key: 'isMinimal'},
+        {label: 'Defined?', key: 'isDefined'},
+        {label: 'Type', key: 'type'}
+    ];
+
+    $s.loading = true;
+    MS.listPublicMedia()
+      .then(function(media) {
+          $s.media = media;
+          $s.loading = false;
+      })
+
 }])
 
 
@@ -1485,7 +1510,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.loadingPlants = false;
     })
     
-    
+
     $scope.getLabel = function(prop) {
         for (var i=0; i<$scope.columns.length; i++) {
             var col = $scope.columns[i];

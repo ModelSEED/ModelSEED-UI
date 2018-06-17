@@ -187,7 +187,7 @@ function($locationProvider, $stateProvider, $httpProvider,
                    
         }).state('app.RefModels', {
             url: "/reference/:ref", //url: "/genomes/:ref",--qz
-            templateUrl: 'app/views/reference/reference_data.html',//templateUrl: 'app/views/genomes/genomes.html',--qz
+            templateUrl: 'app/views/reference/reference_data.html',//'app/views/genomes/genomes.html',--qz
             controller: 'RefModels',
             authenticate: false //true--qz
 
@@ -202,7 +202,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         */    
          
         }).state('app.media', {
-            url: "/reference/media/media",
+            url: "/reference/media",
             templateUrl: 'app/views/reference/biochemistry/media.html',
             controller: 'Media',
             authenticate: true

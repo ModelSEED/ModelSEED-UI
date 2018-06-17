@@ -4,7 +4,7 @@
 <!-- <div style="background:#4B0082;border:1px solid #cccccc;padding: 10px;">  -->
 
 <ul class="toolbar">
-    <li ng-class="{ active: $state.includes('app.RefModels') && ref=='Microbes'}" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels') && ref=='Microbes' }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Microbes'})">
             Microbial Models
         </a>
@@ -47,15 +47,17 @@
 </ul>
 </div>
 
-<div layout="row">
+<!--div layout="row">
     <div class="content-header" flex>
-        {{ref == 'Microbes' ? 'Microbial Models' : (ref == 'Plants' ? 'Plant Models' : 'Subsystems')}}
+        {{ref == 'Microbes' ? 'Microbial Models' : 
+            (ref == 'Plants' ? 'Plant Models' : 'Subsystems')}}
         <br>
     </div>
   
-</div>
+</div-->
 <hr class="no-margin">
 
 <ng-include ng-if="ref=='Microbes'" src="'app/views/reference/microbes--.html'" ></ng-include>
 <ng-include ng-if="ref=='Plants'" src="'app/views/reference/plants--.html'"></ng-include>
 <ng-include ng-if="ref=='Annotations'" src="'app/views/reference/annotations.html'"></ng-include>
+
