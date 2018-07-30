@@ -246,10 +246,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                   visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'aliases'] };
 
     $s.rxnHeader = [
-        {label: 'Name', key: 'name'},
         {label: 'ID', key: 'id', format: function(row) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>';
         }},
+        {label: 'Name', key: 'name'},
         {label: 'EQ', key: 'definition', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
@@ -268,20 +268,28 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     $s.cpdHeader = [
-        {label: 'Name', key: 'name', format: function(row) {
-            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.name+'</a>';
+        {label: 'ID', key: 'id', format: function(row) {
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>';
         }},
+        {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula', format: function(row) {
             return '<span pretty-formula='+row.formula+'></span>';
         }},
-        {label: 'ID', key: 'id'},
         {label: 'Mass', key: 'mass'},
         {label: 'Charge', key: 'charge'},
+        {label: 'Synonyms', key: 'aliases', format: function(row){
+            if(row.aliases==[]) return "N/A";
+            var a_str1 = row.aliases.join();
+            a_str1=a_str1.replace(/\"/g, '');
+            a_str1=a_str1.replace(/\;/g, ', ');
+            return '<span>'+a_str1+'</span>';
+        }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases==[]) return "N/A";
-            var a_str = row.aliases.join();
-            a_str=a_str.replace(/\"/g, '');
-            return '<span>'+a_str+'</span>';
+            var a_str2 = row.aliases.join();
+            a_str2=a_str2.replace(/\"/g, '');
+            a_str2=a_str2.replace(/\;/g, ', ');
+            return '<span>'+a_str2+'</span>';
         }}
     ];
 

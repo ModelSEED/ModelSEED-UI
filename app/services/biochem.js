@@ -32,12 +32,14 @@ function($http, $q, config, $log) {
         }
 
         if (query && cols.length) {
+            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
             var set = [];
             for (var i=0; i<cols.length; i++) {
                 set.push('eq('+cols[i]+',*'+query+'*)');
             }
             url += '&or('+set.join(',')+')';
         } else if (query) {
+            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
             // sort by id when querying
             url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
