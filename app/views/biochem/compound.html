@@ -58,7 +58,7 @@
             <td>Aliases</td>
             <td>
                 <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in cpd.aliases">{{::id}}</li>
+                    <li ng-repeat="id in cpd.aliases">{{::id|rmquotes}}</li>
                 </ul>
             </td>
         </tr>
