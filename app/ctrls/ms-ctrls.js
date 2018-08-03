@@ -250,7 +250,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>';
         }},
         {label: 'Name', key: 'name'},
-        {label: 'EQ', key: 'definition', format: function(r) {
+        {label: 'Equation', key: 'definition', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
