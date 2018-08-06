@@ -6,7 +6,7 @@
     </div>
 
     <md-input-container class = "md-block">
-      <md-toolbar class="md-theme-light">
+
       <div ng-if="relatedFBAs.length" flex layout="row" layout-xs="column"
             layout-align="center center">
           <div flex></div>
@@ -17,7 +17,7 @@
           <div flex="10">Time</div>
           <div flex="10">Actions</div>
       </div>
-      </md-toolbar>
+      <md-divider></md-divider>
 
       <md-radio-group ng-model='selectedFBA.id'>
         <div ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'" ng-click="setFBA($event, fba, item)">
@@ -53,6 +53,5 @@
         </div>
       </md-radio-group>
     </md-input-container>
-    <!--div class="h4"><small>Visualizing FBA data for FBA:{{selectedFBA}}</small></div-->
-    
+
 </div>
