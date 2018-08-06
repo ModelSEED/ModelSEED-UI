@@ -9,7 +9,6 @@
 <div layout="row">
 
 	<div flex>
-	
 	    <br>
 		<div class="h4"><small>Visualize Data:</small></div>
 		
@@ -22,10 +21,9 @@
 		          <option value='Expression'>Expression</option>
 		          <option value='GapFill'>GapFill</option>
 		        </select>
-		      </div>        
-		            
+		      </div>
 		</div>
-	
+
 	    <div>
 		    <span ng-if="selectedService=='FBA'">
 		        <ng-include src="'app/views/lists/model-fbas.html'" >    
@@ -39,11 +37,7 @@
 		        <ng-include src="'app/views/lists/expanded-gapfills.html'" >    
 		    </span>
 	    </div>
-	    
-	    <br><br>
-	
-	</div>    
-       
+	</div>
 
 	<div layout-align="end">
 	    <div flex layout="column">
@@ -182,9 +176,7 @@
            </ng-table-two>
          </md-tab-body>
     </md-tab>
-    
- 
- 
+
  
 
     <md-tab ng-repeat="tab in Tabs.tabs">
@@ -318,5 +310,5 @@
             <i class="icon-file-download"></i>
         </md-button>
     </div>
-    <br><br><br>
+    <br><br>
 </div>

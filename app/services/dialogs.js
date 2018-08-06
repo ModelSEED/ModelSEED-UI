@@ -332,8 +332,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          //self.showComplete('FBA Complete',
-                          //             res.id+' '+res.media_ref.split('/').pop())
+                          self.showComplete('FBA Complete',
+                                       res.id+' '+res.media_ref.split('/').pop())
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -372,7 +372,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          // self.showComplete('FBA Complete', res.id)
+                          self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -404,7 +404,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                     MS.gapfill($scope.form)
                       .then(function(res) {
                            cb();
-                           //self.showComplete('Gapfill Complete', res[0])
+                           self.showComplete('Gapfill Complete', res[0])
                       }).catch(function(e) {
                           self.showError('Gapfill Error', e.error.message.slice(0,30)+'...')
                       })
