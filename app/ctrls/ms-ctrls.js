@@ -241,36 +241,56 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases'] };
     $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
-                  visible: ['name', 'id', 'formula', 'abbreviation', 'deltag', 'deltagerr', 'charge'] };
+                  visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'aliases'] };
 
     $s.rxnHeader = [
-        {label: 'Name', key: 'name', format: function(row) {
-            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.name+'</a>';
+        {label: 'ID', key: 'id', format: function(row) {
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>';
         }},
-        {label: 'ID', key: 'id'},
-        {label: 'EQ', key: 'definition', format: function(r) {
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'definition', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
         }},
-        //{label: 'deltaG', key: 'deltag'},
-        //{label: 'detalGErr', key: 'deltagerr'}
+        {label: 'deltaG', key: 'deltag'},
+        {label: 'Status', key: 'status'},
+        {label: 'Aliases', key: 'aliases', format: function(row){
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
+            else {
+                var a_str = row.aliases.join();
+                if(a_str==='') return "N/A";
+                return '<span>'+a_str+'</span>';
+            }
+        }},
     ];
 
     $s.cpdHeader = [
-        {label: 'Name', key: 'name', format: function(row) {
-            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.name+'</a>';
+        {label: 'ID', key: 'id', format: function(row) {
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>';
         }},
+        {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula', format: function(row) {
             return '<span pretty-formula='+row.formula+'></span>';
         }},
-        {label: 'ID', key: 'id'},
-        {label: 'Abbrev', key: 'abbreviation'},
-        {label: 'deltaG', key: 'deltag'},
-        {label: 'detalGErr', key: 'deltagerr'},
-        {label: 'Charge', key: 'charge'}
+        {label: 'Mass', key: 'mass'},
+        {label: 'Charge', key: 'charge'},
+        {label: 'Synonyms', key: 'aliases', format: function(row){
+            if(row.aliases==[]) return "N/A";
+            var a_str1 = row.aliases.join();
+            a_str1=a_str1.replace(/\"/g, '');
+            a_str1=a_str1.replace(/\;/g, ', ');
+            return '<span>'+a_str1+'</span>';
+        }},
+        {label: 'Aliases', key: 'aliases', format: function(row){
+            if(row.aliases==[]) return "N/A";
+            var a_str2 = row.aliases.join();
+            a_str2=a_str2.replace(/\"/g, '');
+            a_str2=a_str2.replace(/\;/g, ', ');
+            return '<span>'+a_str2+'</span>';
+        }}
     ];
 
     function updateRxns() {

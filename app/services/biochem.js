@@ -32,12 +32,14 @@ function($http, $q, config, $log) {
         }
 
         if (query && cols.length) {
+            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
             var set = [];
             for (var i=0; i<cols.length; i++) {
                 set.push('eq('+cols[i]+',*'+query+'*)');
             }
             url += '&or('+set.join(',')+')';
         } else if (query) {
+            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
             // sort by id when querying
             url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
@@ -126,3 +128,29 @@ function($http, $q, config, $log) {
     }
 
 }])
+
+
+.filter('reverse', function() {
+  return function(input, uppercase) {
+    input = input || '';
+    var out = '';
+    for (var i = 0; i < input.length; i++) {
+      out = input.charAt(i) + out;
+    }
+    // conditional based on optional argument
+    if (uppercase) {
+      out = out.toUpperCase();
+    }
+    return out;
+  };
+})
+.filter('rmquotes', function() {
+  return function(input) {
+    input = input || '';
+    var out = '';
+    if (input != '') {
+        out = input.replace(/\"/g, '').replace(/\'/g, '').replace(/\;/g, ', ');
+    }
+    return out;
+  };
+})
