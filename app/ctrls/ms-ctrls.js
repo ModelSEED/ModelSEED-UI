@@ -262,6 +262,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             else {
                 var a_str = row.aliases.join();
                 if(a_str==='') return "N/A";
+                a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
                 return '<span>'+a_str+'</span>';
             }
         }},
@@ -278,7 +279,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Mass', key: 'mass'},
         {label: 'Charge', key: 'charge'},
         {label: 'Synonyms', key: 'aliases', format: function(row){
-            if(row.aliases==[]) return "N/A";
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
 
             var src_aliases = row.aliases[0].split(';');
             var syn_nms = [];
@@ -287,12 +288,12 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                     syn_nms.push(src_aliases[ai].replace('name:', ''));
                 }
             }
-            var a_str1 = syn_nms.join();
+            var a_str1 = syn_nms.join(', ');
             a_str1=a_str1.replace(/\"/g, '');
             return '<span>'+a_str1+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
-            if(row.aliases==[]) return "N/A";
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
 
             var src_aliases = row.aliases[0].split(';');
             var als = [];
@@ -301,7 +302,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                     als.push(src_aliases[ai]);
                 }
             }
-            var a_str2 = als.join();
+            var a_str2 = als.join(', ');
             a_str2=a_str2.replace(/\"/g, '');
             return '<span>'+a_str2+'</span>';
         }}

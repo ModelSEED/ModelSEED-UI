@@ -1057,7 +1057,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     
     $scope.reconstructPipeline = function(ev, item) {
-    	var parameters = { genome: $scope.name, genome_type: "plant" };
+        // var parameters = { genome: $scope.name, genome_type: "plant" };
+        var parameters = { genome: path + '/genome', output_file: $scope.name, genome_type: "plant" };
     	var reconstructpromise =             
         	MS.reconstructionPipeline( parameters )
         	
