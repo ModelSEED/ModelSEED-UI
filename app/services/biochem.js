@@ -15,7 +15,8 @@ function($http, $q, config, $log) {
         var url = endpoint+collection+'/?http_accept=application/solr+json'
 
         if (opts) {
-            var query = opts.query ? encodeURI(opts.query).replace(/\(/g, '%28') : null,
+            //var query = opts.query ? encodeURI(opts.query).replace(/\(/g, '%28') : null,
+              var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
                 limit = opts.limit ? opts.limit : null,
                 offset = opts.offset ? opts.offset : null,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
@@ -32,14 +33,23 @@ function($http, $q, config, $log) {
         }
 
         if (query && cols.length) {
-            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
+            query = query.trim();
+            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
+
             var set = [];
             for (var i=0; i<cols.length; i++) {
+                if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
+                    query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+                }
                 set.push('eq('+cols[i]+',*'+query+'*)');
             }
             url += '&or('+set.join(',')+')';
         } else if (query) {
-            query = query.replace(/\:/g, ''); //SOLR does not like ':' in the query
+            query = query.trim();
+            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
+            if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
+                query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+            }
             // sort by id when querying
             url += '&keyword(*'+query+'*)&sort(id)'
             cache = false;
