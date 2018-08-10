@@ -1058,7 +1058,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     $scope.reconstructPipeline = function(ev, item) {
         // var parameters = { genome: $scope.name, genome_type: "plant" };
-        var parameters = { genome: path + '/genome', output_file: $scope.name, genome_type: "plant" };
+        var parameters = { genome: genomePath, output_file: $scope.name, genome_type: "plant" };
     	var reconstructpromise =             
         	MS.reconstructionPipeline( parameters )
         	
@@ -1771,7 +1771,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var gene;
                 
                 $scope.data.genes.forEach(function(item) {
-                    foundGenes.push(item.id)
+                    foundGenes.push(item.id);
                 })
                 
                 for ( var i = 0; i <  genomeGenes.length; i++ ) {
@@ -1780,6 +1780,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     if (foundGenes.indexOf(gene) == -1) {
                     	$scope.data.genes.push( { id: gene, reactions: [] } );
                     	// console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    else {
+                        var func = $scope.geneFunctions[gene];
+                        if ($scope.data.genes[foundGenes.indexOf(gene)].functions == undefined) {
+                            $scope.data.genes[foundGenes.indexOf(gene)].functions = [];
+                        }
+                        $scope.data.genes[foundGenes.indexOf(gene)].functions.push(func);
                     }
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
