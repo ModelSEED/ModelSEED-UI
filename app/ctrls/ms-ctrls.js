@@ -253,7 +253,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Equation', key: 'definition', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
