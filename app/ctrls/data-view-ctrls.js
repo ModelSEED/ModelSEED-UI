@@ -397,7 +397,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 seq_type = this.selectedSeqType["name"];
             }
-            */        	
+            */
+
+            Dialogs.showToast('Uploading file......', 'please wait.', 1000000);
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -419,8 +421,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             // MODELSEED-47: if is not plant: Need checks and balances to prevent model name duplication
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
-                    alert('Genome name already exists!\n'+
-                    'Please provide a new name or delete the existing genome');                           
+                    Dialogs.showError('Genome name already exists!\n'+
+                    'Please provide a new name or delete the existing genome');
+                    $scope.uploading = false;
             }).catch(function(e) {
             	
                 startUpload( name, genome_type, template );
@@ -431,8 +434,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     function startUpload( name, genome_type, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
-        	
-            Dialogs.showComplete('Import in progress...');
+            $dialog.hide();
+            Dialogs.showComplete('Job submitted, building in progress...');
                         
            // TODO: MODELSEED-47: Add $scope.selectedTemplate... to the following parameters:
            if( $scope.isPlant ) {
