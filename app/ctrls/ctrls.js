@@ -60,9 +60,9 @@ function($s, MS, $q, MV, uiTools) {
 
     }
     $s.selectedItemChange = function(item) {
-        // self.form.media = item.path;
-    	// $s.medium = $s.searchText;
-    	MV.selectedMedium = item.name;
+        self.form.media = item.path;
+        $s.medium = item.name; // $s.searchText;
+        MV.selectedMedium = item.name;
     }
     
     

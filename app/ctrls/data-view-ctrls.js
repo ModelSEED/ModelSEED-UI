@@ -399,7 +399,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             }
             */
 
-            Dialogs.showToast('Uploading file......', 'please wait.', 1000000);
+            Dialogs.showToast('Uploading......', '', 1000000);
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -464,7 +464,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            
         }, function(error) {
             console.log('shock error:', error);
-            // Dialogs.showError('Upload to SHOCK failed (see console)')                        
+            Dialogs.showError('Upload to SHOCK failed (see console)');
+            $scope.uploading = false;
         });                    
     }
     
@@ -1062,7 +1063,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.reconstructPipeline = function(ev, item) {
         // var parameters = { genome: $scope.name, genome_type: "plant" };
         var parameters = { genome: genomePath, output_file: $scope.name, genome_type: "plant" };
-    	var reconstructpromise =             
+        var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
         	
                       .then(function(r) {
@@ -1077,8 +1078,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     }    
 
     $scope.reconstructPipelineAnnotate = function(ev, item) {
-    	var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };    	
-    	var reconstructpromise =             
+        var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };
+        var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
                       .then(function(r) {
             	          Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', name);

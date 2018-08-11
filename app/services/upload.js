@@ -58,6 +58,11 @@ angular.module('Upload', [])
             error: function(e){
                 console.log('failed upload', e)
                 if (errorCB) errorCB(e);
+                $timeout(function() {
+                    self.status.count = 0;
+                    self.status.progress = 0;
+                    self.status.complete = false;
+                })
             },
             data: form,
             contentType: false,

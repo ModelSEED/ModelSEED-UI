@@ -85,11 +85,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             controller: ['$scope', '$http',
               function($scope, $http) {
                 // $scope.item = item;
-                // $scope.form = {genome: item.path};            	
+                // $scope.form = {genome: item.path};
 
                 $scope.select = function( media ){
                     // self.showToast('Reconstructing', item.name, 5000)                	
-                    // $scope.media = media;
+                    $scope.media = media;
                 	
                     $dialog.hide();
                     

@@ -1,5 +1,5 @@
 
-<md-dialog flex="70">
+<md-dialog flex="70" id="selectMediaDlg">
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
@@ -29,7 +29,7 @@
                 </a>
             </div>
 
-            <form ng-if="filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+            <form ng-if="filterPublic" ng-model="ctrl.form" ng-submit="$event.preventDefault()" >
               <md-autocomplete
                   ng-if="filterPublic"
                   ng-disabled="ctrl.isDisabled"
@@ -50,7 +50,7 @@
               </md-autocomplete>
             </form>
 
-            <form ng-if="!filterPublic" ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
+            <form ng-if="!filterPublic" ng-model="ctrl.form" ng-submit="$event.preventDefault()" >
               <md-autocomplete
                   ng-disabled="ctrl.isDisabled"
                   md-selected-item="ctrl.selectedItem"
