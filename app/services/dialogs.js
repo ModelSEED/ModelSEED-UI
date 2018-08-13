@@ -327,13 +327,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
-                    self.showToast('Running Flux Balance Analysis', item.name, 5000)
                     MS.runFBA($scope.form)
                       .then(function(res) {
                           console.log('run fba response', res)
                           cb();
-                          self.showComplete('FBA Complete',
-                                       res.id+' '+res.media_ref.split('/').pop())
+                          self.showToast('Running Flux Balance Analysis', item.name, 5000)
+                          /* self.showComplete('FBA Complete',
+                                       res.id+' '+res.media_ref.split('/').pop()) */
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -363,16 +363,15 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
                 };
 
                 $scope.runFBA = function(){
-                    self.showToast('Running Flux Balance Analysis', item.name, 5000)          
-                    
                     // use default media if none
                     $scope.form.media = $scope.form.media ? $scope.form.media :
                          "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
                     MS.runFBA($scope.form)
                       .then(function(res) {
+                          self.showToast('Running Flux Balance Analysis', item.name, 5000)
                           console.log('run fba response', res)
                           cb();
-                          self.showComplete('FBA Complete', res.id)
+                          // self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })

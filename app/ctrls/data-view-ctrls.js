@@ -970,7 +970,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     var path = $sParams.path;  
     $scope.name = path.split('/').pop();
     
-    $scope.selected;    
+    $scope.selected;
+    $scope.selectedService = "";
     $scope.selectedFBA = "";
     
     
@@ -1063,32 +1064,30 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.reconstructPipeline = function(ev, item) {
         // var parameters = { genome: $scope.name, genome_type: "plant" };
         var parameters = { genome: genomePath, output_file: $scope.name, genome_type: "plant" };
+
         var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
-        	
-                      .then(function(r) {
-            	          Dialogs.showComplete('Reconstructing Model...', name);
-
-
-                      }).catch(function(e) {
-                    	  console.log( 'ReconstructPipeline Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('Reconstructing Model...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'ReconstructPipeline Error', e.error.message );
+                    Dialogs.showError( 'ReconstructPipeline Error', e.error.message );
+                })
     }    
 
     $scope.reconstructPipelineAnnotate = function(ev, item) {
         var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };
+
         var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
-                      .then(function(r) {
-            	          Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', name);
-
-                      }).catch(function(e) {
-                    	  console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
+                    Dialogs.showError( 'ReconstructPipelineAnnotate Error', e.error.message );
+                })
     }
 
     $scope.annotatePlant = function(ev, item) {
@@ -1097,16 +1096,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     		kmers: 0,
     		blast: 1
     	};
+
     	var annotatePlantpromise =             
         	MS.annotatePlant( opts )
-                      .then(function(r) {
-            	          Dialogs.showComplete('Blasting Genome...', name);
-
-                      }).catch(function(e) {
-                    	  console.log( 'BlastAnnotate Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('Blasting Genome...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'BlastAnnotate Error', e.error.message );
+                    Dialogs.showError( 'BlastAnnotate Error', e.error.message );
+                })
     }
         
     
@@ -1117,6 +1116,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         Dialogs.runPlantFBA(ev, item, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
+                $scope.selectedService='FBA';
             })
         })
     }
