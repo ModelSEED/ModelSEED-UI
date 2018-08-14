@@ -1,12 +1,12 @@
-<h4>
+<h5>
 	<i class="icon-folder-open-o"></i>
 	<span>
-		<a ui-sref="app.myModels()">My Models</a>
-		/ {{name}}
+		<a ui-sref="app.myModels()"> >My Models</a>
+		<a ui-sref="app.modelPage({path: modelPath})">   >{{modelName}}</a>
 	</span>
 </h4>
 
-<div class="h2">FBA</div>
+<div class="h2">{{name}} <small>(for {{modelName}})</small></div>
 <hr class="no-margin">
 
 

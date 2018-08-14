@@ -77,139 +77,9 @@
 
 </div>
 
-
-<!-- old navigation below this line -->
-
-<md-tabs md-selected="Tabs.selectedIndex" md-no-ink md-dynamic-height>
-    <md-tab>
-        <md-tab-label>Reactions</md-tab-label>
-        <md-tab-body>
-
-
-            <ng-table ng-if="!editInProgress"
-                        table-header="rxnHeader"
-                        table-data="data.reactions"
-                        table-opts="rxnOpts"
-                        table-loading="loading"
-                        table-placeholder="Search reactions">
-            </ng-table>
-
-            <ng-table-editor2 ng-if="editInProgress"
-                          table-header="editRxnHeader"
-                          table-data="editableRxns"
-                          table-opts="rxnOpts"
-                          table-loading="loading"
-                          disable-pagination
-                          table-result-text="reactions"
-                          table-placeholder="Search reactions"
-                          delete-btn-template="Delete $count reactions"
-                          add-btn-template="Add reactions"
-                          on-save="save"
-                          on-save-as="saveAs"
-                          on-add="addRxns"
-                          save-text="Saving..."
-                          on-cancel="toggleEdit()">
-            </ng-table-editor2>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>Compounds</md-tab-label>
-        <md-tab-body>
-            <ng-table table-header="cpdHeader"
-                        table-data="data.compounds"
-                        table-opts="cpdOpts"
-                        table-loading="loading"
-                        table-placeholder="Search compounds">
-            </ng-table>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>Genes</md-tab-label>
-        <md-tab-body>
-            <ng-table table-header="geneHeader"
-                        table-data="data.genes"
-                        table-opts="geneOpts"
-                        table-loading="loading"
-                        table-placeholder="Search genes">
-            </ng-table>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>Compartments</md-tab-label>
-        <md-tab-body>
-            <ng-table table-header="compartmentHeader"
-                        table-data="data.compartments"
-                        table-opts="compartmentOpts"
-                        table-loading="loading"
-                        table-placeholder="Search compartments">
-            </ng-table>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab>
-        <md-tab-label>Biomass</md-tab-label>
-        <md-tab-body>
-            <ng-table table-header="biomassHeader"
-                        table-data="data.biomass"
-                        table-opts="biomassOpts"
-                        table-loading="loading"
-                        table-placeholder="Search biomass eqs">
-            </ng-table>
-        </md-tab-body>
-    </md-tab>
-    <!-- 
-    <md-tab>
-        <md-tab-label>Gapfilling</md-tab-label>
-        <md-tab-body>
-            <ng-include src="'app/views/lists/expanded-gapfills.html'"></ng-include>
-        </md-tab-body>
-    </md-tab>
-    -->
-    <md-tab>
-        <md-tab-label>Pathways</md-tab-label>
-        <md-tab-body>
-            <ng-table-two table-header="mapHeader"
-                    table-data="maps"
-                    table-opts="mapOpts"
-                    table-loading="loadingMaps"
-                    table-placeholder="Search maps">
-            </ng-table-two>
-        <md-tab-body>
-    </md-tab>
-    
-    
-    
-     <!-- MODELSEED-66 -->   
-    <md-tab ng-if=" (! isRef) && ( isPlant ) ">
-        <md-tab-label>Predictions</md-tab-label>
-        <md-tab-body>
-           <ng-table-two table-header="predictionsHeader"
-                table-data="annotations"
-                table-opts="annotationOpts"
-                table-loading="loadingAnnotations"
-                table-placeholder="Search annotations">
-           </ng-table-two>
-         </md-tab-body>
-    </md-tab>
-
- 
-
-    <md-tab ng-repeat="tab in Tabs.tabs">
-        <md-tab-label>{{tab.name.length > 14 ? tab.name.slice(0, 15)+'...' : tab.name}}
-            <span ng-if="tab.removable" ng-click="Tabs.removeTab(tab)" class="fa fa-remove hover"></span>
-        </md-tab-label>
-        <md-tab-body>
-            <div pathway="tab.mapID" models="models"></div>
-            <br>
-        </md-tab-body>
-    </md-tab>
-</md-tabs>
-
-<!-- <div ng-if="error" class="alert alert-warning">{{error}}</div>  -->
-
+<div ng-if="! selectedFBA.id">
+    <ng-include src="'app/views/data/model-generic.html'" >
+</div>
 
 <section ng-controller="SideNav">
 
@@ -238,7 +108,6 @@
             </md-button>
         </md-content>
     </md-sidenav>
-
 
 
     <md-sidenav  class="dl-sidenav md-sidenav-right md-whiteframe-z2" md-component-id="downloadOpts">

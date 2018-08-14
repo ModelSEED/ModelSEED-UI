@@ -1138,7 +1138,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 fba: fba.path,
                 org: model.orgName,
                 media: fba.media};
-        
+
     }    
     
     // FBA selection for data viewing (deprecated: check boxes)
@@ -1368,8 +1368,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                         $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                         
                         $scope.rxnFluxHash = parsed.fba.rxnhash;
-                        
-                        // $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
+                        for (var i = 0; i < $scope.rxnFluxes.length; i++) {
+                            $scope.data.reactions[i].flux = $scope.rxnFluxes[i].flux;
+                            $scope.data.reactions[i].min = $scope.rxnFluxes[i].min;
+                            $scope.data.reactions[i].max = $scope.rxnFluxes[i].max;
+                            $scope.data.reactions[i].class = $scope.rxnFluxes[i].class;
+                        }
 
                         $scope.loading = false;
                      });
@@ -1386,9 +1390,18 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                      .then(function(parsed) {
                         $scope.fbas = [parsed.data];
                         $scope.models = [parsed.rawModel];
-                        // $scope.cpdFluxes = parsed.fba.compoundFluxes;
-                        
+                        $scope.cpdFluxes = parsed.fba.exchange_fluxes;
                         $scope.cpdFluxHash = parsed.fba.cpdhash;
+                        for (var i = 0; i < $scope.cpdFluxes.length; i++) {
+                            for (var j = 0; j < $scope.data.compounds.length; j++) {
+                            if ($scope.data.compounds[j].id == $scope.cpdFluxes[i].id) {
+                                    $scope.data.compounds[j].flux = $scope.cpdFluxes[i].flux;
+                                    $scope.data.compounds[j].min = $scope.cpdFluxes[i].min;
+                                    $scope.data.compounds[j].max = $scope.cpdFluxes[i].max;
+                                    $scope.data.compounds[j].class = $scope.cpdFluxes[i].class;
+                                }
+                            }
+                        }
 
                         $scope.loading = false;
                      });
@@ -1514,7 +1527,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     // fbas.push( $scope.selectedFBA );
-                        
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
                                 fbas.push( $scope.rxnFluxHash[ row ].class );
@@ -2078,7 +2090,10 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.split('/').pop()
+    $scope.name = path.split('/').pop();
+    var arr = path.split('/');
+    $scope.modelName = arr[arr.length - 3];
+    $scope.modelPath = path.substring(0, path.indexOf($scope.modelName)) + $scope.modelName;
 
 
     // selected compound, reaction, etc.
@@ -2126,6 +2141,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                     $scope.fbas = [parsed.data];
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
+                    $scope.rxnFluxHash = parsed.fba.rxnhash;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 
                     $scope.loading = false;
@@ -2150,7 +2166,6 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
         $scope.error = e;
         $scope.loading = false;
     })
-
 
 }])
 
