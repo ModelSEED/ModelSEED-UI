@@ -5,58 +5,53 @@
         No FBA simulations for <i>{{name}}</i>.
     </div>
 
- 
+    <md-input-container class = "md-block">
 
-    <table class="table table-condensed">
-        <thead>
-            <tr ng-if="relatedFBAs.length">
-                <th width="80px"></th>
-                <th>ID</th>
-                <th>Objective</th>
-                <th>Objective Function</th>
-                <th>Media</th>
-                <th>Time</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <md-radio-group ng-model='selectedFBA.id'>
-      <div ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'" ng-click="setFBA($event, fba, item)" class="row">
-        <div flex layout='row' layout-padding layout-wrap layout-align="start center" >
-
-          <md-radio-button flex="10"
-                ng-value="fba.id"
-                class="">
-          </md-radio-button>
-          <div flex style="max-width:100px;">
-            <a ui-sref="app.fbaPage({path: fba.path})" ng-click="$event.stopPropagation()">{{::fba.id}}</a>
-          </div>
-          <div flex style="max-width:120px;">
-            {{fba.objective === '10000000' ? 0 : fba.objective}}
-          </div>
-          <div flex style="max-width:120px;">
-            {{fba.objective_function ? fba.objective_function : 'N/A'}}
-          </div>
-          <div flex style="max-width:200px;">
-            <a ui-sref="app.mediaPage({path: fba.media})"
-                       ng-click="$event.stopPropagation()">{{::fba.media.split('/').pop()}}</a>
-          </div>
-          <div flex style="max-width:150px;">
-            {{relativeTime(fba.timestamp)}}
-          </div>
-          <div flex style="max-width:50px;">
-            <a ng-click="deleteFBA($event, $index, item)" class="no-link">
-                        <md-tooltip md-delay="800">Delete FBA</md-tooltip>
-                        <i class="icon-highlight-remove"></i>
-          </div>
-
-        </div>
-        </div>
+      <div ng-if="relatedFBAs.length" flex layout="row" layout-xs="column"
+            layout-align="center center">
+          <div flex></div>
+          <div flex="10">ID</div>
+          <div flex="10">Objective</div>
+          <div flex="25">Objective Function</div>
+          <div flex="30">Media</div>
+          <div flex="10">Time</div>
+          <div flex="10">Actions</div>
       </div>
-    </md-radio-group>
+      <md-divider></md-divider>
 
-    <div class="h4"><small>Visualizing FBA data for FBA:{{selectedFBA}}</small></div>        
-    
+      <md-radio-group ng-model='selectedFBA.id'>
+        <div ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'" ng-click="setFBA($event, fba, item)">
+          <div flex layout="row" layout-wrap layout-align="start center" >
+            <md-radio-button flex aria-label="fba.id"
+                  ng-value="fba.id"
+                  class="">
+            </md-radio-button>
+            <div flex="10">
+              <a ui-sref="app.fbaPage({path: fba.path})" ng-click="$event.stopPropagation()">{{::fba.id}}</a>
+            </div>
+            <div flex="10">
+              {{fba.objective === '10000000' ? 0 : fba.objective}}
+            </div>
+            <div flex="25">
+              {{fba.objective_function ? fba.objective_function : 'N/A'}}
+            </div>
+            <div flex="30">
+              <a ui-sref="app.mediaPage({path: fba.media})"
+                        ng-click="$event.stopPropagation()">{{::fba.media.split('/').pop()}}</a>
+            </div>
+            <div flex="10">
+              {{relativeTime(fba.timestamp)}}
+            </div>
+            <div flex="10">
+              <a ng-click="deleteFBA($event, $index, item)" class="no-link">
+                          <md-tooltip md-delay="800">Delete FBA</md-tooltip>
+                          <i class="icon-highlight-remove"></i>
+            </div>
+
+          </div>
+          </div>
+        </div>
+      </md-radio-group>
+    </md-input-container>
+
 </div>

@@ -397,7 +397,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             } else {
                 seq_type = this.selectedSeqType["name"];
             }
-            */        	
+            */
+
+            Dialogs.showToast('Uploading......', '', 1000000);
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -419,8 +421,9 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             // MODELSEED-47: if is not plant: Need checks and balances to prevent model name duplication
             WS.getObjectMeta('/'+Auth.user+'/plantseed/'+name)
                 .then(function() {
-                    alert('Genome name already exists!\n'+
-                    'Please provide a new name or delete the existing genome');                           
+                    Dialogs.showError('Genome name already exists!\n'+
+                    'Please provide a new name or delete the existing genome');
+                    $scope.uploading = false;
             }).catch(function(e) {
             	
                 startUpload( name, genome_type, template );
@@ -431,8 +434,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     function startUpload( name, genome_type, template ) {
 
         Upload.uploadFile($scope.selectedFiles, null, function(node) {
-        	
-            Dialogs.showComplete('Import in progress...');
+            $dialog.hide();
+            Dialogs.showComplete('Job submitted, building in progress...');
                         
            // TODO: MODELSEED-47: Add $scope.selectedTemplate... to the following parameters:
            if( $scope.isPlant ) {
@@ -461,7 +464,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            
         }, function(error) {
             console.log('shock error:', error);
-            // Dialogs.showError('Upload to SHOCK failed (see console)')                        
+            Dialogs.showError('Upload to SHOCK failed (see console)');
+            $scope.uploading = false;
         });                    
     }
     
@@ -966,7 +970,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     var path = $sParams.path;  
     $scope.name = path.split('/').pop();
     
-    $scope.selected;    
+    $scope.selected;
+    $scope.selectedService = "";
     $scope.selectedFBA = "";
     
     
@@ -1057,33 +1062,32 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     
     $scope.reconstructPipeline = function(ev, item) {
-    	var parameters = { genome: $scope.name, genome_type: "plant" };
-    	var reconstructpromise =             
+        // var parameters = { genome: $scope.name, genome_type: "plant" };
+        var parameters = { genome: genomePath, output_file: $scope.name, genome_type: "plant" };
+
+        var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
-        	
-                      .then(function(r) {
-            	          Dialogs.showComplete('Reconstructing Model...', name);
-
-
-                      }).catch(function(e) {
-                    	  console.log( 'ReconstructPipeline Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('Reconstructing Model...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'ReconstructPipeline Error', e.error.message );
+                    Dialogs.showError( 'ReconstructPipeline Error', e.error.message );
+                })
     }    
 
     $scope.reconstructPipelineAnnotate = function(ev, item) {
-    	var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };    	
-    	var reconstructpromise =             
+        var parameters = { genome: $scope.name, genome_type: "plant", annotation_process: "kmer" };
+
+        var reconstructpromise =
         	MS.reconstructionPipeline( parameters )
-                      .then(function(r) {
-            	          Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', name);
-
-                      }).catch(function(e) {
-                    	  console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('ReAnnotating Genome & Reconstructing Model...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'ReconstructPipelineAnnotate Error', e.error.message );
+                    Dialogs.showError( 'ReconstructPipelineAnnotate Error', e.error.message );
+                })
     }
 
     $scope.annotatePlant = function(ev, item) {
@@ -1092,16 +1096,16 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     		kmers: 0,
     		blast: 1
     	};
+
     	var annotatePlantpromise =             
         	MS.annotatePlant( opts )
-                      .then(function(r) {
-            	          Dialogs.showComplete('Blasting Genome...', name);
-
-                      }).catch(function(e) {
-                    	  console.log( 'BlastAnnotate Error', e.error.message );
-
-                      })    	
-    	
+                .then(function(r) {
+                    Dialogs.showComplete('Blasting Genome...', $scope.name);
+                    $state.go('app.myModels');
+                }).catch(function(e) {
+                    console.log( 'BlastAnnotate Error', e.error.message );
+                    Dialogs.showError( 'BlastAnnotate Error', e.error.message );
+                })
     }
         
     
@@ -1112,6 +1116,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         Dialogs.runPlantFBA(ev, item, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
+                $scope.selectedService='FBA';
             })
         })
     }
@@ -1133,7 +1138,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 fba: fba.path,
                 org: model.orgName,
                 media: fba.media};
-        
+
     }    
     
     // FBA selection for data viewing (deprecated: check boxes)
@@ -1363,8 +1368,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                         $scope.rxnFluxes = parsed.fba.reaction_fluxes;
                         
                         $scope.rxnFluxHash = parsed.fba.rxnhash;
-                        
-                        // $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
+                        for (var i = 0; i < $scope.rxnFluxes.length; i++) {
+                            $scope.data.reactions[i].flux = $scope.rxnFluxes[i].flux;
+                            $scope.data.reactions[i].min = $scope.rxnFluxes[i].min;
+                            $scope.data.reactions[i].max = $scope.rxnFluxes[i].max;
+                            $scope.data.reactions[i].class = $scope.rxnFluxes[i].class;
+                        }
 
                         $scope.loading = false;
                      });
@@ -1381,9 +1390,18 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                      .then(function(parsed) {
                         $scope.fbas = [parsed.data];
                         $scope.models = [parsed.rawModel];
-                        // $scope.cpdFluxes = parsed.fba.compoundFluxes;
-                        
+                        $scope.cpdFluxes = parsed.fba.exchange_fluxes;
                         $scope.cpdFluxHash = parsed.fba.cpdhash;
+                        for (var i = 0; i < $scope.cpdFluxes.length; i++) {
+                            for (var j = 0; j < $scope.data.compounds.length; j++) {
+                            if ($scope.data.compounds[j].id == $scope.cpdFluxes[i].id) {
+                                    $scope.data.compounds[j].flux = $scope.cpdFluxes[i].flux;
+                                    $scope.data.compounds[j].min = $scope.cpdFluxes[i].min;
+                                    $scope.data.compounds[j].max = $scope.cpdFluxes[i].max;
+                                    $scope.data.compounds[j].class = $scope.cpdFluxes[i].class;
+                                }
+                            }
+                        }
 
                         $scope.loading = false;
                      });
@@ -1509,7 +1527,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 if( $scope.relatedFBAs && $scope.selectedFBA.length>0 ) {
                 	
                     // fbas.push( $scope.selectedFBA );
-                        
                         if( $scope.rxnFluxes ) {
                             if( $scope.rxnFluxHash ) {
                                 fbas.push( $scope.rxnFluxHash[ row ].class );
@@ -1770,7 +1787,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 var gene;
                 
                 $scope.data.genes.forEach(function(item) {
-                    foundGenes.push(item.id)
+                    foundGenes.push(item.id);
                 })
                 
                 for ( var i = 0; i <  genomeGenes.length; i++ ) {
@@ -1779,6 +1796,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     if (foundGenes.indexOf(gene) == -1) {
                     	$scope.data.genes.push( { id: gene, reactions: [] } );
                     	// console.log( "gene ", gene, " was in parsed data from GenomeParser, but not from ModelParser; therefore addeds to latter")
+                    }
+                    else {
+                        var func = $scope.geneFunctions[gene];
+                        if ($scope.data.genes[foundGenes.indexOf(gene)].functions == undefined) {
+                            $scope.data.genes[foundGenes.indexOf(gene)].functions = [];
+                        }
+                        $scope.data.genes[foundGenes.indexOf(gene)].functions.push(func);
                     }
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
@@ -2066,7 +2090,10 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
 
     // path and name of object
     var path = $sParams.path;
-    $scope.name = path.split('/').pop()
+    $scope.name = path.split('/').pop();
+    var arr = path.split('/');
+    $scope.modelName = arr[arr.length - 3];
+    $scope.modelPath = path.substring(0, path.indexOf($scope.modelName)) + $scope.modelName;
 
 
     // selected compound, reaction, etc.
@@ -2114,6 +2141,7 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
                     $scope.fbas = [parsed.data];
                     $scope.models = [parsed.rawModel];
                     $scope.rxnFluxes = parsed.fba.reaction_fluxes;
+                    $scope.rxnFluxHash = parsed.fba.rxnhash;
                     $scope.exchangeFluxes = parsed.fba.exchange_fluxes;
 
                     $scope.loading = false;
@@ -2138,7 +2166,6 @@ function($scope, $state, $sParams, Auth, WS, Biochem,
         $scope.error = e;
         $scope.loading = false;
     })
-
 
 }])
 
