@@ -2,6 +2,11 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.2 (Aug 15, 2018)
+- Revamped Biochemistry tables including aliases and synonyms to search
+- Improved "Reconstruct Model" behaviour for plant models
+- Stylistic modifications and visual/search bugfixes for FBA and Gene tables
+
 ####v2.1 (Jan 2, 2018)
 - Minor stylistic modifications for major release
 - Moved "Build Model" to main toolbar
