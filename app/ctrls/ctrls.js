@@ -24,15 +24,6 @@ function($s, MS, $q, MV, uiTools) {
     $s.myMedia = [];
     $s.media = [];
     
-    // $s.medium = "Complete";
-    /*
-    $s.isDisabled = false;
-    self.querySearch = querySearch;
-    self.selectedItemChange = selectedItemChange;
-    self.searchTextChange = searchTextChange;
-    */
-    
-    
     MS.listMyMedia()
     .then(function(media) {
         $s.myMedia = media;
@@ -57,15 +48,11 @@ function($s, MS, $q, MV, uiTools) {
     }
 
     $s.searchTextChange = function(text) {
-
+        console.log("Media search text changed to:", text);
     }
     $s.selectedItemChange = function(item) {
-        self.form.media = item.path;
-        $s.medium = item.name; // $s.searchText;
-        MV.selectedMedium = item.name;
+        MV.selectedMedium = item.path;
     }
-    
-    
 
     function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
