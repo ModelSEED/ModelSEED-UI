@@ -347,8 +347,8 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     
     
     // MODELSEED-47: Called from the Media widget, in the Upload Microbe FAST tab        
-    $scope.selectedItemChange = function(item) {
-        $scope.media = item.path;
+    $scope.selectedItemChange = function(mdia) {
+        $scope.media = mdia;
 
     }
     
@@ -441,7 +441,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            if( $scope.isPlant ) {
         	   genome_type = "plant";
            }
-           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: MV.selectedMedium }; // $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   
@@ -1937,7 +1937,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 id: id,
                 modelCpd: ModelParser.cpdhash[item]};
 
-            Biochem.getCpd(id)
+            //Biochem.getCpd(id)
+            Biochem.getCpd_local(id)
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
                 })
