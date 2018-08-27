@@ -441,7 +441,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            if( $scope.isPlant ) {
         	   genome_type = "plant";
            }
-           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: MV.selectedMedium }; // $scope.media };
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   

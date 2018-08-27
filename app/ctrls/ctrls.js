@@ -50,7 +50,9 @@ function($s, MS, $q, MV, uiTools) {
     $s.searchTextChange = function(text) {
         console.log("Media search text changed to:", text);
     }
+
     $s.selectedItemChange = function(item) {
+        MV.pre_Medium = MV.selectedMedium;
         MV.selectedMedium = item.path;
     }
 

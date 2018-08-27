@@ -6,8 +6,8 @@
  */
 
 angular.module('Dialogs', []).service('Dialogs', 
-['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
+['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -84,18 +84,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth) {
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
               function($scope, $http) {
-                // $scope.item = item;
-                // $scope.form = {genome: item.path};
-
-                $scope.select = function( media ){
-                    // self.showToast('Reconstructing', item.name, 5000)                	
-                    $scope.media = media;
-                	
-                    $dialog.hide();
-                    
+                $scope.select = function(){
+                    $dialog.hide(); // Simply use whatever media set to MV.selectedMedium
                 };
 
-                $scope.cancel = function(){
+                $scope.cancel = function(){ // reverse setting to MV.selectedMedium
+                    MV.selectedMedium = MV.pre_Medium;
                     $dialog.hide();
                 };
               }]
