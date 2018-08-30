@@ -8,6 +8,7 @@ function($http, $q, config, $log) {
     var self = this
 
     var endpoint = config.services.solr_url;
+    var local_endpoint = config.services.local_solr_url;
 
     var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {
@@ -108,8 +109,15 @@ function($http, $q, config, $log) {
                     })
     }
 
-    this.getCpd= function(id) {
+    this.getCpd = function(id) {
         var url = endpoint+'model_compound/?http_accept=application/json&eq(id,'+id+')'
+        return $http.get(url)
+                    .then(function(res) {
+                        return res.data[0];
+                    })
+    }
+    this.getCpd_local = function(id) {
+        var url = local_endpoint+'compounds'+'/select?wt=json&q="id":'+id;
         return $http.get(url)
                     .then(function(res) {
                         return res.data[0];
