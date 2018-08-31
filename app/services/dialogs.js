@@ -76,7 +76,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
     
     
     
-    this.selectMedia = function(ev) {
+    this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/selectMedia.html',
@@ -85,11 +85,14 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
             controller: ['$scope', '$http',
               function($scope, $http) {
                 $scope.select = function(){
-                    $dialog.hide(); // Simply use whatever media set to MV.selectedMedium
+                    // Simply use whatever media set to MV.selectedMedium
+                    cb(MV.selectedMedium);
+                    $dialog.hide();
                 };
 
-                $scope.cancel = function(){ // reverse setting to MV.selectedMedium
+                $scope.cancel = function(){ // reverse setting of MV.selectedMedium
                     MV.selectedMedium = MV.pre_Medium;
+                    cb(MV.selectedMedium);
                     $dialog.hide();
                 };
               }]

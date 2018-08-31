@@ -142,50 +142,10 @@
 		  </label>
 		  <br><br>
 
-
          <md-content>
-            <md-button ng-click="selectMedia($event)" class="md-raised">Select Media (Optional)</md-button>
+            <md-button ng-click="selectMedia($event)" class="md-raised">Change Media (Optional)</md-button>
+            <label style="color: blue">(Selected media: {{mediaName}})</label>
          </md-content>
-			              
-		            
-          
-          <!-- <div ng-controller="MediaDropdown as ctrl">  -->
-           <!-- 
-           <div layout="row" layout-align="end end">
-                <md-progress-circular ng-if="!myMedia || !media"
-                                      md-mode="indeterminate"
-                                      md-diameter="10">
-                </md-progress-circular>                 
-           </div>
-            -->			              
-			              
-          
-          <!-- 
-           <form ng-model="ctrl.form.media" ng-submit="$event.preventDefault()" >
-              <md-autocomplete
-
-                  ng-disabled="ctrl.isDisabled"
-                  md-selected-item="ctrl.selectedItem"
-                  md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                  md-search-text="ctrl.searchText"
-                  md-selected-item-change="selectedItemChange(item)"
-                  md-items="item in ctrl.querySearch(ctrl.searchText)"
-                  md-item-text="item.name"
-                  md-min-length="0"
-                  placeholder="Search for public media formulation (optional)...">
-                <md-item-template>
-                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
-                </md-item-template>
-                <md-not-found>
-                  No matches found for "{{ctrl.searchText}}".
-                </md-not-found>
-              </md-autocomplete>
-           </form>          
-           -->
-          
-          <!-- </div>  -->          
-          <br><br><br>
-             
              
           <div flex="35" layout="row">
               <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>

@@ -140,11 +140,6 @@ function($scope, $sParams, WS, $http) {
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
 function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
  Dialogs, ViewOptions, WS, Auth, uiTools, Tabs, MS, Session, MV, config) {
-
-    // path and name of object
-    // var path = $sParams.path;
-	
-	
 	
 	// MODELSEED-70	
     $scope.$watch('opts', function(value){
@@ -155,11 +150,12 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 	$scope.isPlant = true;
 	
 	$scope.microbeTabIsLocked = false;
-	$scope.plantTabIsLocked = false;
-    // $scope.Tabs = Tabs;
-    // Tabs.totalTabCount = 4;
-    
-	$scope.selectedKingdom = []; // Plants or Microbes
+    $scope.media = MV.selectedMedium;
+
+    // get media file name from the absolute path
+    var n = $scope.media.split('/').length;
+    $scope.mediaName = $scope.media.split('/')[n - 1];
+    $scope.selectedKingdom = []; // Plants or Microbes
 	$scope.selectedSeqType = []; // protein or DNA
 	$scope.selectedTaxa = []; // genome_type: features or contigs
 	$scope.selectedTemplate = [];	
@@ -177,18 +173,17 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
         $scope.selectedPublic = item;
         $scope.reconstruct(ev, $scope.selectedPublic);
     }
-    
-    
 
     $scope.selectMedia = function(ev) {
         
-        Dialogs.selectMedia(ev);
-        
-        $scope.selectedItemChange( MV.selectedMedium );
-        	          
+        Dialogs.selectMedia(ev,
+        function(mdm) {
+            console.log('selecting media: ', mdm);
+            $scope.media = mdm;
+            var n = $scope.media.split('/').length;
+            $scope.mediaName = $scope.media.split('/')[n - 1];
+        });
     }
-    
-    
     
     // the selected item for the build operations (not used yet)
     $scope.selected = null;
@@ -349,7 +344,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
     // MODELSEED-47: Called from the Media widget, in the Upload Microbe FAST tab        
     $scope.selectedItemChange = function(mdia) {
         $scope.media = mdia;
-
     }
     
         
@@ -399,7 +393,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             }
             */
 
-            Dialogs.showToast('Uploading with media: ' + MV.selectedMedium, '', 1000000);
+            Dialogs.showToast('Uploading with media: ' + $scope.mediaName, '', 1000000);
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -441,7 +435,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            if( $scope.isPlant ) {
         	   genome_type = "plant";
            }
-           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: MV.selectedMedium };
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   

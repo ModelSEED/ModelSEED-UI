@@ -21,7 +21,7 @@
                                       md-mode="indeterminate"
                                       md-diameter="10">
                 </md-progress-circular>
-                <a ng-click="filterPublic = !filterPublic">
+                <a ng-click="filterPublic=!filterPublic">
                     <span ng-if="filterPublic">Search my media
                         <span ng-if="myMedia">(<span class="label-media">{{myMedia.length}}</span>)</span>
                     </span>
@@ -31,7 +31,6 @@
 
             <form ng-if="filterPublic" ng-model="ctrl.form" ng-submit="$event.preventDefault()" >
               <md-autocomplete
-                  ng-if="filterPublic"
                   ng-disabled="ctrl.isDisabled"
                   md-selected-item="ctrl.selectedItem"
                   md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
@@ -40,7 +39,8 @@
                   md-items="item in querySearch(ctrl.searchText)"
                   md-item-text="item.name"
                   md-min-length="0"
-                  placeholder="Search for public media formulation (optional)...">
+                  placeholder="Search for public media formulation (optional)..."
+                  md-autofocus>
                 <md-item-template>
                   <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
                 </md-item-template>
@@ -60,7 +60,8 @@
                   md-items="item in querySearch(ctrl.searchText)"
                   md-item-text="item.name"
                   md-min-length="0"
-                  placeholder="Search my media (optional)...">
+                  placeholder="Search my media (optional)..."
+                  md-autofocus>
                 <md-item-template>
                   <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}}</span>
                 </md-item-template>

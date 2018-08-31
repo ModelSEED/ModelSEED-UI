@@ -52,8 +52,10 @@ function($s, MS, $q, MV, uiTools) {
     }
 
     $s.selectedItemChange = function(item) {
-        MV.pre_Medium = MV.selectedMedium;
-        MV.selectedMedium = item.path;
+        if(item != undefined) {
+            MV.pre_Medium = MV.selectedMedium;
+            MV.selectedMedium = item.path;
+        }
     }
 
     function createFilterFor(query) {
