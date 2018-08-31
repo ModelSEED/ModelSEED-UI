@@ -399,7 +399,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             }
             */
 
-            Dialogs.showToast('Uploading......', '', 1000000);
+            Dialogs.showToast('Uploading with media: ' + MV.selectedMedium, '', 1000000);
           	var genome_type = "";
             if( this.selectedTaxa && this.selectedTaxa.length==0 ) {
             	// Set the default:
@@ -441,7 +441,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
            if( $scope.isPlant ) {
         	   genome_type = "plant";
            }
-           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: $scope.media };
+           var parameters = { shock_id: node, genome: name, genome_type: genome_type, media: MV.selectedMedium };
            MS.reconstructionPipeline( parameters )
                .then( function (res) {
             	   
