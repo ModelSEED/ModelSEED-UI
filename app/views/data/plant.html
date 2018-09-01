@@ -18,8 +18,6 @@
     <md-tab-body>       
      <div ng-if="isPlant"> 
       <div layout="column">     
-        <br><br>
-                
        <form name="upload_form" id="upload-form" class="upload-form form-horizontal">        
             <div class="form-group">
                 <br>		
@@ -95,12 +93,9 @@
     </md-tab-label>
 
     <md-tab-body>
-    
-
 
      <div ng-if="!isPlant"> 
        <div layout="column">     
-        <br><br>
                 
          <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
 
@@ -118,10 +113,7 @@
                 {{selectedFiles[0].name}}
             </div>
 
-
-
-        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">          
-          <br><br>        
+        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
                   
           <label style="margin: 10px">
            Select Template Model:    
@@ -130,8 +122,7 @@
                 ng-options="option.value for option in options">
                 <option value="">Automatically select</option>
             </select>
-          </label>           
-          <br><br>
+          </label>
           
           <label style="margin: 10px">
               Genome Type:
@@ -140,7 +131,6 @@
 		          <option value="">Contigs</option>
 		      </select>
 		  </label>
-		  <br><br>
 
          <md-content>
             <md-button ng-click="selectMedia($event)" class="md-raised">Change Media (Optional)</md-button>
@@ -150,24 +140,18 @@
           <div flex="35" layout="row">
               <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
           </div>
-                                          
-          <br>
-          
+
           <div flex="10" layout="row">                                 
           <md-button class="md-primary md-raised"
             ng-click="startUpload(  )"
             ng-disabled="!selectedFiles">
                Build Model
-            <br>
           </md-button>
                    
           <md-progress-circular ng-if="uploading" md-mode="indeterminate">
           </md-progress-circular>
-                              
           </div>
-          
           </div>
-                           
          </form>
        </div>
      </div>
@@ -184,7 +168,6 @@
   </md-tab-label>
   
   <md-tab-body>
-  <br><br>
 
   <div>
 
@@ -257,8 +240,7 @@
     -->
     
   </div>
-    
-  <br><br>  
+
   </md-tab-body>
     
   </md-tab>
@@ -271,7 +253,6 @@
   </md-tab-label>
   
   <md-tab-body>
-  <br><br>
 
   <div>
 

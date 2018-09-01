@@ -89,7 +89,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     cb(MV.selectedMedium);
                     $dialog.hide();
                 };
-
+                $scope.setDefault = function(){
+                    // Set MV.selectedMedium to 'Complete'
+                    MV.selectedMedium = 'Complete';
+                    cb(MV.selectedMedium);
+                    $dialog.hide();
+                };
                 $scope.cancel = function(){ // reverse setting of MV.selectedMedium
                     MV.selectedMedium = MV.pre_Medium;
                     cb(MV.selectedMedium);

@@ -31,6 +31,7 @@
 
             <form ng-if="filterPublic" ng-model="ctrl.form" ng-submit="$event.preventDefault()" >
               <md-autocomplete
+                  ng-if="filterPublic"
                   ng-disabled="ctrl.isDisabled"
                   md-selected-item="ctrl.selectedItem"
                   md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
@@ -79,6 +80,9 @@
     <div class="md-actions">
         <md-button ng-click="select( medium )" type="button">
             Select
+        </md-button>
+        <md-button ng-click="setDefault()" type="button">
+            Use Complete
         </md-button>
     </div>
     </form>
