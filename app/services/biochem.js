@@ -91,7 +91,6 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-
     this.getRxn = function(id, opts) {
         var url = endpoint+'model_reaction/?http_accept=application/json';
 
@@ -108,7 +107,6 @@ function($http, $q, config, $log) {
                         return Array.isArray(id) ? res.data : res.data[0];
                     })
     }
-
     this.getCpd = function(id) {
         var url = endpoint+'model_compound/?http_accept=application/json&eq(id,'+id+')'
         return $http.get(url)
@@ -116,14 +114,6 @@ function($http, $q, config, $log) {
                         return res.data[0];
                     })
     }
-    this.getCpd_local = function(id) {
-        var url = local_endpoint+'compounds'+'/select?wt=json&q="id":'+id;
-        return $http.get(url)
-                    .then(function(res) {
-                        return res.data[0];
-                    })
-    }
-
     this.findReactions = function(cpd) {
         var url = endpoint+'model_reaction/?http_accept=application/solr+json',
             url = url+'&eq(equation,*'+cpd+'*)&limit(10000)&select(id,equation,name,definition)'
@@ -145,8 +135,133 @@ function($http, $q, config, $log) {
             }
     }
 
-}])
+    /*************Begin translating the RQL syntax to Solr query syntax******************/
+    this.get_local = function(collection, opts) {
+        var cache = true;
+        var url = local_endpoint+collection+'/select?wt=json'
 
+        if (opts) {
+            var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
+                limit = opts.limit ? opts.limit : null,
+                offset = opts.offset ? opts.offset : 0,
+                sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
+                sortField = opts.sort ? opts.sort.field : '',
+                cols = opts.visible ? opts.visible : [];
+        }
+
+        if (cols && cols.length) {
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push(cols[i]);
+            }
+            // url += '&select('+set.join(',')+')';
+            url += '&fl='+set.join(',');
+        }
+
+        if (query && cols.length) {
+            query = query.trim();
+            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
+
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
+                    query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+                }
+                //set.push('eq('+cols[i]+',*'+query+'*)');
+                set.push(cols[i]+':*'+query+'*');
+            }
+            //url += '&or('+set.join(',')+')';
+            url += '&q='+set.join(' AND ');
+        } else if (query) {
+            query = query.trim();
+            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
+            if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
+                query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+            }
+            // sort by id when querying
+            // url += '&keyword(*'+query+'*)&sort(id)';
+            url += '&q='+'*'+query+'*&sort=id asc';
+            cache = false;
+        } else {
+            // url += '&keyword(*)';
+            url += '&q=*';
+            cache = false;
+        }
+
+        if (limit)
+            url += '&rows='+limit+ offset ? '&start='+offset : ''; // url += '&limit('+limit+ (offset ? ','+offset : '') +')';
+
+        if (sort) {
+            // url += '&sort('+sort+sortField+')';
+            url += '&sort='+ sortField + ' ' + sort;
+            cache = false;
+        }
+
+        if (!offset) cache = true;
+
+        // cancel any previous request using defer
+        if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
+        if (cpdReq && collection === 'model_compound') cpdReq.resolve();
+        if (geneReq && collection === 'gene') geneReq.resolve();
+
+        var liveReq = $q.defer();
+
+        // save defer for later use
+        if (collection === 'model_reaction')
+            rxnReq = liveReq;
+        else if (collection === 'model_compound')
+            cpdReq = liveReq;
+        else if (collection === 'gene')
+            geneReq = liveReq;
+
+        console.log('caching?', cache)
+        return $http.get(url, {cache: cache, timeout: liveReq.promise})
+                    .then(function(res) {
+                        rxnReq = false, cpdReq = false; geneReq = false;
+                        return res.data.response;
+                    })
+    }
+    this.getRxn_local = function(id, opts) {
+        var url = local_endpoint+'reactions/select?wt=json'
+
+        if (opts && 'select' in opts) {
+            if (Array.isArray(opts.select))
+                //url += '&select('+String(opts.select)+')';
+                url += '&fl='+opts.select.join(',');
+            else
+                //url += '&select('+opts.select+')';
+                url += '&fl='+opts.select;
+        }
+
+        if (Array.isArray(id))
+            //url += '&in(id,('+String(id)+'))&limit('+id.length+')';
+            url += '&q="id":('+id.join(' OR ')+ ')';
+        else
+            //url += '&eq(id,'+id+')';
+            url += '&q="id":'+id;
+        return $http.get(url)
+                    .then(function(res) {
+                        return Array.isArray(id) ? res.data : res.data[0];
+                    })
+    }
+    this.getCpd_local = function(id) {
+        var url = local_endpoint+'compounds/select?wt=json&q="id":'+id;
+        return $http.get(url)
+                    .then(function(res) {
+                        return res.data[0];
+                    })
+    }
+    this.findReactions_local = function(cpd) {
+        var url = endpoint+'reactions/select?wt=json',
+            url = url+'&q="equation":*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
+        return $http.get(url)
+                    .then(function(res) {
+
+                        return res.data.response;
+                    })
+    }
+    /*************End translating the RQL syntax to Solr query syntax******************/
+}])
 
 .filter('reverse', function() {
   return function(input, uppercase) {
