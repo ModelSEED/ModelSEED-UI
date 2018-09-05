@@ -256,7 +256,7 @@ function($http, $q, config, $log) {
     }
     this.findReactions_local = function(cpd) {
         var url = endpoint+'reactions/select?wt=json',
-            url = url+'&q="equation":*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
+            url = url+'&q=equation:*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
         return $http.get(url)
                     .then(function(res) {
 
