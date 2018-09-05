@@ -932,7 +932,8 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
                 function updateCpds() {
-                    Biochem.get('model_compound', $s.cpdOpts)
+                    //Biochem.get('model_compound', $s.cpdOpts)
+                    Biochem.get_local('compounds', $s.cpdOpts)
                            .then(function(res) {
                                 $s.cpds = res;
                                 $s.loadingCpds = false;

@@ -180,7 +180,7 @@ function($http, $q, config, $log) {
             }
             // sort by id when querying
             // url += '&keyword(*'+query+'*)&sort(id)';
-            url += '&q='+'*'+query+'*&sort=id asc';
+            url += '&q='+'*'+query+'*';
             cache = false;
         } else {
             // url += '&keyword(*)';
@@ -193,6 +193,7 @@ function($http, $q, config, $log) {
 
         if (sort) {
             // url += '&sort('+sort+sortField+')';
+            sort = sort=='-' ? 'desc' : 'asc';
             url += '&sort='+ sortField + ' ' + sort;
             cache = false;
         }
@@ -200,16 +201,18 @@ function($http, $q, config, $log) {
         if (!offset) cache = true;
 
         // cancel any previous request using defer
-        if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
-        if (cpdReq && collection === 'model_compound') cpdReq.resolve();
+        //if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
+        //if (cpdReq && collection === 'model_compound') cpdReq.resolve();
+        if (rxnReq && collection === 'reactions') rxnReq.resolve();
+        if (cpdReq && collection === 'compounds') cpdReq.resolve();
         if (geneReq && collection === 'gene') geneReq.resolve();
 
         var liveReq = $q.defer();
 
         // save defer for later use
-        if (collection === 'model_reaction')
+        if (collection === 'reactions')
             rxnReq = liveReq;
-        else if (collection === 'model_compound')
+        else if (collection === 'compounds')
             cpdReq = liveReq;
         else if (collection === 'gene')
             geneReq = liveReq;
@@ -235,20 +238,20 @@ function($http, $q, config, $log) {
 
         if (Array.isArray(id))
             //url += '&in(id,('+String(id)+'))&limit('+id.length+')';
-            url += '&q="id":('+id.join(' OR ')+ ')';
+            url += '&q=id:('+id.join(' OR ')+ ')';
         else
             //url += '&eq(id,'+id+')';
-            url += '&q="id":'+id;
+            url += '&q=id:'+id;
         return $http.get(url)
                     .then(function(res) {
-                        return Array.isArray(id) ? res.data : res.data[0];
+                        return Array.isArray(id) ? res.docs : res.data[0];
                     })
     }
     this.getCpd_local = function(id) {
-        var url = local_endpoint+'compounds/select?wt=json&q="id":'+id;
+        var url = local_endpoint+'compounds/select?wt=json&q=id:'+id;
         return $http.get(url)
                     .then(function(res) {
-                        return res.data[0];
+                        return res.data.response.docs[0];
                     })
     }
     this.findReactions_local = function(cpd) {

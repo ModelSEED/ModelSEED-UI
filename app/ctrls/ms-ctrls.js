@@ -348,7 +348,8 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    Biochem.getCpd($s.id)
+    //Biochem.getCpd($s.id)
+    Biochem.getCpd_local($s.id)
         .then(function(data) {
             $s.cpd = data;
             $s.loading = false;
