@@ -138,7 +138,7 @@ function($http, $q, config, $log) {
     /*************Begin translating the RQL syntax to Solr query syntax******************/
     this.get_local = function(collection, opts) {
         var cache = true;
-        var url = local_endpoint+collection+'/select?wt=json'
+        var url = solr_endpoint+collection+'/select?wt=json'
 
         if (opts) {
             var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
@@ -225,7 +225,7 @@ function($http, $q, config, $log) {
                     })
     }
     this.getRxn_local = function(id, opts) {
-        var url = local_endpoint+'reactions/select?wt=json'
+        var url = solr_endpoint+'reactions/select?wt=json'
 
         if (opts && 'select' in opts) {
             if (Array.isArray(opts.select))
@@ -248,7 +248,7 @@ function($http, $q, config, $log) {
                     })
     }
     this.getCpd_local = function(id) {
-        var url = local_endpoint+'compounds/select?wt=json&q=id:'+id;
+        var url = solr_endpoint+'compounds/select?wt=json&q=id:'+id;
         return $http.get(url)
                     .then(function(res) {
                         return res.data.response.docs[0];
