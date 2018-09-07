@@ -932,8 +932,7 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
                 function updateCpds() {
-                    //Biochem.get('model_compound', $s.cpdOpts)
-                    Biochem.get_local('compounds', $s.cpdOpts)
+                    Biochem.get_solr('compounds', $s.cpdOpts)
                            .then(function(res) {
                                 $s.cpds = res;
                                 $s.loadingCpds = false;
@@ -971,8 +970,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     
     
     $scope.selectedGF = "";
-
-    
        
     var genomePath = path + '/genome';
     var dictionary = {};
@@ -1045,7 +1042,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 $scope.expression = expList;
             })
-            
     }
     
     $scope.uploadExpression = function(ev, item) {
@@ -1053,8 +1049,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
             updateExpression(item);
         })
     }
-    
-    
+
     
     $scope.reconstructPipeline = function(ev, item) {
         // var parameters = { genome: $scope.name, genome_type: "plant" };
@@ -1102,9 +1097,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     Dialogs.showError( 'BlastAnnotate Error', e.error.message );
                 })
     }
-        
-    
-    
+
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
@@ -1933,7 +1926,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 modelCpd: ModelParser.cpdhash[item]};
 
             //Biochem.getCpd(id)
-            Biochem.getCpd_local(id)
+            Biochem.getCpd_solr(id)
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
                 })
@@ -2033,16 +2026,14 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                                 {label: 'deltaG', key: 'deltag'},
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
-
                 function updateRxns() {
-                    Biochem.get('model_reaction', $scope.rxnOpts)
+                    // Biochem.get('model_reaction', $scope.rxnOpts)
+                    Biochem.get_solr('reactions', $scope.rxnOpts)
                            .then(function(res) {
                                 $scope.bioRxns = res;
                                 $scope.loadingRxns = false;
                            })
                 }
-
-
                 $scope.$watch('bioRxnOpts', function(after, before) {
                     $scope.loadingRxns = true;
                     updateRxns();

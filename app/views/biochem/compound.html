@@ -1,11 +1,13 @@
-
-<div class="h2">
-    Compound
-    <small>{{cpd.name}} (<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
+<div layout="row">
+    <div class="h5">
+        <i class="icon-folder-open-o"></i>
+        <a ui-sref="app.biochem({chem: 'compounds'})"> >Compounds</a>
+    </div>
+    <div class="h2">
+        Compound
+        <small>{{cpd.name}} (<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
+    </div>
 </div>
-<hr class="no-margin">
-<br>
-
 
 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 

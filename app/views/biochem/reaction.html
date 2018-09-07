@@ -1,23 +1,26 @@
-
-<h2>
-    Reaction
-    <small>{{rxn.name}}</small>
-</h2>
-<hr>
-
-<h4>Reaction Details</h4>
+<div layout="row">
+    <div class="h5">
+        <i class="icon-folder-open-o"></i>
+        <a ui-sref="app.biochem({chem: 'reactions'})"> >Reactions</a>
+    </div>
+    <div class="h2">
+        Reaction
+        <small>{{rxn.name}}</small>
+    </div>
+</div>
+<hr class="no-margin">
+<br>
 
 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 <table class="table table-horizontal table-condensed" ng-if="!loading">
     <thead></thead>
     <tbody>
-        <tr><td>Name</td><td>{{rxn.name}}</td></tr>
-        <tr><td>ID</td><td>{{rxn.id}}</td></tr>
-        <tr><td>Abbreviation</td><td>{{rxn.abbreviation}}</td></tr>
         <tr>
             <td>Equation</td>
             <td stoichiometry-to-imgs="{{rxn.stoichiometry}}" direction="{{rxn.direction}}"></td>
         </tr>
+        <tr><td>ID</td><td>{{rxn.id}}</td></tr>
+        <tr><td>Abbreviation</td><td>{{rxn.abbreviation}}</td></tr>
         <tr><td>Equation with IDs</td><td>{{rxn.equation}}</td></tr>
         <tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr>
         <tr><td>DeltaG</td><td>{{rxn.deltag}}</td></tr>

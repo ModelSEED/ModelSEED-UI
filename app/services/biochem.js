@@ -123,20 +123,9 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-    this.getImagePath = function (id) {
-            if (id) {
-                var img_root = config.services.cpd_img_url;
-                var dir_depth = 0;
-                var ext = '.png';
-                for (var i = 0; i < dir_depth; i++) {
-                    img_root += id[i] + "/";
-                }
-                return img_root + id + ext
-            }
-    }
 
     /*************Begin translating the RQL syntax to Solr query syntax******************/
-    this.get_local = function(collection, opts) {
+    this.get_solr = function(collection, opts) {
         var cache = true;
         var url = solr_endpoint+collection+'/select?wt=json'
 
@@ -154,7 +143,6 @@ function($http, $q, config, $log) {
             for (var i=0; i<cols.length; i++) {
                 set.push(cols[i]);
             }
-            // url += '&select('+set.join(',')+')';
             url += '&fl='+set.join(',');
         }
 
@@ -167,32 +155,26 @@ function($http, $q, config, $log) {
                 if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
                     query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
                 }
-                //set.push('eq('+cols[i]+',*'+query+'*)');
                 set.push(cols[i]+':*'+query+'*');
             }
-            //url += '&or('+set.join(',')+')';
-            url += '&q='+set.join(' AND ');
+            url += '&q='+set.join(' OR ');
         } else if (query) {
             query = query.trim();
             query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
             if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
                 query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
             }
-            // sort by id when querying
-            // url += '&keyword(*'+query+'*)&sort(id)';
             url += '&q='+'*'+query+'*';
             cache = false;
         } else {
-            // url += '&keyword(*)';
             url += '&q=*';
             cache = false;
         }
 
         if (limit)
-            url += '&rows='+limit+ offset ? '&start='+offset : ''; // url += '&limit('+limit+ (offset ? ','+offset : '') +')';
+            url += '&rows='+limit+ offset ? '&start='+offset : '';
 
         if (sort) {
-            // url += '&sort('+sort+sortField+')';
             sort = sort=='-' ? 'desc' : 'asc';
             url += '&sort='+ sortField + ' ' + sort;
             cache = false;
@@ -201,8 +183,6 @@ function($http, $q, config, $log) {
         if (!offset) cache = true;
 
         // cancel any previous request using defer
-        //if (rxnReq && collection === 'model_reaction') rxnReq.resolve();
-        //if (cpdReq && collection === 'model_compound') cpdReq.resolve();
         if (rxnReq && collection === 'reactions') rxnReq.resolve();
         if (cpdReq && collection === 'compounds') cpdReq.resolve();
         if (geneReq && collection === 'gene') geneReq.resolve();
@@ -217,6 +197,7 @@ function($http, $q, config, $log) {
         else if (collection === 'gene')
             geneReq = liveReq;
 
+        console.log("Solr query:", url);
         console.log('caching?', cache)
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
@@ -224,46 +205,54 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-    this.getRxn_local = function(id, opts) {
+    this.getRxn_solr = function(id, opts) {
         var url = solr_endpoint+'reactions/select?wt=json'
 
         if (opts && 'select' in opts) {
             if (Array.isArray(opts.select))
-                //url += '&select('+String(opts.select)+')';
                 url += '&fl='+opts.select.join(',');
             else
-                //url += '&select('+opts.select+')';
                 url += '&fl='+opts.select;
         }
 
         if (Array.isArray(id))
-            //url += '&in(id,('+String(id)+'))&limit('+id.length+')';
             url += '&q=id:('+id.join(' OR ')+ ')';
         else
-            //url += '&eq(id,'+id+')';
             url += '&q=id:'+id;
         return $http.get(url)
                     .then(function(res) {
-                        return Array.isArray(id) ? res.docs : res.data[0];
+                        return Array.isArray(id) ? res.data.response.docs : res.data.response.docs[0];
                     })
     }
-    this.getCpd_local = function(id) {
+    this.getCpd_solr = function(id) {
         var url = solr_endpoint+'compounds/select?wt=json&q=id:'+id;
+        console.log("Solr query:", url);
         return $http.get(url)
                     .then(function(res) {
                         return res.data.response.docs[0];
                     })
     }
-    this.findReactions_local = function(cpd) {
+    this.findReactions_solr = function(cpd) {
         var url = endpoint+'reactions/select?wt=json',
             url = url+'&q=equation:*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
         return $http.get(url)
                     .then(function(res) {
 
-                        return res.data.response;
+                        return res.data.response.docs;
                     })
     }
     /*************End translating the RQL syntax to Solr query syntax******************/
+        this.getImagePath = function (id) {
+            if (id) {
+                var img_root = config.services.cpd_img_url;
+                var dir_depth = 0;
+                var ext = '.png';
+                for (var i = 0; i < dir_depth; i++) {
+                    img_root += id[i] + "/";
+                }
+                return img_root + id + ext
+            }
+    }
 }])
 
 .filter('reverse', function() {

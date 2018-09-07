@@ -1,7 +1,13 @@
-
 <div layout="row">
+    <div ng-if="!isMine" class="h5">
+        <i class="icon-folder-open-o"></i>
+        <a ui-sref="app.myModels()"> >My Models</a>
+    </div>
     <div class="h2">Model <small>{{name}}</small></div>
 </div>
+<br>
+<hr class="no-margin">
+
 <div layout="column">
     <div ng-if="! isRef" flex="30" class="vertical-center" layout="row" layout-align="start">
         <div ng-if="isPlant">

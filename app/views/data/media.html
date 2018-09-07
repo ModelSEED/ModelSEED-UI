@@ -1,13 +1,20 @@
-	<br>	
 <div layout="row">
 
-
-	<div ng-if="!isMine" class="h4">
-		<a ui-sref="app.media({tab: 'public'})">Public Media</a> / {{name}}
+	<div ng-if="!isMine" class="h5">
+		<i class="icon-folder-open-o"></i>
+		<a ui-sref="app.media({tab: 'public'})"> >Public Media</a>
+	</div>
+	<div class="h2">
+		Media
+		<small>{{name}}</small>
+	</div>
+	<div ng-if="!isMine" class="h5">
+		<i class="icon-folder-open-o"></i>
+		<a ui-sref="app.myMedia({tab: 'mine'})"> >My Media</a>
 	</div>
 
-	<div ng-if="isMine" class="h4">
-		<a ui-sref="app.media({tab: 'mine'})">My Media</a> / {{name}} 
+	<div ng-if="isMine" class="h5">
+		<a ui-sref="app.myMedia({tab: 'mine'})">My Media</a> / {{name}}
 		<small class="text-muted">{{editInProgress ? '(Editing)' : ''}}</small>
 	</div>
 
@@ -22,7 +29,7 @@
 	</md-input-container>
 	
 </div>
-
+<br>
 <hr class="no-margin">
 
 
