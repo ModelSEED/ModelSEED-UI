@@ -349,7 +349,6 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    //Biochem.getCpd($s.id)
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
             $s.cpd = data;
@@ -364,7 +363,6 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    // Biochem.getRxn($s.id)
     Biochem.getRxn_solr($s.id)
         .then(function(data) {
             $s.rxn = data;
@@ -380,7 +378,6 @@ function($s, Biochem, $state, $stateParams, Bio) {
 
     var cpdID = $stateParams.cpd;;
 
-    // Bio.get('model_compound', {query: cpdID})
     Bio.get_solr('compounds', {query: cpdID})
        .then(function(res) {
            $s.totalFound = res.numFound;
