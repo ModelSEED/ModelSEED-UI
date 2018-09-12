@@ -1931,8 +1931,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 id: id,
                 modelCpd: ModelParser.cpdhash[item]};
 
-            //Biochem.getCpd(id)
-            Biochem.getCpd_local(id)
+            Biochem.getCpd(id)
+            //Biochem.getCpd_local(id)
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
                 })
