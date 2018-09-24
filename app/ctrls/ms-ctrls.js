@@ -240,9 +240,16 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
-    $s.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
+    // Reactions
+    var rxn_sFields = ['id', 'name', 'status', 'aliases'];
+    $s.rxnOpts = Session.getOpts($state, 'rxns') ||
+                  {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases'] };
-    $s.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
+
+    // Compounds
+    var cpd_sFields = ['id', 'name', 'formula', 'aliases'];
+    $s.cpdOpts = Session.getOpts($state, 'cpds') ||
+                  {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'compounds', searchFields: cpd_sFields,
                   visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'aliases'] };
 
     $s.rxnHeader = [
@@ -327,13 +334,17 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }
 
     $s.$watch('rxnOpts', function(after, before) {
+        console.log('after', after);
         $s.loadingRxns = true;
         updateRxns();
+        Session.setOpts($state, 'rxns', after);
     }, true)
 
-    $s.$watch('cpdOpts', function(opts) {
+    $s.$watch('cpdOpts', function(after, before) {
+        console.log('after', after);
         $s.loadingCpds = true;
         updateCpds();
+        Session.setOpts($state, 'cpds', after);
     }, true)
 
     /* table row click (not used as of now)
@@ -1292,6 +1303,11 @@ function($s, $sParams, WS, MS, Auth,
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
+    /* Media --setting up for a solr-table like column search
+    var med_sFields = ['name', 'isMinimal', 'isDefined', 'type'];
+    $s.mediaOpts = Session.getOpts($state, 'media') ||
+                   {query: '', limit: 20, offset: 0, sort: {field: 'name'}, core: 'media', searchFields: med_sFields};
+    */
     $s.mediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'name'}};
     $s.myMediaOpts = {query: '', limit: 20, offset: 0, sort: {field: 'timestamp', desc: true}};
 

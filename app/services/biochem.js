@@ -8,7 +8,7 @@ function($http, $q, config, $log) {
     var self = this
 
     var endpoint = config.services.solr_url;
-    var solr_endpoint = config.services.dev_solr_url;
+    var solr_endpoint = config.services.local_solr_url; //dev_solr_url;
 
     var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {
@@ -135,9 +135,10 @@ function($http, $q, config, $log) {
                 offset = opts.offset ? opts.offset : 0,
                 sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
                 sortField = opts.sort ? opts.sort.field : '',
+                searchFields = 'searchFields' in opts ? opts.searchFields : null, // fields to query against
+                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual columns
                 cols = opts.visible ? opts.visible : [];
         }
-
         if (cols && cols.length) {
             var set = [];
             for (var i=0; i<cols.length; i++) {
@@ -146,26 +147,20 @@ function($http, $q, config, $log) {
             url += '&fl='+set.join(',');
         }
 
-        if (query && cols.length) {
-            query = query.trim();
-            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
-
-            var set = [];
-            for (var i=0; i<cols.length; i++) {
-                if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
-                    query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+        if (query || queryColumn) {
+            if (queryColumn) {
+                var f = [];
+                for (var field in queryColumn) {
+                    f.push(field+':(*'+queryColumn[field]+'*)');
                 }
-                set.push(cols[i]+':*'+query+'*');
+                url += '&q='+f.join(' AND ')
+            } else if (searchFields) {
+                var f = [];
+                for (var i=0; i<searchFields.length; i++) {
+                    f.push(searchFields[i]+':(*'+query+'*)');
+                }
+                url += '&q='+f.join(' OR ')
             }
-            url += '&q='+set.join(' OR ');
-        } else if (query) {
-            query = query.trim();
-            query = query.replace(/\:/g, ''); // SOLR does not like ':' in the query
-            if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
-                query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
-            }
-            url += '&q='+'*'+query+'*';
-            cache = false;
         } else {
             url += '&q=*';
             cache = false;
