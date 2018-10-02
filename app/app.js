@@ -131,9 +131,18 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('main.events', {
             url: '/events',
             templateUrl: '/ms-projects/events/events.html',
+        }).state('main.events.plantseed2015', {
+            url: '/plantseed2015',
+            templateUrl: '/ms-projects/events/plantseed2015/home.html',
         }).state('main.events.plantseed2016', {
             url: '/plantseed2016',
             templateUrl: '/ms-projects/events/plantseed2016/home.html',
+        }).state('main.events.plantseed2017', {
+            url: '/plantseed2017',
+            templateUrl: '/ms-projects/events/plantseed2017/home.html',
+        }).state('main.events.plantseed2018', {
+            url: '/plantseed2018',
+            templateUrl: '/ms-projects/events/plantseed2018/home.html',
         })
 
 
