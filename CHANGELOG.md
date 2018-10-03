@@ -2,6 +2,9 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.3 (Sep 23, 2018)
+- Fixed and restyled media choices when building a microbial model from file
+
 ####v2.2 (Aug 15, 2018)
 - Revamped Biochemistry tables including aliases and synonyms to search
 - Improved "Reconstruct Model" behaviour for plant models

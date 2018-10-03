@@ -1929,6 +1929,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
             //Biochem.getCpd(id)
             Biochem.getCpd_solr(id)
+
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
                 })
