@@ -37,7 +37,7 @@
 		<div flex="60" class="vertical-center" layout="row" layout-align="start">
 		    
 		      <div flex="50" class="vertical-center" layout="row" layout-align="start">
-		        <select flex="30" ng-model="selectedService" ng-click="showRelatedData( item )">
+		        <select flex="30" ng-model="selectedService" ng-click="getRelatedData( item )">
                   <option value="">---Please select---</option>
 		          <option value='FBA'>FBA</option>
 		          <option value='Expression'>Expression</option>
@@ -56,9 +56,9 @@
 		    <span ng-if="selectedService=='Expression'">
 		        <ng-include src="'app/views/lists/expanded-expression.html'" >    
 		    </span>
-		
+
 		    <span ng-if="selectedService=='GapFill'">
-		        <ng-include src="'app/views/lists/expanded-gapfills.html'" >    
+		        <ng-include src="'app/views/lists/model-gapfills.html'" >
 		    </span>
 	    </div>
 	</div>

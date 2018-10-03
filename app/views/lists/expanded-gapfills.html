@@ -1,4 +1,3 @@
-
 <div class="gapfill-table expanded-table">
     <!--<h5>Gapfills</h5>-->
 
@@ -17,7 +16,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gf in relatedGapfills track by $index" ng-click="setSelectedGapfilling($event, gf, item)" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
+            <tr ng-repeat="gf in relatedGapfills track by $index" ng-click="setSelectedGF($event, gf, item)" class="row-hover"> <!--ng-click="integrateGapfill(gf.integrated, item, gf)"-->
                 <td>
                     <img ng-if="gf.loading"
                          src="img/ajax-loader.gif"
@@ -36,7 +35,7 @@
                 <td>
                     <a ui-sref="app.gfPage({path: gf.ref})" ng-click="$event.stopPropagation()">{{::gf.id}}</a>
                 </td>
-                <td>{{relTime(gf.rundate)}}</td>
+                <td>{{relTime(gpf.rundate)}}</td>
                 <!--<td>
                     <a ng-click="deleteGapfill($index, item, gf)" class="no-link">
                         <md-tooltip md-delay="800">Unintegrate and delete gapfill</md-tooltip>

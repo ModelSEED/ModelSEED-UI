@@ -1,0 +1,51 @@
+<div class="gapfill-table expanded-table">
+    <!--<h5>Gapfills</h5>-->
+
+    <div ng-if="!relatedGapfills.length" class="text-muted">
+        No gapfills for <i>{{name}}</i>.
+    </div>
+
+    <md-input-container class = "md-block">
+       <div ng-if="relatedGapfills.length" flex layout="row" layout-xs="column"
+            layout-align="center center">
+          <div flex></div>
+          <div flex="10">ID</div>
+          <div flex="15">Integrated?</div>
+          <div flex="35">Media</div>
+          <div flex="20">Time</div>
+       </div>
+
+       <md-divider></md-divider>
+
+       <md-radio-group ng-model='selectedGF.id'>
+        <div ng-repeat="gpf in relatedGapfills | orderBy : '-timestamp'" ng-click="setSelectedGF($event, gpf, item)">
+          <div flex layout="row" layout-wrap layout-align="start center" >
+
+            <md-radio-button flex aria-label="gpf.id"
+                  ng-value="gpf.id"
+                  class="">
+            </md-radio-button>
+
+            <div flex="10">
+              <a ui-sref="app.gfPage({path: gpf.ref})" ng-click="$event.stopPropagation()">{{::gpf.id}}</a>
+            </div>
+
+            <img ng-if="gpf.loading" src="img/ajax-loader.gif" width="15" height="15">
+            <div flex="15" ng-if="!gpf.loading" class="fa {{gpf.integrated ? 'fa-check-square-o' : 'fa-square-o'}}">
+            </div>
+
+            <div flex="35">
+              <a ui-sref="app.mediaPage({path: gpf.media})"
+                        ng-click="$event.stopPropagation()">{{::gpf.media.split('/').pop()}}</a>
+            </div>
+            <div flex="20">
+              {{relativeTime(gpf.rundate)}}
+            </div>
+           </div>
+          </div>
+        </div>
+      </md-radio-group>
+
+    </md-input-container>
+
+</div>

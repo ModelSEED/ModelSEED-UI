@@ -212,18 +212,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
 		            } else {
 		            	template = this.selectedTemplate["name"];
 		            }
-		            
-		            
 
 		        	var name = $scope.form.output_file || "";
-		        	if( name.length == 0 ) {
-		        		
-		        		
+                    if( name.length == 0 ) {
 		        		
 		                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
 
-		                
-		                
 
 		        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
 		                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
@@ -232,28 +226,19 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
 		            	// Validate name to assign to the new model
 		                var regex = /[^\w]/gi;
 		                if( regex.test( name ) == true ) {
-		                
-		                	$scope.form.output_file = "Invalid Model Name, using the default!";
-		                	
-		                	
+
+                            $scope.form.output_file = "Invalid Model Name, using the default!";
 
 			                var parameters = { genome: item.path, genome_type: genome_type }; // Is Ok to omit the output_file arg
-
-			                
 			                
 			        		// Gets: _ERROR_Object name PATRIC:1123738.3 contains forbidden characters!_ERROR_:
 			                // var parameters = { genome: item.path, output_file: item.path, genome_type: genome_type };
 		                } else {
 		                	
-		                	
-		                	
 		                	// Assert: Optional name was entered and was validated
 		                    var parameters = { genome: item.path, genome_type: genome_type, output_file: name };
 		                }
-		        	}
-
-		            
-                    
+                    }
                     
                     MS.reconstruct( parameters )
                     // MS.reconstruct($scope.form)
@@ -292,7 +277,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     self.showToast('Reconstructing', item.name, 5000);
                     MS.reconstruct($scope.form, {gapfill: 0, plant: 1, output_file: modelfolder})
                       .then(function(r) {
-                           cb(r);
+                           if (cb) cb(r);
                            self.showComplete('Reconstruct Complete', item.name, r[2]+r[0])
                       }).catch(function(e) {
                           self.showError('Reconstruct Error', e.error.message.slice(0,30)+'...')
@@ -329,13 +314,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 $scope.form = {model: item.path, media_supplement: []};
 
                 $scope.runFBA = function(){
+                    self.showToast('Running Flux Balance Analysis', item.name, 5000)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                          console.log('run fba response', res)
-                          cb();
-                          self.showToast('Running Flux Balance Analysis', item.name, 5000)
+                          console.log('fba job started: ', res)
                           /* self.showComplete('FBA Complete',
                                        res.id+' '+res.media_ref.split('/').pop()) */
+                          if (cb) cb();
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
                       })
@@ -368,11 +353,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     // use default media if none
                     $scope.form.media = $scope.form.media ? $scope.form.media :
                          "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
+
+                    self.showToast('Running Flux Balance Analysis', item.name, 5000)
                     MS.runFBA($scope.form)
                       .then(function(res) {
-                          self.showToast('Running Flux Balance Analysis', item.name, 5000)
-                          console.log('run fba response', res)
-                          cb();
+                          console.log('fba job started: ', res)
+                          if (cb) cb();
                           // self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
                           self.showError('Run FBA Error', e.error.message.slice(0,30)+'...')
@@ -402,10 +388,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 $scope.gapfill = function(){
                     self.showToast('Gapfilling', item.name, 5000)
 
+                    self.showToast('Running gapfilling...', item.name, 5000)
                     MS.gapfill($scope.form)
                       .then(function(res) {
-                           cb();
-                           self.showComplete('Gapfill Complete', res[0])
+                           console.log('gapfill job started: ', res)
+                           if (cb) cb();
                       }).catch(function(e) {
                           self.showError('Gapfill Error', e.error.message.slice(0,30)+'...')
                       })

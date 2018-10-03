@@ -18,7 +18,6 @@
           <div flex="10">Actions</div>
       </div>
       <md-divider></md-divider>
-
       <md-radio-group ng-model='selectedFBA.id'>
         <div ng-repeat="fba in relatedFBAs | orderBy : '-timestamp'" ng-click="setFBA($event, fba, item)">
           <div flex layout="row" layout-wrap layout-align="start center" >

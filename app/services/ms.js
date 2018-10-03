@@ -126,7 +126,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     
 
     this.runFBA = function(form) {
-        $log.log('run fba params', form)
+        $log.log('run ms.fba params', form)
         return $http.rpc('ms', 'FluxBalanceAnalysis', form)
                     .then(function(res){
                         return res;
@@ -134,6 +134,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
     }
 
     this.gapfill = function(form) {
+        $log.log('run ms.gapfill params', form)
         return $http.rpc('ms', 'GapfillModel', form)
                     .then(function(res){
                         return res;
@@ -349,7 +350,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                             var gf = res[i];
                             gf.media = gf.media_ref ? gf.media_ref.split('/').pop() : '';
                         }
-
+                        console.log("MS.list_gapfill_solutions returns result:\n", res);
                         return res;
                     }).catch(function() {
                         return [];
