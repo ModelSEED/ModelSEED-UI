@@ -18,7 +18,7 @@
        <md-divider></md-divider>
 
        <md-radio-group ng-model='selectedGF.id'>
-        <div ng-repeat="gpf in relatedGapfills | orderBy : '-timestamp'" ng-click="setSelectedGF($event, gpf, item)">
+        <div ng-repeat="gpf in relatedGapfills | orderBy : '-rundate'" ng-click="setSelectedGF($event, gpf, item)">
           <div flex layout="row" layout-wrap layout-align="start center" >
 
             <md-radio-button flex aria-label="gpf.id"

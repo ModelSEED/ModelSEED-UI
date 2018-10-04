@@ -1184,12 +1184,36 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         // e.stopPropagation();        
         
         $scope.selectedGF = gf.id;
+        $scope.setReactionGFs();
+    }
 
-        var data = {model: model.path,
-                gpf: gf.ref,
-                org: model.orgName,
-                media: gf.media_ref};
-    } 
+    // Filling the gapfill info for the reactions in $scope.data.reactions array
+    $scope.setReactionGFs = function() {
+        if($scope.data.reactions.length > 0 && $scope.relatedGapfills.length > 0) {
+            var m_rxns = $scope.data.reactions;
+            for (var k = 0; k < m_rxns.length; k++) {
+                m_rxns[k].is_gapfilled = '';
+            }
+
+            var gf_id = $scope.selectedGF;
+            for (var i = 0; i < $scope.relatedGapfills.length; i++) {
+                if (gf_id == $scope.relatedGapfills[i].id) {
+                    var solution_rxns = $scope.relatedGapfills[i]['solution_reactions'][0];
+                    for (var j = 0; j < solution_rxns.length; j++) {
+                        var s_rxn = solution_rxns[j]["reaction"].split( "/").slice( -1 )[0];
+
+                        for (var k = 0; k < m_rxns.length; k++) {
+                            if (m_rxns[k].id == s_rxn) {
+                                m_rxns[k].is_gapfilled = 'Yes';
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
     
     
         
@@ -1416,8 +1440,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
              }
         } ,
         
-        
-        
         // converge orthogonal Flux data:
         {label: 'Flux', key: 'id',
 
@@ -1513,21 +1535,11 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
             formatter: function(row) {
                 var is_gapfilled = '';
-                if($scope.selectedGF != '' && $scope.relatedGapfills.length > 0) {
-                    var gf_id = $scope.selectedGF;
-
-                    for (var i = 0; i < $scope.relatedGapfills.length; i++) {
-                        if (gf_id == $scope.relatedGapfills[i].id) {
-                            var solution_rxns = $scope.relatedGapfills[i]['solution_reactions'][0];
-                            for (var j = 0; j < solution_rxns.length; j++) {
-                                rxn = solution_rxns[j]["reaction"].split( "/").slice( -1 )[0];
-                                if (row == rxn) {
-                                    is_gapfilled = 'Yes';
-                                    break;
-                                }
-                            }
-                            break;
-                        }
+                var m_rxns = $scope.data.reactions;
+                for (var k = 0; k < m_rxns.length; k++) {
+                    if (row == m_rxns[k].id) {
+                        is_gapfilled = m_rxns[k].is_gapfilled;
+                        break;
                     }
                 }
                 return is_gapfilled;
