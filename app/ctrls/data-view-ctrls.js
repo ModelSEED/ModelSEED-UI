@@ -134,7 +134,7 @@ function($scope, $sParams, WS, $http) {
 
 
 
-<!-- Build New Model -->
+//
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
@@ -1915,7 +1915,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             $scope.selected = {id: id,
                                modelRxn: ModelParser.rxnhash[item]};
 
-            Biochem.getRxn(id)
+            // Biochem.getRxn(id)
+            Biochem.getRxn_solr(id)
                    .then(function(rxn) {
                         $scope.selected.rxn = rxn;
                     })
@@ -2855,7 +2856,8 @@ function($scope, $sParams, WS, $http, Biochem) {
       }
 
         // add equation from biochem
-        return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        // return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
 

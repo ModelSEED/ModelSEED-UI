@@ -383,20 +383,20 @@ function($s, Biochem, $stateParams) {
 
 
 
-.controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams', 'Biochem',
-function($s, Biochem, $state, $stateParams, Bio) {
+.controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams',
+function($s, Biochem, $state, $stateParams) {
     $s.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
 
     var cpdID = $stateParams.cpd;;
 
-    Bio.get_solr('compounds', {query: cpdID})
+    Biochem.get_solr('compounds', {query: cpdID})
        .then(function(res) {
            $s.totalFound = res.numFound;
            $s.cpd = res.docs[0];
        })
 
     $s.loading = true;
-    Bio.findReactions(cpdID)
+    Biochem.findReactions(cpdID)
        .then(function(res) {
            $s.reactionCount = res.numFound;
            $s.data = res.docs;
@@ -1203,7 +1203,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 
 
-<!-- TODO: Make new myMedia state/controller -->
+// <!-- TODO: Make new myMedia state/controller -->
 .controller('MyMedia',
 ['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',
