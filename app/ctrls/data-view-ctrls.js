@@ -993,7 +993,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         var fbaProm, gapfillProm, expressionProm;
 
         item.loading = true;
-        gapfillProm = showGapfills();
+        gapfillProm = updateGapfills();
         expressionProm = showExpression();
         if (item.relatedFBAs) 
             delete item.relatedFBAs;
@@ -1159,14 +1159,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         })
     }    
     
-    function showGapfills() {
-        if ($scope.item.relatedGapfills) {
-            delete $scope.item.relatedGapfills;
-        } else {
-            return updateGapfills();
-        }
-    }    
-
     function updateGapfills() {
         return MS.getModelGapfills(path)
             .then(function(gfs) {
@@ -1203,7 +1195,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                         var s_rxn = solution_rxns[j]["reaction"].split( "/").slice( -1 )[0];
 
                         for (var k = 0; k < m_rxns.length; k++) {
-                            if (m_rxns[k].id == s_rxn) {
+                            if (m_rxns[k].id.substr(0, 8) == s_rxn.substr(0, 8)) {
                                 m_rxns[k].is_gapfilled = 'Yes';
                                 break;
                             }
@@ -2810,10 +2802,11 @@ function($scope, $sParams, WS, $http, Biochem) {
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
+    var arr = path.split('/');
+    $scope.modelName = arr[arr.length - 3];
 
-    var modelDirA = path.split('/').slice(0, path.split('/').length-2);
-    $scope.modelName = modelDirA.pop().slice(1);
-    $scope.modelPath = modelDirA.join('/')+'/'+$scope.modelName;
+    var modelDirA = arr.slice(0, path.split('/').length-2);
+    $scope.modelPath = modelDirA.join('/');
 
     $scope.tabs = {tabIndex : 0};
 
@@ -2840,22 +2833,22 @@ function($scope, $sParams, WS, $http, Biochem) {
     function parseSolution(solutionData) {
         var data = [], ids = [];
 
-      if( solutionData ) {  
-        for (var i=0; i<solutionData[0].length; i++) {
-            var rxn = solutionData[0][i],
-                id = rxn.reaction_ref.split('/').pop();
+        if( solutionData ) {
+            for (var i=0; i<solutionData[0].length; i++) {
+                var rxn = solutionData[0][i],
+                    id = rxn.reaction_ref.split('/').pop();
 
-            console.log('solution', solutionData)
-            data.push({rxn: id,
-                       compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
-                       direction: rxn.direction
-                   });
+                console.log('solution', solutionData)
+                data.push({rxn: id,
+                        compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
+                        direction: rxn.direction
+                    });
 
-            ids.push(id.split('_')[0]);
+                ids.push(id.split('_')[0]);
+            }
         }
-      }
 
-        // add equation from biochem
+        // add reaction equations for these rxn ids from biochem
         // return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
         return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
