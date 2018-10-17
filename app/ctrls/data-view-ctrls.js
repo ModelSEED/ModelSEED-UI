@@ -1176,15 +1176,15 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         // e.stopPropagation();        
         
         $scope.selectedGF = gf.id;
-        $scope.setReactionGFs();
+        $scope.matchGFReactions();
     }
 
     // Filling the gapfill info for the reactions in $scope.data.reactions array
-    $scope.setReactionGFs = function() {
+    $scope.matchGFReactions = function() {
         if($scope.data.reactions.length > 0 && $scope.relatedGapfills.length > 0) {
             var m_rxns = $scope.data.reactions;
             for (var k = 0; k < m_rxns.length; k++) {
-                m_rxns[k].is_gapfilled = '';
+                m_rxns[k].is_gapfilled = !m_rxns[k].gapfill ? '' : 'Yes';
             }
 
             var gf_id = $scope.selectedGF;
@@ -1206,8 +1206,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             }
         }
     }
-    
-    
         
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();
@@ -1742,9 +1740,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             return links.join('<br>') || '-';
         }},
     ]
-
-    
-    
 
     var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
