@@ -134,7 +134,7 @@ function($scope, $sParams, WS, $http) {
 
 
 
-<!-- Build New Model -->
+/** Build New Model **/
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
