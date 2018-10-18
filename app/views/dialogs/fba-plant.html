@@ -84,7 +84,7 @@
                 <input ng-model="ctrl.form.reaction_ko_list" type="text" placeholder="rxn00001;rxn00002; (example)">
             </md-input-container>            
 
-
+            <div ng-if="isPlant">
             Expression Data
             <div ng-controller="ExpressionDropdown as ctrl" ng-init="initialized = item">
                 <form  ng-model="ctrl.form.expression" ng-submit="$event.preventDefault()" name="fbaForm">
@@ -134,7 +134,8 @@
                     </md-input-container>                    
                 
                 </form>           
-            </div> 
+            </div>
+            </div>
 
 
             <!-- this fails?
