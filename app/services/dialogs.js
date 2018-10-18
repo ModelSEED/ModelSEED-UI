@@ -350,7 +350,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
         })
     }
 
-    this.runPlantFBA = function(ev, item, cb) {
+    this.runPlantFBA = function(ev, item, isPlant, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/fba-plant.html',
@@ -359,6 +359,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
             controller: ['$scope', '$http',
             function($scope, $http) {
                 $scope.item = item;
+                $scope.isPlant = isPlant;
                 $scope.form = {
                     model: item.path, 
                     media_supplement: []
@@ -366,8 +367,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
 
                 $scope.runFBA = function(){
                     // use default media if none
-                    $scope.form.media = $scope.form.media ? $scope.form.media :
-                         "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
+                    if (isPlant) {
+                        $scope.form.media = $scope.form.media ? $scope.form.media :
+                            "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
+                    }
+                    else {
+                        $scope.form.media = $scope.form.media ? $scope.form.media : "Complete";
+                    }
                     MS.runFBA($scope.form)
                       .then(function(res) {
                           self.showToast('Running Flux Balance Analysis', item.name, 5000)

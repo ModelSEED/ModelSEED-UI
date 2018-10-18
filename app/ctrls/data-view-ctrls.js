@@ -1101,13 +1101,12 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     Dialogs.showError( 'BlastAnnotate Error', e.error.message );
                 })
     }
-        
-    
-    
+
+
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
-        Dialogs.runPlantFBA(ev, item, function() {
+        Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
                 $scope.selectedService='FBA';
