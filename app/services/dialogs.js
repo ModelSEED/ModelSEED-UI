@@ -362,7 +362,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     MS.runFBA($scope.form)
                       .then(function(res) {
                           console.log('fba job started: ', res)
-                          self.showToast('Running Flux Balance Analysis ', item.name, 5000);
+                          self.showToast('Running Flux Balance Analysis ', item.path.split('/').pop(), 5000);
                           if (cb) cb();
                           // self.showComplete('FBA Complete', res.id)
                       }).catch(function(e) {
@@ -391,9 +391,17 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 $scope.form = {model: item.path};
 
                 $scope.gapfill = function(){
+                    // use default media if none
+                    if ($scope.isPlant) {
+                        $scope.form.media = $scope.form.media ? $scope.form.media :
+                            "/chenry/public/modelsupport/media/PlantHeterotrophicMedia";
+                    }
+                    else {
+                        $scope.form.media = $scope.form.media ? $scope.form.media : "Complete";
+                    }
                     MS.gapfill($scope.form)
                       .then(function(res) {
-                          self.showToast('Running gapfilling...', item.name, 5000);
+                          self.showToast('Running gapfilling...', item.path.split('/').pop(), 5000);
                           console.log('gapfill job started: ', res)
                           if (cb) cb();
                       }).catch(function(e) {

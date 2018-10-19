@@ -1008,7 +1008,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     function updateFBAs() {
         return MS.getModelFBAs(path)
             .then(function(fbas) {                
-                
                 $scope.relatedFBAs = fbas;
                 // Tabs.selectedIndex = 0;
             })
@@ -1092,7 +1091,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
         Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
-                item.fbaCount++;
+                item.fbaCount = $scope.relatedFBAs.length;
                 $scope.selectedService='FBA';
             })
         })
@@ -1147,12 +1146,12 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         }
     }    
            
-    $scope.gapfill = function(ev) {
-        var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
+    $scope.gapfill = function(ev, item) {
+        //var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
     
         Dialogs.gapfill(ev, item, function() {
             updateGapfills().then(function() {
-                item.gapfillCount++;
+                item.gapfillCount = $scope.relatedGapfills.length;
                 $scope.selectedService='GapFill';
             })
         })
@@ -1170,7 +1169,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
     // MODELSEED-68: Make display of gapfilling data orthogonal as well!
     // Gapfill selection for data viewing (enables determine which GF is selected via radios)
-    $scope.setSelectedGF = function(e, gf, model) {
+    $scope.setSelectedGF = function(e, gf, mdl) {
         // e.preventDefault();
         // e.stopPropagation();        
         

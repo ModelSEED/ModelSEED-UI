@@ -336,6 +336,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
                             d.push(res[i]);
                         }
+                        console.log("MS.list_fba_studies returns result:\n", res);
                         return d;
                     }).catch(function() {
                         return [];
