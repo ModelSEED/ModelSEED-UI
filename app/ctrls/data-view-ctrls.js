@@ -134,7 +134,7 @@ function($scope, $sParams, WS, $http) {
 
 
 
-//
+/** Build New Model **/
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
@@ -968,7 +968,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     $scope.selectedService = "";
     $scope.selectedFBA = "";
     
-    
     $scope.selectedGF = "";
        
     var genomePath = path + '/genome';
@@ -989,7 +988,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     
     $scope.getRelatedData = function( item ) {
         $scope.item = item;
-
         var fbaProm, gapfillProm, expressionProm;
 
         item.loading = true;
@@ -1092,7 +1090,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
-        Dialogs.runPlantFBA(ev, item, function() {
+        Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
                 $scope.selectedService='FBA';
@@ -1184,7 +1182,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         if($scope.data.reactions.length > 0 && $scope.relatedGapfills.length > 0) {
             var m_rxns = $scope.data.reactions;
             for (var k = 0; k < m_rxns.length; k++) {
-                m_rxns[k].is_gapfilled = !m_rxns[k].gapfill ? '' : 'Yes';
+                m_rxns[k].is_gapfilled = '';
             }
 
             var gf_id = $scope.selectedGF;
@@ -1206,6 +1204,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             }
         }
     }
+    
+    
         
     $scope.deleteFBA = function(e, i, model) {
         e.stopPropagation();

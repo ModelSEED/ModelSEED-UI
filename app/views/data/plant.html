@@ -1,6 +1,3 @@
-
-
-
 <div class="content-header" flex>
     <h1>Build Model</h1><br>
 </div>
@@ -11,62 +8,51 @@
   
   <md-tab md-on-select="setDomain('plants')" name="PlantUploadTab" ng-disabled="plantTabIsLocked">
     <md-tab-label>
-      UPLOAD Plants FASTA
+        UPLOAD Plants FASTA
     </md-tab-label>
 
     <md-tab-body>
-
-     <div ng-if="isPlant"> 
-      <div layout="column">
-
-       <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
-
-            <div class="form-group">
-                <br>
-                <label class="control-label"> <i>Select FASTA file: </i> </label>
-                <label class="md-button md-primary md-raised">
-                    Choose File...
-                    <input
-                        name="upload"
-                        enctype="multipart/form-data"
-                        type="file"
-                        onchange="angular.element(this).scope().selectFile(this.files)"/>
-                </label>
-                {{selectedFiles[0].name}}
-            </div>
-        
-            <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
-            <!--
-            <label style="margin: 10px">
-            Select Template Model:
-                <select
-                    ng-model="selectedTemplate"
-                    ng-options="option.value for option in options">
-                    <option value="">Automatically select</option>
-                </select>
-            </label>
-            -->
-                <br>
-                <div flex="40" layout="row">
-                    <!--label class="md-button md-primary md-raised">Model name (required): </label-->
-                    <input flex="40" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
-                </div><br>
-
-                <div flex="10" layout="row">
-                    <md-button class="md-primary md-raised"
-                        ng-click="startUpload(  )"
-                        ng-disabled="!selectedFiles">
-                        Build Model
-                    </md-button>
-
-                    <md-progress-circular ng-if="uploading" md-mode="indeterminate"></md-progress-circular>
+        <div ng-if="isPlant">
+        <div layout="column">
+            <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
+                <div class="form-group">
+                    <br>
+                    <label class="control-label"> <i>Select FASTA file: </i> </label>
+                    <label class="md-button md-primary md-raised">
+                        Choose File...
+                        <input
+                                name="upload"
+                                enctype="multipart/form-data"
+                                type="file"
+                                onchange="angular.element(this).scope().selectFile(this.files)"/>
+                    </label>
+                    {{selectedFiles[0].name}}
                 </div>
-            </div>
-         </form>
-       </div>
-     </div>
+
+                <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
+                    <md-content>
+                        <md-button ng-click="selectMedia($event)" class="md-raised">Change Media (Optional)</md-button>
+                        <label style="color: blue">(Selected media: {{mediaName}})</label>
+                    </md-content>
+                    <br>
+                    <div flex="35" layout="row">
+                        <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
+                    </div><br>
+
+                    <div flex="10" layout="row">
+                        <md-button class="md-primary md-raised"
+                            ng-click="startUpload(  )"
+                            ng-disabled="!selectedFiles">
+                            Build Model
+                        </md-button>
+                        <md-progress-circular ng-if="uploading" md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
              
-  </md-tab-body>
+     </md-tab-body>
   </md-tab>
   
   
@@ -78,68 +64,62 @@
     </md-tab-label>
 
     <md-tab-body>
+        <div ng-if="!isPlant">
+        <div layout="column">
+            <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
+                <div class="form-group">
+                    <br>
+                    <label class="control-label"> <i>Select FASTA file: </i> </label>
+                    <label class="md-button md-primary md-raised">
+                        Choose File...
+                        <input
+                            name="upload"
+                            enctype="multipart/form-data"
+                            type="file"
+                            onchange="angular.element(this).scope().selectFile(this.files)"/>
+                    </label>
+                    {{selectedFiles[0].name}}
+                </div>
 
-     <div ng-if="!isPlant"> 
-       <div layout="column">     
-                
-         <form name="upload_form" id="upload-form" class="upload-form form-horizontal">
+                <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
+                    <label style="margin: 10px">
+                        Select Template Model:
+                        <select
+                            ng-model="selectedTemplate"
+                            ng-options="option.value for option in options">
+                            <option value="">Automatically select</option>
+                        </select>
+                    </label>
 
-            <div class="form-group">
-                <br>		
-                <label class="control-label"> <i>Select FASTA file: </i> </label>
-                <label class="md-button md-primary md-raised">
-                    Choose File...
-                    <input
-                        name="upload"
-                        enctype="multipart/form-data"
-                        type="file"
-                        onchange="angular.element(this).scope().selectFile(this.files)"/>
-                </label>
-                {{selectedFiles[0].name}}
+                    <label style="margin: 10px">
+                        Genome Type:
+                        <select flex ng-model="selectedTaxa"
+                            ng-options="optionTaxa.value for optionTaxa in taxaOptions">
+                            <option value="">Contigs</option>
+                        </select>
+                    </label>
+
+                    <md-content>
+                        <md-button ng-click="selectMedia($event)" class="md-raised">Change Media (Optional)</md-button>
+                        <label style="color: blue">(Selected media: {{mediaName}})</label>
+                    </md-content>
+                    <br>
+                    <div flex="35" layout="row">
+                        <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
+                    </div>
+
+                    <div flex="10" layout="row">
+                        <md-button class="md-primary md-raised"
+                            ng-click="startUpload(  )"
+                            ng-disabled="!selectedFiles">
+                            Build Model
+                        </md-button>
+                        <md-progress-circular ng-if="uploading" md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                </div>
+                </form>
             </div>
-
-        <div ng-if="selectedFiles[0].name.length>0" flex="30" class="vertical-center" layout="column" layout-align="start">
-                  
-            <label style="margin: 10px">
-            Select Template Model:
-                <select
-                    ng-model="selectedTemplate"
-                    ng-options="option.value for option in options">
-                    <option value="">Automatically select</option>
-                </select>
-            </label>
-
-            <label style="margin: 10px">
-                Genome Type:
-                <select flex ng-model="selectedTaxa"
-                    ng-options="optionTaxa.value for optionTaxa in taxaOptions">
-                    <option value="">Contigs</option>
-                </select>
-            </label>
-
-            <md-content>
-                <md-button ng-click="selectMedia($event)" class="md-raised">Change Media (Optional)</md-button>
-                <label style="color: blue">(Selected media: {{mediaName}})</label>
-            </md-content>
-            <br>
-            <div flex="35" layout="row">
-                <input flex="35" ng-model="modelName" class="form-control" placeholder="Name Model to build -- Required" required autofocus></input>
-            </div>
-
-            <div flex="10" layout="row">
-                <md-button class="md-primary md-raised"
-                    ng-click="startUpload(  )"
-                    ng-disabled="!selectedFiles">
-                    Build Model
-                </md-button>
-
-                <md-progress-circular ng-if="uploading" md-mode="indeterminate"></md-progress-circular>
-            </div>
-          </div>
-         </form>
-       </div>
-     </div>
-             
+        </div>
     </md-tab-body>    
   </md-tab>
 
