@@ -391,13 +391,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 $scope.form = {model: item.path};
 
                 $scope.gapfill = function(){
-                    self.showToast('Gapfilling', item.name, 5000)
-
-                    self.showToast('Running gapfilling...', item.name, 5000)
                     MS.gapfill($scope.form)
                       .then(function(res) {
-                           console.log('gapfill job started: ', res)
-                           if (cb) cb();
+                          self.showToast('Running gapfilling...', item.name, 5000);
+                          console.log('gapfill job started: ', res)
+                          if (cb) cb();
                       }).catch(function(e) {
                           self.showError('Gapfill Error', e.error.message.slice(0,30)+'...')
                       })

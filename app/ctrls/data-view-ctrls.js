@@ -1153,6 +1153,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         Dialogs.gapfill(ev, item, function() {
             updateGapfills().then(function() {
                 item.gapfillCount++;
+                $scope.selectedService='GapFill';
             })
         })
     }    
