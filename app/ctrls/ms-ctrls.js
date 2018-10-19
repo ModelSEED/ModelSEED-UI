@@ -1203,7 +1203,7 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
 
 
 
-<!-- TODO: Make new myMedia state/controller -->
+/** TODO: Make new myMedia state/controller **/
 .controller('MyMedia',
 ['$scope', '$stateParams', 'WS', 'MS', 'Auth',
  'Session', 'uiTools', 'Dialogs', '$state',

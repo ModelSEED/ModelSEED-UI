@@ -1,3 +1,6 @@
+<h5>
+    <i class="icon-folder-open-o"></i><a ui-sref="app.myModels()"> >My Models</a>
+</h5>
 <div layout="row">
     <div ng-if="!isMine" class="h5">
         <i class="icon-folder-open-o"></i>
@@ -15,11 +18,11 @@
             <!--md-button class="md-primary md-raised md-button" ng-click="reconstructPipelineAnnotate($event, item)">
                 ReAnnotate & Rebuild Model</md-button-->
             <md-button class="md-primary md-raised md-button" ng-click="annotatePlant($event, item)">Blast Genome</md-button>
+            <md-button class="md-primary md-raised md-button" ng-click="uploadExpression( $event, item )" >Add Expression</md-button>
         </div>
         <md-button class="md-primary md-raised md-button" ng-click="runPlantFBA($event, item)">Run FBA</md-button>
         <md-button class="md-primary md-raised md-button" ng-click="gapfill($event)">Run GapFilling</md-button>
-        <md-button class="md-primary md-raised md-button" ng-click="uploadExpression( $event, item )" >Add Expression</md-button>
-        <md-button md-no-ink ng-click="toggleOperations($event, 'download', item)" aria-label="view download options">
+
             <md-tooltip>View download options</md-tooltip>
             <i class="icon-file-download"></i>
         </md-button>

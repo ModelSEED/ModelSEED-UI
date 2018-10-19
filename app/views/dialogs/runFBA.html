@@ -21,7 +21,6 @@
             <p ng-if="isPlant" class="text-muted">Note: Plant Heterotrophic Media is used by default.</p>
             <!-- select media name:media -->
 
-
             <div ng-controller="MediaDropdown as ctrl">
                 <div layout="row" layout-align="end end">
                     <md-progress-circular ng-if="!myMedia || !media"
@@ -85,17 +84,13 @@
                     FVA?
                 </md-checkbox>
             </div>
-            -->
 
-            <!--
             <div flex="50">
                 <md-checkbox ng-model="form.simulateko" aria-label="fva checkbox" md-no-ink>
                     Simulate Gene Knockout?
                 </md-checkbox>
             </div>
-            -->
 
-            <!--
             <div flex="50">
                 <md-checkbox ng-model="form.minimizeflux" aria-label="fva checkbox" md-no-ink>
                     Minimize Flux?

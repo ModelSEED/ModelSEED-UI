@@ -134,7 +134,7 @@ function($scope, $sParams, WS, $http) {
 
 
 
-<!-- Build New Model -->
+/** Build New Model **/
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
@@ -1092,7 +1092,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
-        Dialogs.runPlantFBA(ev, item, function() {
+        Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
                 item.fbaCount++;
                 $scope.selectedService='FBA';
