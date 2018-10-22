@@ -36,7 +36,7 @@
 
             <div flex="35">
               <a ui-sref="app.mediaPage({path: gpf.media})"
-                        ng-click="$event.stopPropagation()">{{::gpf.media.split('/').pop()}}</a>
+                  ng-click="$event.stopPropagation()">{{::gpf.media.split('/').pop()}}</a>
             </div>
             <div flex="20">
               {{relativeTime(gpf.rundate)}}

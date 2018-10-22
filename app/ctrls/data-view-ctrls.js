@@ -968,7 +968,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     $scope.selectedService = "";
     $scope.selectedFBA = "";
     
-    
     $scope.selectedGF = "";
        
     var genomePath = path + '/genome';
@@ -989,11 +988,10 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     
     $scope.getRelatedData = function( item ) {
         $scope.item = item;
-
         var fbaProm, gapfillProm, expressionProm;
 
         item.loading = true;
-        gapfillProm = showGapfills();
+        gapfillProm = updateGapfills();
         expressionProm = showExpression();
         if (item.relatedFBAs) 
             delete item.relatedFBAs;
@@ -1010,7 +1008,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     function updateFBAs() {
         return MS.getModelFBAs(path)
             .then(function(fbas) {                
-                
                 $scope.relatedFBAs = fbas;
                 // Tabs.selectedIndex = 0;
             })
@@ -1094,7 +1091,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
         Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
-                item.fbaCount++;
+                item.fbaCount = $scope.relatedFBAs.length;
                 $scope.selectedService='FBA';
             })
         })
@@ -1149,24 +1146,17 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         }
     }    
            
-    $scope.gapfill = function(ev) {
-        var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
+    $scope.gapfill = function(ev, item) {
+        //var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
     
         Dialogs.gapfill(ev, item, function() {
             updateGapfills().then(function() {
-                item.gapfillCount++;
+                item.gapfillCount = $scope.relatedGapfills.length;
+                $scope.selectedService='GapFill';
             })
         })
     }    
     
-    function showGapfills() {
-        if ($scope.item.relatedGapfills) {
-            delete $scope.item.relatedGapfills;
-        } else {
-            return updateGapfills();
-        }
-    }    
-
     function updateGapfills() {
         return MS.getModelGapfills(path)
             .then(function(gfs) {
@@ -1179,16 +1169,16 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
     // MODELSEED-68: Make display of gapfilling data orthogonal as well!
     // Gapfill selection for data viewing (enables determine which GF is selected via radios)
-    $scope.setSelectedGF = function(e, gf, model) {
+    $scope.setSelectedGF = function(e, gf, mdl) {
         // e.preventDefault();
         // e.stopPropagation();        
         
         $scope.selectedGF = gf.id;
-        $scope.setReactionGFs();
+        $scope.matchGFReactions();
     }
 
     // Filling the gapfill info for the reactions in $scope.data.reactions array
-    $scope.setReactionGFs = function() {
+    $scope.matchGFReactions = function() {
         if($scope.data.reactions.length > 0 && $scope.relatedGapfills.length > 0) {
             var m_rxns = $scope.data.reactions;
             for (var k = 0; k < m_rxns.length; k++) {
@@ -1203,7 +1193,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                         var s_rxn = solution_rxns[j]["reaction"].split( "/").slice( -1 )[0];
 
                         for (var k = 0; k < m_rxns.length; k++) {
-                            if (m_rxns[k].id == s_rxn) {
+                            if (m_rxns[k].id.substr(0, 8) == s_rxn.substr(0, 8)) {
                                 m_rxns[k].is_gapfilled = 'Yes';
                                 break;
                             }
@@ -1751,9 +1741,6 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
         }},
     ]
 
-    
-    
-
     var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
     var parts = path.split('/');
@@ -1915,7 +1902,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             $scope.selected = {id: id,
                                modelRxn: ModelParser.rxnhash[item]};
 
-            Biochem.getRxn(id)
+            // Biochem.getRxn(id)
+            Biochem.getRxn_solr(id)
                    .then(function(rxn) {
                         $scope.selected.rxn = rxn;
                     })
@@ -2809,10 +2797,11 @@ function($scope, $sParams, WS, $http, Biochem) {
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
+    var arr = path.split('/');
+    $scope.modelName = arr[arr.length - 3];
 
-    var modelDirA = path.split('/').slice(0, path.split('/').length-2);
-    $scope.modelName = modelDirA.pop().slice(1);
-    $scope.modelPath = modelDirA.join('/')+'/'+$scope.modelName;
+    var modelDirA = arr.slice(0, path.split('/').length-2);
+    $scope.modelPath = modelDirA.join('/');
 
     $scope.tabs = {tabIndex : 0};
 
@@ -2839,23 +2828,24 @@ function($scope, $sParams, WS, $http, Biochem) {
     function parseSolution(solutionData) {
         var data = [], ids = [];
 
-      if( solutionData ) {  
-        for (var i=0; i<solutionData[0].length; i++) {
-            var rxn = solutionData[0][i],
-                id = rxn.reaction_ref.split('/').pop();
+        if( solutionData ) {
+            for (var i=0; i<solutionData[0].length; i++) {
+                var rxn = solutionData[0][i],
+                    id = rxn.reaction_ref.split('/').pop();
 
-            console.log('solution', solutionData)
-            data.push({rxn: id,
-                       compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
-                       direction: rxn.direction
-                   });
+                console.log('solution', solutionData)
+                data.push({rxn: id,
+                        compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
+                        direction: rxn.direction
+                    });
 
-            ids.push(id.split('_')[0]);
+                ids.push(id.split('_')[0]);
+            }
         }
-      }
 
-        // add equation from biochem
-        return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        // add reaction equations for these rxn ids from biochem
+        // return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
 
