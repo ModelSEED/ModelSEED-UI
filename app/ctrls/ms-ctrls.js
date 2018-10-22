@@ -316,8 +316,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     function updateRxns() {
-        // Biochem.get('model_reaction', $s.rxnOpts)
-        Biochem.get_solr('reactions', $s.rxnOpts)
+        Biochem.get('model_reaction', $s.rxnOpts)
+        // Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
                     $s.rxns = res;
                     $s.loadingRxns = false;
@@ -325,8 +325,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }
 
     function updateCpds() {
-        // Biochem.get('model_compound', $s.cpdOpts)
-        Biochem.get_solr('compounds', $s.cpdOpts)
+        Biochem.get('model_compound', $s.cpdOpts)
+        // Biochem.get_solr('compounds', $s.cpdOpts)
                .then(function(res) {
                     $s.cpds = res;
                     $s.loadingCpds = false;
@@ -360,7 +360,8 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    Biochem.getCpd_solr($s.id)
+    Biochem.getCpd($s.id)
+    // Biochem.getCpd_solr($s.id)
         .then(function(data) {
             $s.cpd = data;
             $s.loading = false;
@@ -374,7 +375,8 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    Biochem.getRxn_solr($s.id)
+    Biochem.getRxn($s.id)
+    // Biochem.getRxn_solr($s.id)
         .then(function(data) {
             $s.rxn = data;
             $s.loading = false;
@@ -389,7 +391,8 @@ function($s, Biochem, $state, $stateParams) {
 
     var cpdID = $stateParams.cpd;;
 
-    Biochem.get_solr('compounds', {query: cpdID})
+    Biochem.get('model_compound', {query: cpdID})
+    // Biochem.get_solr('compounds', {query: cpdID})
        .then(function(res) {
            $s.totalFound = res.numFound;
            $s.cpd = res.docs[0];
