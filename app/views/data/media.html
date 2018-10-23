@@ -1,6 +1,6 @@
 <div layout="row">
 
-	<div ng-if="!isMine" class="h5">
+	<div class="h5">
 		<i class="icon-folder-open-o"></i>
 		<a ui-sref="app.media({tab: 'public'})"> >Public Media</a>
 	</div>
@@ -8,7 +8,7 @@
 		Media
 		<small>{{name}}</small>
 	</div>
-	<div ng-if="!isMine" class="h5">
+	<div class="h5">
 		<i class="icon-folder-open-o"></i>
 		<a ui-sref="app.myMedia({tab: 'mine'})"> >My Media</a>
 	</div>
