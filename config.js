@@ -2,7 +2,7 @@
 /* service endpoint and UI configuration settings */
 angular.module('config', []).service('config', function() {
 
-    this.releaseVersion = 'v2.3';
+    this.releaseVersion = 'v2.4';
 
     // wether or not to include plants UI components
     // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods

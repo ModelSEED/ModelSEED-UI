@@ -2,6 +2,9 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.4 (Nov 12, 2018)
+- Fixed visualization of gapfilling results, they now can be seen in the Model reactions table
+
 ####v2.3 (Sep 23, 2018)
 - Fixed and restyled media choices when building a microbial model from file
 
