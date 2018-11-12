@@ -134,7 +134,7 @@ function($scope, $sParams, WS, $http) {
 
 
 
-<!-- Build New Model -->
+/** Build New Model **/
 .controller('BuildPlant',
 ['$scope', '$state', 'Patric', '$timeout', '$http', 'Upload', '$mdDialog',
  'Dialogs', 'ViewOptions', 'WS', 'Auth', 'uiTools', 'Tabs', 'MS', 'Session', 'ModelViewer', 'config',
@@ -933,6 +933,7 @@ function($s, $state, $sParams, WS, MS, tools,
 
                 function updateCpds() {
                     Biochem.get('model_compound', $s.cpdOpts)
+                    // Biochem.get_solr('compounds', $s.cpdOpts)
                            .then(function(res) {
                                 $s.cpds = res;
                                 $s.loadingCpds = false;
@@ -952,9 +953,9 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
 .controller('ModelDataView',
-['$scope', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs', 'GenomeParser',
+['$scope', '$q', '$state', '$stateParams', 'Auth', 'MS', 'WS', 'Biochem', '$mdDialog', 'Dialogs', 'GenomeParser',
  'ModelParser', 'FBAParser', 'uiTools', 'Tabs', '$mdSidenav', '$document', '$http', 'ModelViewer', 'config',
-function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, GenomeParser,
+function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, GenomeParser,
          ModelParser, FBAParser, uiTools, Tabs, $mdSidenav, $document, $http, MV, config) {        
 
     $scope.Tabs = Tabs;
@@ -968,10 +969,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.selectedService = "";
     $scope.selectedFBA = "";
     
-    
     $scope.selectedGF = "";
-
-    
        
     var genomePath = path + '/genome';
     var dictionary = {};
@@ -984,45 +982,34 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     if( parsedPath.indexOf('plantseed') == -1 && parsedPath.indexOf('modelseed') == -1 ) {
     	$scope.isRef = false;
     } else {
-    	$scope.isRef = true;    	
+        $scope.isRef = true;
     }
-        
+
     $scope.isPlant = path.split('/')[2] === 'plantseed' ? true : false;
     
-    $scope.showRelatedData = function( item ) {
+    $scope.getRelatedData = function( item ) {
         $scope.item = item;
-        // item.loading = true;        
-        
-        var gapfillProm = showGapfills();
-        var expressionProm = showExpression();
+        var fbaProm, gapfillProm, expressionProm;
 
-        var fbaProm;
-        
+        item.loading = true;
+        gapfillProm = updateGapfills();
+        expressionProm = showExpression();
         if (item.relatedFBAs) 
             delete item.relatedFBAs;
         else         
             fbaProm = updateFBAs();
-            
-        // Set reaction fluxes for the selected FBA (thanks to the "addFBA" method):
-        $scope.getRxnFluxes();
-        $scope.getCpdFluxes();               
         
-        /*
         $q.all([fbaProm, gapfillProm, expressionProm])
             .then(function() {
-                console.log('done')
+                console.log('Done getting FBA, Gapfill and Expression data.')
                 item.loading = false
             } );
-        */
-            
     }
 
     function updateFBAs() {
         return MS.getModelFBAs(path)
             .then(function(fbas) {                
-                
                 $scope.relatedFBAs = fbas;
-                                
                 // Tabs.selectedIndex = 0;
             })
     }
@@ -1044,7 +1031,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 
                 $scope.expression = expList;
             })
-            
     }
     
     $scope.uploadExpression = function(ev, item) {
@@ -1052,8 +1038,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
             updateExpression(item);
         })
     }
-    
-    
+
     
     $scope.reconstructPipeline = function(ev, item) {
         // var parameters = { genome: $scope.name, genome_type: "plant" };
@@ -1101,15 +1086,13 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     Dialogs.showError( 'BlastAnnotate Error', e.error.message );
                 })
     }
-        
-    
-    
+
     $scope.runPlantFBA = function(ev, item) {
         // var item = {path: path, name: $scope.name, fbaCount: $scope.fbaCount};
 
-        Dialogs.runPlantFBA(ev, item, function() {
+        Dialogs.runPlantFBA(ev, item, $scope.isPlant, function() {
             updateFBAs().then(function() {
-                item.fbaCount++;
+                item.fbaCount = $scope.relatedFBAs.length;
                 $scope.selectedService='FBA';
             })
         })
@@ -1123,10 +1106,10 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         // e.stopPropagation();        
         
         $scope.selectedFBA = fba.path.split( "/").slice( -1 );
+
+        // Call functions to set selected fba fluxes:
         $scope.getRxnFluxes();
         $scope.getCpdFluxes();
-        
-        $scope.showRelatedData( $scope.item );
         
         var data = {model: model.path,
                 fba: fba.path,
@@ -1139,8 +1122,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.addFBA = function(e, fba, model) {
         e.preventDefault();
         e.stopPropagation();
-        
-        // $scope.selectedFBA = fba.path.split( "/").slice( -1 );
 
         var data = {model: model.path,
                     fba: fba.path,
@@ -1166,24 +1147,17 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         }
     }    
            
-    $scope.gapfill = function(ev) {
-        var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
+    $scope.gapfill = function(ev, item) {
+        //var item = {path: path, name: $scope.name, gapfillCount: $scope.gapfillCount};
     
         Dialogs.gapfill(ev, item, function() {
-            updateGapfills(item).then(function() {
-                item.gapfillCount++;
+            updateGapfills().then(function() {
+                item.gapfillCount = $scope.relatedGapfills.length;
+                $scope.selectedService='GapFill';
             })
         })
     }    
     
-    function showGapfills() {
-        if ($scope.relatedGapfills) {
-            delete $scope.relatedGapfills;
-        } else {
-            return updateGapfills();
-        }
-    }    
-
     function updateGapfills() {
         return MS.getModelGapfills(path)
             .then(function(gfs) {
@@ -1196,22 +1170,41 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
 
     // MODELSEED-68: Make display of gapfilling data orthogonal as well!
     // Gapfill selection for data viewing (enables determine which GF is selected via radios)
-    $scope.setSelectedGapfilling = function(e, gf, model) {
+    $scope.setSelectedGF = function(e, gf, mdl) {
         // e.preventDefault();
         // e.stopPropagation();        
         
-        // $scope.selectedGF = gf.path.split( "/").slice( -1 );
-        
-        /*
-        $scope.getRxnFluxes();
-        $scope.getCpdFluxes();        
-        $scope.showRelatedData( $scope.item );        
-        var data = {model: model.path,
-                fba: fba.path,
-                org: model.orgName,
-                media: fba.media};
-        */
-    } 
+        $scope.selectedGF = gf.id;
+        $scope.matchGFReactions();
+    }
+
+    // Filling the gapfill info for the reactions in $scope.data.reactions array
+    $scope.matchGFReactions = function() {
+        if($scope.data.reactions.length > 0 && $scope.relatedGapfills.length > 0) {
+            var m_rxns = $scope.data.reactions;
+            for (var k = 0; k < m_rxns.length; k++) {
+                m_rxns[k].is_gapfilled = '';
+            }
+
+            var gf_id = $scope.selectedGF;
+            for (var i = 0; i < $scope.relatedGapfills.length; i++) {
+                if (gf_id == $scope.relatedGapfills[i].id) {
+                    var solution_rxns = $scope.relatedGapfills[i]['solution_reactions'][0];
+                    for (var j = 0; j < solution_rxns.length; j++) {
+                        var s_rxn = solution_rxns[j]["reaction"].split( "/").slice( -1 )[0];
+
+                        for (var k = 0; k < m_rxns.length; k++) {
+                            if (m_rxns[k].id.substr(0, 8) == s_rxn.substr(0, 8)) {
+                                m_rxns[k].is_gapfilled = 'Yes';
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
     
     
         
@@ -1353,7 +1346,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
     $scope.getRxnFluxes = function( ) {
         // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
     	if( $scope.selectedFBA.length>0 ) {
-        var fbaPath = path + '/fba/' + $scope.selectedFBA; 
+        var fbaPath = path + '/fba/' + $scope.selectedFBA;
         WS.get( fbaPath ).then(function(obj) {
             FBAParser.parse(obj.data)
                      .then(function(parsed) {
@@ -1374,7 +1367,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         })
       }
     }
-    
+
+
     $scope.getCpdFluxes = function( ) {
         // var fbaId = MV.models[0]["fba"].split( "/").slice( -1 );
     	if( $scope.selectedFBA.length>0 ) {
@@ -1437,8 +1431,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
              }
         } ,
         
-        
-        
         // converge orthogonal Flux data:
         {label: 'Flux', key: 'id',
 
@@ -1454,7 +1446,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
-                            if( $scope.rxnFluxHash ) {
+                            if( $scope.rxnFluxHash && $scope.rxnFluxHash[ row ]) {
                                 fbas.push( $scope.rxnFluxHash[ row ].value );
                             }
                         }
@@ -1477,7 +1469,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
-                            if( $scope.rxnFluxHash ) {
+                            if( $scope.rxnFluxHash && $scope.rxnFluxHash[ row ]) {
                                 fbas.push( $scope.rxnFluxHash[ row ].min );
                             }
                         }
@@ -1500,7 +1492,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                     // fbas.push( $scope.selectedFBA );
                         
                         if( $scope.rxnFluxes ) {
-                            if( $scope.rxnFluxHash ) {
+                            if( $scope.rxnFluxHash && $scope.rxnFluxHash[ row ]) {
                                 fbas.push( $scope.rxnFluxHash[ row ].max );
                             }
                         }
@@ -1522,23 +1514,30 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 	
                     // fbas.push( $scope.selectedFBA );
                         if( $scope.rxnFluxes ) {
-                            if( $scope.rxnFluxHash ) {
+                            if( $scope.rxnFluxHash && $scope.rxnFluxHash[ row ]) {
                                 fbas.push( $scope.rxnFluxHash[ row ].class );
                             }
                         }
                 }
                 return fbas.join('<br>');
             }
+        },
+        {label: 'Gapfilled', key: 'id',
 
-        }        
-        /* 
-        {label: 'Gapfill', key: 'gapfill',
-            formatter: function(item) {
-                return item.summary || '-';
+            formatter: function(row) {
+                var is_gapfilled = '';
+                var m_rxns = $scope.data.reactions;
+                for (var k = 0; k < m_rxns.length; k++) {
+                    if (row == m_rxns[k].id) {
+                        is_gapfilled = m_rxns[k].is_gapfilled;
+                        break;
+                    }
+                }
+                return is_gapfilled;
             }
         }
-        */ 
         ];
+
 
     $scope.cpdHeader = [{
         label: 'ID', key: 'id', newTab: 'cpd',
@@ -1743,9 +1742,6 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
         }},
     ]
 
-    
-    
-
     var modelPath = path;
     // if path is of form '<user>/home/models/'', use old paths
     var parts = path.split('/');
@@ -1908,6 +1904,7 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                                modelRxn: ModelParser.rxnhash[item]};
 
             Biochem.getRxn(id)
+            // Biochem.getRxn_solr(id)
                    .then(function(rxn) {
                         $scope.selected.rxn = rxn;
                     })
@@ -1932,7 +1929,8 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                 modelCpd: ModelParser.cpdhash[item]};
 
             Biochem.getCpd(id)
-            //Biochem.getCpd_local(id)
+            // Biochem.getCpd_solr(id)
+
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
                 })
@@ -2032,16 +2030,14 @@ function($scope, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs, Ge
                                 {label: 'deltaG', key: 'deltag'},
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
-
                 function updateRxns() {
                     Biochem.get('model_reaction', $scope.rxnOpts)
+                    // Biochem.get_solr('reactions', $scope.rxnOpts)
                            .then(function(res) {
                                 $scope.bioRxns = res;
                                 $scope.loadingRxns = false;
                            })
                 }
-
-
                 $scope.$watch('bioRxnOpts', function(after, before) {
                     $scope.loadingRxns = true;
                     updateRxns();
@@ -2802,10 +2798,11 @@ function($scope, $sParams, WS, $http, Biochem) {
     // path and name of object
     var path = $sParams.path;
     $scope.name = path.split('/').pop()
+    var arr = path.split('/');
+    $scope.modelName = arr[arr.length - 3];
 
-    var modelDirA = path.split('/').slice(0, path.split('/').length-2),
-        modelName = modelDirA.pop().slice(1);
-    $scope.modelPath = modelDirA.join('/')+'/'+modelName;
+    var modelDirA = arr.slice(0, path.split('/').length-2);
+    $scope.modelPath = modelDirA.join('/');
 
     $scope.tabs = {tabIndex : 0};
 
@@ -2832,23 +2829,24 @@ function($scope, $sParams, WS, $http, Biochem) {
     function parseSolution(solutionData) {
         var data = [], ids = [];
 
-      if( solutionData ) {  
-        for (var i=0; i<solutionData[0].length; i++) {
-            var rxn = solutionData[0][i],
-                id = rxn.reaction_ref.split('/').pop();
+        if( solutionData ) {
+            for (var i=0; i<solutionData[0].length; i++) {
+                var rxn = solutionData[0][i],
+                    id = rxn.reaction_ref.split('/').pop();
 
-            console.log('solution', solutionData)
-            data.push({rxn: id,
-                       compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
-                       direction: rxn.direction
-                   });
+                console.log('solution', solutionData)
+                data.push({rxn: id,
+                        compartment: rxn.compartment_ref.split('/').pop()+rxn.compartmentIndex,
+                        direction: rxn.direction
+                    });
 
-            ids.push(id.split('_')[0]);
+                ids.push(id.split('_')[0]);
+            }
         }
-      }
 
-        // add equation from biochem
+        // add reaction equations for these rxn ids from biochem
         return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        // return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
 
@@ -3108,14 +3106,6 @@ function TestServiceCall($s, $sParams, WS, MS) {
               document.getElementById(13).value = returnoutput;              
               call += "submittedModel(";
               break;              
-            case "getModel":
-              returnoutput = MS.getModel(parameters);
-              document.getElementById(13).value = returnoutput;              
-              call += "getModel(";
-              break;
-          
-          
-          
             case "getModel":
               returnoutput = MS.getModel(parameters);
               document.getElementById(13).value = returnoutput;              

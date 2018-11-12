@@ -8,7 +8,7 @@ function($http, $q, config, $log) {
     var self = this
 
     var endpoint = config.services.solr_url;
-    var local_endpoint = config.services.local_solr_url;
+    var solr_endpoint = config.services.local_solr_url; //dev_solr_url;
 
     var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {
@@ -91,7 +91,6 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-
     this.getRxn = function(id, opts) {
         var url = endpoint+'model_reaction/?http_accept=application/json';
 
@@ -108,7 +107,6 @@ function($http, $q, config, $log) {
                         return Array.isArray(id) ? res.data : res.data[0];
                     })
     }
-
     this.getCpd = function(id) {
         var url = endpoint+'model_compound/?http_accept=application/json&eq(id,'+id+')'
         return $http.get(url)
@@ -116,14 +114,6 @@ function($http, $q, config, $log) {
                         return res.data[0];
                     })
     }
-    this.getCpd_local = function(id) {
-        var url = local_endpoint+'compounds'+'/select?wt=json&q="id":'+id;
-        return $http.get(url)
-                    .then(function(res) {
-                        return res.data[0];
-                    })
-    }
-
     this.findReactions = function(cpd) {
         var url = endpoint+'model_reaction/?http_accept=application/solr+json',
             url = url+'&eq(equation,*'+cpd+'*)&limit(10000)&select(id,equation,name,definition)'
@@ -133,7 +123,121 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-    this.getImagePath = function (id) {
+
+    /*************Begin translating the RQL syntax to Solr query syntax******************/
+    this.get_solr = function(collection, opts) {
+        var cache = true;
+        var url = solr_endpoint+collection+'/select?wt=json'
+
+        if (opts) {
+            var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
+                limit = opts.limit ? opts.limit : null,
+                offset = opts.offset ? opts.offset : 0,
+                sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
+                sortField = opts.sort ? opts.sort.field : '',
+                searchFields = 'searchFields' in opts ? opts.searchFields : null, // fields to query against
+                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual columns
+                cols = opts.visible ? opts.visible : [];
+        }
+        if (cols && cols.length) {
+            var set = [];
+            for (var i=0; i<cols.length; i++) {
+                set.push(cols[i]);
+            }
+            url += '&fl='+set.join(',');
+        }
+
+        if (query || queryColumn) {
+            if (queryColumn) {
+                var f = [];
+                for (var field in queryColumn) {
+                    f.push(field+':(*'+queryColumn[field]+'*)');
+                }
+                url += '&q='+f.join(' AND ')
+            } else if (searchFields) {
+                var f = [];
+                for (var i=0; i<searchFields.length; i++) {
+                    f.push(searchFields[i]+':(*'+query+'*)');
+                }
+                url += '&q='+f.join(' OR ')
+            }
+        } else {
+            url += '&q=*';
+            cache = false;
+        }
+
+        if (limit)
+            url += '&rows='+limit+ offset ? '&start='+offset : '';
+
+        if (sort) {
+            sort = sort=='-' ? 'desc' : 'asc';
+            url += '&sort='+ sortField + ' ' + sort;
+            cache = false;
+        }
+
+        if (!offset) cache = true;
+
+        // cancel any previous request using defer
+        if (rxnReq && collection === 'reactions') rxnReq.resolve();
+        if (cpdReq && collection === 'compounds') cpdReq.resolve();
+        if (geneReq && collection === 'gene') geneReq.resolve();
+
+        var liveReq = $q.defer();
+
+        // save defer for later use
+        if (collection === 'reactions')
+            rxnReq = liveReq;
+        else if (collection === 'compounds')
+            cpdReq = liveReq;
+        else if (collection === 'gene')
+            geneReq = liveReq;
+
+        console.log("Solr query:", url);
+        console.log('caching?', cache)
+        return $http.get(url, {cache: cache, timeout: liveReq.promise})
+                    .then(function(res) {
+                        rxnReq = false, cpdReq = false; geneReq = false;
+                        return res.data.response;
+                    })
+    }
+    this.getRxn_solr = function(id, opts) {
+        var url = solr_endpoint+'reactions/select?wt=json'
+
+        if (opts && 'select' in opts) {
+            if (Array.isArray(opts.select))
+                url += '&fl='+opts.select.join(',');
+            else
+                url += '&fl='+opts.select;
+        }
+
+        if (Array.isArray(id))
+            url += '&q=id:('+id.join(' OR ')+ ')';
+        else
+            url += '&q=id:'+id;
+        return $http.get(url)
+                    .then(function(res) {
+                        return Array.isArray(id) ? res.data.response.docs : res.data.response.docs[0];
+                    })
+    }
+    this.getCpd_solr = function(id) {
+        var url = solr_endpoint+'compounds/select?wt=json&q=id:'+id;
+        console.log("Solr query:", url);
+        return $http.get(url)
+                    .then(function(res) {
+                        return res.data.response.docs[0];
+                    })
+    }
+    this.findReactions_solr = function(cpd) {
+        var url = endpoint+'reactions/select?wt=json',
+            url = url+'&q=equation:*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
+        return $http.get(url)
+                    .then(function(res) {
+
+                        return res.data.response.docs;
+                    })
+    }
+    /*************End translating the RQL syntax to Solr query syntax******************/
+        this.getImagePath = function (id) {
             if (id) {
                 var img_root = config.services.cpd_img_url;
                 var dir_depth = 0;
@@ -144,9 +248,7 @@ function($http, $q, config, $log) {
                 return img_root + id + ext
             }
     }
-
 }])
-
 
 .filter('reverse', function() {
   return function(input, uppercase) {

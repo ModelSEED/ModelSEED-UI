@@ -40,7 +40,7 @@ function($http, $q, $rootScope, config, Auth) {
                 sort = opts.sort ? (opts.sort.desc ? 'desc': 'asc') : null,
                 sortField = opts.sort && 'field' in opts.sort ? opts.sort.field : '',
                 searchFields = 'searchFields' in opts ? opts.searchFields : null, // fields to query against
-                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual column
+                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual columns
                 query = 'query' in opts && query != '' ? opts.query : null,
                 cols = opts.visible ? opts.visible : [];
         }

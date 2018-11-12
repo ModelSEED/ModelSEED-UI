@@ -2,7 +2,7 @@
 /* service endpoint and UI configuration settings */
 angular.module('config', []).service('config', function() {
 
-    this.releaseVersion = 'v2.3';
+    this.releaseVersion = 'v2.4';
 
     // wether or not to include plants UI components
     // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods
@@ -19,6 +19,7 @@ angular.module('config', []).service('config', function() {
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         solr_url: "https://www.patricbrc.org/api/",
         local_solr_url: "http://0.0.0.0:8983/solr/",
+        dev_solr_url: "http://140.221.65.31:8983/solr/",
         ms_support_url: "http://modelseed.org/services/ms_fba",
         ms_solr_url: "http://modelseed.theseed.org/solr/",
         cpd_img_url: "http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"

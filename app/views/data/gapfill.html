@@ -1,5 +1,15 @@
+<h5>
+	<i class="icon-folder-open-o"></i>
+	<span>
+		<a ui-sref="app.myModels()"> >My Models</a>
+		<a ui-sref="app.modelPage({path: modelPath})">   >{{modelName}}</a>
+	</span>
+</h5>
 
-<div layout="row">
+<div class="h2">{{name}} <small>(for {{modelName}})</small></div>
+<hr class="no-margin">
+
+<!--div layout="row">
 	<div class="h2" flex>Gapfill <small>{{name}}</small></div>
 	<div layout="column" layout-align="center end">
 		<a ui-sref="app.modelPage({path: modelPath})">
@@ -9,7 +19,7 @@
 			{{meta.media.split('/').pop()}} (<span class="label-media">Media</span>)
 		</a>
 	</div>
-</div>
+</div-->
 
 <hr class="no-margin">
 

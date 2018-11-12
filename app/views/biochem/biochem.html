@@ -48,36 +48,3 @@
 
 <ng-include ng-if="chem == 'reactions'" src="'app/views/biochem/biochem-reaction.html'"></ng-include>
 <ng-include ng-if="chem == 'compounds'" src="'app/views/biochem/biochem-compound.html'"></ng-include>
-
-<!--
-<div class="h2">Biochemistry</div>
-<hr class="no-margin">
-
-
-<md-tabs md-selected="tabs.tabIndex" md-no-ink md-dynamic-height>
-    <md-tab label="Reactions">
-        <md-tab-body>
-            <ng-table-solr table-header="rxnHeader"
-                           table-data="rxns"
-                           table-opts="rxnOpts"
-                           table-loading="loadingRxns"
-                           table-placeholder="Search reactions">
-            </ng-table-solr>
-        </md-tab-body>
-    </md-tab>
-
-    <md-tab label="Compounds">
-        <md-tab-body>
-            <ng-table-solr table-header="cpdHeader"
-                           table-data="cpds"
-                           table-opts="cpdOpts"
-                           table-loading="loadingCpds"
-                           table-placeholder="Search compounds">
-            </ng-table-solr>
-        </md-tab-body>
-    </md-tab>
-
-
-
-</md-tabs>
--->
