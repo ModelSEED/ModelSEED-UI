@@ -2244,6 +2244,12 @@ function($s, WS, $stateParams) {
 
     $s.usr = $stateParams.usernm;
     $s.subsys = $stateParams.subsysnm;
+
+    if( $s.usr == '' || $s.subsys == '' ) {
+        console.log('Please specify the correct user name and subsystem name.');
+        return false;
+    }
+
     var wsPath = '/' + $s.usr + '/subsystem/' + $s.subsys;
     var captions = [];
 
@@ -2262,6 +2268,10 @@ function($s, WS, $stateParams) {
             }
             $s.loading = false;
         })
+        .catch(function(error) {
+            console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+            $s.loading = false;
+        });
     }
 
     // Parse the given data for the subsystem odata structure
