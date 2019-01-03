@@ -2236,6 +2236,55 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 }])
 
 
+// Begin add-subsystem control
+.controller('Subsystem',['$scope', 'WS', '$stateParams',
+function($s, WS, $stateParams) {
+    $s.subsysOpts = {query: '', limit: 20, offset: 0};
+    $s.subsysHeader = []; // dynamically filled later
+
+    $s.usr = $stateParams.usernm;
+    $s.subsys = $stateParams.subsysnm;
+    var wsPath = '/' + $s.usr + '/subsystem/' + $s.subsys;
+    var captions = [];
+
+    $s.loading = true;
+    if (WS.cached.subsystems) {
+        $s.subsysData = WS.cached.subsystems;
+        $s.loading = false;
+    } else {
+        WS.get(wsPath)
+        .then(function(res) {
+            $s.subsysData = parseSubsysData(res.data.name, res.data.data); 
+            captions = res.data.data[0];
+            WS.cached.subsystems = $s.subsysData;
+            for (var k=0; k<captions.length; k++) {
+                $s.subsysHeader[k] = {label: captions[k], key: captions[k]};
+            }
+            $s.loading = false;
+        })
+    }
+
+    // Parse the given data for the subsystem odata structure
+    function parseSubsysData(obj_name, obj_data) {
+        var caps = obj_data[0];
+
+        // convert the subsystem data into an array of objects from an array of arrays
+        data = [];
+        for (var i=1; i<obj_data.length; i++) {
+            data[i-1] = {};
+            for (var j=0; j<caps.length; j++) {
+                data[i-1][caps[j]] = obj_data[i][j];
+            }
+        }
+        // console.log(data);
+
+        return data;
+    }
+}])
+
+// End add-subsystem control
+
+
 
 //var merged = objs1.concat(objs2);
 function mergeObjects(objs1, objs2, key) {

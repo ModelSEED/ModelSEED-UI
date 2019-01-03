@@ -193,10 +193,21 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
             authenticate: true
-            
-            
-            
-        }).state('app.RefModels', {
+        })
+        
+        /* For temporary display of the subsystems*/
+        .state('app.subsystem', {
+            url: "/subsystem/:usernm/:subsysnm",
+            templateUrl: 'app/views/subsystems/subsystem.html',
+            //templateUrl: 'app/views/annotations.html',
+            //controller: 'PlantAnnotations',
+            controller: 'Subsystem',
+            authenticate: true
+        })
+        /* */
+
+
+        .state('app.RefModels', {
             url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
             controller: 'RefModels',
