@@ -2243,14 +2243,15 @@ function($s, WS, $stateParams) {
     $s.subsysHeader = []; // dynamically filled later
 
     $s.usr = $stateParams.usernm;
+    $s.subfolder = $stateParams.subsysfolder;
     $s.subsys = $stateParams.subsysnm;
 
-    if( $s.usr == '' || $s.subsys == '' ) {
+    if( $s.usr == '' || $s.subfolder == '' || $s.subsys == '' ) {
         console.log('Please specify the correct user name and subsystem name.');
         return false;
     }
 
-    var wsPath = '/' + $s.usr + '/subsystem/' + $s.subsys;
+    var wsPath = '/' + $s.usr + '/' + $s.subfolder + '/' + $s.subsys;
     var captions = [];
 
     $s.loading = true;
