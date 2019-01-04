@@ -199,13 +199,10 @@ function($locationProvider, $stateProvider, $httpProvider,
         .state('app.subsystem', {
             url: "/subsystem{path:nonURIEncoded}",
             templateUrl: 'app/views/subsystems/subsystem.html',
-            //templateUrl: 'app/views/annotations.html',
-            //controller: 'PlantAnnotations',
             controller: 'Subsystem',
             authenticate: true
         })
-        /* */
-
+        /* End of temporary display of the subsystems*/
 
         .state('app.RefModels', {
             url: "/genomes/:ref",

@@ -2284,8 +2284,6 @@ function($s, WS, $stateParams) {
                 data[i-1][caps[j]] = obj_data[i][j];
             }
         }
-        // console.log(data);
-
         return data;
     }
 }])
