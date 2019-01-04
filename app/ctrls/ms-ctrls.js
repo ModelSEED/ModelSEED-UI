@@ -2242,16 +2242,15 @@ function($s, WS, $stateParams) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
 
-    $s.usr = $stateParams.usernm;
-    $s.subfolder = $stateParams.subsysfolder;
-    $s.subsys = $stateParams.subsysnm;
+    $s.usr = $stateParams.username.replace('/', '');
+    $s.subpath = $stateParams.subsystemPath.replace('/', '');
 
-    if( $s.usr == '' || $s.subfolder == '' || $s.subsys == '' ) {
-        console.log('Please specify the correct user name and subsystem name.');
+    if( $s.usr == '' || $s.subpath == '' ) {
+        console.log('Please specify the correct user name and path to the subsystem.');
         return false;
     }
 
-    var wsPath = '/' + $s.usr + '/' + $s.subfolder + '/' + $s.subsys;
+    var wsPath = '/' + $s.usr + '/' + $s.subpath;
     var captions = [];
 
     $s.loading = true;

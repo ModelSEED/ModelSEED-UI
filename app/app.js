@@ -197,7 +197,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         
         /* For temporary display of the subsystems*/
         .state('app.subsystem', {
-            url: "/subsystem/:usernm/:subsysfolder/:subsysnm",
+            url: "/subsystem?:username:subsystemPath",
             templateUrl: 'app/views/subsystems/subsystem.html',
             //templateUrl: 'app/views/annotations.html',
             //controller: 'PlantAnnotations',
