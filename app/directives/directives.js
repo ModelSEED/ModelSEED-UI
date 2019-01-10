@@ -2256,3 +2256,55 @@ function($compile, $stateParams) {
         }
     }
 }])
+
+
+// added for searching biochemistry data in solr
+.directive('biochemSearchResults', function () {
+    return {
+      scope: {
+        solrUrl: '=',
+        collection: '=',
+        displayField: '=',
+        search_query: '&',
+        results: '&'
+      },
+      restrict: 'E',
+      controller: function($scope, $http) {
+        console.log('Searching for ' + $scope.query + ' at ' + $scope.solrUrl + ' in ' + $scope.collection);
+        $scope.$watch('query', function() {
+          $http(
+            {method: 'JSONP',
+             url: $scope.solrUrl + $scope.collection + '/select',
+             params:{'json.wrf': 'JSON_CALLBACK',
+                    'q': $scope.search_query,
+                    'fl': $scope.displayField}
+            })
+            .success(function(data) {
+              var docs = data.response.docs;
+              console.log('search success!');
+              $scope.results.docs = docs;
+
+            }).error(function() {
+              console.log('Search failed!');
+            });
+        });
+      },
+      template: '<input ng-model="search_query" name="Search Query"></input>' +
+                '<input ng-model="collection" name="Search Collection"></input>' +
+                '<h2>Biochemistry Search Results for </h2>' +
+                '<span ng-repeat="doc in results.docs">' +
+                '  <p>{{doc}}</p>'  +
+                '</span>'
+    };
+  });
+
+  /* supposed to be used as follows:
+<biochem-search-results
+    solr-url="'http://0.0.0.0:8983/solr/'"
+    collection="'compounds'"
+    search_query="''"
+    display-field="'aliases'">
+</biochem-search-results>
+  */
+
+// End 'added for searching biochemistry data in solr'
