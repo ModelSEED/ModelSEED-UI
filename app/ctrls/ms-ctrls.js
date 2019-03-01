@@ -275,9 +275,12 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
     ];
 
+    $s.cpdComments = ['bad abbreviation', 'bad synonym', 'bad formula', 'bad charge'];
     $s.cpdHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>';
+            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', $s.cpdComments)">';
+            comment_str += '<md-icon class="material-icons">comment</md-icon><button/>';
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a><br>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula', format: function(row) {
@@ -348,8 +351,13 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }, true)
 
     /* table row click (not used as of now)
-    $s.rowClick = function($e, row) {}
+    $s.rowClick = function(ev) {}
     */
+
+    $s.getBiochemScope = function() {
+        return $scope;
+    }
+
 }])
 
 

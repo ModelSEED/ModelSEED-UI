@@ -5,7 +5,9 @@
  *
  */
 
-angular.module('Dialogs', []).service('Dialogs', 
+angular.module('Dialogs', [])
+
+.service('Dialogs',
 ['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer',
 function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
     var self = this;
@@ -74,8 +76,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
         })
     }
     
-    
-    
     this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -90,7 +90,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     $dialog.hide();
                 };
                 $scope.setDefault = function(){
-                    // Set MV.selectedMedium to 'Complete'
+                    // Set MV.selectedMedium back to 'Complete'
                     MV.selectedMedium = 'Complete';
                     cb(MV.selectedMedium);
                     $dialog.hide();
@@ -103,8 +103,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
               }]
         });
     }
-
-    
 
     this.reconstruct = function(ev, item, cb) {
         ev.stopPropagation();
@@ -292,8 +290,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
               }]
         })
     }
-
-    
 
     /**
      * [function runFBA]
@@ -641,7 +637,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
         })    
     }
 
-
    this.annotatePlant = function(ev, item, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -681,6 +676,55 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
             }]
         })
     }    
+
+    this.leaveComment = function(ev, rowId, item_list, userinfo, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/leaveComment.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+              function($scope, $http) {
+                if( item_list == undefined || item_list.length == 0) {
+                    item_list = ['bad abbreviation', 'bad synonym', 'bad formula', 'bad charge'];
+                }
+                $scope.items = item_list;
+                $scope.selected = [];
+                $scope.row_id = rowId;
+                if (userinfo == undefined) {
+                    userinfo = {username: Auth.user};
+                }
+                else{
+                    console.log('Commenting user: ', userinfo);
+                }
+                $scope.user = userinfo;
+
+                $scope.submit = function(){
+                    if ($scope.selected.length != 0 || $scope.user['remarks'] != undefined) {
+                        cb({user: $scope.user,
+                            rowId: $scope.row_id,
+                            comments: $scope.selected});
+                    }
+                    $dialog.hide();
+                };
+                $scope.cancel = function(){
+                    $dialog.hide();
+                };
+                $scope.toggle = function (item, list) {
+                  var idx = list.indexOf(item);
+                  if (idx > -1) {
+                    list.splice(idx, 1);
+                  }
+                  else {
+                    list.push(item);
+                  }
+                };
+                $scope.exists = function (item, list) {
+                  return list.indexOf(item) > -1;
+                };
+              }]
+        });
+    }
 
 }])
 

@@ -186,7 +186,16 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/biochem/reactions/:id",
             templateUrl: 'app/views/biochem/reaction.html',
             controller: 'Reaction'
+        }).state('app.cpd_comment', {
+            url: "/biochem/comments/compound/:id",
+            templateUrl: 'app/views/biochem/comment-compound.html',
+            controller: 'Compound'
+        }).state('app.rxn_comment', {
+            url: "/biochem/comments/reaction/:id",
+            templateUrl: 'app/views/biochem/comment-reaction.html',
+            controller: 'Reaction'
         })
+
 
         .state('app.plantAnnotations', {
             url: "/plant-annotations/",

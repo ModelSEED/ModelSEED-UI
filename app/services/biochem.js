@@ -1,5 +1,4 @@
 
-
 angular.module('Biochem', [])
 .service('Biochem', ['$http', '$q', 'config', '$log',
 function($http, $q, config, $log) {
@@ -8,7 +7,9 @@ function($http, $q, config, $log) {
     var self = this
 
     var endpoint = config.services.solr_url;
-    var solr_endpoint = config.services.local_solr_url; //dev_solr_url;
+    // var solr_endpoint = config.services.local_solr_url;
+    var solr_endpoint = config.services.ms_solr_url;
+    //var solr_endpoint = config.services.dev_solr_url;
 
     var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {

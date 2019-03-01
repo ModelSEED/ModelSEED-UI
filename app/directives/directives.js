@@ -1440,7 +1440,8 @@ function($compile, $stateParams) {
     };
 }])
 
-.directive('ngTableSolr', function() {
+.directive('ngTableSolr', ['Dialogs', '$mdDialog',
+function(Dialogs, $dialog) {
     return {
         restrict: 'EA',
         scope: {
@@ -1472,9 +1473,29 @@ function($compile, $stateParams) {
                      scope.opts.query = '';
                 }
             }
+
+            scope.alert = function(arg) {
+                alert(arg);
+            }
+
+            /* user leaves a comment on a row*/
+            scope.leaveComment = function(ev, rowId, comment_items, usr) {
+                Dialogs.leaveComment(ev, rowId, comment_items, usr,
+                function(comments) {
+                    console.log('getting a comment: ', comments);
+                });
+            }
+
+            /* table row click (not used as of now)*/
+            scope.rowClick = function(ev) {
+                Dialogs.rowClicked(ev,
+                function(rowId) {
+                    console.log('row clicked on: ', rowId);
+                });
+            }
         }
     }
- })
+ }])
 
 
  .directive('ngSolrTableEditor', function() {

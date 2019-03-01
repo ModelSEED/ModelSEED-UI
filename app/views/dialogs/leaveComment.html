@@ -1,0 +1,64 @@
+<!--Comments-->
+<md-dialog flex="70" id="leaveCommentDlg">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Leave Comments</h3>
+        <span flex></span>
+        <small>{{item.name}}</small>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <form>
+    <md-dialog-content>
+        <div layout="row" layout-wrap>
+            <div flex="100" flex-gt-sm="50" layout="column">
+                <fieldset class="standard">
+                    <div layout="row" layout-wrap flex>
+                        <div flex="50" ng-repeat="item in items">
+                            <md-checkbox ng-checked="exists(item, selected)" ng-click="toggle(item, selected)">
+                                {{ item }} <span ng-if="exists(item, selected)">(selected)</span>
+                            </md-checkbox>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div flex="100" flex-gt-sm="50" layout="column">
+                <md-content class="md-no-momentum">
+                    <md-input-container class="md-icon-float md-block">
+                        <label>Name</label>
+                        <md-icon class="material-icons">person</md-icon>
+                        <input ng-model="user.name" type="text">
+                    </md-input-container>
+                
+                    <md-input-container class="md-block">
+                        <!-- Use floating placeholder instead of label -->
+                        <md-icon class="material-icons">email</md-icon>
+                        <input ng-model="user.email" type="email" placeholder="Email (preferred)" ng-required="false">
+                    </md-input-container>
+                
+                    <md-input-container class="md-icon-float md-icon-right md-block">
+                        <!-- Use floating placeholder instead of label -->
+                        <md-icon class="material-icons">comment</md-icon>
+                        <input ng-model="user.remarks" type="text" placeholder="Other remarks" ng-required="false">
+                    </md-input-container>
+                </md-content>
+            </div>
+            <div flex="100">
+                <h2 class="md-title">Selected comments</h2>
+                <code style="display: block; padding: 8px;">{{selected | json}}</code>
+            </div>
+        </div>
+        <div class="md-actions">
+            <md-button ng-click="cancel()" type="button">
+                Cancel
+            </md-button>
+            <md-button ng-click="submit()" type="button">
+                Send Comment
+            </md-button>
+        </div>
+    </md-dialog-content>
+    </form>
+</md-dialog>
+<!--/.Comments-->
