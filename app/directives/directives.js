@@ -1479,7 +1479,16 @@ function(Dialogs, $dialog) {
             }
 
             /* user leaves a comment on a row*/
-            scope.leaveComment = function(ev, rowId, comment_items, usr) {
+            scope.rxnComments = ['bad abbreviation', 'bad stoichiometry', 'bad balance', 'bad EC', 'bad database mapping'];
+            scope.cpdComments = ['bad abbreviation', 'bad synonym', 'bad formula', 'bad charge', 'bad structure', 'bad database mapping'];
+            scope.leaveComment = function(ev, rowId, comment_tab, usr) {
+                if(comment_tab == 'rxn'){
+                    comment_items = scope.rxnComments;
+                }
+                else if(comment_tab == 'cpd'){
+                    comment_items = scope.cpdComments;
+                }
+                console.log('comment items passed: ', comment_items);
                 Dialogs.leaveComment(ev, rowId, comment_items, usr,
                 function(comments) {
                     console.log('getting a comment: ', comments);

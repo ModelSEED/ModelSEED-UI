@@ -254,7 +254,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>';
+            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
+            comment_str += '<md-icon class="material-icons">comment</md-icon><button/>';
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a><br>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Equation', key: 'definition', format: function(r) {
@@ -275,10 +277,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
     ];
 
-    $s.cpdComments = ['bad abbreviation', 'bad synonym', 'bad formula', 'bad charge'];
     $s.cpdHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', $s.cpdComments)">';
+            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', \'cpd\')">';
             comment_str += '<md-icon class="material-icons">comment</md-icon><button/>';
             return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a><br>'+comment_str;
         }},

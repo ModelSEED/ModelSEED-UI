@@ -2,9 +2,8 @@
 <md-dialog flex="70" id="leaveCommentDlg">
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
-        <h3>Leave Comments</h3>
+        <h3>Leave Comments on <strong>{{row_id}}</strong></h3>
         <span flex></span>
-        <small>{{item.name}}</small>
         <md-button class="md-icon-button" ng-click="cancel()">
           <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
         </md-button>
@@ -13,18 +12,18 @@
     <form>
     <md-dialog-content>
         <div layout="row" layout-wrap>
-            <div flex="100" flex-gt-sm="50" layout="column">
+            <div flex="66" flex-gt-sm="60" layout="column">
                 <fieldset class="standard">
                     <div layout="row" layout-wrap flex>
                         <div flex="50" ng-repeat="item in items">
                             <md-checkbox ng-checked="exists(item, selected)" ng-click="toggle(item, selected)">
-                                {{ item }} <span ng-if="exists(item, selected)">(selected)</span>
+                                {{ item }} <span ng-if="exists(item, selected)"></span>
                             </md-checkbox>
                         </div>
                     </div>
                 </fieldset>
             </div>
-            <div flex="100" flex-gt-sm="50" layout="column">
+            <div flex="33" flex-gt-sm="40" layout="column">
                 <md-content class="md-no-momentum">
                     <md-input-container class="md-icon-float md-block">
                         <label>Name</label>
@@ -35,7 +34,7 @@
                     <md-input-container class="md-block">
                         <!-- Use floating placeholder instead of label -->
                         <md-icon class="material-icons">email</md-icon>
-                        <input ng-model="user.email" type="email" placeholder="Email (preferred)" ng-required="false">
+                        <input ng-model="user.email" type="email" placeholder="Email (appreciated)" ng-required="false">
                     </md-input-container>
                 
                     <md-input-container class="md-icon-float md-icon-right md-block">
