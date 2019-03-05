@@ -1488,7 +1488,8 @@ function(Dialogs, $dialog) {
                 else if(comment_tab == 'cpd'){
                     comment_items = scope.cpdComments;
                 }
-                console.log('comment items passed: ', comment_items);
+                // console.log('comment items passed: ', comment_items);
+
                 Dialogs.leaveComment(ev, rowId, comment_items, usr,
                 function(comments) {
                     console.log('getting a comment: ', comments);

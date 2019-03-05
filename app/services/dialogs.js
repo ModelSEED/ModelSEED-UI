@@ -8,8 +8,8 @@
 angular.module('Dialogs', [])
 
 .service('Dialogs',
-['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
+['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer', 'config', '$http',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config, $http) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -699,17 +699,49 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 }
                 $scope.user = userinfo;
 
-                $scope.submit = function(){
+                $scope.submit = function() {
                     if ($scope.selected.length != 0 || $scope.user['remarks'] != undefined) {
-                        cb({user: $scope.user,
+                        var ms_rest_endpoint = config.services.ms_rest_url+'comments';
+                        var comm_headers = {
+                                Authentication: Auth.token,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        // console.log('headers', comm_headers);
+
+                        var comments = {user: $scope.user,
                             rowId: $scope.row_id,
-                            comments: $scope.selected});
+                            comments: $scope.selected};
+                        var data = {comment: comments};
+                        // use $http to post the comments JSON object to the ms_rest_url endpoint
+                        var req = $http({
+                            method: 'POST',
+                            url: ms_rest_endpoint,
+                            headers: comm_headers,
+                            data: data
+                        });
+
+                        req.then( onSuccess, onError );
+                        cb(comments);
                     }
                     $dialog.hide();
                 };
+
                 $scope.cancel = function(){
                     $dialog.hide();
                 };
+
+                function onSuccess(response) {
+                    console.log("Successfully POST-ed data:\n", response.data);
+                    //return(response.data);
+                }
+                function onError(response) {
+                    console.log("POST-ing of data failed:\n", response);
+                    if (!angular.isObject( response.data ) || !response.data.message) {
+                        //return( $q.reject( "An unknown error occurred." ) );
+                    }
+                    // Otherwise, use expected error message.
+                    //return( $q.reject( response.data.message ) );
+                }
                 $scope.toggle = function (item, list) {
                   var idx = list.indexOf(item);
                   if (idx > -1) {

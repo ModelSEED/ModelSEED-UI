@@ -409,6 +409,33 @@
             "tags": [
                 {
                     "tag": "api",
+                    "type": "post",
+                    "name": "/comments/",
+                    "optional": false,
+                    "description": "post user comments",
+                    "line": 1,
+                    "source": "@api {post} /comments/ post user comments"
+                },
+                {
+                    "tag": "apiName",
+                    "name": "comments",
+                    "optional": false,
+                    "type": "",
+                    "description": "",
+                    "line": 2,
+                    "source": "@apiName comments"
+                }
+            ],
+            "line": 0,
+            "description": "",
+            "source": "@api {post} /comments/ post user comments\n@apiName comments"
+        }
+    ],
+    [
+        {
+            "tags": [
+                {
+                    "tag": "api",
                     "type": "get",
                     "name": "/test-service/",
                     "optional": false,
