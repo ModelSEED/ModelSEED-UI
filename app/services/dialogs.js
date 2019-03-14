@@ -702,25 +702,41 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $scope.submit = function() {
                     if ($scope.selected.length != 0 || $scope.user['remarks'] != undefined) {
                         var ms_rest_endpoint = config.services.ms_rest_url+'comments';
+                        var comments = {user: $scope.user,
+                            rowId: $scope.row_id,
+                            comments: $scope.selected};
+                        var data = {comment: JSON.stringify(comments)};
+                        /* use $http to post the comments JSON object to the ms_rest_url endpoint
                         var comm_headers = {
                                 Authentication: Auth.token,
                                 'Content-Type': 'application/x-www-form-urlencoded'
                             }
-                        // console.log('headers', comm_headers);
-
-                        var comments = {user: $scope.user,
-                            rowId: $scope.row_id,
-                            comments: $scope.selected};
-                        var data = {comment: comments};
-                        // use $http to post the comments JSON object to the ms_rest_url endpoint
+                        console.log('headers', comm_headers);
                         var req = $http({
                             method: 'POST',
                             url: ms_rest_endpoint,
                             headers: comm_headers,
                             data: data
                         });
-
                         req.then( onSuccess, onError );
+                        */
+                        $.ajax({
+                            url: ms_rest_endpoint,
+                            dataType: 'json',
+                            type: 'POST',
+                            data: data,
+                            success: function(response){
+                                console.log("Successfully POST-ed data: " + response.msg + "\n", comments);
+                            },
+                            error: function(response) {
+                                if(response.msg) {
+                                    console.log("POST-ing of data failed: " + response.msg + "\n", comments);
+                                }
+                                else {
+                                    console.log("POST-ing of data failed with unknown error.\n", comments);
+                                }
+                            }
+                        });
                         cb(comments);
                     }
                     $dialog.hide();
@@ -730,18 +746,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     $dialog.hide();
                 };
 
-                function onSuccess(response) {
-                    console.log("Successfully POST-ed data:\n", response.data);
-                    //return(response.data);
-                }
-                function onError(response) {
-                    console.log("POST-ing of data failed:\n", response);
-                    if (!angular.isObject( response.data ) || !response.data.message) {
-                        //return( $q.reject( "An unknown error occurred." ) );
-                    }
-                    // Otherwise, use expected error message.
-                    //return( $q.reject( response.data.message ) );
-                }
                 $scope.toggle = function (item, list) {
                   var idx = list.indexOf(item);
                   if (idx > -1) {
@@ -754,10 +758,9 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $scope.exists = function (item, list) {
                   return list.indexOf(item) > -1;
                 };
-              }]
+            }]
         });
     }
-
 }])
 
 .service('AuthDialog',
