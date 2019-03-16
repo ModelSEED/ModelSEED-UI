@@ -726,14 +726,18 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                             type: 'POST',
                             data: data,
                             success: function(response){
-                                console.log("Successfully POST-ed data: " + response.msg + "\n", comments);
+                                console.log( "Successfully POST-ed data:\n", comments);
+                                swal('User comments', response.msg);
                             },
                             error: function(response) {
                                 if(response.msg) {
-                                    console.log("POST-ing of data failed: " + response.msg + "\n", comments);
+                                    console.log("POST-ing of data failed:\n", comments);
+                                    swal('User comments', response.msg);
                                 }
                                 else {
-                                    console.log("POST-ing of data failed with unknown error.\n", comments);
+                                    var cm_msg = "POST-ing of data failed with unknown error.";
+                                    console.log(cm_msg + "\n", comments);
+                                    swal('User comments', cm_msg);
                                 }
                             }
                         });
