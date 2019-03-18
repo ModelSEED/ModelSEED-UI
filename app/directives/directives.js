@@ -1479,8 +1479,8 @@ function(Dialogs, $dialog) {
             }
 
             /* user leaves a comment on a row*/
-            scope.rxnComments = ['bad abbreviation', 'bad stoichiometry', 'bad balance', 'bad EC', 'bad database mapping'];
-            scope.cpdComments = ['bad abbreviation', 'bad synonym', 'bad formula', 'bad charge', 'bad structure', 'bad database mapping'];
+            scope.rxnComments = ['incorrect abbreviation', 'incorrect stoichiometry', 'incorrect balance', 'incorrect EC', 'incorrect database mapping'];
+            scope.cpdComments = ['incorrect abbreviation', 'incorrect synonym', 'incorrect formula', 'incorrect charge', 'incorrect structure', 'incorrect database mapping'];
             scope.leaveComment = function(ev, rowId, comment_tab, usr) {
                 if(comment_tab == 'rxn'){
                     comment_items = scope.rxnComments;
