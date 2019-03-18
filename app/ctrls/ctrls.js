@@ -205,7 +205,7 @@ function($scope, Biochem) {
 
     function querySearch (query) {
         // return Biochem.get('model_compound', {query: query, limit: 10})
-        return Biochem.get_solr('compounds', {query: query, limit: 10})
+        return Biochem.get_solr('compounds', {query: query, limit: 25})
                 .then(function(res) {
                     var data = [];
                     for (var i in res.docs) {
@@ -236,7 +236,7 @@ function($scope, Biochem) {
 
     function querySearch (query) {
         // return Biochem.get('model_reaction', {query: query, limit: 10})
-        return Biochem.get_solr('reactions', {query: query, limit: 10})
+        return Biochem.get_solr('reactions', {query: query, limit: 25})
                 .then(function(res) {
                     var data = [];
                     for (var i in res.docs) {

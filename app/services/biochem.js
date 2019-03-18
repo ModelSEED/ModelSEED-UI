@@ -167,8 +167,8 @@ function($http, $q, config, $log) {
             cache = false;
         }
 
-        if (limit)
-            url += '&rows='+limit+ offset ? '&start='+offset : '';
+        url += limit ? '&rows='+limit : '';
+        url += offset ? '&start='+offset : '';
 
         if (sort) {
             sort = sort=='-' ? 'desc' : 'asc';

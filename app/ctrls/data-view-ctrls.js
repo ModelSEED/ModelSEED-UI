@@ -1332,13 +1332,13 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     }
 
     // table options
-    $scope.rxnOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.geneOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+    $scope.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.geneOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.compartmentOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.mapOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.annotationOpts = {query: '', limit: 25, offset: 0, sort: {field: 'role'}};
     
     
     // converge orthogonal Flux data:        
@@ -2021,7 +2021,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                     $self.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
-                $scope.bioRxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                $scope.bioRxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                               visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
 
                 $scope.bioRxnHeader = [{label: 'Name', key: 'name'},

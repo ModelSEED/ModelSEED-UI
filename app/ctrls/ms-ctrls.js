@@ -396,7 +396,7 @@ function($s, Biochem, $stateParams) {
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams',
 function($s, Biochem, $state, $stateParams) {
-    $s.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $s.opts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
 
     var cpdID = $stateParams.cpd;;
 
@@ -451,7 +451,7 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
     $scope.Tabs = Tabs;
     Tabs.totalTabCount = 2;
 
-    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.mapOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.mapHeader = [
         {label: 'Name', key: 'name',
          click: function(item) {
@@ -585,7 +585,7 @@ function($s, WS) {
 
     var wsPath = '/plantseed/Data/annotation_overview';
 
-    $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
+    $s.annoOpts = {query: '', limit: 25, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
         {label: 'Role', key: 'role'},
@@ -677,7 +677,7 @@ function($s, WS) {
 function($scope, FBA, WS, $dialog, $sce) {
     $scope.FBA = FBA;
 
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $scope.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.rxnHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},
@@ -696,7 +696,7 @@ function($scope, FBA, WS, $dialog, $sce) {
                })
        })
 
-    $scope.opts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.opts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.modelHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},

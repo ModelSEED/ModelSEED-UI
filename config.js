@@ -35,5 +35,5 @@ angular.module('config', []).service('config', function() {
             models: '/plantseed/',
             genomes: '/plantseed/'
         }
-    }
+    };
 })
