@@ -685,7 +685,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
               function($scope, $http) {
-                alert(item_list);
                 if( item_list == undefined || item_list.length == 0) {
                     item_list = ['incorrect abbreviation', 'incorrect database mapping'];
                 }
