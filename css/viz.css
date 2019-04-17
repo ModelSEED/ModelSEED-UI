@@ -127,3 +127,19 @@ line,
     cursor: pointer;
     cursor: hand;
 }
+
+/* feedback button */
+.feedback-btn {
+    font-size: 14px;
+    position: fixed;
+    bottom: -3px;
+    right: 60px;
+    width: auto;
+    padding: 10px;
+    outline: 0;
+    background-clip: padding-box;
+    -webkit-box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    -moz-box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    z-index: 40000;
+  }

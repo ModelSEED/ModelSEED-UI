@@ -695,7 +695,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     userinfo = {username: Auth.user};
                 }
                 else{
-                    console.log('Commenting user: ', userinfo);
+                    console.log('Commenting from user: ', userinfo);
                 }
                 $scope.user = userinfo;
 
@@ -823,7 +823,64 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
             }]
         })
     }
+}])
 
+.service('FBDialog',
+['$rootScope', '$mdDialog', '$window', '$timeout', 'Auth', '$stateParams',
+function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
+
+    this.leaveFeedback = function() {
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/auth.html',
+            clickOutsideToClose: false,
+            controller: ['$scope', '$state', '$http',
+            function($s, $state, $http) {
+                // set login method
+                if ($rootScope.$stateParams.login == 'patric')
+                    $s.method = Auth.loginMethod('patric');
+                else
+                    $s.method = Auth.loginMethod('rast');
+
+                $s.creds = {};
+
+                // sets method and changes url param
+                $s.switchMethod = function(method) {
+                    $s.method = Auth.loginMethod(method);
+                    $state.go($state.current.name, {login: method});
+                }
+
+                $s.ok = function(){
+                    $s.loading = true;
+
+                    if ($stateParams.login == 'patric')
+                        var prom = Auth.loginPatric($s.creds.user, $s.creds.pass)
+                    else
+                        var prom = Auth.login($s.creds.user, $s.creds.pass)
+
+                    prom.success(function(data) {
+                        $dialog.hide();
+                        $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false})
+                            .then(function() {
+                                setTimeout(function(){
+                                    $window.location.reload();
+                                }, 0);
+                            });
+
+                    }).error(function(e, status){
+                        $s.loading = false;
+                        if (status == 401)
+                            $s.inValid = true;
+                        else
+                            $s.failMsg = "Could not reach authentication service: "+e.error_msg;
+                    })
+                }
+
+                $s.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
 }])
 
 .controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {

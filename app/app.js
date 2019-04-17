@@ -392,9 +392,9 @@ function($locationProvider, $stateProvider, $httpProvider,
 
 
 .run(['$rootScope', '$state', '$stateParams', '$window',
-      '$location', 'Auth', '$timeout', 'config', 'AuthDialog',
+      '$location', 'Auth', '$timeout', 'config', 'AuthDialog', 'FBDialog',
 function($rootScope, $state, $sParams, $window,
-         $location, auth, $timeout, config, AuthDialog) {
+         $location, auth, $timeout, config, AuthDialog, FBDialog) {
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams){
         // if first load on home and user is authenticated,
@@ -417,6 +417,17 @@ function($rootScope, $state, $sParams, $window,
         $window.ga('send', 'pageview', $location.path());
     })
 
+    // To replace the feedback.js lib
+    $('body').append('<button id="feedbackButton" class="feedback-btn">' + 'My Feedback Button' + '</button>');
+    $(document).on('click', '.feedback-btn', function(){
+              alert("Feedback button clicked from app.js!");
+              FBDialog.leaveFeedback();
+              /*Dialogs.leaveComment($event, 0, [], {'remarks': 'testing'},
+                function(comments) {
+                    console.log('getting a comment: ', comments);
+                });*/
+          })
+
     $rootScope.$state = $state;
     $rootScope.$stateParams = $sParams;
 
@@ -426,11 +437,11 @@ function($rootScope, $state, $sParams, $window,
     $rootScope.includePlants = config.includePlants;
 
 
-    // instantiate user feedback plugin
+    /* instantiate user feedback plugin
     $.feedback({
         ajaxURL: config.services.ms_rest_url+'feedback',
         html2canvasURL: 'components/html2canvas/build/html2canvas.js'
-    });
+    });*/
 }])
 
 .run(['Jobs', function(Jobs) {
