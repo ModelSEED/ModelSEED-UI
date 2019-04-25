@@ -320,8 +320,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     function updateRxns() {
-        // Biochem.get('model_reaction', $s.rxnOpts)
-        Biochem.get_solr('reactions', $s.rxnOpts)
+        Biochem.get('model_reaction', $s.rxnOpts)
+        // Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
                     docs = res['docs'];
                     docs.forEach(function(doc) {
@@ -335,8 +335,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }
 
     function updateCpds() {
-        // Biochem.get('model_compound', $s.cpdOpts)
-        Biochem.get_solr('compounds', $s.cpdOpts)
+        Biochem.get('model_compound', $s.cpdOpts)
+        // Biochem.get_solr('compounds', $s.cpdOpts)
                .then(function(res) {
                     $s.cpds = res;
                     $s.loadingCpds = false;
