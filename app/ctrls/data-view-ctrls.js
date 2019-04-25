@@ -1906,6 +1906,9 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             // Biochem.getRxn(id)
             Biochem.getRxn_solr(id)
                    .then(function(rxn) {
+                        if (rxn['is_obsolete'] == "1") {
+                            rxn['status'] += " (obsolete)";
+                        }
                         $scope.selected.rxn = rxn;
                     })
 

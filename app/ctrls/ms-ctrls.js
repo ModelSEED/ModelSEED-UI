@@ -244,7 +244,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     var rxn_sFields = ['id', 'name', 'status', 'aliases'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'aliases'];
@@ -323,6 +323,12 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         // Biochem.get('model_reaction', $s.rxnOpts)
         Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
+                    docs = res['docs'];
+                    docs.forEach(function(doc) {
+                        if (doc['is_obsolete'] == "1") {
+                            doc['status'] += " (obsolete)";
+                        }
+                    })
                     $s.rxns = res;
                     $s.loadingRxns = false;
                })
@@ -387,6 +393,23 @@ function($s, Biochem, $stateParams) {
     // Biochem.getRxn($s.id)
     Biochem.getRxn_solr($s.id)
         .then(function(data) {
+            if (data['is_obsolete'] == "1") {
+                data['status'] += " (obsolete)";
+            }
+            if (data['is_transport']) {
+                data['is_transport'] = "Yes";
+            }
+            else {
+                data['is_transport'] = "No";
+            }
+
+            if (data['linked_reaction'] != undefined) {
+                data['linked_rxn_ids'] = data['linked_reaction'].split(';');
+            }
+            if (data['compound_ids'] != undefined) {
+                data['cpd_ids'] = data['compound_ids'][0].split(';');
+            }
+
             $s.rxn = data;
             $s.loading = false;
         })
