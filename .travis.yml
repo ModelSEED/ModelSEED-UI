@@ -1,7 +1,8 @@
 language: node_js
+node_js:
+  - "9"
 
 before_script:
-  - nvm install
   - npm install -g bower
   - bower install
   - npm install -g grunt
