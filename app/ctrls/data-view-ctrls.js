@@ -2034,8 +2034,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
                 function updateRxns() {
-                    Biochem.get('model_reaction', $scope.rxnOpts)
-                    // Biochem.get_solr('reactions', $scope.rxnOpts)
+                    //Biochem.get('model_reaction', $scope.rxnOpts)
+                    Biochem.get_solr('reactions', $scope.rxnOpts)
                            .then(function(res) {
                                 $scope.bioRxns = res;
                                 $scope.loadingRxns = false;

@@ -320,13 +320,13 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     function updateRxns() {
-        Biochem.get('model_reaction', $s.rxnOpts)
-        // Biochem.get_solr('reactions', $s.rxnOpts)
+        //Biochem.get('model_reaction', $s.rxnOpts)
+        Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
                     docs = res['docs'];
                     docs.forEach(function(doc) {
                         if (doc['is_obsolete'] == "1") {
-                            doc['status'] += " (obsolete)";
+                            doc['status'] += " (and is obsolete)";
                         }
                     })
                     $s.rxns = res;
@@ -335,8 +335,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }
 
     function updateCpds() {
-        Biochem.get('model_compound', $s.cpdOpts)
-        // Biochem.get_solr('compounds', $s.cpdOpts)
+        //Biochem.get('model_compound', $s.cpdOpts)
+        Biochem.get_solr('compounds', $s.cpdOpts)
                .then(function(res) {
                     $s.cpds = res;
                     $s.loadingCpds = false;
@@ -394,13 +394,16 @@ function($s, Biochem, $stateParams) {
     Biochem.getRxn_solr($s.id)
         .then(function(data) {
             if (data['is_obsolete'] == "1") {
-                data['status'] += " (obsolete)";
-            }
-            if (data['is_transport']) {
-                data['is_transport'] = "Yes";
+                data['is_obsolete_display'] = "Yes";
             }
             else {
-                data['is_transport'] = "No";
+                data['is_obsolete_display'] = "No";
+            }
+            if (data['is_transport']) {
+                data['is_transport_display'] = "Yes";
+            }
+            else {
+                data['is_transport_display'] = "No";
             }
 
             if (data['linked_reaction'] != undefined) {
