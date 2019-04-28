@@ -418,14 +418,9 @@ function($rootScope, $state, $sParams, $window,
     })
 
     // To replace the feedback.js lib
-    $('body').append('<button id="feedbackButton" class="feedback-btn">' + 'My Feedback Button' + '</button>');
+    $('body').append('<button id="feedbackButton" class="feedback-btn">' + 'Send user feedback' + '</button>');
     $(document).on('click', '.feedback-btn', function(){
-              alert("Feedback button clicked from app.js!");
               FBDialog.leaveFeedback();
-              /*Dialogs.leaveComment($event, 0, [], {'remarks': 'testing'},
-                function(comments) {
-                    console.log('getting a comment: ', comments);
-                });*/
           })
 
     $rootScope.$state = $state;

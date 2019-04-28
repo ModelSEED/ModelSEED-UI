@@ -672,7 +672,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $scope.cancel = function(){
                     $dialog.hide();
                 }
-
             }]
         })
     }    
@@ -700,7 +699,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $scope.user = userinfo;
 
                 $scope.submit = function() {
-                    if ($scope.selected.length != 0 || $scope.user['remarks'] != undefined) {
+                    if ($scope.selected.length != 0 || $scope.user['remarks']) {
                         var ms_rest_endpoint = config.services.ms_rest_url+'comments';
                         var comments = {user: $scope.user,
                             rowId: $scope.row_id,
@@ -744,11 +743,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                         cb(comments);
                     }
                     $dialog.hide();
-                };
+                }
 
                 $scope.cancel = function(){
                     $dialog.hide();
-                };
+                }
 
                 $scope.toggle = function (item, list) {
                   var idx = list.indexOf(item);
@@ -758,12 +757,12 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                   else {
                     list.push(item);
                   }
-                };
+                }
                 $scope.exists = function (item, list) {
                   return list.indexOf(item) > -1;
-                };
+                }
             }]
-        });
+        })
     }
 }])
 
@@ -826,56 +825,52 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
 }])
 
 .service('FBDialog',
-['$rootScope', '$mdDialog', '$window', '$timeout', 'Auth', '$stateParams',
-function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
+['$mdDialog', 'Auth', 'config', function($dialog, Auth, config) {
 
     this.leaveFeedback = function() {
         return $dialog.show({
-            templateUrl: 'app/views/dialogs/auth.html',
+            templateUrl: 'app/views/dialogs/user_feedback.html',
             clickOutsideToClose: false,
-            controller: ['$scope', '$state', '$http',
-            function($s, $state, $http) {
-                // set login method
-                if ($rootScope.$stateParams.login == 'patric')
-                    $s.method = Auth.loginMethod('patric');
-                else
-                    $s.method = Auth.loginMethod('rast');
+            controller: ['$scope', '$http',
+              function($scope, $http) {
+                $scope.user = {'username': Auth.user,
+                               'name': '',
+                               'email': ''};
+                $scope.remarks = '';
+                console.log('Feedback from user: ', $scope.user.username);
 
-                $s.creds = {};
-
-                // sets method and changes url param
-                $s.switchMethod = function(method) {
-                    $s.method = Auth.loginMethod(method);
-                    $state.go($state.current.name, {login: method});
+                $scope.submit = function() {
+                    if ($scope.remarks && $scope.remarks.toLowerCase() != 'feedback') {
+                        var ms_rest_endpoint = config.services.ms_rest_url+'feedback';
+                        var comments = {user: $scope.user,
+                                        comments: $scope.remarks};
+                        var data = {comment: JSON.stringify(comments)};
+                        $.ajax({
+                            url: ms_rest_endpoint,
+                            dataType: 'json',
+                            type: 'POST',
+                            data: data,
+                            success: function(response){
+                                console.log( "Successfully POST-ed data:\n", comments);
+                                swal('User feedback', response.msg);
+                            },
+                            error: function(response) {
+                                if(response.msg) {
+                                    console.log("POST-ing of data failed:\n", comments);
+                                    swal('User feedback', response.msg);
+                                }
+                                else {
+                                    var cm_msg = "POST-ing of data failed with unknown error.";
+                                    console.log(cm_msg + "\n", comments);
+                                    swal('User feedback', cm_msg);
+                                }
+                            }
+                        });
+                    }
+                    $dialog.hide();
                 }
 
-                $s.ok = function(){
-                    $s.loading = true;
-
-                    if ($stateParams.login == 'patric')
-                        var prom = Auth.loginPatric($s.creds.user, $s.creds.pass)
-                    else
-                        var prom = Auth.login($s.creds.user, $s.creds.pass)
-
-                    prom.success(function(data) {
-                        $dialog.hide();
-                        $state.transitionTo($state.current.name, {}, {reload: true, inherit: true, notify: false})
-                            .then(function() {
-                                setTimeout(function(){
-                                    $window.location.reload();
-                                }, 0);
-                            });
-
-                    }).error(function(e, status){
-                        $s.loading = false;
-                        if (status == 401)
-                            $s.inValid = true;
-                        else
-                            $s.failMsg = "Could not reach authentication service: "+e.error_msg;
-                    })
-                }
-
-                $s.cancel = function(){
+                $scope.cancel = function(){
                     $dialog.hide();
                 }
             }]
