@@ -254,9 +254,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
-            comment_str += '<md-icon class="material-icons">comment</md-icon><button/>';
-            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a><br>'+comment_str;
+            var comment_str = '<md-button class="md-fab" ng-disabled="true" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
+            comment_str += '<md-tooltip>Add Comments</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Equation', key: 'definition', format: function(r) {
@@ -279,9 +280,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.cpdHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            var comment_str = '<button ng-click="leaveComment($event, \''+row.id+'\', \'cpd\')">';
-            comment_str += '<md-icon class="material-icons">comment</md-icon><button/>';
-            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a><br>'+comment_str;
+            var comment_str = '<md-button class="md-fab" ng-disabled="true" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'cpd\')">';
+            comment_str += '<md-tooltip>Add your comment</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula', format: function(row) {
