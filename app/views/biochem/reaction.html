@@ -25,18 +25,33 @@
         <tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr>
         <tr><td>DeltaG</td><td>{{rxn.deltag}}</td></tr>
         <tr><td>DeltaGErr</td><td>{{rxn.deltagerr}}</td></tr>
-        <tr><td>direction</td><td>{{rxn.direction}}</td></tr>
+        <tr><td>Direction</td><td>{{rxn.direction}}</td></tr>
         <tr><td>Reversibility</td><td>{{rxn.reversibility}}</td></tr>
-        <tr><td>Is transport?</td><td>{{rxn.is_transport}}</td></tr>
+        <tr><td>Is transport?</td><td>{{rxn.is_transport_display}}</td></tr>
+        <tr><td>Status</td><td>{{rxn.status}}</td></tr>
+        <tr><td>Is obsolete?</td><td>{{rxn.is_obsolete_display}}</td></tr>
 
         <tr>
-            <td>Compound IDs</td>
+            <td>Linked reaction ID(s)</td>
             <td>
                 <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in rxn.compound_ids">
+                    <li ng-repeat="id in rxn.linked_rxn_ids">
+                        <a ui-sref="app.rxn({id: id})">{{id}}</a>
+                    </li>
+                </ul>
+                <span class="text-muted" ng-if="!rxn.linked_rxn_ids.length">(none found)</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Compound ID(s)</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in rxn.cpd_ids">
                         <a ui-sref="app.cpd({id: id})">{{id}}</a>
                     </li>
                 </ul>
+                <span class="text-muted" ng-if="!rxn.cpd_ids.length">(none found)</span>
             </td>
         </tr>
 
