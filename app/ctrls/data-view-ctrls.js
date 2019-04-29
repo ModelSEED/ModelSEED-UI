@@ -1903,8 +1903,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             $scope.selected = {id: id,
                                modelRxn: ModelParser.rxnhash[item]};
 
-            Biochem.getRxn(id)
-            // Biochem.getRxn_solr(id)
+            // Biochem.getRxn(id)
+            Biochem.getRxn_solr(id)
                    .then(function(rxn) {
                         if (rxn['is_obsolete'] == "1") {
                             rxn['status'] += " (obsolete)";
@@ -2848,8 +2848,8 @@ function($scope, $sParams, WS, $http, Biochem) {
         }
 
         // add reaction equations for these rxn ids from biochem
-        return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
-        // return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
+        // return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
 
@@ -2861,7 +2861,7 @@ function($scope, $sParams, WS, $http, Biochem) {
                 data[i].eq = res[i].definition.replace('<=>', dir);
             }
             return data;
-        })
+        });
     }
 
 }])
