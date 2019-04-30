@@ -14,7 +14,7 @@
 <md-dialog flex="70" id="leaveFeedbackDlg">
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
-        <h3>Your feedback</h3>
+        <h3>Your feedbacks</h3>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
           <md-icon class="material-icons" aria-label="Cancel feedback">close</md-icon>
@@ -36,9 +36,9 @@
                         <input ng-model="user.email" type="email" placeholder="Email (appreciated)" ng-required="false">
                     </md-input-container>
                 
-                    <mat-form-field style="width: 300px;">
+                    <mat-form-field style="width: 280px;">
                         <md-icon class="material-icons">comment</md-icon>
-                        <textarea ng-model="remarks" name="rmks" matInput rows="5" cols="110" placeholder="Feedback"></textarea>
+                        <textarea ng-model="remarks" name="rmks" matInput rows="5" cols="100" placeholder="Feedback"></textarea>
                     </mat-form-field>
                 </md-content>
             </div>

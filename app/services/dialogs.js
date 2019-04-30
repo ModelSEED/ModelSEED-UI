@@ -830,7 +830,7 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
     this.leaveFeedback = function() {
         return $dialog.show({
             templateUrl: 'app/views/dialogs/user_feedback.html',
-            clickOutsideToClose: false,
+            clickOutsideToClose: true,
             controller: ['$scope', '$http',
               function($scope, $http) {
                 $scope.user = {'username': Auth.user,
