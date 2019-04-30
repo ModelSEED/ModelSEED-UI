@@ -418,7 +418,7 @@ function($rootScope, $state, $sParams, $window,
     })
 
     // To replace the feedback.js lib
-    $('body').append('<button id="feedbackButton" class="feedback-btn">' + 'Send user feedback' + '</button>');
+    $('body').append('<button id="feedbackButton" class="feedback-btn"><md-icon class="fa fa-pencil fa-fw" alt="magic wand"></md-icon>' + '  Send user feedback' + '</button>');
     $(document).on('click', '.feedback-btn', function(){
               FBDialog.leaveFeedback();
           })
