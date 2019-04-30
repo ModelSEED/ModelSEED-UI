@@ -429,7 +429,7 @@ function($rootScope, $state, $sParams, $window,
     // instantiate user feedback plugin
     $.feedback({
         ajaxURL: config.services.ms_rest_url+'/feedback',
-        html2canvasURL: 'components/html2canvas/build/html2canvas.js'
+        html2canvasURL: 'node_modules/html2canvas/build/html2canvas.js'
     });
 }])
 
