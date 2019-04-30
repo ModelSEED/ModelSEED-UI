@@ -396,10 +396,10 @@ function($s, Biochem, $stateParams) {
     Biochem.getRxn_solr($s.id)
         .then(function(data) {
             if (data['is_obsolete'] == "1") {
-                data['is_obsolete_display'] = "Yes";
+                data['is_obsolete_display'] = true;
             }
             else {
-                data['is_obsolete_display'] = "No";
+                data['is_obsolete_display'] = false;
             }
             if (data['is_transport']) {
                 data['is_transport_display'] = "Yes";
@@ -410,6 +410,7 @@ function($s, Biochem, $stateParams) {
 
             if (data['linked_reaction'] != undefined) {
                 data['linked_rxn_ids'] = data['linked_reaction'].split(';');
+                data['replace_rxn'] = data['linked_rxn_ids'].shift();
             }
             if (data['compound_ids'] != undefined) {
                 data['cpd_ids'] = data['compound_ids'][0].split(';');

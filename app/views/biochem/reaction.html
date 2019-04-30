@@ -28,18 +28,25 @@
         <tr><td>Direction</td><td>{{rxn.direction}}</td></tr>
         <tr><td>Reversibility</td><td>{{rxn.reversibility}}</td></tr>
         <tr><td>Is transport?</td><td>{{rxn.is_transport_display}}</td></tr>
-        <tr><td>Status</td><td>{{rxn.status}}</td></tr>
-        <tr><td>Is obsolete?</td><td>{{rxn.is_obsolete_display}}</td></tr>
+        <tr><td>Status</td><td>{{rxn.status}}<span ng-if="rxn.is_obsolete_display">(and is obsolete)</span></td></tr>
 
-        <tr>
-            <td>Linked reaction ID(s)</td>
+        <tr ng-if="rxn.is_obsolete_display">
+            <td>Linked reaction</td>
             <td>
-                <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in rxn.linked_rxn_ids">
-                        <a ui-sref="app.rxn({id: id})">{{id}}</a>
-                    </li>
-                </ul>
-                <span class="text-muted" ng-if="!rxn.linked_rxn_ids.length">(none found)</span>
+                <table>
+                <tr>
+                    <td><a ui-sref="app.rxn({id: rxn.replace_rxn})">{{rxn.replace_rxn}}</a></td>
+                    <td ng-if="rxn.linked_rxn_ids.length">(Identical reactions:</td>
+                    <td>
+                        <ul class="list-unstyled no-margin" ng-if="rxn.linked_rxn_ids.length">
+                            <li style="display: inline" ng-repeat="id in rxn.linked_rxn_ids">
+                                <a ui-sref="app.rxn({id: id})">{{id}}</a>
+                            </li>
+                        </ul>
+                    </td>
+                    <td ng-if="rxn.linked_rxn_ids.length">)</td>
+                </tr>
+                </table>
             </td>
         </tr>
 
@@ -47,7 +54,7 @@
             <td>Compound ID(s)</td>
             <td>
                 <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in rxn.cpd_ids">
+                    <li style="display: inline" ng-repeat="id in rxn.cpd_ids">
                         <a ui-sref="app.cpd({id: id})">{{id}}</a>
                     </li>
                 </ul>
