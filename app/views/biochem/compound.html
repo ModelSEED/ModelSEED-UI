@@ -20,23 +20,21 @@
                  tooltip-trigger tooltip="Click to expand.">
 		</tr>
 		<tr>
-        <tr><td>Name</td><td>{{cpd.name}}</td></tr>
+        <tr><td width="16%">ID</td><td>{{cpd.id}}</td></tr>
         <tr>
-            <td>Formula</td>
-            <td pretty-formula={{cpd.formula}}></td>
+            <td>Name</td>
+            <td><span>{{cpd.name}}&nbsp;&nbsp;(Formula:&nbsp;<span pretty-formula={{cpd.formula}}></span>,&nbsp;&nbsp;Abbreviation:&nbsp;{{cpd.abbreviation}})</span>
+            </td>
         </tr>
-        <tr><td>ID</td><td>{{cpd.id}}</td></tr>
-        <tr><td>Abbreviation</td><td>{{cpd.abbreviation}}</td></tr>
-        <tr><td>Source</td><td>{{cpd.source}}</td>
-        <tr><td>Mass</td><td>{{cpd.mass}}</td></tr>
-        <tr><td>Charge</td><td>{{cpd.charge}}</td></tr>
-        <tr><td>DeltaG</td><td>{{cpd.deltag === 10000000 ? 'unspecified' : cpd.deltag}}</td></tr>
-        <tr><td>DeltaGErr</td><td>{{cpd.deltagerr === 10000000 ? 'unspecified' : cpd.deltagerr}}</td></tr>
-        <tr><td>Is cofactor?</td><td>{{cpd.is_cofactor}}</td></tr>
-        <tr><td>Is core?</td><td>{{cpd.is_core}}</td></tr>
-        <tr><td>Is obsolete?</td><td>{{cpd.is_obsolete}}</td></tr>
-
         <tr>
+            <td>Molecular properties</td>
+            <td><span>Weight={{cpd.mass}},&nbsp;&nbsp;Charge={{cpd.charge}}</span></td>
+        </tr>
+        <tr>
+            <td>Gibbs free energy change</td>
+            <td>&#8710G={{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}</td>
+        </tr>
+        <tr ng-if="cpd.pka">
             <td>PKA IDs</td>
             <td>
                 <ul class="list-unstyled no-margin">
@@ -45,7 +43,7 @@
             </td>
         </tr>
 
-        <tr>
+        <tr ng-if="cpd.pkb">
             <td>PKB IDs</td>
             <td>
                 <ul class="list-unstyled no-margin">
@@ -53,15 +51,22 @@
                 </ul>
             </td>
         </tr>
-
-        <tr><td>structure</td><td>{{::cpd.structure}}</td></tr>
-
+        <tr ng-if="cpd.structure"><td>structure</td><td>{{::cpd.structure}}</td></tr>
         <tr>
             <td>Aliases</td>
             <td>
                 <ul class="list-unstyled no-margin">
                     <li ng-repeat="id in cpd.aliases">{{::id|rmquotes}}</li>
                 </ul>
+            </td>
+        </tr>
+        <tr><td>Source</td><td>{{cpd.source}}</td></tr>
+        <tr>
+            <td>Other info</td>
+            <td><span>Is cofactor?:&nbsp;{{cpd.is_cofactor?'Yes':'No'}},&nbsp;&nbsp;
+                      Is core?:&nbsp;{{cpd.is_core?'Yes':'No'}},&nbsp;&nbsp;
+                      Is obsolete?:&nbsp;{{cpd.is_obsolete===true?'Yes':'No'}}
+                </span>
             </td>
         </tr>
     </tr>

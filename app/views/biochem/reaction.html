@@ -16,19 +16,19 @@
     <thead></thead>
     <tbody>
         <tr>
-            <td>Equation</td>
+            <td width="16%">Equation</td>
             <td stoichiometry-to-imgs="{{rxn.stoichiometry}}" direction="{{rxn.direction}}"></td>
         </tr>
         <tr><td>ID</td><td>{{rxn.id}}</td></tr>
         <tr><td>Abbreviation</td><td>{{rxn.abbreviation}}</td></tr>
         <tr><td>Equation with IDs</td><td>{{rxn.equation}}</td></tr>
         <tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr>
-        <tr><td>DeltaG</td><td>{{rxn.deltag}}</td></tr>
-        <tr><td>DeltaGErr</td><td>{{rxn.deltagerr}}</td></tr>
-        <tr><td>Direction</td><td>{{rxn.direction}}</td></tr>
-        <tr><td>Reversibility</td><td>{{rxn.reversibility}}</td></tr>
-        <tr><td>Is transport?</td><td>{{rxn.is_transport_display}}</td></tr>
-        <tr><td>Status</td><td>{{rxn.status}}<span ng-if="rxn.is_obsolete_display">(and is obsolete)</span></td></tr>
+        <tr>
+            <td>Gibbs free energy change</td>
+            <td><span>&#8710G={{rxn.deltag}}&plusmn{{rxn.deltagerr}}&nbsp;&nbsp;(estimated thermodynamic reversibility:&nbsp;{{rxn.reversibility}})</span></td>
+        </tr>
+        <!--tr><td>Thermodynamic</td><td>{{rxn.reversibility}}</td></tr>
+        <tr><td>Direction</td><td>{{rxn.direction}}</td></tr-->
 
         <tr ng-if="rxn.is_obsolete_display">
             <td>Linked reaction</td>
@@ -63,21 +63,23 @@
         </tr>
 
         <tr>
+            <td>Aliases</td>
+            <td>
+                <ul class="list-unstyled no-margin">
+                    <li ng-repeat="id in rxn.aliases">{{id}}</li>
+                </ul>
+            </td>
+        </tr>
+
+        <tr><td>Is transport?</td><td>{{rxn.is_transport?'Yes':'No'}}</td></tr>
+        <tr><td>Status</td><td>{{rxn.status}}<span ng-if="rxn.is_obsolete_display">(and is obsolete)</span></td></tr>
+        <tr>
             <td>Pathways</td>
             <td>
                 <ul class="list-unstyled no-margin">
                     <li ng-repeat="id in rxn.pathways">{{id}}</li>
                 </ul>
                 <span class="text-muted" ng-if="!rxn.pathways.length">(none found)</span>
-            </td>
-        </tr>
-
-        <tr>
-            <td>Aliases</td>
-            <td>
-                <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in rxn.aliases">{{id}}</li>
-                </ul>
             </td>
         </tr>
     </tr>

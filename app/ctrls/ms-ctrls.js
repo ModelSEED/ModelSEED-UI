@@ -401,13 +401,6 @@ function($s, Biochem, $stateParams) {
             else {
                 data['is_obsolete_display'] = false;
             }
-            if (data['is_transport']) {
-                data['is_transport_display'] = "Yes";
-            }
-            else {
-                data['is_transport_display'] = "No";
-            }
-
             if (data['linked_reaction'] != undefined) {
                 data['linked_rxn_ids'] = data['linked_reaction'].split(';');
                 data['replace_rxn'] = data['linked_rxn_ids'].shift();
