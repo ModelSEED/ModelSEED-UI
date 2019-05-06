@@ -375,6 +375,36 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
     $s.getImagePath = Biochem.getImagePath;
+    // Reactions
+    var cpd_rxn_sFields = ['equation'];
+    $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
+
+    $s.rxnHeader = [
+        {label: 'ID', key: 'id', format: function(row) {
+            var comment_str = '&nbsp;&nbsp;<md-button class="md-fab" ng-disabled="false" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
+            comment_str += '<md-tooltip>Add Comments</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
+        }},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        {label: 'deltaG', key: 'deltag'},
+        {label: 'Status', key: 'status'},
+        {label: 'Aliases', key: 'aliases', format: function(row){
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
+            else {
+                var a_str = row.aliases.join();
+                if(a_str==='') return "N/A";
+                a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
+                return '<span>'+a_str+'</span>';
+            }
+        }},
+    ];
 
     $s.loading = true;
     // Biochem.getCpd($s.id)
@@ -382,6 +412,11 @@ function($s, Biochem, $stateParams) {
         .then(function(data) {
             $s.cpd = data;
             $s.loading = false;
+        })
+    Biochem.get_solr('reactions', $s.rxnOpts)
+        .then(function(res) {
+            $s.rxns = res;
+            $s.loadingRxns = false;
         })
 }])
 

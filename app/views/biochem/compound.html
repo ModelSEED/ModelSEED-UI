@@ -5,7 +5,7 @@
     </div>
     <div class="h2">
         Compound
-        <small>{{cpd.name}} (<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
+        <small>{{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
         </tr>
         <tr>
             <td>Gibbs free energy change</td>
-            <td>&#8710G={{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}</td>
+            <td>&#8710G={{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}&nbsp;(kcal/mol)</td>
         </tr>
         <tr ng-if="cpd.pka">
             <td>PKA IDs</td>
@@ -86,3 +86,4 @@
     </div>
   </div>
 </div>
+<ng-include src="'app/views/biochem/biochem-reaction.html'"></ng-include>

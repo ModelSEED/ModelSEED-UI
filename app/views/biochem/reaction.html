@@ -5,7 +5,7 @@
     </div>
     <div class="h2">
         Reaction
-        <small>{{rxn.name}}</small>
+        <small>{{rxn.id}}&nbsp;({{rxn.name}})</small>
     </div>
 </div>
 <hr class="no-margin">
@@ -22,10 +22,10 @@
         <tr><td>ID</td><td>{{rxn.id}}</td></tr>
         <tr><td>Abbreviation</td><td>{{rxn.abbreviation}}</td></tr>
         <tr><td>Equation with IDs</td><td>{{rxn.equation}}</td></tr>
-        <tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr>
+        <!--tr><td>Stoichiometry</td><td>{{rxn.stoichiometry}}</td></tr-->
         <tr>
             <td>Gibbs free energy change</td>
-            <td><span>&#8710G={{rxn.deltag}}&plusmn{{rxn.deltagerr}}&nbsp;&nbsp;(estimated thermodynamic reversibility:&nbsp;{{rxn.reversibility}})</span></td>
+            <td><span>&#8710G={{rxn.deltag}}&plusmn{{rxn.deltagerr}}&nbsp;(kcal/mol)&nbsp;&nbsp;(estimated thermodynamic reversibility:&nbsp;{{rxn.reversibility}})</span></td>
         </tr>
         <!--tr><td>Thermodynamic</td><td>{{rxn.reversibility}}</td></tr>
         <tr><td>Direction</td><td>{{rxn.direction}}</td></tr-->

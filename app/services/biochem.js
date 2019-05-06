@@ -233,8 +233,8 @@ function($http, $q, config, $log) {
                     })
     }
     this.findReactions_solr = function(cpd, flds='id,equation,name,definition', r_limit=10) {
-        var url = endpoint+'reactions/select?wt=json',
-            url = url+'&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
+        var url = solr_endpoint+'reactions/select?wt=json';
+            url += '&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
         return $http.get(url)
                     .then(function(res) {
                         return res.data.response.docs;
