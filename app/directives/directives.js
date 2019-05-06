@@ -2248,17 +2248,19 @@ function(Dialogs, $dialog) {
                     name = attrs[4] ? attrs[4].replace(/^"(.*)"$/, '$1')
                                    .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
 
-                var fig = function(stoich){
+                var fig = function(stoich, compart){
                     return '<figure><img src='+Biochem.getImagePath(id)+' height=100px>' +
                            '<figcaption>'+stoich+' <a ui-sref="app.cpd({id: \''
-                           +id+'\'})"><i>'+name+'</i></a> ['+compart+']' +
+                           +id+'\'})"><i>'+name+'</i></a>' + compart +
                            '</figcaption></figure>';
                 }
 
                 if (weight < 0)
-                    lhs.push(fig(weight === -1 ? '' : -1*weight));
+                    lhs.push(fig(weight === "-1" ? '' : -1*weight,
+                                compartNum === "0" ? '' : ' ['+compart+']'));
                 if (weight > 0)
-                    rhs.push(fig(weight === 1 ? '' : weight));
+                    rhs.push(fig(weight === "1" ? '' : weight,
+                                compartNum === "0" ? '' : ' ['+compart+']'));
             }
 
             var eq = '<div class="reactant">'+ lhs.join(' + ') +
