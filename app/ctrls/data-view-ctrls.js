@@ -932,8 +932,8 @@ function($s, $state, $sParams, WS, MS, tools,
 
 
                 function updateCpds() {
-                    Biochem.get('model_compound', $s.cpdOpts)
-                    // Biochem.get_solr('compounds', $s.cpdOpts)
+                    // Biochem.get('model_compound', $s.cpdOpts)
+                    Biochem.get_solr('compounds', $s.cpdOpts)
                            .then(function(res) {
                                 $s.cpds = res;
                                 $s.loadingCpds = false;
@@ -1332,13 +1332,13 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     }
 
     // table options
-    $scope.rxnOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.geneOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+    $scope.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.geneOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.compartmentOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.mapOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.annotationOpts = {query: '', limit: 25, offset: 0, sort: {field: 'role'}};
     
     
     // converge orthogonal Flux data:        
@@ -1903,9 +1903,12 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             $scope.selected = {id: id,
                                modelRxn: ModelParser.rxnhash[item]};
 
-            Biochem.getRxn(id)
-            // Biochem.getRxn_solr(id)
+            // Biochem.getRxn(id)
+            Biochem.getRxn_solr(id)
                    .then(function(rxn) {
+                        if (rxn['is_obsolete'] == "1") {
+                            rxn['status'] += " (obsolete)";
+                        }
                         $scope.selected.rxn = rxn;
                     })
 
@@ -2021,7 +2024,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                     $self.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
-                $scope.bioRxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                $scope.bioRxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                               visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
 
                 $scope.bioRxnHeader = [{label: 'Name', key: 'name'},
@@ -2031,8 +2034,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
                 function updateRxns() {
-                    Biochem.get('model_reaction', $scope.rxnOpts)
-                    // Biochem.get_solr('reactions', $scope.rxnOpts)
+                    //Biochem.get('model_reaction', $scope.rxnOpts)
+                    Biochem.get_solr('reactions', $scope.rxnOpts)
                            .then(function(res) {
                                 $scope.bioRxns = res;
                                 $scope.loadingRxns = false;
@@ -2845,8 +2848,8 @@ function($scope, $sParams, WS, $http, Biochem) {
         }
 
         // add reaction equations for these rxn ids from biochem
-        return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
-        // return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
+        // return Biochem.getRxn(ids, {select: 'definition'}).then(function(res) {
+        return Biochem.getRxn_solr(ids, {select: 'definition'}).then(function(res) {
             for (var i=0; i<ids.length; i++) {
                 var d = data[i].direction, dir;
 
@@ -2858,7 +2861,7 @@ function($scope, $sParams, WS, $http, Biochem) {
                 data[i].eq = res[i].definition.replace('<=>', dir);
             }
             return data;
-        })
+        });
     }
 
 }])

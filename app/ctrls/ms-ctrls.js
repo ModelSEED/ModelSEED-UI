@@ -244,7 +244,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     var rxn_sFields = ['id', 'name', 'status', 'aliases'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'aliases'];
@@ -254,7 +254,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>';
+            var comment_str = '&nbsp;&nbsp;<md-button class="md-fab" ng-disabled="false" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
+            comment_str += '<md-tooltip>Add Comments</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Equation', key: 'definition', format: function(r) {
@@ -277,7 +280,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.cpdHeader = [
         {label: 'ID', key: 'id', format: function(row) {
-            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>';
+            var comment_str = '&nbsp;&nbsp;<md-button class="md-fab" ng-disabled="false" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'cpd\')">';
+            comment_str += '<md-tooltip>Add your comment</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.cpd({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
         {label: 'Formula', key: 'formula', format: function(row) {
@@ -316,17 +322,23 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     function updateRxns() {
-        Biochem.get('model_reaction', $s.rxnOpts)
-        // Biochem.get_solr('reactions', $s.rxnOpts)
+        //Biochem.get('model_reaction', $s.rxnOpts)
+        Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
+                    docs = res['docs'];
+                    docs.forEach(function(doc) {
+                        if (doc['is_obsolete'] == "1") {
+                            doc['status'] += " (and is obsolete)";
+                        }
+                    })
                     $s.rxns = res;
                     $s.loadingRxns = false;
                })
     }
 
     function updateCpds() {
-        Biochem.get('model_compound', $s.cpdOpts)
-        // Biochem.get_solr('compounds', $s.cpdOpts)
+        //Biochem.get('model_compound', $s.cpdOpts)
+        Biochem.get_solr('compounds', $s.cpdOpts)
                .then(function(res) {
                     $s.cpds = res;
                     $s.loadingCpds = false;
@@ -348,8 +360,13 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }, true)
 
     /* table row click (not used as of now)
-    $s.rowClick = function($e, row) {}
+    $s.rowClick = function(ev) {}
     */
+
+    $s.getBiochemScope = function() {
+        return $scope;
+    }
+
 }])
 
 
@@ -358,13 +375,48 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
     $s.getImagePath = Biochem.getImagePath;
+    // Reactions
+    var cpd_rxn_sFields = ['equation'];
+    $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
+
+    $s.rxnHeader = [
+        {label: 'ID', key: 'id', format: function(row) {
+            var comment_str = '&nbsp;&nbsp;<md-button class="md-fab" ng-disabled="false" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
+            comment_str += '<md-tooltip>Add Comments</md-tooltip>';
+            comment_str += '<md-icon class="material-icons">comment</md-icon></md-button>';
+            return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
+        }},
+        {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        {label: 'deltaG', key: 'deltag'},
+        {label: 'Status', key: 'status'},
+        {label: 'Aliases', key: 'aliases', format: function(row){
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
+            else {
+                var a_str = row.aliases.join();
+                if(a_str==='') return "N/A";
+                a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
+                return '<span>'+a_str+'</span>';
+            }
+        }},
+    ];
 
     $s.loading = true;
-    Biochem.getCpd($s.id)
-    // Biochem.getCpd_solr($s.id)
+    // Biochem.getCpd($s.id)
+    Biochem.getCpd_solr($s.id)
         .then(function(data) {
             $s.cpd = data;
             $s.loading = false;
+        })
+    Biochem.get_solr('reactions', $s.rxnOpts)
+        .then(function(res) {
+            $s.rxns = res;
+            $s.loadingRxns = false;
         })
 }])
 
@@ -375,9 +427,23 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    Biochem.getRxn($s.id)
-    // Biochem.getRxn_solr($s.id)
+    // Biochem.getRxn($s.id)
+    Biochem.getRxn_solr($s.id)
         .then(function(data) {
+            if (data['is_obsolete'] == "1") {
+                data['is_obsolete_display'] = true;
+            }
+            else {
+                data['is_obsolete_display'] = false;
+            }
+            if (data['linked_reaction'] != undefined) {
+                data['linked_rxn_ids'] = data['linked_reaction'].split(';');
+                data['replace_rxn'] = data['linked_rxn_ids'].shift();
+            }
+            if (data['compound_ids'] != undefined) {
+                data['cpd_ids'] = data['compound_ids'][0].split(';');
+            }
+
             $s.rxn = data;
             $s.loading = false;
         })
@@ -387,12 +453,12 @@ function($s, Biochem, $stateParams) {
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams',
 function($s, Biochem, $state, $stateParams) {
-    $s.opts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $s.opts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
 
     var cpdID = $stateParams.cpd;;
 
-    Biochem.get('model_compound', {query: cpdID})
-    // Biochem.get_solr('compounds', {query: cpdID})
+    // Biochem.get('model_compound', {query: cpdID})
+    Biochem.get_solr('compounds', {query: cpdID})
        .then(function(res) {
            $s.totalFound = res.numFound;
            $s.cpd = res.docs[0];
@@ -442,7 +508,7 @@ function($state, $scope, $timeout, VizOpts, Tabs, MV) {
     $scope.Tabs = Tabs;
     Tabs.totalTabCount = 2;
 
-    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.mapOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.mapHeader = [
         {label: 'Name', key: 'name',
          click: function(item) {
@@ -576,7 +642,7 @@ function($s, WS) {
 
     var wsPath = '/plantseed/Data/annotation_overview';
 
-    $s.annoOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsystems'}};
+    $s.annoOpts = {query: '', limit: 25, offset: 0, sort: {field: 'subsystems'}};
 
     $s.annoHeader = [
         {label: 'Role', key: 'role'},
@@ -668,7 +734,7 @@ function($s, WS) {
 function($scope, FBA, WS, $dialog, $sce) {
     $scope.FBA = FBA;
 
-    $scope.rxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'}};
+    $scope.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.rxnHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},
@@ -687,7 +753,7 @@ function($scope, FBA, WS, $dialog, $sce) {
                })
        })
 
-    $scope.opts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
+    $scope.opts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
     $scope.modelHeader = [
         {label: 'ID', key: 'id'},
         {label: 'Name', key: 'name'},
