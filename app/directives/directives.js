@@ -2194,13 +2194,13 @@ function(Dialogs, $dialog) {
                                    .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
 
                 if (weight < 0)
-                    lhs.push((weight === -1 ? '' : -1*weight) +
+                    lhs.push((weight === "-1" ? '' : -1*weight) +
                              ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
-                             ' ['+compart+']');
+                             (compartNum === "0" ? '' : ' ['+compart+']'));
                 if (weight > 0)
-                    rhs.push((weight === 1 ? '' : weight) +
+                    rhs.push((weight === "1" ? '' : weight) +
                              ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
-                             ' ['+compart+']');
+                             (compartNum === "0" ? '' : ' ['+compart+']'));
             }
 
             var eq = lhs.join(' + ') +
