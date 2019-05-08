@@ -269,12 +269,10 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Status', key: 'status'},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            else {
-                var a_str = row.aliases.join();
-                if(a_str==='') return "N/A";
-                a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
-                return '<span>'+a_str+'</span>';
-            }
+            var a_str = row.aliases.join();
+            if(a_str==='') return "N/A";
+            a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
+            return '<span>'+a_str+'</span>';
         }},
     ];
 
@@ -293,30 +291,16 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Charge', key: 'charge'},
         {label: 'Synonyms', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-
-            var src_aliases = row.aliases[0].split(';');
-            var syn_nms = [];
-            for (var ai = 0; ai < src_aliases.length; ai++) {
-                if( src_aliases[ai].indexOf('name:') != -1) {
-                    syn_nms.push(src_aliases[ai].replace('name:', ''));
-                }
-            }
-            var a_str1 = syn_nms.join(', ');
-            a_str1=a_str1.replace(/\"/g, '');
+            var a_str1 = row.aliases[0].replace('Name:', '').replace(/\"/g, '');
             return '<span>'+a_str1+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-
-            var src_aliases = row.aliases[0].split(';');
-            var als = [];
-            for (var ai = 0; ai < src_aliases.length; ai++) {
-                if( src_aliases[ai].indexOf('name:') == -1) {
-                    als.push(src_aliases[ai]);
-                }
+            var als = row.aliases.slice(1, row.aliases.length);
+            for (var i=0; i<als.length; i++) {
+                als[i] = als[i].replace(/([A-Za-z]+:)(\s.*)/g,'<b>$1</b>$2');
             }
-            var a_str2 = als.join(', ');
-            a_str2=a_str2.replace(/\"/g, '');
+            var a_str2 = als.join('<br>').replace(/\"/g, '');
             return '<span>'+a_str2+'</span>';
         }}
     ];
@@ -397,12 +381,10 @@ function($s, Biochem, $stateParams) {
         {label: 'Status', key: 'status'},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            else {
-                var a_str = row.aliases.join();
-                if(a_str==='') return "N/A";
-                a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
-                return '<span>'+a_str+'</span>';
-            }
+            var a_str = row.aliases.join();
+            if(a_str==='') return "N/A";
+            a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
+            return '<span>'+a_str+'</span>';
         }},
     ];
 
@@ -410,6 +392,7 @@ function($s, Biochem, $stateParams) {
     // Biochem.getCpd($s.id)
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
+            data.aliases[0] = data.aliases[0].replace('Name:', 'Synonyms:');
             $s.cpd = data;
             $s.loading = false;
         })
