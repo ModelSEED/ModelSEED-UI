@@ -267,12 +267,25 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Synonyms', key: 'aliases', format: function(row){
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
+            var src_aliases = row.aliases[0].split('name:');
+            if(src_aliases.length==0) return "N/A";
+            var a_str1 = src_aliases[1].replace(/\|/g, '<br>');
+            a_str1 = a_str1.replace(/\"/g, '');
+            return '<span>'+a_str1+'</span>';
+        }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var a_str = row.aliases.join();
-            if(a_str==='') return "N/A";
-            a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
-            return '<span>'+a_str+'</span>';
+            var src_aliases = row.aliases[0].split('name:');
+            if(src_aliases.length==0) return "N/A";
+            var arr_als = src_aliases[0].split(';');
+            for (var i=0; i<arr_als.length; i++) {
+                arr_als[i] = arr_als[i].replace(/([A-Za-z]+:)(.*)/,'<b>$1</b>$2');
+            }
+            var a_str2 = arr_als.join('<br>');
+            a_str2 = a_str2.replace(/\"/g, '');
+            return '<span>'+a_str2+'</span>';
         }},
     ];
 
@@ -379,13 +392,26 @@ function($s, Biochem, $stateParams) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Synonyms', key: 'aliases', format: function(row){
+            if(row.aliases===undefined || row.aliases.length==0) return "N/A";
+            var src_aliases = row.aliases[0].split('name:');
+            if(src_aliases.length==0) return "N/A";
+            var a_str1 = src_aliases[1].replace(/\|/g, '<br>');
+            a_str1 = a_str1.replace(/\"/g, '');
+            return '<span>'+a_str1+'</span>';
+        }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var a_str = row.aliases.join();
-            if(a_str==='') return "N/A";
-            a_str = a_str.replace(/\;/g, ', ').replace(/\"/g, '');
-            return '<span>'+a_str+'</span>';
-        }},
+            var src_aliases = row.aliases[0].split('name:');
+            if(src_aliases.length==0) return "N/A";
+            var arr_als = src_aliases[0].split(';');
+            for (var i=0; i<arr_als.length; i++) {
+                arr_als[i] = arr_als[i].replace(/([A-Za-z]+:)(.*)/,'<b>$1</b>$2');
+            }
+            var a_str2 = arr_als.join('<br>');
+            a_str2 = a_str2.replace(/\"/g, '');
+            return '<span>'+a_str2+'</span>';
+        }}
     ];
 
     $s.loading = true;
