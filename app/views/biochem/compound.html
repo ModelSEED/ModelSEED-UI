@@ -1,4 +1,51 @@
-<div layout="row">
+
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
+    <ul class="toolbar">
+       <!--
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Microbes'})">
+                <span hide-sm>Public Microbial Models</span>
+            </a>
+        </li>
+        -->
+
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Plants'})" >
+                <span hide-sm>Public Plant Models</span>
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels({ref: 'Annotations'})" >
+                <span hide-sm>Subsystems</span>
+            </a>
+        </li>
+        <!-- 
+        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.RefModels" tabIndex='0'>
+                <span hide-sm>FunctionalRoles</span>
+            </a>
+        </li>
+         -->
+        <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'reactions'})">
+                <span hide-sm>Reactions</span>
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+                <span hide-sm>Compounds</span>
+            </a>
+        </li>
+
+        <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
+            <a ui-sref="app.media">
+                <span hide-sm>Media</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!--div layout="row">
     <div class="h5">
         <i class="icon-folder-open-o"></i>
         <a ui-sref="app.biochem({chem: 'compounds'})"> >Compounds</a>
@@ -7,7 +54,7 @@
         Compound
         <small>{{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
     </div>
-</div>
+</div-->
 
 <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
 
@@ -15,17 +62,25 @@
     <thead></thead>
     <tbody>
         <tr>
-            <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
-                 height="325" data-toggle="modal" data-target="#modal"
-                 tooltip-trigger tooltip="Click to expand.">
+            <td width="16%">Compound</td>
+            <td>
+                {{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)
+            </td>
 		</tr>
-		<tr>
-        <tr><td width="16%">ID</td><td>{{cpd.id}}</td></tr>
+        <tr>
+            <td>structure</td>
+            <td>
+                <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
+                 height="325" data-toggle="modal" data-target="#modal"
+                 tooltip-trigger tooltip="Click to expand."></img>
+            </td>
+		</tr>
+        <!--tr><td width="16%">ID</td><td>{{cpd.id}}</td></tr>
         <tr>
             <td>Name</td>
             <td><span>{{cpd.name}}&nbsp;&nbsp;(Formula:&nbsp;<span pretty-formula={{cpd.formula}}></span>,&nbsp;&nbsp;Abbreviation:&nbsp;{{cpd.abbreviation}})</span>
             </td>
-        </tr>
+        </tr-->
         <tr>
             <td>Molecular properties</td>
             <td><span>Weight={{cpd.mass}},&nbsp;&nbsp;Charge={{cpd.charge}}</span></td>
@@ -69,7 +124,7 @@
                 </span>
             </td>
         </tr>
-    </tr>
+    </tbody>
 </table>
 <div id='modal' class="modal fade">
   <div class="modal-dialog modal-lg">
