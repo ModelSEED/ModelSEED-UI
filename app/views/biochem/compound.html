@@ -56,13 +56,14 @@
     </div>
 </div-->
 
-<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+<!--div layout="row">
+<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular-->
 
 <table class="table table-horizontal table-condensed" ng-if="!loading">
     <thead></thead>
     <tbody>
         <tr>
-            <td width="16%">Compound</td>
+            <td style="width: 280px;">Compound</td>
             <td>
                 {{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)
             </td>
@@ -72,7 +73,8 @@
             <td>
                 <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
                  height="325" data-toggle="modal" data-target="#modal"
-                 tooltip-trigger tooltip="Click to expand."></img>
+                 tooltip-trigger tooltip="Click to expand."
+                 style="margin-left: 0px; display: block;"></img>
             </td>
 		</tr>
         <!--tr><td width="16%">ID</td><td>{{cpd.id}}</td></tr>
@@ -113,6 +115,7 @@
                 <ul class="list-unstyled no-margin">
                     <li ng-repeat="id in cpd.aliases">{{::id|rmquotes}}</li>
                 </ul>
+                <span style="display: inline-block; width: 700px;">{{cpd.synm}}</span>
             </td>
         </tr>
         <tr><td>Source</td><td>{{cpd.source}}</td></tr>

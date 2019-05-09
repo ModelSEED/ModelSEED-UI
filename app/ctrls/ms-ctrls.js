@@ -262,11 +262,6 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
-        {label: 'Equation', key: 'definition', format: function(r) {
-            if (!r.stoichiometry) return "N/A";
-            var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
-        }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
         {label: 'Ontology', key: 'ontology', format: function(row){
@@ -278,7 +273,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var src_aliases = row.aliases[0].split('name:');
             if(src_aliases.length==0) return "N/A";
-            var a_str1 = src_aliases[1].replace(/\|/g, '<br>');
+            var a_str1 = src_aliases[1];//.replace(/\|/g, '<br>');
             a_str1 = a_str1.replace(/\"/g, '');
             return '<span style="display: inline-block;">'+a_str1+'</span>';
         }},
@@ -294,6 +289,11 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             a_str2 = a_str2.replace(/\"/g, '');
             return '<span>'+a_str2+'</span>';
         }},
+        {label: 'Equation', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }}
     ];
 
     $s.cpdHeader = [
@@ -398,11 +398,6 @@ function($s, Biochem, $stateParams) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
-        {label: 'Equation', key: 'definition', format: function(r) {
-            if (!r.stoichiometry) return "N/A";
-            var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
-        }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
         {label: 'Ontology', key: 'ontology'},
@@ -424,7 +419,12 @@ function($s, Biochem, $stateParams) {
             }
             var a_str2 = arr_als.join('<br>');
             a_str2 = a_str2.replace(/\"/g, '');
-            return '<span>'+a_str2+'</span>';
+            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+        }},
+        {label: 'Equation', key: 'definition', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
         }}
     ];
 
@@ -432,7 +432,7 @@ function($s, Biochem, $stateParams) {
     // Biochem.getCpd($s.id)
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
-            data.aliases[0] = data.aliases[0].replace('Name:', 'Synonyms:');
+            data.synm = data.aliases.shift().replace('Name:', 'Synonyms:');
             $s.cpd = data;
             $s.loading = false;
         })
@@ -466,7 +466,11 @@ function($s, Biochem, $stateParams) {
             if (data['compound_ids'] != undefined) {
                 data['cpd_ids'] = data['compound_ids'][0].split(';');
             }
-
+            if (data['aliases'] != undefined) {
+                var arr = data['aliases'][0].split('name:');
+                data['synm'] = 'Synonyms: ' + arr[1];
+                data['aliases'][0] = arr[0].replace(/;$/, '');
+            }
             $s.rxn = data;
             $s.loading = false;
         })
