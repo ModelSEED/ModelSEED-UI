@@ -244,13 +244,15 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     var rxn_sFields = ['id', 'name', 'status', 'aliases'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
+                            'aliases', 'is_obsolete', 'ontology'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'aliases'];
     $s.cpdOpts = Session.getOpts($state, 'cpds') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'compounds', searchFields: cpd_sFields,
-                  visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr', 'charge', 'aliases'] };
+                  visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr',
+                            'charge', 'aliases', 'ontology'] };
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
@@ -267,13 +269,18 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Ontology', key: 'ontology', format: function(row){
+            if(row.ontology===undefined || row.ontology==='class:null|context:null')
+                return "N/A";
+            return row.ontology;
+        }},
         {label: 'Synonyms', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var src_aliases = row.aliases[0].split('name:');
             if(src_aliases.length==0) return "N/A";
             var a_str1 = src_aliases[1].replace(/\|/g, '<br>');
             a_str1 = a_str1.replace(/\"/g, '');
-            return '<span>'+a_str1+'</span>';
+            return '<span style="display: inline-block;">'+a_str1+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
@@ -302,10 +309,15 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'Mass', key: 'mass'},
         {label: 'Charge', key: 'charge'},
+        {label: 'Ontology', key: 'ontology', format: function(row){
+            if(row.ontology===undefined || row.ontology==='class:null|context:null')
+                return "N/A";
+            return row.ontology;
+        }},
         {label: 'Synonyms', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var a_str1 = row.aliases[0].replace('Name:', '').replace(/\"/g, '');
-            return '<span>'+a_str1+'</span>';
+            return '<span style="display: inline-block;">'+a_str1+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
@@ -375,7 +387,8 @@ function($s, Biochem, $stateParams) {
     // Reactions
     var cpd_rxn_sFields = ['equation'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status', 'aliases', 'is_obsolete'] };
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
+                            'aliases', 'is_obsolete', 'ontology'] };
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
@@ -392,13 +405,14 @@ function($s, Biochem, $stateParams) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Ontology', key: 'ontology'},
         {label: 'Synonyms', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var src_aliases = row.aliases[0].split('name:');
             if(src_aliases.length==0) return "N/A";
             var a_str1 = src_aliases[1].replace(/\|/g, '<br>');
             a_str1 = a_str1.replace(/\"/g, '');
-            return '<span>'+a_str1+'</span>';
+            return '<span style="display: inline-block;">'+a_str1+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
