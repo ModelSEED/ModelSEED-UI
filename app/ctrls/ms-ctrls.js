@@ -241,14 +241,14 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'aliases'];
+    var rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
                             'aliases', 'is_obsolete', 'ontology', 'pathways'] };
 
     // Compounds
-    var cpd_sFields = ['id', 'name', 'formula', 'aliases'];
+    var cpd_sFields = ['id', 'name', 'formula', 'aliases', 'ontology'];
     $s.cpdOpts = Session.getOpts($state, 'cpds') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'compounds', searchFields: cpd_sFields,
                   visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr',
@@ -264,7 +264,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Name', key: 'name'},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
-        {label: 'Synonyms', key: 'aliases', format: function(row){
+        {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var synms= row.aliases[row.aliases.length -1];
             synms = synms.replace('Name:', '').replace(/\"/g, '');
@@ -295,7 +295,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
                 return "N/A";
             return row.ontology;
         }},
-        {label: 'Equation', key: 'definition', format: function(r) {
+        {label: 'Equation', key: 'stoichiometry', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
@@ -315,7 +315,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'Mass', key: 'mass'},
         {label: 'Charge', key: 'charge'},
-        {label: 'Synonyms', key: 'aliases', format: function(row){
+        {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var a_str1 = row.aliases[0].replace('Name:', '').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+a_str1+'</span>';
@@ -391,7 +391,7 @@ function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
     $s.getImagePath = Biochem.getImagePath;
     // Reactions
-    var cpd_rxn_sFields = ['equation'];
+    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
                             'aliases', 'is_obsolete', 'ontology', 'pathways'] };
@@ -406,7 +406,7 @@ function($s, Biochem, $stateParams) {
         {label: 'Name', key: 'name'},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
-        {label: 'Synonyms', key: 'aliases', format: function(row){
+        {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var synms= row.aliases[row.aliases.length -1];
             synms = synms.replace('Name:', '').replace(/\"/g, '');
@@ -437,7 +437,7 @@ function($s, Biochem, $stateParams) {
                 return "N/A";
             return row.ontology;
         }},
-        {label: 'Equation', key: 'definition', format: function(r) {
+        {label: 'Equation', key: 'stoichiometry', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span style="white-space: nowrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
@@ -456,6 +456,7 @@ function($s, Biochem, $stateParams) {
         .then(function(res) {
             $s.rxns = res;
             $s.loadingRxns = false;
+            $s.enableColumnSearch = false;
         })
 }])
 
