@@ -43,91 +43,42 @@
         </li>
     </ul>
 </div>
-
-<!--div layout="row">
-    <div class="h5">
-        <i class="icon-folder-open-o"></i>
-        <a ui-sref="app.biochem({chem: 'compounds'})"> >Compounds</a>
+<div layout="row" ng-if="!loading">
+    <div flex="33" layout="column">
+        <span><strong>Compound:</strong> {{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span pretty-formula={{cpd.formula}}></span>)</span>
     </div>
-    <div class="h2">
-        Compound
-        <small>{{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)</small>
+    <div flex="60" layout="column"></div>
+</div>
+<hr>
+<div layout="row" ng-if="!loading">
+    <div flex="33" layout="column">
+        <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
+        height="325" data-toggle="modal" data-target="#modal"
+        tooltip-trigger tooltip="Click to expand."
+        style="margin-left: 0px; display: block;"></img>
     </div>
-</div-->
-
-<!--div layout="row">
-<md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular-->
-
-<table class="table table-horizontal table-condensed" ng-if="!loading">
-    <thead></thead>
-    <tbody>
-        <tr>
-            <td style="width: 280px;">Compound</td>
-            <td>
-                {{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span ng-if="!loading" pretty-formula={{cpd.formula}}></span>)
-            </td>
-		</tr>
-        <tr>
-            <td>structure</td>
-            <td>
-                <img id="compound-image" ng-src="{{getImagePath(cpd.id)}}"
-                 height="325" data-toggle="modal" data-target="#modal"
-                 tooltip-trigger tooltip="Click to expand."
-                 style="margin-left: 0px; display: block;"></img>
-            </td>
-		</tr>
-        <!--tr><td width="16%">ID</td><td>{{cpd.id}}</td></tr>
-        <tr>
-            <td>Name</td>
-            <td><span>{{cpd.name}}&nbsp;&nbsp;(Formula:&nbsp;<span pretty-formula={{cpd.formula}}></span>,&nbsp;&nbsp;Abbreviation:&nbsp;{{cpd.abbreviation}})</span>
-            </td>
-        </tr-->
-        <tr>
-            <td>Molecular properties</td>
-            <td><span>Weight={{cpd.mass}},&nbsp;&nbsp;Charge={{cpd.charge}}</span></td>
-        </tr>
-        <tr>
-            <td>Gibbs free energy change</td>
-            <td>&#8710G={{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}&nbsp;(kcal/mol)</td>
-        </tr>
-        <tr ng-if="cpd.pka">
-            <td>PKA IDs</td>
-            <td>
-                <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in cpd.pka">{{::id}}</li>
-                </ul>
-            </td>
-        </tr>
-
-        <tr ng-if="cpd.pkb">
-            <td>PKB IDs</td>
-            <td>
-                <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in cpd.pkb">{{::id}}</li>
-                </ul>
-            </td>
-        </tr>
-        <tr ng-if="cpd.structure"><td>structure</td><td>{{::cpd.structure}}</td></tr>
-        <tr>
-            <td>Aliases</td>
-            <td>
-                <ul class="list-unstyled no-margin">
-                    <li ng-repeat="id in cpd.aliases">{{::id|rmquotes}}</li>
-                </ul>
-                <span style="display: inline-block; width: 700px;">{{cpd.synm}}</span>
-            </td>
-        </tr>
-        <tr><td>Source</td><td>{{cpd.source}}</td></tr>
-        <tr>
-            <td>Other info</td>
-            <td><span>Is cofactor?:&nbsp;{{cpd.is_cofactor?'Yes':'No'}},&nbsp;&nbsp;
-                      Is core?:&nbsp;{{cpd.is_core?'Yes':'No'}},&nbsp;&nbsp;
-                      Is obsolete?:&nbsp;{{cpd.is_obsolete===true?'Yes':'No'}}
-                </span>
-            </td>
-        </tr>
-    </tbody>
-</table>
+    <div flex="60" layout="column">
+        <ul class="list-unstyled no-margin">
+            <li><strong> &#8710G:</strong>&nbsp;{{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}&nbsp;(kcal/mol)</li>
+            <li ng-if="cpd.pka"><strong>pKa:</strong> {{cpd.pka}}</li>
+            <li ng-if="cpd.pkb"><strong>pKb:</strong> {{cpd.pkb}}</li>
+            <li><strong>Weight:</strong> {{cpd.mass}}</li>
+            <li><strong>Charge:</strong> {{cpd.charge}}</li>
+            <li ng-if="cpd.structure"><strong>Structure:</strong> {{::cpd.structure}}</li>
+            <li><strong>InChIKey:</strong> {{cpd.inchikey}}</li>
+            <li><strong>SMILES:</strong> {{cpd.smiles}}</li>
+            <li><strong>Is co-factor?:</strong> {{cpd.is_cofactor?'Yes':'No'}}</li>
+            <li><strong>Is core?:</strong> {{cpd.is_core?'Yes':'No'}}</li>
+            <li><strong>Is obsolete?:</strong> {{cpd.is_obsolete?'Yes':'No'}}</li>
+            <li><strong>Aliases:</strong> {{cpd.aliases}}</li>
+            <li><strong>Synonyms:</strong> {{cpd.synm}}</li>
+            <li ng-if="cpd.ontology!='class:null|context:null'">
+                <strong>Ontology:</strong> {{cpd.ontology}}
+            </li>
+            <li><strong>Source:</strong> {{cpd.source}}</li>
+        </ul>
+    </div>
+</div>
 <div id='modal' class="modal fade">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">

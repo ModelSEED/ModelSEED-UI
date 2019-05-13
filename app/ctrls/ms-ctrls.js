@@ -245,7 +245,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'aliases', 'is_obsolete', 'ontology', 'pathways'] };
+                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'aliases', 'ontology'];
@@ -394,7 +394,7 @@ function($s, Biochem, $stateParams) {
     var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'aliases', 'is_obsolete', 'ontology', 'pathways'] };
+                            'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways'] };
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
@@ -485,8 +485,10 @@ function($s, Biochem, $stateParams) {
             }
             if (data['aliases'] != undefined) {
                 var sn = data['aliases'].pop();
-                data['synm'] = 'Synonyms: ' + sn.replace('Name:', '');
+                data['synm'] = sn.replace('Name:', '');
             }
+            data['equation_display'] = data['equation'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
+            data['definition_display'] = data['definition'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
             $s.rxn = data;
             $s.loading = false;
         })
