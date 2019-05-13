@@ -70,7 +70,7 @@
     <div flex="20" layout="column"><strong>Equation with compound IDs</strong></div>
     <div flex="60" layout="column"> {{rxn.equation_display}}</div>
 </div>
-<div layout="row" ng-if="!loading">
+<div layout="row">
     <div flex="20" layout="column"><strong>Gibbs free energy change&nbsp;&#8710G</strong></div>
     <div flex="60" layout="column">
         <span>{{rxn.deltag}}&plusmn{{rxn.deltagerr}}&nbsp;(kcal/mol)</span>
@@ -80,7 +80,7 @@
     <div flex="20" layout="column"><strong>EC numbers</strong></div>
     <div flex="60" layout="column">{{rxn.ec_numbers}}</div>
 </div>
-<div layout="row" ng-if="!loading">
+<div layout="row">
     <div flex="20" layout="column"><strong>Direction</strong></div>
     <div flex="60" layout="column">{{rxn.direction}}</div>
 </div>
