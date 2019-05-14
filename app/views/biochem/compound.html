@@ -47,7 +47,7 @@
     <div flex="33" layout="column">
         <span><strong>Compound:</strong> {{cpd.id}}&nbsp;({{cpd.name}},&nbsp;<span pretty-formula={{cpd.formula}}></span>)</span>
     </div>
-    <div flex="60" layout="column"></div>
+    <div flex="66" layout="column"></div>
 </div>
 <hr>
 <div layout="row" ng-if="!loading">
@@ -57,7 +57,7 @@
         tooltip-trigger tooltip="Click to expand."
         style="margin-left: 0px; display: block;"></img>
     </div>
-    <div flex="60" layout="column">
+    <div flex="66" layout="column">
         <ul class="list-unstyled no-margin">
             <li><strong> &#8710G:</strong>&nbsp;{{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}&nbsp;(kcal/mol)</li>
             <li ng-if="cpd.pka"><strong>pKa:</strong> {{cpd.pka}}</li>

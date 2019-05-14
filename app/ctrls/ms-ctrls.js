@@ -262,6 +262,11 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'stoichiometry', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: wrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
@@ -294,11 +299,6 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if(row.ontology===undefined || row.ontology==='class:null|context:null|step:null')
                 return "N/A";
             return row.ontology;
-        }},
-        {label: 'Equation', key: 'stoichiometry', format: function(r) {
-            if (!r.stoichiometry) return "N/A";
-            var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: nowrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
         }}
     ];
 
@@ -404,6 +404,11 @@ function($s, Biochem, $stateParams) {
             return '<a ui-sref="app.rxn({id: \''+row.id+'\'})">'+row.id+'</a>'+comment_str;
         }},
         {label: 'Name', key: 'name'},
+        {label: 'Equation', key: 'stoichiometry', format: function(r) {
+            if (!r.stoichiometry) return "N/A";
+            var stoich = r.stoichiometry.replace(/\"/g, '')
+            return '<span style="white-space: wrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
@@ -436,11 +441,6 @@ function($s, Biochem, $stateParams) {
             if(row.ontology===undefined || row.ontology==='class:null|context:null|step:null')
                 return "N/A";
             return row.ontology;
-        }},
-        {label: 'Equation', key: 'stoichiometry', format: function(r) {
-            if (!r.stoichiometry) return "N/A";
-            var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: nowrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
         }}
     ];
 

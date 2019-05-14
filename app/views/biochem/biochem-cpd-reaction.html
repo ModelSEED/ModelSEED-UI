@@ -1,15 +1,14 @@
 
-<md-content layout="column" layout-fill
-    style="border: 2px solid darkblue; max-width: 1400px; max-height: 600px;">
-<div class="h5"><strong>Reactions of {{id}}:</strong></div>
-<hr class="no-margin">
+<md-content layout="column" layout-fill>
+    <div class="h5"><strong>Reactions of {{id}}:</strong></div>
+    <hr class="no-margin">
 
-            <ng-table-solr table-header="rxnHeader"
-                           table-data="rxns"
-                           table-opts="rxnOpts"
-                           table-loading="loadingRxns"
-                           enable-column-search="enableColumnSearch"
-                           opts="opts"
-                           table-placeholder="Search reactions">
-            </ng-table-solr>
+    <ng-table-solr table-header="rxnHeader"
+                    table-data="rxns"
+                    table-opts="rxnOpts"
+                    table-loading="loadingRxns"
+                    enable-column-search="enableColumnSearch"
+                    opts="opts"
+                    table-placeholder="Search reactions">
+    </ng-table-solr>
 </md-content>
