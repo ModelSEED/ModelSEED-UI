@@ -281,8 +281,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Pathways', key: 'pathways', format: function(row){
             if(row.pathways===undefined || row.pathways.length==0) return "N/A";
@@ -326,8 +326,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/([A-Za-z]+:)(\s.*)/g,'<b>$1</b>$2');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Ontology', key: 'ontology', format: function(row){
             if(row.ontology===undefined || row.ontology==='class:null|context:null')
@@ -423,8 +423,8 @@ function($s, Biochem, $stateParams) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Pathways', key: 'pathways', format: function(row){
             if(row.pathways===undefined || row.pathways.length==0) return "N/A";
