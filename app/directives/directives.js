@@ -1470,7 +1470,7 @@ function(Dialogs, $dialog) {
                 if (scope.advancedOptsEnabled == false) {
                     delete scope.opts.queryColumn;
                 } else {
-                     scope.opts.query = '';
+                    scope.opts.query = '';
                 }
             }
 
