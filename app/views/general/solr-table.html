@@ -39,14 +39,13 @@
         </tr>
         <tr ng-if="advancedOptsEnabled">
             <th ng-repeat="h in header track by $index">
-                <input ng-if="opts.searchFields.indexOf(h.key) != -1"
+                <input ng-if="opts.searchFields.indexOf(h.key)!=-1"
                        type="text"
                        placeholder="Search..."
                        style="width: 100%;"
                        ng-model="opts.queryColumn[h.key]"
                        ng-model-options="{debounce: {default: 400, blur: 0}}">
             </th>
-
         </tr>
     </thead>
 
