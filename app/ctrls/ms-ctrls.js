@@ -241,14 +241,14 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
                             'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways'] };
 
     // Compounds
-    var cpd_sFields = ['id', 'name', 'formula', 'aliases', 'ontology'];
+    var cpd_sFields = ['id', 'name', 'formula', 'synonyms', 'aliases', 'ontology'];
     $s.cpdOpts = Session.getOpts($state, 'cpds') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'compounds', searchFields: cpd_sFields,
                   visible: ['name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr',
@@ -281,8 +281,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Pathways', key: 'pathways', format: function(row){
             if(row.pathways===undefined || row.pathways.length==0) return "N/A";
@@ -317,8 +317,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Charge', key: 'charge'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var a_str1 = row.aliases[0].replace('Name:', '').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str1+'</span>';
+            var synms = row.aliases[0].replace('Name:', '').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+synms+'</span>';
         }},
         {label: 'Aliases', key: 'aliases', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
@@ -326,8 +326,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/([A-Za-z]+:)(\s.*)/g,'<b>$1</b>$2');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Ontology', key: 'ontology', format: function(row){
             if(row.ontology===undefined || row.ontology==='class:null|context:null')
@@ -423,8 +423,8 @@ function($s, Biochem, $stateParams) {
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
             }
-            var a_str2 = als.join('<br>').replace(/\"/g, '');
-            return '<span style="display: inline-block; width: 300px;">'+a_str2+'</span>';
+            var als_str = als.join('<br>').replace(/\"/g, '');
+            return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
         }},
         {label: 'Pathways', key: 'pathways', format: function(row){
             if(row.pathways===undefined || row.pathways.length==0) return "N/A";
@@ -448,7 +448,7 @@ function($s, Biochem, $stateParams) {
     // Biochem.getCpd($s.id)
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
-            data.synm = data.aliases.shift().replace('Name:', 'Synonyms:');
+            data.synm = data.aliases.shift().replace('Name:', '');
             $s.cpd = data;
             $s.loading = false;
         })

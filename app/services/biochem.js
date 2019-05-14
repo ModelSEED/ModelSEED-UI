@@ -152,7 +152,12 @@ function($http, $q, config, $log) {
             if (queryColumn) {
                 var f = [];
                 for (var field in queryColumn) {
-                    f.push(field+':(*'+queryColumn[field]+'*)');
+                    queryColumn[field] = queryColumn[field].replace(/\'/g, "\'"); // reserve primes (')
+                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+)/g, ""); // get rid of these symbols with blanks
+                    if (field == 'synonyms')
+                        f.push('aliases'+':(*'+queryColumn[field]+'*)');
+                    else
+                        f.push(field+':(*'+queryColumn[field]+'*)');
                 }
                 url += '&q='+f.join(' AND ')
             } else if (searchFields) {
