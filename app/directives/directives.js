@@ -1457,6 +1457,7 @@ function(Dialogs, $dialog) {
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
+            scope.advancedOptsEnabled = true;
 
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
