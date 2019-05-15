@@ -163,6 +163,8 @@ function($http, $q, config, $log) {
             } else if (searchFields) {
                 var f = [];
                 for (var i=0; i<searchFields.length; i++) {
+                    if (searchFields[i] == 'synonyms')
+                        searchFields[i] = 'aliases';
                     f.push(searchFields[i]+':(*'+query+'*)');
                 }
                 url += '&q='+f.join(' OR ')
