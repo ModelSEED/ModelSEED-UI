@@ -1453,16 +1453,17 @@ function(Dialogs, $dialog) {
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
             enableDownload: '=',
-            enableColumnSearch: '='
+            enableColumnSearch: '=enableColumnSearch'
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
-            scope.advancedOptsEnabled = true;
+            scope.advancedOptsEnabled = scope.enableColumnSearch;
 
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
             }
 
+            var searchFields = scope.opts.searchFields;
             scope.toggleAdvancedOptions = function($ev) {
                 scope.advancedOptsEnabled = !scope.advancedOptsEnabled
 
@@ -1472,6 +1473,13 @@ function(Dialogs, $dialog) {
                     delete scope.opts.queryColumn;
                 } else {
                     scope.opts.query = '';
+                    for (var i=0; i<searchFields.length; i++) {
+                        if (searchFields[i] == 'aliases') {
+                            searchFields[i] = 'synonyms';
+                            break;
+                        }
+                    }
+                    scope.opts.searchFields = searchFields;
                 }
             }
 

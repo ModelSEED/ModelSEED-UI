@@ -236,6 +236,7 @@ function($s, Jobs) {
 function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.chem = $stateParams.chem;
+    $s.enableColumnSearch = true;
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
