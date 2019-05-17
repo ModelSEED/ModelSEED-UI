@@ -237,6 +237,13 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.chem = $stateParams.chem;
     $s.enableColumnSearch = true;
+    $s.externalDBs = {
+        BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
+        BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
+        KEGG: 'https://www.kegg.jp/entry/', //e.g., https://www.kegg.jp/entry/R00004 and https://www.kegg.jp/entry/C01328
+        MetaCyc_c: 'https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=', // e.g., https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=ATP
+        MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
+    }
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
@@ -281,6 +288,17 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             var als = row.aliases.slice(0, row.aliases.length -1);
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
+                var arr = als[i].split('</b>')
+                var arr1 = arr[1].split(';');
+                for (var j=0; j<arr1.length; j++) {
+                    if (als[i].indexOf('BiGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['BiGG_r']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('KEGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['KEGG']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('MetaCyc') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['MetaCyc_r']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                }
+                als[i] = arr[0] + "</b>" + arr1.join(';');
             }
             var als_str = als.join('<br>').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
@@ -325,7 +343,18 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var als = row.aliases.slice(1, row.aliases.length);
             for (var i=0; i<als.length; i++) {
-                als[i] = als[i].replace(/([A-Za-z]+:)(\s.*)/g,'<b>$1</b>$2');
+                als[i] = als[i].replace(/^([A-Za-z]+:\s)(.*)/g,'<b>$1</b>$2');
+                var arr = als[i].split('</b>')
+                var arr1 = arr[1].split(';');
+                for (var j=0; j<arr1.length; j++) {
+                    if (als[i].indexOf('BiGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['BiGG_c']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('KEGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['KEGG']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('MetaCyc') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['MetaCyc_c']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                }
+                als[i] = arr[0] + "</b>" + arr1.join(';');
             }
             var als_str = als.join('<br>').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
@@ -391,6 +420,13 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 function($s, Biochem, $stateParams) {
     $s.id = $stateParams.id;
     $s.getImagePath = Biochem.getImagePath;
+    $s.externalDBs = {
+        BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
+        BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
+        KEGG: 'https://www.kegg.jp/entry/', //e.g., https://www.kegg.jp/entry/R00004 and https://www.kegg.jp/entry/C01328
+        MetaCyc_c: 'https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=', // e.g., https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=ATP
+        MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
+    }
     // Reactions
     var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
@@ -423,6 +459,17 @@ function($s, Biochem, $stateParams) {
             var als = row.aliases.slice(0, row.aliases.length -1);
             for (var i=0; i<als.length; i++) {
                 als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
+                var arr = als[i].split('</b>')
+                var arr1 = arr[1].split(';');
+                for (var j=0; j<arr1.length; j++) {
+                    if (als[i].indexOf('BiGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['BiGG_r']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('KEGG') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['KEGG']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                    if (als[i].indexOf('MetaCyc') != -1)
+                        arr1[j] ='<a target="_blank" href="'+$s.externalDBs['MetaCyc_r']+arr1[j].trim()+'">'+arr1[j]+'</a>';
+                }
+                als[i] = arr[0] + "</b>" + arr1.join(';');
             }
             var als_str = als.join('<br>').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+als_str+'</span>';
