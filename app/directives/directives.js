@@ -1473,12 +1473,8 @@ function(Dialogs, $dialog) {
                     delete scope.opts.queryColumn;
                 } else {
                     scope.opts.query = '';
-                    for (var i=0; i<searchFields.length; i++) {
-                        if (searchFields[i] == 'aliases') {
-                            searchFields[i] = 'synonyms';
-                            break;
-                        }
-                    }
+                    searchFields[3] = 'synonyms';
+                    searchFields[4] = 'aliases';
                     scope.opts.searchFields = searchFields;
                 }
             }
