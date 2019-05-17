@@ -241,7 +241,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
         BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
         KEGG: 'https://www.kegg.jp/entry/', //e.g., https://www.kegg.jp/entry/R00004 and https://www.kegg.jp/entry/C01328
-        MetaCyc_c: 'https://biocyc.org/compound?orgid=META&id=', //e.g. https://biocyc.org/compound?orgid=META&id=ATP
+        MetaCyc_c: 'https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=', // e.g., https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=ATP
         MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
     }
 
@@ -424,7 +424,7 @@ function($s, Biochem, $stateParams) {
         BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
         BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
         KEGG: 'https://www.kegg.jp/entry/', //e.g., https://www.kegg.jp/entry/R00004 and https://www.kegg.jp/entry/C01328
-        MetaCyc_c: 'https://biocyc.org/compound?orgid=META&id=', //e.g. https://biocyc.org/compound?orgid=META&id=ATP
+        MetaCyc_c: 'https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=', // e.g., https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=ATP
         MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
     }
     // Reactions
