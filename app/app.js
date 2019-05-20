@@ -56,10 +56,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         	
             templateUrl: 'app/views/main.html',
             
-            
             controller: "FrontPage"
-            	
-            	
             	
         }).state('main.home', {
             url: "/?login&redirect",

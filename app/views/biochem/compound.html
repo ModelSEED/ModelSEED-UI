@@ -70,7 +70,28 @@
             <li><strong>Is co-factor?:</strong> {{cpd.is_cofactor?'Yes':'No'}}</li>
             <li><strong>Is core?:</strong> {{cpd.is_core?'Yes':'No'}}</li>
             <li><strong>Is obsolete?:</strong> {{cpd.is_obsolete?'Yes':'No'}}</li>
-            <li><strong>Aliases:</strong> {{cpd.aliases}}</li>
+            <li><strong>Aliases:</strong>
+                <span ng-repeat="als in cpd.aliases">
+                    <span ng-if="als.indexOf('BiGG')!=-1"><b>{{als.split(':')[0]}}:</b>
+                        <span ng-repeat="al in als.split(':')[1].split(';')">
+                            <a target="_blank" href="http://bigg.ucsd.edu/universal/metabolites/{{al.trim()}}">{{al}}</a>;
+                        </span>
+                    </span>
+                    <span ng-if="als.indexOf('KEGG')!=-1"><b>{{als.split(':')[0]}}:</b>
+                        <span ng-repeat="al in als.split(':')[1].split(';')">
+                            <a target="_blank" href="https://www.kegg.jp/entry/{{al.trim()}}">{{al}}</a>;
+                        </span>
+                    </span>
+                    <span ng-if="als.indexOf('MetaCyc')!=-1"><b>{{als.split(':')[0]}}</b>
+                        <span ng-repeat="al in als.split(':')[1].split(';')">
+                            <a target="_blank" href="https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object={{al.trim()}}">{{al}}</a>;
+                        </span>
+                    </span>
+                    <span ng-if="als.indexOf('BiGG')==-1 && als.indexOf('KEGG')==-1 && als.indexOf('MetaCyc')==-1">
+                        <b>{{als.split(':')[0]}}:</b>{{als.split(':')[1]}};
+                    </span>
+                </span>
+            </li>
             <li><strong>Synonyms:</strong> {{cpd.synm}}</li>
             <li ng-if="cpd.ontology!='class:null|context:null'">
                 <strong>Ontology:</strong> {{cpd.ontology}}

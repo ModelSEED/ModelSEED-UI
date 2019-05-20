@@ -7,6 +7,11 @@
     </div>
 
     <ul class="md-toolbar-tools about-toolbar">
+        <li>
+            <a ui-sref="app.biochem({chem: 'reactions'})">
+                Biochemistry
+            </a>
+        </li>
         <li ng-class="{ active: $state.includes('main.team') }">
             <a ui-sref="main.team">
                 Team

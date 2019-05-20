@@ -48,81 +48,102 @@
 <hr>
 <div layout="row" ng-if="!loading">
     <div flex="20" layout="column"><strong>Reaction</strong></div>
-    <div flex="60" layout="column">{{rxn.id}}&nbsp;[{{rxn.name}}]</div>
+    <div flex="80" layout="column">{{rxn.id}}&nbsp;[{{rxn.name}}]</div>
 </div>
 <hr>
 <div layout="row" ng-if="!loading">
     <div flex="20" layout="column"><strong>Equation</strong></div>
-    <div flex="60" layout="column">
+    <div flex="80" layout="column">
         <span stoichiometry-to-imgs="{{rxn.stoichiometry}}" direction="{{rxn.direction}}"></span>
     </div>
 </div>
 <hr>
 <div layout="row">
     <div flex="20" layout="column"><strong>Abbreviation</strong></div>
-    <div flex="60" layout="column"> {{rxn.abbreviation}}</div>
+    <div flex="80" layout="column"> {{rxn.abbreviation}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Reaction definition</strong></div>
-    <div flex="60" layout="column"> {{rxn.definition_display}}</div>
+    <div flex="80" layout="column"> {{rxn.definition_display}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Equation with compound IDs</strong></div>
-    <div flex="60" layout="column"> {{rxn.equation_display}}</div>
+    <div flex="80" layout="column"> {{rxn.equation_display}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Gibbs free energy change&nbsp;&#8710G</strong></div>
-    <div flex="60" layout="column">
+    <div flex="80" layout="column">
         <span>{{rxn.deltag}}&plusmn{{rxn.deltagerr}}&nbsp;(kcal/mol)</span>
     </div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>EC numbers</strong></div>
-    <div flex="60" layout="column">{{rxn.ec_numbers}}</div>
+    <div flex="80" layout="column">{{rxn.ec_numbers}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Direction</strong></div>
-    <div flex="60" layout="column">{{rxn.direction}}</div>
+    <div flex="80" layout="column">{{rxn.direction}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Thermodynamic reversibility</strong></div>
-    <div flex="60" layout="column">{{rxn.reversibility}}</div>
+    <div flex="80" layout="column">{{rxn.reversibility}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Status</strong></div>
-    <div flex="60" layout="column">{{rxn.status}}</div>
+    <div flex="80" layout="column">{{rxn.status}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Is obsolete?</strong></div>
-    <div flex="60" layout="column">{{rxn.is_obsolete_display?'Yes':'No'}}</div>
+    <div flex="80" layout="column">{{rxn.is_obsolete_display?'Yes':'No'}}</div>
 </div>
 <div layout="row" ng-if="rxn.is_obsolete_display">
     <div flex="20" layout="column"><strong>Linked reaction</strong></div>
-    <div flex="60" layout="column">
+    <div flex="80" layout="column">
         <span><a ui-sref="app.rxn({id: rxn.replace_rxn})">{{rxn.replace_rxn}}</a></span>
     </div>
 </div>
 <div layout="row" ng-if="rxn.aliases.length">
     <div flex="20" layout="column"><strong>Aliases</strong></div>
-    <div flex="60" layout="column">{{rxn.aliases}}</div>
+    <div flex="80" layout="column">
+        <span ng-repeat="als in rxn.aliases">
+            <span ng-if="als.indexOf('BiGG')!=-1"><b>{{als.split(':')[0]}}:</b>
+                <span ng-repeat="al in als.split(':')[1].split(';')">
+                    <a target="_blank" href="http://bigg.ucsd.edu/universal/reactions/{{al.trim()}}">{{al}}</a>;
+                </span>
+            </span>
+            <span ng-if="als.indexOf('KEGG')!=-1"><b>{{als.split(':')[0]}}:</b>
+                <span ng-repeat="al in als.split(':')[1].split(';')">
+                    <a target="_blank" href="https://www.kegg.jp/entry/{{al.trim()}}">{{al}}</a>;
+                </span>
+            </span>
+            <span ng-if="als.indexOf('MetaCyc')!=-1"><b>{{als.split(':')[0]}}</b>
+                <span ng-repeat="al in als.split(':')[1].split(';')">
+                    <a target="_blank" href="https://biocyc.org/META/NEW-IMAGE?type=REACTION&object={{al.trim()}}">{{al}}</a>;
+                </span>
+            </span>
+            <span ng-if="als.indexOf('BiGG')==-1 && als.indexOf('KEGG')==-1 && als.indexOf('MetaCyc')==-1">
+                <b>{{als.split(':')[0]}}:</b>{{als.split(':')[1]}};
+            </span>
+        </span>
+    </div>
 </div>
 <div layout="row" ng-if="!loading">
     <div flex="20" layout="column"><strong>Synonyms</strong></div>
-    <div flex="60" layout="column">{{rxn.synm}}</div>
+    <div flex="80" layout="column">{{rxn.synm}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Is transport?</strong></div>
-    <div flex="60" layout="column">{{rxn.is_transport?'Yes':'No'}}</div>
+    <div flex="80" layout="column">{{rxn.is_transport?'Yes':'No'}}</div>
 </div>
 <div layout="row">
         <div flex="20" layout="column"><strong>Source</strong></div>
-        <div flex="60" layout="column">{{rxn.source}}</div>
+        <div flex="80" layout="column">{{rxn.source}}</div>
 </div>
 <div layout="row" ng-if="rxn.pathways.length">
     <div flex="20" layout="column"><strong>Pathways</strong></div>
-    <div flex="60" layout="column">{{rxn.pathways}}</div>
+    <div flex="80" layout="column">{{rxn.pathways}}</div>
 </div>
 <div layout="row" ng-if="rxn.ontology!='class:null|context:null|step:null'">
         <div flex="20" layout="column"><strong>Ontology</strong></div>
-        <div flex="60" layout="column">{{rxn.ontology}}</div>
+        <div flex="80" layout="column">{{rxn.ontology}}</div>
 </div>
