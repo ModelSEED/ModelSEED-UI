@@ -2,6 +2,9 @@
 
 Below contains a summary of notable changes and deploy date for each release.
 
+####v2.5 (June 6, 2019)
+- Major upgrade to biochemistry data and visualization
+
 ####v2.4 (Nov 12, 2018)
 - Fixed visualization of gapfilling results, they now can be seen in the Model reactions table
 

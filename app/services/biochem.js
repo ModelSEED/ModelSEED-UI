@@ -1,5 +1,4 @@
 
-
 angular.module('Biochem', [])
 .service('Biochem', ['$http', '$q', 'config', '$log',
 function($http, $q, config, $log) {
@@ -8,7 +7,9 @@ function($http, $q, config, $log) {
     var self = this
 
     var endpoint = config.services.solr_url;
-    var solr_endpoint = config.services.local_solr_url; //dev_solr_url;
+    // var solr_endpoint = config.services.local_solr_url;
+    var solr_endpoint = config.services.ms_solr_url;
+    //var solr_endpoint = config.services.dev_solr_url;
 
     var cpdReq, rxnReq, geneReq;
     this.get = function(collection, opts) {
@@ -151,12 +152,19 @@ function($http, $q, config, $log) {
             if (queryColumn) {
                 var f = [];
                 for (var field in queryColumn) {
-                    f.push(field+':(*'+queryColumn[field]+'*)');
+                    queryColumn[field] = queryColumn[field].replace(/\'/g, "\'"); // reserve primes (')
+                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+)/g, ""); // get rid of these symbols with blanks
+                    if (field == 'synonyms')
+                        f.push('aliases'+':(*'+queryColumn[field]+'*)');
+                    else
+                        f.push(field+':(*'+queryColumn[field]+'*)');
                 }
                 url += '&q='+f.join(' AND ')
             } else if (searchFields) {
                 var f = [];
                 for (var i=0; i<searchFields.length; i++) {
+                    if (searchFields[i] == 'synonyms')
+                        searchFields[i] = 'aliases';
                     f.push(searchFields[i]+':(*'+query+'*)');
                 }
                 url += '&q='+f.join(' OR ')
@@ -166,8 +174,8 @@ function($http, $q, config, $log) {
             cache = false;
         }
 
-        if (limit)
-            url += '&rows='+limit+ offset ? '&start='+offset : '';
+        url += limit ? '&rows='+limit : '';
+        url += offset ? '&start='+offset : '';
 
         if (sort) {
             sort = sort=='-' ? 'desc' : 'asc';
@@ -200,8 +208,8 @@ function($http, $q, config, $log) {
                         return res.data.response;
                     })
     }
-    this.getRxn_solr = function(id, opts) {
-        var url = solr_endpoint+'reactions/select?wt=json'
+    this.getRxn_solr = function(ids, opts) {
+        var url = solr_endpoint+'reactions/select?wt=json';
 
         if (opts && 'select' in opts) {
             if (Array.isArray(opts.select))
@@ -210,29 +218,32 @@ function($http, $q, config, $log) {
                 url += '&fl='+opts.select;
         }
 
-        if (Array.isArray(id))
-            url += '&q=id:('+id.join(' OR ')+ ')';
+        if (Array.isArray(ids))
+            url += '&q=id:('+ids.join(' OR ')+ ')';
         else
-            url += '&q=id:'+id;
+            url += '&q=id:'+ids;
         return $http.get(url)
                     .then(function(res) {
-                        return Array.isArray(id) ? res.data.response.docs : res.data.response.docs[0];
+                        return Array.isArray(ids) ? res.data.response.docs : res.data.response.docs[0];
                     })
     }
-    this.getCpd_solr = function(id) {
-        var url = solr_endpoint+'compounds/select?wt=json&q=id:'+id;
-        console.log("Solr query:", url);
-        return $http.get(url)
-                    .then(function(res) {
-                        return res.data.response.docs[0];
-                    })
-    }
-    this.findReactions_solr = function(cpd) {
-        var url = endpoint+'reactions/select?wt=json',
-            url = url+'&q=equation:*'+cpd+'*&rows=10000&fl=id,equation,name,definition';
-        return $http.get(url)
-                    .then(function(res) {
+    this.getCpd_solr = function(ids) {
+        var url = solr_endpoint+'compounds/select?wt=json';
 
+        if (Array.isArray(ids))
+            url += '&q=id:('+ids.join(' OR ')+ ')';
+        else
+            url += '&q=id:'+ids;
+        return $http.get(url)
+                    .then(function(res) {
+                        return Array.isArray(ids) ? res.data.response.docs : res.data.response.docs[0];
+                    })
+    }
+    this.findReactions_solr = function(cpd, flds='id,equation,name,definition', r_limit=10) {
+        var url = solr_endpoint+'reactions/select?wt=json';
+            url += '&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
+        return $http.get(url)
+                    .then(function(res) {
                         return res.data.response.docs;
                     })
     }

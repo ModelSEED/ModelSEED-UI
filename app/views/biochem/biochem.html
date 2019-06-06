@@ -26,16 +26,16 @@
             </a>
         </li>
          -->
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'reactions'})">
-            <span hide-sm>Reactions</span>
-        </a>
-    </li>    
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
-            <span hide-sm>Compounds</span>
-        </a>
-    </li>
+        <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'reactions'})">
+                <span hide-sm>Reactions</span>
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+                <span hide-sm>Compounds</span>
+            </a>
+        </li>
     
         <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
             <a ui-sref="app.media">
@@ -44,7 +44,6 @@
         </li>
     </ul>
 </div>
-
 
 <ng-include ng-if="chem == 'reactions'" src="'app/views/biochem/biochem-reaction.html'"></ng-include>
 <ng-include ng-if="chem == 'compounds'" src="'app/views/biochem/biochem-compound.html'"></ng-include>

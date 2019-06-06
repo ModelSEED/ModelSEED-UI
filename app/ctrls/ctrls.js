@@ -20,10 +20,10 @@ function($s, MS, $q, MV, uiTools) {
     $s.filterPublic = true;
 
     self.form = $s.form;
-    
+
     $s.myMedia = [];
     $s.media = [];
-    
+
     MS.listMyMedia()
     .then(function(media) {
         $s.myMedia = media;
@@ -31,13 +31,12 @@ function($s, MS, $q, MV, uiTools) {
     .then(function() {
         MS.listPublicMedia()
         .then(function(pub_media){
-        	$s.media = pub_media;
+            $s.media = pub_media;
         } )
-        
     } ).catch(function(e) {
         $s.myMedia = []; // media folder may not exist
         $s.media = [];
-    })    
+    })
 
     $s.querySearch = function (query) {
         if (!$s.filterPublic)
@@ -205,8 +204,8 @@ function($scope, Biochem) {
     self.numberBuffer = '';
 
     function querySearch (query) {
-        return Biochem.get('model_compound', {query: query, limit: 10})
-        // return Biochem.get_solr('compounds', {query: query, limit: 10})
+        // return Biochem.get('model_compound', {query: query, limit: 10})
+        return Biochem.get_solr('compounds', {query: query, limit: 25})
                 .then(function(res) {
                     var data = [];
                     for (var i in res.docs) {
@@ -236,8 +235,8 @@ function($scope, Biochem) {
     self.numberBuffer = '';
 
     function querySearch (query) {
-        return Biochem.get('model_reaction', {query: query, limit: 10})
-        // return Biochem.get_solr('reactions', {query: query, limit: 10})
+        // return Biochem.get('model_reaction', {query: query, limit: 10})
+        return Biochem.get_solr('reactions', {query: query, limit: 25})
                 .then(function(res) {
                     var data = [];
                     for (var i in res.docs) {
@@ -397,7 +396,7 @@ function($s, $http, uiTools, config) {
     $s.reversed = false; // sort by year
 
     var url = config.services.ms_rest_url;
-    $http.get(url+'/publications')
+    $http.get(url+'publications')
         .then(function(res) {
             var d = res.data;
             for (var i=0; i<d.length; i++) {
@@ -538,7 +537,58 @@ function($s, $stateParams, auth) {
 ['$scope', '$stateParams', '$timeout',
 function($scope, $stateParams, $timeout) {
 
+}])
 
+.controller('LeaveComment', ['$scope', 'MS', '$q', 'ModelViewer', 'uiTools',
+function($s, MS, $q, MV, uiTools) {
+    var self = this;
 
+    $s.relativeTime = uiTools.relativeTime;
+    $s.filterPublic = true;
+
+    self.form = $s.form;
+
+    $s.myMedia = [];
+    $s.media = [];
+
+    MS.listMyMedia()
+    .then(function(media) {
+        $s.myMedia = media;
+    })
+    .then(function() {
+        MS.listPublicMedia()
+        .then(function(pub_media){
+            $s.media = pub_media;
+        } )
+    } ).catch(function(e) {
+        $s.myMedia = []; // media folder may not exist
+        $s.media = [];
+    })
+
+    $s.querySearch = function (query) {
+        if (!$s.filterPublic)
+            var results = query ? $s.myMedia.filter( createFilterFor(query) ) : $s.myMedia;
+        else
+            var results = query ? $s.media.filter( createFilterFor(query) ) : $s.media;
+        return results.slice(0, 50);
+    }
+
+    $s.searchTextChange = function(text) {
+        console.log("Media search text changed to:", text);
+    }
+
+    $s.selectedItemChange = function(item) {
+        if(item != undefined) {
+            MV.pre_Medium = MV.selectedMedium;
+            MV.selectedMedium = item.path;
+        }
+    }
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(state) {
+            return (state.value.indexOf(lowercaseQuery) >= 0);
+        };
+    }
 
 }])

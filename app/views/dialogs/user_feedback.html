@@ -1,0 +1,55 @@
+
+<!--md-dialog flex="70">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Please Leave Your Feedback</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Cancel feedback.">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar-->
+
+    <!--Feedback-->
+<md-dialog flex="70" id="leaveFeedbackDlg">
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>Your feedbacks</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Cancel feedback">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <form>
+    <md-dialog-content>
+            <div flex="100" layout="column">
+                <md-content class="md-no-momentum">
+                    <md-input-container class="md-icon-float md-block">
+                        <md-icon class="material-icons">person</md-icon>
+                        <input ng-model="user.name" type="text" placeholder="Your name">
+                    </md-input-container>
+                
+                    <md-input-container class="md-block">
+                        <!-- Use floating placeholder instead of label -->
+                        <md-icon class="material-icons">email</md-icon>
+                        <input ng-model="user.email" type="email" placeholder="Email (appreciated)" ng-required="false">
+                    </md-input-container>
+                
+                    <mat-form-field style="width: 280px;">
+                        <md-icon class="material-icons">comment</md-icon>
+                        <textarea ng-model="remarks" name="rmks" matInput rows="5" cols="100" placeholder="Feedback"></textarea>
+                    </mat-form-field>
+                </md-content>
+            </div>
+        <div class="md-actions">
+            <md-button ng-click="cancel()" type="button">
+                Cancel
+            </md-button>
+            <md-button ng-click="submit()" type="button">
+                Send Feedback
+            </md-button>
+        </div>
+    </md-dialog-content>
+    </form>
+</md-dialog>

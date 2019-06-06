@@ -1440,7 +1440,8 @@ function($compile, $stateParams) {
     };
 }])
 
-.directive('ngTableSolr', function() {
+.directive('ngTableSolr', ['Dialogs', '$mdDialog',
+function(Dialogs, $dialog) {
     return {
         restrict: 'EA',
         scope: {
@@ -1452,15 +1453,17 @@ function($compile, $stateParams) {
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
             enableDownload: '=',
-            enableColumnSearch: '='
+            enableColumnSearch: '=enableColumnSearch'
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
+            scope.advancedOptsEnabled = scope.enableColumnSearch;
 
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
             }
 
+            var searchFields = scope.opts.searchFields;
             scope.toggleAdvancedOptions = function($ev) {
                 scope.advancedOptsEnabled = !scope.advancedOptsEnabled
 
@@ -1469,12 +1472,45 @@ function($compile, $stateParams) {
                 if (scope.advancedOptsEnabled == false) {
                     delete scope.opts.queryColumn;
                 } else {
-                     scope.opts.query = '';
+                    scope.opts.query = '';
+                    searchFields[3] = 'synonyms';
+                    searchFields[4] = 'aliases';
+                    scope.opts.searchFields = searchFields;
                 }
+            }
+
+            scope.alert = function(arg) {
+                alert(arg);
+            }
+
+            /* user leaves a comment on a row*/
+            scope.rxnComments = ['incorrect abbreviation', 'incorrect stoichiometry', 'incorrect balance', 'incorrect EC', 'incorrect database mapping'];
+            scope.cpdComments = ['incorrect abbreviation', 'incorrect synonym', 'incorrect formula', 'incorrect charge', 'incorrect structure', 'incorrect database mapping'];
+            scope.leaveComment = function(ev, rowId, comment_tab, usr) {
+                if(comment_tab == 'rxn'){
+                    comment_items = scope.rxnComments;
+                }
+                else if(comment_tab == 'cpd'){
+                    comment_items = scope.cpdComments;
+                }
+                // console.log('comment items passed: ', comment_items);
+
+                Dialogs.leaveComment(ev, rowId, comment_items, usr,
+                function(comments) {
+                    console.log('getting a comment: ', comments);
+                });
+            }
+
+            /* table row click (not used as of now)*/
+            scope.rowClick = function(ev) {
+                Dialogs.rowClicked(ev,
+                function(rowId) {
+                    console.log('row clicked on: ', rowId);
+                });
             }
         }
     }
- })
+ }])
 
 
  .directive('ngSolrTableEditor', function() {
@@ -2163,13 +2199,13 @@ function($compile, $stateParams) {
                                    .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
 
                 if (weight < 0)
-                    lhs.push((weight === -1 ? '' : -1*weight) +
+                    lhs.push((weight === "-1" ? '' : -1*weight) +
                              ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
-                             ' ['+compart+']');
+                             (compartNum === "0" ? '' : ' ['+compart+']'));
                 if (weight > 0)
-                    rhs.push((weight === 1 ? '' : weight) +
+                    rhs.push((weight === "1" ? '' : weight) +
                              ' <a ui-sref="app.cpd({id: \''+id+'\'})"><i>'+name+'</i></a>' +
-                             ' ['+compart+']');
+                             (compartNum === "0" ? '' : ' ['+compart+']'));
             }
 
             var eq = lhs.join(' + ') +
@@ -2217,17 +2253,19 @@ function($compile, $stateParams) {
                     name = attrs[4] ? attrs[4].replace(/^"(.*)"$/, '$1')
                                    .replace(/(?!\d\-|\d\,|^\d|\d\')(\d+)/g, '<sub>$1</sub>') : 'N/A';
 
-                var fig = function(stoich){
+                var fig = function(stoich, compart){
                     return '<figure><img src='+Biochem.getImagePath(id)+' height=100px>' +
                            '<figcaption>'+stoich+' <a ui-sref="app.cpd({id: \''
-                           +id+'\'})"><i>'+name+'</i></a> ['+compart+']' +
+                           +id+'\'})"><i>'+name+'</i></a>' + compart +
                            '</figcaption></figure>';
                 }
 
                 if (weight < 0)
-                    lhs.push(fig(weight === -1 ? '' : -1*weight));
+                    lhs.push(fig(weight === "-1" ? '' : -1*weight,
+                                compartNum === "0" ? '' : ' ['+compart+']'));
                 if (weight > 0)
-                    rhs.push(fig(weight === 1 ? '' : weight));
+                    rhs.push(fig(weight === "1" ? '' : weight,
+                                compartNum === "0" ? '' : ' ['+compart+']'));
             }
 
             var eq = '<div class="reactant">'+ lhs.join(' + ') +
@@ -2256,3 +2294,55 @@ function($compile, $stateParams) {
         }
     }
 }])
+
+
+// added for searching biochemistry data in solr
+.directive('biochemSearchResults', function () {
+    return {
+      scope: {
+        solrUrl: '=',
+        collection: '=',
+        displayField: '=',
+        search_query: '&',
+        results: '&'
+      },
+      restrict: 'E',
+      controller: function($scope, $http) {
+        console.log('Searching for ' + $scope.query + ' at ' + $scope.solrUrl + ' in ' + $scope.collection);
+        $scope.$watch('query', function() {
+          $http(
+            {method: 'JSONP',
+             url: $scope.solrUrl + $scope.collection + '/select',
+             params:{'json.wrf': 'JSON_CALLBACK',
+                    'q': $scope.search_query,
+                    'fl': $scope.displayField}
+            })
+            .success(function(data) {
+              var docs = data.response.docs;
+              console.log('search success!');
+              $scope.results.docs = docs;
+
+            }).error(function() {
+              console.log('Search failed!');
+            });
+        });
+      },
+      template: '<input ng-model="search_query" name="Search Query"></input>' +
+                '<input ng-model="collection" name="Search Collection"></input>' +
+                '<h2>Biochemistry Search Results for </h2>' +
+                '<span ng-repeat="doc in results.docs">' +
+                '  <p>{{doc}}</p>'  +
+                '</span>'
+    };
+  });
+
+  /* supposed to be used as follows:
+<biochem-search-results
+    solr-url="'http://0.0.0.0:8983/solr/'"
+    collection="'compounds'"
+    search_query="''"
+    display-field="'aliases'">
+</biochem-search-results>
+  */
+
+// End 'added for searching biochemistry data in solr'

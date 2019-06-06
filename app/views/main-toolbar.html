@@ -7,6 +7,10 @@
     </div>
 
     <ul class="md-toolbar-tools about-toolbar">
+        <md-button class="md-raised md-primary pull-right"
+                   ui-sref="app.biochem({chem: 'reactions'})">
+            Biochemistry
+        </md-button>
         <li ng-class="{ active: $state.includes('main.team') }">
             <a ui-sref="main.team">
                 Team
@@ -34,12 +38,12 @@
         
         
         
-        <!-- TODO MODELSEED-59: KBASE trap -->
+        <!-- TODO MODELSEED-59: KBASE trap>
             <md-button md-no-ink ng-click="toggleOperations($event, 'kbase')" 
                 class="md-raised md-primary pull-right" aria-label="view analysis options">
                  KBase
                 <md-tooltip ng-if="!selected">View Analysis options</md-tooltip>
-            </md-button>
+            </md-button-->
             
             
                     
