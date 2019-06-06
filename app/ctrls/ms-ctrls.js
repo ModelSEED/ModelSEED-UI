@@ -129,8 +129,7 @@ function($s, $http, config) {
           .then(function(res) { $s.shock = true; })
           .catch(function() { $s.shock = false; })
 
-    //$http.get($s.urls.ms_solr_url+'reactions/?http_accept=application/solr+json')
-    $http.get($s.urls.ms_solr_url+'reactions/select?q=*')
+    $http.get($s.urls.solr_url+'reactions/select?q=*')
          .then(function(res) { $s.solr = true; })
          .catch(function() { $s.solr = false; })
 
