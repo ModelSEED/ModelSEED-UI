@@ -23,7 +23,7 @@
     "angular-aria": "~1.4.0",
     "angular-material": "~0.10.1",
     "angular-scroll": "~0.6.5",
-    "bootstrap": "~3.3.4",
+    "bootstrap": "^4.3.1",
     "d3": "~3.5.5",
     "font-awesome": "~4.3.0",
     "html2canvas": "github:niklasvh/html2canvas#0.4.1",
