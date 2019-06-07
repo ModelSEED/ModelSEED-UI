@@ -19,8 +19,8 @@ function($state, $http, config, $window) {
 
     // if previously authenticated, set user/token
     if (auth) {
-        this.user = auth.data.user_id;
-        this.token = auth.data.token;
+        this.user = auth.user_id;
+        this.token = auth.token;
 
         // set auth method used
         if (this.token.indexOf('rast.nmpdr.org') !== -1)
