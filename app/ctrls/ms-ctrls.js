@@ -10,10 +10,10 @@ angular.module('ms-ctrls', [])
 function($scope, $state, $stateParams, Auth, $window) {
 
     // set login method
-    if ($stateParams.login == 'patric')
-        $scope.method = Auth.loginMethod('patric');
-    else
+    if ($stateParams.login == 'rast')
         $scope.method = Auth.loginMethod('rast');
+    else
+        $scope.method = Auth.loginMethod('partic');
 
     // sets method and changes url param
     $scope.switchMethod = function(method) {

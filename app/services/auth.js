@@ -99,17 +99,17 @@ function($state, $http, config, $window) {
     }
 
     this.loginMethod = function(method) {
-        if (method === 'patric')
+        if (method === 'rast')
             return {
-                name: 'PATRIC',
-                newAccountURL: 'https://user.patricbrc.org/register/',
-                forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'
+                name: 'RAST',
+                newAccountURL: 'http://rast.nmpdr.org/?page=Register',
+                forgotPasswordUrl: 'http://rast.nmpdr.org/?page=RequestNewPassword'
             };
 
         return {
-            name: 'RAST',
-            newAccountURL: 'http://rast.nmpdr.org/?page=Register',
-            forgotPasswordUrl: 'http://rast.nmpdr.org/?page=RequestNewPassword'
+            name: 'PATRIC',
+            newAccountURL: 'https://user.patricbrc.org/register/',
+            forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'
         };
     }
 
