@@ -17,19 +17,19 @@
   },
   "homepage": "http://modelseed.org",
   "dependencies": {
-    "@uirouter/angularjs": "~0.2.18",
-    "angular": "~1.4.0",
-    "angular-animate": "~1.4.0",
-    "angular-aria": "~1.4.0",
-    "angular-material": "~0.10.1",
-    "angular-scroll": "~0.6.5",
-    "bootstrap": "^4.3.1",
-    "d3": "~3.5.5",
-    "font-awesome": "~4.3.0",
+    "@uirouter/angularjs": "0.2.18",
+    "angular": "1.4.0",
+    "angular-animate": "1.4.0",
+    "angular-aria": "1.4.0",
+    "angular-material": "0.10.1",
+    "angular-scroll": "0.6.5",
+    "bootstrap": "3.3.4",
+    "d3": "3.5.5",
+    "font-awesome": "4.3.0",
     "html2canvas": "github:niklasvh/html2canvas#0.4.1",
-    "jquery": "~3.4.0",
+    "jquery": "3.4.0",
     "ng-context-menu": "github:talis/ng-context-menu#v1.0.1",
-    "papaparse": "~4.1.2",
-    "showdown": "~1.2.1"
+    "papaparse": "4.1.2",
+    "showdown": "1.2.1"
   }
 }
