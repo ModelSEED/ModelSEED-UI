@@ -94,8 +94,8 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('Version', ['$scope', '$http', 'config',
-function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config', '$rootScope',
+function($s, $http, config, $rootScope) {
 
     $s.release = config.releaseVersion;
 
@@ -137,7 +137,7 @@ function($s, $http, config) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
-    $http.rpc('msSupport', 'list_rast_jobs', {owner: 'nconrad'})
+    $http.rpc('msSupport', 'list_rast_jobs', {owner: $rootScope.user})
          .then(function(res) {
              console.log('res', res); $s.msSupport = true;
          })
