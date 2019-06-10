@@ -777,10 +777,10 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
             controller: ['$scope', '$state', '$http',
             function($s, $state, $http) {
                 // set login method
-                if ($rootScope.$stateParams.login == 'rast')
-                    $s.method = Auth.loginMethod('rast');
-                else
+                if ($rootScope.$stateParams.login == 'patric')
                     $s.method = Auth.loginMethod('patric');
+                else
+                    $s.method = Auth.loginMethod('rast');
 
                 $s.creds = {};
 
