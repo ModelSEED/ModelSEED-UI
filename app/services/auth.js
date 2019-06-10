@@ -105,7 +105,6 @@ function($state, $http, config, $window) {
                 newAccountURL: 'https://user.patricbrc.org/register/',
                 forgotPasswordUrl: 'https://user.patricbrc.org/reset_password'
             };
-
         return {
             name: 'RAST',
             newAccountURL: 'http://rast.nmpdr.org/?page=Register',

@@ -10,8 +10,8 @@ angular.module('ms-ctrls', [])
 function($scope, $state, $stateParams, Auth, $window) {
 
     // set login method
-    if ($stateParams.login == 'patric')
-        $scope.method = Auth.loginMethod('patric');
+    if ($stateParams.login == 'partic')
+        $scope.method = Auth.loginMethod('partic');
     else
         $scope.method = Auth.loginMethod('rast');
 
@@ -94,8 +94,8 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('Version', ['$scope', '$http', 'config',
-function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config', '$rootScope',
+function($s, $http, config, $rootScope) {
 
     $s.release = config.releaseVersion;
 
@@ -129,7 +129,7 @@ function($s, $http, config) {
           .then(function(res) { $s.shock = true; })
           .catch(function() { $s.shock = false; })
 
-    $http.get($s.urls.solr_url+'model_reaction/?http_accept=application/solr+json')
+    $http.get($s.urls.solr_url+'reactions/select?q=*')
          .then(function(res) { $s.solr = true; })
          .catch(function() { $s.solr = false; })
 
@@ -137,7 +137,7 @@ function($s, $http, config) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
-    $http.rpc('msSupport', 'list_rast_jobs', {owner: 'nconrad'})
+    $http.rpc('msSupport', 'list_rast_jobs', {owner: $rootScope.user})
          .then(function(res) {
              console.log('res', res); $s.msSupport = true;
          })
