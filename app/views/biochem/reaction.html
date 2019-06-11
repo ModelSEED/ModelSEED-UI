@@ -78,7 +78,7 @@
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>EC numbers</strong></div>
-    <div flex="80" layout="column">{{rxn.ec_numbers}}</div>
+    <div flex="80" layout="column">{{rxn.ec_numbers_display}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Direction</strong></div>
@@ -141,7 +141,7 @@
 </div>
 <div layout="row" ng-if="rxn.pathways.length">
     <div flex="20" layout="column"><strong>Pathways</strong></div>
-    <div flex="80" layout="column">{{rxn.pathways}}</div>
+    <div flex="80" layout="column">{{rxn.pathways_display}}</div>
 </div>
 <div layout="row" ng-if="rxn.ontology!='class:null|context:null|step:null'">
         <div flex="20" layout="column"><strong>Ontology</strong></div>

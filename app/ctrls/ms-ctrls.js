@@ -497,6 +497,12 @@ function($s, Biochem, $stateParams) {
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
             data.synm = data.aliases.shift().replace('Name:', '');
+            if (data['pka'] != undefined) {
+                data['pka_display'] = data['pka'][0].replace('"', '');
+            }
+            if (data['pkb'] != undefined) {
+                data['pkb_display'] = data['pkb'][0].replace('"', '');
+            }
             $s.cpd = data;
             $s.loading = false;
         })
@@ -534,6 +540,12 @@ function($s, Biochem, $stateParams) {
             if (data['aliases'] != undefined) {
                 var sn = data['aliases'].pop();
                 data['synm'] = sn.replace('Name:', '');
+            }
+            if (data['ec_numbers'] != undefined) {
+                data['ec_numbers_display'] = data['ec_numbers'][0].replace('"', '');
+            }
+            if (data['pathways'] != undefined) {
+                data['pathways_display'] = data['pathways'][0].replace('"', '');
             }
             data['equation_display'] = data['equation'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
             data['definition_display'] = data['definition'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
