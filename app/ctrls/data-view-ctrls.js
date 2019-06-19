@@ -914,10 +914,12 @@ function($s, $state, $sParams, WS, MS, tools,
                     $s.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
+                var cpd_sFields = ['name', 'id', 'formula', 'abbreviation','deltag',
+                                   'deltagerr', 'charge'];
                 $s.cpdOpts = {
                     query: '', limit: 10, offset: 0, sort: {field: 'id'},
-                    visible: ['name', 'id', 'formula', 'abbreviation',
-                            'deltag', 'deltagerr', 'charge']
+                    searchFields: cpd_sFields,
+                    visible: cpd_sFields
                 };
 
                 $s.cpdHeader = [
@@ -926,7 +928,7 @@ function($s, $state, $sParams, WS, MS, tools,
                     {label: 'Formula', key: 'formula'},
                     {label: 'Abbrev', key: 'abbreviation'},
                     {label: 'deltaG', key: 'deltag'},
-                    {label: 'detalGErr', key: 'deltagerr'},
+                    {label: 'deltaGErr', key: 'deltagerr'},
                     {label: 'Charge', key: 'charge'}
                 ];
 

@@ -343,7 +343,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var als = row.aliases.slice(1, row.aliases.length);
             for (var i=0; i<als.length; i++) {
-                als[i] = als[i].replace(/^([A-Za-z]+:\s)(.*)/g,'<b>$1</b>$2');
+                als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
                 var arr = als[i].split('</b>')
                 var arr1 = arr[1].split(';');
                 for (var j=0; j<arr1.length; j++) {
