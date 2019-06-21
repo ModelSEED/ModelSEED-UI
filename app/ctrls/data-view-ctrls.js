@@ -1332,13 +1332,13 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     }
 
     // table options
-    $scope.rxnOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.cpdOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.geneOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.compartmentOpts = {query: '', limit: 20, offset: 0, sort: null};
-    $scope.biomassOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.mapOpts = {query: '', limit: 20, offset: 0, sort: {field: 'id'}};
-    $scope.annotationOpts = {query: '', limit: 10, offset: 0, sort: {field: 'role'}};
+    $scope.rxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.cpdOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.geneOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.compartmentOpts = {query: '', limit: 25, offset: 0, sort: null};
+    $scope.biomassOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.mapOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'}};
+    $scope.annotationOpts = {query: '', limit: 25, offset: 0, sort: {field: 'role'}};
     
     
     // converge orthogonal Flux data:        
@@ -1906,6 +1906,9 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
             // Biochem.getRxn(id)
             Biochem.getRxn_solr(id)
                    .then(function(rxn) {
+                        if (rxn['is_obsolete'] == "1") {
+                            rxn['status'] += " (obsolete)";
+                        }
                         $scope.selected.rxn = rxn;
                     })
 
@@ -1928,8 +1931,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                 id: id,
                 modelCpd: ModelParser.cpdhash[item]};
 
-            //Biochem.getCpd(id)
-            Biochem.getCpd_solr(id)
+            Biochem.getCpd(id)
+            // Biochem.getCpd_solr(id)
 
                 .then(function(cpd) {
                     $scope.selected.cpd = cpd;
@@ -2021,7 +2024,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                     $self.$broadcast('Events.commandOperation', {op: 'add', items: opItems});
                 }
 
-                $scope.bioRxnOpts = {query: '', limit: 10, offset: 0, sort: {field: 'id'},
+                $scope.bioRxnOpts = {query: '', limit: 25, offset: 0, sort: {field: 'id'},
                               visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction'] };
 
                 $scope.bioRxnHeader = [{label: 'Name', key: 'name'},
@@ -2031,7 +2034,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                                 {label: 'detalGErr', key: 'deltagerr'}];
 
                 function updateRxns() {
-                    // Biochem.get('model_reaction', $scope.rxnOpts)
+                    //Biochem.get('model_reaction', $scope.rxnOpts)
                     Biochem.get_solr('reactions', $scope.rxnOpts)
                            .then(function(res) {
                                 $scope.bioRxns = res;
@@ -2858,7 +2861,7 @@ function($scope, $sParams, WS, $http, Biochem) {
                 data[i].eq = res[i].definition.replace('<=>', dir);
             }
             return data;
-        })
+        });
     }
 
 }])

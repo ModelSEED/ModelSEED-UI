@@ -5,9 +5,11 @@
  *
  */
 
-angular.module('Dialogs', []).service('Dialogs', 
-['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
+angular.module('Dialogs', [])
+
+.service('Dialogs',
+['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer', 'config', '$http',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config, $http) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -74,8 +76,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
         })
     }
     
-    
-    
     this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -90,7 +90,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                     $dialog.hide();
                 };
                 $scope.setDefault = function(){
-                    // Set MV.selectedMedium to 'Complete'
+                    // Set MV.selectedMedium back to 'Complete'
                     MV.selectedMedium = 'Complete';
                     cb(MV.selectedMedium);
                     $dialog.hide();
@@ -103,8 +103,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
               }]
         });
     }
-
-    
 
     this.reconstruct = function(ev, item, cb) {
         ev.stopPropagation();
@@ -292,8 +290,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
               }]
         })
     }
-
-    
 
     /**
      * [function runFBA]
@@ -641,7 +637,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
         })    
     }
 
-
    this.annotatePlant = function(ev, item, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -677,11 +672,98 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV) {
                 $scope.cancel = function(){
                     $dialog.hide();
                 }
-
             }]
         })
     }    
 
+    this.leaveComment = function(ev, rowId, item_list, userinfo, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/leaveComment.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+              function($scope, $http) {
+                if( item_list == undefined || item_list.length == 0) {
+                    item_list = ['incorrect abbreviation', 'incorrect database mapping'];
+                }
+                $scope.items = item_list;
+                $scope.selected = [];
+                $scope.row_id = rowId;
+                if (userinfo == undefined) {
+                    userinfo = {username: Auth.user};
+                }
+                else{
+                    console.log('Commenting from user: ', userinfo);
+                }
+                $scope.user = userinfo;
+
+                $scope.submit = function() {
+                    if ($scope.selected.length != 0 || $scope.user['remarks']) {
+                        var ms_rest_endpoint = config.services.ms_rest_url+'comments';
+                        var comments = {user: $scope.user,
+                            rowId: $scope.row_id,
+                            comments: $scope.selected};
+                        var data = {comment: JSON.stringify(comments)};
+                        /* use $http to post the comments JSON object to the ms_rest_url endpoint
+                        var comm_headers = {
+                                Authentication: Auth.token,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        console.log('headers', comm_headers);
+                        var req = $http({
+                            method: 'POST',
+                            url: ms_rest_endpoint,
+                            headers: comm_headers,
+                            data: data
+                        });
+                        req.then( onSuccess, onError );
+                        */
+                        $.ajax({
+                            url: ms_rest_endpoint,
+                            dataType: 'json',
+                            type: 'POST',
+                            data: data,
+                            success: function(response){
+                                console.log( "Successfully POST-ed data:\n", comments);
+                                swal('User comments', response.msg);
+                            },
+                            error: function(response) {
+                                if(response.msg) {
+                                    console.log("POST-ing of data failed:\n", comments);
+                                    swal('User comments', response.msg);
+                                }
+                                else {
+                                    var cm_msg = "POST-ing of data failed with unknown error.";
+                                    console.log(cm_msg + "\n", comments);
+                                    swal('User comments', cm_msg);
+                                }
+                            }
+                        });
+                        cb(comments);
+                    }
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+
+                $scope.toggle = function (item, list) {
+                  var idx = list.indexOf(item);
+                  if (idx > -1) {
+                    list.splice(idx, 1);
+                  }
+                  else {
+                    list.push(item);
+                  }
+                }
+                $scope.exists = function (item, list) {
+                  return list.indexOf(item) > -1;
+                }
+            }]
+        })
+    }
 }])
 
 .service('AuthDialog',
@@ -740,7 +822,60 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
             }]
         })
     }
+}])
 
+.service('FBDialog',
+['$mdDialog', 'Auth', 'config', function($dialog, Auth, config) {
+
+    this.leaveFeedback = function() {
+        return $dialog.show({
+            templateUrl: 'app/views/dialogs/user_feedback.html',
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+              function($scope, $http) {
+                $scope.user = {'username': Auth.user,
+                               'name': '',
+                               'email': ''};
+                $scope.remarks = '';
+                console.log('Feedback from user: ', $scope.user.username);
+
+                $scope.submit = function() {
+                    if ($scope.remarks && $scope.remarks.toLowerCase() != 'feedback') {
+                        var ms_rest_endpoint = config.services.ms_rest_url+'feedback';
+                        var comments = {user: $scope.user,
+                                        comments: $scope.remarks};
+                        var data = {comment: JSON.stringify(comments)};
+                        $.ajax({
+                            url: ms_rest_endpoint,
+                            dataType: 'json',
+                            type: 'POST',
+                            data: data,
+                            success: function(response){
+                                console.log( "Successfully POST-ed data:\n", comments);
+                                swal('User feedback', response.msg);
+                            },
+                            error: function(response) {
+                                if(response.msg) {
+                                    console.log("POST-ing of data failed:\n", comments);
+                                    swal('User feedback', response.msg);
+                                }
+                                else {
+                                    var cm_msg = "POST-ing of data failed with unknown error.";
+                                    console.log(cm_msg + "\n", comments);
+                                    swal('User feedback', cm_msg);
+                                }
+                            }
+                        });
+                    }
+                    $dialog.hide();
+                }
+
+                $scope.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
 }])
 
 .controller('ToastCtrl', ['$scope', '$mdToast', '$timeout', function($scope, $mdToast, $timeout) {
