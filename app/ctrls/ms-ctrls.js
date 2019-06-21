@@ -2417,7 +2417,8 @@ function($s, WS, $stateParams) {
     } else {
         WS.get(wsPath)
         .then(function(res) {
-            $s.subsysData = parseSubsysData(res.data.name, res.data.data); 
+            $s.subsysName = res.data.name;
+            $s.subsysData = parseSubsysData($s.subsysName, res.data.data);
             captions = res.data.data[0];
             WS.cached.subsystems = $s.subsysData;
             for (var k=0; k<captions.length; k++) {
@@ -2431,7 +2432,7 @@ function($s, WS, $stateParams) {
         });
     }
 
-    // Parse the given data for the subsystem odata structure
+    // Parse the given data for the subsystem data structure
     function parseSubsysData(obj_name, obj_data) {
         var caps = obj_data[0];
 
