@@ -6,14 +6,13 @@
 
     <md-input-container layout-align="start center" layout="row" class="table-options" flex>
         <a ng-if="enableColumnSearch" ng-click="toggleAdvancedOptions($event)">
-            <i class="tiny-link-icon material-icons">settings_applications</i> advanced
+            <i class="tiny-link-icon material-icons">settings_applications</i> {{advanceSearch}}
         </a>
 
         <a  ng-if="enableDownload" ng-click="download($event)">
             <i class="tiny-link-icon material-icons">file_download</i> download
         </a>
     </md-input-container>
-
 
     <md-progress-circular ng-if="loading"
                           md-mode="indeterminate"
