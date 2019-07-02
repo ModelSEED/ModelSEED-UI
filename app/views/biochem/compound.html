@@ -60,8 +60,8 @@
     <div flex="66" layout="column">
         <ul class="list-unstyled no-margin">
             <li><strong> &#8710G:</strong>&nbsp;{{cpd.deltag===10000000?'unspecified':cpd.deltag}}&plusmn{{cpd.deltagerr===10000000?'unspecified':cpd.deltagerr}}&nbsp;(kcal/mol)</li>
-            <li ng-if="cpd.pka"><strong>pKa:</strong> {{cpd.pka}}</li>
-            <li ng-if="cpd.pkb"><strong>pKb:</strong> {{cpd.pkb}}</li>
+            <li ng-if="cpd.pka"><strong>pKa:</strong> {{cpd.pka_display}}</li>
+            <li ng-if="cpd.pkb"><strong>pKb:</strong> {{cpd.pkb_display}}</li>
             <li><strong>Weight:</strong> {{cpd.mass}}</li>
             <li><strong>Charge:</strong> {{cpd.charge}}</li>
             <li ng-if="cpd.structure"><strong>Structure:</strong> {{::cpd.structure}}</li>
