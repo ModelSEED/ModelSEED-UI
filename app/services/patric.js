@@ -7,7 +7,7 @@ function($http, $q, $rootScope, config, Auth) {
 
     var self = this;
 
-    var endpoint = config.services.solr_url;
+    var endpoint = config.services.patric_solr_url;
 
     var liveReq;
 
