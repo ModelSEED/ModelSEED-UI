@@ -1,6 +1,8 @@
 ##Change Log
 
 Below contains a summary of notable changes and deploy date for each release.
+####v2.5.1 (July 2, 2019)
+- several bug fixes related to biochemistry visualization and search
 
 ####v2.5 (June 6, 2019)
 - Major upgrade to biochemistry data and visualization
