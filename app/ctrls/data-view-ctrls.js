@@ -267,6 +267,14 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                       $scope.loading = false;
                   })
               })
+        $scope.loading = true;
+        MS.listRastGenomes()
+            .then(function(data) {
+                $scope.rastMicrobes = data;
+                $timeout(function() {
+                    $scope.loading = false;
+                })
+            })
     }
     
     
