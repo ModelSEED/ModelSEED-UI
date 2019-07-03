@@ -1,17 +1,18 @@
 
 <div class="table-controls"  layout="row">
-    <md-input-container md-no-float flex="45" disable-search="advancedOptsEnabled"
-        search="opts.query" search-opts="opts" search-placeholder={{::placeholder}}>
-    </md-input-container>
-
-    <md-input-container layout-align="start center" layout="row" class="table-options" flex>
+    <md-input-container layout-align="start" layout="row" class="table-options" flex>
         <a ng-if="enableColumnSearch" ng-click="toggleAdvancedOptions($event)">
-            <i class="tiny-link-icon material-icons">settings_applications</i> {{advanceSearch}}
+            <md-tooltip md-direction="right">click to toggle</md-tooltip>
+            <b><i class="tiny-link-icon material-icons">settings_applications</i>{{advanceSearch}}</b>
         </a>
-
         <a  ng-if="enableDownload" ng-click="download($event)">
             <i class="tiny-link-icon material-icons">file_download</i> download
         </a>
+    </md-input-container>
+
+    <!--md-input-container layout-align="start center" ng-if="!advancedOptsEnabled" md-no-float flex="45" disable-search="advancedOptsEnabled"-->
+    <md-input-container layout-align="center" ng-if="!advancedOptsEnabled" md-no-float flex="45"
+        search="opts.query" search-opts="opts" search-placeholder={{::placeholder}}>
     </md-input-container>
 
     <md-progress-circular ng-if="loading"
