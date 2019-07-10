@@ -1460,9 +1460,9 @@ function(Dialogs, $dialog) {
         link: function(scope, elem, attrs) {
             scope.advancedOptsEnabled = scope.enableColumnSearch;
             if (scope.advancedOptsEnabled) {
-                scope.advanceSearch = 'search in columns';
+                scope.advanceSearch = 'Click to search all fields';
             } else {
-                scope.advanceSearch = 'search all fields';
+                scope.advanceSearch = 'Click to search columns';
             }
 
             scope.download = function($ev) {
@@ -1477,13 +1477,13 @@ function(Dialogs, $dialog) {
                 // and remove general query when enabled
                 if (scope.advancedOptsEnabled == false) {
                     delete scope.opts.queryColumn;
-                    scope.advanceSearch = 'search all fields';
+                    scope.advanceSearch = 'Click to search in columns';
                 } else {
                     scope.opts.query = '';
                     searchFields[3] = 'synonyms';
                     searchFields[4] = 'aliases';
                     scope.opts.searchFields = searchFields;
-                    scope.advanceSearch = 'search in columns';
+                    scope.advanceSearch = 'Click to search all fields';
                 }
             }
 
