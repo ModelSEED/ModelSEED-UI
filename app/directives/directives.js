@@ -1453,17 +1453,26 @@ function(Dialogs, $dialog) {
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
             enableDownload: '=',
-            enableColumnSearch: '=enableColumnSearch'
+            enableColumnSearch: '=enableColumnSearch',
+            advanceSearch: '=advanceSearch'
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
+            var searchAll = 'Click to search all fields';
+            var searchCol = 'Click to search in columns'; 
+            var searchFields = scope.opts.searchFields;
+
             scope.advancedOptsEnabled = scope.enableColumnSearch;
+            if (scope.advancedOptsEnabled) {
+                scope.advanceSearch = searchAll;
+            } else {
+                scope.advanceSearch = searchCol;
+            }
 
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
             }
 
-            var searchFields = scope.opts.searchFields;
             scope.toggleAdvancedOptions = function($ev) {
                 scope.advancedOptsEnabled = !scope.advancedOptsEnabled
 
@@ -1471,11 +1480,13 @@ function(Dialogs, $dialog) {
                 // and remove general query when enabled
                 if (scope.advancedOptsEnabled == false) {
                     delete scope.opts.queryColumn;
+                    scope.advanceSearch = searchCol;
                 } else {
                     scope.opts.query = '';
                     searchFields[3] = 'synonyms';
                     searchFields[4] = 'aliases';
                     scope.opts.searchFields = searchFields;
+                    scope.advanceSearch = searchAll;
                 }
             }
 

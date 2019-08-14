@@ -277,8 +277,6 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
             })
     }
     
-    
-    
 
     // MODELSEED-47: load Patric Genomes for user to select for modeling
     Patric.listGenomes( $scope.opts )

@@ -237,6 +237,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.chem = $stateParams.chem;
     $s.enableColumnSearch = true;
+    $s.advanceSearch = 'search in columns';
     $s.externalDBs = {
         BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
         BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
@@ -279,7 +280,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Status', key: 'status'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var synms= row.aliases[row.aliases.length -1];
+            var synms = row.aliases[row.aliases.length -1];
             synms = synms.replace('Name:', '').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+synms+'</span>';
         }},
