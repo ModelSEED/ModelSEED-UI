@@ -192,14 +192,14 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
         
-        /* For temporary display of the subsystems*/
-        .state('app.subsystem', {
-            url: "/subsystem{path:nonURIEncoded}",
-            templateUrl: 'app/views/subsystems/subsystem.html',
+        /* For temporary display of a subsystem in a spreadsheet*/
+        .state('app.subsys_spreadsheet', {
+            url: "/subsys_spreadsheet{path:nonURIEncoded}",
+            templateUrl: 'app/views/subsystems/subsys_spreadsheet.html',
             controller: 'Subsystem',
             authenticate: true
         })
-        /* End of temporary display of the subsystems*/
+        /* End of temporary display of a subsystem in a spreadsheet*/
 
         .state('app.RefModels', {
             url: "/genomes/:ref",
