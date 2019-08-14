@@ -2465,6 +2465,63 @@ function($s, WS, $stateParams) {
 
 // End add-subsystem control
 
+// Begin Spreadsheet control
+.controller('Spreadsheet',['$scope', 'WS', '$stateParams',
+function($s, WS, $stateParams) {
+    $s.genericOpts = {query: '', limit: 20, offset: 0};
+    $s.genericHeader = []; // dynamically filled later
+
+    // workspace path and name of object
+    var wsPath = $stateParams.path;
+    if( wsPath == '' ) {
+        console.log('Please specify the correct path to the data.');
+        return false;
+    }
+
+    var captions = [];
+
+    $s.loading = true;
+    if (WS.cached.genericData) {
+        $s.genericData = WS.cached.genericData;
+        $s.genericHeader = WS.cached.genericHeader;
+        $s.loading = false;
+    } else {
+        WS.get(wsPath)
+        .then(function(res) {
+            $s.genericName = res.data.name;
+            $s.genericData = parseGenericData($s.genericName, res.data.data);
+            captions = res.data.data[0];
+            WS.cached.gnericData = $s.genericData;
+            for (var k=0; k<captions.length; k++) {
+                $s.genericHeader[k] = {label: captions[k], key: captions[k]};
+            }
+            WS.cached.genericHeader = $s.genericHeader;
+            $s.loading = false;
+        })
+        .catch(function(error) {
+            console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+            $s.loading = false;
+        });
+    }
+
+    // Parse the given data for the subsystem data structure
+    function parseGenericData(obj_name, obj_data) {
+        var caps = obj_data[0];
+
+        // convert the subsystem data into an array of objects from an array of arrays
+        data = [];
+        for (var i=1; i<obj_data.length; i++) {
+            data[i-1] = {};
+            for (var j=0; j<caps.length; j++) {
+                data[i-1][caps[j]] = obj_data[i][j];
+            }
+        }
+        return data;
+    }
+}])
+
+// End Spreadsheet control
+
 
 
 //var merged = objs1.concat(objs2);

@@ -191,15 +191,25 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'PlantAnnotations',
             authenticate: true
         })
-        
-        /* For temporary display of a subsystem in a spreadsheet*/
-        .state('app.subsys_spreadsheet', {
-            url: "/subsys_spreadsheet{path:nonURIEncoded}",
-            templateUrl: 'app/views/subsystems/subsys_spreadsheet.html',
+
+        /* For display of a subsystem*/
+        .state('app.subsystem', {
+            url: "/subsystem{path:nonURIEncoded}",
+            templateUrl: 'app/views/subsystems/subsystem.html',
             controller: 'Subsystem',
             authenticate: true
         })
-        /* End of temporary display of a subsystem in a spreadsheet*/
+        /* End of display of a subsystem*/
+
+        /* For display of generic data in a spreadsheet*/
+        .state('app.spreadsheet', {
+            url: "/spreadsheet{path:nonURIEncoded}",
+            templateUrl: 'app/views/subsystems/spreadsheet.html',
+            controller: 'Spreadsheet',
+            authenticate: true
+        })
+        /* End of display of generic data in a spreadsheet*/
+
 
         .state('app.RefModels', {
             url: "/genomes/:ref",
