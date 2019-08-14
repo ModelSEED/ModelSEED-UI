@@ -2426,6 +2426,7 @@ function($s, WS, $stateParams) {
     $s.loading = true;
     if (WS.cached.subsystems) {
         $s.subsysData = WS.cached.subsystems;
+        $s.subsysHeader = WS.cached.subsysHeader;
         $s.loading = false;
     } else {
         WS.get(wsPath)
@@ -2437,6 +2438,7 @@ function($s, WS, $stateParams) {
             for (var k=0; k<captions.length; k++) {
                 $s.subsysHeader[k] = {label: captions[k], key: captions[k]};
             }
+            WS.cached.subsysHeader = $s.subsysHeader;
             $s.loading = false;
         })
         .catch(function(error) {
