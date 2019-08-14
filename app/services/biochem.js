@@ -149,7 +149,7 @@ function($http, $q, config, $log) {
                 var f = [];
                 for (var field in queryColumn) {
                     queryColumn[field] = queryColumn[field].replace(/\'/g, "\'"); // reserve primes (')
-                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+)/g, ""); // get rid of these symbols with blanks
+                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+|\.|\-)/g, ""); // get rid of these symbols with blanks
                     if (field == 'synonyms')
                         f.push('aliases'+':(*'+queryColumn[field]+'*)');
                     else
@@ -164,6 +164,14 @@ function($http, $q, config, $log) {
                     f.push(searchFields[i]+':(*'+query+'*)');
                 }
                 url += '&q='+f.join(' OR ')
+            } else if (query) {
+                query = query.trim();
+                query = query.replace(/\'/g, "\'"); // reserve primes (')
+                query = query.replace(/(;|,|\:|\"|\+\.\-)/g, ""); // get rid of these symbols with blanks
+                if (query.indexOf(' ') != -1 || query.indexOf('%20') != -1) {
+                    query = query.replace(/'20%'/g, '*').replace(/\s/g, '*');
+                }
+                url += '&q=*'+query+'*';
             }
         } else {
             url += '&q=*';
@@ -197,7 +205,7 @@ function($http, $q, config, $log) {
             geneReq = liveReq;
 
         console.log("Solr query:", url);
-        console.log('caching?', cache)
+        console.log('caching?', cache);
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
                         rxnReq = false, cpdReq = false; geneReq = false;
