@@ -10,8 +10,8 @@ angular.module('ms-ctrls', [])
 function($scope, $state, $stateParams, Auth, $window) {
 
     // set login method
-    if ($stateParams.login == 'patric')
-        $scope.method = Auth.loginMethod('patric');
+    if ($stateParams.login == 'partic')
+        $scope.method = Auth.loginMethod('partic');
     else
         $scope.method = Auth.loginMethod('rast');
 
@@ -94,8 +94,8 @@ function($scope, $stateParams) {
 
 }])
 
-.controller('Version', ['$scope', '$http', 'config',
-function($s, $http, config) {
+.controller('Version', ['$scope', '$http', 'config', '$rootScope',
+function($s, $http, config, $rootScope) {
 
     $s.release = config.releaseVersion;
 
@@ -137,7 +137,7 @@ function($s, $http, config) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
-    $http.rpc('msSupport', 'list_rast_jobs', {owner: 'nconrad'})
+    $http.rpc('msSupport', 'list_rast_jobs', {owner: $rootScope.user})
          .then(function(res) {
              console.log('res', res); $s.msSupport = true;
          })
@@ -237,6 +237,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.chem = $stateParams.chem;
     $s.enableColumnSearch = true;
+    $s.advanceSearch = 'search in columns';
     $s.externalDBs = {
         BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
         BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
@@ -279,7 +280,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Status', key: 'status'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var synms= row.aliases[row.aliases.length -1];
+            var synms = row.aliases[row.aliases.length -1];
             synms = synms.replace('Name:', '').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+synms+'</span>';
         }},
@@ -343,7 +344,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var als = row.aliases.slice(1, row.aliases.length);
             for (var i=0; i<als.length; i++) {
-                als[i] = als[i].replace(/^([A-Za-z]+:\s)(.*)/g,'<b>$1</b>$2');
+                als[i] = als[i].replace(/^([A-Za-z]+)(.*:)(.*)/,'<b>$1$2</b>$3');
                 var arr = als[i].split('</b>')
                 var arr1 = arr[1].split(';');
                 for (var j=0; j<arr1.length; j++) {
@@ -497,6 +498,12 @@ function($s, Biochem, $stateParams) {
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
             data.synm = data.aliases.shift().replace('Name:', '');
+            if (data['pka'] != undefined) {
+                data['pka_display'] = data['pka'][0].replace('"', '');
+            }
+            if (data['pkb'] != undefined) {
+                data['pkb_display'] = data['pkb'][0].replace('"', '');
+            }
             $s.cpd = data;
             $s.loading = false;
         })
@@ -534,6 +541,12 @@ function($s, Biochem, $stateParams) {
             if (data['aliases'] != undefined) {
                 var sn = data['aliases'].pop();
                 data['synm'] = sn.replace('Name:', '');
+            }
+            if (data['ec_numbers'] != undefined) {
+                data['ec_numbers_display'] = data['ec_numbers'][0].replace('"', '');
+            }
+            if (data['pathways'] != undefined) {
+                data['pathways_display'] = data['pathways'][0].replace('"', '');
             }
             data['equation_display'] = data['equation'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
             data['definition_display'] = data['definition'].replace(/\(1\)/g,'').replace(/\[0\]/g,'');
