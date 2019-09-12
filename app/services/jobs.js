@@ -42,7 +42,7 @@ function($http, $rootScope, $timeout, Dialogs) {
     }
 
     this.getActiveCount = function() {
-        return activeIDs.length;
+        return activeIds.length;
     }
 
     // method to add job id to list of active Jobs
@@ -92,7 +92,7 @@ function($http, $rootScope, $timeout, Dialogs) {
         })
     }
 
-    // organizes jobs by queued, running, completed, and activeIDs
+    // organizes jobs by queued, running, completed, and activeIds
     function groupJobs() {
         queuedJobs = [],
         runningJobs = [],
@@ -102,7 +102,7 @@ function($http, $rootScope, $timeout, Dialogs) {
         for (var i=0; i<self.jobs.length; i++) {
             var job = self.jobs[i];
 
-            if (job.status === 'queued') {
+            if (job.id !== null && job.status === 'queued') {
                 queuedJobs.push(job);
                 activeIds.push(job.id);
             } else if (job.status === 'in-progress') {
@@ -122,8 +122,12 @@ function($http, $rootScope, $timeout, Dialogs) {
                 // if active jobs have change emit event
                 for (var i=0; i<activeIds.length; i++) {
                     var id = activeIds[i];
-                    var oldStatus = self.jobsHash[id].status;
-                    var newStatus = jobsHash[id].status;
+                    var oldStatus, newStatus;
+                    if (typeof(self.jobsHash[id]) === 'undefined') {
+                        continue;
+                    }
+                    oldStatus = self.jobsHash[id].status;
+                    newStatus = jobsHash[id].status;
 
                     if (newStatus !== oldStatus) {
                         $rootScope.$broadcast('Event.JobStatusChange', {
