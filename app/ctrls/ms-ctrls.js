@@ -2432,12 +2432,16 @@ function($s, WS, $stateParams) {
         WS.get(wsPath)
         .then(function(res) {
             $s.subsysName = res.data.name;
-            $s.subsysData = parseSubsysData($s.subsysName, res.data.data);
-            captions = res.data.data[0];
+            $s.subsysData = parseSubsysData1(res.data.data);
             WS.cached.subsystems = $s.subsysData;
-            for (var k=0; k<captions.length; k++) {
-                $s.subsysHeader[k] = {label: captions[k], key: captions[k]};
-            }
+            $s.subsysData = parseSubsysData2($s.subsysData);
+
+            captions = res.data.data[0];
+            $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
+            for (var k=1; k<captions.length; k++) {
+                $s.subsysHeader[k] = {label: captions[k], key: captions[k], formatter: function(row) {
+                    return '<span>'+row+'</span>';
+            }}}
             WS.cached.subsysHeader = $s.subsysHeader;
             $s.loading = false;
         })
@@ -2448,11 +2452,11 @@ function($s, WS, $stateParams) {
     }
 
     // Parse the given data for the subsystem data structure
-    function parseSubsysData(obj_name, obj_data) {
+    function parseSubsysData1(obj_data) {
         var caps = obj_data[0];
 
         // convert the subsystem data into an array of objects from an array of arrays
-        data = [];
+        var data = [];
         for (var i=1; i<obj_data.length; i++) {
             data[i-1] = {};
             for (var j=0; j<caps.length; j++) {
@@ -2460,6 +2464,96 @@ function($s, WS, $stateParams) {
             }
         }
         return data;
+    }
+
+    // Parse the given data for the NEW subsystem data structure
+    function parseSubsysData2(input_data) {
+    /*
+     input_data: has a structure of an array of objects, i.e.,
+        [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
+     return: the input_data with its original object subdata modified.
+    */
+        var curation_roles = [], prediction_roles = []; candidate_roles = [];
+        for (var i=1; i<input_data.length; i++) {
+            curation_roles[i] = {};
+            prediction_roles[i] = {};
+            candidate_roles[i] = {};
+            var data = input_data[i];
+            Object.keys(data).forEach(function(key) {
+                curation_roles[i][key] = [];
+                prediction_roles[i][key] = [];
+                candidate_roles[i][key] = [];
+                var val = data[key];
+                if (typeof val === 'object' && key != 'Genome') {
+                    Object.keys(val).forEach(function(sub_key) {
+                        switch(sub_key) {
+                            case 'curation':
+                              // curation roles
+                              Object.keys(val[sub_key]).forEach(function(ssubK) {
+                                var cur_arr = Object.keys(val[sub_key][ssubK]);
+                                curation_roles[i][key] = curation_roles[i][key].concat(cur_arr);
+                              });
+                              break;
+                            case 'prediction':
+                              // prediction roles
+                              Object.keys(val[sub_key]).forEach(function(ssubK) {
+                                var pred_arr = Object.keys(val[sub_key][ssubK]);
+                                prediction_roles[i][key] = prediction_roles[i][key].concat(pred_arr);
+                              });
+                              break;
+                            case 'candidates':
+                              // candidate roles
+                              Object.keys(val[sub_key]).forEach(function(ssubK) {
+                                var can_arr = Object.keys(val[sub_key][ssubK]);
+                                candidate_roles[i][key] = candidate_roles[i][key].concat(can_arr);
+                              });
+                              break;
+                            default:
+                              // do nothing
+                              break;
+                        }
+                    });
+                    var cur_str = '', pre_str = '', can_str = '', gene_id_str = '<div style="display: flex;">';
+                    //if (curation_roles[i][key].length > 0) {
+                        cur_str = '<div style="flex: 30%; color: green;">Curations:<br><select style="width:100px;" multiple=yes>';
+                        var cur_arr = curation_roles[i][key].sort();
+                        for (var j = 0; j < cur_arr.length; j++) {
+                            cur_str += '<option value ="' + cur_arr[j] + '">';
+                            cur_str += cur_arr[j] + '</option>';
+                        }
+                        cur_str += '</select></div>';
+                        gene_id_str += cur_str;
+                    //}
+                    var btn1_str ='<div style="flex: 6%;"><br><br><button type="button"><=<button></div>';
+                    gene_id_str += btn1_str;
+                    //if (candidate_roles[i][key].length > 0) {
+                        can_str = '<div style="flex: 27%; color: red;">Candidates:<br><select style="width:100px;" multiple=yes>';
+                        var can_arr = candidate_roles[i][key].sort();
+                        for (var j = 0; j < can_arr.length; j++) {
+                            can_str += '<option value ="' + can_arr[j] + '">';
+                            can_str += can_arr[j] + '</option>';
+                        }
+                        can_str += '</select></div>';
+                        gene_id_str += can_str;
+                    //}
+                    var btn2_str ='<div style="flex: 6%;"><br><br><button type="button">=><button></div>';
+                    gene_id_str += btn2_str;
+                    //if (prediction_roles[i][key].length > 0) {
+                        pre_str = '<div style="flex: 31%;">Predictions:<br><select style="width:100px;" multiple=yes>';
+                        var pre_arr = prediction_roles[i][key].sort();
+                        for (var j = 0; j < pre_arr.length; j++) {
+                            pre_str += '<option value ="' + pre_arr[j] + '">';
+                            pre_str += pre_arr[j] + '</option>';
+                        }
+                        pre_str += '</select></div>';
+                        gene_id_str += pre_str;
+                    //}
+                    data[key] = gene_id_str + '</div>';
+                }
+            });
+            input_data[i] = data;
+        }
+        return input_data;
     }
 }])
 
