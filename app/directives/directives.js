@@ -1428,6 +1428,14 @@ function($compile, $stateParams) {
                 sel_dest.options = sel_dest.options.sort();
             }
 
+            scope.removeSelected = function(ev, src, usr) {
+                // remove selected items in src
+                var sel_src = document.getElementById(src);
+                for (var i = 0; i < sel_src.options.length; i++) {
+                    if (sel_src.options[i].selected)
+                        sel_src.removeChild(sel_src.options[i]);
+                }
+            }
         }
     }
 }])

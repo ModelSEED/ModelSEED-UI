@@ -2427,14 +2427,16 @@ function($s, WS, $stateParams) {
     if (WS.cached.subsystems) {
         $s.subsysData = WS.cached.subsystems;
         $s.subsysHeader = WS.cached.subsysHeader;
+        $s.subsysDataClone = Object.assign({}, $s.subsysData);
         $s.loading = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
             $s.subsysName = res.data.name;
-            $s.subsysData = parseSubsysData1(res.data.data);
+            $s.subsysData = parseSubsysData(res.data.data);
+            $s.subsysDataClone = Object.assign({}, $s.subsysData);
             WS.cached.subsystems = $s.subsysData;
-            $s.subsysData = parseSubsysData2($s.subsysData);
+            $s.subsysData = buildHtmlContent($s.subsysData);
 
             captions = res.data.data[0];
             $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
@@ -2452,7 +2454,7 @@ function($s, WS, $stateParams) {
     }
 
     // Parse the given data for the subsystem data structure
-    function parseSubsysData1(obj_data) {
+    function parseSubsysData(obj_data) {
         var caps = obj_data[0];
 
         // convert the subsystem data into an array of objects from an array of arrays
@@ -2466,12 +2468,12 @@ function($s, WS, $stateParams) {
         return data;
     }
 
-    // Parse the given data for the NEW subsystem data structure
-    function parseSubsysData2(input_data) {
+    // With the given data from the NEW subsystem data structure, build the html content for table cells
+    function buildHtmlContent(input_data) {
     /*
      input_data: has a structure of an array of objects, i.e.,
         [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
-     return: the input_data with its original object subdata modified.
+     return: the input_data with its original object subdata replaces with the html masked data.
     */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
         for (var i=1; i<input_data.length; i++) {
@@ -2515,10 +2517,11 @@ function($s, WS, $stateParams) {
                               break;
                         }
                     });
+
                     var cur_str = '', pre_str = '', can_str = '',
-                    gene_id_str = '<div style="display: flex;">';
+                    gene_id_str = '<section layout = "row" layout-sm = "column" layout-align = "center center">';
                     var row_col = 'row'+i.toString(10)+'_col'+k.toString(10);
-                    cur_str = '<div style="flex: 30%; color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:100px;" multiple=yes>';
+                    cur_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
                     var cur_arr = curation_roles[i][key].sort();
                     for (var j = 0; j < cur_arr.length; j++) {
                         cur_str += '<option value ="' + cur_arr[j] + '">';
@@ -2527,11 +2530,13 @@ function($s, WS, $stateParams) {
                     cur_str += '</select></div>';
                     gene_id_str += cur_str;
 
-                    var btn1_str ='<div style="flex: 6%;"><br><br><md-button class="md-raised"  aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
-                    btn1_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button></div>';
-                    gene_id_str += btn1_str;
+                    var btn10_str ='<div><br><md-button class="md-raised" aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
+                    btn10_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button><br>';
+                    var btn11_str ='<md-button class="md-raised" aria-label="Remove item(s)" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'\')">';
+                    btn11_str += '<md-tooltip>Remove item(s)</md-tooltip>=></md-button></div>';
+                    gene_id_str += btn10_str + btn11_str;
 
-                    can_str = '<div style="flex: 27%;">Candidates:<br><select id="can_'+row_col+'" style="width:100px;" multiple=yes>';
+                    can_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
                     var can_arr = candidate_roles[i][key].sort();
                     for (var j = 0; j < can_arr.length; j++) {
                         can_str += '<option value ="' + can_arr[j] + '">';
@@ -2540,20 +2545,21 @@ function($s, WS, $stateParams) {
                     can_str += '</select></div>';
                     gene_id_str += can_str;
 
-                    var btn2_str ='<div style="flex: 6%;"><br><br><md-button class="md-raised"  aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
-                    btn2_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button></div>';
-                    alert(btn2_str);
-                    gene_id_str += btn2_str;
+                    var btn20_str ='<div><br><md-button class="md-raised" aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
+                    btn20_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button><br>';
+                    var btn21_str ='<md-button class="md-raised" aria-label="Remove item(s)" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'\')">';
+                    btn21_str += '<md-tooltip>Remove item(s)</md-tooltip><=</md-button></div>';
+                    gene_id_str += btn20_str + btn21_str;
 
-                    pre_str = '<div style="flex: 31%;">Predictions:<br><select id="pre_'+row_col+'" style="width:100px;" multiple=yes>';
+                    pre_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
                     var pre_arr = prediction_roles[i][key].sort();
                     for (var j = 0; j < pre_arr.length; j++) {
                         pre_str += '<option value ="' + pre_arr[j] + '">';
                         pre_str += pre_arr[j] + '</option>';
                     }
-                    pre_str += '</select></div>';
+                    pre_str += '</select></div></section>';
                     gene_id_str += pre_str;
-                    data[key] = gene_id_str + '</div>';
+                    data[key] = gene_id_str;
                 }
             }
             input_data[i] = data;
