@@ -2479,7 +2479,9 @@ function($s, WS, $stateParams) {
             prediction_roles[i] = {};
             candidate_roles[i] = {};
             var data = input_data[i];
-            Object.keys(data).forEach(function(key) {
+            var key_arr =Object.keys(data);
+            for (var k = 1; k<key_arr.length; k++) {
+                key = key_arr[k];
                 curation_roles[i][key] = [];
                 prediction_roles[i][key] = [];
                 candidate_roles[i][key] = [];
@@ -2513,44 +2515,47 @@ function($s, WS, $stateParams) {
                               break;
                         }
                     });
-                    var cur_str = '', pre_str = '', can_str = '', gene_id_str = '<div style="display: flex;">';
-                    //if (curation_roles[i][key].length > 0) {
-                        cur_str = '<div style="flex: 30%; color: green;">Curations:<br><select style="width:100px;" multiple=yes>';
-                        var cur_arr = curation_roles[i][key].sort();
-                        for (var j = 0; j < cur_arr.length; j++) {
-                            cur_str += '<option value ="' + cur_arr[j] + '">';
-                            cur_str += cur_arr[j] + '</option>';
-                        }
-                        cur_str += '</select></div>';
-                        gene_id_str += cur_str;
-                    //}
-                    var btn1_str ='<div style="flex: 6%;"><br><br><button type="button"><=<button></div>';
+                    var cur_str = '', pre_str = '', can_str = '',
+                    gene_id_str = '<div style="display: flex;">';
+                    var row_col = 'row'+i.toString(10)+'_col'+k.toString(10);
+                    cur_str = '<div style="flex: 30%; color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:100px;" multiple=yes>';
+                    var cur_arr = curation_roles[i][key].sort();
+                    for (var j = 0; j < cur_arr.length; j++) {
+                        cur_str += '<option value ="' + cur_arr[j] + '">';
+                        cur_str += cur_arr[j] + '</option>';
+                    }
+                    cur_str += '</select></div>';
+                    gene_id_str += cur_str;
+
+                    var btn1_str ='<div style="flex: 6%;"><br><br><md-button class="md-raised"  aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
+                    btn1_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button></div>';
                     gene_id_str += btn1_str;
-                    //if (candidate_roles[i][key].length > 0) {
-                        can_str = '<div style="flex: 27%; color: red;">Candidates:<br><select style="width:100px;" multiple=yes>';
-                        var can_arr = candidate_roles[i][key].sort();
-                        for (var j = 0; j < can_arr.length; j++) {
-                            can_str += '<option value ="' + can_arr[j] + '">';
-                            can_str += can_arr[j] + '</option>';
-                        }
-                        can_str += '</select></div>';
-                        gene_id_str += can_str;
-                    //}
-                    var btn2_str ='<div style="flex: 6%;"><br><br><button type="button">=><button></div>';
+
+                    can_str = '<div style="flex: 27%;">Candidates:<br><select id="can_'+row_col+'" style="width:100px;" multiple=yes>';
+                    var can_arr = candidate_roles[i][key].sort();
+                    for (var j = 0; j < can_arr.length; j++) {
+                        can_str += '<option value ="' + can_arr[j] + '">';
+                        can_str += can_arr[j] + '</option>';
+                    }
+                    can_str += '</select></div>';
+                    gene_id_str += can_str;
+
+                    var btn2_str ='<div style="flex: 6%;"><br><br><md-button class="md-raised"  aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
+                    btn2_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button></div>';
+                    alert(btn2_str);
                     gene_id_str += btn2_str;
-                    //if (prediction_roles[i][key].length > 0) {
-                        pre_str = '<div style="flex: 31%;">Predictions:<br><select style="width:100px;" multiple=yes>';
-                        var pre_arr = prediction_roles[i][key].sort();
-                        for (var j = 0; j < pre_arr.length; j++) {
-                            pre_str += '<option value ="' + pre_arr[j] + '">';
-                            pre_str += pre_arr[j] + '</option>';
-                        }
-                        pre_str += '</select></div>';
-                        gene_id_str += pre_str;
-                    //}
+
+                    pre_str = '<div style="flex: 31%;">Predictions:<br><select id="pre_'+row_col+'" style="width:100px;" multiple=yes>';
+                    var pre_arr = prediction_roles[i][key].sort();
+                    for (var j = 0; j < pre_arr.length; j++) {
+                        pre_str += '<option value ="' + pre_arr[j] + '">';
+                        pre_str += pre_arr[j] + '</option>';
+                    }
+                    pre_str += '</select></div>';
+                    gene_id_str += pre_str;
                     data[key] = gene_id_str + '</div>';
                 }
-            });
+            }
             input_data[i] = data;
         }
         return input_data;

@@ -1399,6 +1399,34 @@ function($compile, $stateParams) {
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
+            scope.addSelected = function(ev, src, dest, usr) {
+                // add selected items in src to the destination DOM object dest
+                var sel_src = document.getElementById(src);
+                var sel_dest = document.getElementById(dest);
+                for (var i = 0; i < sel_src.options.length; i++) {
+                    if (sel_src.options[i].selected) {
+                        var sel_val = sel_src.options[i].value;
+                        var in_dest = false;
+                        for (var j = 0; j < sel_dest.length; j++) {
+                            if (sel_dest.options[j].value == sel_val) {
+                                in_dest = true;
+                                break;
+                            }
+                        }
+                        if (!in_dest) {
+                            // create a new option element
+                            var opt = document.createElement('option');
+                            // create text node to add to option element (opt)
+                            opt.appendChild( document.createTextNode(sel_val) );
+                            // set value property of opt
+                            opt.value = sel_val;
+                            // add opt to end of select box (sel)
+                            sel_dest.appendChild(opt);
+                        }
+                    }
+                }
+                sel_dest.options = sel_dest.options.sort();
+            }
 
         }
     }
