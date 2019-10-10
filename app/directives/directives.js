@@ -1425,16 +1425,47 @@ function($compile, $stateParams) {
                         }
                     }
                 }
-                sel_dest.options = sel_dest.options.sort();
+                sortOptions(sel_dest);
             }
 
             scope.removeSelected = function(ev, src, usr) {
-                // remove selected items in src
                 var sel_src = document.getElementById(src);
-                for (var i = 0; i < sel_src.options.length; i++) {
-                    if (sel_src.options[i].selected)
-                        sel_src.removeChild(sel_src.options[i]);
+
+                // 1) Remember selected items.
+                var is_selected = [];
+                for (var i = 0; i < sel_src.options.length; ++i) {
+                    is_selected[i] = sel_src.options[i].selected;
                 }
+
+                // 2) Remove selected items.
+                var len = sel_src.options.length;
+                while (len--) {
+                    if (is_selected[len]) {
+                        sel_src.removeChild(sel_src.options[len]);
+                    }
+                }
+            }
+
+            function sortOptions(sel) {
+                var options = sel.options;
+                var optionsArray = [], optionVals = [], optionsArray1 = [];
+                for (var i = 0; i < options.length; i++) {
+                    optionsArray.push(options[i]);
+                    optionVals.push(options[i].value);
+                }
+                optionVals = optionVals.sort();
+                for (var j = 0; j < optionVals.length; j++) {
+                    for (var k = 0; k < optionsArray.length; k++) {
+                        if (optionVals[j] == optionsArray[k].value) {
+                            optionsArray1[j] = optionsArray[k];
+                            break;
+                        }
+                    }
+                }
+                for (var l = 0; l <= options.length; l++) {
+                    options[l] = optionsArray1[l];
+                }
+                sel.options = options;
             }
         }
     }

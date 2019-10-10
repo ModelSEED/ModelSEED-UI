@@ -2532,8 +2532,8 @@ function($s, WS, $stateParams) {
 
                     var btn10_str ='<div><br><md-button class="md-raised" aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
                     btn10_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button><br>';
-                    var btn11_str ='<md-button class="md-raised" aria-label="Remove item(s)" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'\')">';
-                    btn11_str += '<md-tooltip>Remove item(s)</md-tooltip>=></md-button></div>';
+                    var btn11_str ='<md-button class="md-raised" aria-label="Remove from Curations" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'\')">';
+                    btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
                     gene_id_str += btn10_str + btn11_str;
 
                     can_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
@@ -2547,8 +2547,8 @@ function($s, WS, $stateParams) {
 
                     var btn20_str ='<div><br><md-button class="md-raised" aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
                     btn20_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button><br>';
-                    var btn21_str ='<md-button class="md-raised" aria-label="Remove item(s)" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'\')">';
-                    btn21_str += '<md-tooltip>Remove item(s)</md-tooltip><=</md-button></div>';
+                    var btn21_str ='<md-button class="md-raised" aria-label="Remove from Predictions" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'\')">';
+                    btn21_str += '<md-tooltip>Remove from Predictions</md-tooltip><=</md-button></div>';
                     gene_id_str += btn20_str + btn21_str;
 
                     pre_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
