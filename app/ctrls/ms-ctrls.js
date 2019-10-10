@@ -2518,11 +2518,14 @@ function($s, WS, $stateParams) {
                         }
                     });
 
+                    var cur_arr = curation_roles[i][key].sort();
+                    var can_arr = candidate_roles[i][key].sort();
+                    var pre_arr = prediction_roles[i][key].sort();
                     var cur_str = '', pre_str = '', can_str = '',
                     gene_id_str = '<section layout = "row" layout-sm = "column" layout-align = "center center">';
+
                     var row_col = 'row'+i.toString(10)+'_col'+k.toString(10);
                     cur_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
-                    var cur_arr = curation_roles[i][key].sort();
                     for (var j = 0; j < cur_arr.length; j++) {
                         cur_str += '<option value ="' + cur_arr[j] + '">';
                         cur_str += cur_arr[j] + '</option>';
@@ -2532,27 +2535,27 @@ function($s, WS, $stateParams) {
 
                     var btn10_str ='<div><br><md-button class="md-raised" aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
                     btn10_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button><br>';
-                    var btn11_str ='<md-button class="md-raised" aria-label="Remove from Curations" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'\')">';
+                    var btn11_str ='<md-button class="md-raised" aria-label="Remove from Curations" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
                     btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
                     gene_id_str += btn10_str + btn11_str;
 
                     can_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
-                    var can_arr = candidate_roles[i][key].sort();
                     for (var j = 0; j < can_arr.length; j++) {
-                        can_str += '<option value ="' + can_arr[j] + '">';
-                        can_str += can_arr[j] + '</option>';
+                        can_str += '<option value="';
+                        can_str += can_arr[j] + '"';
+                        if (!pre_arr.includes(can_arr[j])) can_str += ' style="color: red;"';
+                        can_str += '>' + can_arr[j] + '</option>';
                     }
                     can_str += '</select></div>';
                     gene_id_str += can_str;
 
                     var btn20_str ='<div><br><md-button class="md-raised" aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
                     btn20_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button><br>';
-                    var btn21_str ='<md-button class="md-raised" aria-label="Remove from Predictions" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'\')">';
+                    var btn21_str ='<md-button class="md-raised" aria-label="Remove from Predictions" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
                     btn21_str += '<md-tooltip>Remove from Predictions</md-tooltip><=</md-button></div>';
                     gene_id_str += btn20_str + btn21_str;
 
                     pre_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
-                    var pre_arr = prediction_roles[i][key].sort();
                     for (var j = 0; j < pre_arr.length; j++) {
                         pre_str += '<option value ="' + pre_arr[j] + '">';
                         pre_str += pre_arr[j] + '</option>';

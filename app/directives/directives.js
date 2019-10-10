@@ -1426,9 +1426,10 @@ function($compile, $stateParams) {
                     }
                 }
                 sortOptions(sel_dest);
+                if (dest.indexOf('pre_') != -1) updateOptionColor(dest, src);
             }
 
-            scope.removeSelected = function(ev, src, usr) {
+            scope.removeSelected = function(ev, src, cand, usr) {
                 var sel_src = document.getElementById(src);
 
                 // 1) Remember selected items.
@@ -1444,6 +1445,8 @@ function($compile, $stateParams) {
                         sel_src.removeChild(sel_src.options[len]);
                     }
                 }
+                sortOptions(sel_src);
+                if (src.indexOf('pre_') != -1) updateOptionColor(src, cand);
             }
 
             function sortOptions(sel) {
@@ -1466,6 +1469,33 @@ function($compile, $stateParams) {
                     options[l] = optionsArray1[l];
                 }
                 sel.options = options;
+            }
+
+            function updateOptionColor(sel_target, sel_cand) {
+                var  t_opts= document.getElementById(sel_target).options,
+                     c_opts = document.getElementById(sel_cand).options,
+                     t_optVals = [], c_optVals = [];
+
+                if (c_opts == undefined) return;
+                for (var k = 0; k < c_opts.length; k++) c_optVals.push(c_opts[k].value);
+
+                if (t_opts == undefined) {
+                    for (var k1 = 0; k1 < c_opts.length; k1++) {
+                        c_opts[k1].setAttribute("style", "color: red;");
+                    }
+                }
+                else {
+                    for (var j = 0; j < t_opts.length; j++) {
+                        t_optVals.push(t_opts[j].value);
+                    }
+                    for (var i = 0; i < c_optVals.length; i++) {
+                        if (!t_optVals.includes(c_optVals[i])) {
+                            c_opts[i].setAttribute("style", "color: red;");
+                        }
+                        else c_opts[i].setAttribute("style", "color: black;");
+                    }
+                }
+                sel_cand.options = c_opts;
             }
         }
     }
