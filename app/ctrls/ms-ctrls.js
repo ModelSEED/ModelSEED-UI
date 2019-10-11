@@ -2413,6 +2413,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 function($s, WS, $stateParams) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
+    $s.subsysData = [];
     $s.subsysDataClone = [];
 
     // workspace path and name of object
@@ -2428,16 +2429,18 @@ function($s, WS, $stateParams) {
     if (WS.cached.subsystems) {
         $s.subsysData = WS.cached.subsystems;
         $s.subsysHeader = WS.cached.subsysHeader;
-        $s.subsysDataClone = Object.assign({}, $s.subsysData);
+        $s.subsysDataClone = WS.cached.subsystemsClone;
         $s.loading = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
             $s.subsysName = res.data.name;
+            $s.subsysDataClone = Object.assign({}, res);
+            WS.cached.subsystemsClone = $s.subsysDataClone;
+
             $s.subsysData = parseSubsysData(res.data.data);
-            $s.subsysDataClone = Object.assign({}, $s.subsysData);
-            WS.cached.subsystems = $s.subsysData;
             $s.subsysData = buildHtmlContent($s.subsysData);
+            WS.cached.subsystems = $s.subsysData;
 
             captions = res.data.data[0];
             $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
@@ -2456,9 +2459,8 @@ function($s, WS, $stateParams) {
 
     // Parse the given data for the subsystem data structure
     function parseSubsysData(obj_data) {
-        var caps = obj_data[0];
-
         // convert the subsystem data into an array of objects from an array of arrays
+        var caps = obj_data[0];
         var data = [];
         for (var i=1; i<obj_data.length; i++) {
             data[i-1] = {};
@@ -2477,17 +2479,24 @@ function($s, WS, $stateParams) {
         return: the input_data with its original object subdata replaces with the html masked data.
         */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
+        var curation_scores = [], prediction_scores = []; candidate_scores = [];
         for (var i=1; i<input_data.length; i++) {
             curation_roles[i] = {};
             prediction_roles[i] = {};
             candidate_roles[i] = {};
+            curation_scores[i] = {};
+            prediction_scores[i] = {};
+            candidate_scores[i] = {};
             var indata = input_data[i];
-            var key_arr =Object.keys(indata);
+            var key_arr = Object.keys(indata);
             for (var k = 1; k<key_arr.length; k++) {
                 key = key_arr[k];
                 curation_roles[i][key] = [];
                 prediction_roles[i][key] = [];
                 candidate_roles[i][key] = [];
+                curation_scores[i][key] = [];
+                prediction_scores[i][key] = [];
+                candidate_scores[i][key] = [];
                 var val = indata[key];
                 if (typeof val === 'object' && key != 'Genome') {
                     Object.keys(val).forEach(function(sub_key) {
@@ -2495,22 +2504,28 @@ function($s, WS, $stateParams) {
                             case 'curation':
                               // curation roles
                               Object.keys(val[sub_key]).forEach(function(ssubK) {
-                                var cur_arr = Object.keys(val[sub_key][ssubK]);
-                                curation_roles[i][key] = curation_roles[i][key].concat(cur_arr);
+                                var curk_arr = Object.keys(val[sub_key][ssubK]);
+                                var curv_arr = Object.values(val[sub_key][ssubK]); 
+                                curation_roles[i][key] = curation_roles[i][key].concat(curk_arr);
+                                curation_scores[i][key] = curation_roles[i][key].concat(curv_arr);
                               });
                               break;
                             case 'prediction':
                               // prediction roles
                               Object.keys(val[sub_key]).forEach(function(ssubK) {
-                                var pred_arr = Object.keys(val[sub_key][ssubK]);
-                                prediction_roles[i][key] = prediction_roles[i][key].concat(pred_arr);
+                                var prek_arr = Object.keys(val[sub_key][ssubK]);
+                                var prev_arr = Object.values(val[sub_key][ssubK]);
+                                prediction_roles[i][key] = prediction_roles[i][key].concat(prek_arr);
+                                prediction_scores[i][key] = prediction_scores[i][key].concat(prev_arr);
                               });
                               break;
                             case 'candidates':
                               // candidate roles
                               Object.keys(val[sub_key]).forEach(function(ssubK) {
-                                var can_arr = Object.keys(val[sub_key][ssubK]);
-                                candidate_roles[i][key] = candidate_roles[i][key].concat(can_arr);
+                                var cank_arr = Object.keys(val[sub_key][ssubK]);
+                                var canv_arr = Object.values(val[sub_key][ssubK]);
+                                candidate_roles[i][key] = candidate_roles[i][key].concat(cank_arr);
+                                candidate_scores[i][key] = candidate_scores[i][key].concat(canv_arr);
                               });
                               break;
                             default:
@@ -2579,24 +2594,18 @@ function($s, WS, $stateParams) {
         }
         pre_str += '</select></div></section>';
         gene_id_str += pre_str;
-        return gene_id_str + buildSaveCancelHtml();
+        return gene_id_str + buildSaveCancelHtml(row_col);
     }
 
-    function buildSaveCancelHtml() {
+    function buildSaveCancelHtml(cell_id) {
+        var gene_list_ids = '\'cur_' + cell_id + '\', \'can_' + cell_id + '\', \'pre_' + cell_id + '\'';
         var save_cancel_str = '<section layout="row" layout-sm="column" layout-align="center center">';
         save_cancel_str += '<div>' +
-            '<!--md-button ng-if="operations.length" class="icon-button" ng-click="undo()">' +
-            '    <i class="material-icons">undo</i>' +
-            '    <md-tooltip>Undo last change</md-tooltip>' +
-            '</md-button-->' +
-            '<!--md-button ng-if="onSaveAs" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">' +
-            '    {{saveInProgress ? saveInProgressText : \'Save as...\'}}' +
-            '</md-button-->' +
-            '<md-button class="md-raised" style="right: 7px;" ng-click="save($event)" ng-disabled="saveInProgress">' +
+            '<md-button id="save_'+cell_id+'" class="md-raised" style="right: 7px;" ng-click="save($event,'+gene_list_ids+', \'\')" ng-disabled="saveInProgress">' +
             '    {{saveAsInProgress ? saveInProgressText : \'Save\'}}' +
             '    <md-tooltip>Save change(s)</md-tooltip>' +
             '</md-button>' +
-            '<md-button  class="md-raised" ng-click="undo()">' +
+            '<md-button id="cancel_'+cell_id+'" class="md-raised" ng-click="cancel($event,'+gene_list_ids+', \'\')">' +
             '    <md-tooltip>Discard change(s)</md-tooltip>Cancel' +
             '</md-button>' +
             '<!--a ng-click="cancel($event)" class="no-link">Cancel</a-->';

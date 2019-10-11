@@ -1449,6 +1449,33 @@ function($compile, $stateParams) {
                 if (src.indexOf('pre_') != -1) updateOptionColor(src, cand);
             }
 
+            scope.save = function(ev, cur, cand, pre, usr) {
+                /*
+                 Save the data in dropdown lists in cell (row_id and col_id) into the corresponding
+                 json document sections.
+                 */
+                var patt = /^cur_(row)(\d+)(_col)(\d+)$/;
+                var id_arr = patt.exec(cur);
+                var row_id = id_arr[2];
+                var col_id = id_arr[4];
+                var cur_opts = document.getElementById(cur),
+                    cand_opts = document.getElementById(cand),
+                    pre_opts = document.getElementById(pre);
+                var cur_vals = [], cand_vals = [], pre_vals = [];
+                for (var i=0; i<cur_opts; i++) {
+                    cur_vals.push(cur_opts[i].value);
+                }
+                for (var i=0; i<cur_opts; i++) {
+                    cand_vals.push(cand_opts[i].value);
+                }
+                for (var i=0; i<cur_opts; i++) {
+                    pre_vals.push(pre_opts[i].value);
+                }
+                if (cur_opts.length > 0) console.log(cur_opts);
+                if (cand_opts.length > 0) console.log(cand_opts);
+                if (pre_opts.length > 0) console.log(pre_opts);
+            }
+
             function sortOptions(sel) {
                 var options = sel.options;
                 var optionsArray = [], optionVals = [], optionsArray1 = [];
