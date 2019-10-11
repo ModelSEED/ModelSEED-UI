@@ -2539,7 +2539,7 @@ function($s, WS, $stateParams) {
         can_arr = can_arr.sort();
         pre_arr = pre_arr.sort();
         var cur_str = '', pre_str = '', can_str = '',
-        gene_id_str = '<section layout = "row" layout-sm = "column" layout-align = "center center">';
+        gene_id_str = '<section layout="row" layout-sm="column" layout-align="center center">';
 
         var row_col = 'row'+row_id.toString(10)+'_col'+col_id.toString(10);
         cur_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
@@ -2579,8 +2579,31 @@ function($s, WS, $stateParams) {
         }
         pre_str += '</select></div></section>';
         gene_id_str += pre_str;
-        return gene_id_str;
+        return gene_id_str + buildSaveCancelHtml();
     }
+
+    function buildSaveCancelHtml() {
+        var save_cancel_str = '<section layout="row" layout-sm="column" layout-align="center center">';
+        save_cancel_str += '<div>' +
+            '<!--md-button ng-if="operations.length" class="icon-button" ng-click="undo()">' +
+            '    <i class="material-icons">undo</i>' +
+            '    <md-tooltip>Undo last change</md-tooltip>' +
+            '</md-button-->' +
+            '<!--md-button ng-if="onSaveAs" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">' +
+            '    {{saveInProgress ? saveInProgressText : \'Save as...\'}}' +
+            '</md-button-->' +
+            '<md-button class="md-primary" style="right: 7px;" ng-click="save($event)" ng-disabled="saveInProgress">' +
+            '    {{saveAsInProgress ? saveInProgressText : \'Save\'}}' +
+            '    <md-tooltip>Save change(s)</md-tooltip>' +
+            '</md-button>' +
+            '<md-button  class="md-secondary" ng-click="undo()">' +
+            '    <md-tooltip>Discard change(s)</md-tooltip>Cancel' +
+            '</md-button>' +
+            '<!--a ng-click="cancel($event)" class="no-link">Cancel</a-->';
+        save_cancel_str += '</div></section>';
+        return save_cancel_str;
+    }
+
 }])
 // End add-subsystem control
 
