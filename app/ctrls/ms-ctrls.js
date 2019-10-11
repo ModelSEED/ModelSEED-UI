@@ -2592,11 +2592,11 @@ function($s, WS, $stateParams) {
             '<!--md-button ng-if="onSaveAs" class="md-secondary" ng-click="save($event)" ng-disabled="saveInProgress">' +
             '    {{saveInProgress ? saveInProgressText : \'Save as...\'}}' +
             '</md-button-->' +
-            '<md-button class="md-primary" style="right: 7px;" ng-click="save($event)" ng-disabled="saveInProgress">' +
+            '<md-button class="md-raised" style="right: 7px;" ng-click="save($event)" ng-disabled="saveInProgress">' +
             '    {{saveAsInProgress ? saveInProgressText : \'Save\'}}' +
             '    <md-tooltip>Save change(s)</md-tooltip>' +
             '</md-button>' +
-            '<md-button  class="md-secondary" ng-click="undo()">' +
+            '<md-button  class="md-raised" ng-click="undo()">' +
             '    <md-tooltip>Discard change(s)</md-tooltip>Cancel' +
             '</md-button>' +
             '<!--a ng-click="cancel($event)" class="no-link">Cancel</a-->';
