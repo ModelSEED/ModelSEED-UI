@@ -2413,6 +2413,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 function($s, WS, $stateParams) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
+    $s.subsysDataClone = [];
 
     // workspace path and name of object
     var wsPath = $stateParams.path;
@@ -2470,24 +2471,24 @@ function($s, WS, $stateParams) {
 
     // With the given data from the NEW subsystem data structure, build the html content for table cells
     function buildHtmlContent(input_data) {
-    /*
-     input_data: has a structure of an array of objects, i.e.,
-        [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
-     return: the input_data with its original object subdata replaces with the html masked data.
-    */
+        /*
+        input_data: has a structure of an array of objects, i.e.,
+            [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
+        return: the input_data with its original object subdata replaces with the html masked data.
+        */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
         for (var i=1; i<input_data.length; i++) {
             curation_roles[i] = {};
             prediction_roles[i] = {};
             candidate_roles[i] = {};
-            var data = input_data[i];
-            var key_arr =Object.keys(data);
+            var indata = input_data[i];
+            var key_arr =Object.keys(indata);
             for (var k = 1; k<key_arr.length; k++) {
                 key = key_arr[k];
                 curation_roles[i][key] = [];
                 prediction_roles[i][key] = [];
                 candidate_roles[i][key] = [];
-                var val = data[key];
+                var val = indata[key];
                 if (typeof val === 'object' && key != 'Genome') {
                     Object.keys(val).forEach(function(sub_key) {
                         switch(sub_key) {
@@ -2517,60 +2518,70 @@ function($s, WS, $stateParams) {
                               break;
                         }
                     });
-
-                    var cur_arr = curation_roles[i][key].sort();
-                    var can_arr = candidate_roles[i][key].sort();
-                    var pre_arr = prediction_roles[i][key].sort();
-                    var cur_str = '', pre_str = '', can_str = '',
-                    gene_id_str = '<section layout = "row" layout-sm = "column" layout-align = "center center">';
-
-                    var row_col = 'row'+i.toString(10)+'_col'+k.toString(10);
-                    cur_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
-                    for (var j = 0; j < cur_arr.length; j++) {
-                        cur_str += '<option value ="' + cur_arr[j] + '">';
-                        cur_str += cur_arr[j] + '</option>';
-                    }
-                    cur_str += '</select></div>';
-                    gene_id_str += cur_str;
-
-                    var btn10_str ='<div><br><md-button class="md-raised" aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
-                    btn10_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button><br>';
-                    var btn11_str ='<md-button class="md-raised" aria-label="Remove from Curations" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
-                    btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
-                    gene_id_str += btn10_str + btn11_str;
-
-                    can_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
-                    for (var j = 0; j < can_arr.length; j++) {
-                        can_str += '<option value="';
-                        can_str += can_arr[j] + '"';
-                        if (!pre_arr.includes(can_arr[j])) can_str += ' style="color: red;"';
-                        can_str += '>' + can_arr[j] + '</option>';
-                    }
-                    can_str += '</select></div>';
-                    gene_id_str += can_str;
-
-                    var btn20_str ='<div><br><md-button class="md-raised" aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
-                    btn20_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button><br>';
-                    var btn21_str ='<md-button class="md-raised" aria-label="Remove from Predictions" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
-                    btn21_str += '<md-tooltip>Remove from Predictions</md-tooltip><=</md-button></div>';
-                    gene_id_str += btn20_str + btn21_str;
-
-                    pre_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
-                    for (var j = 0; j < pre_arr.length; j++) {
-                        pre_str += '<option value ="' + pre_arr[j] + '">';
-                        pre_str += pre_arr[j] + '</option>';
-                    }
-                    pre_str += '</select></div></section>';
-                    gene_id_str += pre_str;
-                    data[key] = gene_id_str;
+                    indata[key] = buildCellHtml(curation_roles[i][key], candidate_roles[i][key], prediction_roles[i][key], i, k);
                 }
             }
-            input_data[i] = data;
+            input_data[i] = indata;
         }
         return input_data;
     }
-}])
 
+    function buildCellHtml(cur_arr, can_arr, pre_arr, row_id, col_id) {
+        /*
+        cur_arr: an array of curation gene_ids (string)
+        can_arr: an array of candidate gene_ids (string)
+        pre_arr: an array of prediction gene_ids (string)
+        row_id: the cell's row id (int)
+        col_id: the cell's columm id (int)
+        return: the html string that mask the data for a table cell at (row_id, col_id).
+        */
+        cur_arr = cur_arr.sort();
+        can_arr = can_arr.sort();
+        pre_arr = pre_arr.sort();
+        var cur_str = '', pre_str = '', can_str = '',
+        gene_id_str = '<section layout = "row" layout-sm = "column" layout-align = "center center">';
+
+        var row_col = 'row'+row_id.toString(10)+'_col'+col_id.toString(10);
+        cur_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
+        for (var j = 0; j < cur_arr.length; j++) {
+            cur_str += '<option value ="' + cur_arr[j] + '">';
+            cur_str += cur_arr[j] + '</option>';
+        }
+        cur_str += '</select></div>';
+        gene_id_str += cur_str;
+
+        var btn10_str ='<div><br><md-button class="md-raised" aria-label="Add to curations" ng-click="addSelected($event, \'can_'+row_col+'\', \'cur_'+row_col+'\', \'\')">';
+        btn10_str += '<md-tooltip>Add to curations</md-tooltip><=</md-button><br>';
+        var btn11_str ='<md-button class="md-raised" aria-label="Remove from Curations" ng-click="removeSelected($event, \'cur_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
+        btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
+        gene_id_str += btn10_str + btn11_str;
+
+        can_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
+        for (var j = 0; j < can_arr.length; j++) {
+            can_str += '<option value="';
+            can_str += can_arr[j] + '"';
+            if (!pre_arr.includes(can_arr[j])) can_str += ' style="color: red;"';
+            can_str += '>' + can_arr[j] + '</option>';
+        }
+        can_str += '</select></div>';
+        gene_id_str += can_str;
+
+        var btn20_str ='<div><br><md-button class="md-raised" aria-label="Add to predictions" ng-click="addSelected($event, \'can_'+row_col+'\', \'pre_'+row_col+'\', \'\')">';
+        btn20_str += '<md-tooltip>Add to predictions</md-tooltip>=></md-button><br>';
+        var btn21_str ='<md-button class="md-raised" aria-label="Remove from Predictions" ng-click="removeSelected($event, \'pre_'+row_col+'\', \'can_'+row_col+'\', \'\')">';
+        btn21_str += '<md-tooltip>Remove from Predictions</md-tooltip><=</md-button></div>';
+        gene_id_str += btn20_str + btn21_str;
+
+        pre_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
+        for (var j = 0; j < pre_arr.length; j++) {
+            pre_str += '<option value ="' + pre_arr[j] + '">';
+            pre_str += pre_arr[j] + '</option>';
+        }
+        pre_str += '</select></div></section>';
+        gene_id_str += pre_str;
+        return gene_id_str;
+    }
+}])
 // End add-subsystem control
 
 // Begin Spreadsheet control

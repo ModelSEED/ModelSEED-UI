@@ -1480,9 +1480,9 @@ function($compile, $stateParams) {
                 for (var k = 0; k < c_opts.length; k++) c_optVals.push(c_opts[k].value);
 
                 if (t_opts == undefined) {
-                    if (c_opts.length == 1) c_opts[0].selected = false;
                     for (var k1 = 0; k1 < c_opts.length; k1++) {
                         c_opts[k1].setAttribute("style", "color: red;");
+                        c_opts[k1].selected = false;
                     }
                 }
                 else {
@@ -1494,6 +1494,7 @@ function($compile, $stateParams) {
                             c_opts[i].setAttribute("style", "color: red;");
                         }
                         else c_opts[i].setAttribute("style", "color: black;");
+                        c_opts[i].selected = false;
                     }
                 }
                 sel_cand.options = c_opts;

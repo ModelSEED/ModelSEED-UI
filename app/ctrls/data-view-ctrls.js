@@ -812,7 +812,7 @@ function($s, $state, $sParams, WS, MS, tools,
 
     $s.toggleEdit = function() {
         $s.editInProgress = !$s.editInProgress;
-        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field,  $s.mediaOpts.sort.desc  );
+        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field, $s.mediaOpts.sort.desc);
     }
 
     if ($s.name === 'new-media') {
