@@ -1458,22 +1458,34 @@ function($compile, $stateParams) {
                 var id_arr = patt.exec(cur);
                 var row_id = id_arr[2];
                 var col_id = id_arr[4];
-                var cur_opts = document.getElementById(cur),
-                    cand_opts = document.getElementById(cand),
-                    pre_opts = document.getElementById(pre);
-                var cur_vals = [], cand_vals = [], pre_vals = [];
-                for (var i=0; i<cur_opts; i++) {
-                    cur_vals.push(cur_opts[i].value);
+                var cur_opts = document.getElementById(cur).options,
+                    cand_opts = document.getElementById(cand).options,
+                    pre_opts = document.getElementById(pre).options;
+                var cur_data = [], cand_data = [], pre_data = []; //arrays of objects
+                for (var i=0; i<cur_opts.length; i++) {
+                    var cur = {};
+                    cur[cur_opts[i].text] = {"score": cur_opts[i].value};
+                    cur_data.push(cur);
                 }
-                for (var i=0; i<cur_opts; i++) {
-                    cand_vals.push(cand_opts[i].value);
+                for (var i=0; i<cand_opts.length; i++) {
+                    var cand = {};
+                    cand[cand_opts[i].text] = {"score": cand_opts[i].value};
+                    cand_data.push(cand);
                 }
-                for (var i=0; i<cur_opts; i++) {
-                    pre_vals.push(pre_opts[i].value);
+                for (var i=0; i<pre_opts.length; i++) {
+                    var pre = {};
+                    pre[pre_opts[i].text] = {"score": pre_opts[i].value};
+                    pre_data.push(pre);
                 }
-                if (cur_opts.length > 0) console.log(cur_opts);
-                if (cand_opts.length > 0) console.log(cand_opts);
-                if (pre_opts.length > 0) console.log(pre_opts);
+                if (cur_data.length > 0) console.log(cur_data);
+                if (cand_data.length > 0) console.log(cand_data);
+                if (pre_data.length > 0) console.log(pre_data);
+
+                var caps = Object.keys(scope.data[row_id]);
+                console.log({"subsysName": scope.data[row_id]['Genome'],
+                        "curation": cur_data,
+                        "candidates": cand_data,
+                        "prediction": pre_data});
             }
 
             function sortOptions(sel) {

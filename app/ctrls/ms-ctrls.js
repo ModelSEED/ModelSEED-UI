@@ -2563,7 +2563,7 @@ function($s, WS, $stateParams) {
         var row_col = 'row'+row_id.toString(10)+'_col'+col_id.toString(10);
         curk_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
         for (var j = 0; j < curk_arr.length; j++) {
-            curk_str += '<option value ="' + curv_arr[j]["score"] + '">';
+            curk_str += '<option value="' + curv_arr[j]["score"] + '">';
             curk_str += curk_arr[j] + '</option>';
         }
         curk_str += '</select></div>';
@@ -2580,7 +2580,7 @@ function($s, WS, $stateParams) {
             cank_str += '<option value="';
             cank_str += canv_arr[j]["score"] + '"';
             if (!prek_arr.includes(cank_arr[j])) cank_str += ' style="color: red;"';
-            cank_str += '>' + cank_arr[j] + '</option>';
+            cank_str += ' title="score:'+canv_arr[j]["score"]+'">' + cank_arr[j] + '</option>';
         }
         cank_str += '</select></div>';
         gene_id_str += cank_str;
