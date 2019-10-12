@@ -1405,10 +1405,10 @@ function($compile, $stateParams) {
                 var sel_dest = document.getElementById(dest);
                 for (var i = 0; i < sel_src.options.length; i++) {
                     if (sel_src.options[i].selected) {
-                        var sel_val = sel_src.options[i].value;
+                        var sel_val = sel_src.options[i].value, sel_text = sel_src.options[i].text;
                         var in_dest = false;
                         for (var j = 0; j < sel_dest.length; j++) {
-                            if (sel_dest.options[j].value == sel_val) {
+                            if (sel_dest.options[j].text == sel_text) {
                                 in_dest = true;
                                 break;
                             }
@@ -1417,7 +1417,7 @@ function($compile, $stateParams) {
                             // create a new option element
                             var opt = document.createElement('option');
                             // create text node to add to option element (opt)
-                            opt.appendChild( document.createTextNode(sel_val) );
+                            opt.appendChild( document.createTextNode(sel_text) );
                             // set value property of opt
                             opt.value = sel_val;
                             // add opt to end of select box (sel)
@@ -1478,15 +1478,16 @@ function($compile, $stateParams) {
 
             function sortOptions(sel) {
                 var options = sel.options;
-                var optionsArray = [], optionVals = [], optionsArray1 = [];
+                var optionsArray = [], optionVals = [], optionTexts = [], optionsArray1 = [];
                 for (var i = 0; i < options.length; i++) {
                     optionsArray.push(options[i]);
                     optionVals.push(options[i].value);
+                    optionTexts.push(options[i].text);
                 }
-                optionVals = optionVals.sort();
-                for (var j = 0; j < optionVals.length; j++) {
+                optionTexts = optionTexts.sort();
+                for (var j = 0; j < optionTexts.length; j++) {
                     for (var k = 0; k < optionsArray.length; k++) {
-                        if (optionVals[j] == optionsArray[k].value) {
+                        if (optionTexts[j] == optionsArray[k].text) {
                             optionsArray1[j] = optionsArray[k];
                             break;
                         }
@@ -1501,10 +1502,10 @@ function($compile, $stateParams) {
             function updateOptionColor(sel_target, sel_cand) {
                 var  t_opts= document.getElementById(sel_target).options,
                      c_opts = document.getElementById(sel_cand).options,
-                     t_optVals = [], c_optVals = [];
+                     t_optTexts = [], c_optTexts = [];
 
                 if (c_opts == undefined) return;
-                for (var k = 0; k < c_opts.length; k++) c_optVals.push(c_opts[k].value);
+                for (var k = 0; k < c_opts.length; k++) c_optTexts.push(c_opts[k].text);
 
                 if (t_opts == undefined) {
                     for (var k1 = 0; k1 < c_opts.length; k1++) {
@@ -1514,10 +1515,10 @@ function($compile, $stateParams) {
                 }
                 else {
                     for (var j = 0; j < t_opts.length; j++) {
-                        t_optVals.push(t_opts[j].value);
+                        t_optTexts.push(t_opts[j].text);
                     }
-                    for (var i = 0; i < c_optVals.length; i++) {
-                        if (!t_optVals.includes(c_optVals[i])) {
+                    for (var i = 0; i < c_optTexts.length; i++) {
+                        if (!t_optTexts.includes(c_optTexts[i])) {
                             c_opts[i].setAttribute("style", "color: red;");
                         }
                         else c_opts[i].setAttribute("style", "color: black;");
