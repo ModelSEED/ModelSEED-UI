@@ -1,0 +1,79 @@
+
+<div ng-if="data">
+    <div class="table-controls table-editor-controls">
+        <!--div layout="row">
+            <md-input-container layout="row" layout-align="end center" flex>
+                <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress">
+                    {{saveInProgress ? saveInProgressText : 'Save'}}
+                </md-button>
+                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
+                    {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
+                </md-button>
+                <a ng-click="cancel($event)" class="no-link">Cancel</a>
+            </md-input-container>
+        </div-->
+
+        <div layout="row">
+            <md-input-container md-no-float flex="45"
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+            </md-input-container>
+
+            <md-progress-circular ng-if="loading"
+                                md-mode="indeterminate"
+                                class="table-loading"
+                                md-diameter="20">
+            </md-progress-circular>
+
+            <div ng-if="noPagination" layout="row" layout-align="end center" flex>
+                {{data.length}} {{resultText}}
+            </div>
+
+            <md-input-container
+                ng-if="!noPagination"
+                pagination
+                pagination-offset="opts.offset"
+                pagination-limit="opts.limit"
+                pagination-total="filtered.length"
+                layout="row"
+                layout-align="end center" flex>
+            </md-input-container>
+        </div>
+    </div>
+
+    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+        <thead>
+            <tr>
+                <th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}"
+                    ng-click="sortBy($event, h.key)" >{{::h.label}}
+                </th>
+            </tr>
+        </thead>
+
+        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                        | limitTo : opts.limit : opts.offset)"
+            ng-click="rowClick($event, row)"
+            ng-class="{'row-hover': rowClick}"
+            class="{{hoverClass}}">
+            <td ng-repeat="h in header" style="border: 1px solid black;">
+                <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
+                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                    {{::row[h.key]}}
+                </a>
+
+                <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                    <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{::row[h.key]}}</a>
+                    <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>
+                </span>
+            </td>
+        </tr>
+    </table>
+
+    <div ng-if="!loading && filtered.length == 0" class="item-not-found">
+        No item found
+    </div>
+</div>
+<br>
+<md-progress-circular ng-if="loading"
+                      md-mode="indeterminate"
+                      md-diameter="40">
+</md-progress-circular>

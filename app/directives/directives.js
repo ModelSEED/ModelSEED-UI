@@ -1398,6 +1398,32 @@ function($compile, $stateParams) {
             var ele = angular.element(elem);
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
+        }
+    }
+}])
+
+.directive('ngTableSubsystem', ['$sce', '$compile', function($sce, $compile) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            rowClick: '=tableRowClick',
+            hoverClass: '@tableRowHoverClass',
+            placeholder: '@tablePlaceholder',
+            resultText: '@tableResultText',
+            onSave: '=onSave',
+            onSaveAs: '=onSaveAs',
+            saveInProgressText: '@saveInProgressText',
+            onCancel: '&onCancel'
+        },
+        templateUrl: 'app/views/general/table-subsys.html',
+        link: function(scope, elem, attrs) {
+            var ele = angular.element(elem);
+
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
             scope.addSelected = function(ev, src, dest, usr) {
                 // add selected items in src to the destination DOM object dest
@@ -1449,7 +1475,46 @@ function($compile, $stateParams) {
                 if (src.indexOf('pre_') != -1) updateOptionColor(src, cand);
             }
 
-            scope.save = function(ev, cur, cand, pre, usr) {
+            scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
+            scope.saveInProgress = false;
+            scope.save = function($ev) {
+                scope.saveInProgress = true;
+
+                scope.onSave(scope.data)
+                        .then(function(res) {
+                            scope.saveInProgres = false;
+                            scope.onCancel();
+                        })
+            }
+
+            scope.saveAs = function($ev) {
+                scope.saveAsInProgress = true;
+
+                // show save as dialog, with save/cancel callbacks
+                Dialogs.saveAs($ev,
+                    function(newName){
+                        scope.onSaveAs(scope.data, newName)
+                                .then(function() {
+                                    scope.saveAsInProgres = false;
+                                    scope.onCancel();
+                                });
+                    },
+                    function() {
+
+                    });
+            }
+
+            scope.cancel = function($event) {
+                $event.preventDefault();
+                scope.onCancel();
+            }
+
+            // listen for operations, add to operation stack
+            scope.$on('Events.commandOperation', function(e, operation) {
+                scope.operations.push({op: operation.op, items: operation.items})
+            })
+
+            scope.saveCellData = function(ev, cur, cand, pre, usr) {
                 /*
                  Save the data in dropdown lists in cell (row_id and col_id) into the corresponding
                  json document sections.

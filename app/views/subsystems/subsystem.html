@@ -6,9 +6,11 @@
 
 <hr class="no-margin">
 
-<ng-table-two table-header="subsysHeader"
-          table-data="subsysData"
-          table-opts="subsysOpts"
-          table-loading="loading"
-          table-placeholder="Search subsystems">
-</ng-table-two>
+<ng-table-subsystem table-header="subsysHeader"
+        table-data="subsysData"
+        table-opts="subsysOpts"
+        table-loading="loading"
+        on-save="save"
+        on-save-as="saveAs"
+        table-placeholder="Search subsystems">
+</ng-table-subsystem>

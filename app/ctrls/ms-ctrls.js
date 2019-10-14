@@ -2409,8 +2409,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
 // Begin add-subsystem control
-.controller('Subsystem',['$scope', 'WS', '$stateParams',
-function($s, WS, $stateParams) {
+.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools',
+function($s, WS, $stateParams, tools) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
@@ -2455,6 +2455,35 @@ function($s, WS, $stateParams) {
             console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
             $s.loading = false;
         });
+    }
+
+    $s.save = function(data) {
+        var table = tools.JSONToTable(head, angular.copy(data));
+
+        return WS.save(path, table, {overwrite: true, userMeta: $s.subsysMeta, type: 'subsystem'})
+                 .then(function() {
+                     $s.subsystems = data;
+                     Dialogs.showComplete('Saved subsystems', $s.name)
+                 })
+    }
+
+    $s.saveAs = function(data, newName) {
+        var table = tools.JSONToTable(head, angular.copy(data));
+
+        var folder = '/'+Auth.user+'/subsystems/';
+        return WS.save(folder+newName, table, {
+            userMeta: {
+                name: newName,
+                isMinimal: 0,
+                isDefined: 0,
+            }, overwrite: true, type: 'subsystem'})
+            .then(function(res) {
+                Dialogs.showComplete('Saved subsystem data', newName);
+                $state.go('app.subsystem', {path: folder+newName})
+            }).catch(function(e) {
+                console.log('error', e)
+                self.showError('Save error', e.error.message.slice(0,30)+'...')
+            })
     }
 
     // Parse the given data for the subsystem data structure
@@ -2598,7 +2627,7 @@ function($s, WS, $stateParams) {
         }
         prek_str += '</select></div></section>';
         gene_id_str += prek_str;
-        return gene_id_str + buildSaveCancelHtml(row_col);
+        return gene_id_str; // + buildSaveCancelHtml(row_col);
     }
 
     function buildSaveCancelHtml(cell_id) {
