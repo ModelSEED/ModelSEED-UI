@@ -2409,8 +2409,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
 // Begin add-subsystem control
-.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools',
-function($s, WS, $stateParams, tools) {
+.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools', 'Dialogs',
+function($s, WS, $stateParams, tools, Dialogs) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
@@ -2437,6 +2437,7 @@ function($s, WS, $stateParams, tools) {
             $s.subsysName = res.data.name;
             $s.subsysDataClone = Object.assign({}, res);
             WS.cached.subsystemsClone = $s.subsysDataClone;
+            $s.subsysMeta = res.meta;
 
             $s.subsysData = parseSubsysData(res.data.data);
             $s.subsysData = buildHtmlContent($s.subsysData);
@@ -2459,7 +2460,6 @@ function($s, WS, $stateParams, tools) {
 
     $s.save = function(data) {
         var table = tools.JSONToTable(head, angular.copy(data));
-
         return WS.save(path, table, {overwrite: true, userMeta: $s.subsysMeta, type: 'subsystem'})
                  .then(function() {
                      $s.subsystems = data;

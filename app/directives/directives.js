@@ -1836,9 +1836,7 @@ function(Dialogs, $dialog) {
             scope.defaultBtn = function(items) {
                 scope.onDefault();
             }
-
-
-        }
+       }
     }
  })
 
