@@ -6,7 +6,7 @@
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
-                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveInProgress">
+                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveAsInProgress">
                     {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
                 <a ng-click="cancel($event)" class="no-link">Cancel</a>

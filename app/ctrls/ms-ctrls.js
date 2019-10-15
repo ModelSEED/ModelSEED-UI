@@ -2428,21 +2428,25 @@ function($s, WS, $stateParams, tools, Dialogs) {
     $s.loading = true;
     if (WS.cached.subsystems) {
         $s.subsysData = WS.cached.subsystems;
-        $s.subsysHeader = WS.cached.subsysHeader;
         $s.subsysDataClone = WS.cached.subsystemsClone;
+        $s.subsysHeader = WS.cached.subsysHeader;
         $s.loading = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
             $s.subsysName = res.data.name;
-            $s.subsysDataClone = Object.assign({}, res);
-            WS.cached.subsystemsClone = $s.subsysDataClone;
             $s.subsysMeta = res.meta;
 
+            // unmasked data
+            $s.subsysDataClone = Object.assign({}, res.data.data);
+            WS.cached.subsystemsClone = $s.subsysDataClone;
+
+            // html-masked data
             $s.subsysData = parseSubsysData(res.data.data);
             $s.subsysData = buildHtmlContent($s.subsysData);
             WS.cached.subsystems = $s.subsysData;
 
+            // table header
             captions = res.data.data[0];
             $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
             for (var k=1; k<captions.length; k++) {
@@ -2459,19 +2463,16 @@ function($s, WS, $stateParams, tools, Dialogs) {
     }
 
     $s.save = function(data) {
-        var table = tools.JSONToTable(head, angular.copy(data));
-        return WS.save(path, table, {overwrite: true, userMeta: $s.subsysMeta, type: 'subsystem'})
+        return WS.save(wsPath, data, {overwrite: true, userMeta: $s.subsysMeta, type: 'subsystem'})
                  .then(function() {
-                     $s.subsystems = data;
-                     Dialogs.showComplete('Saved subsystems', $s.name)
+                     $s.subsysDataClone = data;
+                     Dialogs.showComplete('Saved subsystems', $s.subsysName)
                  })
     }
 
     $s.saveAs = function(data, newName) {
-        var table = tools.JSONToTable(head, angular.copy(data));
-
         var folder = '/'+Auth.user+'/subsystems/';
-        return WS.save(folder+newName, table, {
+        return WS.save(folder+newName, data, {
             userMeta: {
                 name: newName,
                 isMinimal: 0,

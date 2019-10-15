@@ -1402,12 +1402,14 @@ function($compile, $stateParams) {
     }
 }])
 
-.directive('ngTableSubsystem', ['$sce', '$compile', function($sce, $compile) {
+.directive('ngTableSubsystem',
+            ['$sce', '$compile', 'Dialogs', function($sce, $compile, Dialogs) {
     return {
         restrict: 'EA',
         scope: {
             header: '=tableHeader',
             data: '=tableData',
+            dataClone: '=tableDataClone',
             opts: '=tableOpts',
             loading: '=tableLoading',
             rowClick: '=tableRowClick',
@@ -1451,6 +1453,7 @@ function($compile, $stateParams) {
                         }
                     }
                 }
+                updateCloneData(dest);
                 sortOptions(sel_dest);
                 if (dest.indexOf('pre_') != -1) updateOptionColor(dest, src);
             }
@@ -1471,6 +1474,7 @@ function($compile, $stateParams) {
                         sel_src.removeChild(sel_src.options[len]);
                     }
                 }
+                updateCloneData(src);
                 sortOptions(sel_src);
                 if (src.indexOf('pre_') != -1) updateOptionColor(src, cand);
             }
@@ -1480,7 +1484,7 @@ function($compile, $stateParams) {
             scope.save = function($ev) {
                 scope.saveInProgress = true;
 
-                scope.onSave(scope.data)
+                scope.onSave(scope.dataClone)
                         .then(function(res) {
                             scope.saveInProgres = false;
                             scope.onCancel();
@@ -1493,7 +1497,7 @@ function($compile, $stateParams) {
                 // show save as dialog, with save/cancel callbacks
                 Dialogs.saveAs($ev,
                     function(newName){
-                        scope.onSaveAs(scope.data, newName)
+                        scope.onSaveAs(scope.dataClone, newName)
                                 .then(function() {
                                     scope.saveAsInProgres = false;
                                     scope.onCancel();
@@ -1501,7 +1505,7 @@ function($compile, $stateParams) {
                     },
                     function() {
 
-                    });
+                });
             }
 
             scope.cancel = function($event) {
@@ -1514,43 +1518,51 @@ function($compile, $stateParams) {
                 scope.operations.push({op: operation.op, items: operation.items})
             })
 
-            scope.saveCellData = function(ev, cur, cand, pre, usr) {
+            function updateCloneData(sel_id) {
                 /*
-                 Save the data in dropdown lists in cell (row_id and col_id) into the corresponding
-                 json document sections.
+                 Save the data in dropdown list with id of sel_id into the corresponding
+                 json document sections of the dataClone.
                  */
-                var patt = /^cur_(row)(\d+)(_col)(\d+)$/;
-                var id_arr = patt.exec(cur);
-                var row_id = id_arr[2];
-                var col_id = id_arr[4];
-                var cur_opts = document.getElementById(cur).options,
-                    cand_opts = document.getElementById(cand).options,
-                    pre_opts = document.getElementById(pre).options;
-                var cur_data = [], cand_data = [], pre_data = []; //arrays of objects
-                for (var i=0; i<cur_opts.length; i++) {
-                    var cur = {};
-                    cur[cur_opts[i].text] = {"score": cur_opts[i].value};
-                    cur_data.push(cur);
-                }
-                for (var i=0; i<cand_opts.length; i++) {
-                    var cand = {};
-                    cand[cand_opts[i].text] = {"score": cand_opts[i].value};
-                    cand_data.push(cand);
-                }
-                for (var i=0; i<pre_opts.length; i++) {
-                    var pre = {};
-                    pre[pre_opts[i].text] = {"score": pre_opts[i].value};
-                    pre_data.push(pre);
-                }
-                if (cur_data.length > 0) console.log(cur_data);
-                if (cand_data.length > 0) console.log(cand_data);
-                if (pre_data.length > 0) console.log(pre_data);
+                var cell_info = getRowColIds(sel_id);
+                var gene_group_name = cell_info['gene_group'],
+                    row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'];
 
-                var caps = Object.keys(scope.data[row_id]);
-                console.log({"subsysName": scope.data[row_id]['Genome'],
-                        "curation": cur_data,
-                        "candidates": cand_data,
-                        "prediction": pre_data});
+                var sel_opts = document.getElementById(sel_id).options;
+                var sel_data = []; //arrays of objects
+                for (var i=0; i<sel_opts.length; i++) {
+                    var sel = {};
+                    sel[sel_opts[i].text] = {"score": sel_opts[i].value};
+                    sel_data.push(sel);
+                }
+                scope.dataClone[row_id+1][col_id][gene_group_name] = sel_data;
+            }
+
+            function getRowColIds(sel_id) {
+                /*
+                sel_id: in the form of, e.g., 'cur_row12_col3'
+                return: {'name': 'cur', 'row_id': 12, 'col_id': 3}
+                */
+                // parts = ['curation', 'row12', 'col3']
+                var parts = sel_id.split('_');
+                var gene_grp = '';
+                switch(parts[0]) {
+                    case "cur":
+                        gene_grp = 'curation';
+                        break;
+                    case "pre":
+                        gene_grp = 'prediction';
+                        break;
+                    case "cand":
+                        gene_grp = 'candidates';
+                        break;
+                    default:
+                        // do nothing
+                        break;
+                }
+                return {"gene_group": gene_grp,
+                        "row_id": Number(parts[1].substring(3,)),
+                        "col_id": Number(parts[2].substring(3,))};
             }
 
             function sortOptions(sel) {
