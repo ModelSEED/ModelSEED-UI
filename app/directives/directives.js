@@ -1427,21 +1427,41 @@ function($compile, $stateParams) {
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
-            scope.addSelected = function(ev, src, dest, usr) {
-                // add selected items in src to the destination DOM object dest
-                var sel_src = document.getElementById(src);
-                var sel_dest = document.getElementById(dest);
-                for (var i = 0; i < sel_src.options.length; i++) {
-                    if (sel_src.options[i].selected) {
-                        var sel_val = sel_src.options[i].value, sel_text = sel_src.options[i].text;
-                        var in_dest = false;
-                        for (var j = 0; j < sel_dest.length; j++) {
-                            if (sel_dest.options[j].text == sel_text) {
+            scope.addSelected = function(ev, cand, dest, usr) {
+                // add selected items in candidates to the destination DOM object dest if the item--
+                // 1) is not in the dest AND 2) is not in the third select (dropdown box)
+                var cell_info = getRowColIds(cand);
+                var row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'],
+                    cur_id = 'cur_row'+row_id.toString()+'_col'+col_id.toString(),
+                    pre_id = 'pre_row'+row_id.toString()+'_col'+col_id.toString(),
+                    third_id = '';
+
+                if (cur_id == dest) third_id = pre_id;
+                else third_id = cur_id;
+
+                var sel_cand = document.getElementById(cand),
+                    sel_dest = document.getElementById(dest),
+                    sel_3rd = document.getElementById(third_id);
+
+                for (var i = 0; i < sel_cand.options.length; i++) {
+                    if (sel_cand.options[i].selected) {
+                        var sel_val = sel_cand.options[i].value,
+                            sel_text = sel_cand.options[i].text;
+                        var in_dest = false, in_3rd = false;
+                        for (var j1 = 0; j1 < sel_dest.length; j1++) {
+                            if (sel_dest.options[j1].text == sel_text) {
                                 in_dest = true;
                                 break;
                             }
                         }
-                        if (!in_dest) {
+                        for (var j2 = 0; j2 < sel_3rd.length; j2++) {
+                            if (sel_3rd.options[j2].text == sel_text) {
+                                in_3rd = true;
+                                break;
+                            }
+                        }
+                        if (!in_dest && !in_3rd) {
                             // create a new option element
                             var opt = document.createElement('option');
                             // create text node to add to option element (opt)
@@ -1455,7 +1475,7 @@ function($compile, $stateParams) {
                 }
                 updateCloneData(dest);
                 sortOptions(sel_dest);
-                if (dest.indexOf('pre_') != -1) updateOptionColor(dest, src);
+                updateOptionColor(cand);
             }
 
             scope.removeSelected = function(ev, src, cand, usr) {
@@ -1476,7 +1496,7 @@ function($compile, $stateParams) {
                 }
                 updateCloneData(src);
                 sortOptions(sel_src);
-                if (src.indexOf('pre_') != -1) updateOptionColor(src, cand);
+                updateOptionColor(cand);
             }
 
             scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
@@ -1566,6 +1586,7 @@ function($compile, $stateParams) {
             }
 
             function sortOptions(sel) {
+                // Sort (ascending) the select options by their text values.
                 var options = sel.options;
                 var optionsArray = [], optionVals = [], optionTexts = [], optionsArray1 = [];
                 for (var i = 0; i < options.length; i++) {
@@ -1588,33 +1609,53 @@ function($compile, $stateParams) {
                 sel.options = options;
             }
 
-            function updateOptionColor(sel_target, sel_cand) {
-                var  t_opts= document.getElementById(sel_target).options,
-                     c_opts = document.getElementById(sel_cand).options,
-                     t_optTexts = [], c_optTexts = [];
+            function updateOptionColor(cand_id) {
+                // update the option items' color according to their match with items in
+                // either the curation or the prediction lists: the item will be colored red when
+                // it is absent in BOTH the curation list AND the prediction list
+                var cell_info = getRowColIds(cand_id);
+                var row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'],
+                    cur_id = 'cur_row'+row_id.toString()+'_col'+col_id.toString(),
+                    pre_id = 'pre_row'+row_id.toString()+'_col'+col_id.toString();
 
-                if (c_opts == undefined) return;
-                for (var k = 0; k < c_opts.length; k++) c_optTexts.push(c_opts[k].text);
+                var  cur_opts= document.getElementById(cur_id).options,
+                     cand_opts = document.getElementById(cand_id).options,
+                     pre_opts = document.getElementById(pre_id).options;
 
-                if (t_opts == undefined) {
-                    for (var k1 = 0; k1 < c_opts.length; k1++) {
-                        c_opts[k1].setAttribute("style", "color: red;");
-                        c_opts[k1].selected = false;
+                if (cand_opts.length == 0) return;
+
+                var cur_optTexts = [], cand_optTexts = [], pre_optTexts = [];
+
+                for (var k = 0; k < cand_opts.length; k++) cand_optTexts.push(cand_opts[k].text);
+
+                if (cur_opts == 0 && pre_opts == 0) {
+                    for (var k1 = 0; k1<cand_opts.length; k1++) {
+                        cand_opts[k1].setAttribute("style", "color: red;");
+                        cand_opts[k1].selected = false;
                     }
                 }
                 else {
-                    for (var j = 0; j < t_opts.length; j++) {
-                        t_optTexts.push(t_opts[j].text);
-                    }
-                    for (var i = 0; i < c_optTexts.length; i++) {
-                        if (!t_optTexts.includes(c_optTexts[i])) {
-                            c_opts[i].setAttribute("style", "color: red;");
+                    if(cur_opts.length > 0) {
+                        for (var j1 = 0; j1 < cur_opts.length; j1++) {
+                            cur_optTexts.push(cur_opts[j1].text);
                         }
-                        else c_opts[i].setAttribute("style", "color: black;");
-                        c_opts[i].selected = false;
+                    }
+                    if(pre_opts.length > 0) {
+                        for (var j2 = 0; j2 < pre_opts.length; j2++) {
+                            pre_optTexts.push(pre_opts[j2].text);
+                        }
+                    }
+                    for (var i = 0; i < cand_optTexts.length; i++) {
+                        if (!cur_optTexts.includes(cand_optTexts[i]) && !pre_optTexts.includes(cand_optTexts[i])) {
+                            cand_opts[i].setAttribute("style", "color: red;");
+                        }
+                        else {
+                            cand_opts[i].setAttribute("style", "color: black;");
+                        }
+                        cand_opts[i].selected = false;
                     }
                 }
-                sel_cand.options = c_opts;
             }
         }
     }

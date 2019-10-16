@@ -2409,8 +2409,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
 // Begin add-subsystem control
-.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools', 'Dialogs',
-function($s, WS, $stateParams, tools, Dialogs) {
+.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools', 'Dialogs', '$http', 'Auth',
+function($s, WS, $stateParams, tools, Dialogs, $http, Auth) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
@@ -2463,7 +2463,7 @@ function($s, WS, $stateParams, tools, Dialogs) {
     }
 
     $s.save = function(data) {
-        return WS.save(wsPath, data, {overwrite: true, userMeta: $s.subsysMeta, type: 'subsystem'})
+        return WS.save(wsPath, data, {overwrite: true, userMeta: $s.subsysMeta, type: 'upspecified'})
                  .then(function() {
                      $s.subsysDataClone = data;
                      Dialogs.showComplete('Saved subsystems', $s.subsysName)
@@ -2473,11 +2473,9 @@ function($s, WS, $stateParams, tools, Dialogs) {
     $s.saveAs = function(data, newName) {
         var folder = '/'+Auth.user+'/subsystems/';
         return WS.save(folder+newName, data, {
-            userMeta: {
-                name: newName,
-                isMinimal: 0,
-                isDefined: 0,
-            }, overwrite: true, type: 'subsystem'})
+                       userMeta: {},
+                       overwrite: true,
+                       type: 'unspecified'})
             .then(function(res) {
                 Dialogs.showComplete('Saved subsystem data', newName);
                 $state.go('app.subsystem', {path: folder+newName})
@@ -2609,7 +2607,7 @@ function($s, WS, $stateParams, tools, Dialogs) {
         for (var j = 0; j < cank_arr.length; j++) {
             cank_str += '<option value="';
             cank_str += canv_arr[j]["score"] + '"';
-            if (!prek_arr.includes(cank_arr[j])) cank_str += ' style="color: red;"';
+            if (!prek_arr.includes(cank_arr[j]) && !curk_arr.includes(cank_arr[j])) cank_str += ' style="color: red;"';
             cank_str += ' title="score:'+canv_arr[j]["score"]+'">' + cank_arr[j] + '</option>';
         }
         cank_str += '</select></div>';
@@ -2621,14 +2619,14 @@ function($s, WS, $stateParams, tools, Dialogs) {
         btn21_str += '<md-tooltip>Remove from Predictions</md-tooltip><=</md-button></div>';
         gene_id_str += btn20_str + btn21_str;
 
-        prek_str = '<div>Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
+        prek_str = '<div style="color: blue;">Predictions:<br><select id="pre_'+row_col+'" style="width:130px;" multiple=yes>';
         for (var j = 0; j < prek_arr.length; j++) {
             prek_str += '<option value ="' + prev_arr[j]["score"] + '">';
             prek_str += prek_arr[j] + '</option>';
         }
         prek_str += '</select></div></section>';
         gene_id_str += prek_str;
-        return gene_id_str; // + buildSaveCancelHtml(row_col);
+        return gene_id_str;
     }
 
     function buildSaveCancelHtml(cell_id) {
