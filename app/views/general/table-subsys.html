@@ -2,7 +2,7 @@
 <div ng-if="data">
     <div class="table-controls table-editor-controls">
         <div layout="row">
-            <md-input-container layout="row" layout-align="end center" flex>
+            <md-input-container layout="row" layout-align="start center" flex>
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
@@ -14,7 +14,7 @@
         </div>
 
         <div layout="row">
-            <md-input-container md-no-float flex="45"
+            <md-input-container md-no-float
                 search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
             </md-input-container>
 
@@ -24,7 +24,7 @@
                                 md-diameter="20">
             </md-progress-circular>
 
-            <div ng-if="noPagination" layout="row" layout-align="end center" flex>
+            <div ng-if="noPagination" layout="row" layout-align="start center">
                 {{data.length}} {{resultText}}
             </div>
 
@@ -35,7 +35,7 @@
                 pagination-limit="opts.limit"
                 pagination-total="filtered.length"
                 layout="row"
-                layout-align="end center" flex>
+                layout-align="start center">
             </md-input-container>
         </div>
     </div>
