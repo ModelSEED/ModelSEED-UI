@@ -1504,9 +1504,10 @@ function($compile, $stateParams) {
             scope.save = function($ev) {
                 scope.saveInProgress = true;
 
-                scope.onSave(scope.dataClone)
+                scope.onSave(Object.values(scope.dataClone))
                         .then(function(res) {
                             scope.saveInProgres = false;
+                            scope.saveInProgressText = 'Save';
                             scope.onCancel();
                         })
             }
@@ -1517,7 +1518,7 @@ function($compile, $stateParams) {
                 // show save as dialog, with save/cancel callbacks
                 Dialogs.saveAs($ev,
                     function(newName){
-                        scope.onSaveAs(scope.dataClone, newName)
+                        scope.onSaveAs(Object.values(scope.dataClone), newName)
                                 .then(function() {
                                     scope.saveAsInProgres = false;
                                     scope.onCancel();

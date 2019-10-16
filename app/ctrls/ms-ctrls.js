@@ -2409,8 +2409,8 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 
 
 // Begin add-subsystem control
-.controller('Subsystem',['$scope', 'WS', '$stateParams', 'uiTools', 'Dialogs', '$http', 'Auth',
-function($s, WS, $stateParams, tools, Dialogs, $http, Auth) {
+.controller('Subsystem',['$scope', '$state', 'WS', '$stateParams', 'uiTools', 'Dialogs', '$http', 'Auth',
+function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
     $s.subsysOpts = {query: '', limit: 20, offset: 0};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
@@ -2463,22 +2463,25 @@ function($s, WS, $stateParams, tools, Dialogs, $http, Auth) {
     }
 
     $s.save = function(data) {
-        return WS.save(wsPath, data, {overwrite: true, userMeta: $s.subsysMeta, type: 'upspecified'})
-                 .then(function() {
-                     $s.subsysDataClone = data;
-                     Dialogs.showComplete('Saved subsystems', $s.subsysName)
-                 })
+        var data_obj = {"name": $s.subsysName, "data": data};
+        return WS.save(wsPath, data_obj, {overwrite: true, userMeta: {}, type: 'unspecified'})
+            .then(function() {
+                $s.subsysDataClone = Object.assign({}, data);
+                Dialogs.showComplete('Saved subsystems', $s.subsysName);
+                $state.go('app.subsystem', wsPath);
+            }).catch(function(e) {
+                console.log('error', e)
+                self.showError('Save error', e.error.message.slice(0,30)+'...')
+            })
     }
 
     $s.saveAs = function(data, newName) {
         var folder = '/'+Auth.user+'/subsystems/';
-        return WS.save(folder+newName, data, {
-                       userMeta: {},
-                       overwrite: true,
-                       type: 'unspecified'})
+        data = {"name": $s.subsysName, "data": data};
+        return WS.save(folder+newName, data, {userMeta: {}, overwrite: true, type: 'unspecified'})
             .then(function(res) {
-                Dialogs.showComplete('Saved subsystem data', newName);
-                $state.go('app.subsystem', {path: folder+newName})
+                Dialogs.showComplete('Saved subsystem data to ', newName);
+                $state.go('app.subsystem', {path: folder+newName});
             }).catch(function(e) {
                 console.log('error', e)
                 self.showError('Save error', e.error.message.slice(0,30)+'...')
