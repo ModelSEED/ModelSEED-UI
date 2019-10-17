@@ -2511,7 +2511,9 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
         var curation_scores = [], prediction_scores = []; candidate_scores = [];
-        for (var i=1; i<input_data.length; i++) {
+        input_data[0] = rxnRow(input_data[0]);
+
+        for (var i=1; i<input_data.length; i++) { // i=1 to skip masking the reaction row
             curation_roles[i] = {};
             prediction_roles[i] = {};
             candidate_roles[i] = {};
@@ -2571,6 +2573,23 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             input_data[i] = indata;
         }
         return input_data;
+    }
+
+    function rxnRow(indata0) {
+        // re-write the reaction row by adding the anchor links
+        var key_arr = Object.keys(indata0);
+        for (var k = 1; k<key_arr.length; k++) {
+            var key = key_arr[k],
+                val = indata0[key];
+            var lnk_arr = [];
+            if (key != 'Genome') {
+                val.split(',').forEach(function(item, index) {
+                    lnk_arr.push('<a ui-sref="app.rxn({id: \''+item+'\'})" target="_blank">'+item+'</a>');
+                })
+                indata0[key] = lnk_arr.join(',');
+            }
+        }
+        return indata0;
     }
 
     function buildCellHtml(curk_arr, cank_arr, prek_arr, curv_arr, canv_arr, prev_arr, row_id, col_id) {
