@@ -1506,9 +1506,7 @@ function($compile, $stateParams) {
 
                 scope.onSave(Object.values(scope.dataClone))
                         .then(function(res) {
-                            scope.saveInProgres = false;
-                            scope.saveInProgressText = 'Save';
-                            scope.onCancel();
+                            scope.saveInProgress = false;
                         })
             }
 
@@ -1521,7 +1519,6 @@ function($compile, $stateParams) {
                         scope.onSaveAs(Object.values(scope.dataClone), newName)
                                 .then(function() {
                                     scope.saveAsInProgres = false;
-                                    scope.onCancel();
                                 });
                     },
                     function() {
