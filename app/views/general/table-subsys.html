@@ -48,10 +48,26 @@
                     ng-click="sortBy($event, h.key)" >{{::h.label}}
                 </th>
             </tr>
+            <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc).slice(0,1))"
+                ng-click="rowClick($event, row)"
+                ng-class="{'row-hover': rowClick}"
+                class="{{hoverClass}}">
+                <th class="firstrow" ng-repeat="h in header" style="border: 1px solid black;">
+                    <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
+                    <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                        {{::row[h.key]}}
+                    </a>
+
+                    <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                        <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{::row[h.key]}}</a>
+                        <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>
+                    </span>
+                </th>
+            </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
-                        | limitTo : opts.limit : opts.offset)"
+        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc).slice(1)
+                        | limitTo : opts.limit + 1 : opts.offset)"
             ng-click="rowClick($event, row)"
             ng-class="{'row-hover': rowClick}"
             class="{{hoverClass}}">

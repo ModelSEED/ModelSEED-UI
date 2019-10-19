@@ -16,31 +16,17 @@ td, th {
     width: 100%;
     padding: 0.25em;
 }
-th {background-color: rgba(9, 173, 202, 0.767);}
-/*
-td:last-child, th:last-child {
-    position: sticky;
-    right: 0;
-    z-index: 1;
-    background-color: blue;
-}*/
+th {color: white; background-color: rgba(9, 173, 202, 0.767);}
 thead th {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: -5px;
+    top: 0;
     z-index: 2;
 }
 thead th:first-child {
     left: 0;
     z-index: 3;
 }
-/*
-tbody tr:first-child {
-    position: -webkit-sticky;
-    position: sticky;
-    top: -10px;
-    background-color: pink;
-}*/
 tbody td:first-child {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
@@ -48,4 +34,12 @@ tbody td:first-child {
     z-index: 1;
     font-weight: bold;
     background-color: rgba(9, 173, 202, 0.767);
+}
+.firstrow {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: 55px;
+    z-index: 2;
+    color: black;
+    background-color: rgba(247, 243, 16, 0.767);
 }
