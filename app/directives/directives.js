@@ -1424,6 +1424,7 @@ function($compile, $stateParams) {
         templateUrl: 'app/views/general/table-subsys.html',
         link: function(scope, elem, attrs) {
             var ele = angular.element(elem);
+            scope.htmlPath = 'app/views/general/';
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
 

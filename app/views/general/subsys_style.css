@@ -1,0 +1,51 @@
+div.container {
+    overflow: scroll;
+    width: 100%;
+    height: 100%;
+    max-width: 120em;
+    max-height: 100em;
+    position: relative;
+}
+table {
+    /*table-layout: auto;*/
+    width: 100%;
+    position: relative;
+}
+td, th {
+    border: 1px solid #000;
+    width: 100%;
+    padding: 0.25em;
+}
+th {background-color: rgba(9, 173, 202, 0.767);}
+/*
+td:last-child, th:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background-color: blue;
+}*/
+thead th {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: -5px;
+    z-index: 2;
+}
+thead th:first-child {
+    left: 0;
+    z-index: 3;
+}
+/*
+tbody tr:first-child {
+    position: -webkit-sticky;
+    position: sticky;
+    top: -10px;
+    background-color: pink;
+}*/
+tbody td:first-child {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    font-weight: bold;
+    background-color: rgba(9, 173, 202, 0.767);
+}
