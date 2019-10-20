@@ -2411,7 +2411,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth) {
 // Begin add-subsystem control
 .controller('Subsystem',['$scope', '$state', 'WS', '$stateParams', 'uiTools', 'Dialogs', '$http', 'Auth',
 function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
-    $s.subsysOpts = {query: '', limit: 10, offset: 0};
+    $s.subsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'Genome'}};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
     $s.subsysDataClone = [];

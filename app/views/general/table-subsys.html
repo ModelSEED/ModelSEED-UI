@@ -45,7 +45,7 @@
         <thead>
             <tr>
                 <th sortable col-id="{{header[0].key}}"
-                    ng-click="sortBy($event, header[0].key)" >{{::header[0].label}}
+                    ng-click="sortBy($event, header[0].key)">{{::header[0].label}}
                 </th>
                 <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
                     ng-click="sortBy($event, h.key)" >{{::h.label}}
@@ -68,7 +68,7 @@
         </thead>
         <tbody>
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
-                        | limitTo : opts.limit : opts.offset).slice(1)"
+                        | limitTo : opts.limit : opts.offset)"
             ng-click="rowClick($event, row)"
             ng-class="{'row-hover': rowClick}"
             class="{{hoverClass}}">
