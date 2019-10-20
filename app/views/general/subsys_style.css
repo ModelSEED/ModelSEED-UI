@@ -1,5 +1,5 @@
 div.container {
-    overflow: scroll;
+    overflow: auto;
     width: 100%;
     height: 100%;
     max-width: 120em;
@@ -16,30 +16,39 @@ td, th {
     width: 100%;
     padding: 0.25em;
 }
-th {color: white; background-color: rgba(9, 173, 202, 0.767);}
+th {color: white; background: rgb(9, 173, 202);}
 thead th {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 0;
-    z-index: 2;
+    top: 90px;
+    z-index: 1;  /* Ensure it stays on top of other player divs */
 }
 thead th:first-child {
-    left: 0;
-    z-index: 3;
+    left: -15px;
+    z-index: 2;
 }
 tbody td:first-child {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    left: 0;
-    z-index: 1;
+    left: -15px;
+    z-index: 1;  /* Ensure it stays on top of other player divs */
     font-weight: bold;
-    background-color: rgba(9, 173, 202, 0.767);
+    background-color: rgb(9, 173, 202);
 }
 .firstrow {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 55px;
-    z-index: 2;
+    top: 145px;
+    z-index: 1;  /* Ensure it stays on top of other player divs */
     color: black;
-    background-color: rgba(247, 243, 16, 0.767);
+    background-color: rgb(247, 243, 16);
+}
+.table-search {
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 2;  /* Ensure it stays on top of other player divs */
+    top: 0px;    /* Where it should stick to */
+    left: -15px;
+    color: #000;
+    background: #ccc;
 }

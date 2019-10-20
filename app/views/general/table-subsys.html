@@ -1,7 +1,7 @@
 
 <link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
 <div ng-if="data" class='container' flex>
-    <div class="table-controls table-editor-controls">
+    <div class="table-controls table-editor-controls table-search">
         <div layout="row">
             <md-input-container layout="row" layout-align="start center" flex>
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress">
@@ -44,9 +44,13 @@
     <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
         <thead>
             <tr>
-                <th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}"
+                <th sortable col-id="{{header[0].key}}"
+                    ng-click="sortBy($event, header[0].key)" >{{::header[0].label}}
+                </th>
+                <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
                     ng-click="sortBy($event, h.key)" >{{::h.label}}
                 </th>
+                <!--th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}">{{::h.label}}</th-->
             </tr>
             <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc).slice(0,1))"
                 ng-click="rowClick($event, row)"
