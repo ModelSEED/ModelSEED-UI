@@ -2522,7 +2522,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             candidate_scores[i] = {};
             var indata = input_data[i];
             var key_arr = Object.keys(indata);
-            for (var k = 1; k<key_arr.length; k++) {
+            for (var k = 1; k<key_arr.length; k++) { // k=1 to skip masking the genome column
                 key = key_arr[k];
                 curation_roles[i][key] = [];
                 prediction_roles[i][key] = [];
@@ -2608,9 +2608,9 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         cank_arr = cank_arr.sort();
         prek_arr = prek_arr.sort();
         var curk_str = '', prek_str = '', cank_str = '',
-        gene_id_str = '<section layout="row" layout-sm="column" layout-align="center center">';
+            row_col = 'row'+row_id.toString(10)+'_col'+col_id.toString(10),
+            gene_id_str = '<section layout="row" layout-sm="column" layout-align="center center">';
 
-        var row_col = 'row'+row_id.toString(10)+'_col'+col_id.toString(10);
         curk_str = '<div style="color: green;">Curations:<br><select id="cur_'+row_col+'" style="width:130px;" multiple=yes>';
         for (var j = 0; j < curk_arr.length; j++) {
             curk_str += '<option value="' + curv_arr[j]["score"] + '">';
@@ -2625,7 +2625,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
         gene_id_str += btn10_str + btn11_str;
 
-        cank_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes>';
+        cank_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes ng-click="cellClick($event, \''+row_col+'\', \'\')">';
         for (var j = 0; j < cank_arr.length; j++) {
             cank_str += '<option value="';
             cank_str += canv_arr[j]["score"] + '"';

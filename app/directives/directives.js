@@ -1412,7 +1412,7 @@ function($compile, $stateParams) {
             dataClone: '=tableDataClone',
             opts: '=tableOpts',
             loading: '=tableLoading',
-            rowClick: '=tableRowClick',
+            cellClick: '=tableCellClick',
             hoverClass: '@tableRowHoverClass',
             placeholder: '@tablePlaceholder',
             resultText: '@tableResultText',
@@ -1421,12 +1421,34 @@ function($compile, $stateParams) {
             saveInProgressText: '@saveInProgressText',
             onCancel: '&onCancel'
         },
-        templateUrl: 'app/views/general/table-subsys.html',
+        templateUrl: 'app/views/subsystems/table-subsys.html',
         link: function(scope, elem, attrs) {
             var ele = angular.element(elem);
-            scope.htmlPath = 'app/views/general/';
+            scope.htmlPath = 'app/views/subsystems/';
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+            // model: cell selection data
+            scope.selectedCell = '';
+
+            scope.showMeta = function(ev, item) {
+                Dialogs.showMeta(ev, path(item.name))
+            }
+
+            scope.cellClick = function(ev, row_col, usr) {
+                //alert("Selected cell at " + row_col);
+                scope.selectedCell = row_col;
+                var can_id = 'can_' + row_col;
+                var cell_info = getRowColIds(can_id);
+                var gene_group_name = cell_info['gene_group'],
+                    row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'];
+                var sel_cand = document.getElementById(can_id);
+                alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][sel_cand.selectedIndex]));
+
+                ev.stopPropagation();
+                ev.preventDefault();
+            }
 
             scope.addSelected = function(ev, cand, dest, usr) {
                 // add selected items in candidates to the destination DOM object dest if the item--

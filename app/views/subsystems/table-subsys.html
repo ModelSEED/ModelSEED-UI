@@ -68,10 +68,7 @@
         </thead>
         <tbody>
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
-                        | limitTo : opts.limit : opts.offset)"
-            ng-click="rowClick($event, row)"
-            ng-class="{'row-hover': rowClick}"
-            class="{{hoverClass}}">
+                        | limitTo : opts.limit : opts.offset)">
             <td ng-repeat="h in header" style="border: 1px solid black;">
                 <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
                 <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
