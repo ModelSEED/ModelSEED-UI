@@ -25,6 +25,7 @@ angular.module('ModelSEED',
  'Upload',
  'Biochem',
  'Browser',
+ 'Subsystems',
  'Regulons',
  'Fusions',
  'Dialogs',
@@ -195,7 +196,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         /* For display of a subsystem*/
         .state('app.subsystem', {
             url: "/subsystem{path:nonURIEncoded}",
-            templateUrl: 'app/views/subsystems/subsystem.html',
+            templateUrl: 'app/components/subsystems/subsystem.html',
             controller: 'Subsystem',
             authenticate: true
         })
@@ -204,7 +205,7 @@ function($locationProvider, $stateProvider, $httpProvider,
         /* For display of generic data in a spreadsheet*/
         .state('app.spreadsheet', {
             url: "/spreadsheet{path:nonURIEncoded}",
-            templateUrl: 'app/views/subsystems/spreadsheet.html',
+            templateUrl: 'app/components/subsystems/spreadsheet.html',
             controller: 'Spreadsheet',
             authenticate: true
         })

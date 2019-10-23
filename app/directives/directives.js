@@ -1421,10 +1421,10 @@ function($compile, $stateParams) {
             saveInProgressText: '@saveInProgressText',
             onCancel: '&onCancel'
         },
-        templateUrl: 'app/views/subsystems/table-subsys.html',
+        templateUrl: 'app/components/subsystems/table-subsys.html',
         link: function(scope, elem, attrs) {
             var ele = angular.element(elem);
-            scope.htmlPath = 'app/views/subsystems/';
+            scope.htmlPath = 'app/components/subsystems/';
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
 
