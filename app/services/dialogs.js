@@ -76,6 +76,82 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
     
+    this.showGene = function(ev, geneObj, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/show-gene.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($s, $http) {
+                $self = $s;
+                $s.editEvdCode = false;
+                $s.editScore = false;
+                $s.updatingGene = false;
+                $s.edit = {score: '', evidence_code: []};
+                $s.validJSON = true;
+                $s.gene = geneObj;
+                $s.geneId = Object.keys(geneObj)[0];
+                $s.score = geneObj[$s.geneId]['score'] || '';
+                $s.evidence_code = geneObj[$s.geneId]['evidence_code'] || '[]';
+
+                $s.editEvidenceCode = function() {
+                    $s.editEvdCode = !$s.editEvdCode;
+                    $s.edit.evidence_code = $s.evidence_code || '[]';
+                }
+
+                $s.editScore = function() {
+                    $s.editScore = !$s.editScore;
+                }
+
+                $s.updateEvdCode = function(e_code) {
+                    $s.updatingEvdCode = true;
+                    //$s.tidyEvdCode(e_code);
+                    // alert("updating gene content...");
+                    $s.edit.evidence_code = e_code;
+                    var edit_gene = {};
+                    edit_gene[$s.geneId] = {};
+                    edit_gene[$s.geneId] = $s.edit;
+                    cb(edit_gene);
+                    $s.evidence_code = $s.edit.evidence_code;
+                    $s.updatingEvdCode = false, $s.editEvdCode = false; 
+                }
+
+                $s.updateScore = function(s) {
+                    $s.updatingScore = true;
+                    // update the dropdown Content
+                    alert("updating gene content...");
+                    var edit_gene = {};
+                    edit_gene[$s.geneId]['score'] = s;
+                    cb(edit_gene).then(function() {
+                        $s.score = edit_gene[$s.geneId]['score'];
+                        $s.updatingScore = false, $s.editScore = false; 
+                    })
+                }
+
+                $s.tidyEvdCode = function(text) {
+                    //$s.edit.evidence_code = JSON.stringify(JSON.parse(text), null, 4)
+                    $s.edit.evidence_code = text.split('\n');
+                }
+
+                $s.tidyScore = function(text) {
+                    $s.edit.score = JSON.stringify(JSON.parse(text), null, 4)
+                }
+
+                $s.validateJSON = function(text) {
+                    try {
+                        var meta = JSON.parse(text);
+                        $s.validJSON = true;
+                    } catch(err) { $s.validJSON = false }
+                }
+
+                $s.cancel = function(){
+                    $dialog.hide();
+                }
+            }]
+        })
+    }
+
     this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -114,9 +190,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
               function($scope, $http) {
                 $scope.item = item;
                 $scope.form = {genome: item.path};
-                
-                
-                
+
             	$scope.selectedKingdom = []; // Plants or Microbes
             	$scope.selectedSeqType = []; // protein or DNA
             	$scope.selectedTaxa = []; // genome_type: features or contigs

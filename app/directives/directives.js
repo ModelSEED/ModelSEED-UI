@@ -1431,20 +1431,26 @@ function($compile, $stateParams) {
             // model: cell selection data
             scope.selectedCell = '';
 
-            scope.showMeta = function(ev, item) {
-                Dialogs.showMeta(ev, path(item.name))
+            scope.showGene = function(ev, item) {
+                Dialogs.showGene(ev, path(item.name))
             }
 
             scope.cellClick = function(ev, row_col, usr) {
-                //alert("Selected cell at " + row_col);
                 scope.selectedCell = row_col;
                 var can_id = 'can_' + row_col;
                 var cell_info = getRowColIds(can_id);
                 var gene_group_name = cell_info['gene_group'],
                     row_id = cell_info['row_id'],
                     col_id = cell_info['col_id'];
-                var sel_cand = document.getElementById(can_id);
-                alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][sel_cand.selectedIndex]));
+                scope.sel_cand = document.getElementById(can_id);
+
+                //alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][scope.sel_cand.selectedIndex]));
+
+                Dialogs.showGene(ev, scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex],
+                function(gene) {
+                    console.log('modified gene object: ', JSON.stringify(gene));
+                    scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex] = gene;
+                });
 
                 ev.stopPropagation();
                 ev.preventDefault();
