@@ -85,10 +85,9 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;
-                $s.editingEvdCodes = false;
                 $s.editingScore = false;
-                $s.updatingEvdCodes = false;
                 $s.updatingScore = false;
+                $s.validNumber = true;
                 // for scratch area to hold the user edits
                 $s.edit = {score: '', evidence_codes: ''};
                 //$s.validJSON = true;
@@ -101,38 +100,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $s.annotated_date = geneObj[$s.geneId]['annotated_date'] || '';
                 $s.is_annotated = $s.annotated_date ? true : false;
                 $s.mod_history = geneObj[$s.geneId]['mod_history'] || [];
-                $s.has_history = ($s.mod_history.length>0) ? true : false;
-
-                $s.editEvidenceCodes = function() {
-                    $s.editingEvdCodes = !$s.editingEvdCodes;
-                    $s.edit.evidence_codes = $s.evidence_codes || [];
-                }
-
-                $s.editScore = function() {
-                    $s.editingScore = !$s.editingScore;
-                    $s.edit.score = $s.score || '';
-                }
-
-                $s.updateEvdCodes = function(e_codes, comment="") {
-                    $s.updatingEvdCodes = true;
-                    var edit_gene = {};
-                    $s.annotated_date = new Date().toISOString().slice(0, 10);
-                    var ec_arr = e_codes.split('\n');
-                    for (var i=0; i<ec_arr.length; i++) {
-                        $s.mod_history.push({"evidence_code": ec_arr[i],
-                                    "user": Auth.user,
-                                    "annotated_date": $s.annotated_date,
-                                    "comment": comment});
-                    }
-                    edit_gene[$s.geneId] = {"evidence_codes": ec_arr,
-                                            "score": $s.score,
-                                            "annotated_date": $s.annotated_date,
-                                            "mod_history": $s.mod_history};
-                    cb(edit_gene);
-                    $s.evidence_codes = ec_arr;
-                    $s.updatingEvdCodes = false, $s.editingEvdCodes = false,
-                    $s.is_annotated = true, $s.has_history = true;
-                }
 
                 $s.addEvdCode = function(ec_id, cm_id) {
                     var ec = document.getElementById(ec_id),
@@ -166,8 +133,13 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                                             "annotated_date": $s.annotated_date,
                                             "mod_history": $s.mod_history};
                         cb(edit_gene);
-                        $s.is_annotated = true, $s.has_history = true;
+                        $s.is_annotated = true;
                     }
+                }
+
+                $s.editScore = function() {
+                    $s.editingScore = !$s.editingScore;
+                    $s.edit.score = $s.score || '';
                 }
 
                 $s.updateScore = function(s) {
@@ -180,20 +152,17 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     $s.updatingScore = false, $s.editingScore = false;
                 }
 
-                $s.tidyEvdCode = function(text) {
-                    //$s.edit.evidence_code = JSON.stringify(JSON.parse(text), null, 4)
-                    $s.edit.evidence_code = text.split('\n');
-                }
-
                 $s.tidyScore = function(text) {
                     $s.edit.score = JSON.stringify(JSON.parse(text), null, 4)
                 }
 
-                $s.validateJSON = function(text) {
-                    try {
-                        var meta = JSON.parse(text);
-                        $s.validJSON = true;
-                    } catch(err) { $s.validJSON = false }
+                $s.validateNumber = function(text) {
+                    // If text is Not a Number or less than 0 or greater than 1.0
+                    if (isNaN(text) || text < 0 || text > 1) {
+                        $s.validNumber = false;
+                    } else {
+                      $s.validNumber = true;
+                    }
                 }
 
                 $s.cancel = function(){
