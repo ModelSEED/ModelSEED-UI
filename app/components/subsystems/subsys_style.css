@@ -35,6 +35,11 @@ tbody td:first-child {
     font-weight: bold;
     background-color: rgb(9, 173, 202);
 }
+tbody td:hover {background-color:#ddd;}
+tbody th:first-child {
+    z-index: 2;
+}
+
 .stickyrow {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
@@ -45,9 +50,6 @@ tbody td:first-child {
     color: black;
     background-color: rgb(220, 228, 147);
 }
-tbody th:first-child {
-    z-index: 2;
-}
 .table-search {
     position: -webkit-sticky;
     position: sticky;
@@ -56,4 +58,32 @@ tbody th:first-child {
     left: -15px;
     color: #000;
     background: #ccc;
+}
+
+/*for styling the popup table*/
+.popup_table {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 60%;
+}
+.popup_table td:first-child {
+    background-color:#f2f2f2;
+    border: 1px solid black;
+}
+.popup_table td:first-child:hover {
+    background-color: #ddd;
+}
+.popup_table td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.popup_table tr:nth-child(even){background-color: #f2f2f2;}
+.popup_table tr:hover {background-color: #ddd;}
+.popup_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+    width: 60%;
 }

@@ -85,48 +85,82 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;
-                $s.editEvdCode = false;
-                $s.editScore = false;
-                $s.updatingGene = false;
-                $s.edit = {score: '', evidence_code: []};
-                $s.validJSON = true;
-                $s.gene = geneObj;
+                $s.editingEvdCodes = false;
+                $s.editingScore = false;
+                $s.updatingEvdCodes = false;
+                $s.updatingScore = false;
+                // for scratch area to hold the user edits
+                $s.edit = {score: '', evidence_codes: ''};
+                //$s.validJSON = true;
+                $s.gene = geneObj; // the selected dropdown item
                 $s.geneId = Object.keys(geneObj)[0];
                 $s.score = geneObj[$s.geneId]['score'] || '';
-                $s.evidence_code = geneObj[$s.geneId]['evidence_code'] || '[]';
+                var evd_codes = geneObj[$s.geneId]['evidence_codes'] ? geneObj[$s.geneId]['evidence_codes'] : [];
+                $s.evidence_codes = (evd_codes.length>0) ? evd_codes : [];
 
-                $s.editEvidenceCode = function() {
-                    $s.editEvdCode = !$s.editEvdCode;
-                    $s.edit.evidence_code = $s.evidence_code || '[]';
+                $s.annotated_date = geneObj[$s.geneId]['annotated_date'] || '';
+                $s.is_annotated = $s.annotated_date ? true : false;
+                $s.mod_history = geneObj[$s.geneId]['mod_history'] || [];
+                $s.has_history = ($s.mod_history.length>0) ? true : false;
+
+                $s.editEvidenceCodes = function() {
+                    $s.editingEvdCodes = !$s.editingEvdCodes;
+                    $s.edit.evidence_codes = $s.evidence_codes || [];
                 }
 
                 $s.editScore = function() {
-                    $s.editScore = !$s.editScore;
+                    $s.editingScore = !$s.editingScore;
+                    $s.edit.score = $s.score || '';
                 }
 
-                $s.updateEvdCode = function(e_code) {
-                    $s.updatingEvdCode = true;
-                    //$s.tidyEvdCode(e_code);
-                    // alert("updating gene content...");
-                    $s.edit.evidence_code = e_code;
+                $s.updateEvdCodes = function(e_codes, comment="") {
+                    $s.updatingEvdCodes = true;
                     var edit_gene = {};
-                    edit_gene[$s.geneId] = {};
-                    edit_gene[$s.geneId] = $s.edit;
+                    $s.annotated_date = new Date().toISOString().slice(0, 10);
+                    var ec_arr = e_codes.split('\n');
+                    for (var i=0; i<ec_arr.length; i++) {
+                        $s.mod_history.push({"evidence_code": ec_arr[i],
+                                    "user": Auth.user,
+                                    "annotated_date": $s.annotated_date,
+                                    "comment": comment});
+                    }
+                    edit_gene[$s.geneId] = {"evidence_codes": ec_arr,
+                                            "score": $s.score,
+                                            "annotated_date": $s.annotated_date,
+                                            "mod_history": $s.mod_history};
                     cb(edit_gene);
-                    $s.evidence_code = $s.edit.evidence_code;
-                    $s.updatingEvdCode = false, $s.editEvdCode = false; 
+                    $s.evidence_codes = ec_arr;
+                    $s.updatingEvdCodes = false, $s.editingEvdCodes = false,
+                    $s.is_annotated = true, $s.has_history = true;
+                }
+
+                $s.addEvdCode = function(ec_id, cm_id) {
+                    var ec = document.getElementById(ec_id),
+                        cm = document.getElementById(cm_id);
+                    var edit_gene = {};
+                    $s.annotated_date = new Date().toISOString().slice(0, 10);
+                    $s.mod_history.push({"evidence_code": ec.value,
+                                         "user": Auth.user,
+                                         "comment": cm.value,
+                                         "annotated_date": $s.annotated_date
+                                        });
+                    $s.evidence_codes.push(ec.value);
+                    edit_gene[$s.geneId] = {"evidence_codes": $s.evidence_codes,
+                                            "score": $s.score,
+                                            "annotated_date": $s.annotated_date,
+                                            "mod_history": $s.mod_history};
+                    cb(edit_gene);
+                    $s.is_annotated = true, $s.has_history = true;
                 }
 
                 $s.updateScore = function(s) {
                     $s.updatingScore = true;
-                    // update the dropdown Content
-                    alert("updating gene content...");
                     var edit_gene = {};
-                    edit_gene[$s.geneId]['score'] = s;
-                    cb(edit_gene).then(function() {
-                        $s.score = edit_gene[$s.geneId]['score'];
-                        $s.updatingScore = false, $s.editScore = false; 
-                    })
+                    edit_gene[$s.geneId]= {"evidence_code": $s.evidence_code.split('\n'),
+                                           "score": s};
+                    cb(edit_gene);
+                    $s.score = s;
+                    $s.updatingScore = false, $s.editingScore = false;
                 }
 
                 $s.tidyEvdCode = function(text) {

@@ -1,0 +1,121 @@
+<md-dialog flex="75">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>{{geneId}}</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-content layout-margin layout-padding>
+        <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+
+        <!--table class="table table-horizontal">
+            <thead></thead>
+            <tbody>
+                <tr><td>Name</td><td>{{meta[0]}}</td></tr>
+                <tr><td>Type</td><td>{{meta[1]}}</td></tr>
+                <tr><td>Path</td><td>{{meta[2] + meta[0]}}</td></tr>
+                <tr><td>Created</td><td>{{meta[3]}}</td></tr>
+                <tr><td>Created by</td><td>{{meta[5]}}</td></tr>
+                <tr><td>UUID (ID)</td><td>{{meta[4]}}</td></tr>
+                <tr><td>Global Permission</td><td>{{meta[10]}}</td></tr>
+                <tr><td>Your Permission</td><td>{{meta[9]}}</td></tr>
+            </tbody>
+        </table-->
+
+        <!--The score section-->
+        <section>
+            <span class="editable-header">Score</span>
+            <span ng-if="!updatingScore && !editingScore">
+                <a ng-click="editScore()" class="no-href">edit</a>
+            </span>
+            <span ng-if="!updatingScore && editingScore">
+                <a ng-click="editScore()" class="no-link">Cancel</a> &middot;
+                <a ng-click="updateScore(edit.score)" class="no-href">Update</a>
+            </span>
+            <span ng-if="updatingScore">Updating...</span>
+
+            <div ng-if="!editingScore">
+                <pre>{{score ? score : 'No score found'}}</pre>
+            </div>
+            <div ng-if="editingScore">
+                <textarea type="text"
+                        ng-model="edit.score"
+                        class="form-control editable-textarea"
+                        ng-change=""
+                        ng-init="edit.score=score">
+                </textarea>
+            </div>
+        </section>
+            
+        <!--The evidence_code section-->
+        <section>
+            <span class="editable-header">Evidence Codes</span>
+            <span ng-if="!updatingEvdCodes && !editingEvdCodes">
+                <a ng-click="editEvidenceCodes()" class="no-href" title="Enter one evidence code per line">
+                    edit
+                </a>
+            </span>
+            <span ng-if="!updatingEvdCodes && editingEvdCodes">
+                <a ng-click="editEvidenceCodes()" class="no-link">Cancel</a> &middot;
+                <a ng-click="updateEvdCodes(edit.evidence_codes, edit.comment)" class="no-href">Update</a>
+            </span>
+
+            <span ng-if="!updatingEvdCodes && !editingEvdCodes && is_annotated" class="pull-right">
+                <label>Annotated on: {{annotated_date}}</label>
+                <!--a class="pull-right no-href" ng-click="tidyEvdCode(edit.evidence_code)">tidy up</a-->
+            </span>
+            <span ng-if="updatingEvdCodes">Updating...</span>
+
+            <div ng-if="!editingEvdCodes">
+                <pre>{{evidence_codes.length>0 ? evidence_codes: 'No evidence code found'}}</pre>
+            </div>
+
+            <div ng-if="editingEvdCodes">
+                <textarea type="text"
+                        rows="{{edit.evidence_codes.split('\n').length}}"
+                        ng-model="edit.evidence_codes"
+                        class="form-control editable-textarea"
+                        ng-change=""
+                        ng-init="edit.evidence_codes=evidence_codes.join('\n')">
+                </textarea>
+            </div>
+            <div>
+                <span class="editable-header">New Evidence Code</span><br>
+                <input id="evc" type="text", placeholder='evidence code'></input>
+                <input id="cmt" type="text", placeholder='comment'></input>
+                <a ng-click="addEvdCode('evc', 'cmt')" class="no-href">Add</a>
+            </div>
+        </section>
+        <br>
+
+        <!--The annotation history section-->
+        <!--section ng-if="has_history"-->
+        <section>
+            <span class="editable-header">Annotation history</span>
+            <table class="popup_table">
+                <tr>
+                    <th>evidence_code</th><th>comment</th><th>user</th><th>annotated_date</th>
+                </tr>
+                <tr ng-repeat="mh in mod_history">
+                    <td>{{mh.evidence_code}}</td>
+                    <td>{{mh.comment}}</td>
+                    <td>{{mh.user}}</td>
+                    <td>{{mh.annotated_date}}</td>
+                </tr>
+            </table>
+            <br>
+        </section>
+            
+    </md-content>
+
+    <div class="md-actions">
+        <md-button ng-click="cancel()">
+            Close
+        </md-button>
+    </div>
+</md-dialog>
