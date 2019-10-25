@@ -64,7 +64,7 @@ tbody th:first-child {
 .popup_table {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
-    width: 60%;
+    width: 80%;
 }
 .popup_table td:first-child {
     background-color:#f2f2f2;
@@ -85,5 +85,5 @@ tbody th:first-child {
     text-align: left;
     background-color: #4CAF50;
     color: white;
-    width: 60%;
+    width: 80%;
 }

@@ -138,19 +138,36 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     var ec = document.getElementById(ec_id),
                         cm = document.getElementById(cm_id);
                     var edit_gene = {};
+                    var ansr1 = false, ansr2 = false;
                     $s.annotated_date = new Date().toISOString().slice(0, 10);
-                    $s.mod_history.push({"evidence_code": ec.value,
-                                         "user": Auth.user,
-                                         "comment": cm.value,
-                                         "annotated_date": $s.annotated_date
-                                        });
-                    $s.evidence_codes.push(ec.value);
-                    edit_gene[$s.geneId] = {"evidence_codes": $s.evidence_codes,
+                    var new_ec_hist = {
+                        "evidence_code": ec.value,
+                        "user": Auth.user,
+                        "comment": cm.value,
+                        "annotated_date": $s.annotated_date
+                    };
+                    for (var i=0; i<$s.mod_history.length; i++) {
+                        if ($s.mod_history[i]['evidence_code']===new_ec_hist['evidence_code']
+                            && $s.mod_history[i]['comment']===new_ec_hist['comment']
+                            && $s.mod_history[i]['annotated_date']===new_ec_hist['annotated_date']
+                            && $s.mod_history[i]['user']===new_ec_hist['user']) {
+                            ansr1 = true;
+                            break;
+                        }
+                    }
+                    if (!$s.evidence_codes.includes(ec.value)) {
+                        ansr2 = true;
+                        $s.evidence_codes.push(ec.value);
+                    }
+                    if (!ansr1 || ansr2) {
+                        $s.mod_history.push(new_ec_hist);
+                        edit_gene[$s.geneId] = {"evidence_codes": $s.evidence_codes,
                                             "score": $s.score,
                                             "annotated_date": $s.annotated_date,
                                             "mod_history": $s.mod_history};
-                    cb(edit_gene);
-                    $s.is_annotated = true, $s.has_history = true;
+                        cb(edit_gene);
+                        $s.is_annotated = true, $s.has_history = true;
+                    }
                 }
 
                 $s.updateScore = function(s) {
@@ -182,6 +199,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $s.cancel = function(){
                     $dialog.hide();
                 }
+
             }]
         })
     }

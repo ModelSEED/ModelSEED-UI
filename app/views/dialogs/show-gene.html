@@ -1,4 +1,4 @@
-<md-dialog flex="75">
+<md-dialog flex="55">
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
@@ -12,20 +12,6 @@
 
     <md-content layout-margin layout-padding>
         <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
-
-        <!--table class="table table-horizontal">
-            <thead></thead>
-            <tbody>
-                <tr><td>Name</td><td>{{meta[0]}}</td></tr>
-                <tr><td>Type</td><td>{{meta[1]}}</td></tr>
-                <tr><td>Path</td><td>{{meta[2] + meta[0]}}</td></tr>
-                <tr><td>Created</td><td>{{meta[3]}}</td></tr>
-                <tr><td>Created by</td><td>{{meta[5]}}</td></tr>
-                <tr><td>UUID (ID)</td><td>{{meta[4]}}</td></tr>
-                <tr><td>Global Permission</td><td>{{meta[10]}}</td></tr>
-                <tr><td>Your Permission</td><td>{{meta[9]}}</td></tr>
-            </tbody>
-        </table-->
 
         <!--The score section-->
         <section>
@@ -55,7 +41,7 @@
         <!--The evidence_code section-->
         <section>
             <span class="editable-header">Evidence Codes</span>
-            <span ng-if="!updatingEvdCodes && !editingEvdCodes">
+            <!--span ng-if="!updatingEvdCodes && !editingEvdCodes">
                 <a ng-click="editEvidenceCodes()" class="no-href" title="Enter one evidence code per line">
                     edit
                 </a>
@@ -63,19 +49,19 @@
             <span ng-if="!updatingEvdCodes && editingEvdCodes">
                 <a ng-click="editEvidenceCodes()" class="no-link">Cancel</a> &middot;
                 <a ng-click="updateEvdCodes(edit.evidence_codes, edit.comment)" class="no-href">Update</a>
-            </span>
+            </span-->
 
             <span ng-if="!updatingEvdCodes && !editingEvdCodes && is_annotated" class="pull-right">
-                <label>Annotated on: {{annotated_date}}</label>
+                <label>Last annotated on: {{annotated_date}}</label>
                 <!--a class="pull-right no-href" ng-click="tidyEvdCode(edit.evidence_code)">tidy up</a-->
             </span>
-            <span ng-if="updatingEvdCodes">Updating...</span>
+            <!--span ng-if="updatingEvdCodes">Updating...</span-->
 
             <div ng-if="!editingEvdCodes">
                 <pre>{{evidence_codes.length>0 ? evidence_codes: 'No evidence code found'}}</pre>
             </div>
 
-            <div ng-if="editingEvdCodes">
+            <!--div ng-if="editingEvdCodes">
                 <textarea type="text"
                         rows="{{edit.evidence_codes.split('\n').length}}"
                         ng-model="edit.evidence_codes"
@@ -83,7 +69,7 @@
                         ng-change=""
                         ng-init="edit.evidence_codes=evidence_codes.join('\n')">
                 </textarea>
-            </div>
+            </div-->
             <div>
                 <span class="editable-header">New Evidence Code</span><br>
                 <input id="evc" type="text", placeholder='evidence code'></input>
