@@ -4,13 +4,18 @@
     <div class="table-controls table-editor-controls table-search">
         <div layout="row">
             <md-input-container layout="row" layout-align="start center" flex>
-                <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress">
+                <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress"
+                    title="Overwrite the original data file">
                     {{saveInProgress ? saveInProgressText : 'Save'}}
                 </md-button>
-                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveAsInProgress">
+                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveAsInProgress"
+                    title="Save to a new file">
                     {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
                 </md-button>
                 <!--a ng-click="cancel($event)" class="no-link">Cancel</a-->
+                <span ng-if="dataModified && !dataSaved" class="pull-right color-error">
+                    Note: Data has been modified but not saved yet.
+                </span>
             </md-input-container>
         </div>
 

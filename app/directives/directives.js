@@ -1430,12 +1430,14 @@ function($compile, $stateParams) {
 
             // model: cell selection data
             scope.selectedCell = '';
+            scope.dataModified = false;
+            scope.dataSaved = true;
 
             scope.showGene = function(ev, item) {
                 Dialogs.showGene(ev, path(item.name))
             }
 
-            scope.cellClick = function(ev, row_col, usr) {
+            scope.cellDblClick = function(ev, row_col, usr) {
                 scope.selectedCell = row_col;
                 var can_id = 'can_' + row_col;
                 var cell_info = getRowColIds(can_id);
@@ -1450,6 +1452,8 @@ function($compile, $stateParams) {
                 function(gene) {
                     console.log('modified gene object: ', JSON.stringify(gene));
                     scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex] = gene;
+                    scope.dataModified = true;
+                    scope.dataSaved = false;
                 });
 
                 ev.stopPropagation();
@@ -1536,6 +1540,7 @@ function($compile, $stateParams) {
                 scope.onSave(Object.values(scope.dataClone))
                         .then(function(res) {
                             scope.saveInProgress = false;
+                            scope.dataSaved = true;
                         })
             }
 
@@ -1548,6 +1553,7 @@ function($compile, $stateParams) {
                         scope.onSaveAs(Object.values(scope.dataClone), newName)
                                 .then(function() {
                                     scope.saveAsInProgres = false;
+                                    scope.dataSaved = true;
                                 });
                     },
                     function() {

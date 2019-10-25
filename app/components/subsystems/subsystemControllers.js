@@ -219,7 +219,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         btn11_str += '<md-tooltip>Remove from Curations</md-tooltip>=></md-button></div>';
         gene_id_str += btn10_str + btn11_str;
 
-        cank_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes ng-dblclick="cellClick($event, \''+row_col+'\', \'\')">';
+        cank_str = '<div>Candidates:<br><select id="can_'+row_col+'" style="width:130px;" multiple=yes ng-dblclick="cellDblClick($event, \''+row_col+'\', \'\')">';
         for (var j = 0; j < cank_arr.length; j++) {
             cank_str += '<option value="';
             cank_str += canv_arr[j]["score"] + '"';

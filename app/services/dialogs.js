@@ -152,10 +152,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     $s.updatingScore = false, $s.editingScore = false;
                 }
 
-                $s.tidyScore = function(text) {
-                    $s.edit.score = JSON.stringify(JSON.parse(text), null, 4)
-                }
-
                 $s.validateNumber = function(text) {
                     // If text is Not a Number or less than 0 or greater than 1.0
                     if (isNaN(text) || text < 0 || text > 1) {
