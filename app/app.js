@@ -193,14 +193,20 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
         })
 
-        /* For display of a subsystem*/
+        /* For subsystems*/
+        .state('app.mySubsystems', {
+            url: "/mySubsystems/?tab",
+            templateUrl: 'app/components/subsystems/my-subsystems.html',
+            controller: 'MySubsystems',
+            authenticate: true
+        })
         .state('app.subsystem', {
             url: "/subsystem{path:nonURIEncoded}",
             templateUrl: 'app/components/subsystems/subsystem.html',
             controller: 'Subsystem',
             authenticate: true
         })
-        /* End of display of a subsystem*/
+        /* End of subsystems*/
 
         /* For display of generic data in a spreadsheet*/
         .state('app.spreadsheet', {
@@ -219,15 +225,6 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
 
 
-
-        /*    
-        }).state('app.genomes', {
-            url: "/genomes/",
-            templateUrl: 'app/views/genomes/genomes.html',
-            controller: 'Genomes',
-            authenticate: true
-        */    
-            
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
@@ -235,7 +232,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
             
             
-            }).state('app.myMedia', {
+        }).state('app.myMedia', {
             url: "/myMedia/?tab",
             templateUrl: 'app/views/my-media.html',
             controller: 'MyMedia',

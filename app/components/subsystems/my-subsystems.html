@@ -12,37 +12,38 @@
         </a>
     </li>
     <li ng-class="{ active: $state.includes('app.mySubsystems') }" id="tour-1">
-            <a ui-sref="app.mySubsystems"> 
+            <a ui-sref="app.mySubsystems">    
                 <span hide-sm>My Subsystems</span>
             </a>
-    </li>
+    </li>    
     
 </ul>
 </div>
 
 <div layout="row">
-    <div class="content-header" flex>My Media<br>
-        <small class="help-text" hide-sm>Click on a media row to view...</small>
+    <div class="content-header" flex>My Subsystems<br>
+        <small class="help-text" hide-sm>Click on a subsystem row to view...</small>
     </div>
 </div>
 
-<!-- From original \views\media.html: -->
-<ng-table-selector table-header="myMediaHeader"
-    table-data="myMedia"
-    table-opts="myMediaOpts"
-    table-loading="loadingMyMedia"
-    on-submit="deleteMedia"
-    submit-btn-template="Delete $count media"
+<!-- passing the subsystems data to the ngTableSelector directive -->
+<ng-table-selector table-header="mySubsysHeader"
+    table-data="mySubsystems"
+    table-opts="mySubsysOpts"
+    table-loading="loadingMySubsystems"
+    on-submit="deleteSubsystem"
+    submit-btn-template="Delete $count subsystem(s)"
     submit-btn-type="remove"
     submit-btn-class="md-warn md-raised"
     submit-progress-text="Deleting..."
-    on-default="newMedia"
-    default-btn-template="Create New media"
+    on-default="newSubsystem"
+    default-btn-template="Create new subsystem"
     default-btn-type="add"
     default-btn-class="md-primary md-raised"
-    table-placeholder="Search my media">
+    table-placeholder="Search my subsystems">
 </ng-table-selector>
-<!-- end from original... -->
+<!-- end passing ... -->
+
 
 <hr class="no-margin">
 

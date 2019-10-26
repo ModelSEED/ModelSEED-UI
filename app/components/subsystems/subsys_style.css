@@ -70,9 +70,10 @@ tbody th:first-child {
     background-color:#f2f2f2;
     border: 1px solid black;
 }
+/*
 .popup_table td:first-child:hover {
     background-color: #ddd;
-}
+}*/
 .popup_table td, th {
     border: 1px solid #ddd;
     padding: 8px;

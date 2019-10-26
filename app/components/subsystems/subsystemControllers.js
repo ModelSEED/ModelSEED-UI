@@ -1,6 +1,93 @@
 
 // Begin add-subsystem controller
 angular.module('Subsystems', ['uiTools'])
+.controller('MySubsystems',
+['$scope', '$stateParams', 'WS', 'MS', 'Auth',
+ 'Session', 'uiTools', 'Dialogs', '$state',
+function($s, $sParams, WS, MS, Auth,
+         Session, uiTools, Dialogs, $state) {
+
+    $s.tabs = {tabIndex: Session.getTab($state)};
+    $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
+
+    $s.mySubsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'timestamp', desc: true}};
+
+    $s.mySubsysHeader = [
+        {label: 'Subsystem name', key: 'subsysName',
+         link: {
+            state: 'app.subsystem',
+            getOpts: function(row) {
+                return {path: row.path};
+            }
+         }
+        },
+        {label: 'Modification Date', key: 'timestamp',
+            formatter: function(row) {
+                return uiTools.relativeTime(row.timestamp);
+            }
+        }
+    ];
+
+    $s.loadingMySubsystems = true;
+
+    MS.listMySubsystems()
+      .then(function(subsys) {
+          $s.mySubsystems = subsys;
+          $s.loadingMySubsystems = false;
+      }).catch(function(e) {
+          $s.loadingMySubsystems = false;
+          $s.mySubsystems = [];
+      })
+
+    // copy subsystem to my subsystem
+    $s.submit = function(items, cb) {
+        copySubsystem(items).then(cb)
+    }
+
+    // delete a subsystem
+    $s.deleteSubsystem = function(items, cb) {
+        var paths = [];
+        items.forEach(function(item) {
+            paths.push(item.path)
+        })
+
+        WS.deleteObj(paths)
+          .then(cb)
+          .then(function() {
+                Dialogs.showComplete('Deleted '+paths.length+' subsystem'+
+                                     (paths.length>1 ? 's' : ''))
+          })
+    }
+
+    // direct user to the new subsystem page
+    $s.newSubsystem = function() {
+        $state.go('app.subsystem', {path: '/'+Auth.user+'/subsystems/new-subsystem'})
+    }
+
+    function copySubsystem(items) {
+        var paths = [];
+        items.forEach(function(item) { paths.push(item.path); })
+
+        var destination = '/'+Auth.user+'/subsystems';
+        return WS.createFolder(destination)
+            .then(function(res) {
+                WS.copyList(paths, destination)
+                  .then(function(res) {
+                    $s.mySubsystem = mergeObjects($s.mySubsystem, WS.sanitizeSubsystemObjs(res), 'path');
+                    Dialogs.showComplete('Copied '+res.length+' subsystem'+
+                                            (paths.length>1 ? 's' : ''))
+                    $s.tabs.tabIndex = 2; // 'My Subsystem'
+                }).catch(function(e) {
+                    if (e.error.code === -32603)
+                        Dialogs.error("Oh no!", "Can't overwrite your existing subsystem names."+
+                                      "Please consider renaming or deleting.")
+                })
+            })
+    }
+
+}])
+
+
 .controller('Subsystem',
 ['$scope', '$state', 'WS', '$stateParams',
  'uiTools', 'Dialogs', '$http', 'Auth',
@@ -16,6 +103,11 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         console.log('Please specify the correct user name and path to the subsystem.');
         return false;
     }
+
+    // determine if user can copy this media to their workspace
+    if (wsPath.split('/')[1] !== Auth.user) $s.canCopy = true;
+
+    $s.subsysName = wsPath.split('/').pop();
 
     var captions = [];
 

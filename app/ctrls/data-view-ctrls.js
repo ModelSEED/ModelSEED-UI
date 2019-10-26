@@ -799,7 +799,7 @@ function($s, $state, $sParams, WS, MS, tools,
     // determine if user can copy this media to their workspace
     if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
 
-    $s.name = path.split('/').pop()
+    $s.name = path.split('/').pop();
 
     $s.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
     $s.mediaHeader = [
