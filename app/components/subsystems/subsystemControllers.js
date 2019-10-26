@@ -107,15 +107,15 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
     // determine if user can copy this media to their workspace
     if (wsPath.split('/')[1] !== Auth.user) $s.canCopy = true;
 
-    $s.subsysName = wsPath.split('/').pop();
-
+    var subsysFileName = wsPath.split('/').pop();
     var captions = [];
 
     $s.loading = true;
-    if (WS.cached.subsystems) {
+    if (WS.cached.subsystems && WS.cached.subsysName===subsysFileName) {
         $s.subsysData = WS.cached.subsystems;
         $s.subsysDataClone = WS.cached.subsystemsClone;
         $s.subsysHeader = WS.cached.subsysHeader;
+        $s.subsysName = WS.cached.subsysName;
         $s.loading = false;
     } else {
         WS.get(wsPath)
@@ -131,6 +131,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             $s.subsysData = parseSubsysData(res.data.data);
             $s.subsysData = buildHtmlContent($s.subsysData);
             WS.cached.subsystems = $s.subsysData;
+            WS.cached.subsysName = $s.subsysName;
 
             // table header
             captions = res.data.data[0];
