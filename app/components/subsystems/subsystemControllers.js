@@ -46,6 +46,8 @@ function($s, $sParams, WS, MS, Auth,
 
     // delete a subsystem
     $s.deleteSubsystem = function(items, cb) {
+        alert("The deletion feature is to be implemented...");
+        /*
         var paths = [];
         items.forEach(function(item) {
             paths.push(item.path)
@@ -57,11 +59,13 @@ function($s, $sParams, WS, MS, Auth,
                 Dialogs.showComplete('Deleted '+paths.length+' subsystem'+
                                      (paths.length>1 ? 's' : ''))
           })
+          */
     }
 
     // direct user to the new subsystem page
     $s.newSubsystem = function() {
-        $state.go('app.subsystem', {path: '/'+Auth.user+'/subsystems/new-subsystem'})
+        alert("The createNew feature is to be implemented...");
+        // $state.go('app.subsystem', {path: '/'+Auth.user+'/subsystems/new-subsystem'})
     }
 
     function copySubsystem(items) {
@@ -164,7 +168,9 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
 
     $s.saveAs = function(data, newName) {
         var folder = '/'+Auth.user+'/subsystems/';
-        data = {"name": $s.subsysName, "data": data};
+        // Rename not only the subsystem file, but also the subsystem name to newName
+        // (not $s.subsysName any more)
+        data = {"name": newName, "data": data};
         return WS.save(folder+newName, data, {userMeta: {}, overwrite: true, type: 'unspecified'})
             .then(function(res) {
                 Dialogs.showComplete('Saved subsystem data to ', newName);
