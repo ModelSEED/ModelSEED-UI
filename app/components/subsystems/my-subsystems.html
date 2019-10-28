@@ -27,13 +27,27 @@
 </div>
 
 <!-- passing the subsystems data to the ngTableSelector directive -->
-<ng-table-selector table-header="mySubsysHeader"
+<!--ng-table-selector table-header="mySubsysHeader"
     table-data="mySubsystems"
     table-opts="mySubsysOpts"
     table-loading="loadingMySubsystems"
     on-submit="deleteSubsystem"
     submit-btn-template="Delete $count subsystem(s)"
     submit-btn-type="remove"
+    submit-btn-class="md-warn md-raised"
+    submit-progress-text="Deleting..."
+    on-default="newSubsystem"
+    default-btn-template="Create new subsystem"
+    default-btn-type="add"
+    default-btn-class="md-primary md-raised"
+    table-placeholder="Search my subsystems">
+</ng-table-selector-->
+<!-- passing the subsystems data to the ngTableSelector directive -->
+<ng-table-selector table-header="mySubsysHeader"
+    table-data="mySubsystems"
+    table-opts="mySubsysOpts"
+    table-loading="loadingMySubsystems"
+    submit-btn-template="Delete $count subsystem(s)"
     submit-btn-class="md-warn md-raised"
     submit-progress-text="Deleting..."
     on-default="newSubsystem"
