@@ -267,9 +267,15 @@ function($scope, $state, Patric, $timeout, $http, Upload, $dialog,
                       $scope.loading = false;
                   })
               })
+        $scope.loading = true;
+        MS.listRastGenomes()
+            .then(function(data) {
+                $scope.rastMicrobes = data;
+                $timeout(function() {
+                    $scope.loading = false;
+                })
+            })
     }
-    
-    
     
 
     // MODELSEED-47: load Patric Genomes for user to select for modeling
@@ -793,7 +799,7 @@ function($s, $state, $sParams, WS, MS, tools,
     // determine if user can copy this media to their workspace
     if (path.split('/')[1] !== Auth.user) $s.canCopy = true;
 
-    $s.name = path.split('/').pop()
+    $s.name = path.split('/').pop();
 
     $s.mediaOpts = {query: '', offset: 0, sort: {field: 'id'}};
     $s.mediaHeader = [
@@ -806,7 +812,7 @@ function($s, $state, $sParams, WS, MS, tools,
 
     $s.toggleEdit = function() {
         $s.editInProgress = !$s.editInProgress;
-        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field,  $s.mediaOpts.sort.desc  );
+        $s.editableData = $filter('orderBy')($s.media, $s.mediaOpts.sort.field, $s.mediaOpts.sort.desc);
     }
 
     if ($s.name === 'new-media') {

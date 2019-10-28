@@ -1,0 +1,26 @@
+<div layout="row">
+    <div class="content-header">Subsystem <b><small>{{subsysName}}</small></b>
+        <div class="h5">
+            <i class="icon-folder-open-o"></i>
+            <a ui-sref="app.mySubsystems({tab: 'mine'})"> >My Subsystems</a>
+        </div>
+    </div>
+	<div ng-if="isMine" class="h5">
+		<a ui-sref="app.mySubsystems({tab: 'mine'})">My Subsystem</a> / {{subsysName}}
+		<small class="text-muted">{{editInProgress ? '(Editing)' : ''}}</small>
+	</div>
+</div>
+
+<hr class="no-margin">
+
+<!-- passing the subsystem data to the ngTableSubsystem directive -->
+<ng-table-subsystem table-header="subsysHeader"
+    table-data="subsysData"
+    table-data-clone="subsysDataClone"
+    table-opts="subsysOpts"
+    table-loading="loading"
+    on-save="save"
+    on-save-as="saveAs"
+    table-placeholder="Search subsystems">
+</ng-table-subsystem>
+<!-- end passing ... -->

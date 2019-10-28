@@ -149,7 +149,7 @@ function($http, $q, config, $log) {
                 var f = [];
                 for (var field in queryColumn) {
                     queryColumn[field] = queryColumn[field].replace(/\'/g, "\'"); // reserve primes (')
-                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+\.\-)/g, ""); // get rid of these symbols with blanks
+                    queryColumn[field] = queryColumn[field].replace(/(;|,|\:|\"|\+|\.|\-)/g, ""); // get rid of these symbols with blanks
                     if (field == 'synonyms')
                         f.push('aliases'+':(*'+queryColumn[field]+'*)');
                     else
@@ -205,7 +205,7 @@ function($http, $q, config, $log) {
             geneReq = liveReq;
 
         console.log("Solr query:", url);
-        console.log('caching?', cache)
+        console.log('caching?', cache);
         return $http.get(url, {cache: cache, timeout: liveReq.promise})
                     .then(function(res) {
                         rxnReq = false, cpdReq = false; geneReq = false;

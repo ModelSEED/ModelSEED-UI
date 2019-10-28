@@ -423,6 +423,36 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
         })
     }
 
+    this.mySubsystems = null; //cached subsystem data
+    this.listMySubsystems = function() {
+        if (self.mySubsystems != null) {
+            var d = $q.defer();
+            d.resolve(self.mySubsystems)
+            return d.promise;
+        }
+
+        var path = '/'+Auth.user+'/subsystems';
+        return WS.listL(path)
+            .then(function(objs) {
+                if (!objs) return [];
+                var subsys = [];
+                for (var i=0; i<objs.length; i++) {
+                    var obj = objs[i];
+                    subsys.push(self.sanitizeSubsystem(obj));
+                }
+
+                self.mySubsystems = subsys;
+                return subsys;
+            })
+    }
+
+    this.sanitizeSubsystem = function(obj) {
+        return {subsysName: obj[0],
+                path: obj[2]+obj[0],
+                type: obj[7].type ? obj[7].type : 'unspecified',
+                timestamp: Date.parse(obj[3]),
+                value: obj[0].toLowerCase() }
+    }
     // if new object already exists in cache,
     // delete old, replace with new
     function syncCache(data, model) {

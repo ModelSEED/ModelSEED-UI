@@ -1398,8 +1398,298 @@ function($compile, $stateParams) {
             var ele = angular.element(elem);
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
+        }
+    }
+}])
 
+.directive('ngTableSubsystem',
+            ['$sce', '$compile', 'Dialogs', function($sce, $compile, Dialogs) {
+    return {
+        restrict: 'EA',
+        scope: {
+            header: '=tableHeader',
+            data: '=tableData',
+            dataClone: '=tableDataClone',
+            opts: '=tableOpts',
+            loading: '=tableLoading',
+            cellClick: '=tableCellClick',
+            hoverClass: '@tableRowHoverClass',
+            placeholder: '@tablePlaceholder',
+            resultText: '@tableResultText',
+            onSave: '=onSave',
+            onSaveAs: '=onSaveAs',
+            saveInProgressText: '@saveInProgressText',
+            onCancel: '&onCancel'
+        },
+        templateUrl: 'app/components/subsystems/table-subsys.html',
+        link: function(scope, elem, attrs) {
+            var ele = angular.element(elem);
+            scope.htmlPath = 'app/components/subsystems/';
 
+            scope.noPagination = ('disablePagination' in attrs) ? true: false;
+
+            // model: cell selection data
+            scope.selectedCell = '';
+            scope.dataModified = false;
+            scope.dataSaved = true;
+
+            scope.showGene = function(ev, item) {
+                Dialogs.showGene(ev, path(item.name))
+            }
+
+            scope.cellDblClick = function(ev, row_col, usr) {
+                scope.selectedCell = row_col;
+                var can_id = 'can_' + row_col;
+                var cell_info = getRowColIds(can_id);
+                var gene_group_name = cell_info['gene_group'],
+                    row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'];
+                scope.sel_cand = document.getElementById(can_id);
+
+                //alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][scope.sel_cand.selectedIndex]));
+
+                Dialogs.showGene(ev, scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex],
+                function(gene) {
+                    console.log('modified gene object: ', JSON.stringify(gene));
+                    scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex] = gene;
+                    scope.dataModified = true;
+                    scope.dataSaved = false;
+                });
+
+                ev.stopPropagation();
+                ev.preventDefault();
+            }
+
+            scope.addSelected = function(ev, cand, dest, usr) {
+                // add selected items in candidates to the destination DOM object dest if the item--
+                // 1) is not in the dest AND 2) is not in the third select (dropdown box)
+                var cell_info = getRowColIds(cand);
+                var row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'],
+                    cur_id = 'cur_row'+row_id.toString()+'_col'+col_id.toString(),
+                    pre_id = 'pre_row'+row_id.toString()+'_col'+col_id.toString(),
+                    third_id = '';
+
+                if (cur_id == dest) third_id = pre_id;
+                else third_id = cur_id;
+
+                var sel_cand = document.getElementById(cand),
+                    sel_dest = document.getElementById(dest),
+                    sel_3rd = document.getElementById(third_id);
+
+                for (var i = 0; i < sel_cand.options.length; i++) {
+                    if (sel_cand.options[i].selected) {
+                        var sel_val = sel_cand.options[i].value,
+                            sel_text = sel_cand.options[i].text;
+                        var in_dest = false, in_3rd = false;
+                        for (var j1 = 0; j1 < sel_dest.length; j1++) {
+                            if (sel_dest.options[j1].text == sel_text) {
+                                in_dest = true;
+                                break;
+                            }
+                        }
+                        for (var j2 = 0; j2 < sel_3rd.length; j2++) {
+                            if (sel_3rd.options[j2].text == sel_text) {
+                                in_3rd = true;
+                                break;
+                            }
+                        }
+                        if (!in_dest && !in_3rd) {
+                            // create a new option element
+                            var opt = document.createElement('option');
+                            // create text node to add to option element (opt)
+                            opt.appendChild( document.createTextNode(sel_text) );
+                            // set value property of opt
+                            opt.value = sel_val;
+                            // add opt to end of select box (sel)
+                            sel_dest.appendChild(opt);
+                        }
+                    }
+                }
+                updateCloneData(dest);
+                sortOptions(sel_dest);
+                updateOptionColor(cand);
+            }
+
+            scope.removeSelected = function(ev, src, cand, usr) {
+                var sel_src = document.getElementById(src);
+
+                // 1) Remember selected items.
+                var is_selected = [];
+                for (var i = 0; i < sel_src.options.length; ++i) {
+                    is_selected[i] = sel_src.options[i].selected;
+                }
+
+                // 2) Remove selected items.
+                var len = sel_src.options.length;
+                while (len--) {
+                    if (is_selected[len]) {
+                        sel_src.removeChild(sel_src.options[len]);
+                    }
+                }
+                updateCloneData(src);
+                sortOptions(sel_src);
+                updateOptionColor(cand);
+            }
+
+            scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
+            scope.saveInProgress = false;
+            scope.save = function($ev) {
+                scope.saveInProgress = true;
+
+                scope.onSave(Object.values(scope.dataClone))
+                        .then(function(res) {
+                            scope.saveInProgress = false;
+                            scope.dataSaved = true;
+                        })
+            }
+
+            scope.saveAs = function($ev) {
+                scope.saveAsInProgress = true;
+
+                // show save as dialog, with save/cancel callbacks
+                Dialogs.saveAs($ev,
+                    function(newName){
+                        scope.onSaveAs(Object.values(scope.dataClone), newName)
+                                .then(function() {
+                                    scope.saveAsInProgres = false;
+                                    scope.dataSaved = true;
+                                });
+                    },
+                    function() {
+
+                });
+            }
+
+            scope.cancel = function($event) {
+                $event.preventDefault();
+                scope.onCancel();
+            }
+
+            // listen for operations, add to operation stack
+            scope.$on('Events.commandOperation', function(e, operation) {
+                scope.operations.push({op: operation.op, items: operation.items})
+            })
+
+            function updateCloneData(sel_id) {
+                /*
+                 Save the data in dropdown list with id of sel_id into the corresponding
+                 json document sections of the dataClone.
+                 */
+                var cell_info = getRowColIds(sel_id);
+                var gene_group_name = cell_info['gene_group'],
+                    row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'];
+
+                var sel_opts = document.getElementById(sel_id).options;
+                var sel_data = []; //arrays of objects
+                for (var i=0; i<sel_opts.length; i++) {
+                    var sel = {};
+                    sel[sel_opts[i].text] = {"score": sel_opts[i].value};
+                    sel_data.push(sel);
+                }
+                scope.dataClone[row_id+1][col_id][gene_group_name] = sel_data;
+            }
+
+            function getRowColIds(sel_id) {
+                /*
+                sel_id: in the form of, e.g., 'cur_row12_col3'
+                return: {'name': 'cur', 'row_id': 12, 'col_id': 3}
+                */
+                // parts = ['curation', 'row12', 'col3']
+                var parts = sel_id.split('_');
+                var gene_grp = '';
+                switch(parts[0]) {
+                    case "cur":
+                        gene_grp = 'curation';
+                        break;
+                    case "pre":
+                        gene_grp = 'prediction';
+                        break;
+                    case "cand":
+                        gene_grp = 'candidates';
+                        break;
+                    default:
+                        // do nothing
+                        break;
+                }
+                return {"gene_group": gene_grp,
+                        "row_id": Number(parts[1].substring(3,)),
+                        "col_id": Number(parts[2].substring(3,))};
+            }
+
+            function sortOptions(sel) {
+                // Sort (ascending) the select options by their text values.
+                var options = sel.options;
+                var optionsArray = [], optionVals = [], optionTexts = [], optionsArray1 = [];
+                for (var i = 0; i < options.length; i++) {
+                    optionsArray.push(options[i]);
+                    optionVals.push(options[i].value);
+                    optionTexts.push(options[i].text);
+                }
+                optionTexts = optionTexts.sort();
+                for (var j = 0; j < optionTexts.length; j++) {
+                    for (var k = 0; k < optionsArray.length; k++) {
+                        if (optionTexts[j] == optionsArray[k].text) {
+                            optionsArray1[j] = optionsArray[k];
+                            break;
+                        }
+                    }
+                }
+                for (var l = 0; l <= options.length; l++) {
+                    options[l] = optionsArray1[l];
+                }
+                sel.options = options;
+            }
+
+            function updateOptionColor(cand_id) {
+                // update the option items' color according to their match with items in
+                // either the curation or the prediction lists: the item will be colored red when
+                // it is absent in BOTH the curation list AND the prediction list
+                var cell_info = getRowColIds(cand_id);
+                var row_id = cell_info['row_id'],
+                    col_id = cell_info['col_id'],
+                    cur_id = 'cur_row'+row_id.toString()+'_col'+col_id.toString(),
+                    pre_id = 'pre_row'+row_id.toString()+'_col'+col_id.toString();
+
+                var  cur_opts= document.getElementById(cur_id).options,
+                     cand_opts = document.getElementById(cand_id).options,
+                     pre_opts = document.getElementById(pre_id).options;
+
+                if (cand_opts.length == 0) return;
+
+                var cur_optTexts = [], cand_optTexts = [], pre_optTexts = [];
+
+                for (var k = 0; k < cand_opts.length; k++) cand_optTexts.push(cand_opts[k].text);
+
+                if (cur_opts == 0 && pre_opts == 0) {
+                    for (var k1 = 0; k1<cand_opts.length; k1++) {
+                        cand_opts[k1].setAttribute("style", "color: red;");
+                        cand_opts[k1].selected = false;
+                    }
+                }
+                else {
+                    if(cur_opts.length > 0) {
+                        for (var j1 = 0; j1 < cur_opts.length; j1++) {
+                            cur_optTexts.push(cur_opts[j1].text);
+                        }
+                    }
+                    if(pre_opts.length > 0) {
+                        for (var j2 = 0; j2 < pre_opts.length; j2++) {
+                            pre_optTexts.push(pre_opts[j2].text);
+                        }
+                    }
+                    for (var i = 0; i < cand_optTexts.length; i++) {
+                        if (!cur_optTexts.includes(cand_optTexts[i]) && !pre_optTexts.includes(cand_optTexts[i])) {
+                            cand_opts[i].setAttribute("style", "color: red;");
+                        }
+                        else {
+                            cand_opts[i].setAttribute("style", "color: black;");
+                        }
+                        cand_opts[i].selected = false;
+                    }
+                }
+            }
         }
     }
 }])
@@ -1453,17 +1743,26 @@ function(Dialogs, $dialog) {
             placeholder: '@tablePlaceholder',
             stylingOpts: '=opts',
             enableDownload: '=',
-            enableColumnSearch: '=enableColumnSearch'
+            enableColumnSearch: '=enableColumnSearch',
+            advanceSearch: '=advanceSearch'
         },
         templateUrl: 'app/views/general/solr-table.html',
         link: function(scope, elem, attrs) {
+            var searchAll = 'Click to search all fields';
+            var searchCol = 'Click to search in columns'; 
+            var searchFields = scope.opts.searchFields;
+
             scope.advancedOptsEnabled = scope.enableColumnSearch;
+            if (scope.advancedOptsEnabled) {
+                scope.advanceSearch = searchAll;
+            } else {
+                scope.advanceSearch = searchCol;
+            }
 
             scope.download = function($ev) {
                 scope.enableDownload($ev, scope.opts);
             }
 
-            var searchFields = scope.opts.searchFields;
             scope.toggleAdvancedOptions = function($ev) {
                 scope.advancedOptsEnabled = !scope.advancedOptsEnabled
 
@@ -1471,11 +1770,13 @@ function(Dialogs, $dialog) {
                 // and remove general query when enabled
                 if (scope.advancedOptsEnabled == false) {
                     delete scope.opts.queryColumn;
+                    scope.advanceSearch = searchCol;
                 } else {
                     scope.opts.query = '';
                     searchFields[3] = 'synonyms';
                     searchFields[4] = 'aliases';
                     scope.opts.searchFields = searchFields;
+                    scope.advanceSearch = searchAll;
                 }
             }
 
@@ -1621,9 +1922,7 @@ function(Dialogs, $dialog) {
             scope.defaultBtn = function(items) {
                 scope.onDefault();
             }
-
-
-        }
+       }
     }
  })
 

@@ -1,0 +1,67 @@
+
+<div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
+<ul class="toolbar">
+    <li ng-class="{ active: $state.includes('app.myModels') }" id="tour-1">
+        <a ui-sref="app.myModels">
+            <span hide-sm>My Models</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.myMedia') }" id="tour-1">        
+        <a ui-sref="app.myMedia">
+            <span hide-sm>My Media</span>
+        </a>
+    </li>
+    <li ng-class="{ active: $state.includes('app.mySubsystems') }" id="tour-1">
+            <a ui-sref="app.mySubsystems">    
+                <span hide-sm>My Subsystems</span>
+            </a>
+    </li>    
+    
+</ul>
+</div>
+
+<div layout="row">
+    <div class="content-header" flex>My Subsystems<br>
+        <small class="help-text" hide-sm>Click on a subsystem row to view...</small>
+    </div>
+</div>
+
+<!-- passing the subsystems data to the ngTableSelector directive -->
+<!--ng-table-selector table-header="mySubsysHeader"
+    table-data="mySubsystems"
+    table-opts="mySubsysOpts"
+    table-loading="loadingMySubsystems"
+    on-submit="deleteSubsystem"
+    submit-btn-template="Delete $count subsystem(s)"
+    submit-btn-type="remove"
+    submit-btn-class="md-warn md-raised"
+    submit-progress-text="Deleting..."
+    on-default="newSubsystem"
+    default-btn-template="Create new subsystem"
+    default-btn-type="add"
+    default-btn-class="md-primary md-raised"
+    table-placeholder="Search my subsystems">
+</ng-table-selector-->
+<!-- passing the subsystems data to the ngTableSelector directive -->
+<ng-table-selector table-header="mySubsysHeader"
+    table-data="mySubsystems"
+    table-opts="mySubsysOpts"
+    table-loading="loadingMySubsystems"
+    on-submit="deleteSubsystem"
+    submit-btn-template="Delete $count subsystem(s)"
+    submit-btn-class="md-warn md-raised"
+    submit-progress-text="Deleting..."
+    on-default="newSubsystem"
+    default-btn-template="Create new subsystem"
+    default-btn-type="add"
+    default-btn-class="md-primary md-raised"
+    table-placeholder="Search my subsystems">
+</ng-table-selector>
+<!-- end passing ... -->
+
+
+<hr class="no-margin">
+
+<div ng-if="error" class="ms-color-error">
+    {{error}}
+</div>

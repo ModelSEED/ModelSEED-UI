@@ -25,6 +25,7 @@ angular.module('ModelSEED',
  'Upload',
  'Biochem',
  'Browser',
+ 'Subsystems',
  'Regulons',
  'Fusions',
  'Dialogs',
@@ -190,25 +191,40 @@ function($locationProvider, $stateProvider, $httpProvider,
             templateUrl: 'app/views/annotations.html',
             controller: 'PlantAnnotations',
             authenticate: true
-            
-            
-            
-        }).state('app.RefModels', {
+        })
+
+        /* For subsystems*/
+        .state('app.mySubsystems', {
+            url: "/mySubsystems/?tab",
+            templateUrl: 'app/components/subsystems/my-subsystems.html',
+            controller: 'MySubsystems',
+            authenticate: true
+        })
+        .state('app.subsystem', {
+            url: "/subsystem{path:nonURIEncoded}",
+            templateUrl: 'app/components/subsystems/subsystem.html',
+            controller: 'Subsystem',
+            authenticate: true
+        })
+        /* End of subsystems*/
+
+        /* For display of generic data in a spreadsheet*/
+        .state('app.spreadsheet', {
+            url: "/spreadsheet{path:nonURIEncoded}",
+            templateUrl: 'app/components/subsystems/spreadsheet.html',
+            controller: 'Spreadsheet',
+            authenticate: true
+        })
+        /* End of display of generic data in a spreadsheet*/
+
+
+        .state('app.RefModels', {
             url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
             controller: 'RefModels',
             authenticate: true
 
 
-
-        /*    
-        }).state('app.genomes', {
-            url: "/genomes/",
-            templateUrl: 'app/views/genomes/genomes.html',
-            controller: 'Genomes',
-            authenticate: true
-        */    
-            
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
@@ -216,7 +232,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
             
             
-            }).state('app.myMedia', {
+        }).state('app.myMedia', {
             url: "/myMedia/?tab",
             templateUrl: 'app/views/my-media.html',
             controller: 'MyMedia',

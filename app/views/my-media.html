@@ -11,6 +11,11 @@
             <span hide-sm>My Media</span>
         </a>
     </li>
+    <li ng-class="{ active: $state.includes('app.mySubsystems') }" id="tour-1">
+            <a ui-sref="app.mySubsystems"> 
+                <span hide-sm>My Subsystems</span>
+            </a>
+    </li>
     
 </ul>
 </div>
@@ -22,27 +27,24 @@
 </div>
 
 <!-- From original \views\media.html: -->
-            <ng-table-selector table-header="myMediaHeader"
-                        table-data="myMedia"
-                        table-opts="myMediaOpts"
-                        table-loading="loadingMyMedia"
-                        on-submit="deleteMedia"
-                        submit-btn-template="Delete $count media"
-                        submit-btn-type="remove"
-                        submit-btn-class="md-warn md-raised"
-                        submit-progress-text="Deleting..."
-                        on-default="newMedia"
-                        default-btn-template="Create New media"
-                        default-btn-type="add"
-                        default-btn-class="md-primary md-raised"
-                        table-placeholder="Search my media">
-            </ng-table-selector>
- <!-- end from original... -->
-
-
+<ng-table-selector table-header="myMediaHeader"
+    table-data="myMedia"
+    table-opts="myMediaOpts"
+    table-loading="loadingMyMedia"
+    on-submit="deleteMedia"
+    submit-btn-template="Delete $count media"
+    submit-btn-type="remove"
+    submit-btn-class="md-warn md-raised"
+    submit-progress-text="Deleting..."
+    on-default="newMedia"
+    default-btn-template="Create New media"
+    default-btn-type="add"
+    default-btn-class="md-primary md-raised"
+    table-placeholder="Search my media">
+</ng-table-selector>
+<!-- end from original... -->
 
 <hr class="no-margin">
-
 
 <div ng-if="error" class="ms-color-error">
     {{error}}

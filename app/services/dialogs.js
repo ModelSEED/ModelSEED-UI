@@ -76,6 +76,99 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
     
+    this.showGene = function(ev, geneObj, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/show-gene.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($s, $http) {
+                $self = $s;
+                $s.editingScore = false;
+                $s.updatingScore = false;
+                $s.validNumber = true;
+                // for scratch area to hold the user edits
+                $s.edit = {score: '', evidence_codes: ''};
+                //$s.validJSON = true;
+                $s.gene = geneObj; // the selected dropdown item
+                $s.geneId = Object.keys(geneObj)[0];
+                $s.score = geneObj[$s.geneId]['score'] || '';
+                var evd_codes = geneObj[$s.geneId]['evidence_codes'] ? geneObj[$s.geneId]['evidence_codes'] : [];
+                $s.evidence_codes = (evd_codes.length>0) ? evd_codes : [];
+
+                $s.annotated_date = geneObj[$s.geneId]['annotated_date'] || '';
+                $s.is_annotated = $s.annotated_date ? true : false;
+                $s.mod_history = geneObj[$s.geneId]['mod_history'] || [];
+
+                $s.addEvdCode = function(ec_id, cm_id) {
+                    var ec = document.getElementById(ec_id),
+                        cm = document.getElementById(cm_id);
+                    var edit_gene = {};
+                    var ansr1 = false, ansr2 = false;
+                    $s.annotated_date = new Date().toISOString().slice(0, 10);
+                    var new_ec_hist = {
+                        "evidence_code": ec.value,
+                        "user": Auth.user,
+                        "comment": cm.value,
+                        "annotated_date": $s.annotated_date
+                    };
+                    for (var i=0; i<$s.mod_history.length; i++) {
+                        if ($s.mod_history[i]['evidence_code']===new_ec_hist['evidence_code']
+                            && $s.mod_history[i]['comment']===new_ec_hist['comment']
+                            && $s.mod_history[i]['annotated_date']===new_ec_hist['annotated_date']
+                            && $s.mod_history[i]['user']===new_ec_hist['user']) {
+                            ansr1 = true;
+                            break;
+                        }
+                    }
+                    if (!$s.evidence_codes.includes(ec.value)) {
+                        ansr2 = true;
+                        $s.evidence_codes.push(ec.value);
+                    }
+                    if (!ansr1 || ansr2) {
+                        $s.mod_history.push(new_ec_hist);
+                        edit_gene[$s.geneId] = {"evidence_codes": $s.evidence_codes,
+                                            "score": $s.score,
+                                            "annotated_date": $s.annotated_date,
+                                            "mod_history": $s.mod_history};
+                        cb(edit_gene);
+                        $s.is_annotated = true;
+                    }
+                }
+
+                $s.editScore = function() {
+                    $s.editingScore = !$s.editingScore;
+                    $s.edit.score = $s.score || '';
+                }
+
+                $s.updateScore = function(s) {
+                    $s.updatingScore = true;
+                    var edit_gene = {};
+                    edit_gene[$s.geneId]= {"evidence_code": $s.evidence_code.split('\n'),
+                                           "score": s};
+                    cb(edit_gene);
+                    $s.score = s;
+                    $s.updatingScore = false, $s.editingScore = false;
+                }
+
+                $s.validateNumber = function(text) {
+                    // If text is Not a Number or less than 0 or greater than 1.0
+                    if (isNaN(text) || text < 0 || text > 1) {
+                        $s.validNumber = false;
+                    } else {
+                      $s.validNumber = true;
+                    }
+                }
+
+                $s.cancel = function(){
+                    $dialog.hide();
+                }
+
+            }]
+        })
+    }
+
     this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -114,9 +207,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
               function($scope, $http) {
                 $scope.item = item;
                 $scope.form = {genome: item.path};
-                
-                
-                
+
             	$scope.selectedKingdom = []; // Plants or Microbes
             	$scope.selectedSeqType = []; // protein or DNA
             	$scope.selectedTaxa = []; // genome_type: features or contigs

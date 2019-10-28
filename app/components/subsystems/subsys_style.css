@@ -1,0 +1,90 @@
+div.container {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    max-width: 120em;
+    max-height: 100em;
+    position: relative;
+}
+table {
+    /*table-layout: auto;*/
+    width: 100%;
+    position: relative;
+}
+td, th {
+    border: 1px solid #000;
+    width: 100%;
+    padding: 0.25em;
+}
+th {color: white; background: rgb(9, 173, 202);}
+thead th {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: 90px;
+    z-index: 2;  /* Ensure it stays on top of other player divs */
+}
+thead th:first-child {
+    left: -15px;
+    z-index: 3;
+}
+tbody td:first-child {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    left: -15px;
+    z-index: 1;  /* Ensure it stays on top of other player divs */
+    font-weight: bold;
+    background-color: rgb(9, 173, 202);
+}
+tbody td:hover {background-color:#ddd;}
+tbody th:first-child {
+    z-index: 2;
+}
+
+.stickyrow {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: 145px;
+    /*bottom: 0px;*/
+    left: -15px;
+    z-index: 1;  /* Ensure it stays on top of other player divs */
+    color: black;
+    background-color: rgb(220, 228, 147);
+}
+.table-search {
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 2;  /* Ensure it stays on top of other player divs */
+    top: 0px;    /* Where it should stick to */
+    left: -15px;
+    color: #000;
+    background: #ccc;
+}
+
+/*for styling the popup table*/
+.popup_table {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 80%;
+}
+.popup_table td:first-child {
+    background-color:#f2f2f2;
+    border: 1px solid black;
+}
+/*
+.popup_table td:first-child:hover {
+    background-color: #ddd;
+}*/
+.popup_table td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.popup_table tr:nth-child(even){background-color: #f2f2f2;}
+.popup_table tr:hover {background-color: #ddd;}
+.popup_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+    width: 80%;
+}

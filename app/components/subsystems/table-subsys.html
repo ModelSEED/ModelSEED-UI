@@ -1,0 +1,95 @@
+
+<link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
+<div ng-if="data" class='container' flex>
+    <div class="table-controls table-editor-controls table-search">
+        <div layout="row">
+            <md-input-container layout="row" layout-align="start center" flex>
+                <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress"
+                    title="Overwrite the original data file">
+                    {{saveInProgress ? saveInProgressText : 'Save'}}
+                </md-button>
+                <md-button class="md-secondary" ng-click="saveAs($event)" ng-disabled="saveAsInProgress"
+                    title="Save to a new file">
+                    {{saveAsInProgress ? saveInProgressText : 'Save as...'}}
+                </md-button>
+                <span ng-if="dataModified && !dataSaved" class="pull-right color-error">
+                    Note: Data has been modified but not saved yet.
+                </span>
+            </md-input-container>
+        </div>
+
+        <div layout="row">
+            <md-input-container md-no-float
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+            </md-input-container>
+
+            <md-progress-circular ng-if="loading"
+                                md-mode="indeterminate"
+                                class="table-loading"
+                                md-diameter="40">
+            </md-progress-circular>
+
+            <div ng-if="noPagination" layout="row" layout-align="start center">
+                {{data.length}} {{resultText}}
+            </div>
+
+            <md-input-container
+                ng-if="!noPagination"
+                pagination
+                pagination-offset="opts.offset"
+                pagination-limit="opts.limit"
+                pagination-total="filtered.length"
+                layout="row"
+                layout-align="start center">
+            </md-input-container>
+        </div>
+    </div>
+
+    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+        <thead>
+            <tr>
+                <th sortable col-id="{{header[0].key}}"
+                    ng-click="sortBy($event, header[0].key)">{{::header[0].label}}
+                </th>
+                <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
+                    ng-click="sortBy($event, h.key)" >{{::h.label}}
+                </th>
+                <!--th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}">{{::h.label}}</th-->
+            </tr>
+            <tr ng-repeat="row in data.slice(0,1)">
+                <th class="stickyrow" ng-repeat="h in header" style="border: 1px solid black;">
+                    <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
+                    <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                        {{::row[h.key]}}
+                    </a>
+
+                    <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                        <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{::row[h.key]}}</a>
+                        <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+                        | limitTo : opts.limit : opts.offset)">
+            <td ng-repeat="h in header" style="border: 1px solid black;">
+                <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
+                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                    {{::row[h.key]}}
+                </a>
+
+                <span ng-if="!h.hasOwnProperty('formatter') && !h.hasOwnProperty('link')">
+                    <a ng-if="h.hasOwnProperty('click')" ng-click="h.click(row)">{{::row[h.key]}}</a>
+                    <span ng-if="!h.hasOwnProperty('click')">{{::row[h.key]}}</span>
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div ng-if="!loading && filtered.length == 0" class="item-not-found">
+        No item found
+    </div>
+</div>
+<br>

@@ -7,7 +7,7 @@ function($http, $q, $rootScope, config, Auth) {
 
     var self = this;
 
-    var endpoint = config.services.solr_url;
+    var endpoint = config.services.patric_solr_url;
 
     var liveReq;
 
@@ -46,7 +46,12 @@ function($http, $q, $rootScope, config, Auth) {
             if (words.length > 1) {
                 var q = [];
                 for (var i=0; i<words.length; i++) {
-                    q.push('eq(genome_name,'+words[i]+'*)')
+                    var word = words[i].trim();
+                    word = word.replace(/(;|,|\:|\"|\'|\+|\.|\-|[0-9]+)/g, ""); // get rid of these symbols
+                    if (word.indexOf(' ') != -1 || word.indexOf('%20') != -1) {
+                        word = word.replace(/'20%'/g, '*').replace(/\s/g, '*');
+                    }
+                    q.push('eq(genome_name,'+word+'*)')
                 }
                 url += '&and('+q.join(',')+')';
             } else {
