@@ -115,9 +115,9 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
     var captions = [];
 
     $s.loading = true;
-    if (WS.cached.subsystems && WS.cached.subsysName===subsysFileName) {
-        $s.subsysData = WS.cached.subsystems;
-        $s.subsysDataClone = WS.cached.subsystemsClone;
+    if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
+        $s.subsysData = WS.cached.subsystem;
+        $s.subsysDataClone = WS.cached.subsystemClone;
         $s.subsysHeader = WS.cached.subsysHeader;
         $s.subsysName = WS.cached.subsysName;
         $s.loading = false;
@@ -129,12 +129,12 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
 
             // unmasked data
             $s.subsysDataClone = Object.assign({}, res.data.data);
-            WS.cached.subsystemsClone = $s.subsysDataClone;
+            WS.cached.subsystemClone = $s.subsysDataClone;
 
             // html-masked data
             $s.subsysData = parseSubsysData(res.data.data);
             $s.subsysData = buildHtmlContent($s.subsysData);
-            WS.cached.subsystems = $s.subsysData;
+            WS.cached.subsystem = $s.subsysData;
             WS.cached.subsysName = $s.subsysName;
 
             // table header
@@ -419,3 +419,44 @@ function($s, WS, $stateParams) {
 }])
 
 // End Spreadsheet control
+
+// Begin ProteinFamily control
+.controller('ProteinFamily',
+['$scope', '$state', 'WS', '$stateParams',
+ 'uiTools', 'Dialogs', '$http', 'Auth',
+function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
+    $s.phyloXMLData = '';  // xml string
+    $s.phyloXMLDataClone = '';  // xml string
+
+    // workspace path and name of object
+    var wsPath = $stateParams.path;
+    if( wsPath == '' ) {
+        console.log('Please specify the correct user name and path to the protein family data.');
+        return false;
+    }
+
+    $s.xml_loading = true;
+    //xml_wsPath = wsPath.split('/').slice(0, 2);
+    //xml_wsPath = xml_wsPath.join('/') + '/xmls/sample.xml';
+    xml_wsPath = wsPath;
+    if (WS.cached.protFam) {
+        $s.xmlData = WS.cached.protFam;
+        $s.xmlDataClone = WS.cached.xmlDataClone;
+        $s.xml_loading = false;
+    } else {
+        WS.get(xml_wsPath)
+        .then(function(res) {
+            $s.protFam = res.data;
+            $s.xmlMeta = res.meta;
+            $s.xmlDataClone = Object.assign({}, res.data);
+            WS.cached.xmlDataClone = $s.xmlDataClone;
+            $s.xml_loading = false;
+        })
+        .catch(function(error) {
+            console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+            $s.xml_loading = false;
+        });
+    }
+}])
+
+// End ProteinFamily control

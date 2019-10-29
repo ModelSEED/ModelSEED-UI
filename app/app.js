@@ -206,6 +206,12 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'Subsystem',
             authenticate: true
         })
+        .state('app.proteinFamily', {
+            url: "/phyloXML{path:nonURIEncoded}",
+            templateUrl: 'app/components/proteinFam/proteinFamily-tree.html',
+            controller: 'ProteinFamily',
+            authenticate: true
+        })
         /* End of subsystems*/
 
         /* For display of generic data in a spreadsheet*/

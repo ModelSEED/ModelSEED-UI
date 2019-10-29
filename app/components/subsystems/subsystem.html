@@ -1,14 +1,13 @@
 <div layout="row">
-    <div class="content-header">Subsystem <b><small>{{subsysName}}</small></b>
+    <div class="content-header">Subsystem: <b><small>{{subsysName}}</small></b>
         <div class="h5">
             <i class="icon-folder-open-o"></i>
             <a ui-sref="app.mySubsystems({tab: 'mine'})"> >My Subsystems</a>
         </div>
     </div>
-	<div ng-if="isMine" class="h5">
-		<a ui-sref="app.mySubsystems({tab: 'mine'})">My Subsystem</a> / {{subsysName}}
-		<small class="text-muted">{{editInProgress ? '(Editing)' : ''}}</small>
-	</div>
+    <div class="h5">
+        <a href="app/components/proteinFam/proteinFamily-tree.html" target="_blank">Protein family (sample)</a>
+    </div>
 </div>
 
 <hr class="no-margin">
