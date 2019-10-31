@@ -153,10 +153,10 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         });
     }
 
+    // loading the family tree data (in extendable phyloxml format)
     $s.xml_loading = true;
     xml_wsPath = wsPath.split('/').slice(0, 2);
-    xml_wsPath = xml_wsPath.join('/') + '/xmls/sample.xml';
-    //xml_wsPath = wsPath;
+    xml_wsPath = xml_wsPath.join('/') + '/xmls/example.xml';
     if (WS.cached.protFam) {
         $s.protFam = WS.cached.protFam;
         $s.xmlDataClone = WS.cached.xmlDataClone;
@@ -169,15 +169,34 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
                 xmlMeta_str = res.meta;
             $s.xml_loading = false;
 
-            // Parse from xml string to xml object
+            // Parse from xml string to a DOM tree and return a XMLDocument
+            // XMLSerializer will do the reverse
+            // var oSerializer = new XMLSerializer();
+            // var sXML = oSerializer.serializeToString(xmldoc);
             var p = new DOMParser();
-            $s.protFam = p.parseFromString(xml_str, 'text/xml');
+            var xmlDoc = p.parseFromString(xml_str, 'text/xml');
+            console.log(xmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing" : xmlDoc.documentElement.nodeName);
+            $s.protFam = xmlDoc;
             WS.cached.protFam = $s.protFam;
             $s.xmlDataClone = $s.protFam.cloneNode(true);
             WS.cached.xmlDataClone = $s.xmlDataClone;
             $s.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
             WS.cached.xmlMeta = $s.xmlMeta;
-
+            /*
+            //var resTable = document.getElementById ("resTable");
+            var xmlNodes = ["name", "taxonomy", "events", "property"];
+            var cladeTags = xmlDoc.getElementsByTagName("clade");
+            for (i = 0; i < cladeTags.length; i++) {
+                //resTable.insertRow (i);
+                for (j = 0; j < xmlNodes.length; j++) {
+                    var recordNode = cladeTags[i].getElementsByTagName(xmlNodes[j])[0];
+                    //resTable.rows[i].insertCell(j);
+                    if ('textContent' in recordNode)
+                        alert(recordNode.textContent); //resTable.rows[i].cells[j].innerHTML = recordNode.textContent;
+                    else
+                        alert(recordNode.text); //resTable.rows[i].cells[j].innerHTML = recordNode.text;
+                }
+            }*/
             // generate the tree -- move to the proteinFamily directive or dialog popup
             /*
             d3.select("#phyd3").text("Loading...");
