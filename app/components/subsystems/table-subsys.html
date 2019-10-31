@@ -52,7 +52,7 @@
                     ng-click="sortBy($event, header[0].key)">{{::header[0].label}}
                 </th>
                 <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
-                    ng-click="sortBy($event, h.key)" >{{::h.label}}
+                    ng-dblclick="headerDblClick($event, h.key)">{{::h.label}}
                 </th>
                 <!--th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}">{{::h.label}}</th-->
             </tr>

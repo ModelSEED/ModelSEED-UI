@@ -1,0 +1,28 @@
+<md-dialog flex="55">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools md-toolbar-accent">
+        <h3>{{functionName}}</h3>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-content layout-margin layout-padding>
+        <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
+            
+        <!--The family tree section-->
+        <section>
+            <div id="phyd3" class="col-xs-9">
+        </section>
+
+    </md-content>
+
+    <div class="md-actions">
+        <md-button ng-click="cancel()">
+            Close
+        </md-button>
+    </div>
+</md-dialog>
