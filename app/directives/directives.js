@@ -1410,6 +1410,7 @@ function($compile, $stateParams) {
             header: '=tableHeader',
             data: '=tableData',
             dataClone: '=tableDataClone',
+            treeDataClone: '=tableTreeDataClone',
             opts: '=tableOpts',
             loading: '=tableLoading',
             cellClick: '=tableCellClick',
@@ -1447,13 +1448,24 @@ function($compile, $stateParams) {
                 scope.sel_cand = document.getElementById(can_id);
 
                 //alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][scope.sel_cand.selectedIndex]));
-
                 Dialogs.showGene(ev, scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex],
                 function(gene) {
                     console.log('modified gene object: ', JSON.stringify(gene));
                     scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex] = gene;
                     scope.dataModified = true;
                     scope.dataSaved = false;
+                });
+
+                ev.stopPropagation();
+                ev.preventDefault();
+            }
+
+            scope.headerDblClick = function(ev, func_name, usr) {
+                alert("Header " + func_name + " has been double clicked!");
+                var tree_data = scope.treeDataClone;
+
+                Dialogs.showFuncFamTree(ev, func_name, function(tree_msg) {
+                    console.log('Calling back from tree display--' + tree_msg);
                 });
 
                 ev.stopPropagation();

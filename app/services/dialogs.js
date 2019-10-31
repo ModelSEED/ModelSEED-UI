@@ -75,7 +75,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             }]
         })
     }
-    
+
     this.showGene = function(ev, geneObj, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -165,6 +165,62 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     $dialog.hide();
                 }
 
+            }]
+        })
+    }
+
+    this.showFuncFamTree = function(ev, func, cb) {
+        ev.stopPropagation();
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/show-famTree.html',
+            //templateUrl: 'app/components/proteinFam/htmls/tree-labels.html',
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            controller: ['$scope', '$http',
+            function($s, $http) {
+                $self = $s;
+                $s.functionName = func;
+
+                var opts = {
+                    dynamicHide: true,
+                    height: 800,
+                    invertColors: false,
+                    lineupNodes: true,
+                    showDomains: true,
+                    showDomainNames: false,
+                    showDomainColors: true,
+                    showGraphs: true,
+                    showGraphLegend: true,
+                    showLength: false,
+                    showNodeNames: true,
+                    showNodesType: "only leaf",
+                    showPhylogram: false,
+                    showTaxonomy: true,
+                    showFullTaxonomy: false,
+                    showSequences: false,
+                    showTaxonomyColors: true,
+                    backgroundColor: "#f5f5f5",
+                    foregroundColor: "#000000",
+                    nanColor: "#f5f5f5",
+                };
+
+                // function load() -- the tree part
+                jQuery('#foregroundColor').val(opts.foregroundColor);
+                jQuery('#backgroundColor').val(opts.backgroundColor);
+                jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
+                jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
+                d3.select("#phyd3").text("Loading...");
+                d3.xml("/app/components/proteinFam/xmls/labels.xml", "application/xml",
+                function(xml) {
+                    d3.select("#phyd3").text(null);
+                    var tree = phyd3.phyloxml.parse(xml);
+                    phyd3.phylogram.build("#phyd3", tree, opts);
+                });
+
+                $s.cancel = function(){
+                    cb(func + ' tree displayed');
+                    $dialog.hide();
+                }
             }]
         })
     }

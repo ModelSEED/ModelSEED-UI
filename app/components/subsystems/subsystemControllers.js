@@ -153,6 +153,44 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         });
     }
 
+    $s.xml_loading = true;
+    xml_wsPath = wsPath.split('/').slice(0, 2);
+    xml_wsPath = xml_wsPath.join('/') + '/xmls/sample.xml';
+    //xml_wsPath = wsPath;
+    if (WS.cached.protFam) {
+        $s.protFam = WS.cached.protFam;
+        $s.xmlDataClone = WS.cached.xmlDataClone;
+        $s.xmlMeta = WS.cached.xmlMeta;
+        $s.xml_loading = false;
+    } else {
+        WS.get(xml_wsPath)
+        .then(function(res) {
+            var xml_str = res.data,
+                xmlMeta_str = res.meta;
+            $s.xml_loading = false;
+
+            // Parse from xml string to xml object
+            var p = new DOMParser();
+            $s.protFam = p.parseFromString(xml_str, 'text/xml');
+            WS.cached.protFam = $s.protFam;
+            $s.xmlDataClone = $s.protFam.cloneNode(true);
+            WS.cached.xmlDataClone = $s.xmlDataClone;
+            $s.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
+            WS.cached.xmlMeta = $s.xmlMeta;
+
+            // generate the tree -- move to the proteinFamily directive or dialog popup
+            /*
+            d3.select("#phyd3").text("Loading...");
+            var tree = phyd3.phyloxml.parse($s.protFam);
+            d3.select("#phyd3").text(null);
+            phyd3.phylogram.build("#phyd3", tree, $s.phyopts);*/
+        })
+        .catch(function(error) {
+            console.log('Caught an error: "' + error);
+            $s.xml_loading = false;
+        });
+    }
+
     $s.save = function(data) {
         var data_obj = {"name": $s.subsysName, "data": data};
         return WS.save(wsPath, data_obj, {overwrite: true, userMeta: {}, type: 'unspecified'})
@@ -425,8 +463,30 @@ function($s, WS, $stateParams) {
 ['$scope', '$state', 'WS', '$stateParams',
  'uiTools', 'Dialogs', '$http', 'Auth',
 function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
-    $s.phyloXMLData = '';  // xml string
-    $s.phyloXMLDataClone = '';  // xml string
+    $s.protFam = null;  // xml DOM object
+    $s.xmlDataClone = null;  // xml DOM object
+    $s.phyopts = {
+        dynamicHide: true,
+        height: 800,
+        invertColors: false,
+        lineupNodes: true,
+        showDomains: true,
+        showDomainNames: false,
+        showDomainColors: true,
+        showGraphs: true,
+        showGraphLegend: true,
+        showLength: false,
+        showNodeNames: true,
+        showNodesType: "only leaf",
+        showPhylogram: false,
+        showTaxonomy: true,
+        showFullTaxonomy: false,
+        showSequences: false,
+        showTaxonomyColors: true,
+        backgroundColor: "#f5f5f5",
+        foregroundColor: "#000000",
+        nanColor: "#f5f5f5",
+    };
 
     // workspace path and name of object
     var wsPath = $stateParams.path;
@@ -440,23 +500,57 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
     //xml_wsPath = xml_wsPath.join('/') + '/xmls/sample.xml';
     xml_wsPath = wsPath;
     if (WS.cached.protFam) {
-        $s.xmlData = WS.cached.protFam;
+        $s.protFam = WS.cached.protFam;
         $s.xmlDataClone = WS.cached.xmlDataClone;
         $s.xml_loading = false;
     } else {
         WS.get(xml_wsPath)
         .then(function(res) {
-            $s.protFam = res.data;
+            var xml_str = res.data,
+                xmlMeta_str = res.meta;
             $s.xmlMeta = res.meta;
-            $s.xmlDataClone = Object.assign({}, res.data);
-            WS.cached.xmlDataClone = $s.xmlDataClone;
             $s.xml_loading = false;
+
+            // Parse from xml string to xml object
+            var p = new DOMParser();
+            $s.protFam = p.parseFromString(xml_str, 'text/xml');
+            WS.cached.protFam = $s.protFam;
+            $s.xmlDataClone = $s.protFam.cloneNode(true);
+            WS.cached.xmlDataClone = $s.xmlDataClone;
+
+            // generate the tree -- move to the proteinFamily directive or dialog popup
+            /*
+            var tree = phyd3.phyloxml.parse($s.protFam);
+            d3.select("#phyd3").text("Loading...");
+            d3.select("#phyd3").text(null);
+            phyd3.phylogram.build("#phyd3", tree, $s.phyopts);*/
         })
         .catch(function(error) {
-            console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+            console.log('Caught an error: "' + error);
             $s.xml_loading = false;
         });
     }
+
+    $s.loadPhyloXML = function() {
+        jQuery('#foregroundColor').val(opts.foregroundColor);
+        jQuery('#backgroundColor').val(opts.backgroundColor);
+        jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
+        jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
+        d3.select("#phyd3").text("Loading...");
+        //d3.xml("https://raw.githubusercontent.com/vibbits/phyd3/master/dist/sample.xml")
+        //  .then(function(xml) {
+        /*
+        d3.xml("sample.xml", "application/xml", function(xml) {
+            d3.select("#phyd3").text(null);
+            var tree = phyd3.phyloxml.parse(xml);
+            phyd3.phylogram.build("#phyd3", tree, opts);
+        });
+        */
+        d3.select("#phyd3").text(null);
+        var tree = phyd3.phyloxml.parse($s.protFam);
+        phyd3.phylogram.build("#phyd3", tree, $s.phyopts);
+    };
+
 }])
 
 // End ProteinFamily control
