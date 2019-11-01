@@ -1461,7 +1461,6 @@ function($compile, $stateParams) {
             }
 
             scope.headerDblClick = function(ev, func_name, usr) {
-                alert("Header " + func_name + " has been double clicked!");
                 var tree_data = scope.treeDataClone;
 
                 Dialogs.showFuncFamTree(ev, func_name, function(tree_msg) {
