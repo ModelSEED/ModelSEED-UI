@@ -174,7 +174,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             // var oSerializer = new XMLSerializer();
             // var sXML = oSerializer.serializeToString(xmldoc);
             var p = new DOMParser();
-            var xmlDoc = p.parseFromString(xml_str, 'text/xml');
+            var xmlDoc = p.parseFromString(xml_str, 'application/xml');
             console.log(xmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing" : xmlDoc.documentElement.nodeName);
             $s.protFam = xmlDoc;
             WS.cached.protFam = $s.protFam;
@@ -197,12 +197,6 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
                         alert(recordNode.text); //resTable.rows[i].cells[j].innerHTML = recordNode.text;
                 }
             }*/
-            // generate the tree -- move to the proteinFamily directive or dialog popup
-            /*
-            d3.select("#phyd3").text("Loading...");
-            var tree = phyd3.phyloxml.parse($s.protFam);
-            d3.select("#phyd3").text(null);
-            phyd3.phylogram.build("#phyd3", tree, $s.phyopts);*/
         })
         .catch(function(error) {
             console.log('Caught an error: "' + error);

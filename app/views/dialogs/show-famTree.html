@@ -9,7 +9,7 @@
 <!--script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script-->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-<md-dialog flex="55">
+<md-dialog flex="90">
 
     <md-toolbar>
       <div class="md-toolbar-tools md-toolbar-accent">
@@ -265,15 +265,91 @@
                 Download as:
                 <button class="btn btn-primary" id="linkSVG">SVG</button>
                 <button class="btn btn-primary" id="linkPNG">PNG</button>
-                <a href="submissions/labels.xml" class="btn btn-primary" id="linkXML" download >XML</a>
+                <a href="app/components/proteinFam/xmls/example.xml" class="btn btn-primary" id="linkXML" download >XML</a>
             </div>
         </div>
         <!--The family tree section-->
         <section>
             <div id="phyd3" class="col-xs-9"></div>
         </section>
+        <!--The footer portion of the left panel-->
+        <div class="col-sm-9 text-center">
+            Use your mouse to drag, zoom and modify the tree. <br />
+            <strong>Actions:</strong><br />
+            CTRL + wheel = scale Y, ALT + wheel = scale X<br />
+            mouse click = node info<br />
+            CTRL + mouse click = swap, ALT + mouse click = view subtree, SHIFT + mouse click = color subtree<br />
+            <br />
+            You can use the URL of this page as permalink.
+        </div>
     </div>
 
+    <div class="modal fade" id="taxonomyColorsModal" tabindex="-1" role="dialog" aria-labelledby="taxonomyColorsModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="taxonomyColorsModalLabel">Taxonomy colors</h4>
+          </div>
+          <div class="modal-body phyd3-modal">
+            &nbsp;
+              <form class="row form-horizontal" id="taxonomyColorsList">
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="applyTaxonomyColors">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="groupLabelModal" tabindex="-1" role="dialog" aria-labelledby="groupLabelModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="groupLabelModalLabel">Group label</h4>
+          </div>
+          <div class="modal-body phyd3-modal">
+            <form class="form-horizontal">
+                <input id="groupID" hidden="hidden" type="text" />
+                <input id="groupDepth" hidden="hidden" type="text" />
+                <div class="form-group">
+                    <label class="col-xs-4 control-label"> Label </label>
+                    <div class="col-xs-8">
+                        <input id="groupLabel" class="form-control" type="text" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-4 control-label"> Foreground color </label>
+                    <div class="col-xs-8">
+                        <div id="groupLabelForegroundCP" class="input-group colorpicker-component">
+                            <input id="groupLabelForeground" type="text" class="form-control" />
+                            <span class="input-group-btn">
+                                <span class="input-group-addon btn btn-fab btn-fab-mini" title="Set foreground color"><i></i></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-4 control-label"> Background color </label>
+                    <div class="col-xs-8">
+                        <div id="groupLabelBackgroundCP" class="input-group colorpicker-component">
+                            <input id="groupLabelBackground" type="text" class="form-control" />
+                            <span class="input-group-btn">
+                                <span class="input-group-addon btn btn-fab btn-fab-mini" title="Set foreground color"><i></i></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id='clearGroupLabel'>Clear</button>
+            <button type="button" class="btn btn-primary" id='applyGroupLabel'>Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
     </md-content>
 
     <div class="md-actions">

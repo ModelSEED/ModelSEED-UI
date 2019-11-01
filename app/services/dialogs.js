@@ -189,7 +189,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 ga('create', 'UA-61194136-8', 'auto');
                 ga('send', 'pageview');
 
-                var opts = {
+                $s.opts = {
                     dynamicHide: true,
                     height: 800,
                     invertColors: false,
@@ -213,16 +213,16 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 };
 
                 // function load() -- the tree part
-                jQuery('#foregroundColor').val(opts.foregroundColor);
-                jQuery('#backgroundColor').val(opts.backgroundColor);
-                jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
-                jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
+                jQuery('#foregroundColor').val($s.opts.foregroundColor);
+                jQuery('#backgroundColor').val($s.opts.backgroundColor);
+                jQuery('#foregroundColorButton').colorpicker({color: $s.opts.foregroundColor});
+                jQuery('#backgroundColorButton').colorpicker({color: $s.opts.backgroundColor});
                 d3.select("#phyd3").text("Loading...");
-                d3.xml("/app/components/proteinFam/xmls/labels.xml", "application/xml",
+                d3.xml("/app/components/proteinFam/xmls/example.xml", "application/xml",
                 function(xml) {
                     d3.select("#phyd3").text(null);
                     var tree = phyd3.phyloxml.parse(xml);
-                    phyd3.phylogram.build("#phyd3", tree, opts);
+                    phyd3.phylogram.build("#phyd3", tree, $s.opts);
                 });
 
                 $s.cancel = function(){
