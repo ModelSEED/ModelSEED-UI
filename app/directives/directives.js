@@ -1460,15 +1460,38 @@ function($compile, $stateParams) {
                 ev.preventDefault();
             }
 
-            scope.headerDblClick = function(ev, func_name, usr) {
-                var tree_data = scope.treeDataClone;
+            scope.selected = {};
 
-                Dialogs.showFuncFamTree(ev, func_name, function(tree_msg) {
-                    console.log('Calling back from tree display--' + tree_msg);
+            scope.headerDblClick = function(ev, func_name, col_id, usr) {
+                var tree_data = scope.treeDataClone;
+                if(func_name == 'first')
+                    func_name = 'example';
+                else
+                    func_name = 'labels';
+
+                Dialogs.showFuncFamTree(ev, func_name, col_id, function(tree_msg) {
+                    console.log(func_name + ' calling back from tree display--' + tree_msg);
                 });
 
                 ev.stopPropagation();
                 ev.preventDefault();
+            }
+
+            // context menu open
+            scope.openMenu = function(e, i) {
+                scope.selectColumn(e, i);
+            }
+
+            // context menu close
+            scope.closeMenu = function(e, i) {
+                scope.selected = undefined;
+            }
+
+            scope.selectColumn = function(e, i) {
+                scope.selected = {func_name: i.key, column_id: i.column_id};
+
+                e.stopPropagation();
+                e.preventDefault();
             }
 
             scope.addSelected = function(ev, cand, dest, usr) {

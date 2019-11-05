@@ -169,11 +169,10 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
 
-    this.showFuncFamTree = function(ev, func, cb) {
+    this.showFuncFamTree = function(ev, func, col_id, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-famTree.html',
-            //templateUrl: 'app/components/proteinFam/htmls/tree-labels.html',
             targetEvent: ev,
             clickOutsideToClose: true,
             controller: ['$scope', '$http',
@@ -218,7 +217,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 jQuery('#foregroundColorButton').colorpicker({color: $s.opts.foregroundColor});
                 jQuery('#backgroundColorButton').colorpicker({color: $s.opts.backgroundColor});
                 d3.select("#phyd3").text("Loading...");
-                d3.xml("/app/components/proteinFam/xmls/example.xml", "application/xml",
+                var xml_file = "/app/components/proteinFam/xmls/" + func + ".xml";
+                d3.xml(xml_file, "application/xml",
                 function(xml) {
                     d3.select("#phyd3").text(null);
                     var tree = phyd3.phyloxml.parse(xml);

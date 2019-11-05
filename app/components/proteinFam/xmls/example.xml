@@ -964,7 +964,7 @@
      </data>
     </label>
     <label type="color">
-      <name>GeneGroup</name>
+      <name>Annotation</name>
       <data tag="property" ref="resistance"/>
     </label>
   </labels>

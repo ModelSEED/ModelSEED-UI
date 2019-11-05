@@ -114,6 +114,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
     var subsysFileName = wsPath.split('/').pop();
     var captions = [];
 
+    // loading the subsystem data (in json format)
     $s.loading = true;
     if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
         $s.subsysData = WS.cached.subsystem;
@@ -137,13 +138,14 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             WS.cached.subsystem = $s.subsysData;
             WS.cached.subsysName = $s.subsysName;
 
-            // table header
+            // subsystem table header
             captions = res.data.data[0];
             $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
             for (var k=1; k<captions.length; k++) {
-                $s.subsysHeader[k] = {label: captions[k], key: captions[k], formatter: function(row) {
+                $s.subsysHeader[k] = {label: captions[k], key: captions[k], column_id: k, formatter: function(row) {
                     return '<span>'+row+'</span>';
-            }}}
+                }
+            }}
             WS.cached.subsysHeader = $s.subsysHeader;
             $s.loading = false;
         })

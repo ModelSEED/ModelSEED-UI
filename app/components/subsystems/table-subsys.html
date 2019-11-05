@@ -52,14 +52,17 @@
                     ng-click="sortBy($event, header[0].key)">{{::header[0].label}}
                 </th>
                 <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
-                    ng-dblclick="headerDblClick($event, h.key)">{{::h.label}}
+                    ng-class="{active: selected.index == $index}"
+                    context-menu="openMenu($event, h)"
+                    context-menu-close="closeMenu($event, h)"
+                    data-target="dropdown-menu-target">{{::h.label}}
                 </th>
-                <!--th sortable ng-repeat="h in header track by $index" col-id="{{h.key}}">{{::h.label}}</th-->
             </tr>
             <tr ng-repeat="row in data.slice(0,1)">
                 <th class="stickyrow" ng-repeat="h in header" style="border: 1px solid black;">
                     <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
-                    <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                    <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )"
+                        ng-click="$event.stopPropagation();">
                         {{::row[h.key]}}
                     </a>
 
@@ -87,6 +90,24 @@
         </tr>
         </tbody>
     </table>
+
+    <!-- right click dropdown context menu -->
+    <div class="dropdown position-fixed" id="dropdown-menu-target" style="z-index: 5">
+        <ul class="dropdown-menu" role="menu">
+            <li>
+                <!--a role="menuitem" tabindex="1" ng-click="headerDblClick($event, selected.func_name)"-->
+                <a role="menuitem" tabindex="1" ng-click="headerDblClick($event, 'first')">
+                   view family tree 1
+                </a>
+            </li>
+            <li>
+                <!--a role="menuitem" tabindex="2" ng-click="headerDblClick($event, selected.func_name)"-->
+                <a role="menuitem" tabindex="2" ng-click="headerDblClick($event, 'second')">
+                    view family tree 2
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <div ng-if="!loading && filtered.length == 0" class="item-not-found">
         No item found
