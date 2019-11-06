@@ -1447,7 +1447,6 @@ function($compile, $stateParams) {
                     col_id = cell_info['col_id'];
                 scope.sel_cand = document.getElementById(can_id);
 
-                //alert(JSON.stringify(scope.dataClone[row_id+1][col_id]['candidates'][scope.sel_cand.selectedIndex]));
                 Dialogs.showGene(ev, scope.dataClone[row_id+1][col_id]["candidates"][scope.sel_cand.selectedIndex],
                 function(gene) {
                     console.log('modified gene object: ', JSON.stringify(gene));
@@ -1463,18 +1462,70 @@ function($compile, $stateParams) {
             scope.selected = {};
 
             scope.headerDblClick = function(ev, func_name, col_id, usr) {
-                var tree_data = scope.treeDataClone;
                 if(func_name == 'first')
-                    func_name = 'example';
+                    func_name = 'example_1';
+                else if(func_name == 'second')
+                    func_name = 'example_2';
                 else
                     func_name = 'labels';
 
+                updateAnnotationInTree(func_name, col_id);
                 Dialogs.showFuncFamTree(ev, func_name, col_id, function(tree_msg) {
                     console.log(func_name + ' calling back from tree display--' + tree_msg);
                 });
 
                 ev.stopPropagation();
                 ev.preventDefault();
+            }
+
+            // Modify the XML data structure according to the annotations in column (col_id)
+            function updateAnnotationInTree(func, col_id) {
+                var caps = scope.dataClone[0];
+                var xmldoc = scope.treeDataClone;
+                // get the `phylogeny` node as the root
+                var tree_root = xmldoc.firstChild.childNodes[1];
+                var can_arr = [], cur_arr = [], pre_arr = [];
+                var dKeys = Object.keys(scope.dataClone);
+                for (var r=2; r<dKeys.length; r++) { // r=2 skip header and rxn rows
+                    can_arr = scope.dataClone[r][col_id]["candidates"];
+                    cur_arr = scope.dataClone[r][col_id]["curation"];
+                    pre_arr = scope.dataClone[r][col_id]["prediction"];
+
+                    traverse(tree_root, 'name', can_arr, cur_arr, pre_arr);
+                }
+            }
+
+            // run through the annotation arrays to find gene_name matches
+            // looping through these three arrays--if gene is in cur_arr, then green color
+            // will be assigned to that the 'clade' node; if gene is in pre_arr, then blue
+            // color will be assigned to that the 'clade' node; if gene is not in either
+            // cur_arr or pre_arr, red color will be assigned to that the 'clade' node;
+            // otherwise, black color will be assigned to that the 'clade' node.
+            function traverse(tree, tagName, can_arr, cur_arr, pre_arr) {
+                if (tree.childElementCount > 0) {
+                    var nodes = tree.getElementsByTagName(tagName)
+                    for (var i=0; i<nodes.length; i++) {
+                        if (nodes[i].childNodes.length > 0) {
+                            var gene_name = nodes[i].innerHTML;
+                            var parnt = nodes[i].parentNode;
+                            var ele1 = document.createElement('events');
+                            var ele10 = document.createElement('speciations');
+                            ele10.appendChild(documnet.createTextNode('1'));
+                            ele1.appendChild(ele10);
+                            var ele2 = document.createElement('property');
+                            ele2.setAttribute('ref', 'resistance');
+                            ele2.setAttribute('datatype', 'xsd:string');
+                            ele2.setAttribute('applies_to', 'clade');
+                            var txt = document.createTextNode('green');
+                            ele2.appendChild(txt);
+                            parnt.appendChild(ele1);
+                            parnt.appendChild(ele2);
+                        }
+                    }
+                    console.log(tree);
+                }
+                else
+                    console.log(tree);
             }
 
             // context menu open
@@ -1488,8 +1539,7 @@ function($compile, $stateParams) {
             }
 
             scope.selectColumn = function(e, i) {
-                scope.selected = {func_name: i.key, column_id: i.column_id};
-
+                scope.selected = {func_name: i.key, col_id: i.column_id};
                 e.stopPropagation();
                 e.preventDefault();
             }
