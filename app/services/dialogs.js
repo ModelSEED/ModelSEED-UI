@@ -169,7 +169,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
 
-    this.showFuncFamTree = function(ev, func, col_id, cb) {
+    this.showFuncFamTree = function(ev, func, phyloxml, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-famTree.html',
@@ -217,13 +217,25 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 jQuery('#foregroundColorButton').colorpicker({color: $s.opts.foregroundColor});
                 jQuery('#backgroundColorButton').colorpicker({color: $s.opts.backgroundColor});
                 d3.select("#phyd3").text("Loading...");
-                var xml_file = "/app/components/proteinFam/xmls/" + func + ".xml";
+
+                //console.log('xml string from xmldoc outerHTML:\n' + phyloxml.firstChild.outerHTML);
+                /* passing the phyloxml doc to phyd3.phylogram.build directly
+                   instead of through d3.xml call yet still passing the phyloxml doc does NOT work
+                d3.select("#phyd3").text(null);
+                var tree = phyd3.phyloxml.parse(phyloxml);
+                phyd3.phylogram.build("#phyd3", tree, $s.opts);
+                */
+                //**for reading the test.xml file and then in the callback pass phyloxml doc WORKS!
+                xml_file = "app/components/proteinFam/xmls/test.xml";
                 d3.xml(xml_file, "application/xml",
                 function(xml) {
+                    // console.log('\nxml string from xml file reading:\n' + xml.firstChild.outerHTML);
                     d3.select("#phyd3").text(null);
-                    var tree = phyd3.phyloxml.parse(xml);
+                    //var tree = phyd3.phyloxml.parse(xml);
+                    var tree = phyd3.phyloxml.parse(phyloxml);
                     phyd3.phylogram.build("#phyd3", tree, $s.opts);
                 });
+                //*/
 
                 $s.cancel = function(){
                     cb(func + ' tree displayed');

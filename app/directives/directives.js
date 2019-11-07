@@ -1462,15 +1462,8 @@ function($compile, $stateParams) {
             scope.selected = {};
 
             scope.headerDblClick = function(ev, func_name, col_id, usr) {
-                if(func_name == 'first')
-                    func_name = 'example_1';
-                else if(func_name == 'second')
-                    func_name = 'example_2';
-                else
-                    func_name = 'labels';
-
-                updateAnnotationInTree(func_name, col_id);
-                Dialogs.showFuncFamTree(ev, func_name, col_id, function(tree_msg) {
+                var xmldoc = updateAnnotationInTree(func_name, col_id);
+                Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
                     console.log(func_name + ' calling back from tree display--' + tree_msg);
                 });
 
@@ -1481,18 +1474,53 @@ function($compile, $stateParams) {
             // Modify the XML data structure according to the annotations in column (col_id)
             function updateAnnotationInTree(func, col_id) {
                 var caps = scope.dataClone[0];
-                var xmldoc = scope.treeDataClone;
-                // get the `phylogeny` node as the root
-                var tree_root = xmldoc.firstChild.childNodes[1];
+                var xmldoc = scope.treeDataClone.cloneNode(true);
                 var can_arr = [], cur_arr = [], pre_arr = [];
                 var dKeys = Object.keys(scope.dataClone);
-                for (var r=2; r<dKeys.length; r++) { // r=2 skip header and rxn rows
-                    can_arr = scope.dataClone[r][col_id]["candidates"];
-                    cur_arr = scope.dataClone[r][col_id]["curation"];
-                    pre_arr = scope.dataClone[r][col_id]["prediction"];
+                for (var r=1; r<dKeys.length-1; r++) { // r=1 skip header
+                    var row_col = 'row' + r.toString() + '_col' + col_id.toString();
+                    var can_id = 'can_' + row_col, cur_id = 'cur_' + row_col, pre_id = 'pre_' + row_col;
+                    if (document.getElementById(can_id) !== null)
+                        can_arr = document.getElementById(can_id).options;
+                    if (document.getElementById(cur_id) !== null)
+                        cur_arr = document.getElementById(cur_id).options;
+                    if (document.getElementById(pre_id) !== null)
+                        pre_arr = document.getElementById(pre_id).options;
 
-                    traverse(tree_root, 'name', can_arr, cur_arr, pre_arr);
+                    if (can_arr != [])
+                        xmldoc = mapAnnotations(xmldoc, 'name', can_arr, cur_arr, pre_arr);
                 }
+                // After all annotations have been updated with new xml nodes added, append the last:
+                var lbls = xmldoc.createElement('labels');
+                var lbl1 = xmldoc.createElement('label');
+                var nm1 = xmldoc.createElement('name');
+                var txt1 = xmldoc.createTextNode('Score');
+                nm1.appendChild(txt1);
+                lbl1.appendChild(nm1);
+                var dt1 = xmldoc.createElement('data');
+                dt1.setAttribute('tag', 'events');
+                dt1.setAttribute('ref', 'speciations');
+                lbl1.appendChild(dt1);
+                lbl1.setAttribute('type', 'text');
+                lbls.appendChild(lbl1);
+
+                var lbl2 = xmldoc.createElement('label');
+                var nm2 = xmldoc.createElement('name');
+                var txt2 = xmldoc.createTextNode('Annotation');
+                nm2.appendChild(txt2);
+                lbl2.appendChild(nm2);
+                var dt2 = xmldoc.createElement('data');
+                dt2.setAttribute('tag', 'property');
+                dt2.setAttribute('ref', 'resistance');
+                lbl2.appendChild(dt2);
+                lbl2.setAttribute('type', 'color');
+
+                lbls.appendChild(lbl2);
+                xmldoc.getElementsByTagName('phyloxml')[0].appendChild(lbls);
+
+                // console.log(xmldoc.documentElement.innerHTML);
+                // console.log(xmldoc.documentElement.outerHTML);
+                return xmldoc;
             }
 
             // run through the annotation arrays to find gene_name matches
@@ -1501,31 +1529,61 @@ function($compile, $stateParams) {
             // color will be assigned to that the 'clade' node; if gene is not in either
             // cur_arr or pre_arr, red color will be assigned to that the 'clade' node;
             // otherwise, black color will be assigned to that the 'clade' node.
-            function traverse(tree, tagName, can_arr, cur_arr, pre_arr) {
+            function mapAnnotations(xmldoc, tagName, can_arr, cur_arr, pre_arr) {
+                // get the `phylogeny` node as the root
+                var tree = xmldoc.firstChild.childNodes[1];
                 if (tree.childElementCount > 0) {
-                    var nodes = tree.getElementsByTagName(tagName)
+                    var nodes = tree.getElementsByTagName(tagName);
+                    var can_genes = [], cur_genes = [], pre_genes = [];
+                    for (var k1=0; k1<can_arr.length; k1++) {
+                        can_genes[k1] = can_arr[k1].text;
+                    }
+                    for (var k2=0; k2<cur_arr.length; k2++) {
+                        cur_genes[k2] = cur_arr[k2].text;
+                    }
+                    for (var k3=0; k3<pre_arr.length; k3++) {
+                        pre_genes[k3] = pre_arr[k3].text;
+                    }
                     for (var i=0; i<nodes.length; i++) {
                         if (nodes[i].childNodes.length > 0) {
                             var gene_name = nodes[i].innerHTML;
                             var parnt = nodes[i].parentNode;
-                            var ele1 = document.createElement('events');
-                            var ele10 = document.createElement('speciations');
-                            ele10.appendChild(documnet.createTextNode('1'));
-                            ele1.appendChild(ele10);
-                            var ele2 = document.createElement('property');
-                            ele2.setAttribute('ref', 'resistance');
-                            ele2.setAttribute('datatype', 'xsd:string');
-                            ele2.setAttribute('applies_to', 'clade');
-                            var txt = document.createTextNode('green');
-                            ele2.appendChild(txt);
-                            parnt.appendChild(ele1);
-                            parnt.appendChild(ele2);
+                            var colr = '', score = 0;
+                            for (var j=0; j<can_genes.length; j++) {
+                                var can_gene = can_genes[j];
+                                if (gene_name.indexOf(can_gene) >= 0) {
+                                    // found gene in annotation
+                                    colr = 'red'; // default color, not in curation or prediction
+                                    if (cur_genes.includes(can_gene)) {
+                                        colr = 'green';
+                                        score = can_arr[j]['value'];
+                                        break;
+                                    }
+                                    else if (pre_genes.includes(can_gene)) {
+                                        color = 'blue';
+                                        score = can_arr[j]['value'];
+                                        break;
+                                    }
+                                }
+                            }
+                            if (colr !== '') {
+                                var ele1 = xmldoc.createElement('events');
+                                var ele10 = xmldoc.createElement('speciations');
+                                ele10.appendChild(xmldoc.createTextNode(score.toString()));
+                                ele1.appendChild(ele10);
+                                var ele2 = xmldoc.createElement('property');
+                                ele2.setAttribute('ref', 'resistance');
+                                ele2.setAttribute('datatype', 'xsd:string');
+                                ele2.setAttribute('applies_to', 'clade');
+                                var txt = xmldoc.createTextNode(colr);
+                                ele2.appendChild(txt);
+                                parnt.appendChild(ele1);
+                                parnt.appendChild(ele2);
+                            }
                         }
                     }
-                    console.log(tree);
                 }
-                else
-                    console.log(tree);
+                return xmldoc;
             }
 
             // context menu open
@@ -1622,10 +1680,10 @@ function($compile, $stateParams) {
                 scope.saveInProgress = true;
 
                 scope.onSave(Object.values(scope.dataClone))
-                        .then(function(res) {
-                            scope.saveInProgress = false;
-                            scope.dataSaved = true;
-                        })
+                .then(function(res) {
+                    scope.saveInProgress = false;
+                    scope.dataSaved = true;
+                })
             }
 
             scope.saveAs = function($ev) {
@@ -1635,13 +1693,12 @@ function($compile, $stateParams) {
                 Dialogs.saveAs($ev,
                     function(newName){
                         scope.onSaveAs(Object.values(scope.dataClone), newName)
-                                .then(function() {
-                                    scope.saveAsInProgres = false;
-                                    scope.dataSaved = true;
-                                });
+                        .then(function() {
+                            scope.saveAsInProgres = false;
+                            scope.dataSaved = true;
+                        });
                     },
                     function() {
-
                 });
             }
 

@@ -157,15 +157,15 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
 
     // loading the family tree data (in extendable phyloxml format)
     $s.xml_loading = true;
-    xml_wsPath = wsPath.split('/').slice(0, 2);
-    xml_wsPath = xml_wsPath.join('/') + '/xmls/example.xml';
+    $s.phyloxml_wsPath = wsPath.split('/').slice(0, 2);
+    $s.phyloxml_wsPath = $s.phyloxml_wsPath.join('/') + '/xmls/example.xml';
     if (WS.cached.protFam) {
         $s.protFam = WS.cached.protFam;
         $s.xmlDataClone = WS.cached.xmlDataClone;
         $s.xmlMeta = WS.cached.xmlMeta;
         $s.xml_loading = false;
     } else {
-        WS.get(xml_wsPath)
+        WS.get($s.phyloxml_wsPath)
         .then(function(res) {
             var xml_str = res.data,
                 xmlMeta_str = res.meta;
@@ -214,6 +214,18 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
             .then(function(res) {
                 Dialogs.showComplete('Saved subsystem data to ', newName);
                 $state.go('app.subsystem', {path: folder+newName});
+            }).catch(function(e) {
+                console.log('error', e)
+                self.showError('Save error', e.error.message.slice(0,30)+'...')
+            })
+    }
+
+    $s.savePhyloXML = function(data) {
+        return WS.save($s.phyloxml_wsPath, data, {overwrite: true, userMeta: {}, type: 'unspecified'})
+            .then(function() {
+                $s.xmlDataClone = Object.assign({}, data);
+                Dialogs.showComplete('Saved phyloxml', $s.subsysName);
+                // $state.go('app.subsystem', wsPath);
             }).catch(function(e) {
                 console.log('error', e)
                 self.showError('Save error', e.error.message.slice(0,30)+'...')

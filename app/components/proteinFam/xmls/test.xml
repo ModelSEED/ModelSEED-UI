@@ -10,17 +10,6 @@
             <branch_length>0.02532</branch_length>
           </clade>
           <clade>
-            <name>ZM04G38950</name>
-            <branch_length>0.18765</branch_length>
-            <taxonomy>
-              <code>Monocots</code>
-            </taxonomy>
-            <events>
-              <speciations>1</speciations>
-            </events>
-            <property ref="resistance" datatype="xsd:string" applies_to="clade">green</property>
-          </clade>
-          <clade>
             <name>Ptrichocarpa_v3_1_Ptrichocarpa|_|Potri.010G209000.2</name>
             <branch_length>0.01849</branch_length>
           </clade>
@@ -124,7 +113,7 @@
                   <clade>
                     <name>Alyrata_v2_1_Alyrata|_|AL5G36560.t1</name>
                     <branch_length>0.00242</branch_length>
-                  </clade>
+                  <events xmlns=""><speciations>0.99</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.99</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.99</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                   <clade>
                     <branch_length>0.0009</branch_length>
                     <clade>
@@ -160,7 +149,7 @@
                 <clade>
                   <name>Alyrata_v2_1_Alyrata|_|AL8G43470.t1</name>
                   <branch_length>0.00804</branch_length>
-                </clade>
+                <events xmlns=""><speciations>0.98</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.98</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.98</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                 <clade>
                   <name>Athaliana_Araport11_Athaliana|_|AT5G65750.1</name>
                   <branch_length>0.0094</branch_length>
@@ -553,7 +542,7 @@
                           <clade>
                             <name>Acomosus_v3_Acomosus|_|Aco000539.1</name>
                             <branch_length>0.04654</branch_length>
-                          </clade>
+                          <events xmlns=""><speciations>0.845</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.845</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.845</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                           <clade>
                             <branch_length>0.0541</branch_length>
                             <clade>
@@ -647,7 +636,7 @@
                                 <clade>
                                   <name>Acomosus_v3_Acomosus|_|Aco010969.1</name>
                                   <branch_length>0.20734</branch_length>
-                                </clade>
+                                <events xmlns=""><speciations>0.665</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.665</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.665</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                                 <clade>
                                   <name>Macuminata_v1_Macuminata|_|GSMUA_Achr10T26720_001</name>
                                   <branch_length>0.07606</branch_length>
@@ -658,7 +647,7 @@
                                 <clade>
                                   <name>Acomosus_v3_Acomosus|_|Aco001481.1</name>
                                   <branch_length>0.0557</branch_length>
-                                </clade>
+                                <events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                                 <clade>
                                   <branch_length>0.05867</branch_length>
                                   <clade>
@@ -748,11 +737,11 @@
                       <clade>
                         <name>Ahypochondriacus_v2_1_Ahypochondriacus|_|AH000559-RA</name>
                         <branch_length>0.03031</branch_length>
-                      </clade>
+                      <events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.83</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                       <clade>
                         <name>Ahypochondriacus_v2_1_Ahypochondriacus|_|AH001827-RA</name>
                         <branch_length>0.01292</branch_length>
-                      </clade>
+                      <events xmlns=""><speciations>0.81</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.81</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property><events xmlns=""><speciations>0.81</speciations></events><property xmlns="" ref="resistance" datatype="xsd:string" applies_to="clade">red</property></clade>
                     </clade>
                     <clade>
                       <branch_length>0.01191</branch_length>
@@ -957,4 +946,14 @@
       </clade>
     </clade>
   </phylogeny>
+<labels xmlns="">
+<label type="text">
+<name>Score</name>
+<data tag="events" ref="speciations"/>
+</label>
+<label type="color">
+<name>Annotation</name>
+<data tag="property" ref="resistance"/>
+</label>
+</labels>
 </phyloxml>
