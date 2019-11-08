@@ -21,7 +21,7 @@
       </div>
     </md-toolbar>
 
-    <md-content layout-margin layout-padding>
+    <md-dialog-content layout-margin layout-padding style="max-width:900px;max-height:880px;">
         <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
             
     <div class="row phyd3-controls well">
@@ -269,11 +269,10 @@
             </div>
         </div>
         <!--The family tree section-->
-        <section>
-            <div id="phyd3" class="col-xs-9"></div>
-        </section>
+        <div id="phyd3" class="col-xs-9"></div>
+
         <!--The footer portion of the left panel-->
-        <div class="col-sm-9 text-center">
+        <div class="text-center">
             Use your mouse to drag, zoom and modify the tree. <br />
             <strong>Actions:</strong><br />
             CTRL + wheel = scale Y, ALT + wheel = scale X<br />
@@ -350,7 +349,7 @@
         </div>
       </div>
     </div>
-    </md-content>
+</md-dialog-content>
 
     <div class="md-actions">
         <md-button ng-click="cancel()">
