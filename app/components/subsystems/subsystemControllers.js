@@ -93,9 +93,9 @@ function($s, $sParams, WS, MS, Auth,
 
 
 .controller('Subsystem',
-['$scope', '$state', 'WS', '$stateParams',
+['$scope', '$state', 'WS', 'MS','$stateParams',
  'uiTools', 'Dialogs', '$http', 'Auth',
-function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
+function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     $s.subsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'Genome'}};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
@@ -110,6 +110,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
 
     // determine if user can copy this media to their workspace
     if (wsPath.split('/')[1] !== Auth.user) $s.canCopy = true;
+    $s.subsysPath = wsPath.split('/').slice(0, 3).join('/');
 
     var subsysFileName = wsPath.split('/').pop();
     var captions = [];
@@ -147,48 +148,21 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
                 }
             }}
             WS.cached.subsysHeader = $s.subsysHeader;
+
+            $s.loadingMySubsysTrees = true;
+            MS.listMySubsysFamilyTrees($s.subsysName)
+            .then(function(subsysTrees) {
+                $s.mySubsysFamTrees = subsysTrees;
+                $s.loadingMySubsysTrees = false;
+            }).catch(function(e) {
+                $s.loadingMySubsysTrees = false;
+                $s.mySubsysFamTrees = [];
+            })
             $s.loading = false;
         })
         .catch(function(error) {
             console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
             $s.loading = false;
-        });
-    }
-
-    // loading the family tree data (in extendable phyloxml format)
-    $s.xml_loading = true;
-    $s.phyloxml_wsPath = wsPath.split('/').slice(0, 2);
-    $s.phyloxml_wsPath = $s.phyloxml_wsPath.join('/') + '/xmls/example.xml';
-    if (WS.cached.protFam) {
-        $s.protFam = WS.cached.protFam;
-        $s.xmlDataClone = WS.cached.xmlDataClone;
-        $s.xmlMeta = WS.cached.xmlMeta;
-        $s.xml_loading = false;
-    } else {
-        WS.get($s.phyloxml_wsPath)
-        .then(function(res) {
-            var xml_str = res.data,
-                xmlMeta_str = res.meta;
-            $s.xml_loading = false;
-
-            // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
-            // XMLSerializer will do the reverse of DOMParser
-            // var oSerializer = new XMLSerializer();
-            // var sXML = oSerializer.serializeToString(xmldoc);
-            var p = new DOMParser();
-            var xmlDoc = p.parseFromString(xml_str, 'application/xml');
-            console.log(xmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
-                        : xmlDoc.documentElement.nodeName);
-            $s.protFam = xmlDoc;
-            WS.cached.protFam = $s.protFam;
-            $s.xmlDataClone = $s.protFam.cloneNode(true);
-            WS.cached.xmlDataClone = $s.xmlDataClone;
-            $s.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
-            WS.cached.xmlMeta = $s.xmlMeta;
-        })
-        .catch(function(error) {
-            console.log('Caught an error: "' + error);
-            $s.xml_loading = false;
         });
     }
 

@@ -53,7 +53,7 @@
                 </th>
                 <th ng-repeat="h in header.slice(1) track by $index" col-id="{{h.key}}"
                     ng-class="{active: selected.index == $index}"
-                    context-menu="openMenu($event, h)"
+                    context-menu="openMenu($event, $index, h)"
                     context-menu-close="closeMenu($event, h)"
                     data-target="dropdown-menu-target">{{::h.label}}
                 </th>
@@ -94,19 +94,9 @@
     <!-- right click dropdown context menu -->
     <div class="dropdown position-fixed" id="dropdown-menu-target" style="z-index: 5">
         <ul class="dropdown-menu" role="menu">
-            <li>
-                <a role="menuitem" tabindex="1" ng-click="headerDblClick($event, selected.func_name, selected.col_id)">
-                   view family tree 1
-                </a>
-            </li>
-            <li>
-                <a role="menuitem" tabindex="2" ng-click="headerDblClick($event, selected.func_name, selected.col_id)">
-                    view family tree 2
-                </a>
-            </li>
-            <li>
-                <a role="menuitem" tabindex="2" ng-click="headerDblClick($event, selected.func_name, selected.col_id)">
-                    view family tree 3
+            <li ng-repeat="t in famtrees">
+                <a role="menuitem" tabindex="1" ng-click="familyTreeSelect($event, t.treeName, selected.func_name, selected.col_id)">
+                   {{t.treeName}}
                 </a>
             </li>
         </ul>

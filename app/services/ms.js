@@ -453,6 +453,38 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 timestamp: Date.parse(obj[3]),
                 value: obj[0].toLowerCase() }
     }
+
+    this.mySubsysFamilyTrees = null; //cached subsystem family tree data
+    this.listMySubsysFamilyTrees = function(subsysName) {
+        if (self.mySubsysFamilyTrees != null) {
+            var d = $q.defer();
+            d.resolve(self.mySubsysFamilyTrees)
+            return d.promise;
+        }
+
+        var phyloxmlPath = '/'+Auth.user+'/subsystems/phyloxmls/';
+        var p = phyloxmlPath + subsysName;
+        return WS.listL(p)
+            .then(function(objs) {
+                if (!objs) return [];
+                var subsystrees = [];
+                for (var i=0; i<objs.length; i++) {
+                    var obj = objs[i];
+                    subsystrees.push(self.sanitizeSubsysTree(obj));
+                }
+                self.mySubsystemFamilyTrees = subsystrees;
+                return subsystrees;
+            })
+    }
+
+    this.sanitizeSubsysTree = function(obj) {
+        return {treeName: obj[0].split('.')[0],
+                path: obj[2]+obj[0],
+                type: obj[7].type ? obj[7].type : 'unspecified',
+                timestamp: Date.parse(obj[3]),
+                value: obj[0].toLowerCase() }
+    }
+
     // if new object already exists in cache,
     // delete old, replace with new
     function syncCache(data, model) {

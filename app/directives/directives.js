@@ -1403,15 +1403,17 @@ function($compile, $stateParams) {
 }])
 
 .directive('ngTableSubsystem',
-            ['$sce', '$compile', 'Dialogs', function($sce, $compile, Dialogs) {
+            ['$sce', '$compile', 'Dialogs', 'WS', function($sce, $compile, Dialogs, WS) {
     return {
         restrict: 'EA',
         scope: {
             header: '=tableHeader',
             data: '=tableData',
+            subsysName: '=tableSubsysName',
+            subsysPath: '=tableSubsysPath',
             dataClone: '=tableDataClone',
-            treeDataClone: '=tableTreeDataClone',
             opts: '=tableOpts',
+            famtrees: '=tableFamtrees',
             loading: '=tableLoading',
             cellClick: '=tableCellClick',
             hoverClass: '@tableRowHoverClass',
@@ -1433,6 +1435,7 @@ function($compile, $stateParams) {
             scope.selectedCell = '';
             scope.dataModified = false;
             scope.dataSaved = true;
+            scope.treeData = null;
 
             scope.showGene = function(ev, item) {
                 Dialogs.showGene(ev, path(item.name))
@@ -1461,20 +1464,52 @@ function($compile, $stateParams) {
 
             scope.selected = {};
 
-            scope.headerDblClick = function(ev, func_name, col_id, usr) {
-                var xmldoc = updateAnnotationInTree(func_name, col_id);
-                Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
-                    console.log(func_name + ' calling back from tree display--' + tree_msg);
-                });
-
+            scope.familyTreeSelect = function(ev, treeName, func_name, col_id, usr) {
+                loadPhyloXML(treeName);
+                if (scope.treeData != null) {
+                    var xmldoc = updateAnnotationInTree(func_name, col_id);
+                    Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
+                        console.log(func_name + ' calling back from tree display--' + tree_msg);
+                    });
+                }
                 ev.stopPropagation();
                 ev.preventDefault();
             }
 
+            function loadPhyloXML(treeName) {
+                // loading the family tree data (in extendable phyloxml format)
+                // assuming that the family tree(s) are saved in the subfolder of
+                // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
+                var phyloxmlDoc = null;
+                var phyloxml_wsPath = scope.subsysPath + '/phyloxmls/';
+                //phyloxml_wsPath = $s.phyloxml_wsPath.join('/') + '/xmls/example.xml';
+                phyloxml_wsPath = phyloxml_wsPath + scope.subsysName + '/' + treeName + '.xml';
+                WS.get(phyloxml_wsPath)
+                .then(function(res) {
+                    var xml_str = res.data,
+                        xmlMeta_str = res.meta;
+                    xml_loading = false;
+
+                    // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
+                    // XMLSerializer will do the reverse of DOMParser
+                    // var oSerializer = new XMLSerializer();
+                    // var sXML = oSerializer.serializeToString(xmldoc);
+                    var p = new DOMParser();
+                    phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
+                    console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
+                                : phyloxmlDoc.documentElement.nodeName);
+                    scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
+                    scope.treeData = phyloxmlDoc;
+                })
+                .catch(function(error) {
+                    console.log('Caught an error: "' + error.error.message);
+                });
+                return phyloxmlDoc;
+            }
+
             // Modify the XML data structure according to the annotations in column (col_id)
             function updateAnnotationInTree(func, col_id) {
-                var caps = scope.dataClone[0];
-                var xmldoc = scope.treeDataClone.cloneNode(true);
+                var xmldoc = scope.treeData.cloneNode(true);
                 var can_arr = [], cur_arr = [], pre_arr = [];
                 var dKeys = Object.keys(scope.dataClone);
                 for (var r=1; r<dKeys.length-1; r++) { // r=1 skip header
@@ -1587,8 +1622,8 @@ function($compile, $stateParams) {
             }
 
             // context menu open
-            scope.openMenu = function(e, i) {
-                scope.selectColumn(e, i);
+            scope.openMenu = function(e, i, h) {
+                scope.selectColumn(e, i, h);
             }
 
             // context menu close
@@ -1596,8 +1631,8 @@ function($compile, $stateParams) {
                 scope.selected = undefined;
             }
 
-            scope.selectColumn = function(e, i) {
-                scope.selected = {func_name: i.key, col_id: i.column_id};
+            scope.selectColumn = function(e, i, h) {
+                scope.selected = {func_name: h.key, col_id: h.column_id};
                 e.stopPropagation();
                 e.preventDefault();
             }
