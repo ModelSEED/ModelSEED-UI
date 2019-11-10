@@ -1477,6 +1477,7 @@ function($compile, $stateParams) {
             }
 
             function loadPhyloXML(treeName) {
+                scope.loadingFamTree = true;
                 // loading the family tree data (in extendable phyloxml format)
                 // assuming that the family tree(s) are saved in the subfolder of
                 // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
@@ -1500,11 +1501,12 @@ function($compile, $stateParams) {
                                 : phyloxmlDoc.documentElement.nodeName);
                     scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
                     scope.treeData = phyloxmlDoc;
+                    scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
                     console.log('Caught an error: "' + error.error.message);
+                    scope.loadingFamTree = false;
                 });
-                return phyloxmlDoc;
             }
 
             // Modify the XML data structure according to the annotations in column (col_id)

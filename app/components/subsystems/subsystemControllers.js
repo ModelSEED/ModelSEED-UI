@@ -117,6 +117,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
 
     // loading the subsystem data (in json format)
     $s.loading = true;
+    $s.loadingMySubsysTrees = true;
     if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
         $s.subsysData = WS.cached.subsystem;
         $s.subsysDataClone = WS.cached.subsystemClone;
@@ -149,15 +150,16 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
             }}
             WS.cached.subsysHeader = $s.subsysHeader;
 
-            $s.loadingMySubsysTrees = true;
             MS.listMySubsysFamilyTrees($s.subsysName)
             .then(function(subsysTrees) {
-                $s.mySubsysFamTrees = subsysTrees;
-                $s.loadingMySubsysTrees = false;
-            }).catch(function(e) {
-                $s.loadingMySubsysTrees = false;
-                $s.mySubsysFamTrees = [];
-            })
+                    $s.mySubsysFamTrees = subsysTrees;
+                    $s.loadingMySubsysTrees = false;
+                    WS.cached.subsysFamTrees = $s.mySubsysFamTrees;
+                }).catch(function(e) {
+                    $s.loadingMySubsysTrees = false;
+                    $s.mySubsysFamTrees = [];
+                });
+
             $s.loading = false;
         })
         .catch(function(error) {

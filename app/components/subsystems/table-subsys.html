@@ -23,7 +23,7 @@
                 search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
             </md-input-container>
 
-            <md-progress-circular ng-if="loading"
+            <md-progress-circular ng-if="loading || loadingFamTree"
                                 md-mode="indeterminate"
                                 class="table-loading"
                                 md-diameter="40">
@@ -102,7 +102,7 @@
         </ul>
     </div>
 
-    <div ng-if="!loading && filtered.length == 0" class="item-not-found">
+    <div ng-if="!loading && !loadingFamTree && filtered.length == 0" class="item-not-found">
         No item found
     </div>
 </div>
