@@ -1436,6 +1436,7 @@ function($compile, $stateParams) {
             scope.dataModified = false;
             scope.dataSaved = true;
             scope.treeData = null;
+            scope.selected = {};
 
             scope.showGene = function(ev, item) {
                 Dialogs.showGene(ev, path(item.name))
@@ -1462,34 +1463,24 @@ function($compile, $stateParams) {
                 ev.preventDefault();
             }
 
-            scope.selected = {};
-
-            scope.familyTreeSelect = function(ev, treeName, func_name, col_id, usr) {
-                loadPhyloXML(treeName);
-                if (scope.treeData != null) {
-                    var xmldoc = updateAnnotationInTree(func_name, col_id);
-                    Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
-                        console.log(func_name + ' calling back from tree display--' + tree_msg);
-                    });
-                }
+            scope.familyTreeSelected = function(ev, treeName, func_name, col_id, usr) {
+                loadPhyloXML(ev, treeName, func_name, col_id, updateAnnotationInTree);
                 ev.stopPropagation();
                 ev.preventDefault();
             }
 
-            function loadPhyloXML(treeName) {
-                scope.loadingFamTree = true;
+            function loadPhyloXML(ev, treeName, func_name, col_id, cb) {
                 // loading the family tree data (in extendable phyloxml format)
                 // assuming that the family tree(s) are saved in the subfolder of
                 // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
+                scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
                 var phyloxml_wsPath = scope.subsysPath + '/phyloxmls/';
-                //phyloxml_wsPath = $s.phyloxml_wsPath.join('/') + '/xmls/example.xml';
                 phyloxml_wsPath = phyloxml_wsPath + scope.subsysName + '/' + treeName + '.xml';
                 WS.get(phyloxml_wsPath)
                 .then(function(res) {
                     var xml_str = res.data,
                         xmlMeta_str = res.meta;
-                    xml_loading = false;
 
                     // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
                     // XMLSerializer will do the reverse of DOMParser
@@ -1501,10 +1492,15 @@ function($compile, $stateParams) {
                                 : phyloxmlDoc.documentElement.nodeName);
                     scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
                     scope.treeData = phyloxmlDoc;
+                    var xmldoc = cb(func_name, col_id);
+                    Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
+                        alert(func_name + ' calling back from tree display--' + tree_msg);
+                    });
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
                     console.log('Caught an error: "' + error.error.message);
+                    scope.treeData = null;
                     scope.loadingFamTree = false;
                 });
             }
@@ -1528,35 +1524,35 @@ function($compile, $stateParams) {
                         xmldoc = mapAnnotations(xmldoc, 'name', can_arr, cur_arr, pre_arr);
                 }
                 // After all annotations have been updated with new xml nodes added, append the last:
-                var lbls = xmldoc.createElement('labels');
-                var lbl1 = xmldoc.createElement('label');
-                var nm1 = xmldoc.createElement('name');
+                var root_node = xmldoc.getElementsByTagName('phyloxml')[0];
+                var lbls = xmldoc.createElement('labels', root_node.namespaceURI);
+                var lbl1 = xmldoc.createElement('label', root_node.namespaceURI);
+                var nm1 = xmldoc.createElement('name', root_node.namespaceURI);
                 var txt1 = xmldoc.createTextNode('Score');
                 nm1.appendChild(txt1);
                 lbl1.appendChild(nm1);
-                var dt1 = xmldoc.createElement('data');
+                var dt1 = xmldoc.createElement('data', root_node.namespaceURI);
                 dt1.setAttribute('tag', 'events');
                 dt1.setAttribute('ref', 'speciations');
                 lbl1.appendChild(dt1);
                 lbl1.setAttribute('type', 'text');
                 lbls.appendChild(lbl1);
 
-                var lbl2 = xmldoc.createElement('label');
-                var nm2 = xmldoc.createElement('name');
+                var lbl2 = xmldoc.createElement('label', root_node.namespaceURI);
+                var nm2 = xmldoc.createElement('name', root_node.namespaceURI);
                 var txt2 = xmldoc.createTextNode('Annotation');
                 nm2.appendChild(txt2);
                 lbl2.appendChild(nm2);
-                var dt2 = xmldoc.createElement('data');
+                var dt2 = xmldoc.createElement('data', root_node.namespaceURI);
                 dt2.setAttribute('tag', 'property');
                 dt2.setAttribute('ref', 'resistance');
                 lbl2.appendChild(dt2);
                 lbl2.setAttribute('type', 'color');
 
                 lbls.appendChild(lbl2);
-                xmldoc.getElementsByTagName('phyloxml')[0].appendChild(lbls);
+                root_node.appendChild(lbls);
 
-                // console.log(xmldoc.documentElement.innerHTML);
-                // console.log(xmldoc.documentElement.outerHTML);
+                console.log(xmldoc.firstChild.innerHTML);
                 return xmldoc;
             }
 
@@ -1569,6 +1565,7 @@ function($compile, $stateParams) {
             function mapAnnotations(xmldoc, tagName, can_arr, cur_arr, pre_arr) {
                 // get the `phylogeny` node as the root
                 var tree = xmldoc.firstChild.childNodes[1];
+                var namespc = tree.namespaceURI;
                 if (tree.childElementCount > 0) {
                     var nodes = tree.getElementsByTagName(tagName);
                     var can_genes = [], cur_genes = [], pre_genes = [];
@@ -1585,30 +1582,23 @@ function($compile, $stateParams) {
                         if (nodes[i].childNodes.length > 0) {
                             var gene_name = nodes[i].innerHTML;
                             var parnt = nodes[i].parentNode;
-                            var colr = '', score = 0;
+                            var colr = '', score = '';''
                             for (var j=0; j<can_genes.length; j++) {
                                 var can_gene = can_genes[j];
-                                if (gene_name.indexOf(can_gene) >= 0) {
-                                    // found gene in annotation
+                                if (gene_name.indexOf(can_gene) >= 0) {// found gene in annotation
                                     colr = 'red'; // default color, not in curation or prediction
-                                    if (cur_genes.includes(can_gene)) {
-                                        colr = 'green';
-                                        score = can_arr[j]['value'];
-                                        break;
-                                    }
-                                    else if (pre_genes.includes(can_gene)) {
-                                        color = 'blue';
-                                        score = can_arr[j]['value'];
-                                        break;
-                                    }
+                                    if (cur_genes.includes(can_gene)) colr = 'green';
+                                    else if (pre_genes.includes(can_gene)) colr = 'blue';
+                                    score = can_arr[j]['value'];
+                                    break;
                                 }
                             }
                             if (colr !== '') {
-                                var ele1 = xmldoc.createElement('events');
-                                var ele10 = xmldoc.createElement('speciations');
+                                var ele1 = xmldoc.createElementNS(namespc, 'events');
+                                var ele10 = xmldoc.createElementNS(namespc, 'speciations');
                                 ele10.appendChild(xmldoc.createTextNode(score.toString()));
                                 ele1.appendChild(ele10);
-                                var ele2 = xmldoc.createElement('property');
+                                var ele2 = xmldoc.createElementNS(namespc, 'property');
                                 ele2.setAttribute('ref', 'resistance');
                                 ele2.setAttribute('datatype', 'xsd:string');
                                 ele2.setAttribute('applies_to', 'clade');

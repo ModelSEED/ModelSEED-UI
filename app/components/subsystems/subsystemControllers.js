@@ -117,13 +117,15 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
 
     // loading the subsystem data (in json format)
     $s.loading = true;
-    $s.loadingMySubsysTrees = true;
+    $s.listMySubsysTrees = true;
     if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
         $s.subsysData = WS.cached.subsystem;
         $s.subsysDataClone = WS.cached.subsystemClone;
         $s.subsysHeader = WS.cached.subsysHeader;
         $s.subsysName = WS.cached.subsysName;
+        $s.mySubsysFamTrees = WS.cached.subsysFamTrees;
         $s.loading = false;
+        $s.listMySubsysTrees = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
@@ -150,20 +152,21 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
             }}
             WS.cached.subsysHeader = $s.subsysHeader;
 
+            // family trees for the subsystem with the name of $.subsysName
             MS.listMySubsysFamilyTrees($s.subsysName)
             .then(function(subsysTrees) {
                     $s.mySubsysFamTrees = subsysTrees;
-                    $s.loadingMySubsysTrees = false;
-                    WS.cached.subsysFamTrees = $s.mySubsysFamTrees;
+                    WS.cached.subsysFamTrees = subsysTrees;
                 }).catch(function(e) {
-                    $s.loadingMySubsysTrees = false;
                     $s.mySubsysFamTrees = [];
                 });
 
+            $s.listMySubsysTrees = false;
             $s.loading = false;
         })
         .catch(function(error) {
             console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+            $s.listMySubsysTrees = false;
             $s.loading = false;
         });
     }

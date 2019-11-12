@@ -438,7 +438,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 var subsys = [];
                 for (var i=0; i<objs.length; i++) {
                     var obj = objs[i];
-                    subsys.push(self.sanitizeSubsystem(obj));
+                    if (obj[0] !== 'phyloxmls')
+                        subsys.push(self.sanitizeSubsystem(obj));
                 }
 
                 self.mySubsystems = subsys;

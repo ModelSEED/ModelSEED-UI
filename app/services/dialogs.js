@@ -226,7 +226,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 phyd3.phylogram.build("#phyd3", tree, $s.opts);
                 */
                 //**for reading the test.xml file and then in the callback pass phyloxml doc WORKS!
-                xml_file = "app/components/proteinFam/xmls/test.xml";
+                xml_file = "app/components/proteinFam/xmls/phylo_example_1.xml";
                 d3.xml(xml_file, "application/xml",
                 function(xml) {
                     // console.log('\nxml string from xml file reading:\n' + xml.firstChild.outerHTML);
