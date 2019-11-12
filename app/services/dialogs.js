@@ -174,7 +174,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-famTree.html',
             targetEvent: ev,
-            clickOutsideToClose: true,
+            clickOutsideToClose: false,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;
@@ -229,7 +229,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 xml_file = "app/components/proteinFam/xmls/phylo_example_1.xml";
                 d3.xml(xml_file, "application/xml",
                 function(xml) {
-                    // console.log('\nxml string from xml file reading:\n' + xml.firstChild.outerHTML);
                     d3.select("#phyd3").text(null);
                     //var tree = phyd3.phyloxml.parse(xml);
                     var tree = phyd3.phyloxml.parse(phyloxml);

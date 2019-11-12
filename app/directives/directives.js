@@ -1494,7 +1494,7 @@ function($compile, $stateParams) {
                     scope.treeData = phyloxmlDoc;
                     var xmldoc = cb(func_name, col_id);
                     Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
-                        alert(func_name + ' calling back from tree display--' + tree_msg);
+                        // alert(func_name + ' calling back from tree display--' + tree_msg);
                     });
                     scope.loadingFamTree = false;
                 })
@@ -1552,7 +1552,7 @@ function($compile, $stateParams) {
                 lbls.appendChild(lbl2);
                 root_node.appendChild(lbls);
 
-                console.log(xmldoc.firstChild.innerHTML);
+                // console.log(xmldoc.firstChild.innerHTML);
                 return xmldoc;
             }
 
@@ -1589,7 +1589,8 @@ function($compile, $stateParams) {
                                     colr = 'red'; // default color, not in curation or prediction
                                     if (cur_genes.includes(can_gene)) colr = 'green';
                                     else if (pre_genes.includes(can_gene)) colr = 'blue';
-                                    score = can_arr[j]['value'];
+                                    // Because `sepeciations` can only take nonNegativeInteger values
+                                    score = Number(can_arr[j]['value']).toFixed(2)*100;
                                     break;
                                 }
                             }
