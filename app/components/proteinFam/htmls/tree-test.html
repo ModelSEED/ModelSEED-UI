@@ -5,7 +5,8 @@
     <title>PhyD3-test</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href="libs/css/bootstrap-material-design.min.css" />
+    <!--link rel="stylesheet" href="libs/css/bootstrap-material-design.min.css" /-->
+    <link rel="stylesheet" href="../css/bootstrap-material-design.min.css" /
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -60,7 +61,8 @@
         }
         function loadTree() {
             d3.select("#phyd3").html("Loading...<br /><br />");
-            var fid = "../xmls/bcl_2.xml".trim();
+            // var fid = "../xmls/phylo_example_1.xml".trim();
+            var fid = "../xmls/sample.xml".trim();
             
             d3.xml(fid, function(xml) { //d3.xml("submissions/"+fid, function(xml) {
                     d3.select("#phyd3").text(null);

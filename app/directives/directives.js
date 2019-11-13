@@ -1508,11 +1508,11 @@ function($compile, $stateParams) {
             // Modify the XML data structure according to the annotations in column (col_id)
             function updateAnnotationInTree(func, col_id) {
                 var xmldoc = scope.treeData.cloneNode(true);
-                var can_arr = [], cur_arr = [], pre_arr = [];
                 var dKeys = Object.keys(scope.dataClone);
                 for (var r=1; r<dKeys.length-1; r++) { // r=1 skip header
                     var row_col = 'row' + r.toString() + '_col' + col_id.toString();
                     var can_id = 'can_' + row_col, cur_id = 'cur_' + row_col, pre_id = 'pre_' + row_col;
+                    var can_arr = [], cur_arr = [], pre_arr = [];
                     if (document.getElementById(can_id) !== null)
                         can_arr = document.getElementById(can_id).options;
                     if (document.getElementById(cur_id) !== null)
@@ -1528,7 +1528,7 @@ function($compile, $stateParams) {
                 var lbls = xmldoc.createElement('labels', root_node.namespaceURI);
                 var lbl1 = xmldoc.createElement('label', root_node.namespaceURI);
                 var nm1 = xmldoc.createElement('name', root_node.namespaceURI);
-                var txt1 = xmldoc.createTextNode('Score');
+                var txt1 = xmldoc.createTextNode('Percentage Score');
                 nm1.appendChild(txt1);
                 lbl1.appendChild(nm1);
                 var dt1 = xmldoc.createElement('data', root_node.namespaceURI);
@@ -1544,15 +1544,15 @@ function($compile, $stateParams) {
                 nm2.appendChild(txt2);
                 lbl2.appendChild(nm2);
                 var dt2 = xmldoc.createElement('data', root_node.namespaceURI);
-                dt2.setAttribute('tag', 'property');
-                dt2.setAttribute('ref', 'resistance');
+                dt2.setAttribute('tag', 'colortag');
+                // dt2.setAttribute('ref', 'resistance');
                 lbl2.appendChild(dt2);
                 lbl2.setAttribute('type', 'color');
 
                 lbls.appendChild(lbl2);
                 root_node.appendChild(lbls);
 
-                // console.log(xmldoc.firstChild.innerHTML);
+                //console.log(xmldoc.firstChild.innerHTML);
                 return xmldoc;
             }
 
@@ -1567,7 +1567,6 @@ function($compile, $stateParams) {
                 var tree = xmldoc.firstChild.childNodes[1];
                 var namespc = tree.namespaceURI;
                 if (tree.childElementCount > 0) {
-                    var nodes = tree.getElementsByTagName(tagName);
                     var can_genes = [], cur_genes = [], pre_genes = [];
                     for (var k1=0; k1<can_arr.length; k1++) {
                         can_genes[k1] = can_arr[k1].text;
@@ -1578,17 +1577,17 @@ function($compile, $stateParams) {
                     for (var k3=0; k3<pre_arr.length; k3++) {
                         pre_genes[k3] = pre_arr[k3].text;
                     }
+                    var nodes = tree.getElementsByTagName(tagName);
                     for (var i=0; i<nodes.length; i++) {
                         if (nodes[i].childNodes.length > 0) {
                             var gene_name = nodes[i].innerHTML;
                             var parnt = nodes[i].parentNode;
-                            var colr = '', score = '';''
+                            var colr = '', score = 0;
                             for (var j=0; j<can_genes.length; j++) {
-                                var can_gene = can_genes[j];
-                                if (gene_name.indexOf(can_gene) >= 0) {// found gene in annotation
-                                    colr = 'red'; // default color, not in curation or prediction
-                                    if (cur_genes.includes(can_gene)) colr = 'green';
-                                    else if (pre_genes.includes(can_gene)) colr = 'blue';
+                                if (gene_name.indexOf(can_genes[j]) >= 0) {// found gene in annotation
+                                    colr = '0xFF0000';  // 'red'; // default color, not in curation or prediction
+                                    if (cur_genes.includes(can_genes[j])) colr = '0x00FF00';  // 'green';
+                                    else if (pre_genes.includes(can_genes[j])) colr = '0x0000FF';  // 'blue';
                                     // Because `sepeciations` can only take nonNegativeInteger values
                                     score = Number(can_arr[j]['value']).toFixed(2)*100;
                                     break;
@@ -1605,8 +1604,11 @@ function($compile, $stateParams) {
                                 ele2.setAttribute('applies_to', 'clade');
                                 var txt = xmldoc.createTextNode(colr);
                                 ele2.appendChild(txt);
+                                var ele3 = xmldoc.createElementNS(namespc, 'colortag');
+                                ele3.appendChild(txt);
                                 parnt.appendChild(ele1);
                                 parnt.appendChild(ele2);
+                                parnt.appendChild(ele3);
                             }
                         }
                     }

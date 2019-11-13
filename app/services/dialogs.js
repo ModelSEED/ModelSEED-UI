@@ -191,6 +191,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $s.opts = {
                     dynamicHide: true,
                     height: 800,
+                    popupWidth: 300,
                     invertColors: false,
                     lineupNodes: true,
                     showDomains: true,

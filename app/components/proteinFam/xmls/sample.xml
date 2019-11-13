@@ -10180,11 +10180,11 @@
   </graphs>
   <labels>
     <label type="text">
-      <name show="1">Text label</name>
+      <name show="1">Text Label</name>
       <data tag="category"/>
     </label>
     <label type="color">
-      <name>Color label</name>
+      <name>Color Label</name>
       <data tag="colortag"/>
     </label>
   </labels>
