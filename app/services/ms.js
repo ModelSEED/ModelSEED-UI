@@ -455,16 +455,17 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 value: obj[0].toLowerCase() }
     }
 
-    this.mySubsysFamilyTrees = null; //cached subsystem family tree data
-    this.listMySubsysFamilyTrees = function(subsysName) {
-        if (self.mySubsysFamilyTrees != null) {
+    this.allSubsysFamilyTrees = null; //cached subsystem family tree data
+    this.listAllSubsysFamilyTrees = function(subsysName) {
+        if (self.allSubsysFamilyTrees != null) {
             var d = $q.defer();
-            d.resolve(self.mySubsysFamilyTrees)
+            d.resolve(self.allSubsysFamilyTrees)
             return d.promise;
         }
 
-        var phyloxmlPath = '/'+Auth.user+'/subsystems/phyloxmls/';
-        var p = phyloxmlPath + subsysName;
+        //var phyloxmlPath = '/'+Auth.user+'/subsystems/phyloxmls/';
+        var phyloxmlPath = '/'+Auth.user+'/subsystems/families';
+        var p = phyloxmlPath; // + '/' + subsysName;
         return WS.listL(p)
             .then(function(objs) {
                 if (!objs) return [];
@@ -473,7 +474,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                     var obj = objs[i];
                     subsystrees.push(self.sanitizeSubsysTree(obj));
                 }
-                self.mySubsystemFamilyTrees = subsystrees;
+                self.allSubsystemFamilyTrees = subsystrees;
                 return subsystrees;
             })
     }

@@ -1413,7 +1413,8 @@ function($compile, $stateParams) {
             subsysPath: '=tableSubsysPath',
             dataClone: '=tableDataClone',
             opts: '=tableOpts',
-            famtrees: '=tableFamtrees',
+            allFamtrees: '=tableAllFamtrees',
+            myFamtrees: '=tableMyFamtrees',
             loading: '=tableLoading',
             cellClick: '=tableCellClick',
             hoverClass: '@tableRowHoverClass',
@@ -1475,8 +1476,9 @@ function($compile, $stateParams) {
                 // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
                 scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
-                var phyloxml_wsPath = scope.subsysPath + '/phyloxmls/';
-                phyloxml_wsPath = phyloxml_wsPath + scope.subsysName + '/' + treeName + '.xml';
+                //var phyloxml_wsPath = scope.subsysPath + '/phyloxmls/';
+                var phyloxml_wsPath = scope.subsysPath + '/families/';
+                phyloxml_wsPath = phyloxml_wsPath + treeName;
                 WS.get(phyloxml_wsPath)
                 .then(function(res) {
                     var xml_str = res.data,
@@ -1564,7 +1566,7 @@ function($compile, $stateParams) {
             // otherwise, black color will be assigned to that the 'clade' node.
             function mapAnnotations(xmldoc, tagName, can_arr, cur_arr, pre_arr) {
                 // get the `phylogeny` node as the root
-                var tree = xmldoc.firstChild.childNodes[1];
+                var tree = xmldoc.firstChild.childNodes[0];
                 var namespc = tree.namespaceURI;
                 if (tree.childElementCount > 0) {
                     var can_genes = [], cur_genes = [], pre_genes = [];

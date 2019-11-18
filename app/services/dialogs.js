@@ -189,7 +189,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 ga('send', 'pageview');
 
                 $s.opts = {
-                    dynamicHide: true,
+                    dynamicHide: false,
                     height: 800,
                     popupWidth: 300,
                     invertColors: false,
@@ -202,7 +202,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     showLength: false,
                     showNodeNames: true,
                     showNodesType: "only leaf",
-                    showPhylogram: false,
+                    showPhylogram: true,
                     showTaxonomy: true,
                     showFullTaxonomy: false,
                     showSequences: false,

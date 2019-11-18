@@ -94,7 +94,7 @@
     <!-- right click dropdown context menu -->
     <div class="dropdown position-fixed" id="dropdown-menu-target" style="z-index: 5">
         <ul class="dropdown-menu" role="menu">
-            <li ng-repeat="t in famtrees">
+            <li ng-repeat="t in allFamtrees">
                 <a role="menuitem" tabindex="1" ng-click="familyTreeSelected($event, t.treeName, selected.func_name, selected.col_id)">
                    {{t.treeName}}
                 </a>

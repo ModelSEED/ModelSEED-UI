@@ -108,24 +108,24 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
         return false;
     }
 
-    // determine if user can copy this media to their workspace
-    if (wsPath.split('/')[1] !== Auth.user) $s.canCopy = true;
+    // Find the subsystem file path
     $s.subsysPath = wsPath.split('/').slice(0, 3).join('/');
-
     var subsysFileName = wsPath.split('/').pop();
-    var captions = [];
+    $s.captions = [];
 
     // loading the subsystem data (in json format)
     $s.loading = true;
-    $s.listMySubsysTrees = true;
-    if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
+    $s.listAllSubsysFamTrees = true;
+    if (WS.cached.subsystem) {
         $s.subsysData = WS.cached.subsystem;
         $s.subsysDataClone = WS.cached.subsystemClone;
         $s.subsysHeader = WS.cached.subsysHeader;
         $s.subsysName = WS.cached.subsysName;
-        $s.mySubsysFamTrees = WS.cached.subsysFamTrees;
+        $s.allSubsysFamTrees = WS.cached.allSubsysFamTrees;
+        $s.captions = WS.cached.captions;
+        $s.mySubsysFamTrees = WS.cached.mySubsysFamTrees;
         $s.loading = false;
-        $s.listMySubsysTrees = false;
+        $s.listAllSubsysTrees = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
@@ -137,36 +137,36 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
             WS.cached.subsystemClone = $s.subsysDataClone;
 
             // html-masked data
-            $s.subsysData = parseSubsysData(res.data.data);
+            parseSubsysData(res.data.data);
             $s.subsysData = buildHtmlContent($s.subsysData);
+            WS.cached.captions = $s.captions;
+            WS.cached.mySubsysFamTrees = $s.mySubsysFamTrees;
             WS.cached.subsystem = $s.subsysData;
             WS.cached.subsysName = $s.subsysName;
 
             // subsystem table header
-            captions = res.data.data[0];
-            $s.subsysHeader[0] = {label: captions[0], key: captions[0]};
-            for (var k=1; k<captions.length; k++) {
-                $s.subsysHeader[k] = {label: captions[k], key: captions[k], column_id: k, formatter: function(row) {
+            $s.subsysHeader[0] = {label: $s.captions[0], key: $s.captions[0]};
+            for (var k=1; k<$s.captions.length; k++) {
+                $s.subsysHeader[k] = {label: $s.captions[k], key: $s.captions[k], column_id: k, formatter: function(row) {
                     return '<span>'+row+'</span>';
                 }
             }}
             WS.cached.subsysHeader = $s.subsysHeader;
 
-            // family trees for the subsystem with the name of $.subsysName
-            MS.listMySubsysFamilyTrees($s.subsysName)
+            //family trees for the subsystem with the name of $.subsysName
+            MS.listAllSubsysFamilyTrees($s.subsysName)
             .then(function(subsysTrees) {
-                    $s.mySubsysFamTrees = subsysTrees;
-                    WS.cached.subsysFamTrees = subsysTrees;
+                    $s.allSubsysFamTrees = subsysTrees;
+                    WS.cached.allSubsysFamTrees = subsysTrees;
                 }).catch(function(e) {
-                    $s.mySubsysFamTrees = [];
+                    $s.allSubsysFamTrees = [];
                 });
-
-            $s.listMySubsysTrees = false;
+            $s.listAllSubsysFamTrees = false;
             $s.loading = false;
         })
         .catch(function(error) {
             console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
-            $s.listMySubsysTrees = false;
+            $s.listAllSubsysTrees = false;
             $s.loading = false;
         });
     }
@@ -214,7 +214,15 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // Parse the given data for the subsystem data structure
     function parseSubsysData(obj_data) {
         // convert the subsystem data into an array of objects from an array of arrays
-        var caps = obj_data[0];
+        var caps = ["Genome"], families = {};
+        // fetching the subsystem head captions and family trees
+        for (var i0=1; i0<obj_data[0].length; i0++) {
+            var obj = obj_data[0][i0];
+            if (typeof obj === 'object') {
+                caps.push(obj.role);
+                families[obj.role] = obj.families;
+            }
+        }
         var data = [];
         for (var i=1; i<obj_data.length; i++) {
             data[i-1] = {};
@@ -222,7 +230,9 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
                 data[i-1][caps[j]] = obj_data[i][j];
             }
         }
-        return data;
+        $s.captions = caps;
+        $s.subsysData = data;
+        $s.mySubsysFamTrees = families;
     }
 
     // With the given data from the NEW subsystem data structure, build the html content for table cells
@@ -299,18 +309,20 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     }
 
     function rxnRow(indata0) {
-        // re-write the reaction row by adding the anchor links
+        // re-write the reaction row by adding the anchor links and allowing blank rxns
         var key_arr = Object.keys(indata0);
         for (var k = 1; k<key_arr.length; k++) {
             var key = key_arr[k],
                 val = indata0[key];
             var lnk_arr = [];
-            if (key != 'Genome') {
+            if (val !== '') {
                 val.split(',').forEach(function(item, index) {
                     lnk_arr.push('<a ui-sref="app.rxn({id: \''+item+'\'})" target="_blank">'+item+'</a>');
                 })
                 indata0[key] = lnk_arr.join(',');
             }
+            else
+            indata0[key] = "<span></span>";
         }
         return indata0;
     }
@@ -406,7 +418,7 @@ function($s, WS, $stateParams) {
         return false;
     }
 
-    var captions = [];
+    $s.captions = [];
 
     $s.loading = true;
     if (WS.cached.genericData) {
@@ -418,10 +430,9 @@ function($s, WS, $stateParams) {
         .then(function(res) {
             $s.genericName = res.data.name;
             $s.genericData = parseGenericData($s.genericName, res.data.data);
-            captions = res.data.data[0];
             WS.cached.gnericData = $s.genericData;
-            for (var k=0; k<captions.length; k++) {
-                $s.genericHeader[k] = {label: captions[k], key: captions[k]};
+            for (var k=0; k<$s.captions.length; k++) {
+                $s.genericHeader[k] = {label: $s.captions[k], key: $s.captions[k]};
             }
             WS.cached.genericHeader = $s.genericHeader;
             $s.loading = false;
