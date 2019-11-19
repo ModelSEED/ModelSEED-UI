@@ -1466,13 +1466,13 @@ function($compile, $stateParams) {
             }
 
             scope.familyTreeSelected = function(ev, treeName, func_name, col_id, usr) {
-                fetchDownloadURL(treeName);
-                loadPhyloXML(ev, treeName, func_name, col_id, updateAnnotationInTree);
+                loadPhyloXML(treeName, func_name, col_id, updateAnnotationInTree);
+                fetchDownloadURL(ev, treeName, func_name);
                 ev.stopPropagation();
                 ev.preventDefault();
             }
 
-            function fetchDownloadURL(tree_name) {
+            function fetchDownloadURL(ev, tree_name, func_name) {
                 var fpath = '';
                 for (var i=0; i<scope.allFamtrees.length; i++) {
                     if (scope.allFamtrees[i]['treeName'] == tree_name) {
@@ -1483,10 +1483,14 @@ function($compile, $stateParams) {
                 WS.getDownloadURL(fpath)
                 .then(function(res) {
                     scope.downloadURL = res[0];
+                    Dialogs.showFuncFamTree(ev, func_name, scope.downloadURL, scope.xmldoc,
+                        function(tree_msg) {
+                        // alert(func_name + ' calling back from tree display--' + tree_msg);
+                    });
                 })
             }
 
-            function loadPhyloXML(ev, treeName, func_name, col_id, cb) {
+            function loadPhyloXML(treeName, func_name, col_id, cb) {
                 // loading the family tree data (in extendable phyloxml format)
                 // assuming that the family tree(s) are saved in the subfolder of
                 // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
@@ -1510,11 +1514,7 @@ function($compile, $stateParams) {
                                 : phyloxmlDoc.documentElement.nodeName);
                     scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
                     scope.treeData = phyloxmlDoc;
-                    var xmldoc = cb(func_name, col_id);
-                    Dialogs.showFuncFamTree(ev, func_name, scope.downloadURL, xmldoc,
-                        function(tree_msg) {
-                        // alert(func_name + ' calling back from tree display--' + tree_msg);
-                    });
+                    scope.xmldoc = cb(func_name, col_id);
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {

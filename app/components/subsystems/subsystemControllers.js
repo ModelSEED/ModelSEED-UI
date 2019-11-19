@@ -116,7 +116,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // loading the subsystem data (in json format)
     $s.loading = true;
     $s.listAllSubsysFamTrees = true;
-    if (WS.cached.subsystem) {
+    if (WS.cached.subsystem && WS.cached.subsysName===subsysFileName) {
         $s.subsysData = WS.cached.subsystem;
         $s.subsysDataClone = WS.cached.subsystemClone;
         $s.subsysHeader = WS.cached.subsysHeader;

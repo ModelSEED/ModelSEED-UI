@@ -210,6 +210,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     backgroundColor: "#f5f5f5",
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
+                    treeWidth: 200,
                 };
                 $s.downloadURL = download_path;
 
