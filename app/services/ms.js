@@ -465,8 +465,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
 
         //var phyloxmlPath = '/'+Auth.user+'/subsystems/phyloxmls/';
         var phyloxmlPath = '/'+Auth.user+'/subsystems/families';
-        var p = phyloxmlPath; // + '/' + subsysName;
-        return WS.listL(p)
+        return WS.listL(phyloxmlPath)
             .then(function(objs) {
                 if (!objs) return [];
                 var subsystrees = [];

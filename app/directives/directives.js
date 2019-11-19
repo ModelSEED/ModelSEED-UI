@@ -1434,6 +1434,7 @@ function($compile, $stateParams) {
 
             // model: cell selection data
             scope.selectedCell = '';
+            scope.downloadURL = '';
             scope.dataModified = false;
             scope.dataSaved = true;
             scope.treeData = null;
@@ -1465,9 +1466,24 @@ function($compile, $stateParams) {
             }
 
             scope.familyTreeSelected = function(ev, treeName, func_name, col_id, usr) {
+                fetchDownloadURL(treeName);
                 loadPhyloXML(ev, treeName, func_name, col_id, updateAnnotationInTree);
                 ev.stopPropagation();
                 ev.preventDefault();
+            }
+
+            function fetchDownloadURL(tree_name) {
+                var fpath = '';
+                for (var i=0; i<scope.allFamtrees.length; i++) {
+                    if (scope.allFamtrees[i]['treeName'] == tree_name) {
+                        fpath = scope.allFamtrees[i]['path'];
+                        break;
+                    }
+                }
+                WS.getDownloadURL(fpath)
+                .then(function(res) {
+                    scope.downloadURL = res[0];
+                })
             }
 
             function loadPhyloXML(ev, treeName, func_name, col_id, cb) {
@@ -1495,7 +1511,8 @@ function($compile, $stateParams) {
                     scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
                     scope.treeData = phyloxmlDoc;
                     var xmldoc = cb(func_name, col_id);
-                    Dialogs.showFuncFamTree(ev, func_name, xmldoc, function(tree_msg) {
+                    Dialogs.showFuncFamTree(ev, func_name, scope.downloadURL, xmldoc,
+                        function(tree_msg) {
                         // alert(func_name + ' calling back from tree display--' + tree_msg);
                     });
                     scope.loadingFamTree = false;

@@ -169,7 +169,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
 
-    this.showFuncFamTree = function(ev, func, phyloxml, cb) {
+    this.showFuncFamTree = function(ev, func, download_path, phyloxml, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-famTree.html',
@@ -211,6 +211,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
                 };
+                $s.downloadURL = download_path;
 
                 // function load() -- the tree part
                 jQuery('#foregroundColor').val($s.opts.foregroundColor);

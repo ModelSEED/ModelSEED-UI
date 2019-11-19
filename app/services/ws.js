@@ -301,6 +301,10 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         $log.log('download response', res)
                         return res;
                     })
+                    .catch(function(error) {
+                        console.log('Caught an error from get_download_url: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
+                        return '';
+                    });
     }
 
     this.getPermissions = function(path) {
