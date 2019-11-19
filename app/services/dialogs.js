@@ -211,6 +211,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
                     treeWidth: 200,
+                    scaleX: 2,
+                    scaleY: 3,
                 };
                 $s.downloadURL = download_path;
 
