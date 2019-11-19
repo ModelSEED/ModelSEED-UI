@@ -1630,6 +1630,7 @@ function($compile, $stateParams) {
 
             scope.selectColumn = function(e, i, h) {
                 scope.selected = {func_name: h.key, col_id: h.column_id};
+                scope.famTrees = scope.myFamtrees[scope.selected.func_name];
                 e.stopPropagation();
                 e.preventDefault();
             }
