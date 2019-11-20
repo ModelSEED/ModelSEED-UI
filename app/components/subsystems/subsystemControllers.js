@@ -10,16 +10,19 @@ function($s, $sParams, WS, MS, Auth,
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
-    $s.mySubsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'timestamp', desc: true}};
+    $s.mySubsysOpts = {query: '', limit: 20, offset: 0, sort: {field: 'subsysName', desc: true}};
 
     $s.mySubsysHeader = [
         {label: 'Subsystem name', key: 'subsysName',
-         link: {
+          link: {
             state: 'app.subsystem',
             getOpts: function(row) {
-                return {path: row.path};
+                if (!row.isFolder)
+                    return {path: row.path};
+                else
+                    return {path: ''};
             }
-         }
+          }
         },
         {label: 'Modification Date', key: 'timestamp',
             formatter: function(row) {
@@ -96,7 +99,8 @@ function($s, $sParams, WS, MS, Auth,
 ['$scope', '$state', 'WS', 'MS','$stateParams',
  'uiTools', 'Dialogs', '$http', 'Auth',
 function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
-    $s.subsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'Genome'}};
+    // $s.subsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'Genome'}};
+    $s.subsysOpts = {query: '', offset: 0, sort: {field: 'Genome'}};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
     $s.subsysDataClone = [];

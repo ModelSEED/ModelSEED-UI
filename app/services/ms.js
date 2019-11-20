@@ -436,11 +436,8 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
             .then(function(objs) {
                 if (!objs) return [];
                 var subsys = [];
-                for (var i=0; i<objs.length; i++) {
-                    var obj = objs[i];
-                    if (obj[0] !== 'phyloxmls')
-                        subsys.push(self.sanitizeSubsystem(obj));
-                }
+                for (var i=0; i<objs.length; i++)
+                    subsys.push(self.sanitizeSubsystem(objs[i]));
 
                 self.mySubsystems = subsys;
                 return subsys;
@@ -451,6 +448,7 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
         return {subsysName: obj[0],
                 path: obj[2]+obj[0],
                 type: obj[7].type ? obj[7].type : 'unspecified',
+                isFolder: obj[8].is_folder,
                 timestamp: Date.parse(obj[3]),
                 value: obj[0].toLowerCase() }
     }

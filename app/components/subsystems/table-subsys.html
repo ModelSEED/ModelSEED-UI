@@ -30,7 +30,7 @@
             </md-progress-circular>
 
             <div ng-if="noPagination" layout="row" layout-align="start center">
-                {{data.length}} {{resultText}}
+                <p>(total {{data.length}} {{resultText}})</p>
             </div>
 
             <md-input-container
@@ -55,7 +55,8 @@
                     ng-class="{active: selected.index == $index}"
                     context-menu="openMenu($event, $index, h)"
                     context-menu-close="closeMenu($event, h)"
-                    data-target="dropdown-menu-target">{{::h.label}}
+                    data-target="dropdown-menu-target"
+                    title="Right click to view family tree(s)">{{::h.label}}
                 </th>
             </tr>
             <tr ng-repeat="row in data.slice(0,1)">

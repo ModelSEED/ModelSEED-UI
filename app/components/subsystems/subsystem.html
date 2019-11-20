@@ -5,12 +5,6 @@
             <a ui-sref="app.mySubsystems({tab: 'mine'})"> >My Subsystems</a>
         </div>
     </div>
-    <!--div class="h5">
-        <a href="app/components/proteinFam/htmls/proteinFamily-tree.html" target="_blank">Protein family (example)</a>
-        <a href="app/components/proteinFam/htmls/proteinFamily-tree-demo.html" target="_blank">Protein family (sample)</a>
-        <a href="app/components/proteinFam/htmls/tree-test.html" target="_blank">Protein family tree (test)</a>
-        <a href="app/components/proteinFam/htmls/tree-labels.html" target="_blank">Protein family tree (labels)</a>
-    </div-->
 </div>
 
 <hr class="no-margin">
@@ -28,6 +22,7 @@
     on-save="save"
     on-save-as="saveAs"
     on-save-phyloxml="savePhyloXML"
-    table-placeholder="Search subsystems">
+    table-result-text="genomes"
+    table-placeholder="Search subsystem">
 </ng-table-subsystem>
 <!-- end passing ... -->

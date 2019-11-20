@@ -1430,7 +1430,7 @@ function($compile, $stateParams) {
             var ele = angular.element(elem);
             scope.htmlPath = 'app/components/subsystems/';
 
-            scope.noPagination = ('disablePagination' in attrs) ? true: false;
+            scope.noPagination = true; //('disablePagination' in attrs) ? true: false;
 
             // model: cell selection data
             scope.selectedCell = '';
@@ -2068,14 +2068,13 @@ function(Dialogs, $dialog) {
             scope.defaultBtnTemplate =  scope.defaultBtnTemplate ? scope.defaultBtnTemplate : 'Add';
 
             scope.noPagination = ('disablePagination' in attrs) ? true: false;
-
             scope.checkedItems = [];
 
             scope.checkItem = function(item) {
                 item.checked = item.checked ? false : true;
 
-                if (item.checked)
-                scope.checkedItems.push(item)
+                if (item.checked && !item.isFolder)
+                    scope.checkedItems.push(item)
                 else {
                     // remove from checked list
                     for (var i=0; i<scope.checkedItems.length; i++) {
