@@ -169,7 +169,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
 
-    this.showFuncFamTree = function(ev, func, download_path, phyloxml, cb) {
+    this.showFuncFamTree = function(ev, func, tree, download_path, phyloxml, cb) {
         ev.stopPropagation();
         $dialog.show({
             templateUrl: 'app/views/dialogs/show-famTree.html',
@@ -179,6 +179,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             function($s, $http) {
                 $self = $s;
                 $s.functionName = func;
+                $s.treeName = tree;
 
                 jQuery.noConflict();
                 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

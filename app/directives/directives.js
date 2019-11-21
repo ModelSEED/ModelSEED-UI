@@ -1483,7 +1483,7 @@ function($compile, $stateParams) {
                 WS.getDownloadURL(fpath)
                 .then(function(res) {
                     scope.downloadURL = res[0];
-                    Dialogs.showFuncFamTree(ev, func_name, scope.downloadURL, scope.xmldoc,
+                    Dialogs.showFuncFamTree(ev, func_name, tree_name, scope.downloadURL, scope.xmldoc,
                         function(tree_msg) {
                         // alert(func_name + ' calling back from tree display--' + tree_msg);
                     });
@@ -2039,8 +2039,7 @@ function(Dialogs, $dialog) {
          }
      }
   })
-
-.directive('ngTableSelector', function() {
+.directive('ngTableSelector', ['$state', '$stateParams', function($state, $stateParams) {
     return {
         restrict: 'EA',
         scope: {
@@ -2084,6 +2083,23 @@ function(Dialogs, $dialog) {
                 }
             }
 
+            scope.goTo = function(item, state) {
+                if (item.isFolder)
+                    $state.go('app.myData', {dir: item.path})
+                else {
+                    if (!state) var state = getState(item);
+                    if (state) {
+                        // models are special in that url is /model/<parent_dir_of_model>
+                        if (item.type === 'model') {
+                            var path =  item.path.slice(0, item.path.lastIndexOf('/') );
+                            $state.go(state, {path: path});
+                        } else {
+                            $state.go(state, {path: item.path });
+                        }
+                    }
+                }
+            }
+
             scope.submitInProgress = false;
             scope.submit = function(items) {
                 scope.submitInProgress = true;
@@ -2114,7 +2130,7 @@ function(Dialogs, $dialog) {
             }
        }
     }
- })
+}])
 
 // curenlty used for media editor
  .directive('ngTableEditor', ['$filter', 'Dialogs', function($filter, Dialogs) {

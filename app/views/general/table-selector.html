@@ -59,13 +59,18 @@
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
                         | limitTo : opts.limit : (opts.query ? 0 : opts.offset)">
             <td>
-                <md-checkbox aria-label="Check media" ng-checked="row.checked"
+                <md-checkbox ng-if="!row.isFolder" aria-label="Check item" ng-checked="row.checked"
                              ng-click="checkItem(row)" ng-class="{'md-warn': submitBtnType == 'remove'}"></md-checkbox>
+                <span ng-if="row.isFolder"><i class="fa fa-folder-o fa-2x soft"></i></span>
             </td>
             <td ng-repeat="h in header">
                 <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row)"></span>
 
-                <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
+                <a ng-if="h.hasOwnProperty('link') && !row.isFolder" ui-sref="{{h.link.state}}(h.link.getOpts(row))"
+                   ng-click="$event.stopPropagation();" title="Click to go to subsystem viewer">
+                    {{row[h.key]}}
+                </a>
+                <a ng-if="h.hasOwnProperty('link') && row.isFolder" ng-click="goTo(row)" title="Click to open folder">
                     {{row[h.key]}}
                 </a>
 
