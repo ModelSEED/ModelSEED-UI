@@ -211,8 +211,8 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
                     treeWidth: 200,
-                    scaleX: 2,
-                    scaleY: 3,
+                    scaleX: 1,
+                    scaleY: 3
                 };
                 $s.downloadURL = download_path;
 
@@ -234,16 +234,52 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 xml_file = "app/components/proteinFam/xmls/phylo_example_1.xml";
                 d3.xml(xml_file, "application/xml",
                 function(xml) {
-                    d3.select("#phyd3").text(null);
-                    //var tree = phyd3.phyloxml.parse(xml);
-                    var tree = phyd3.phyloxml.parse(phyloxml);
-                    phyd3.phylogram.build("#phyd3", tree, $s.opts);
+                    // d3.select("#phyd3").text(null);
+                    // var tree = phyd3.phyloxml.parse(xml);
+                    setContent($s.opts);
                 });
                 //*/
 
-                $s.cancel = function(){
+                $s.cancel = function() {
                     cb(func + ' tree displayed');
                     $dialog.hide();
+                }
+
+                $s.resetZoom = function() {
+                    // force setting the initialOpts to avoid its dynamic changing even from Object.assign({}, $s.opts)
+                    var initialOpts = {
+                        dynamicHide: false,
+                        height: 800,
+                        popupWidth: 300,
+                        invertColors: false,
+                        lineupNodes: true,
+                        showDomains: true,
+                        showDomainNames: false,
+                        showDomainColors: true,
+                        showGraphs: true,
+                        showGraphLegend: true,
+                        showLength: false,
+                        showNodeNames: true,
+                        showNodesType: "only leaf",
+                        showPhylogram: true,
+                        showTaxonomy: true,
+                        showFullTaxonomy: false,
+                        showSequences: false,
+                        showTaxonomyColors: true,
+                        backgroundColor: "#f5f5f5",
+                        foregroundColor: "#000000",
+                        nanColor: "#f5f5f5",
+                        treeWidth: 200,
+                        scaleX: 1,
+                        scaleY: 3
+                    };
+                    setContent(initialOpts);
+                }
+
+                function setContent(opts) {
+                    d3.select("#phyd3").text(null);
+                    var tree = phyd3.phyloxml.parse(phyloxml);
+                    phyd3.phylogram.build("#phyd3", tree, opts);
                 }
             }]
         })
