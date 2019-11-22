@@ -174,13 +174,14 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         ev.stopPropagation();
         $dialog.show({
             //parent: parentEl,
-            //multiple: true,
+            multiple: true,
             templateUrl: 'app/views/dialogs/show-famTree.html',
             targetEvent: ev,
             clickOutsideToClose: false,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;
+                $s.showTree = true;
                 $s.functionName = func;
                 $s.treeName = tree;
 
@@ -245,8 +246,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 //*/
 
                 $s.minimize = function() {
-                    $s.opts.height = 20;
-                    setContent($s.opts);
+                    $s.showTree = false;
+                }
+
+                $s.maximize = function() {
+                    $s.showTree = true;
                 }
 
                 $s.cancel = function() {

@@ -4,9 +4,10 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 <!--link rel="stylesheet" ng-href="app/components/proteinFam/css/bootstrap-material-design.min.css">
 <link rel="stylesheet" type="text/css" ng-href="app/components/proteinFam/css/googleapis_material_icons.css"-->
-<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 <md-dialog flex="90">
 
     <md-toolbar>
@@ -14,12 +15,18 @@
         <h4>Family tree "<b>{{treeName}}</b>" for "<b>{{functionName}}</b>"</h4>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
-          <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+          <md-icon class="material-icons" aria-label="Close window">close</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-show="showTree" ng-click="minimize()">
+          <md-icon class="material-icons" aria-label="Shrink window">minimize</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-show="!showTree" ng-click="maximize()">
+          <md-icon class="material-icons" aria-label="Enlarge window">maximize</md-icon>
         </md-button>
       </div>
     </md-toolbar>
 
-    <md-dialog-content layout-margin layout-padding style="max-width:900px;max-height:900px;">
+    <md-dialog-content ng-show="showTree" layout-margin layout-padding style="max-width:900px;height:500px;">
         <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
             
     <div class="row phyd3-controls well">
@@ -352,7 +359,7 @@
         </div>
       </div>
     </div>
-</md-dialog-content>
+    </md-dialog-content>
 
     <div class="md-actions">
         <md-button ng-click="cancel()">
