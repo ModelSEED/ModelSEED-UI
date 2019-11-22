@@ -1440,10 +1440,6 @@ function($compile, $stateParams) {
             scope.treeData = null;
             scope.selected = {};
 
-            scope.showGene = function(ev, item) {
-                Dialogs.showGene(ev, path(item.name))
-            }
-
             scope.cellDblClick = function(ev, row_col, usr) {
                 scope.selectedCell = row_col;
                 var can_id = 'can_' + row_col;
@@ -1480,14 +1476,16 @@ function($compile, $stateParams) {
                         break;
                     }
                 }
-                WS.getDownloadURL(fpath)
-                .then(function(res) {
-                    scope.downloadURL = res[0];
-                    Dialogs.showFuncFamTree(ev, func_name, tree_name, scope.downloadURL, scope.xmldoc,
-                        function(tree_msg) {
-                        // alert(func_name + ' calling back from tree display--' + tree_msg);
-                    });
-                })
+                if (fpath !== '') {
+                    WS.getDownloadURL(fpath)
+                    .then(function(res) {
+                        scope.downloadURL = res[0];
+                        Dialogs.showFuncFamTree(ev, func_name, tree_name, scope.downloadURL, scope.xmldoc,
+                            function(tree_msg) {
+                            // alert(func_name + ' calling back from tree display--' + tree_msg);
+                        });
+                    })
+                }
             }
 
             function loadPhyloXML(treeName, func_name, col_id, cb) {

@@ -170,8 +170,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
     }
 
     this.showFuncFamTree = function(ev, func, tree, download_path, phyloxml, cb) {
+        var parentEl = angular.element(document.body);
         ev.stopPropagation();
         $dialog.show({
+            //parent: parentEl,
+            //multiple: true,
             templateUrl: 'app/views/dialogs/show-famTree.html',
             targetEvent: ev,
             clickOutsideToClose: false,
@@ -211,7 +214,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     backgroundColor: "#f5f5f5",
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
-                    treeWidth: 200,
+                    treeWidth: 500,
                     scaleX: 1,
                     scaleY: 3
                 };
@@ -240,6 +243,11 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     setContent($s.opts);
                 });
                 //*/
+
+                $s.minimize = function() {
+                    $s.opts.height = 20;
+                    setContent($s.opts);
+                }
 
                 $s.cancel = function() {
                     cb(func + ' tree displayed');
@@ -270,7 +278,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                         backgroundColor: "#f5f5f5",
                         foregroundColor: "#000000",
                         nanColor: "#f5f5f5",
-                        treeWidth: 200,
+                        treeWidth: 500,
                         scaleX: 1,
                         scaleY: 3
                     };
