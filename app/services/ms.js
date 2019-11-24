@@ -453,15 +453,14 @@ function($http, $log, $cacheFactory, $q, MV, WS, config, Auth) {
                 value: obj[0].toLowerCase() }
     }
 
-    this.allSubsysFamilyTrees = null; //cached subsystem family tree data
-    this.listAllSubsysFamilyTrees = function(subsysName) {
+    this.allSubsysFamilyTrees = null; //cached family tree data
+    this.listAllSubsysFamilyTrees = function() {
         if (self.allSubsysFamilyTrees != null) {
             var d = $q.defer();
             d.resolve(self.allSubsysFamilyTrees)
             return d.promise;
         }
-
-        //var phyloxmlPath = '/'+Auth.user+'/subsystems/phyloxmls/';
+        // list all familiy trees under the subsystems/families folder
         var phyloxmlPath = '/'+Auth.user+'/subsystems/families';
         return WS.listL(phyloxmlPath)
             .then(function(objs) {

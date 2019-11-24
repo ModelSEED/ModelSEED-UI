@@ -4,7 +4,7 @@ angular.module('Biochem', [])
 function($http, $q, config, $log) {
     "use strict";
 
-    var self = this
+    var self = this;
     var endpoint = config.services.solr_url;
     var cpdReq, rxnReq, geneReq;
 
@@ -252,16 +252,16 @@ function($http, $q, config, $log) {
                     })
     }
     /*************End translating the RQL syntax to Solr query syntax******************/
-        this.getImagePath = function (id) {
-            if (id) {
-                var img_root = config.services.cpd_img_url;
-                var dir_depth = 0;
-                var ext = '.png';
-                for (var i = 0; i < dir_depth; i++) {
-                    img_root += id[i] + "/";
-                }
-                return img_root + id + ext
+    this.getImagePath = function (id) {
+        if (id) {
+            var img_root = config.services.cpd_img_url;
+            var dir_depth = 0;
+            var ext = '.png';
+            for (var i = 0; i < dir_depth; i++) {
+                img_root += id[i] + "/";
             }
+            return img_root + id + ext
+        }
     }
 }])
 

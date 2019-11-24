@@ -8,9 +8,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-<md-dialog flex="90">
+<md-dialog flex="90" id="tree-window" draggable>
 
-    <md-toolbar>
+    <md-toolbar id="tree-header">
       <div class="md-toolbar-tools md-toolbar-accent">
         <h4>Family tree "<b>{{treeName}}</b>" for "<b>{{functionName}}</b>"</h4>
         <span flex></span>
@@ -361,7 +361,7 @@
     </div>
     </md-dialog-content>
 
-    <div class="md-actions">
+    <div class="md-actions" ng-show="showTree">
         <md-button ng-click="cancel()">
             Close
         </md-button>

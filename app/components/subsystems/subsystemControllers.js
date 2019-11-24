@@ -1,11 +1,9 @@
 
-// Begin add-subsystem controller
 angular.module('Subsystems', ['uiTools'])
+// Begin MySubsystems controller
 .controller('MySubsystems',
-['$scope', '$stateParams', 'WS', 'MS', 'Auth',
- 'Session', 'uiTools', 'Dialogs', '$state',
-function($s, $sParams, WS, MS, Auth,
-         Session, uiTools, Dialogs, $state) {
+['$scope', 'WS', 'MS', 'Auth', 'Session', 'uiTools', 'Dialogs', '$state',
+function($s, WS, MS, Auth, Session, uiTools, Dialogs, $state) {
 
     $s.tabs = {tabIndex: Session.getTab($state)};
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
@@ -93,11 +91,11 @@ function($s, $sParams, WS, MS, Auth,
     }
 
 }])
+// End Subsystems controller
 
-
+// Begin Subsystem controller
 .controller('Subsystem',
-['$scope', '$state', 'WS', 'MS','$stateParams',
- 'uiTools', 'Dialogs', '$http', 'Auth',
+['$scope', '$state', 'WS', 'MS','$stateParams', 'uiTools', 'Dialogs', '$http', 'Auth',
 function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // $s.subsysOpts = {query: '', limit: 10, offset: 0, sort: {field: 'Genome'}};
     $s.subsysOpts = {query: '', offset: 0, sort: {field: 'Genome'}};
@@ -113,7 +111,8 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     }
 
     // Find the subsystem file path
-    $s.subsysPath = wsPath.split('/').slice(0, 3).join('/');
+    $s.subsysDir = wsPath.split('/').slice(0, 3).join('/');
+    $s.subsysPath = wsPath;
     var subsysFileName = wsPath.split('/').pop();
     $s.captions = [];
 
@@ -129,7 +128,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
         $s.captions = WS.cached.captions;
         $s.mySubsysFamTrees = WS.cached.mySubsysFamTrees;
         $s.loading = false;
-        $s.listAllSubsysTrees = false;
+        $s.listAllSubsysFamTrees = false;
     } else {
         WS.get(wsPath)
         .then(function(res) {
@@ -157,8 +156,8 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
             }}
             WS.cached.subsysHeader = $s.subsysHeader;
 
-            //family trees for the subsystem with the name of $.subsysName
-            MS.listAllSubsysFamilyTrees($s.subsysName)
+            // list all family trees under the subsystems/families folder
+            MS.listAllSubsysFamilyTrees()
             .then(function(subsysTrees) {
                     $s.allSubsysFamTrees = subsysTrees;
                     WS.cached.allSubsysFamTrees = subsysTrees;
@@ -170,7 +169,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
         })
         .catch(function(error) {
             console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
-            $s.listAllSubsysTrees = false;
+            $s.listAllSubsysFamTrees = false;
             $s.loading = false;
         });
     }
@@ -407,74 +406,35 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     }
 
 }])
-// End add-subsystem control
+// End Subsystem controller
 
-// Begin Spreadsheet control
-.controller('Spreadsheet',['$scope', 'WS', '$stateParams',
-function($s, WS, $stateParams) {
-    $s.genericOpts = {query: '', limit: 20, offset: 0};
-    $s.genericHeader = []; // dynamically filled later
-
-    // workspace path and name of object
-    var wsPath = $stateParams.path;
-    if( wsPath == '' ) {
-        console.log('Please specify the correct path to the data.');
-        return false;
-    }
-
-    $s.captions = [];
-
-    $s.loading = true;
-    if (WS.cached.genericData) {
-        $s.genericData = WS.cached.genericData;
-        $s.genericHeader = WS.cached.genericHeader;
-        $s.loading = false;
-    } else {
-        WS.get(wsPath)
-        .then(function(res) {
-            $s.genericName = res.data.name;
-            $s.genericData = parseGenericData($s.genericName, res.data.data);
-            WS.cached.gnericData = $s.genericData;
-            for (var k=0; k<$s.captions.length; k++) {
-                $s.genericHeader[k] = {label: $s.captions[k], key: $s.captions[k]};
-            }
-            WS.cached.genericHeader = $s.genericHeader;
-            $s.loading = false;
-        })
-        .catch(function(error) {
-            console.log('Caught an error: "' + (error.error.message).replace(/_ERROR_/gi, '') + '"');
-            $s.loading = false;
-        });
-    }
-
-    // Parse the given data for the subsystem data structure
-    function parseGenericData(obj_name, obj_data) {
-        var caps = obj_data[0];
-
-        // convert the subsystem data into an array of objects from an array of arrays
-        data = [];
-        for (var i=1; i<obj_data.length; i++) {
-            data[i-1] = {};
-            for (var j=0; j<caps.length; j++) {
-                data[i-1][caps[j]] = obj_data[i][j];
-            }
-        }
-        return data;
-    }
-}])
-
-// End Spreadsheet control
-
-// Begin ProteinFamily control
+// Begin ProteinFamily controller
 .controller('ProteinFamily',
-['$scope', '$state', 'WS', '$stateParams',
- 'uiTools', 'Dialogs', '$http', 'Auth',
-function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
-    $s.protFam = null;  // xml DOM object
-    $s.xmlDataClone = null;  // xml DOM object
-    $s.phyopts = {
-        dynamicHide: true,
+['$scope', '$state', '$stateParams', function($s, $state, $stateParams) {
+    console.log($stateParams);
+    $s.sXML = $stateParams.xml;
+
+    // parse the xml string into an XMLDocument object
+    var p = new DOMParser();
+    $s.phyloxmlDoc = p.parseFromString($s.sXML, 'application/xml');
+    console.log($s.phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
+                : $s.phyloxmlDoc.documentElement.nodeName);
+
+    // display the tree via phyd3
+    $s.showTree = true;
+
+    jQuery.noConflict();
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-61194136-8', 'auto');
+    ga('send', 'pageview');
+
+    $s.opts = {
+        dynamicHide: false,
         height: 800,
+        popupWidth: 300,
         invertColors: false,
         lineupNodes: true,
         showDomains: true,
@@ -485,7 +445,7 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         showLength: false,
         showNodeNames: true,
         showNodesType: "only leaf",
-        showPhylogram: false,
+        showPhylogram: true,
         showTaxonomy: true,
         showFullTaxonomy: false,
         showSequences: false,
@@ -493,71 +453,83 @@ function($s, $state, WS, $stateParams, tools, Dialogs, $http, Auth) {
         backgroundColor: "#f5f5f5",
         foregroundColor: "#000000",
         nanColor: "#f5f5f5",
+        treeWidth: 500,
+        scaleX: 1,
+        scaleY: 3
     };
 
-    // workspace path and name of object
-    var wsPath = $stateParams.path;
-    if( wsPath == '' ) {
-        console.log('Please specify the correct user name and path to the protein family data.');
-        return false;
-    }
+    // function load() -- the tree part
+    jQuery('#foregroundColor').val($s.opts.foregroundColor);
+    jQuery('#backgroundColor').val($s.opts.backgroundColor);
+    jQuery('#foregroundColorButton').colorpicker({color: $s.opts.foregroundColor});
+    jQuery('#backgroundColorButton').colorpicker({color: $s.opts.backgroundColor});
+    d3.select("#phyd3").text("Loading...");
 
-    $s.xml_loading = true;
-    //xml_wsPath = wsPath.split('/').slice(0, 2);
-    //xml_wsPath = xml_wsPath.join('/') + '/xmls/sample.xml';
-    xml_wsPath = wsPath;
-    if (WS.cached.protFam) {
-        $s.protFam = WS.cached.protFam;
-        $s.xmlDataClone = WS.cached.xmlDataClone;
-        $s.xml_loading = false;
-    } else {
-        WS.get(xml_wsPath)
-        .then(function(res) {
-            var xml_str = res.data,
-                xmlMeta_str = res.meta;
-            $s.xmlMeta = res.meta;
-            $s.xml_loading = false;
+    //console.log('xml string from xmldoc outerHTML:\n' + phyloxml.firstChild.outerHTML);
+    /* passing the phyloxml doc to phyd3.phylogram.build directly
+        instead of through d3.xml call yet still passing the phyloxml doc does NOT work
+    d3.select("#phyd3").text(null);
+    var tree = phyd3.phyloxml.parse(phyloxml);
+    phyd3.phylogram.build("#phyd3", tree, $s.opts);
+    */
+    xml_file = "app/components/proteinFam/xmls/phylo_example_1.xml";
+    d3.xml(xml_file, "application/xml",
+    function(xml) {
+        // d3.select("#phyd3").text(null);
+        // var tree = phyd3.phyloxml.parse(xml);
+        setContent($s.opts);
+    });
 
-            // Parse from xml string to xml object
-            var p = new DOMParser();
-            $s.protFam = p.parseFromString(xml_str, 'text/xml');
-            WS.cached.protFam = $s.protFam;
-            $s.xmlDataClone = $s.protFam.cloneNode(true);
-            WS.cached.xmlDataClone = $s.xmlDataClone;
-
-            // generate the tree -- move to the proteinFamily directive or dialog popup
-            /*
-            var tree = phyd3.phyloxml.parse($s.protFam);
-            d3.select("#phyd3").text("Loading...");
-            d3.select("#phyd3").text(null);
-            phyd3.phylogram.build("#phyd3", tree, $s.phyopts);*/
-        })
-        .catch(function(error) {
-            console.log('Caught an error: "' + error);
-            $s.xml_loading = false;
-        });
-    }
-
-    $s.loadPhyloXML = function() {
-        jQuery('#foregroundColor').val(opts.foregroundColor);
-        jQuery('#backgroundColor').val(opts.backgroundColor);
-        jQuery('#foregroundColorButton').colorpicker({color: opts.foregroundColor});
-        jQuery('#backgroundColorButton').colorpicker({color: opts.backgroundColor});
-        d3.select("#phyd3").text("Loading...");
-        //d3.xml("https://raw.githubusercontent.com/vibbits/phyd3/master/dist/sample.xml")
-        //  .then(function(xml) {
-        /*
-        d3.xml("sample.xml", "application/xml", function(xml) {
-            d3.select("#phyd3").text(null);
-            var tree = phyd3.phyloxml.parse(xml);
-            phyd3.phylogram.build("#phyd3", tree, opts);
-        });
-        */
+    function setContent(opts) {
         d3.select("#phyd3").text(null);
-        var tree = phyd3.phyloxml.parse($s.protFam);
-        phyd3.phylogram.build("#phyd3", tree, $s.phyopts);
-    };
+        var tree = phyd3.phyloxml.parse($s.phyloxmlDoc);
+        phyd3.phylogram.build("#phyd3", tree, opts);
+    }
+
+    $s.minimize = function() {
+        $s.showTree = false;
+    }
+
+    $s.maximize = function() {
+        $s.showTree = true;
+    }
+
+    $s.cancel = function() {
+        cb(func + ' tree displayed');
+        $dialog.hide();
+    }
+
+    $s.resetZoom = function() {
+        // force setting the initialOpts to avoid its dynamic changing even from Object.assign({}, $s.opts)
+        var initialOpts = {
+            dynamicHide: false,
+            height: 800,
+            popupWidth: 300,
+            invertColors: false,
+            lineupNodes: true,
+            showDomains: true,
+            showDomainNames: false,
+            showDomainColors: true,
+            showGraphs: true,
+            showGraphLegend: true,
+            showLength: false,
+            showNodeNames: true,
+            showNodesType: "only leaf",
+            showPhylogram: true,
+            showTaxonomy: true,
+            showFullTaxonomy: false,
+            showSequences: false,
+            showTaxonomyColors: true,
+            backgroundColor: "#f5f5f5",
+            foregroundColor: "#000000",
+            nanColor: "#f5f5f5",
+            treeWidth: 500,
+            scaleX: 1,
+            scaleY: 3
+        };
+        setContent(initialOpts);
+    }
 
 }])
 
-// End ProteinFamily control
+// End ProteinFamily controller

@@ -8,8 +8,9 @@
 angular.module('Dialogs', [])
 
 .service('Dialogs',
-['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth', 'ModelViewer', 'config', '$http',
-function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config, $http) {
+['MS', 'WS', '$mdDialog', '$mdToast', 'uiTools', '$timeout', 'Upload', 'Auth',
+'ModelViewer', 'config', '$http', '$document',
+function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config, $http, $document) {
     var self = this;
 
     this.showMeta = function(ev, path) {
@@ -164,7 +165,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 $s.cancel = function(){
                     $dialog.hide();
                 }
-
             }]
         })
     }

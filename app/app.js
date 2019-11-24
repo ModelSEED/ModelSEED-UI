@@ -208,15 +208,17 @@ function($locationProvider, $stateProvider, $httpProvider,
         })
         /* End of subsystems*/
 
-        /* For display of generic data in a spreadsheet*/
-        .state('app.spreadsheet', {
-            url: "/spreadsheet{path:nonURIEncoded}",
-            templateUrl: 'app/components/subsystems/spreadsheet.html',
-            controller: 'Spreadsheet',
+        /* For gene family trees*/
+        .state('app.familyTree', {
+            url: "/subsystem/familyTree/",
+            params: {
+                xml: null
+            },
+            templateUrl: 'app/views/dialogs/show-famTree.html',
+            controller: 'ProteinFamily',
             authenticate: true
         })
-        /* End of display of generic data in a spreadsheet*/
-
+        /* End of gene family trees*/
 
         .state('app.RefModels', {
             url: "/genomes/:ref",
@@ -262,7 +264,8 @@ function($locationProvider, $stateProvider, $httpProvider,
             controller: 'MyData',
             authenticate: true
             
-        }).state('app.modelPage', {
+        })
+        .state('app.modelPage', {
             url: "/model{path:nonURIEncoded}?login",
             
             // TEST TEST TEST:
@@ -395,6 +398,20 @@ function($locationProvider, $stateProvider, $httpProvider,
                       .when('/', '/home/')
                       .when('#', '/home/');
 
+}])
+
+.config(['$provide', function ($provide) {
+    $provide.decorator('$state', ['$delegate', '$window',
+        function ($delegate, $window) {
+            var extended = {
+                goNewTab: function (stateName, params) {
+                    $window.open(
+                        $delegate.href(stateName, params, { absolute: true }), '_blank');
+                }
+            };
+            angular.extend($delegate, extended);
+            return $delegate;
+    }])
 }])
 
 .config(['$mdThemingProvider', function($mdThemingProvider) {

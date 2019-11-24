@@ -1403,7 +1403,8 @@ function($compile, $stateParams) {
 }])
 
 .directive('ngTableSubsystem',
-            ['$sce', '$compile', 'Dialogs', 'WS', function($sce, $compile, Dialogs, WS) {
+            ['$state', '$sce', '$compile', 'Dialogs', 'WS',
+    function($state, $sce, $compile, Dialogs, WS) {
     return {
         restrict: 'EA',
         scope: {
@@ -1427,7 +1428,6 @@ function($compile, $stateParams) {
         },
         templateUrl: 'app/components/subsystems/table-subsys.html',
         link: function(scope, elem, attrs) {
-            var ele = angular.element(elem);
             scope.htmlPath = 'app/components/subsystems/';
 
             scope.noPagination = true; //('disablePagination' in attrs) ? true: false;
@@ -1480,6 +1480,8 @@ function($compile, $stateParams) {
                     WS.getDownloadURL(fpath)
                     .then(function(res) {
                         scope.downloadURL = res[0];
+                        //$state.goNewTab('app.familyTree', {xml:scope.sXML});
+                        // $state.go('app.familyTree', {xml:scope.sXML});
                         Dialogs.showFuncFamTree(ev, func_name, tree_name, scope.downloadURL, scope.xmldoc,
                             function(tree_msg) {
                             // alert(func_name + ' calling back from tree display--' + tree_msg);
@@ -1490,12 +1492,9 @@ function($compile, $stateParams) {
 
             function loadPhyloXML(treeName, func_name, col_id, cb) {
                 // loading the family tree data (in extendable phyloxml format)
-                // assuming that the family tree(s) are saved in the subfolder of
-                // phyloxml_wsPath+'/phyloxmls'+$s.subsysName/
                 scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
-                //var phyloxml_wsPath = scope.subsysPath + '/phyloxmls/';
-                var phyloxml_wsPath = scope.subsysPath + '/families/';
+                var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
                 phyloxml_wsPath = phyloxml_wsPath + treeName;
                 WS.get(phyloxml_wsPath)
                 .then(function(res) {
@@ -1512,7 +1511,10 @@ function($compile, $stateParams) {
                                 : phyloxmlDoc.documentElement.nodeName);
                     scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
                     scope.treeData = phyloxmlDoc;
+
+                    var oSerializer = new XMLSerializer();
                     scope.xmldoc = cb(func_name, col_id);
+                    scope.sXML = oSerializer.serializeToString(scope.xmldoc);
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
@@ -2837,7 +2839,7 @@ function(Dialogs, $dialog) {
                 '  <p>{{doc}}</p>'  +
                 '</span>'
     };
-  });
+  })
 
   /* supposed to be used as follows:
 <biochem-search-results
@@ -2849,3 +2851,31 @@ function(Dialogs, $dialog) {
   */
 
 // End 'added for searching biochemistry data in solr'
+
+
+// added for making a md-dialog draggable
+.directive('draggable', ['$window', function ($window) {
+    return {
+        // A = attribute, E = Element, C = Class and M = HTML Comment
+        restrict: 'A',
+        //The link function is responsible for registering DOM listeners as well as updating the DOM.
+        link: function(scope, elem, attrs) {
+            var draggableStr = "draggableModal";
+            var header = angular.element(elem).find('#tree-header');
+
+            header.on('mousedown', (mouseDownEvent) => {
+            var modalDialog = elem;
+            var offset = header.offset();
+
+            modalDialog.addClass(draggableStr).parents().on('mousemove', (mouseMoveEvent) => {
+                jQuery("." + draggableStr, modalDialog.parents()).offset({
+                        top: mouseMoveEvent.pageY - (mouseDownEvent.pageY - offset.top),
+                        left: mouseMoveEvent.pageX - (mouseDownEvent.pageX - offset.left)
+                    });
+                }).on('mouseup', () => {
+                    modalDialog.removeClass(draggableStr);
+                });
+            });
+        }
+    };
+}])

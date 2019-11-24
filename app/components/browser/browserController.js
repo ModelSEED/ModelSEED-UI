@@ -339,7 +339,7 @@ angular.module('Browser', ['uiTools'])
 
     $scope.goTo = function(item, state) {
         if (item.type === 'folder' || item.type === 'modelfolder')
-            $state.go('app.myData', {dir: item.path})
+            $state.go('app.myData', {dir: item.path});
         else {
             if (!state) var state = getState(item);
             if (state) {
