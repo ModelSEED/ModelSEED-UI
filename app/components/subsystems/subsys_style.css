@@ -20,12 +20,14 @@ th {color: white; background: rgb(9, 173, 202);}
 thead th {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 90px;
-    z-index: 2;  /* Ensure it stays on top of other player divs */
+    top: 50px;
+    z-index: 3;  /* Ensure it stays on top of other player divs */
 }
 thead th:first-child {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
     left: -15px;
-    z-index: 3;
+    z-index: 4;
 }
 tbody td:hover {background-color:#ddd;}
 tbody td:first-child {
@@ -43,7 +45,7 @@ tbody th:first-child {
 .stickyrow {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 145px;
+    top: 87px;
     /*bottom: 0px;*/
     left: -15px;
     z-index: 1;  /* Ensure it stays on top of other player divs */

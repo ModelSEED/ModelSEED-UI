@@ -2,7 +2,7 @@
 <link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
 <div ng-if="data" class='container' flex>
     <div class="table-controls table-editor-controls table-search">
-        <div layout="row">
+        <div layout-gt-sm="row">
             <md-input-container layout="row" layout-align="start center" flex>
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress"
                     title="Overwrite the original data file">
@@ -16,23 +16,18 @@
                     Note: Data has been modified but not saved yet.
                 </span>
             </md-input-container>
-        </div>
-
-        <div layout="row">
-            <md-input-container md-no-float
-                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
-            </md-input-container>
-
-            <md-progress-circular ng-if="loading || loadingFamTree"
+            <md-progress-circular ng-if="loading || listAllSubsysFamTrees"
                                 md-mode="indeterminate"
                                 class="table-loading"
                                 md-diameter="40">
             </md-progress-circular>
 
-            <div ng-if="noPagination" layout="row" layout-align="start center">
-                <p>(total {{data.length}} {{resultText}})</p>
-            </div>
-
+            <md-input-container md-no-float layout-align="center center"
+                search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
+            </md-input-container>
+            <md-input-container ng-if="noPagination" layout-align="end center">
+                <span>({{data.length}} {{resultText}})</span>
+            </md-input-container>
             <md-input-container
                 ng-if="!noPagination"
                 pagination
@@ -45,7 +40,7 @@
         </div>
     </div>
 
-    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length == 0">
+    <table class="table table-striped table-bordered" ng-hide="filtered && filtered.length==0">
         <thead>
             <tr>
                 <th sortable col-id="{{header[0].key}}"

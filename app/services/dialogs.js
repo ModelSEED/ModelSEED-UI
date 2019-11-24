@@ -215,7 +215,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                     backgroundColor: "#f5f5f5",
                     foregroundColor: "#000000",
                     nanColor: "#f5f5f5",
-                    treeWidth: 500,
+                    treeWidth: 300,
                     scaleX: 1,
                     scaleY: 3
                 };
@@ -282,7 +282,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                         backgroundColor: "#f5f5f5",
                         foregroundColor: "#000000",
                         nanColor: "#f5f5f5",
-                        treeWidth: 500,
+                        treeWidth: 300,
                         scaleX: 1,
                         scaleY: 3
                     };
