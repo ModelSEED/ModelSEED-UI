@@ -10,7 +10,7 @@
 
 <md-dialog flex id="tree-window" draggable>
 
-    <md-toolbar id="tree-header">
+    <md-toolbar id="tree-header" ng-dblclick="maximize()">
       <div class="md-toolbar-tools md-toolbar-accent">
         <h4>Family tree "<b>{{treeName}}</b>" for "<b>{{functionName}}</b>"</h4>
         <span flex></span>
@@ -366,6 +366,12 @@
     <div class="md-actions" ng-show="showTree">
         <md-button ng-click="cancel()">
             Close
+        </md-button>
+        <md-button class="md-icon-button" ng-show="showTree" ng-click="minimize()">
+          <md-icon class="material-icons" aria-label="Shrink window">minimize</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-show="!showTree" ng-click="maximize()">
+          <md-icon class="material-icons" aria-label="Enlarge window">maximize</md-icon>
         </md-button>
     </div>
 </md-dialog>

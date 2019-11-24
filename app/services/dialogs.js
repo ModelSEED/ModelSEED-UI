@@ -177,7 +177,7 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
             multiple: true,
             templateUrl: 'app/views/dialogs/show-famTree.html',
             targetEvent: ev,
-            clickOutsideToClose: false,
+            clickOutsideToClose: true,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;

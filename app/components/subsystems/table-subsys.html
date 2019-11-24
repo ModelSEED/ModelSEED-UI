@@ -22,10 +22,10 @@
                                 md-diameter="40">
             </md-progress-circular>
 
-            <md-input-container md-no-float layout-align="center center"
+            <md-input-container md-no-float layout-align="start center"
                 search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
             </md-input-container>
-            <md-input-container ng-if="noPagination" layout-align="end center">
+            <md-input-container ng-if="noPagination" layout-align="start end">
                 <span>({{data.length}} {{resultText}})</span>
             </md-input-container>
             <md-input-container
