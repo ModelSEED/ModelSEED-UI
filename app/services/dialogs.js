@@ -174,16 +174,18 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         ev.stopPropagation();
         $dialog.show({
             //parent: parentEl,
-            multiple: true,
+            //multiple: true,
             templateUrl: 'app/views/dialogs/show-famTree.html',
             targetEvent: ev,
-            clickOutsideToClose: true,
+            clickOutsideToClose: false,
             controller: ['$scope', '$http',
             function($s, $http) {
                 $self = $s;
                 $s.showTree = true;
                 $s.functionName = func;
                 $s.treeName = tree;
+                $s.cssText1 = "max-width:1500px;width:100%;height:100%;overflow:hidden;";
+                $s.cssText2 = "max-width:1500px;width:100%;height:100%;overflow:hidden;";
 
                 jQuery.noConflict();
                 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -246,11 +248,20 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                 //*/
 
                 $s.minimize = function() {
+                    $s.cssText1 = "overflow:hidden;";
                     $s.showTree = false;
                 }
 
                 $s.maximize = function() {
+                    $s.cssText1 = "max-width:1500px;width:100%;height:100%;overflow:hidden;";
                     $s.showTree = true;
+                }
+
+                $s.dblclick = function() {
+                    if ($s.showTree)
+                        $s.minimize();
+                    else
+                        $s.maximize();
                 }
 
                 $s.cancel = function() {

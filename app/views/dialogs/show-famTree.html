@@ -8,26 +8,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-<md-dialog flex id="tree-window" draggable>
-
-    <md-toolbar id="tree-header" ng-dblclick="maximize()">
-      <div class="md-toolbar-tools md-toolbar-accent">
-        <h4>Family tree "<b>{{treeName}}</b>" for "<b>{{functionName}}</b>"</h4>
-        <span flex></span>
-        <md-button class="md-icon-button" ng-click="cancel()">
-          <md-icon class="material-icons" aria-label="Close window">close</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" ng-show="showTree" ng-click="minimize()">
-          <md-icon class="material-icons" aria-label="Shrink window">minimize</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" ng-show="!showTree" ng-click="maximize()">
-          <md-icon class="material-icons" aria-label="Enlarge window">maximize</md-icon>
-        </md-button>
-      </div>
+<md-dialog flex draggable id="tree-window" style="{{cssText1}}">
+    <md-toolbar id="tree-header" ng-dblclick="dblclick()">
+        <div class="md-toolbar-tools md-toolbar-accent">
+            <h4>Family tree "<b>{{treeName}}</b>" for "<b>{{functionName}}</b>"</h4>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+            <md-icon class="material-icons" aria-label="Close window">close</md-icon>
+            </md-button>
+            <md-button class="md-icon-button" ng-show="showTree" ng-click="minimize()">
+            <md-icon class="material-icons" aria-label="Shrink window">minimize</md-icon>
+            </md-button>
+            <md-button class="md-icon-button" ng-show="!showTree" ng-click="maximize()">
+            <md-icon class="material-icons" aria-label="Enlarge window">maximize</md-icon>
+            </md-button>
+        </div>
     </md-toolbar>
 
     <md-dialog-content ng-show="showTree" layout-margin layout-padding>
-      <div style="max-width:1500px;width:1100px;height:500px;">
+      <div id="tree-area" style="{{cssText2}}">
         <md-progress-circular ng-if="loading" md-mode="indeterminate"></md-progress-circular>
             
     <div class="row phyd3-controls well">
