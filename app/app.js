@@ -210,11 +210,15 @@ function($locationProvider, $stateProvider, $httpProvider,
 
         /* For gene family trees*/
         .state('app.familyTree', {
-            url: "/subsystem/familyTree/",
+            url: "/familyTree",
             params: {
-                xml: null
+                subsysName: null,
+                roleName: null,
+                treeName: null,
+                sXML: null,
+                xmlDownloadURL: null
             },
-            templateUrl: 'app/views/dialogs/show-famTree.html',
+            templateUrl: 'app/components/subsystems/familiy-tree.html',
             controller: 'ProteinFamily',
             authenticate: true
         })

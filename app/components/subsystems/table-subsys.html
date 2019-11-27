@@ -1,7 +1,8 @@
 
 <link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
-<div ng-if="data" class='container' flex>
-    <div class="table-controls table-editor-controls table-search">
+<div ng-if="data" class='container custom-scrollbar' flex>
+    <!--div class="table-controls table-editor-controls table-search"-->
+    <div class="table table-striped table-bordered table-search">
         <div layout-gt-sm="row">
             <md-input-container layout="row" layout-align="start center" flex>
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress"
@@ -22,10 +23,10 @@
                                 md-diameter="40">
             </md-progress-circular>
 
-            <md-input-container md-no-float layout-align="start center"
+            <md-input-container md-no-float layout-align="center center"
                 search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
             </md-input-container>
-            <md-input-container ng-if="noPagination" layout-align="start end">
+            <md-input-container ng-if="noPagination" layout-align="start center">
                 <span>({{data.length}} {{resultText}})</span>
             </md-input-container>
             <md-input-container

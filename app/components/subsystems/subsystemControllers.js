@@ -411,8 +411,12 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
 // Begin ProteinFamily controller
 .controller('ProteinFamily',
 ['$scope', '$state', '$stateParams', function($s, $state, $stateParams) {
-    console.log($stateParams);
-    $s.sXML = $stateParams.xml;
+    // console.log($stateParams);
+    $s.subsysName = $stateParams.subsysName;
+    $s.roleName = $stateParams.roleName;
+    $s.treeName = $stateParams.treeName;
+    $s.sXML = $stateParams.sXML;
+    $s.xmlDownloadURL = $stateParams.xmlDownloadURL;
 
     // parse the xml string into an XMLDocument object
     var p = new DOMParser();
@@ -465,13 +469,6 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     jQuery('#backgroundColorButton').colorpicker({color: $s.opts.backgroundColor});
     d3.select("#phyd3").text("Loading...");
 
-    //console.log('xml string from xmldoc outerHTML:\n' + phyloxml.firstChild.outerHTML);
-    /* passing the phyloxml doc to phyd3.phylogram.build directly
-        instead of through d3.xml call yet still passing the phyloxml doc does NOT work
-    d3.select("#phyd3").text(null);
-    var tree = phyd3.phyloxml.parse(phyloxml);
-    phyd3.phylogram.build("#phyd3", tree, $s.opts);
-    */
     xml_file = "app/components/proteinFam/xmls/phylo_example_1.xml";
     d3.xml(xml_file, "application/xml",
     function(xml) {

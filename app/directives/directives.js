@@ -1480,9 +1480,14 @@ function($compile, $stateParams) {
                     WS.getDownloadURL(fpath)
                     .then(function(res) {
                         scope.downloadURL = res[0];
-                        //$state.goNewTab('app.familyTree', {xml:scope.sXML});
-                        // $state.go('app.familyTree', {xml:scope.sXML});
-                        Dialogs.showFuncFamTree(ev, func_name, tree_name, scope.downloadURL, scope.xmldoc,
+                        /*$state.goNewTab('app.familyTree', {subsysName:scope.subsysName,roleName:func_name,
+                                                     treeName: tree_name, sXML: scope.sXML,
+                                                     xmlDownloadURL: scope.downloadURL});
+                        $state.go('app.familyTree', {subsysName:scope.subsysName,roleName:func_name,
+                                                     treeName: tree_name, sXML: scope.sXML,
+                                                     xmlDownloadURL: scope.downloadURL});*/
+                        Dialogs.showFuncFamTree(ev, scope.subsysName, func_name, tree_name,
+                                                scope.downloadURL, scope.xmldoc, scope.sXML,
                             function(tree_msg) {
                             // alert(func_name + ' calling back from tree display--' + tree_msg);
                         });

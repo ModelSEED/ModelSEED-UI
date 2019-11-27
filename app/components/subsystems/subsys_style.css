@@ -2,14 +2,17 @@ div.container {
     overflow: auto;
     width: 100%;
     height: 100%;
+    top: 0px;
     max-width: 120em;
     max-height: 100em;
     position: relative;
+    left: 0px;
 }
 table {
     /*table-layout: auto;*/
     width: 100%;
     position: relative;
+    float: left;
 }
 td, th {
     border: 1px solid #000;
@@ -20,8 +23,8 @@ th {color: white; background: rgb(9, 173, 202);}
 thead th {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 50px;
-    z-index: 3;  /* Ensure it stays on top of other player divs */
+    top: 50px;   /* Where it should stick to */
+    z-index: 3;  /* Ensure it stays on top of other layer divs */
 }
 thead th:first-child {
     position: -webkit-sticky; /* for Safari */
@@ -34,7 +37,7 @@ tbody td:first-child {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
     left: -15px;
-    z-index: 1;  /* Ensure it stays on top of other player divs */
+    z-index: 1;  /* Ensure it stays on top of other layer divs */
     font-weight: bold;
     background-color: rgb(9, 173, 202);
 }
@@ -45,17 +48,17 @@ tbody th:first-child {
 .stickyrow {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 87px;
+    top: 88px;
     /*bottom: 0px;*/
     left: -15px;
-    z-index: 1;  /* Ensure it stays on top of other player divs */
+    z-index: 1;  /* Ensure it stays on top of other layer divs */
     color: black;
     background-color: rgb(220, 228, 147);
 }
 .table-search {
     position: -webkit-sticky;
     position: sticky;
-    z-index: 2;  /* Ensure it stays on top of other player divs */
+    z-index: 2;  /* Ensure it stays on top of other layer divs */
     top: 0px;    /* Where it should stick to */
     left: -15px;
     color: #000;
@@ -89,4 +92,26 @@ tbody th:first-child {
     background-color: #4CAF50;
     color: white;
     width: 80%;
+}
+.stop-scrolling {
+    height: 100%;
+    overflow: hidden;
+  }
+div.custom-scrollbar {
+    height: 100%;
+    width: 100%;
+    background: #F5F6F9;
+    overflow-y: scroll;
+}
+div.custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+}
+div.custom-scrollbar::-webkit-scrollbar-track {
+    background: #555999;
+    border-radius: 10px;
+}
+div.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
 }
