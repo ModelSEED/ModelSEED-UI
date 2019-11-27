@@ -4,7 +4,7 @@ div.container {
     height: 100%;
     top: 0px;
     max-width: 120em;
-    max-height: 100em;
+    max-height: 120em;
     position: relative;
     left: 0px;
 }
@@ -12,7 +12,7 @@ table {
     /*table-layout: auto;*/
     width: 100%;
     position: relative;
-    float: left;
+    float: top;
 }
 td, th {
     border: 1px solid #000;
@@ -23,7 +23,7 @@ th {color: white; background: rgb(9, 173, 202);}
 thead th {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 50px;   /* Where it should stick to */
+    top: 54px;   /* Where it should stick to */
     z-index: 3;  /* Ensure it stays on top of other layer divs */
 }
 thead th:first-child {
@@ -48,7 +48,7 @@ tbody th:first-child {
 .stickyrow {
     position: -webkit-sticky; /* for Safari */
     position: sticky;
-    top: 88px;
+    top: 120px;
     /*bottom: 0px;*/
     left: -15px;
     z-index: 1;  /* Ensure it stays on top of other layer divs */
@@ -114,4 +114,18 @@ div.custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,0.5);
     border-radius: 10px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+div.tabheader {
+    height: 50px;
+}
+div.searchheader {
+    align-content: center;
+    -webkit-align-content: center;
+    display: -webkit-flex;
+    display: flex;
+}
+.oneline {
+    white-space:nowrap;
+    overflow:hidden;
+    display:block;
 }
