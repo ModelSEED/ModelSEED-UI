@@ -1,6 +1,6 @@
 
 <link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
-<div ng-if="data" class='container custom-scrollbar' flex>
+<div ng-if="data" class="container disable-scrollbars" flex>
     <!--div class="table-controls table-editor-controls table-search"-->
     <div class="table table-striped table-bordered table-search">
         <div layout-gt-sm="row" class="searchheader">
@@ -79,7 +79,8 @@
             </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | orderBy : opts.sort.field : opts.sort.desc)
+        <tr ng-repeat="row in (filtered = ( data | filter: opts.query | filter: { Genome: '!' + 'Reactions' }
+                        | orderBy : opts.sort.field : opts.sort.desc)
                         | limitTo : opts.limit : opts.offset)">
             <td ng-repeat="h in header" style="border: 1px solid black;">
                 <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
@@ -98,10 +99,12 @@
 
     <!-- right click dropdown context menu -->
     <div class="dropdown position-fixed" id="dropdown-menu-target" style="z-index: 5">
+        <span ng-if="loadingFamTreeFailed" class="ms-color-error">
+            ERROR loading selected family tree--{{errLoadingFamTree}}
+        </span>
         <ul class="dropdown-menu" role="menu">
             <li ng-repeat="t in famTrees">
                 <a role="menuitem" tabindex="1" ng-click="familyTreeSelected($event, t, selected.func_name, selected.col_id)">
-                <!--a role="menuitem" tabindex="1" target="_blank" ui-sref="app.familyTree({xml: '{{sXML}}'})"-->
                    {{t}}
                 </a>
             </li>

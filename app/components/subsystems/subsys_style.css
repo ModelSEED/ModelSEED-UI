@@ -103,18 +103,29 @@ div.custom-scrollbar {
     background: #F5F6F9;
     overflow-y: scroll;
 }
+/*
 div.custom-scrollbar::-webkit-scrollbar {
+    background: #555999;
     width: 10px;
 }
 div.custom-scrollbar::-webkit-scrollbar-track {
-    background: #555999;
+    background: rgba(255,255,255,0.5);
     border-radius: 10px;
 }
 div.custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,0.5);
     border-radius: 10px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}*/
+div.disable-scrollbars {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
 }
+div.disable-scrollbars::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* Chrome/Safari/Webkit */
+}
+
 div.tabheader {
     height: 50px;
 }

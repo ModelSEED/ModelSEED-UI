@@ -43,7 +43,7 @@
             ng-class="{'row-hover': rowClick}"
             class="{{hoverClass}}">
             <td ng-repeat="h in header" style="border: 1px solid black;">
-                <span ng-if="h.hasOwnProperty('formatter')" bind-html-compile="h.formatter(row[h.key])"></span>
+                <span ng-if="h.hasOwnProperty('formatter')" ng-bind-html="h.formatter(row)"></span>
                 <a ng-if="h.hasOwnProperty('link')" ui-sref="{{h.link.state}}( h.link.getOpts(row) )" ng-click="$event.stopPropagation();">
                     {{::row[h.key]}}
                 </a>

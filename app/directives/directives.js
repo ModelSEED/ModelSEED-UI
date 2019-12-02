@@ -1431,6 +1431,8 @@ function($compile, $stateParams) {
             scope.htmlPath = 'app/components/subsystems/';
 
             scope.noPagination = true; //('disablePagination' in attrs) ? true: false;
+            scope.loadingFamTreeFailed = false;
+            scope.errLoadingFamTree = '';;
 
             // model: cell selection data
             scope.selectedCell = '';
@@ -1497,6 +1499,8 @@ function($compile, $stateParams) {
 
             function loadPhyloXML(treeName, func_name, col_id, cb) {
                 // loading the family tree data (in extendable phyloxml format)
+                scope.loadingFamTreeFailed = false;
+                scope.errLoadingFamTree = '';;
                 scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
                 var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
@@ -1523,9 +1527,11 @@ function($compile, $stateParams) {
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
-                    console.log('Caught an error: "' + error.error.message);
+                    console.log('Caught an error while loading family tree:' + error.error.message);
                     scope.treeData = null;
                     scope.loadingFamTree = false;
+                    scope.loadingFamTreeFailed = true;
+                    scope.errLoadingFamTree = 'Error message: ' + error.error.message;
                 });
             }
 
