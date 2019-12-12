@@ -1403,8 +1403,8 @@ function($compile, $stateParams) {
 }])
 
 .directive('ngTableSubsystem',
-            ['$state', '$sce', '$compile', 'Dialogs', 'WS',
-    function($state, $sce, $compile, Dialogs, WS) {
+            ['$state', '$sce', '$compile', 'Dialogs', 'WS', '$http',
+    function($state, $sce, $compile, Dialogs, WS, $http) {
     return {
         restrict: 'EA',
         scope: {
@@ -1417,6 +1417,7 @@ function($compile, $stateParams) {
             allFamtrees: '=tableAllFamtrees',
             myFamtrees: '=tableMyFamtrees',
             loading: '=tableLoading',
+            isDemo: '=tableIsDemo',
             cellClick: '=tableCellClick',
             hoverClass: '@tableRowHoverClass',
             placeholder: '@tablePlaceholder',
@@ -1432,7 +1433,11 @@ function($compile, $stateParams) {
 
             scope.noPagination = true; //('disablePagination' in attrs) ? true: false;
             scope.loadingFamTreeFailed = false;
-            scope.errLoadingFamTree = '';;
+            scope.errLoadingFamTree = '';
+            if (scope.isDemo === "true")
+                scope.isDemo = true;
+            else
+                scope.isDemo = false;
 
             // model: cell selection data
             scope.selectedCell = '';
@@ -1464,10 +1469,16 @@ function($compile, $stateParams) {
             }
 
             scope.familyTreeSelected = function(ev, treeName, func_name, col_id, usr) {
-                loadPhyloXML(treeName, func_name, col_id, updateAnnotationInTree);
-                fetchDownloadURL(ev, treeName, func_name);
-                ev.stopPropagation();
-                ev.preventDefault();
+                if (scope.isDemo)
+                    loadPhyloXML_demo(treeName, func_name, col_id, updateAnnotationInTree);
+                else
+                    loadPhyloXML(treeName, func_name, col_id, updateAnnotationInTree);
+
+                if (!scope.loadingFamTreeFailed) {
+                    fetchDownloadURL(ev, treeName, func_name);
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                }
             }
 
             function fetchDownloadURL(ev, tree_name, func_name) {
@@ -1495,6 +1506,13 @@ function($compile, $stateParams) {
                         });
                     })
                 }
+                else if (scope.isDemo) {
+                    scope.downloadURL = '';
+                    Dialogs.showFuncFamTree(ev, scope.subsysName, func_name, tree_name,
+                                            scope.downloadURL, scope.xmldoc, scope.sXML,
+                        function(tree_msg) {
+                    });
+                }
             }
 
             function loadPhyloXML(treeName, func_name, col_id, cb) {
@@ -1505,10 +1523,53 @@ function($compile, $stateParams) {
                 var phyloxmlDoc = null;
                 var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
                 phyloxml_wsPath = phyloxml_wsPath + treeName;
+
                 WS.get(phyloxml_wsPath)
                 .then(function(res) {
                     var xml_str = res.data,
                         xmlMeta_str = res.meta;
+
+                    // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
+                    // XMLSerializer will do the reverse of DOMParser
+                    // var oSerializer = new XMLSerializer();
+                    // var sXML = oSerializer.serializeToString(xmldoc);
+                    var p = new DOMParser();
+                    phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
+                    console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
+                                : phyloxmlDoc.documentElement.nodeName);
+                    scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
+                    scope.treeData = phyloxmlDoc;
+
+                    var oSerializer = new XMLSerializer();
+                    scope.xmldoc = cb(func_name, col_id);
+                    scope.sXML = oSerializer.serializeToString(scope.xmldoc);
+                    scope.loadingFamTree = false;
+                })
+                .catch(function(error) {
+                    console.log('Caught an error while loading family tree:' + error.error.message);
+                    scope.treeData = null;
+                    scope.loadingFamTree = false;
+                    scope.loadingFamTreeFailed = true;
+                    scope.errLoadingFamTree = 'Error message: ' + error.error.message;
+                });
+            }
+
+            // As the function name indicates, this function is for demo purpose only!
+            function loadPhyloXML_demo(treeName, func_name, col_id, cb) {
+                // loading the family tree data (in extendable phyloxml format)
+                scope.loadingFamTreeFailed = false;
+                scope.errLoadingFamTree = '';;
+                scope.loadingFamTree = true;
+                var phyloxmlDoc = null;
+                var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
+                phyloxml_wsPath = phyloxml_wsPath + treeName;
+                var demo_dir = 'app/components/subsystems/demo',
+                    demo_tree_file_path = [demo_dir, 'OG0000949'].join('/');
+
+                $http.get(demo_tree_file_path)
+                .then(function(res) {
+                    var xml_str = res.data.data,
+                        xmlMeta_str = res.data.meta;
 
                     // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
                     // XMLSerializer will do the reverse of DOMParser
@@ -1738,8 +1799,13 @@ function($compile, $stateParams) {
             scope.saveInProgressText = scope.saveInProgressText || 'Saving...'
             scope.saveInProgress = false;
             scope.save = function($ev) {
-                scope.saveInProgress = true;
+                if (scope.isDemo) {
+                    alert("Saving needs login...inactivated for demo.");
+                    scope.saveInProgress = false;
+                    return;
+                }
 
+                scope.saveInProgress = true;
                 scope.onSave(Object.values(scope.dataClone))
                 .then(function(res) {
                     scope.saveInProgress = false;
@@ -1748,6 +1814,11 @@ function($compile, $stateParams) {
             }
 
             scope.saveAs = function($ev) {
+                if (scope.isDemo) {
+                    alert("Saving needs login...inactivated for demo.");
+                    scope.saveInProgress = false;
+                    return;
+                }
                 scope.saveAsInProgress = true;
 
                 // show save as dialog, with save/cancel callbacks

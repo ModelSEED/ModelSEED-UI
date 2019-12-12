@@ -224,6 +224,14 @@ function($locationProvider, $stateProvider, $httpProvider,
         })
         /* End of gene family trees*/
 
+        /* For demo_subsystems, no authentication required*/
+        .state('app.demo_subsystem', {
+            url: "/demo_subsystem",
+            templateUrl: 'app/components/subsystems/subsystem_demo.html',
+            controller: 'demoSubsystem',
+        })
+        /* End of demo_subsystems*/
+
         .state('app.RefModels', {
             url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
