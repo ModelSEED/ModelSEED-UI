@@ -1,0 +1,63 @@
+<md-dialog aria-label="Mango (Fruit)">
+    <form ng-cloak>
+      <md-toolbar>
+        <div class="md-toolbar-tools">
+          <h2>Welcome to the Subsystem page!</h2>
+          <span flex></span>
+          <md-button class="md-icon-button" ng-click="cancel()">
+              <md-icon class="material-icons" aria-label="Close window">close</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+  
+      <md-dialog-content>
+        <div class="md-dialog-content">
+          <h2>Main features</h2>
+          <p>
+            1. The Excel-like subsystem table consists of columns that have the functional roles as captions, and rows that have genome names as captions.
+               As in Excel, the columns can be scrolled from left to right, and the rows from top to bottom, while the column and row headers stay visible.
+          </p>
+  
+          <p>
+            2. The first row of the table lists the reactions associated with the corresponding functional role of each column. The reaction ids are clickable
+               and can open a separate webpage that will display more biochemistry information on that reaction.
+          </p>
+  
+          <p>
+            3. Below the reaction row, each table cell consists of three groups of gene annotations: <b>curation</b>, <b>candidates</b> and <b>predications</b>.<br>
+               Genes in <b>curation</b> are colored <b style="color: green;">green</b>, in <b>predications</b> are colored  <b style="color: blue;">blue</b>.
+          </p>
+  
+          <p>
+            4. You can select gene id entries from one group and assign it to another, as the arrows point. If a gene in <b>candidates</b> is not included in either
+               <b>curation</b> or <b>predications</b>, that gene id is shown as <b style="color: red;">red</b>; otherwise it will be <b>black</b>.
+          </p>
+  
+          <p>
+            5. By <b style="color: red;">hovering your mouse cursor over</b> the <b>candidates</b> dropdown box, you will see a prompt indicating that you can double click on any of the entries. A popup box will be displayed to allow you to make changes. 
+               After you exit the popup window, you will be reminded to save or save as your changes.
+          </p>
+  
+          <p>
+            6. By <b style="color: red;">hovering your mouse cursor over</b> any of the column caption headers, you will see a prompt indicating that you can <b>right click</b> on the column caption to reveal
+               the protein family/families associated with this function role.  You can then select one of the family name to open a family tree window.  You will be presented with the selected protein
+               family tree that has mapped the annotations in the cells of the selected functional role column with the tree leaf nodes.
+          </p>
+          
+          <p>
+            7. If a match is found, the corresponding colors (<b style="color: green;">green</b>=curation, <b style="color: blue;">blue</b>=predications, <b style="color: red;">red</b>=neither).<br>
+               If the leaf node is not matched at all, then a blank spot by that leaf node is reserved.  In addition, the confidence <b>score out of 100</b> is also presented.
+          </p>
+  
+          <p>
+            8. Please feel free to zoom in and out the tree to view more details. By clicking on the tree nodes, specific node data will also be presented.
+          </p>
+
+          <h3>Thank you for visiting the Subsystem demo page!</h3>
+        </div>
+      </md-dialog-content>
+    </form>
+    <div class="md-actions">
+        <md-button ng-click="cancel()">OK</md-button>
+    </div>
+  </md-dialog>

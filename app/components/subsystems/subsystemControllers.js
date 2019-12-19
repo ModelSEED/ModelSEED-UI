@@ -183,7 +183,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
                 $state.go('app.subsystem', wsPath);
             }).catch(function(e) {
                 console.log('error', e)
-                self.showError('Save error', e.error.message.slice(0,30)+'...')
+                Dialogs.showError('Save error', e.error.message.slice(0,30)+'...')
             })
     }
 
@@ -198,7 +198,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
                 $state.go('app.subsystem', {path: folder+newName});
             }).catch(function(e) {
                 console.log('error', e)
-                self.showError('Save error', e.error.message.slice(0,30)+'...')
+                Dialogs.showError('Save error', e.error.message.slice(0,30)+'...')
             })
     }
 
@@ -210,13 +210,17 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
                 // $state.go('app.subsystem', wsPath);
             }).catch(function(e) {
                 console.log('error', e)
-                self.showError('Save error', e.error.message.slice(0,30)+'...')
+                Dialogs.showError('Save error', e.error.message.slice(0,30)+'...')
             })
     }
 
     // Parse the given data for the subsystem data structure
     function parseSubsysData(obj_data) {
         // convert the subsystem data into an array of objects from an array of arrays
+        // returns an array of objects, where each object represents a row of data in the subsystem table:
+        // The first row of data is the respective reactions where each function role (column caption) is associated.
+        // The rows after the first consist of gene annotation details in arrays of geneIds under the categories of
+        // 'curation'/'candidates'/'predictions'
         var caps = ["Genome"], families = {};
         // fetching the subsystem head captions and family trees
         for (var i0=1; i0<obj_data[0].length; i0++) {
@@ -241,8 +245,27 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // With the given data from the NEW subsystem data structure, build the html content for table cells
     function buildHtmlContent(input_data) {
         /*
-        input_data: has a structure of an array of objects, i.e.,
-            [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
+        input_data: has a structure of an array of objects.  Examples of input_data rows:
+        1st row:
+            input_data[0] = {Genome: "Reactions",
+                "UDP-4-dehydro-6-deoxy-glucose 3,5-epimerase (no EC)": "rxn02735",
+                "UDP-4-dehydro-rhamnose reductase (EC 1.1.1.-)": "rxn02735",
+                "UDP-glucose 4,6-dehydratase (EC 4.2.1.76)": "rxn00215"
+            }
+        2nd (and other) row:
+            input_data[1]= {
+                Genome: "Acomosus"
+                "UDP-4-dehydro-6-deoxy-glucose 3,5-epimerase (no EC)": {
+                    candidates: (6) [
+                        {"Aco000396.1": {score: "0.855"}},
+                        {"Aco006021.1": {score: "0.845"}}...],
+                    curation: []
+                    prediction: (5) […]
+                },
+                "UDP-4-dehydro-rhamnose reductase (EC 1.1.1.-)": {…}
+                "UDP-glucose 4,6-dehydratase (EC 4.2.1.76)": {…}
+            }
+            ...
         return: the input_data with its original object subdata replaces with the html masked data.
         */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
@@ -592,6 +615,10 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // Parse the given data for the subsystem data structure
     function parseSubsysData(obj_data) {
         // convert the subsystem data into an array of objects from an array of arrays
+        // returns an array of objects, where each object represents a row of data in the subsystem table:
+        // The first row of data is the respective reactions where each function role (column caption) is associated.
+        // The rows after the first consist of gene annotation details in arrays of geneIds under the categories of
+        // 'curation'/'candidates'/'predictions'
         var caps = ["Genome"], families = {};
         // fetching the subsystem head captions and family trees
         for (var i0=1; i0<obj_data[0].length; i0++) {
@@ -616,8 +643,27 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     // With the given data from the NEW subsystem data structure, build the html content for table cells
     function buildHtmlContent(input_data) {
         /*
-        input_data: has a structure of an array of objects, i.e.,
-            [{"col_caption1": col_val1}, {"col_caption2": col_val2}, ...]
+        input_data: has a structure of an array of objects.  Examples of input_data rows:
+        1st row:
+            input_data[0] = {Genome: "Reactions",
+                "UDP-4-dehydro-6-deoxy-glucose 3,5-epimerase (no EC)": "rxn02735",
+                "UDP-4-dehydro-rhamnose reductase (EC 1.1.1.-)": "rxn02735",
+                "UDP-glucose 4,6-dehydratase (EC 4.2.1.76)": "rxn00215"
+            }
+        2nd (and other) row:
+            input_data[1]= {
+                Genome: "Acomosus"
+                "UDP-4-dehydro-6-deoxy-glucose 3,5-epimerase (no EC)": {
+                    candidates: (6) [
+                        {"Aco000396.1": {score: "0.855"}},
+                        {"Aco006021.1": {score: "0.845"}}...],
+                    curation: []
+                    prediction: (5) […]
+                },
+                "UDP-4-dehydro-rhamnose reductase (EC 1.1.1.-)": {…}
+                "UDP-glucose 4,6-dehydratase (EC 4.2.1.76)": {…}
+            }
+            ...
         return: the input_data with its original object subdata replaces with the html masked data.
         */
         var curation_roles = [], prediction_roles = []; candidate_roles = [];
@@ -700,7 +746,7 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
                 indata0[key] = lnk_arr.join(',');
             }
             else
-            indata0[key] = "<span></span>";
+                indata0[key] = "<span></span>";
         }
         return indata0;
     }
@@ -767,6 +813,13 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
             '<!--a ng-click="cancel($event)" class="no-link">Cancel</a-->';
         save_cancel_str += '</div></section>';
         return save_cancel_str;
+    }
+
+    $s.showDemoIntro = function(ev, pid, title, msg='Thank you for visiting the subsystem page!') {
+        msg = '';
+        msg += 'whatever details here';
+
+        Dialogs.showAdvanced(ev, pid, title, msg);
     }
 }])
 // End demoSubsystem controller--For sponsors' convenience to review without auth

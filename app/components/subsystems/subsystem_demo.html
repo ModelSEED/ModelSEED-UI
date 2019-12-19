@@ -1,9 +1,16 @@
+<div id='subsystemPage'>
 <div layout="row">
-    <div class="content-header">Subsystem: <b><small>{{subsysName}}</small></b>
-        <div class="h5">
+    <div class="content-header"><b><small>{{subsysName}}</small></b>
+        <!--div class="h5">
             <i class="icon-folder-open-o"></i>
             <a ui-sref="app.mySubsystems({tab: 'mine'})"> >My Subsystems</a>
-        </div>
+        </div-->
+    </div>
+    <div class="dialog-demo-content" layout="column" layout-align="center center" style="width:100%">
+        <md-button class="md-primary md-raised"
+                ng-click="showDemoIntro($event, 'subsystemPage')" >
+            How to browse the subsystem page
+        </md-button>
     </div>
 </div>
 
@@ -28,3 +35,4 @@
 </ng-table-subsystem>
 
 <!-- end passing ... -->
+</div>

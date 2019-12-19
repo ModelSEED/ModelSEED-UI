@@ -311,6 +311,59 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
         })
     }
 
+
+    this.showError = function(msg) {
+       $mdToast.show({
+        controller: 'ToastCtrl',
+        parent: angular.element('.sidebar'),
+        //templateUrl:'app/views/dialogs/notify.html',
+        template: '<md-toast>'+
+                        '<span flex style="margin-right: 30px;">'+
+                          '<span class="ms-color-error">Error</span><br>'+
+                          msg+
+                         '</span>'+
+                    '</md-toast>',
+        hideDelay: 10000
+      });
+    }
+
+    this.showAlert = function(ev, parentID, title, msg) {
+        // Appending dialog to document.body to cover sidenav in docs app
+        // Modal dialogs should fully cover application
+        // to prevent interaction outside of dialog
+        $dialog.show(
+          $dialog.alert()
+            .parent(angular.element(document.querySelector('#'+ parentID)))
+            .clickOutsideToClose(true)
+            .title(title)  //T his is an alert title
+            .content(msg)  // You can specify some description text in here
+            .ariaLabel(title)
+            .ok('OK!')
+            .targetEvent(ev)
+        );
+      };
+
+    this.showAdvanced = function(ev, parentID, title, msg) {
+        $dialog.show({
+            templateUrl: 'app/views/dialogs/show-advanced-msg.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose:true,
+            controller: ['$scope', '$mdDialog',
+              function($scope, $dialog) {
+                $scope.hide = function() {
+                    $dialog.hide();
+                };
+                $scope.cancel = function() {
+                    $dialog.cancel();
+                };
+                $scope.answer = function(answer) {
+                    $dialog.hide(answer);
+                };
+            }]
+      })
+    }
+
     this.selectMedia = function(ev, cb) {
         ev.stopPropagation();
         $dialog.show({
@@ -729,21 +782,6 @@ function(MS, WS, $dialog, $mdToast, uiTools, $timeout, Upload, Auth, MV, config,
                  '</md-toast>',
          hideDelay: 10000
        });
-    }
-
-    this.showError = function(msg) {
-       $mdToast.show({
-        controller: 'ToastCtrl',
-        parent: angular.element('.sidebar'),
-        //templateUrl:'app/views/dialogs/notify.html',
-        template: '<md-toast>'+
-                        '<span flex style="margin-right: 30px;">'+
-                          '<span class="ms-color-error">Error</span><br>'+
-                          msg+
-                         '</span>'+
-                    '</md-toast>',
-        hideDelay: 10000
-      });
     }
 
     this.showError = function(msg) {
