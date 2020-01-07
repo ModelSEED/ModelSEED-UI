@@ -1,12 +1,12 @@
 div.container {
-    overflow: auto;
-    width: 100%;
-    height: 100%;
+    overflow: scroll;
+    width: 90%;
+    height: 88vh;
     top: 0px;
     max-width: 120em;
     max-height: 120em;
     position: relative;
-    left: 0px;
+    left: -80px;
 }
 table {
     /*table-layout: auto;*/
@@ -101,7 +101,7 @@ div.custom-scrollbar {
     height: 100%;
     width: 100%;
     background: #F5F6F9;
-    overflow-y: scroll;
+    overflow: scroll;
 }
 /*
 div.custom-scrollbar::-webkit-scrollbar {
@@ -139,4 +139,18 @@ div.searchheader {
     white-space:nowrap;
     overflow:hidden;
     display:block;
+}
+body {
+    overflow-x: hidden;
+  }
+@media(device-width: 768px) and (device-height: 1024px){
+    ::-webkit-scrollbar {
+        -webkit-appearance: none;
+        width: 7px;
+    }
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,.5);
+        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+    }
 }

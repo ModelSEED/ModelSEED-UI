@@ -1,8 +1,8 @@
 
 <link rel="stylesheet" ng-href="{{ htmlPath }}/subsys_style.css">
-<div ng-if="data" class="container disable-scrollbars" flex>
+<div ng-if="data" class="container" flex>
     <!--div class="table-controls table-editor-controls table-search"-->
-    <div class="table table-striped table-bordered table-search">
+    <div class="table table-striped table-bordered table-search" width="200%">
         <div layout-gt-sm="row" class="searchheader">
             <md-input-container layout="row" layout-align="start center" flex>
                 <md-button ng-if="onSave" class="md-primary" ng-click="save($event)" ng-disabled="saveInProgress"
