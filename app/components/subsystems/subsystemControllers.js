@@ -563,17 +563,18 @@ function($s, $state, WS, MS, $stateParams, tools, Dialogs, $http, Auth) {
     $s.subsysOpts = {query: '', offset: 0, sort: {field: 'Genome'}};
     $s.subsysHeader = []; // dynamically filled later
     $s.subsysData = [];
-    $s.subsysName = ''; //'demo_UDP_Bio';
-    $s.subsysPath = 'app/components/subsystems/demo/xmls';
+    $s.subsysName = 'demo_Zn_subsystem';
+    //$s.subsysName = 'demo_UDP_Bio';
+    $s.subsysPath = '';
     $s.subsysDataClone = [];
     $s.allSubsysFamTrees = [];
     $s.mySubsysFamTrees = [];
     $s.captions = [];
 
+    var demo_sys_file = $s.subsysName + '.json'; // 'demo_UDP_Bio.json'; // 'demo_Zn_subsystem.json';
     $s.loading = true
     var demo_dir = 'app/components/subsystems/demo',
-        demo_subsys_file_path = [demo_dir, 'demo_UDP_Bio.json'].join('/'),
-        demo_tree_file_path = [demo_dir, 'OG0000949'].join('/'),
+        demo_subsys_file_path = [demo_dir, demo_sys_file].join('/'),
         demo_data = [], demo_res = null, demo_meta = null;
 
     $http.get(demo_subsys_file_path)

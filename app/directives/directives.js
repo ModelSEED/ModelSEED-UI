@@ -1417,7 +1417,7 @@ function($compile, $stateParams) {
             allFamtrees: '=tableAllFamtrees',
             myFamtrees: '=tableMyFamtrees',
             loading: '=tableLoading',
-            isDemo: '=tableIsDemo',
+            isDemo: '@tableIsDemo',
             cellClick: '=tableCellClick',
             hoverClass: '@tableRowHoverClass',
             placeholder: '@tablePlaceholder',
@@ -1434,10 +1434,6 @@ function($compile, $stateParams) {
             scope.noPagination = true; //('disablePagination' in attrs) ? true: false;
             scope.loadingFamTreeFailed = false;
             scope.errLoadingFamTree = '';
-            if (scope.isDemo === "true")
-                scope.isDemo = true;
-            else
-                scope.isDemo = false;
 
             // model: cell selection data
             scope.selectedCell = '';
@@ -1469,16 +1465,16 @@ function($compile, $stateParams) {
             }
 
             scope.familyTreeSelected = function(ev, treeName, func_name, col_id, usr) {
-                if (scope.isDemo)
-                    loadPhyloXML_demo(treeName, func_name, col_id, updateAnnotationInTree);
-                else
-                    loadPhyloXML(treeName, func_name, col_id, updateAnnotationInTree);
+                scope.treeData = null;
+                scope.xmldoc = null;
+                scope.sXML = '';
+                scope.loadingFamTreeFailed = false;
+                scope.errLoadingFamTree = 'Caught an error while loading family tree.';
 
-                if (!scope.loadingFamTreeFailed) {
-                    fetchDownloadURL(ev, treeName, func_name);
-                    ev.stopPropagation();
-                    ev.preventDefault();
-                }
+                if (scope.isDemo == "true")
+                    loadPhyloXML_demo(treeName, func_name, col_id, ev);
+                else
+                    loadPhyloXML(treeName, func_name, col_id, ev);
             }
 
             function fetchDownloadURL(ev, tree_name, func_name) {
@@ -1506,19 +1502,19 @@ function($compile, $stateParams) {
                         });
                     })
                 }
-                else if (scope.isDemo) {
+                else if (scope.isDemo == "true") {
                     scope.downloadURL = '';
                     Dialogs.showFuncFamTree(ev, scope.subsysName, func_name, tree_name,
                                             scope.downloadURL, scope.xmldoc, scope.sXML,
                         function(tree_msg) {
                     });
                 }
+                scope.loadingFamTreeFailed = false;
+                scope.errLoadingFamTree = '';
             }
 
-            function loadPhyloXML(treeName, func_name, col_id, cb) {
+            function loadPhyloXML(treeName, func_name, col_id, ev) {
                 // loading the family tree data (in extendable phyloxml format)
-                scope.loadingFamTreeFailed = false;
-                scope.errLoadingFamTree = '';;
                 scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
                 var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
@@ -1526,78 +1522,110 @@ function($compile, $stateParams) {
 
                 WS.get(phyloxml_wsPath)
                 .then(function(res) {
-                    var xml_str = res.data,
-                        xmlMeta_str = res.meta;
+                    if (res == undefined) {
+                        scope.treeData = null;
+                        scope.loadingFamTreeFailed = true;
+                        scope.errLoadingFamTree = 'No family tree data found!';
+                    }
+                    else {
+                        var xml_str = res.data;
+                        if (xml_str == undefined) {
+                            scope.treeData = null;
+                            scope.loadingFamTreeFailed = true;
+                            scope.errLoadingFamTree = 'No family tree data found!';
+                        }
+                        else {
+                            // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
+                            // XMLSerializer will do the reverse of DOMParser
+                            // var oSerializer = new XMLSerializer();
+                            // var sXML = oSerializer.serializeToString(xmldoc);
+                            var p = new DOMParser();
+                            phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
+                            console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
+                                        : phyloxmlDoc.documentElement.nodeName);
+                            scope.treeData = phyloxmlDoc;
 
-                    // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
-                    // XMLSerializer will do the reverse of DOMParser
-                    // var oSerializer = new XMLSerializer();
-                    // var sXML = oSerializer.serializeToString(xmldoc);
-                    var p = new DOMParser();
-                    phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
-                    console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
-                                : phyloxmlDoc.documentElement.nodeName);
-                    scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
-                    scope.treeData = phyloxmlDoc;
-
-                    var oSerializer = new XMLSerializer();
-                    scope.xmldoc = cb(func_name, col_id);
-                    scope.sXML = oSerializer.serializeToString(scope.xmldoc);
+                            var oSerializer = new XMLSerializer();
+                            updateAnnotationInTree(func_name, col_id)
+                            .then(function(xmldoc) {
+                                scope.xmldoc = xmldoc;
+                                scope.sXML = oSerializer.serializeToString(xmldoc);
+                                fetchDownloadURL(ev, treeName, func_name);
+                                ev.stopPropagation();
+                                ev.preventDefault();
+                                scope.loadingFamTreeFailed = false;
+                                scope.errLoadingFamTree = '';
+                            })
+                        }
+                    }
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
-                    console.log('Caught an error while loading family tree:' + error.error.message);
+                    console.log(scope.errLoadingFamTree);
                     scope.treeData = null;
-                    scope.loadingFamTree = false;
                     scope.loadingFamTreeFailed = true;
-                    scope.errLoadingFamTree = 'Error message: ' + error.error.message;
+                    scope.loadingFamTree = false;
                 });
             }
 
             // As the function name indicates, this function is for demo purpose only!
-            function loadPhyloXML_demo(treeName, func_name, col_id, cb) {
+            function loadPhyloXML_demo(treeName, func_name, col_id, ev) {
                 // loading the family tree data (in extendable phyloxml format)
-                scope.loadingFamTreeFailed = false;
-                scope.errLoadingFamTree = '';;
                 scope.loadingFamTree = true;
                 var phyloxmlDoc = null;
-                var phyloxml_wsPath = scope.subsysPath.split('/').slice(0, 3).join('/') + '/families/';
-                phyloxml_wsPath = phyloxml_wsPath + treeName;
                 var demo_dir = 'app/components/subsystems/demo',
-                    demo_tree_file_path = [demo_dir, 'OG0000949'].join('/');
+                    demo_tree_file_path = [demo_dir, treeName].join('/');
 
                 $http.get(demo_tree_file_path)
                 .then(function(res) {
-                    var xml_str = res.data.data,
-                        xmlMeta_str = res.data.meta;
+                    if (res == undefined) {
+                        scope.treeData = null;
+                        scope.loadingFamTreeFailed = true;
+                        scope.errLoadingFamTree = 'No family tree data found!';
+                    }
+                    else {
+                        var xml_str = res.data.data;
+                        if (xml_str == undefined) {
+                            scope.treeData = null;
+                            scope.loadingFamTreeFailed = true;
+                            scope.errLoadingFamTree = 'No family tree data found!';
+                        }
+                        else {
+                            // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
+                            // XMLSerializer will do the reverse of DOMParser
+                            // var oSerializer = new XMLSerializer();
+                            // var sXML = oSerializer.serializeToString(xmldoc);
+                            var p = new DOMParser();
+                            phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
+                            console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
+                                        : phyloxmlDoc.documentElement.nodeName);
+                            scope.treeData = phyloxmlDoc;
 
-                    // DOMParser parses an xml string into a DOM tree and return a XMLDocument in memory
-                    // XMLSerializer will do the reverse of DOMParser
-                    // var oSerializer = new XMLSerializer();
-                    // var sXML = oSerializer.serializeToString(xmldoc);
-                    var p = new DOMParser();
-                    phyloxmlDoc = p.parseFromString(xml_str, 'application/xml');
-                    console.log(phyloxmlDoc.documentElement.nodeName == "parsererror" ? "error while parsing"
-                                : phyloxmlDoc.documentElement.nodeName);
-                    scope.xmlMeta = p.parseFromString(xmlMeta_str, 'text/xml');
-                    scope.treeData = phyloxmlDoc;
-
-                    var oSerializer = new XMLSerializer();
-                    scope.xmldoc = cb(func_name, col_id);
-                    scope.sXML = oSerializer.serializeToString(scope.xmldoc);
+                            var oSerializer = new XMLSerializer();
+                            updateAnnotationInTree(func_name, col_id)
+                            .then(function(xmldoc) {
+                                scope.xmldoc = xmldoc;
+                                scope.sXML = oSerializer.serializeToString(xmldoc);
+                                fetchDownloadURL(ev, treeName, func_name);
+                                ev.stopPropagation();
+                                ev.preventDefault();
+                                scope.loadingFamTreeFailed = false;
+                                scope.errLoadingFamTree = '';
+                            })
+                        }
+                    }
                     scope.loadingFamTree = false;
                 })
                 .catch(function(error) {
-                    console.log('Caught an error while loading family tree:' + error.error.message);
+                    console.log(scope.errLoadingFamTree);
                     scope.treeData = null;
-                    scope.loadingFamTree = false;
                     scope.loadingFamTreeFailed = true;
-                    scope.errLoadingFamTree = 'Error message: ' + error.error.message;
+                    scope.loadingFamTree = false;
                 });
             }
 
             // Modify the XML data structure according to the annotations in column (col_id)
-            function updateAnnotationInTree(func, col_id) {
+            var updateAnnotationInTree = function(func, col_id) {
                 var xmldoc = scope.treeData.cloneNode(true);
                 var dKeys = Object.keys(scope.dataClone);
                 for (var r=1; r<dKeys.length-1; r++) { // r=1 skip header
@@ -1643,8 +1671,7 @@ function($compile, $stateParams) {
                 lbls.appendChild(lbl2);
                 root_node.appendChild(lbls);
 
-                //console.log(xmldoc.firstChild.innerHTML);
-                return xmldoc;
+                return Promise.resolve(xmldoc);
             }
 
             // run through the annotation arrays to find gene_name matches
