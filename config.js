@@ -18,7 +18,7 @@ angular.module('config', []).service('config', function() {
         shock_url: "https://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         ms_support_url: "https://modelseed.org/services/ms_fba",
-        solr_url: "https://modelseed.theseed.org/solr/",
+        solr_url: "https://modelseed.org/solr/",
         patric_solr_url: "https://www.patricbrc.org/api/",
         cpd_img_url: "https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"
     };
