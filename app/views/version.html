@@ -133,6 +133,19 @@
                 </td>
                 <td></td>
             </tr>
+            <tr>
+                <td>Test Service</td>
+                <td>{{urls.test_service_url}}</td>
+                <td>
+                    <small ng-if="!$root.user">login required</small>
+                    <div ng-switch="app" ng-if="$root.user">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
         </tbody>
     </table>
 </div>

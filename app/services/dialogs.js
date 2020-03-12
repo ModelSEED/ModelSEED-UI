@@ -1131,7 +1131,7 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
                                     swal('User feedback', response.msg);
                                 }
                                 else {
-                                    var cm_msg = "POST-ing of data failed with unknown error.";
+                                    var cm_msg = "POST-ing of data to " + ms_rest_endpoint + " failed with unknown error.";
                                     console.log(cm_msg + "\n", comments);
                                     swal('User feedback', cm_msg);
                                 }
