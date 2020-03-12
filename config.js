@@ -13,8 +13,9 @@ angular.module('config', []).service('config', function() {
         app_url: "https://p3.theseed.org/services/app_service",
         ws_url: "https://p3.theseed.org/services/Workspace",
         ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
-	// Versioning is hard-coded into ModelSEED-REST API calls, want to get rid of it
+        // Versioning is hard-coded into ModelSEED-REST API calls, want to get rid of it
         ms_rest_url: "https://modelseed.org/api/v0/",
+        test_service_url: "https://modelseed.org/api/test-service",
         shock_url: "https://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",
         ms_support_url: "https://modelseed.org/services/ms_fba",
