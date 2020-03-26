@@ -507,7 +507,7 @@ function($s, Biochem, $stateParams) {
             $s.cpd = data;
             $s.loading = false;
         })
-    Biochem.get_solr('reactions', $s.rxnOpts)
+    Biochem.findReactions_solr($s.id, cpd_rxn_sFields)
         .then(function(res) {
             $s.rxns = res;
             $s.loadingRxns = false;

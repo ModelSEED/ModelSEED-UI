@@ -248,7 +248,7 @@ function($http, $q, config, $log) {
             url += '&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
         return $http.get(url)
                     .then(function(res) {
-                        return res.data.response.docs;
+                        return res.data.response;
                     })
     }
     /*************End translating the RQL syntax to Solr query syntax******************/
