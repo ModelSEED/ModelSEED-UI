@@ -11,6 +11,7 @@ angular.module('config', []).service('config', function() {
     this.services = {
         auth_url: "https://p3.theseed.org/Sessions/Login",
         app_url: "https://p3.theseed.org/services/app_service",
+        svc_test_url: "https://modelseed.org/api/test-service",
         ws_url: "https://p3.theseed.org/services/Workspace",
         ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
 	// Versioning is hard-coded into ModelSEED-REST API calls, want to get rid of it

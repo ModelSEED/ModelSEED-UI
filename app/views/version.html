@@ -50,6 +50,42 @@
                 <td></td>
             </tr>
             <tr>
+                <td><a href="https://github.com/MG-RAST/Shock" target="_blank">Shock</a></td>
+                <td>{{urls.shock_url}}</td>
+                <td>
+                    <div ng-switch="shock">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>SOLR</td>
+                <td>{{urls.solr_url}}</td>
+                <td>
+                    <div ng-switch="solr">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>API</td>
+                <td>{{urls.svc_test_url}}</td>
+                <td>
+                    <div ng-switch="svc_test">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
                 <td><a href="https://github.com/ModelSEED/ProbModelSEED" target="_blank">ProbModelSEED</a></td>
                 <td>{{urls.ms_url}}</td>
                 <td>
@@ -82,30 +118,6 @@
                     <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/biop3/Workspace/WorkspaceClient.py" target="_blank">Python</a>,
                     <a href="https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm" target="_blank">Perl</a>
                 </td>
-            </tr>
-            <tr>
-                <td><a href="https://github.com/MG-RAST/Shock" target="_blank">Shock</a></td>
-                <td>{{urls.shock_url}}</td>
-                <td>
-                    <div ng-switch="shock">
-                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
-                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
-                        <div ng-switch-default>loading...</div>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>SOLR</td>
-                <td>{{urls.solr_url}}</td>
-                <td>
-                    <div ng-switch="solr">
-                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
-                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
-                        <div ng-switch-default>loading...</div>
-                    </div>
-                </td>
-                <td></td>
             </tr>
             <tr>
                 <td>ModelSEED Support Service</td>
