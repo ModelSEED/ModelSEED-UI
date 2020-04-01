@@ -50,6 +50,42 @@
                 <td></td>
             </tr>
             <tr>
+                <td><a href="https://github.com/MG-RAST/Shock" target="_blank">Shock</a></td>
+                <td>{{urls.shock_url}}</td>
+                <td>
+                    <div ng-switch="shock">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>SOLR</td>
+                <td>{{urls.solr_url}}</td>
+                <td>
+                    <div ng-switch="solr">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>API</td>
+                <td>{{urls.svc_test_url}}</td>
+                <td>
+                    <div ng-switch="svc_test">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
                 <td><a href="https://github.com/ModelSEED/ProbModelSEED" target="_blank">ProbModelSEED</a></td>
                 <td>{{urls.ms_url}}</td>
                 <td>
@@ -84,47 +120,24 @@
                 </td>
             </tr>
             <tr>
-                <td><a href="https://github.com/MG-RAST/Shock" target="_blank">Shock</a></td>
-                <td>{{urls.shock_url}}</td>
-                <td>
-                    <div ng-switch="shock">
-                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
-                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
-                        <div ng-switch-default>loading...</div>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>SOLR</td>
-                <td>{{urls.solr_url}}</td>
-                <td>
-                    <div ng-switch="solr">
-                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
-                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
-                        <div ng-switch-default>loading...</div>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>App Test</td>
-                <td>{{urls.svc_test_url}}</td>
-                <td>
-                    <div ng-switch="svc_test">
-                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
-                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
-                        <div ng-switch-default>loading...</div>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            <tr>
                 <td>ModelSEED Support Service</td>
                 <td>{{urls.ms_support_url}}</td>
                 <td>
                     <small ng-if="!$root.user">login required</small>
                     <div ng-switch="msSupport" ng-if="$root.user">
+                        <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
+                        <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
+                        <div ng-switch-default>loading...</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>App Service</td>
+                <td>{{urls.app_url}}</td>
+                <td>
+                    <small ng-if="!$root.user">login required</small>
+                    <div ng-switch="app" ng-if="$root.user">
                         <div ng-switch-when="true"><i class="material-icons success">check_circle</i></div>
                         <div ng-switch-when="false"><i class="material-icons fail">error_outline</i></div>
                         <div ng-switch-default>loading...</div>
