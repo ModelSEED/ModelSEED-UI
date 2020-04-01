@@ -133,6 +133,10 @@ function($s, $http, config, $rootScope) {
          .then(function(res) { $s.solr = true; })
          .catch(function() { $s.solr = false; })
 
+    $http.get($s.urls.svc_test_url)
+         .then(function(res) { $s.svc_test = true; })
+         .catch(function() { $s.svc_test = false; })
+
     $http.rpc('app', 'query_task_summary', [])
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
