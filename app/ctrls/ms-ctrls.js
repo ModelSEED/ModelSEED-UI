@@ -254,7 +254,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
