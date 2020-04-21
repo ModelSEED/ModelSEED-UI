@@ -169,7 +169,11 @@ function($locationProvider, $stateProvider, $httpProvider,
         })
 
         // main views
-        .state('app.biochem', {
+        .state('app.biochem0', {
+            url: "/biochem",
+            templateUrl: 'app/views/biochem/biochem0.html',
+            controller: 'Biochem'
+        }).state('app.biochem', {
             url: "/biochem/:chem",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem'
