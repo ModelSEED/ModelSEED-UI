@@ -1,6 +1,6 @@
 
 <div style="background:#2D224E;border:1px solid #cccccc;padding: 10px;">
-    <ul class="toolbar">
+    <ul class="md-toolbar-tools about-toolbar">
        <!-- 
         <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Microbes'})">
@@ -9,14 +9,14 @@
         </li>
         -->
         
-        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Plants'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Plants'})">
-                <span hide-sm>Public Plant Models</span>
-            </a>
+                 Public Plant Models
+           </a>
         </li>
-        <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Annotations'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Annotations'})">
-                <span hide-sm>Subsystems</span>
+                Subsystems
             </a>
         </li>
         <!-- 
@@ -25,22 +25,20 @@
                 <span hide-sm>FunctionalRoles</span>
             </a>
         </li>
-         -->
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'reactions'})">
-            <span hide-sm>Reactions</span>
-        </a>
-    </li>    
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
-            <span hide-sm>Compounds</span>
-        </a>
-    </li>
-    
-        
-        <li ng-class="{ active: $state.includes('app.media') }" id="tour-1" >
+        -->
+        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'reactions'}) }" id="tour-1" style="font-size: 16pt; border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'reactions'})">
+                Reactions
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'compounds'}) }" id="tour-1" style="font-size: 16pt; border-right: 1px solid #bbb;">
+            <a ui-sref="app.biochem({chem: 'compounds'})">
+                Compounds
+            </a>
+        </li>
+        <li ng-class="{ active: $state.includes('app.media') }"  style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.media">
-                <span hide-sm>Media</span>
+                Media
             </a>
         </li>
     </ul>

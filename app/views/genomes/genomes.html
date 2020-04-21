@@ -3,7 +3,7 @@
 <!-- Indigo: -->
 <!-- <div style="background:#4B0082;border:1px solid #cccccc;padding: 10px;">  -->
 
-<ul class="toolbar">
+<ul class="md-toolbar-tools about-toolbar">
     <!--   
     <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Microbes'})">
@@ -12,12 +12,15 @@
     </li>
      -->
     
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Plants'}) ||
+                            ($state.includes('app.RefModels') &&
+                             !$state.includes('app.RefModels', {ref: 'Annotations'}))}"
+        style="font-size: 16pt; border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Plants'})">
              Public Plant Models
         </a>
     </li>
-    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Annotations'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
         <a ui-sref="app.RefModels({ref: 'Annotations'})">
             Subsystems
         </a>
@@ -30,18 +33,17 @@
         </a>
     </li>
      -->
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
+    <li ng-class="{ active: $state.includes('app.biochem', {chem: 'reactions'}) }" id="tour-1" style="font-size: 16pt; border-right: 1px solid #bbb;">
         <a ui-sref="app.biochem({chem: 'reactions'})">
             Reactions
         </a>
-    </li>    
-    <li ng-class="{ active: $state.includes('app.biochem') }" id="tour-1" style="border-right: 1px solid #bbb;">
-        <a ui-sref="app.biochem({chem: 'compounds'})" tabIndex='1'>
+    </li>
+    <li ng-class="{ active: $state.includes('app.biochem', {chem: 'compounds'}) }" id="tour-1" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <a ui-sref="app.biochem({chem: 'compounds'})">
             Compounds
         </a>
     </li>
-     
-    <li ng-class="{ active: $state.includes('app.media') }" id="tour-1">
+    <li ng-class="{ active: $state.includes('app.media') }"  style="font-size: 16pt; border-right: 1px solid #bbb;">
         <a ui-sref="app.media">
             Media
         </a>
@@ -64,30 +66,8 @@
          -->
     </div>
 
-    <!--
-    <md-input-container layout-align="center center">
-        <md-switch md-no-ink
-                   ng-model="filters.myGenomes"
-                   aria-label="view my genomes"
-                   ng-click="toggleMyGenomes()">
-            View my genomes
-        </md-switch>
-    </md-input-container>
-
-    <div ng-if="tabs.tabIndex == 1 && view == 'Microbes'" layout-align="center end">
-        <br>
-        <b>Note:</b> to annotate a genome, you must visit
-        <a href="http://rast.nmpdr.org" target="_blank">RAST <i class="fa fa-external-link text-muted"></i></a> at this time.
-    </div>
-
-    <md-radio-group class= "hidden" ng-if="$root.includePlants" ng-model="view" ng-change="changeView(view)" md-no-ink class="plants-toggle">
-        <md-radio-button value="Microbes"><i class="icon-microscope"></i> Microbes</md-radio-button>
-        <md-radio-button value="Plants"><i class="icon-leaf"></i> Plants</md-radio-button>
-    </md-radio-group>
-    -->    
 </div>
 <hr class="no-margin">
-
 
 
 <ng-include ng-if="ref == 'Microbes'" src="'app/views/genomes/microbes--.html'" ></ng-include>

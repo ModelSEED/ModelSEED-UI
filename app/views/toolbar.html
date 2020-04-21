@@ -7,6 +7,7 @@
 	    </a>
 	</div>
 	
+    <!--
 	<md-button flex="22" ui-sref="app.RefModels">
         <span style="font-size: 18pt;">Reference Data</span>	
 	</md-button>
@@ -18,27 +19,29 @@
 	<md-button flex="12" ui-sref="app.plantPage">
         <span style="font-size: 18pt;">Build Model</span>
 	</md-button>
-    <!-- 
-	<ul style="font-size: 18pt; list-style-type: none; ">
-	    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="display: inline; padding: 30px;">
+     -->
+	<ul class="md-toolbar-tools about-toolbar" style="font-size: 18pt;">
+        <li ng-class="{ active: $state.includes('app.RefModels') ||
+                                $state.includes('app.biochem') ||
+                                $state.includes('app.media')}">
 	        <a ui-sref="app.RefModels">
 	            Reference Data
 	        </a>
 	    </li>
 	       
-	    <li ng-class="{ active: $state.includes('app.myModels') }" style="display: inline;">
+        <li ng-class="{ active: $state.includes('app.myModels') ||
+                                $state.includes('app.myMedia')}">
 	        <a ui-sref="app.myModels">
 	            User Data
 	        </a>
 	    </li>
 	        
-	    <li ng-class="{ active: $state.includes('app.plantPage') }" id="tour-1" style="display: inline; padding: 30px;">    
+	    <li ng-class="{ active: $state.includes('app.plantPage') }">
 	        <a ui-sref="app.plantPage">
 	            Build Model
 	        </a>
 	    </li>
 	</ul>
-     -->
 </div>
  
 <div class="toolbar-right" layout="row">
