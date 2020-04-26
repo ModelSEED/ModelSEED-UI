@@ -200,8 +200,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.RefModels', {
             url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
-            controller: 'RefModels',
-            authenticate: true
+            controller: 'RefModels'
+            // authenticate: true
 
 
 
@@ -216,8 +216,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
-            controller: 'Media',
-            authenticate: true
+            controller: 'Media'
+            //authenticate: true
             
             
             }).state('app.myMedia', {

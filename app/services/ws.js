@@ -74,6 +74,52 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
         })
     }
 
+    this.listPublicModels = function(path) {
+        // first get paths to plantseed_data
+        var params = path ? {paths: [path]} : {};
+
+        return $http.rpc('ws', 'ls', params)
+            .then(function(res) {
+                var data = [];
+                var model_paths = params['paths'];
+                for (var i=0; i<model_paths.length; i++) {
+                    var mods = res[model_paths[i]];
+                    for (var j=0; j<mods.length; j++) {
+                        var obj = mods[j][7];
+
+                        // if (!obj.type) continue;
+                        // XXX: list models will return non modelfolders???
+
+                        data.push(self.sanitizeModel(obj))
+                    }
+                }
+
+                // cache data according to plants/microbes
+                if (path && path.split('/')[2] === 'plantseed') self.myPlants = data
+                else self.myModels = data;
+
+                console.log('data', data)
+                return data;
+            })
+    }
+
+    this.sanitizeModel = function(obj) {
+        return {
+            name: obj.id,
+            path: obj.ref,
+            orgName: obj.name,
+            status: obj.status,
+            geneCount: obj.num_genes,
+            rxnCount: obj.num_reactions,
+            cpdCount: obj.num_compounds,
+            fbaCount: obj.fba_count,
+            timestamp: Date.parse(obj.rundate),
+            gapfillCount: obj.unintegrated_gapfills + obj.integrated_gapfills,
+            expression: 'expression_data' in obj ? obj.expression_data : []
+        }
+    }
+
+
     // sanitizeMeta: takes workspace info array, returns dict.
     this.sanitizeMeta = function(obj) {
         return {

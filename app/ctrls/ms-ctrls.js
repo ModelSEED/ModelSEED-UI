@@ -1685,7 +1685,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     $scope.loadingMicrobes = true;    
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
-        console.log('path res', genomes)
+        console.log('Genomes loaded from Patric', genomes)
 
         $scope.microbes = genomes.docs;
         
@@ -1701,12 +1701,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     })
     
     
-    
-
     $scope.loadingPlants = true;
+/*
     MS.listModels( '/plantseed' + '/plantseed' ).
         then(function(res) {
-        console.log('path res', res)
+        console.log('Public plants loaded by MS', res)
                    
         $scope.plants = res;
         $scope.loadingPlants = false;
@@ -1714,8 +1713,17 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.plants = [];
         $scope.loadingPlants = false;
     })
-
-
+*/
+    // public plants for Reference Data tab view
+    WS.listPublicModels('/plantseed/plantseed/')
+      .then(function(mods) {
+          console.log('Public plants loaded by WS', mods)
+          $scope.plants = mods;
+          $scope.loadingPlants = false;
+    }).catch(function(e) {
+        $scope.plants = [];
+        $scope.loadingPlants = false;
+    })
     
     
     $scope.getLabel = function(prop) {
