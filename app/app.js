@@ -257,8 +257,8 @@ function($locationProvider, $stateProvider, $httpProvider,
             // templateUrl: 'app/views/data/test_calls.html',
             
             templateUrl: 'app/views/data/model.html',
-            controller: 'ModelDataView',
-            authenticate: true
+            controller: 'ModelDataView'
+            //authenticate: true
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
