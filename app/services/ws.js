@@ -93,7 +93,11 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
                         data.push(self.sanitizeModel(obj))
                     }
                 }
-
+                data.sort(function (x, y) {
+                    let a = x.name.toUpperCase(),
+                    b = y.name.toUpperCase();
+                    return a == b ? 0 : a > b ? 1 : -1;
+                });
                 // cache data according to plants/microbes
                 if (path && path.split('/')[2] === 'plantseed') self.myPlants = data
                 else self.myModels = data;
