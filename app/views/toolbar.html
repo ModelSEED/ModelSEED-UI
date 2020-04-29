@@ -46,7 +46,7 @@
     </ul>
 </div>
  
-<div class="toolbar-right" layout="row" style="padding: 10px;">
+<div class="toolbar-right" layout="row" style="padding: 4px;">
     <div mega-dropdown id="more-dd" style="position: relative;">
         <a class="cursor">More <i class="fa fa-caret-down"></i></a>
         <mega-dropdown-content id="more-dd-content">
@@ -109,5 +109,14 @@
                 </li>
             </ul>
         </mega-dropdown-content>
+    </div>
+    <div>
+        <md-button ng-if="!$root.user" ui-sref="app.myModels"
+	        style="padding: 8px;" class="md-raised md-primary">
+                <span>Sign In</span>
+        </md-button>
+        <md-button ng-if="$root.user" class="md-primary" ui-sref="app.RefModels">
+            ModelSEED <md-icon class="material-icons" style="margin-bottom: 3px;">input</md-icon>
+        </md-button>
     </div>
 </div>
