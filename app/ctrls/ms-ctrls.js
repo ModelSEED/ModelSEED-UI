@@ -1594,13 +1594,14 @@ function($s, $sParams, WS, MS, Auth,
 
 .controller('RefModels',
 ['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http', '$mdDialog',
 function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config,
-MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
+MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
 	
     var $self = $scope;
     
     $scope.ref = ( $stateParams.ref )? $stateParams.ref: 'Plants';
+    $mdDialog.hide();
 
     $scope.microbes = [];
     $scope.plants = [];

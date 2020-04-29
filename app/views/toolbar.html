@@ -1,5 +1,6 @@
 
-<div class="md-toolbar-tools">
+<!--div class="md-toolbar-tools"-->
+<div class="md-toolbar-tools" style="height: 58px; padding: 10px;">
 
 	<div hide-sm style="margin: 0 40px 0 10px;" class="logo">
 	    <a ui-sref="main.home">
@@ -20,7 +21,7 @@
         <span style="font-size: 18pt;">Build Model</span>
 	</md-button>
      -->
-	<ul class="md-toolbar-tools about-toolbar" style="font-size: 18pt;">
+    <ul class="md-toolbar-tools about-toolbar" style="font-size: 18pt;">
         <li ng-class="{ active: $state.includes('app.RefModels') ||
                                 $state.includes('app.biochem') ||
                                 $state.includes('app.biochem0') ||
@@ -42,10 +43,10 @@
 	            Build Model
 	        </a>
 	    </li>
-	</ul>
+    </ul>
 </div>
  
-<div class="toolbar-right" layout="row">
+<div class="toolbar-right" layout="row" style="padding: 10px;">
     <div mega-dropdown id="more-dd" style="position: relative;">
         <a class="cursor">More <i class="fa fa-caret-down"></i></a>
         <mega-dropdown-content id="more-dd-content">
