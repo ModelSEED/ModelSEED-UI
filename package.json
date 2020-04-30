@@ -27,7 +27,7 @@
     "d3": "3.5.5",
     "font-awesome": "4.3.0",
     "html2canvas": "github:niklasvh/html2canvas#0.4.1",
-    "jquery": "3.4.0",
+    "jquery": "3.5.0",
     "ng-context-menu": "github:talis/ng-context-menu#v1.0.1",
     "papaparse": "4.1.2",
     "showdown": "1.2.1"
