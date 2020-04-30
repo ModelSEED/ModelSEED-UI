@@ -110,10 +110,10 @@
             </ul>
         </mega-dropdown-content>
     </div>
-    <div>
-        <md-button ng-if="!$root.user" ui-sref="app.myModels"
-	        style="padding: 6px;" class="md-raised md-primary">
-                <span>Sign In</span>
+    <div ng-if="!$root.user" ng-controller="RefModels">
+        <md-button ng-click="signin()"
+	        style="padding: 2px; margin-top: 4px; height: 6px;" class="md-raised md-primary pull-right">
+                Sign In
         </md-button>
     </div>
 </div>

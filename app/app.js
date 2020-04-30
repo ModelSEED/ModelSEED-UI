@@ -251,7 +251,8 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
             
         }).state('app.modelPage', {
-            url: "/model{path:nonURIEncoded}?login",
+            //url: "/model{path:nonURIEncoded}?login",
+            url: "/model{path:nonURIEncoded}",
             
             // TEST TEST TEST:
             // templateUrl: 'app/views/data/test_calls.html',
@@ -263,7 +264,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
             controller: 'FBADataView',
-            authenticate: true
+            // authenticate: true
         /*    
         }).state('app.genomePage', {
             url: "/genome{path:nonURIEncoded}",
@@ -303,7 +304,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/media{path:nonURIEncoded}",
             templateUrl: 'app/views/data/media.html',
             controller: 'MediaDataView',
-            authenticate: true
+            //authenticate: true
         }).state('app.gfPage', {
             url: "/gapfill{path:nonURIEncoded}",
             templateUrl: 'app/views/data/gapfill.html',

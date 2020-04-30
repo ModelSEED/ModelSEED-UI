@@ -1593,9 +1593,9 @@ function($s, $sParams, WS, MS, Auth,
 
 
 .controller('RefModels',
-['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
+['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config', 'AuthDialog',
  'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http', '$mdDialog',
-function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config,
+function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config, AuthDialog,
 MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
 	
     var $self = $scope;
@@ -1616,6 +1616,12 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
 
     $scope.relTime = function(datetime) {
         return $scope.relativeTime(Date.parse(datetime));
+    }
+
+    $scope.signin = function() {
+        if(!Auth.isAuthenticated()) {
+            AuthDialog.signIn();
+        }
     }
 
     // microbes / plants view
