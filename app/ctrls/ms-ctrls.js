@@ -1618,6 +1618,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
         return $scope.relativeTime(Date.parse(datetime));
     }
 
+    // for use by toolbar.html
     $scope.signin = function() {
         if(!Auth.isAuthenticated()) {
             AuthDialog.signIn();

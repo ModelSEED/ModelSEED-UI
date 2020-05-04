@@ -1762,6 +1762,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     // fetch object data and parse it.
     $scope.loading = true;
     WS.get(modelPath).then(function(res) {
+        console.log("model objects detail", res);
         $scope.meta = res.meta;
         setFeatureUrl(res.meta.autoMeta.source);
 
@@ -1805,9 +1806,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
                 }        	            	
-            }        	       	
-        } );    	
-    	   
+            }
+        });
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;

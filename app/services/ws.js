@@ -170,6 +170,9 @@ function($http, $q, $cacheFactory, $log, config, Auth) {
 
                         return {meta: meta, data: data};
                     }
+                }).catch(function(e) {
+                    console.log("WS.get() caught an error:\n", e);
+                    throw e;
                 })
 
         if (opts && opts.cache) self.cached[path] = p;
