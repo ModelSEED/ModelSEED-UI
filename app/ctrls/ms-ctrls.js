@@ -133,6 +133,10 @@ function($s, $http, config, $rootScope) {
          .then(function(res) { $s.solr = true; })
          .catch(function() { $s.solr = false; })
 
+    $http.get($s.urls.svc_test_url)
+         .then(function(res) { $s.svc_test = true; })
+         .catch(function() { $s.svc_test = false; })
+
     $http.rpc('app', 'query_task_summary', [])
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
@@ -237,6 +241,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
     $s.chem = $stateParams.chem;
     $s.enableColumnSearch = true;
+    $s.advanceSearch = 'search in columns';
     $s.externalDBs = {
         BiGG_r: 'http://bigg.ucsd.edu/universal/reactions/',//e.g., http://bigg.ucsd.edu/universal/reactions/PPA
         BiGG_c: 'http://bigg.ucsd.edu/universal/metabolites/', //e.g., http://bigg.ucsd.edu/universal/metabolites/h2o
@@ -249,7 +254,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
@@ -279,7 +284,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Status', key: 'status'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
-            var synms= row.aliases[row.aliases.length -1];
+            var synms = row.aliases[row.aliases.length -1];
             synms = synms.replace('Name:', '').replace(/\"/g, '');
             return '<span style="display: inline-block; width: 300px;">'+synms+'</span>';
         }},
@@ -506,7 +511,7 @@ function($s, Biochem, $stateParams) {
             $s.cpd = data;
             $s.loading = false;
         })
-    Biochem.get_solr('reactions', $s.rxnOpts)
+    Biochem.findReactions_solr($s.id, cpd_rxn_sFields)
         .then(function(res) {
             $s.rxns = res;
             $s.loadingRxns = false;
