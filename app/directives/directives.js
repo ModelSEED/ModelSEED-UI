@@ -1594,7 +1594,7 @@ function(Dialogs, $dialog) {
                 item.checked = item.checked ? false : true;
 
                 if (item.checked)
-                scope.checkedItems.push(item)
+                    scope.checkedItems.push(item)
                 else {
                     // remove from checked list
                     for (var i=0; i<scope.checkedItems.length; i++) {
