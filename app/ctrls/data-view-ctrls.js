@@ -636,8 +636,6 @@ function($s, $sParams, MS, $http, config, Auth) {
     }
 
 	
-	
-
     if (genome.split('/')[1] === Auth.user) $s.canEdit = true;
 
     $s.featureID = featureID;
@@ -1419,11 +1417,13 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
                  var links = [];
                  for (var i=0; i<item.length; i++) {
-                	 
+                     links.push(item[i]);
+                     /* remove the linking for reviewers to NOT see the feature details
                      links.push('<a href="/feature' + path + 
              		        '/.plantseed_data/minimal_genome/' +
                              item[i] + '" >'
-                          + item[i] + ' </a>' );                	 
+                          + item[i] + ' </a>' );
+                     */
                      /*
                      links.push('<a href="http:/modelseed.org/feature' + path + 
                     		        '/.plantseed_data/minimal_genome/' +
@@ -1433,7 +1433,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                      links.push('<a href="'+
                                     featureUrl+item[i]+'" target="_blank" class="nowrap" >'
                                  +item[i]+' <i class="fa fa-external-link text-muted"></i></a>')
-                                 */
+                     */
                  }
                  return links.join('<br>');
              }
@@ -1646,12 +1646,12 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
 
                 var links = [];
                 // for (var i=0; i<item.length; i++) {
-               	 
+                links.push(item);
+                /* removed the linking for reviewers to NOT see the feature details
                     links.push('<a href="/feature' + path + 
             		        '/.plantseed_data/minimal_genome/' +
                             item + '">'
-                         + item + ' </a>' );                	 
-
+                         + item + ' </a>' );*/
                 //}
                 // return links;
                 return links.join('<br>');
@@ -1762,6 +1762,7 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
     // fetch object data and parse it.
     $scope.loading = true;
     WS.get(modelPath).then(function(res) {
+        console.log("model objects detail", res);
         $scope.meta = res.meta;
         setFeatureUrl(res.meta.autoMeta.source);
 
@@ -1805,9 +1806,8 @@ function($scope, $q, $state, $sParams, Auth, MS, WS, Biochem, $mdDialog, Dialogs
                     // else
                         // modelGenes[foundGenes.indexOf(gene)].reactions.push(id);
                 }        	            	
-            }        	       	
-        } );    	
-    	   
+            }
+        });
     }).catch(function(e) {
         $scope.error = e;
         $scope.loading = false;

@@ -1593,14 +1593,15 @@ function($s, $sParams, WS, MS, Auth,
 
 
 .controller('RefModels',
-['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config',
- 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http',
-function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config,
-MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
+['$scope', '$stateParams', 'Patric', 'WS', 'MS', 'uiTools', '$mdDialog', 'Dialogs', 'config', 'AuthDialog',
+ 'ModelViewer', '$document', '$mdSidenav', '$q', '$timeout', 'ViewOptions', 'Auth', '$http', '$mdDialog',
+function($scope, $stateParams, Patric, WS, MS, uiTools, $mdDialog, Dialogs, config, AuthDialog,
+MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
 	
     var $self = $scope;
     
     $scope.ref = ( $stateParams.ref )? $stateParams.ref: 'Plants';
+    $mdDialog.hide();
 
     $scope.microbes = [];
     $scope.plants = [];
@@ -1615,6 +1616,13 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
 
     $scope.relTime = function(datetime) {
         return $scope.relativeTime(Date.parse(datetime));
+    }
+
+    // for use by toolbar.html
+    $scope.signin = function() {
+        if(!Auth.isAuthenticated()) {
+            AuthDialog.signIn();
+        }
     }
 
     // microbes / plants view
@@ -1685,7 +1693,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     $scope.loadingMicrobes = true;    
     Patric.listGenomes( $scope.opts )
     .then(function(genomes) {
-        console.log('path res', genomes)
+        console.log('Genomes loaded from Patric', genomes)
 
         $scope.microbes = genomes.docs;
         
@@ -1701,12 +1709,11 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
     })
     
     
-    
-
     $scope.loadingPlants = true;
+/*
     MS.listModels( '/plantseed' + '/plantseed' ).
         then(function(res) {
-        console.log('path res', res)
+        console.log('Public plants loaded by MS', res)
                    
         $scope.plants = res;
         $scope.loadingPlants = false;
@@ -1714,8 +1721,17 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http) {
         $scope.plants = [];
         $scope.loadingPlants = false;
     })
-
-
+*/
+    // public plants for Reference Data tab view
+    WS.listPublicModels('/plantseed/plantseed/')
+      .then(function(mods) {
+          console.log('Public plants loaded by WS', mods)
+          $scope.plants = mods;
+          $scope.loadingPlants = false;
+    }).catch(function(e) {
+        $scope.plants = [];
+        $scope.loadingPlants = false;
+    })
     
     
     $scope.getLabel = function(prop) {

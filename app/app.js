@@ -169,7 +169,11 @@ function($locationProvider, $stateProvider, $httpProvider,
         })
 
         // main views
-        .state('app.biochem', {
+        .state('app.biochem0', {
+            url: "/biochem",
+            templateUrl: 'app/views/biochem/biochem0.html',
+            controller: 'Biochem'
+        }).state('app.biochem', {
             url: "/biochem/:chem",
             templateUrl: 'app/views/biochem/biochem.html',
             controller: 'Biochem'
@@ -196,8 +200,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.RefModels', {
             url: "/genomes/:ref",
             templateUrl: 'app/views/genomes/genomes.html',
-            controller: 'RefModels',
-            authenticate: true
+            controller: 'RefModels'
+            // authenticate: true
 
 
 
@@ -212,8 +216,8 @@ function($locationProvider, $stateProvider, $httpProvider,
         }).state('app.media', {
             url: "/list-media/?tab",
             templateUrl: 'app/views/media.html',
-            controller: 'Media',
-            authenticate: true
+            controller: 'Media'
+            //authenticate: true
             
             
             }).state('app.myMedia', {
@@ -247,19 +251,20 @@ function($locationProvider, $stateProvider, $httpProvider,
             authenticate: true
             
         }).state('app.modelPage', {
-            url: "/model{path:nonURIEncoded}?login",
+            //url: "/model{path:nonURIEncoded}?login",
+            url: "/model{path:nonURIEncoded}",
             
             // TEST TEST TEST:
             // templateUrl: 'app/views/data/test_calls.html',
             
             templateUrl: 'app/views/data/model.html',
-            controller: 'ModelDataView',
-            authenticate: true
+            controller: 'ModelDataView'
+            //authenticate: true
         }).state('app.fbaPage', {
             url: "/fba{path:nonURIEncoded}",
             templateUrl: 'app/views/data/fba.html',
             controller: 'FBADataView',
-            authenticate: true
+            // authenticate: true
         /*    
         }).state('app.genomePage', {
             url: "/genome{path:nonURIEncoded}",
@@ -299,7 +304,7 @@ function($locationProvider, $stateProvider, $httpProvider,
             url: "/media{path:nonURIEncoded}",
             templateUrl: 'app/views/data/media.html',
             controller: 'MediaDataView',
-            authenticate: true
+            //authenticate: true
         }).state('app.gfPage', {
             url: "/gapfill{path:nonURIEncoded}",
             templateUrl: 'app/views/data/gapfill.html',

@@ -1,5 +1,6 @@
 
-<div class="md-toolbar-tools">
+<!--div class="md-toolbar-tools"-->
+<div class="md-toolbar-tools" style="height: 58px; padding: 10px;">
 
 	<div hide-sm style="margin: 0 40px 0 10px;" class="logo">
 	    <a ui-sref="main.home">
@@ -7,6 +8,7 @@
 	    </a>
 	</div>
 	
+    <!--
 	<md-button flex="22" ui-sref="app.RefModels">
         <span style="font-size: 18pt;">Reference Data</span>	
 	</md-button>
@@ -18,30 +20,33 @@
 	<md-button flex="12" ui-sref="app.plantPage">
         <span style="font-size: 18pt;">Build Model</span>
 	</md-button>
-    <!-- 
-	<ul style="font-size: 18pt; list-style-type: none; ">
-	    <li ng-class="{ active: $state.includes('app.RefModels') }" id="tour-1" style="display: inline; padding: 30px;">
+     -->
+    <ul class="md-toolbar-tools about-toolbar" style="font-size: 18pt;">
+        <li ng-class="{ active: $state.includes('app.RefModels') ||
+                                $state.includes('app.biochem') ||
+                                $state.includes('app.biochem0') ||
+                                $state.includes('app.media')}">
 	        <a ui-sref="app.RefModels">
 	            Reference Data
 	        </a>
 	    </li>
 	       
-	    <li ng-class="{ active: $state.includes('app.myModels') }" style="display: inline;">
+        <li ng-class="{ active: $state.includes('app.myModels') ||
+                                $state.includes('app.myMedia')}">
 	        <a ui-sref="app.myModels">
 	            User Data
 	        </a>
 	    </li>
 	        
-	    <li ng-class="{ active: $state.includes('app.plantPage') }" id="tour-1" style="display: inline; padding: 30px;">    
+	    <li ng-class="{ active: $state.includes('app.plantPage') }">
 	        <a ui-sref="app.plantPage">
 	            Build Model
 	        </a>
 	    </li>
-	</ul>
-     -->
+    </ul>
 </div>
  
-<div class="toolbar-right" layout="row">
+<div class="toolbar-right" layout="row" style="padding: 4px;">
     <div mega-dropdown id="more-dd" style="position: relative;">
         <a class="cursor">More <i class="fa fa-caret-down"></i></a>
         <mega-dropdown-content id="more-dd-content">
@@ -104,5 +109,11 @@
                 </li>
             </ul>
         </mega-dropdown-content>
+    </div>
+    <div ng-if="!$root.user" ng-controller="RefModels">
+        <md-button ng-click="signin()"
+	        style="padding: 2px; margin-top: 4px; height: 6px;" class="md-raised md-primary pull-right">
+                Sign In
+        </md-button>
     </div>
 </div>

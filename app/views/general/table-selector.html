@@ -6,7 +6,6 @@
             search="opts.query" search-opts="opts" search-placeholder={{placeholder}}>
         </md-input-container>
 
-
         <md-button ng-if="checkedItems.length" layout-align="center center"
                 ng-click="submit(checkedItems)"
                 class="{{submitBtnClass}}">
@@ -22,7 +21,6 @@
             <i ng-if="defaultBtnType == 'remove'" class="fa fa-minus"></i>
             {{defaultInProgress ? defaultProgressText : defaultBtnTemplate}}
         </md-button>
-
 
 
         <md-progress-circular ng-if="loading"
@@ -51,14 +49,14 @@
     <table class="table table-striped table-bordered table-selector" ng-show="filtered.length">
         <thead>
             <tr>
-                <th></th>
+                <th ng-if="$root.user"></th>
                 <th sortable ng-repeat="h in header track by $index" ng-click="sortBy($event, h.key)">{{h.label}}</th>
             </tr>
         </thead>
 
         <tr ng-repeat="row in (filtered = ( data | filter: opts.query |  orderBy : opts.sort.field : opts.sort.desc) )
                         | limitTo : opts.limit : (opts.query ? 0 : opts.offset)">
-            <td>
+            <td ng-if="$root.user">
                 <md-checkbox aria-label="Check media" ng-checked="row.checked"
                              ng-click="checkItem(row)" ng-class="{'md-warn': submitBtnType == 'remove'}"></md-checkbox>
             </td>
