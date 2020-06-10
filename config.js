@@ -2,7 +2,7 @@
 /* service endpoint and UI configuration settings */
 angular.module('config', []).service('config', function() {
 
-    this.releaseVersion = 'v2.5.1';
+    this.releaseVersion = 'v2.6';
 
     // wether or not to include plants UI components
     // see app/ctrls/ctrls.js > "ViewOptions" for localstorage methods
@@ -14,7 +14,7 @@ angular.module('config', []).service('config', function() {
         svc_test_url: "https://modelseed.org/api/test-service",
         ws_url: "https://p3.theseed.org/services/Workspace",
         ms_url: "https://p3.theseed.org/services/ProbModelSEED/",
-	// Versioning is hard-coded into ModelSEED-REST API calls, want to get rid of it
+        // Versioning is hard-coded into ModelSEED-REST API calls, want to get rid of it
         ms_rest_url: "https://modelseed.org/api/v0/",
         shock_url: "https://p3.theseed.org/services/shock_api",
         patric_auth_url: "https://user.patricbrc.org/authenticate",

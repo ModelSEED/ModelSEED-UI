@@ -1,6 +1,9 @@
 ##Change Log
 
 Below contains a summary of notable changes and deploy date for each release.
+####v2.6 (June 10, 2020)
+- rather significant release, making the entire reference data area as accessible as possible by not requiring a login
+
 ####v2.5.1 (July 2, 2019)
 - several bug fixes related to biochemistry visualization and search
 

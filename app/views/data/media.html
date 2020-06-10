@@ -18,7 +18,7 @@
 		<small class="text-muted">{{editInProgress ? '(Editing)' : ''}}</small>
 	</div>
 
-	<md-input-container ng-if="canCopy" layout-align="end end" flex style="padding-bottom: 2px;">
+	<md-input-container ng-if="canCopy && $root.user" layout-align="end end" flex style="padding-bottom: 2px;">
 		<md-button class="md-raised md-secondary" ng-click="copyMedia()">
 			<span ng-if="!copyInProgress">Copy to edit</span>
 			<span ng-if="copyInProgress">Copying...</span>

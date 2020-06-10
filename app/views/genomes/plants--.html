@@ -18,10 +18,9 @@
 
     <!-- HEADER -->
     <div layout="row">
-        <div class="expand-container vertical-center">
-        </div>
+        <!-- <div class="expand-container vertical-center"></div>  -->
 
-        <div flex="10" layout="row" layout-align="start center">
+        <div flex="15" layout="row" layout-align="start center">
             <b>Model ID</b>
         </div>
 
@@ -33,23 +32,23 @@
             <b>Species Domain</b>
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>Reactions</b></div>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
+            <b>Reactions</b>
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
-            <div><b>Genes</b></div>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
+            <b>Genes</b>
         </div>
 
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div><b>FBA</b></div>
         </div>
         
-        <div flex="10" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div><b>Gapfilling</b></div>
         </div>        
 
-        <div flex="15" layout="row" layout-align="end center" hide-md hide-sm >
+        <div flex="10" layout="row" layout-align="start center" hide-md hide-sm >
             <div><b>Modification Date</b></div>
         </div>
 
@@ -57,8 +56,6 @@
             <div><b>Commands</b></div>
         </div>
     </div>
-
-
 
     <div ng-repeat-start="item in (filtered = ( plants | filter: opts.query) | limitTo : opts.limit : opts.offset)"
          ng-click="showRelatedData(item)"
@@ -68,12 +65,12 @@
 
         <!-- <model-item ng-if="!item.status" layout="row">  -->
 
-            <div flex="10" class="vertical-center">
-                <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
-                    <md-tooltip md-delay="800">View Model</md-tooltip>
-                    {{item.name}}
-                </a><br>
-            </div>
+        <div flex="15" layout="row" layout-align="start center">
+            <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
+                <md-tooltip md-delay="800">View Model</md-tooltip>
+                {{item.name}}
+            </a><br>
+        </div>
 
         <div flex="15" layout="row" layout-align="start center">
             <a ui-sref="app.modelPage({path: item.path})" ng-click="showRelatedData(item)">
@@ -86,23 +83,23 @@
             Plant
         </div>
                 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div>{{item.rxnCount}}</div> 
         </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div>{{item.geneCount}}</div>     
         </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div>{{item.fbaCount}}</div>     
         </div>
 
-        <div flex="8" layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="6" layout="row" layout-align="start center" hide-md hide-sm>
             <div>{{item.gapfillCount}}</div>     
         </div>
         
-        <div flex="15"  layout="row" layout-align="end center" hide-md hide-sm>
+        <div flex="10"  layout="row" layout-align="center" hide-md hide-sm>
             <div>{{relativeTime(item.timestamp)}}</div>
         </div>
 
@@ -111,8 +108,7 @@
                 <md-tooltip ng-if="!selected">View download options</md-tooltip>
                 <i class="icon-file-download"></i>
             </md-button>
-            
-            <a ng-if="!copyInProgress[$index]" ng-click="copy($index, item.path)">
+            <a ng-if="$root.user && !copyInProgress[$index]" ng-click="copy($index, item.path)">
                 Copy
             </a>
             <span ng-if="copyInProgress[$index]">
@@ -120,8 +116,8 @@
             </span>
          </div>
          
-         </model-item>                        
-        </div>
+        </model-item>
+    </div>
 
     <div ng-repeat-end ng-if="item.relatedFBAs || item.relatedGapfills" class="small-tabs my-model-tabs">
     </div>
@@ -218,7 +214,7 @@
                         </td>
                         <td>Tab-separated</td>
                         <td class="text-light">
-                            <small>{{uiTools.readableSize( selected.downloads.cpdTable.size )}}</small>
+                            <small>{{uiTools.readableSize( selected.downloads.cpdTable.size)}}</small>
                         </td>
                     </tr>
                 </tbody>
@@ -229,8 +225,6 @@
             </md-button>
         </md-content>
     </md-sidenav>
-
-
 
 </section>
 
