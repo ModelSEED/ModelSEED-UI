@@ -1,12 +1,10 @@
 mega-dropdown {
-    /*position: relative;*/
+    position: relative;
 }
 
 mega-dropdown-content {
     visibility: hidden;
     position: absolute;
-    top: 50px;
-    right: 0px;
     color: #000;
     z-index: 9999;
     background: #fafafa;

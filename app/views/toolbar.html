@@ -46,9 +46,9 @@
     </ul>
 </div>
  
-<div class="toolbar-right" layout="row" style="padding: 4px;">
+<div class="toolbar-right" layout="row">
     <div mega-dropdown id="more-dd" style="position: relative;">
-        <a class="cursor">More <i class="fa fa-caret-down"></i></a>
+        <a class="cursor" style="white-space: nowrap;">More<i class="fa fa-caret-down"></i></a>
         <mega-dropdown-content id="more-dd-content">
             <ul class="list-unstyled">
                 <li>
@@ -86,19 +86,12 @@
         </mega-dropdown-content>
     </div>
 
-    <div ng-if="$root.user" mega-dropdown id="login-dd" ng-controller="Login" style="position: relative;">
-        <div class="cursor" layout="row">
-            <div layout="column">
-                <!--
-                <div>{{$root.user.split('@')[0]}}
-                <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
-                </div>
-                -->              
-                <div>{{$root.user.split('@')[0]}}</div>
-                <small>@{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}} <i class="fa fa-caret-down"></i></small>
-                
-            </div>
-        </div>
+    <div ng-if="$root.user" mega-dropdown id="login-dd" ng-controller="Login">
+        <a class="cursor" style="white-space: nowrap;">
+            {{$root.user.split('@')[0]}}
+            @{{$root.user.split('@')[1] ? $root.user.split('@')[1] : ' RAST'}}
+            <i class="fa fa-caret-down"></i>
+        </a>
 
         <mega-dropdown-content>
             <ul class="list-unstyled">
@@ -112,7 +105,7 @@
     </div>
     <div ng-if="!$root.user" ng-controller="RefModels">
         <md-button ng-click="signin()"
-	        style="padding: 2px; margin-top: 4px; height: 6px;" class="md-raised md-primary pull-right">
+            style="margin-top: 7px;" class="md-raised md-primary pull-right">
                 Sign In
         </md-button>
     </div>
