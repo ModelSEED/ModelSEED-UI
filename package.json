@@ -18,7 +18,7 @@
   "homepage": "http://modelseed.org",
   "dependencies": {
     "@uirouter/angularjs": "0.2.18",
-    "angular": "1.4.0",
+    "angular": "1.8.0",
     "angular-animate": "1.4.0",
     "angular-aria": "1.4.0",
     "angular-material": "0.10.1",
