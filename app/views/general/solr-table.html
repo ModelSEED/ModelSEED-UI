@@ -35,7 +35,21 @@
     <thead>
         <tr>
             <th sortable="{{::h.sortable}}" ng-repeat="h in header track by $index" col-id="{{::h.key}}"
-                ng-click="sortBy($event, h.key)">{{::h.label}}</th>
+                ng-click="sortBy($event, h.key)"
+                title="{{ h.key=='status' ?
+'OK (OK)
+MI (Mass imbalance)
+CI (Charge imbalance)
+CK (Manually Checked)
+CPDFORMERROR (Missing structure)
+EMPTY (No reagents)'
+                       : h.key=='formula' ?
+'Generic/undefined groups are represented by the letter \'R\',
+you may search for that letter in this column
+to find compounds with them.' : ''}}"
+                class="check-{{ h.key }}">
+                    {{::h.label}}
+            </th>
         </tr>
         <tr ng-if="advancedOptsEnabled">
             <th ng-repeat="h in header track by $index">
