@@ -282,7 +282,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
-        {label: 'Notes', key: 'notes'},
+        {label: 'Notes', key: 'notes', format: function(row){
+            return row.notes.join('|');
+        }},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var synms = row.aliases[row.aliases.length -1];
@@ -373,7 +375,6 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     ];
 
     function updateRxns() {
-        //Biochem.get('model_reaction', $s.rxnOpts)
         Biochem.get_solr('reactions', $s.rxnOpts)
                .then(function(res) {
                     docs = res['docs'];
@@ -388,7 +389,6 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     }
 
     function updateCpds() {
-        //Biochem.get('model_compound', $s.cpdOpts)
         Biochem.get_solr('compounds', $s.cpdOpts)
                .then(function(res) {
                     $s.cpds = res;
