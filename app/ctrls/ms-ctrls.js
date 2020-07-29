@@ -434,10 +434,10 @@ function($s, Biochem, $stateParams) {
         MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
     }
     // Reactions
-    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry'];
+    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways'] };
+                            'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways', 'notes'] };
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
@@ -454,6 +454,9 @@ function($s, Biochem, $stateParams) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Notes', key: 'notes', format: function(row){
+            return row.notes.join('|');
+        }},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var synms= row.aliases[row.aliases.length -1];
