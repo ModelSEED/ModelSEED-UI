@@ -254,11 +254,11 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes', 'is_transport'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes'] };
+                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'synonyms', 'aliases', 'ontology'];
@@ -279,6 +279,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span style="white-space: wrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        {label: 'Transport', key: 'is_transport', format: function(row){
+            return row.is_transport? 'Yes' : 'No';
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
@@ -417,7 +420,6 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.getBiochemScope = function() {
         return $scope;
     }
-
 }])
 
 
@@ -434,10 +436,10 @@ function($s, Biochem, $stateParams) {
         MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
     }
     // Reactions
-    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes'];
+    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes', 'is_transport'];
     $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways', 'notes'] };
+                            'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
     $s.rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
@@ -451,6 +453,9 @@ function($s, Biochem, $stateParams) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
             return '<span style="white-space: wrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+        }},
+        {label: 'Transport', key: 'is_transport', format: function(row){
+            return row.is_transport? 'Yes' : 'No';
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
@@ -502,7 +507,6 @@ function($s, Biochem, $stateParams) {
     ];
 
     $s.loading = true;
-    // Biochem.getCpd($s.id)
     Biochem.getCpd_solr($s.id)
         .then(function(data) {
             data.synm = data.aliases.shift().replace('Name:', '');
@@ -515,7 +519,7 @@ function($s, Biochem, $stateParams) {
             $s.cpd = data;
             $s.loading = false;
         })
-    Biochem.findReactions_solr($s.id, cpd_rxn_sFields)
+    Biochem.findReactions_solr($s.id, '*')
         .then(function(res) {
             $s.rxns = res;
             $s.loadingRxns = false;
@@ -530,7 +534,6 @@ function($s, Biochem, $stateParams) {
     $s.getImagePath = Biochem.getImagePath;
 
     $s.loading = true;
-    // Biochem.getRxn($s.id)
     Biochem.getRxn_solr($s.id)
         .then(function(data) {
             if (data['is_obsolete'] == "1") {
@@ -562,7 +565,6 @@ function($s, Biochem, $stateParams) {
             $s.loading = false;
         })
 }])
-
 
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams',
