@@ -254,11 +254,11 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
-                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways'] };
+                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'synonyms', 'aliases', 'ontology'];
@@ -282,6 +282,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'Notes', key: 'notes'},
         {label: 'Synonyms', key: 'synonyms', format: function(row){
             if(row.aliases===undefined || row.aliases.length==0) return "N/A";
             var synms = row.aliases[row.aliases.length -1];
