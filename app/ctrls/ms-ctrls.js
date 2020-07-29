@@ -254,7 +254,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes', 'is_transport'];
+    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
@@ -435,13 +435,13 @@ function($s, Biochem, $stateParams) {
         MetaCyc_c: 'https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=', // e.g., https://biocyc.org/META/NEW-IMAGE?type=COMPOUND&object=ATP
         MetaCyc_r: 'https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=' //e.g. https://biocyc.org/META/NEW-IMAGE?type=REACTION&object=INORGPYROPHOSPHAT-RXN
     }
-    // Reactions
-    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes', 'is_transport'];
-    $s.rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
+    // cpd_Reactions
+    var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes'];
+    $s.cpd_rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
                             'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
-    $s.rxnHeader = [
+    $s.cpd_rxnHeader = [
         {label: 'ID', key: 'id', format: function(row) {
             var comment_str = '&nbsp;&nbsp;<md-button class="md-fab" ng-disabled="false" aria-label="Comment" ng-click="leaveComment($event, \''+row.id+'\', \'rxn\')">';
             comment_str += '<md-tooltip>Add Comments</md-tooltip>';
@@ -521,8 +521,8 @@ function($s, Biochem, $stateParams) {
         })
     Biochem.findReactions_solr($s.id, '*')
         .then(function(res) {
-            $s.rxns = res;
-            $s.loadingRxns = false;
+            $s.cpd_rxns = res;
+            $s.loadingcpd_Rxns = false;
             $s.enableColumnSearch = false;
         })
 }])

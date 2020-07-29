@@ -9,12 +9,14 @@
         </li>
         -->
         
-        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Plants'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Plants'}) }"
+            style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Plants'})">
                  Public Plant Models
             </a>
         </li>
-        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Annotations'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.RefModels', {ref: 'Annotations'}) }"
+            style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.RefModels({ref: 'Annotations'})">
                 Subsystems
             </a>
@@ -26,17 +28,22 @@
             </a>
         </li>
         -->
-        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'reactions'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'reactions'}) ||
+                                $state.includes('app.rxn')}"
+            style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.biochem({chem: 'reactions'})">
                 Reactions
             </a>
         </li>
-        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'compounds'}) }" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.biochem', {chem: 'compounds'}) ||
+                                $state.includes('app.cpd')}"
+            style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.biochem({chem: 'compounds'})">
                 Compounds
             </a>
         </li>
-        <li ng-class="{ active: $state.includes('app.media') }" style="font-size: 16pt; border-right: 1px solid #bbb;">
+        <li ng-class="{ active: $state.includes('app.media') }"
+            style="font-size: 16pt; border-right: 1px solid #bbb;">
             <a ui-sref="app.media">
                 Media
             </a>
