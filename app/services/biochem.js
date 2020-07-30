@@ -243,9 +243,9 @@ function($http, $q, config, $log) {
                         return Array.isArray(ids) ? res.data.response.docs : res.data.response.docs[0];
                     })
     }
-    this.findReactions_solr = function(cpd, opts, flds='id,equation,name,definition', r_limit=10) {
+    this.findReactions_solr = function(cpd, opts, flds='id,equation,name,definition') {
         var url = endpoint+'reactions/select?wt=json';
-            url += '&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
+            url += '&q=equation:*'+cpd+'*&fl='+flds;
 
         if (opts) {
             var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
@@ -257,6 +257,10 @@ function($http, $q, config, $log) {
                 queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual columns
                 cols = opts.visible ? opts.visible : [];
         }
+
+        url += limit ? '&rows='+limit : '';
+        url += offset ? '&start='+offset : '';
+
         if (sort) {
             sort = sort=='-' ? 'desc' : 'asc';
             url += '&sort='+ sortField + ' ' + sort;
