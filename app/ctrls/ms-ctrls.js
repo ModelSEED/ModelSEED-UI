@@ -424,8 +424,8 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
 
 
 // WARNING: External resources depend on this.
-.controller('Compound',['$scope', 'Biochem', '$stateParams',
-function($s, Biochem, $stateParams) {
+.controller('Compound',['$scope', 'Biochem', '$state', '$stateParams', 'Session',
+function($s, Biochem, $state, $stateParams, Session) {
     $s.id = $stateParams.id;
     $s.getImagePath = Biochem.getImagePath;
     $s.externalDBs = {
@@ -507,24 +507,34 @@ function($s, Biochem, $stateParams) {
     ];
 
     $s.loading = true;
-    Biochem.getCpd_solr($s.id)
-        .then(function(data) {
-            data.synm = data.aliases.shift().replace('Name:', '');
-            if (data['pka'] != undefined) {
-                data['pka_display'] = data['pka'][0].replace('"', '');
-            }
-            if (data['pkb'] != undefined) {
-                data['pkb_display'] = data['pkb'][0].replace('"', '');
-            }
-            $s.cpd = data;
-            $s.loading = false;
-        })
-    Biochem.findReactions_solr($s.id, '*')
-        .then(function(res) {
-            $s.cpd_rxns = res;
-            $s.loadingcpd_Rxns = false;
-            $s.enableColumnSearch = false;
-        })
+    function updateCpd() {
+        Biochem.getCpd_solr($s.id)
+            .then(function(data) {
+                data.synm = data.aliases.shift().replace('Name:', '');
+                if (data['pka'] != undefined) {
+                    data['pka_display'] = data['pka'][0].replace('"', '');
+                }
+                if (data['pkb'] != undefined) {
+                    data['pkb_display'] = data['pkb'][0].replace('"', '');
+                }
+                $s.cpd = data;
+                $s.loading = false;
+            })
+    }
+    function updateCpdRxns() {
+        Biochem.findReactions_solr($s.id, $s.cpd_rxnOpts, '*')
+            .then(function(res) {
+                $s.cpd_rxns = res;
+                $s.loadingcpd_Rxns = false;
+                $s.enableColumnSearch = false;
+            })
+    }
+    $s.$watch('cpd_rxnOpts', function(after, before) {
+        console.log('after', after);
+        $s.loadingcpd_Rxns = true;
+        updateCpdRxns();
+        Session.setOpts($state, 'cpd_rxns', after);
+    }, true)
 }])
 
 // WARNING: External resources depend on this.

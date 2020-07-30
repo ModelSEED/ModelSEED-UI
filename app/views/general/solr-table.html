@@ -71,7 +71,8 @@ WB (water balanced)
     </thead>
 
     <tbody ng-if="data.numFound != 0">
-        <tr ng-repeat="item in data.docs" ng-click="rowClick(item)">
+        <!--tr ng-repeat="item in data.docs" ng-click="rowClick(item)"-->
+        <tr ng-repeat="item in data.docs">
             <td ng-repeat="h in header">
                 <span ng-if="h.format" bind-html-compile="h.format(item)"></span>
                 <span ng-if="!h.format">{{item[h.key] || item[h.key] == 0 ? item[h.key] : '-'}}</span>

@@ -243,9 +243,25 @@ function($http, $q, config, $log) {
                         return Array.isArray(ids) ? res.data.response.docs : res.data.response.docs[0];
                     })
     }
-    this.findReactions_solr = function(cpd, flds='id,equation,name,definition', r_limit=10) {
+    this.findReactions_solr = function(cpd, opts, flds='id,equation,name,definition', r_limit=10) {
         var url = endpoint+'reactions/select?wt=json';
             url += '&q=equation:*'+cpd+'*&rows='+r_limit+'&fl='+flds;
+
+        if (opts) {
+            var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
+                limit = opts.limit ? opts.limit : null,
+                offset = opts.offset ? opts.offset : 0,
+                sort = opts.sort ? (opts.sort.desc ? '-': '+') : null,
+                sortField = opts.sort ? opts.sort.field : '',
+                searchFields = 'searchFields' in opts ? opts.searchFields : null, // fields to query against
+                queryColumn = 'queryColumn' in opts ? opts.queryColumn : null, // query individual columns
+                cols = opts.visible ? opts.visible : [];
+        }
+        if (sort) {
+            sort = sort=='-' ? 'desc' : 'asc';
+            url += '&sort='+ sortField + ' ' + sort;
+        }
+        console.log("Find Cpd reactions solr query:", url);
         return $http.get(url)
                     .then(function(res) {
                         return res.data.response;
