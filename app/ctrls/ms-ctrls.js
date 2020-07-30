@@ -507,20 +507,19 @@ function($s, Biochem, $state, $stateParams, Session) {
     ];
 
     $s.loading = true;
-    function updateCpd() {
-        Biochem.getCpd_solr($s.id)
-            .then(function(data) {
-                data.synm = data.aliases.shift().replace('Name:', '');
-                if (data['pka'] != undefined) {
-                    data['pka_display'] = data['pka'][0].replace('"', '');
-                }
-                if (data['pkb'] != undefined) {
-                    data['pkb_display'] = data['pkb'][0].replace('"', '');
-                }
-                $s.cpd = data;
-                $s.loading = false;
-            })
-    }
+    Biochem.getCpd_solr($s.id)
+        .then(function(data) {
+            data.synm = data.aliases.shift().replace('Name:', '');
+            if (data['pka'] != undefined) {
+                data['pka_display'] = data['pka'][0].replace('"', '');
+            }
+            if (data['pkb'] != undefined) {
+                data['pkb_display'] = data['pkb'][0].replace('"', '');
+            }
+            $s.cpd = data;
+            $s.loading = false;
+        })
+
     function updateCpdRxns() {
         Biochem.findReactions_solr($s.id, $s.cpd_rxnOpts, '*')
             .then(function(res) {
@@ -529,9 +528,11 @@ function($s, Biochem, $state, $stateParams, Session) {
                 $s.enableColumnSearch = false;
             })
     }
+
     $s.$watch('cpd_rxnOpts', function(after, before) {
         console.log('after', after);
         $s.loadingcpd_Rxns = true;
+        $s.loading = false;
         updateCpdRxns();
         Session.setOpts($state, 'cpd_rxns', after);
     }, true)
@@ -575,7 +576,6 @@ function($s, Biochem, $stateParams) {
             $s.loading = false;
         })
 }])
-
 
 .controller('BiochemViewer',['$scope', 'Biochem', '$state', '$stateParams',
 function($s, Biochem, $state, $stateParams) {

@@ -265,6 +265,7 @@ function($http, $q, config, $log) {
             sort = sort=='-' ? 'desc' : 'asc';
             url += '&sort='+ sortField + ' ' + sort;
         }
+
         console.log("Find Cpd reactions solr query:", url);
         return $http.get(url)
                     .then(function(res) {
