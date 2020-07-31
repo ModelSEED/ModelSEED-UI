@@ -1,12 +1,12 @@
 
 <md-content layout="column" layout-fill>
-    <div class="h5"><strong>Found {{rxns.numFound}} reactions for {{id}}:</strong></div>
+    <div class="h5"><strong>Found {{cpd_rxns.numFound}} reactions for {{id}}:</strong></div>
     <hr class="no-margin">
 
-    <ng-table-solr table-header="rxnHeader"
-                    table-data="rxns"
-                    table-opts="rxnOpts"
-                    table-loading="loadingRxns"
+    <ng-table-solr table-header="cpd_rxnHeader"
+                    table-data="cpd_rxns"
+                    table-opts="cpd_rxnOpts"
+                    table-loading="loadingcpd_Rxns"
                     enable-column-search="enableColumnSearch"
                     opts="opts"
                     table-placeholder="Search reactions">
