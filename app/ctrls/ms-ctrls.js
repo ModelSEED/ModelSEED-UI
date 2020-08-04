@@ -18,6 +18,7 @@ function($scope, $state, $stateParams, Auth, $window) {
     // sets method and changes url param
     $scope.switchMethod = function(method) {
         $scope.method = Auth.loginMethod(method);
+        $scope.inValid = false;
         //$state.go('main.home', {login: method});
     }
 
