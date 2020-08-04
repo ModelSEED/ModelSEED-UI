@@ -88,11 +88,14 @@ function($state, $http, config, $window) {
 
     this.logout = function() {
         $window.localStorage.removeItem('auth');
-        $state.transitionTo('main.home', {}, { reload: true, inherit: true, notify: false })
-              .then(function() {
-                  var to_url = window.location.protocol + '//' + window.location.host+'/genomes/Plants';
-                  $window.location.replace(to_url);
-              });
+
+        var to_url = window.location.protocol + '//' + window.location.host;
+        if ($state.current.name === 'main.home') {
+            $window.location.reload();
+        } else {
+            to_url = to_url + '/genomes/Plants';
+            $window.location.replace(to_url);
+        }
     }
 
     this.isAuthenticated = function() {
