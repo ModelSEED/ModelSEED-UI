@@ -1625,7 +1625,6 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
     $scope.MS = MS;
     $scope.MV = MV;
     $scope.uiTools = uiTools;
-    
     MV.makePublic( true );
     
     $scope.relativeTime = uiTools.relativeTime;
@@ -1634,7 +1633,7 @@ MV, $document, $mdSidenav, $q, $timeout, ViewOptions, Auth, $http, $mdDialog) {
         return $scope.relativeTime(Date.parse(datetime));
     }
 
-    // for use by toolbar.html
+    // for use by popup SignIn windows in main-toolbar and toolbar.html
     $scope.signin = function() {
         if(!Auth.isAuthenticated()) {
             AuthDialog.signIn();
