@@ -90,7 +90,8 @@ function($state, $http, config, $window) {
         $window.localStorage.removeItem('auth');
         $state.transitionTo('main.home', {}, { reload: true, inherit: true, notify: false })
               .then(function() {
-                  $window.location.reload();
+                  var to_url = window.location.protocol + '//' + window.location.host+'/genomes/Plants';
+                  $window.location.replace(to_url);
               });
     }
 

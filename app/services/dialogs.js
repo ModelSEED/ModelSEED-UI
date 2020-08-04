@@ -789,7 +789,6 @@ function($rootScope, $dialog, $window, $timeout, Auth, $stateParams) {
                     $s.method = Auth.loginMethod(method);
                     $stateParams.login = method;
                     $s.inValid = false;
-                    $s.creds = {};
                 }
 
                 $s.ok = function(){
