@@ -30,6 +30,6 @@
     "jquery": "3.4.0",
     "ng-context-menu": "github:talis/ng-context-menu#v1.0.1",
     "papaparse": "4.1.2",
-    "showdown": "1.2.1"
+    "showdown": "1.9.1"
   }
 }
