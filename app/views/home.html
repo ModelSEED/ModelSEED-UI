@@ -8,7 +8,18 @@
         <div class="intro-text" flex hide-sm>
             <img src="/img/ModelSEED-logo-horizontal.png" width="280">
             <div class="logo-sub-text text-muted">Metabolic Modeling Made Simple.</div>
-
+            <md-button class="md-raised md-primary" mdbWavesEffect style="
+                height:128px !important;
+                width:280px !important;
+                font-size:28px !important;
+                text-align: center;
+                margin: 46px 0px 0px 0px;
+                padding:26px !important;
+                border-radius: 10px;
+                border: 2px solid black;"
+                ui-sref="app.biochem({chem: 'reactions'})">
+              <span>Biochemistry<br><small>(No login required)</small></span>
+            </md-button>
             <!--
             <div layout-margin ng-controller="Tour">
                 <a ng-click="startTour()">Take a tour!</a>
