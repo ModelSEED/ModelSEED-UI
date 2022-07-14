@@ -142,7 +142,7 @@ function($s, $http, config, $rootScope) {
          .then(function(res) { $s.app = true; })
          .catch(function() { $s.app = false; })
 
-    $http.rpc('msSupport', 'list_rast_jobs', {owner: $rootScope.user})
+    $http.rpc('msSupport', 'version', {owner: $rootScope.user})
          .then(function(res) {
              console.log('res', res); $s.msSupport = true;
          })
