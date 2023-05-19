@@ -32,7 +32,7 @@ function($http, $q, $rootScope, config, Auth) {
 
     this.getUrl = function(core, opts) {
         //var url = "http://0.0.0.0:8983/solr/"+core+'/select?wt=json'
-        var url = endpoint+core+'/select?wt=json'
+        var url = endpoint+core+'_staging/select?wt=json'
 
         if (opts) {
             var limit = opts.limit ? opts.limit : null,
