@@ -2190,6 +2190,8 @@ function(Dialogs, $dialog) {
 
             if (dir === '=')
                 var dirClass = 'fa-arrows-h';
+            else if (dir == '?')
+                var dirClass = 'fa-arrows-h';
             else if (dir === '>')
                 var dirClass = 'fa-long-arrow-right';
             else if (dir === '<')
@@ -2243,7 +2245,12 @@ function(Dialogs, $dialog) {
             var parts = stoichString.split(';');
             var dir = scope.direction;
 
+            console.log("Testing")
+            console.log(dir)
+
             if (dir === '=')
+                var dirClass = 'fa-arrows-h';
+            else if (dir == '?')
                 var dirClass = 'fa-arrows-h';
             else if (dir === '>')
                 var dirClass = 'fa-long-arrow-right';

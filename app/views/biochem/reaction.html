@@ -61,7 +61,7 @@
 <div layout="row" ng-if="!loading">
     <div flex="20" layout="column"><strong>Equation</strong></div>
     <div flex="80" layout="column">
-        <span stoichiometry-to-imgs="{{rxn.stoichiometry}}" direction="{{rxn.direction}}"></span>
+        <span stoichiometry-to-imgs="{{rxn.stoichiometry}}" direction="{{rxn.reversibility}}"></span>
     </div>
 </div>
 <hr>
@@ -86,10 +86,6 @@
 <div layout="row">
     <div flex="20" layout="column"><strong>EC numbers</strong></div>
     <div flex="80" layout="column">{{rxn.ec_numbers_display}}</div>
-</div>
-<div layout="row">
-    <div flex="20" layout="column"><strong>Direction</strong></div>
-    <div flex="80" layout="column">{{rxn.direction}}</div>
 </div>
 <div layout="row">
     <div flex="20" layout="column"><strong>Thermodynamic reversibility</strong></div>
