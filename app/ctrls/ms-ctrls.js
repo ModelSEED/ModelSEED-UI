@@ -258,7 +258,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility', 'stoichiometry', 'status',
                             'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
     // Compounds
@@ -279,7 +279,7 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         {label: 'Equation', key: 'stoichiometry', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: wrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+            return '<span style="white-space: wrap"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.reversibility+'"></span>';
         }},
         {label: 'Transport', key: 'is_transport', format: function(row){
             return row.is_transport? 'Yes' : 'No';
@@ -439,7 +439,7 @@ function($s, Biochem, $state, $stateParams, Session) {
     // cpd_Reactions
     var cpd_rxn_sFields = ['id', 'name', 'status', 'aliases', 'pathways', 'ontology', 'stoichiometry', 'notes'];
     $s.cpd_rxnOpts = {query: $s.id, limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: cpd_rxn_sFields,
-                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'direction', 'stoichiometry', 'status',
+                  visible: ['name', 'id', 'definition', 'deltag', 'deltagerr','reversibility', 'stoichiometry', 'status',
                             'inchikey', 'smiles', 'aliases', 'is_obsolete', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
     $s.cpd_rxnHeader = [
@@ -453,7 +453,7 @@ function($s, Biochem, $state, $stateParams, Session) {
         {label: 'Equation', key: 'stoichiometry', format: function(r) {
             if (!r.stoichiometry) return "N/A";
             var stoich = r.stoichiometry.replace(/\"/g, '')
-            return '<span style="white-space: wrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.direction+'"></span>';
+            return '<span style="white-space: wrap;"'+'stoichiometry-to-eq="'+stoich+'" direction="'+r.reversibility+'"></span>';
         }},
         {label: 'Transport', key: 'is_transport', format: function(row){
             return row.is_transport? 'Yes' : 'No';
