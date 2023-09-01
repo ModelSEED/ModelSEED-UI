@@ -10,7 +10,6 @@
     "type": "git",
     "url": "https://github.com/modelseed/modelseed-ui.git"
   },
-  "author": "nconrad@anl.gov",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/modelseed/modelseed-ui/issues"
