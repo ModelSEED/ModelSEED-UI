@@ -10,7 +10,7 @@ function($http, $q, config, $log) {
 
     this.get = function(collection, opts) {
         var cache = true;
-        var url = endpoint+collection+'/?http_accept=application/solr+json'
+        var url = endpoint+collection+'_staging/?http_accept=application/solr+json'
 
         if (opts) {
             //var query = opts.query ? encodeURI(opts.query).replace(/\(/g, '%28') : null,
@@ -124,7 +124,7 @@ function($http, $q, config, $log) {
     /*************Begin translating the RQL syntax to Solr query syntax******************/
     this.get_solr = function(collection, opts) {
         var cache = true;
-        var url = endpoint+collection+'/select?wt=json'
+        var url = endpoint+collection+'_staging/select?wt=json'
 
         if (opts) {
             var query = opts.query ? opts.query.replace(/\(/g, '%28') : null,
@@ -213,7 +213,7 @@ function($http, $q, config, $log) {
                     })
     }
     this.getRxn_solr = function(ids, opts) {
-        var url = endpoint+'reactions/select?wt=json';
+        var url = endpoint+'reactions_staging/select?wt=json';
 
         if (opts && 'select' in opts) {
             if (Array.isArray(opts.select))
@@ -232,7 +232,7 @@ function($http, $q, config, $log) {
                     })
     }
     this.getCpd_solr = function(ids) {
-        var url = endpoint+'compounds/select?wt=json';
+        var url = endpoint+'compounds_staging/select?wt=json';
 
         if (Array.isArray(ids))
             url += '&q=id:('+ids.join(' OR ')+ ')';
@@ -244,7 +244,7 @@ function($http, $q, config, $log) {
                     })
     }
     this.findReactions_solr = function(cpd, opts, flds='id,equation,name,definition') {
-        var url = endpoint+'reactions/select?wt=json';
+        var url = endpoint+'reactions_staging/select?wt=json';
             url += '&q=equation:*'+cpd+'*&fl='+flds;
 
         if (opts) {
