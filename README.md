@@ -3,21 +3,15 @@
 
 ## Requirements
 - node (https://nodejs.org/)
-- bower `npm install -g bower`
-
-
+(it is recommended that you use nvm to manage versions of node and the package manager npm)
 
 ## Local Installation
 
 ```
 git clone --recursive https://github.com/modelseed/modelseed-ui.git modelseed-ui
 cd modelseed-ui
-bower install
+npm install
 ```
-
-Notes:
-- `bower install` installs some third-party (front-end) dependencies
-
 
 Now point your favorite webserver at `modelseed-ui` and you are ready to go!
 
