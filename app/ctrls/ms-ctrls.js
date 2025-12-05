@@ -255,11 +255,11 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
     $s.$watch('tabs', function(value) { Session.setTab($state, value) }, true)
 
     // Reactions
-    var rxn_sFields = ['id', 'name', 'status', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+    var rxn_sFields = ['id', 'name', 'status', 'ecs', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
     $s.rxnOpts = Session.getOpts($state, 'rxns') ||
                   {query: '', limit: 25, offset: 0, sort: {field: 'id'}, core: 'reactions', searchFields: rxn_sFields,
                   visible: ['name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility', 'stoichiometry', 'status',
-                            'aliases', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes', 'is_transport'] };
+                            'aliases', 'ec_numbers', 'is_obsolete', 'is_transport', 'ontology', 'pathways', 'notes', 'is_transport'] };
 
     // Compounds
     var cpd_sFields = ['id', 'name', 'formula', 'synonyms', 'aliases', 'ontology'];
@@ -286,6 +286,9 @@ function($s, Biochem, $state, $stateParams, MS, Session) {
         }},
         {label: 'deltaG', key: 'deltag'},
         {label: 'Status', key: 'status'},
+        {label: 'EC Numbers', key: 'ecs', format: function(row){
+            return row.ec_numbers;
+        }},
         {label: 'Notes', key: 'notes', format: function(row){
             return row.notes.join('|');
         }},
