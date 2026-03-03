@@ -100,64 +100,94 @@ export default function Header() {
     );
 
     return (
-        <AppBar
-            position="static"
-            elevation={2}
-            sx={{
-                backgroundColor: '#26c6da',
-                minHeight: 48,
-            }}
-        >
-            <Toolbar
+        <>
+            <AppBar
+                position="fixed"
+                elevation={2}
                 sx={{
-                    maxWidth: 1170,
-                    width: '100%',
-                    mx: 'auto',
-                    px: { xs: 1, sm: 2 },
-                    minHeight: { xs: 48, sm: 48 },
+                    backgroundColor: '#2D224E',
+                    minHeight: 50,
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
                 }}
             >
-                {/* Logo */}
-                <Box sx={{ mr: { xs: 1, md: 4 }, display: 'flex', alignItems: 'center' }}>
-                    <Link href="/">
-                        <Image
-                            src="/img/ModelSEED-logo.png"
-                            alt="ModelSEED"
-                            width={174}
-                            height={44}
-                            style={{ objectFit: 'contain', display: 'block' }}
-                            priority
-                        />
-                    </Link>
-                </Box>
+                <Toolbar
+                    sx={{
+                        maxWidth: 1170,
+                        width: '100%',
+                        mx: 'auto',
+                        px: { xs: 1, sm: 2 },
+                        minHeight: { xs: 50, sm: 50 },
+                    }}
+                >
+                    <Box sx={{ mr: { xs: 1, md: 4 }, display: 'flex', alignItems: 'center' }}>
+                        <Link href="/" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <Image
+                                src="/img/ModelSEED-logo.png"
+                                alt="ModelSEED"
+                                width={174}
+                                height={44}
+                                style={{ objectFit: 'contain', display: 'block' }}
+                                priority
+                            />
+                            <Box component="span" sx={{
+                                position: 'absolute',
+                                right: '-20px',
+                                top: '5px',
+                                fontSize: '0.6em',
+                                color: '#aaa'
+                            }}>
+                                (beta)
+                            </Box>
+                        </Link>
+                    </Box>
 
-                {/* Desktop Nav */}
-                {!isMobile && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
-                        <Button
-                            component={Link}
-                            href="/biochem/reactions"
-                            variant="contained"
-                            size="small"
-                            sx={{
-                                backgroundColor: theme.palette.primary.main,
-                                color: '#fff',
-                                fontWeight: 600,
-                                px: 2,
-                                '&:hover': {
-                                    backgroundColor: '#1ba3b4',
-                                },
-                            }}
-                        >
-                            Biochemistry
-                        </Button>
-
-                        {NAV_ITEMS.map((item) => (
+                    {/* Desktop Nav */}
+                    {!isMobile && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
                             <Button
-                                key={item.label}
-                                component={item.external ? 'a' : Link}
-                                href={item.href}
-                                {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                component={Link}
+                                href="/biochem/reactions"
+                                variant="contained"
+                                size="small"
+                                sx={{
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                    px: 2,
+                                    '&:hover': {
+                                        backgroundColor: '#1ba3b4',
+                                    },
+                                }}
+                            >
+                                Biochemistry
+                            </Button>
+
+                            {NAV_ITEMS.map((item) => (
+                                <Button
+                                    key={item.label}
+                                    component={item.external ? 'a' : Link}
+                                    href={item.href}
+                                    {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                    sx={{
+                                        color: '#fff',
+                                        fontWeight: 300,
+                                        fontSize: '0.875rem',
+                                        letterSpacing: '1px',
+                                        '&:hover': {
+                                            color: '#f2f2f2',
+                                            backgroundColor: 'transparent',
+                                        },
+                                    }}
+                                >
+                                    {item.label}
+                                </Button>
+                            ))}
+
+                            <Box sx={{ flex: 1 }} />
+
+                            <Button
+                                component={Link}
+                                href="/about"
                                 sx={{
                                     color: '#fff',
                                     fontWeight: 300,
@@ -169,71 +199,53 @@ export default function Header() {
                                     },
                                 }}
                             >
-                                {item.label}
+                                About
                             </Button>
-                        ))}
 
-                        <Box sx={{ flex: 1 }} />
+                            <Button
+                                component={Link}
+                                href="/"
+                                variant="contained"
+                                size="small"
+                                sx={{
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                    px: 2,
+                                    '&:hover': {
+                                        backgroundColor: '#1ba3b4',
+                                    },
+                                }}
+                            >
+                                Sign In
+                            </Button>
+                        </Box>
+                    )}
 
-                        <Button
-                            component={Link}
-                            href="/about"
-                            sx={{
-                                color: '#fff',
-                                fontWeight: 300,
-                                fontSize: '0.875rem',
-                                letterSpacing: '1px',
-                                '&:hover': {
-                                    color: '#f2f2f2',
-                                    backgroundColor: 'transparent',
-                                },
-                            }}
-                        >
-                            About
-                        </Button>
-
-                        <Button
-                            component={Link}
-                            href="/"
-                            variant="contained"
-                            size="small"
-                            sx={{
-                                backgroundColor: theme.palette.primary.main,
-                                color: '#fff',
-                                fontWeight: 600,
-                                px: 2,
-                                '&:hover': {
-                                    backgroundColor: '#1ba3b4',
-                                },
-                            }}
-                        >
-                            Sign In
-                        </Button>
-                    </Box>
-                )}
-
-                {/* Mobile Hamburger */}
-                {isMobile && (
-                    <>
-                        <Box sx={{ flex: 1 }} />
-                        <IconButton
-                            color="inherit"
-                            aria-label="open navigation menu"
-                            edge="end"
-                            onClick={toggleDrawer(true)}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Drawer
-                            anchor="right"
-                            open={drawerOpen}
-                            onClose={toggleDrawer(false)}
-                        >
-                            {drawerContent}
-                        </Drawer>
-                    </>
-                )}
-            </Toolbar>
-        </AppBar>
+                    {/* Mobile Hamburger */}
+                    {isMobile && (
+                        <>
+                            <Box sx={{ flex: 1 }} />
+                            <IconButton
+                                color="inherit"
+                                aria-label="open navigation menu"
+                                edge="end"
+                                onClick={toggleDrawer(true)}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Drawer
+                                anchor="right"
+                                open={drawerOpen}
+                                onClose={toggleDrawer(false)}
+                            >
+                                {drawerContent}
+                            </Drawer>
+                        </>
+                    )}
+                </Toolbar>
+            </AppBar>
+            <Toolbar sx={{ minHeight: { xs: 50, sm: 50 } }} />
+        </>
     );
 }
