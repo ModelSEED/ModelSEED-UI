@@ -1,6 +1,7 @@
 # ModelSEED UI Roadmap
 
 ## Phase 1: Foundation (CSS & Assets)
+**Status**: ✅ Complete
 - Transfer and organize static assets (images, icons, fonts) from the legacy codebase to the new Next.js `public` directory.
 - Analyze legacy CSS and setup modern global styles and `ThemeProvider` utilizing `@mui/material`.
 
