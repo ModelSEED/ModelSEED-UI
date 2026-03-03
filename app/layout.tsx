@@ -17,6 +17,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                <link rel="stylesheet" href="/icomoon/style.css" />
+            </head>
             <body>
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>
