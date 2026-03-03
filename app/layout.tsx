@@ -18,7 +18,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <head>
                 <link rel="shortcut icon" href="/img/ModelSEED-favicon.png" />
                 <link rel="stylesheet" href="/icomoon/style.css" />
@@ -27,7 +27,7 @@ export default function RootLayout({
                     rel="stylesheet"
                 />
             </head>
-            <body>
+            <body suppressHydrationWarning>
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>
                         <CssBaseline />
