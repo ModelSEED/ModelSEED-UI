@@ -1,5 +1,5 @@
 ---
-updated_at: 2026-03-03T12:38:15-07:59
+updated_at: 2026-03-03T16:16:00-06:00
 ---
 
 # GSD Decisions Log
@@ -24,3 +24,22 @@ updated_at: 2026-03-03T12:38:15-07:59
 - No Angular code is reused — only the HTML structure and CSS values are referenced for pixel-accurate reproduction.
 - Sign-in form is a UI-only stub for now (no auth integration until Phase 5).
 - Mailing list form posts to the existing Mailchimp endpoint (preserved from legacy).
+
+## Phase 3 Decisions
+
+**Date:** 2026-03-03
+
+### Scope
+- Phase 3 scope has been updated from just generic "Shared UI Components" to building the four primary header tab landing pages: `/team`, `/publications`, `/projects`, and `/events`.
+- Sub-pages (like individual team members `/team/:name` or specific yearly events `/events/plantseed2015`) are currently **excluded** from this initial Phase 3 scope to ensure we focus on the core landing pages first (unless requested otherwise).
+- The global `<Header />` will be updated to properly highlight the active tab using Next.js `usePathname()`.
+
+### Approach
+- Chose: **Data-Driven (Content Extraction)** for static content.
+- Reason: Instead of raw, hardcoded JSX ports of `team.html` and `publications.html`, we will extract content into local JSON objects or arrays (e.g., `lib/data/team.ts`, `lib/data/publications.ts`) and map over them. This maintains exact visual replication while dramatically improving maintainability and code readability.
+- Chose: **Client-side Header Navigation** (`"use client"`).
+- Reason: To utilize `usePathname()` for active tab highlighting, the header component must be a client component.
+
+### Constraints
+- Must achieve exact 1:1 visual fidelity with the legacy Angular site.
+- Must use modern MUI v7 components integrated with Next.js App Router, completely replacing old `ngMaterial` wrappers.

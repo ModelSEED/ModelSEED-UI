@@ -1,5 +1,5 @@
 ---
-updated_at: 2026-03-03T13:15:11-06:00
+updated_at: 2026-03-03T16:21:00-06:00
 ---
 
 # ModelSEED UI Roadmap
@@ -14,9 +14,12 @@ updated_at: 2026-03-03T13:15:11-06:00
 - Implement the main application shell (Header, Footer, Navigation).
 - Set up Next.js routing structure (`app` router) based on the legacy site architecture.
 
-## Phase 3: Shared UI Components
-- Rebuild common UI components (buttons, cards, forms, data tables) using MUI v7.
-- Ensure visual fidelity with the legacy design system.
+## Phase 3: Primary Header Pages & Routing State
+**Status**: ✅ Complete
+- Rebuild the primary header tab pages (`/team`, `/publications`, `/projects`, `/events`) using modern Next.js and MUI v7 components.
+- Implement client-side active tab highlighting within the global Next.js `<Header>`.
+- Establish local data-driven patterns (e.g. `lib/data/team.ts`) for managing static content.
+- Ensure exact 1:1 visual fidelity and responsiveness with legacy ModelSEED.
 
 ## Phase 4: Page Implementation
 - Recreate individual pages (Home, Data Views, Tools, etc.) using the shared components and Next.js App Router.
@@ -24,3 +27,6 @@ updated_at: 2026-03-03T13:15:11-06:00
 ## Phase 5: State and Data Integration
 - Integrate `zustand` for global application state.
 - Set up `@tanstack/react-query` to interface securely with the modern backend.
+
+## Timestamp Log
+- Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete

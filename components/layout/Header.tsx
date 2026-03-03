@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import AppBar from '@mui/material/AppBar';
@@ -34,8 +35,12 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function Header() {
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    /** Check if a nav item is active based on the current pathname */
+    const isActive = (href: string) => pathname.startsWith(href);
 
     const toggleDrawer = (open: boolean) => () => {
         setDrawerOpen(open);
@@ -162,26 +167,34 @@ export default function Header() {
                                 Biochemistry
                             </Button>
 
-                            {NAV_ITEMS.map((item) => (
-                                <Button
-                                    key={item.label}
-                                    component={item.external ? 'a' : Link}
-                                    href={item.href}
-                                    {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                                    sx={{
-                                        color: '#fff',
-                                        fontWeight: 300,
-                                        fontSize: '0.875rem',
-                                        letterSpacing: '1px',
-                                        '&:hover': {
-                                            color: '#f2f2f2',
-                                            backgroundColor: 'transparent',
-                                        },
-                                    }}
-                                >
-                                    {item.label}
-                                </Button>
-                            ))}
+                            {NAV_ITEMS.map((item) => {
+                                const active = !item.external && isActive(item.href);
+                                return (
+                                    <Button
+                                        key={item.label}
+                                        component={item.external ? 'a' : Link}
+                                        href={item.href}
+                                        {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                        sx={{
+                                            color: '#EBEBEB',
+                                            fontWeight: 300,
+                                            fontSize: '0.875rem',
+                                            letterSpacing: '1px',
+                                            borderRadius: 0,
+                                            borderBottom: active
+                                                ? '3px solid #EBEBEB'
+                                                : '3px solid transparent',
+                                            '&:hover': {
+                                                color: '#EBEBEB',
+                                                backgroundColor: 'transparent',
+                                                borderBottom: '3px solid #EBEBEB',
+                                            },
+                                        }}
+                                    >
+                                        {item.label}
+                                    </Button>
+                                );
+                            })}
 
                             <Box sx={{ flex: 1 }} />
 
@@ -189,13 +202,18 @@ export default function Header() {
                                 component={Link}
                                 href="/about"
                                 sx={{
-                                    color: '#fff',
+                                    color: '#EBEBEB',
                                     fontWeight: 300,
                                     fontSize: '0.875rem',
                                     letterSpacing: '1px',
+                                    borderRadius: 0,
+                                    borderBottom: isActive('/about')
+                                        ? '3px solid #EBEBEB'
+                                        : '3px solid transparent',
                                     '&:hover': {
-                                        color: '#f2f2f2',
+                                        color: '#EBEBEB',
                                         backgroundColor: 'transparent',
+                                        borderBottom: '3px solid #EBEBEB',
                                     },
                                 }}
                             >
