@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Context Template
 
 Template for `.gsd/phases/{N}/CONTEXT.md` — user's vision for a phase.

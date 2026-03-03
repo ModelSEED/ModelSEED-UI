@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Summary Template
 
 Template for `.gsd/phases/{N}/{plan}-SUMMARY.md` — execution summary after plan completion.

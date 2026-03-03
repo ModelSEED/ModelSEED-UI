@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Milestone Template
 
 Template for `.gsd/milestones/{name}/MILESTONE.md` — milestone definition and tracking.

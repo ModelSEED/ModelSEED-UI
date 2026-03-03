@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Roadmap Template
 
 Template for `.gsd/ROADMAP.md` — phase structure and progress tracking.

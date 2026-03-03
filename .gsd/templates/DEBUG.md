@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Debug Template
 
 Template for `.gsd/debug/[slug].md` — active debug session tracking.

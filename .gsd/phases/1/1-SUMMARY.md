@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-03T09:03:46-06:00
+---
+
 # Plan 1.1 Summary: Asset Migration
 
 ## Work Completed

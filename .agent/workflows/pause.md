@@ -1,5 +1,6 @@
 ---
 description: Context hygiene — dump state for clean session handoff
+updated_at: 2026-03-03T13:45:14-06:00
 ---
 
 # /pause Workflow
@@ -174,3 +175,13 @@ A fresh context often immediately sees solutions that a polluted context missed.
 
 **Key principle:** Save first, recommend second. Never rely on the user being able to issue `/pause`.
 </proactive_state_save>
+
+
+<timestamp_tracking>
+
+## Date & Time Tracking
+**CRITICAL REQUIREMENT:** Whenever you create or update ANY Markdown file as part of this workflow, you MUST include the current date and time in the file.
+- **New Files**: Add a timestamp at the top or bottom of the file (e.g., `Created: YYYY-MM-DD HH:MM:SS TZ`).
+- **File Updates**: Do not remove old timestamps. Instead, append a new timestamp indicating when the update occurred (e.g., `Update: YYYY-MM-DD HH:MM:SS TZ`). You can maintain a changelog or a simple list of update timestamps within the document.
+
+</timestamp_tracking>

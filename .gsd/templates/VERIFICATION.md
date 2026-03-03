@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # VERIFICATION.md Template
 
 > Copy this template when creating phase verification reports.

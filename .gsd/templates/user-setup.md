@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-07:59
+---
+
 # User Setup Template
 
 Template for user setup instructions when external services are needed.

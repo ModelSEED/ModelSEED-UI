@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-03T12:38:15-07:59
+---
+
 # GSD Decisions Log
 
 ## Phase 2 Decisions

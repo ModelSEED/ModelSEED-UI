@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # DECISIONS.md — Architecture Decision Records
 
 > **Purpose**: Log significant technical decisions and their rationale.

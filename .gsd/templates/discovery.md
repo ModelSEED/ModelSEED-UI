@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # Discovery Template
 
 Template for `.gsd/phases/{N}/DISCOVERY.md` — shallow research for library/option decisions.

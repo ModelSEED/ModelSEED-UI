@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-07:59
+---
+
 # JOURNAL.md — Session Log
 
 > **Purpose**: Chronicle of work sessions for context continuity.

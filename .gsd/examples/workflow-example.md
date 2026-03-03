@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-06:00
+---
+
 # GSD Workflow Example
 
 > A complete walkthrough of using GSD from start to finish.

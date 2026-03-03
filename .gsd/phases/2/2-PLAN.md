@@ -2,6 +2,7 @@
 phase: 2
 plan: 2
 wave: 2
+updated_at: 2026-03-03T12:51:25-06:00
 ---
 
 # Plan 2.2: Home Page Build (App Shell + Page Content)

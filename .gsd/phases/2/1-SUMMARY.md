@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-03T12:56:26-06:00
+---
+
 # Plan 2.1 Summary: Next.js Folder Structure & Routing Scaffold
 
 ## Work Completed

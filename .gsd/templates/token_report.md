@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-02T17:05:45-07:59
+---
+
 # Token Report Template
 
 Template for documenting token usage per wave or session.

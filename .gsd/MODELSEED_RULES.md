@@ -1,3 +1,7 @@
+---
+updated_at: 2026-03-03T08:51:04-07:59
+---
+
 # ModelSEED UI Transition Protocol
 
 **CRITICAL DIRECTIVE:** The `external/ModelSEED-UI` directory contains the legacy code. You may **ONLY read from it** to understand the visual layout, features, and assets. You **MUST NOT** copy its implementation or use its outdated methodology.

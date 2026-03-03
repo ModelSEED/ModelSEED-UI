@@ -1,5 +1,6 @@
 ---
 description: The Architect — Analyze codebase and update ARCHITECTURE.md and STACK.md
+updated_at: 2026-03-03T13:45:14-07:59
 ---
 
 # /map Workflow
@@ -392,3 +393,13 @@ Files updated:
 |-------|---------|
 | `codebase-mapper` | Detailed mapping methodology |
 </related>
+
+
+<timestamp_tracking>
+
+## Date & Time Tracking
+**CRITICAL REQUIREMENT:** Whenever you create or update ANY Markdown file as part of this workflow, you MUST include the current date and time in the file.
+- **New Files**: Add a timestamp at the top or bottom of the file (e.g., `Created: YYYY-MM-DD HH:MM:SS TZ`).
+- **File Updates**: Do not remove old timestamps. Instead, append a new timestamp indicating when the update occurred (e.g., `Update: YYYY-MM-DD HH:MM:SS TZ`). You can maintain a changelog or a simple list of update timestamps within the document.
+
+</timestamp_tracking>
