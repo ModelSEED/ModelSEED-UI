@@ -1,13 +1,21 @@
 # App Directory (`/app`)
 
-This directory contains the **Next.js App Router** structure for ModelSEED-UI.
+Next.js App Router root. Each subdirectory maps to a URL route via file-system routing.
 
-## Structure
-- `page.tsx`: The root home page.
-- `layout.tsx`: The root layout containing HTML/Body tags and global providers.
-- `globals.css`: Minimal global styling (managed primarily via Material UI theming).
+## Route Structure
 
-## Guidelines
-- Use **Server Components** by default for data fetching and static content.
-- Use `'use client'` at the top of files that require interactivity or Material UI hooks.
-- Routes are defined by creating subdirectories with their own `page.tsx`.
+| Route | Directory | Legacy Angular State |
+|---|---|---|
+| `/` | `app/page.tsx` | `main.home` |
+| `/team` | `app/team/` | `main.team` |
+| `/publications` | `app/publications/` | `main.publications` |
+| `/projects` | `app/projects/` | `main.projects` |
+| `/events` | `app/events/` | `main.events` |
+| `/about` | `app/about/` | `main.about` |
+| `/biochem` | `app/biochem/` | `app.biochem` |
+
+## Conventions
+- `layout.tsx` — Shared layout wrapper (Header + Footer)
+- `page.tsx` — Route page component
+- `*.module.css` — CSS Modules for page-specific styling
+- Dynamic segments use `[param]` directories (e.g., `[name]`, `[id]`)

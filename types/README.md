@@ -1,7 +1,8 @@
 # Types Directory (`/types`)
 
-This directory centralizes TypeScript definitions used throughout the ModelSEED-UI.
+Shared TypeScript type definitions and interfaces.
 
-## Usage
-- Define interfaces for Genome data, Table schema, and ModelSEED specific objects.
-- Export shared types to ensure strict type safety across the App, Lib, and Components.
+## Planned
+- API response types for ModelSEED backend
+- Domain models (compounds, reactions, models, media, etc.)
+- Component prop interfaces shared across multiple components

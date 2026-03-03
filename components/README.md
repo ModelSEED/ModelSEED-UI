@@ -1,12 +1,12 @@
 # Components Directory (`/components`)
 
-This directory houses reusable UI components for the ModelSEED-UI modernization.
+Reusable UI components for the ModelSEED-UI modernization.
 
 ## Philosophy
-- **Scientific Aesthetics**: All components should leverage **Material UI v6** for a professional, data-centric look and feel.
-- **Modularity**: Components should be focused and reusable.
+- **Scientific Aesthetics**: All components leverage **MUI v7** for a professional, data-centric look and feel.
+- **Modularity**: Components are focused, typed, and reusable across pages.
 
-## Future Organization
-- `common/`: Primitive UI elements (buttons, inputs, signals).
-- `tables/`: Specialized components for Genome Data Tables and viewers.
-- `layout/`: App-specific navigation, headers, and footers.
+## Organization
+- `layout/` — App shell components: `Header.tsx`, `Footer.tsx`
+- `common/` — Primitive UI elements (buttons, inputs, signals)
+- `tables/` — Specialized components for data tables and viewers

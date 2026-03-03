@@ -1,9 +1,10 @@
 # Lib Directory (`/lib`)
 
-This directory contains the core logic, utilities, and integrations for the application.
+Shared utilities, configuration, and core modules.
 
 ## Contents
-- **Store**: Zustand state management definitions.
-- **Hooks**: Custom React hooks (e.g., wrappers around TanStack Query).
-- **Utils**: Formatting, math, and general-purpose helper functions.
-- **API**: Client configurations and fetchers for ModelSEED services.
+- `theme.ts` — MUI v7 theme configuration (colors, typography, component overrides extracted from legacy CSS)
+
+## Planned
+- `store/` — Zustand state management stores
+- `api/` — TanStack React Query hooks and API client configuration
