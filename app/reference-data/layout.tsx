@@ -24,13 +24,11 @@ const REF_DATA_TABS: BiochemTab[] = [
         label: 'Public Plant Models',
         href: '/reference-data/plants',
         matchPaths: ['/reference-data/plants', '/genomes/Plants'],
-        disabled: true,
     },
     {
         label: 'Subsystems',
         href: '/reference-data/subsystems',
         matchPaths: ['/reference-data/subsystems', '/genomes/Annotations'],
-        disabled: true,
     },
     {
         label: 'Reactions',
@@ -46,7 +44,6 @@ const REF_DATA_TABS: BiochemTab[] = [
         label: 'Media',
         href: '/reference-data/media',
         matchPaths: ['/reference-data/media', '/list-media'],
-        disabled: true,
     },
 ];
 
