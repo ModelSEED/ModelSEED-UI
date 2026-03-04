@@ -54,9 +54,9 @@ export default function AppHeader() {
                 position="static"
                 elevation={1}
                 sx={{
-                    backgroundColor: '#fff',
-                    color: '#333',
-                    borderBottom: '1px solid #e0e0e0',
+                    backgroundColor: '#2D224E',
+                    color: '#fff',
+                    borderBottom: '1px solid #1a1433',
                 }}
             >
                 <Toolbar sx={{ minHeight: '58px !important', px: { xs: 2, md: 4 } }}>
@@ -82,12 +82,12 @@ export default function AppHeader() {
                                     fontSize: '1.2rem',
                                     fontWeight: isReferenceDataActive ? 600 : 400,
                                     textTransform: 'none',
-                                    color: isReferenceDataActive ? '#2D224E' : '#555',
+                                    color: isReferenceDataActive ? '#fff' : '#b39ddb',
                                     borderBottom: isReferenceDataActive ? '3px solid #00acc1' : '3px solid transparent',
                                     borderRadius: 0,
                                     px: 2,
                                     '&:hover': {
-                                        backgroundColor: 'rgba(0,0,0,0.04)',
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
                                     }
                                 }}
                             >
@@ -102,12 +102,12 @@ export default function AppHeader() {
                                     fontSize: '1.2rem',
                                     fontWeight: isUserDataActive ? 600 : 400,
                                     textTransform: 'none',
-                                    color: isUserDataActive ? '#2D224E' : '#555',
+                                    color: isUserDataActive ? '#fff' : '#b39ddb',
                                     borderBottom: isUserDataActive ? '3px solid #00acc1' : '3px solid transparent',
                                     borderRadius: 0,
                                     px: 2,
                                     '&:hover': {
-                                        backgroundColor: 'rgba(0,0,0,0.04)',
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
                                     }
                                 }}
                             >
@@ -122,12 +122,12 @@ export default function AppHeader() {
                                     fontSize: '1.2rem',
                                     fontWeight: isBuildModelActive ? 600 : 400,
                                     textTransform: 'none',
-                                    color: isBuildModelActive ? '#2D224E' : '#555',
+                                    color: isBuildModelActive ? '#fff' : '#b39ddb',
                                     borderBottom: isBuildModelActive ? '3px solid #00acc1' : '3px solid transparent',
                                     borderRadius: 0,
                                     px: 2,
                                     '&:hover': {
-                                        backgroundColor: 'rgba(0,0,0,0.04)',
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
                                     }
                                 }}
                             >
@@ -143,7 +143,7 @@ export default function AppHeader() {
                                 color="inherit"
                                 onClick={handleMoreClick}
                                 endIcon={<KeyboardArrowDownIcon />}
-                                sx={{ textTransform: 'none', color: '#555' }}
+                                sx={{ textTransform: 'none', color: '#fff' }}
                             >
                                 More
                             </Button>
@@ -175,7 +175,7 @@ export default function AppHeader() {
                     {isMobile && (
                         <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'flex-end' }}>
                             <IconButton color="inherit" edge="end">
-                                <MenuIcon sx={{ color: '#333' }} />
+                                <MenuIcon sx={{ color: '#fff' }} />
                             </IconButton>
                         </Box>
                     )}

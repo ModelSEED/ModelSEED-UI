@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/lib/theme';
 import Box from '@mui/material/Box';
-import HeaderLayoutRouter from './HeaderLayoutRouter';
+import HeaderLayoutRouter from '@/app/HeaderLayoutRouter';
 import Providers from '@/components/Providers';
 import type { Metadata } from "next";
 import "./globals.css";
