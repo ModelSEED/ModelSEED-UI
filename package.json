@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "@mui/material-nextjs": "^7.3.8",
+    "@mui/x-data-grid": "^8.27.3",
     "@tanstack/react-query": "^5.90.21",
     "next": "16.1.6",
     "react": "19.2.3",

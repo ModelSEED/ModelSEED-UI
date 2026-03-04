@@ -21,8 +21,16 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Establish local data-driven patterns (e.g. `lib/data/team.ts`) for managing static content.
 - Ensure exact 1:1 visual fidelity and responsiveness with legacy ModelSEED.
 
-## Phase 4: Page Implementation
-- Recreate individual pages (Home, Data Views, Tools, etc.) using the shared components and Next.js App Router.
+## Phase 4: Biochemistry Pages
+**Status**: ✅ Complete
+- Installed `@tanstack/react-query` and `@mui/x-data-grid` for data fetching and display.
+- Created `lib/api/biochem.ts` — full Solr API utility ported from legacy AngularJS service.
+- Implemented shared Biochem sub-navigation layout with MUI Tabs.
+- Built Reactions DataGrid (`/biochem/reactions`) with all legacy columns, aliases, server-side pagination/sorting/search.
+- Built Compounds DataGrid (`/biochem/compounds`) with matching functionality.
+- Created Reaction detail page (`/rxn/[id]`) with full property display.
+- Created Compound detail page (`/cpd/[id]`) with image, properties, and related reactions table.
+- Added redirect routes from `/biochem/reactions/[id]` → `/rxn/[id]` and `/biochem/compounds/[id]` → `/cpd/[id]`.
 
 ## Phase 5: State and Data Integration
 - Integrate `zustand` for global application state.
@@ -30,3 +38,4 @@ updated_at: 2026-03-03T16:21:00-06:00
 
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
+- Updated: 2026-03-04T07:52:00-06:00 - Phase 4 marked complete

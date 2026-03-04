@@ -43,3 +43,23 @@ updated_at: 2026-03-03T16:16:00-06:00
 ### Constraints
 - Must achieve exact 1:1 visual fidelity with the legacy Angular site.
 - Must use modern MUI v7 components integrated with Next.js App Router, completely replacing old `ngMaterial` wrappers.
+
+## Phase 4 Decisions
+
+**Date:** 2026-03-03
+
+### Scope
+- Full implementation of the Biochem tabs: Reactions and Compounds, including their respective detail pages (`/rxn/[id]` and `/cpd/[id]`). 
+- Sub-navigation for the other tabs (Public Models, Subsystems, Media) will be built to match the legacy UI, but will remain as "Coming Soon" or empty stubs for now.
+
+### Approach
+- **Data Fetching:** Direct client-side fetching using fetching utilities and `@tanstack/react-query` to hit the existing ModelSEED Solr API, preserving the snappy client-side experience of the legacy app. A utility to translate table state to Solr queries (replacing `biochem.js` behavior) will be created.
+- **Data Tables:** Since there is a lot of data, we will use `@mui/x-data-grid` (or equivalent robust table) with server-side pagination (translating table state into Solr offset/limit parameters) to match the legacy `ng-table-solr`.
+
+### Constraints
+- Search behaves exactly as the legacy UI (custom query parsing for parens, colons, etc.).
+- Formatting of columns (deltaG, stoich, aliases with external links) must map 1:1.
+
+## Timestamp Log
+- Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
+

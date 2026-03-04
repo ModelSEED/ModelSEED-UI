@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/lib/theme';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Providers from '@/components/Providers';
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -31,11 +32,13 @@ export default function RootLayout({
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>
                         <CssBaseline />
-                        <Header />
-                        <main style={{ minHeight: '100vh' }}>
-                            {children}
-                        </main>
-                        <Footer />
+                        <Providers>
+                            <Header />
+                            <main style={{ minHeight: '100vh' }}>
+                                {children}
+                            </main>
+                            <Footer />
+                        </Providers>
                     </ThemeProvider>
                 </AppRouterCacheProvider>
             </body>
