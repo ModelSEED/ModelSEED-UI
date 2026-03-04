@@ -63,3 +63,23 @@ updated_at: 2026-03-03T16:16:00-06:00
 ## Timestamp Log
 - Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
 
+
+## Phase 5 Decisions
+
+**Date:** 2026-03-04
+
+### Scope
+- Deferred Fusions, Regulons ("Projects" links) and Escher.
+- Two-Header Architecture:
+  1. Maintain the current global header (`components/layout/Header.tsx`) for public pages (Home, Team, Publications, Projects, Events, About).
+  2. Implement a new contextual App Header (`components/layout/AppHeader.tsx`) specifically for the reference data / user data / build model sections. This header will display the `Reference Data | User Data | Build Model` tabs and a `More` dropdown for public links.
+- Implement the Workspace API to bring the non-Solr tables online (Plant Models, Subsystems).
+- Rename the `biochem` routes to `reference-data`. The Sub-navigation for reference-data will contain Public Plant Models, Subsystems, Reactions, Compounds, Media.
+- Implement Sign-In Gate: Clicking "User Data" or "Build Model" when not authenticated must trigger a sign-in dialog popup (mocked for now) instead of just navigating.
+
+### Approach
+- Chose: RESTful POST JSON-RPC to ModelSEED Workspace API `https://p3.theseed.org/services/Workspace` with typed utility hooks.
+- Reason: Simplifies authentication logic for future phases, successfully tested live API.
+
+### Constraints
+- Must ensure that legacy permalinks like `/rxn/[id]` and `/cpd/[id]` are not broken by the renaming of `app/biochem` to `app/reference-data`.

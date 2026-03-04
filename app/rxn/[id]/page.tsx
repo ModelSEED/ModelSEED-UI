@@ -101,6 +101,7 @@ export default function ReactionDetailPage() {
     const ecDisplay = (rxn.ec_numbers ?? []).join('; ').replace(/"/g, '');
     const pathwaysDisplay = (rxn.pathways ?? []).join('; ').replace(/"/g, '');
 
+    const backUrl = '/reference-data/reactions';
     const eqDisplay = (rxn.equation ?? rxn.definition ?? '')
         .replace(/\(1\)/g, '')
         .replace(/\[0\]/g, '');

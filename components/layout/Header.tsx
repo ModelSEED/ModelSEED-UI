@@ -67,7 +67,7 @@ export default function Header() {
             <Divider />
             <List>
                 <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/biochem/reactions">
+                    <ListItemButton component={Link} href="/reference-data/reactions">
                         <ListItemText
                             primary="Biochemistry"
                             primaryTypographyProps={{ fontWeight: 600, color: 'primary' }}
@@ -151,7 +151,7 @@ export default function Header() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
                             <Button
                                 component={Link}
-                                href="/biochem/reactions"
+                                href="/reference-data/reactions"
                                 variant="contained"
                                 size="small"
                                 sx={{

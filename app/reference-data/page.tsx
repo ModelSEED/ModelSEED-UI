@@ -5,5 +5,5 @@ import { redirect } from 'next/navigation';
  * where the default biochem page showed the Reactions tab.
  */
 export default function BiochemPage() {
-    redirect('/biochem/reactions');
+    redirect('/reference-data/reactions');
 }

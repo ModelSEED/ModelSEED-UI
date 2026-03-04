@@ -32,9 +32,15 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Created Compound detail page (`/cpd/[id]`) with image, properties, and related reactions table.
 - Added redirect routes from `/biochem/reactions/[id]` → `/rxn/[id]` and `/biochem/compounds/[id]` → `/cpd/[id]`.
 
-## Phase 5: State and Data Integration
-- Integrate `zustand` for global application state.
-- Set up `@tanstack/react-query` to interface securely with the modern backend.
+## Phase 5: Reference Data & Workspace Integration
+**Status**: 🏃 In Progress
+- Establish `lib/api/workspace.ts` to interface securely with the ModelSEED JSON-RPC Workspace API.
+- Refactor the main Application Header to match the "Reference Data | User Data | Build Model" tabbed UI.
+- Rename the `/biochem` module to `/reference-data` to align with the new tab taxonomy.
+- Develop the "Public Plant Models" DataGrid pulling live data from `Workspace.ls`.
+- Develop the "Subsystems" DataGrid pulling live annotation overview data via `Workspace.get`.
+- Develop the "Media" DataGrid pulling live media models via `Workspace.ls`.
+- Build placeholder structures for `/user-data` and `/build-model`.
 
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete

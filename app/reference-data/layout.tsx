@@ -19,33 +19,33 @@ interface BiochemTab {
     disabled?: boolean;
 }
 
-const BIOCHEM_TABS: BiochemTab[] = [
+const REF_DATA_TABS: BiochemTab[] = [
     {
         label: 'Public Plant Models',
-        href: '/biochem/plants',
-        matchPaths: ['/biochem/plants', '/genomes/Plants'],
+        href: '/reference-data/plants',
+        matchPaths: ['/reference-data/plants', '/genomes/Plants'],
         disabled: true,
     },
     {
         label: 'Subsystems',
-        href: '/biochem/subsystems',
-        matchPaths: ['/biochem/subsystems', '/genomes/Annotations'],
+        href: '/reference-data/subsystems',
+        matchPaths: ['/reference-data/subsystems', '/genomes/Annotations'],
         disabled: true,
     },
     {
         label: 'Reactions',
-        href: '/biochem/reactions',
-        matchPaths: ['/biochem/reactions', '/rxn'],
+        href: '/reference-data/reactions',
+        matchPaths: ['/reference-data/reactions', '/rxn'],
     },
     {
         label: 'Compounds',
-        href: '/biochem/compounds',
-        matchPaths: ['/biochem/compounds', '/cpd'],
+        href: '/reference-data/compounds',
+        matchPaths: ['/reference-data/compounds', '/cpd'],
     },
     {
         label: 'Media',
-        href: '/biochem/media',
-        matchPaths: ['/biochem/media', '/list-media'],
+        href: '/reference-data/media',
+        matchPaths: ['/reference-data/media', '/list-media'],
         disabled: true,
     },
 ];
@@ -54,7 +54,7 @@ export default function BiochemLayout({ children }: { children: React.ReactNode 
     const pathname = usePathname();
 
     // Determine active tab index from the current URL
-    const activeIndex = BIOCHEM_TABS.findIndex((tab) =>
+    const activeIndex = REF_DATA_TABS.findIndex((tab) =>
         tab.matchPaths.some((p) => pathname.startsWith(p)),
     );
 
@@ -96,7 +96,7 @@ export default function BiochemLayout({ children }: { children: React.ReactNode 
                         },
                     }}
                 >
-                    {BIOCHEM_TABS.map((tab) => (
+                    {REF_DATA_TABS.map((tab) => (
                         <Tab
                             key={tab.label}
                             label={tab.label}

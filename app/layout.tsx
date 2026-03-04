@@ -2,8 +2,8 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/lib/theme';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Box from '@mui/material/Box';
+import HeaderLayoutRouter from './HeaderLayoutRouter';
 import Providers from '@/components/Providers';
 import type { Metadata } from "next";
 import "./globals.css";
@@ -31,13 +31,18 @@ export default function RootLayout({
             <body suppressHydrationWarning>
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>
-                        <CssBaseline />
                         <Providers>
-                            <Header />
-                            <main style={{ minHeight: '100vh' }}>
+                            <CssBaseline />
+                            <HeaderLayoutRouter />
+                            <Box
+                                component="main"
+                                sx={{
+                                    flexGrow: 1,
+                                    backgroundColor: '#f5f5f5',  // Slight off-white background similar to legacy
+                                }}
+                            >
                                 {children}
-                            </main>
-                            <Footer />
+                            </Box>
                         </Providers>
                     </ThemeProvider>
                 </AppRouterCacheProvider>
