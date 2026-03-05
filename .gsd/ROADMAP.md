@@ -56,6 +56,7 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Implement "My Models" DataGrid (`/my-models`).
 - Implement "My Media" DataGrid (`/myMedia`).
 - Build the "Build New Model" wizard skeleton in (`/plant`).
+- Implement the "Model Detail" page to handle routes like `/model/plantseed/plantseed/...` using Next.js catch-all routing.
 
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
