@@ -60,10 +60,6 @@ updated_at: 2026-03-03T16:16:00-06:00
 - Search behaves exactly as the legacy UI (custom query parsing for parens, colons, etc.).
 - Formatting of columns (deltaG, stoich, aliases with external links) must map 1:1.
 
-## Timestamp Log
-- Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
-
-
 ## Phase 5 Decisions
 
 **Date:** 2026-03-04
@@ -83,3 +79,27 @@ updated_at: 2026-03-03T16:16:00-06:00
 
 ### Constraints
 - Must ensure that legacy permalinks like `/rxn/[id]` and `/cpd/[id]` are not broken by the renaming of `app/biochem` to `app/reference-data`.
+
+## Phase 6 Decisions
+
+**Date:** 2026-03-05
+
+### Scope
+- Revert/update internal resource links to perfectly match the legacy ModelSEED routes (e.g., changing `/cpd/[id]` to `/biochem/compounds/[id]`, `/rxn/[id]` to `/biochem/reactions/[id]`).
+- Restore all hyperlinked columns across Reference Data tabs (Public Plant Models, Subsystems, Reactions, Compounds). 
+- If a route doesn't exist yet (e.g., `/genomes/`, `/model/`), the link must still be generated exactly as it was in the legacy UI.
+- Ensure 1-to-1 visual matching in tables, particularly regarding vertical list spacing (e.g., multiple Pathways or Features in one cell should stack vertically) and link colors.
+- Implement the "Comment" button modal in the Reactions table.
+- Implement proper chemical formula rendering for equations and compound formulas.
+
+### Approach
+- **Exact Path Replication:** Update next.js `Link` components to formulate `href` attributes that perfectly match legacy `modelseed.org` paths. Rename app routing folders as requested to match the legacy paths (e.g. `app/biochem/compounds/[id]`).
+- **DataGrid Formatting:** Utilize `getRowHeight={() => 'auto'}` and custom `renderCell` functions to display arrays as vertically spaced lists in Subsystems/Reactions tables, replicating the legacy styling exactly.
+- **Text Parsers:** Implement regex-based formatting for formulas (converting numbers to subscripts) and mapping reaction equations to clickable molecule links.
+
+### Constraints
+- Every link, button, vertical spacing, and feature must be identical to the original UI. Priority is absolute visual and structural fidelity.
+
+## Timestamp Log
+- Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
+- Updated: 2026-03-05T09:05:00-06:00 - Defined Phase 6 decisions
