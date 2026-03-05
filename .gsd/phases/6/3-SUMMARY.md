@@ -17,11 +17,11 @@ status: complete
     - Automated cleanup of ModelSEED equation syntax (`(1)` and `[0]` markers) for cleaner UI presentation.
     - Injected interactive links for all discovered compounds in the **Reactions** table and **Reaction Details** page.
 
-## Verification
-- Verified formulas render with subscripts.
-- Verified reaction equations create clickable Molecule links pointing to `/biochem/compounds/[id]`.
-
-## Status: COMPLETE
+## Tasks Completed
+| Task | Description | Commit | Status |
+|------|-------------|--------|--------|
+| 1 | Chemical Formula Formatting | 1966c04 | ✅ |
+| 2 | Equation Rendering | 1966c04 | ✅ |
 
 ## Timestamp Log
 - Created: 2026-03-05 09:30:00 -06:00

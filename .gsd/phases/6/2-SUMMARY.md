@@ -16,9 +16,11 @@ status: complete
     - Integrated the Chat/Comment icon into the **Reactions** table using a new `actions` column. 
     - Wired the icon to the modal state to allow per-reaction feedback.
 
-## Verification
-- Verified `ReactionCommentModal.tsx` exists and is imported into `Reactions` page.
-- Verified DataGrid styling supports multi-line cell content for vertical stacking.
+## Tasks Completed
+| Task | Description | Commit | Status |
+|------|-------------|--------|--------|
+| 1 | Dynamic Row Heights | e10206e | ✅ |
+| 2 | Reaction Comment Modal | 779527b | ✅ |
 
 ## Status: COMPLETE
 

@@ -15,11 +15,12 @@ status: complete
     - Updated internal resource links in Reactions and Compounds tables from `/rxn` and `/cpd` to the exhaustive legacy paths `/biochem/reactions` and `/biochem/compounds`.
 - **Layout Logic**: Updated `HeaderLayoutRouter.tsx` to detect the new legacy-matching paths as "App Routes" and show the appropriate header.
 
-## Verification
-- Verified `AppHeader.tsx` reflects `/genomes` as the primary link for Reference Data.
-- Verified detail page routes (`/biochem/reactions/[id]`, `/biochem/compounds/[id]`) correctly handle navigation back to legacy list paths.
-
-## Status: COMPLETE
+## Tasks Completed
+| Task | Description | Commit | Status |
+|------|-------------|--------|--------|
+| 1 | Create Route Group & Move Layout | ab13101 | ✅ |
+| 2 | Migrate Reference Data Pages | ab13101 | ✅ |
+| 3 | Update Navigation Links | e10206e | ✅ |
 
 ## Timestamp Log
 - Created: 2026-03-05 09:28:00 -06:00
