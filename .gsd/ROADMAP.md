@@ -58,6 +58,13 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Build the "Build New Model" wizard skeleton in (`/plant`).
 - Implement the "Model Detail" page to handle routes like `/model/plantseed/plantseed/...` using Next.js catch-all routing.
 
+## Phase 8: Frontpage Links, Subscription, & About Page
+**Status**: 🏃 In Progress
+- Clean up the PATRIC/RAST login and account creation URLs to use functional links.
+- Remove the obsolete subscription section from the homepage.
+- Replace the bug report message with a "Contact Us" `mailto:` link.
+- Rebuild the `/about` page to port legacy AngularJS content to Next.js using MUI layout.
+
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
 - Updated: 2026-03-04T07:52:00-06:00 - Phase 4 marked complete
@@ -65,3 +72,4 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Updated: 2026-03-05T09:06:00-06:00 - Added Phase 6
 - Updated: 2026-03-05T09:32:00-06:00 - Phase 6 marked complete
 - Updated: 2026-03-05T14:02:00-06:00 - Phase 7 marked complete
+- Updated: 2026-03-05T14:26:00-06:00 - Added Phase 8
