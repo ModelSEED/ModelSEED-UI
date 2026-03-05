@@ -44,13 +44,9 @@ function SubsystemLinks({ names }: { names: string[] }) {
             {names.map((name, idx) => (
                 <span key={`${name}-${idx}`}>
                     &middot;{' '}
-                    <a
-                        href={`${PLANT_SUBSYSTEM_BASE}${name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
+                    <Link href={`${PLANT_SUBSYSTEM_BASE}${name}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1', textDecoration: 'none' }}>
                         {name.replace(/_/g, ' ')}
-                    </a>
+                    </Link>
                     {idx < names.length - 1 && <br />}
                 </span>
             ))}
@@ -64,13 +60,9 @@ function PathwayLinks({ names }: { names: string[] }) {
         <span style={{ display: 'inline-block', maxWidth: 420 }}>
             {names.map((name, idx) => (
                 <span key={`${name}-${idx}`}>
-                    <a
-                        href={`${PLANT_PATHWAY_BASE}${name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
+                    <Link href={`${PLANT_PATHWAY_BASE}${name}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1', textDecoration: 'none' }}>
                         {name}
-                    </a>
+                    </Link>
                     {idx < names.length - 1 && <br />}
                 </span>
             ))}
@@ -84,7 +76,7 @@ function FeatureLinks({ ids }: { ids: string[] }) {
         <span style={{ display: 'inline-block', maxWidth: 260 }}>
             {ids.map((id, idx) => (
                 <span key={`${id}-${idx}`}>
-                    <Link href={`${PLANT_FEATURE_BASE}${id}`} style={{ color: '#1976d2' }}>
+                    <Link href={`${PLANT_FEATURE_BASE}${id}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
                         {id}
                     </Link>
                     {idx < ids.length - 1 && <br />}

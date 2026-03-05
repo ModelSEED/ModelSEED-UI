@@ -28,7 +28,7 @@ const columns: GridColDef<PlantModelItem>[] = [
         width: 220,
         renderCell: (params) => (
             <Link
-                href={`https://modelseed.org/model/plantseed/plantseed/${params.value}`}
+                href={`/model/plantseed/plantseed/${params.value}`}
                 style={{ color: '#00acc1', textDecoration: 'none' }}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -43,7 +43,7 @@ const columns: GridColDef<PlantModelItem>[] = [
         width: 200,
         renderCell: (params) => (
             <Link
-                href={`https://modelseed.org/model/plantseed/plantseed/${params.row.id}`}
+                href={`/model/plantseed/plantseed/${params.row.id}`}
                 style={{ color: '#00acc1', textDecoration: 'none' }}
                 target="_blank"
                 rel="noopener noreferrer"
