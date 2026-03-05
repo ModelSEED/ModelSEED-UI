@@ -67,7 +67,7 @@ export default function Header() {
             <Divider />
             <List>
                 <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/reference-data/reactions">
+                    <ListItemButton component={Link} href="/biochem/reactions">
                         <ListItemText
                             primary="Biochemistry"
                             primaryTypographyProps={{ fontWeight: 600, color: 'primary' }}

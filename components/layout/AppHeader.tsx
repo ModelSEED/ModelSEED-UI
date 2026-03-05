@@ -26,10 +26,10 @@ export default function AppHeader() {
     const [moreAnchorEl, setMoreAnchorEl] = useState<null | HTMLElement>(null);
     const [signInOpen, setSignInOpen] = useState(false);
 
-    // If user is inside /reference-data, /rxn, or /cpd
-    const isReferenceDataActive = pathname.startsWith('/reference-data') ||
-        pathname.startsWith('/rxn') ||
-        pathname.startsWith('/cpd');
+    // If user is inside /genomes, /biochem, or /list-media
+    const isReferenceDataActive = pathname.startsWith('/genomes') ||
+        pathname.startsWith('/biochem') ||
+        pathname.startsWith('/list-media');
 
     const isUserDataActive = pathname.startsWith('/user-data');
     const isBuildModelActive = pathname.startsWith('/build-model');
@@ -77,7 +77,7 @@ export default function AppHeader() {
                         <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, height: '100%', alignItems: 'stretch' }}>
                             <Button
                                 component={Link}
-                                href="/reference-data/reactions"
+                                href="/genomes"
                                 sx={{
                                     fontSize: '1.2rem',
                                     fontWeight: isReferenceDataActive ? 600 : 400,
