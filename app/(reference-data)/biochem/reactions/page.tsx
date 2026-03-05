@@ -8,6 +8,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { formatEquation } from '@/components/utils/formatEquation';
+import IconButton from '@mui/material/IconButton';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -74,81 +78,6 @@ function parsePathways(pathways?: string[]): React.ReactNode {
     );
 }
 
-/* ─── Columns ────────────────────────────────────────────────── */
-
-const columns: GridColDef<Reaction>[] = [
-    {
-        field: 'id',
-        headerName: 'ID',
-        width: 120,
-        renderCell: (params) => (
-            <Link href={`/rxn/${params.value}`} style={{ color: '#1976d2' }}>
-                {params.value}
-            </Link>
-        ),
-    },
-    { field: 'name', headerName: 'Name', width: 220 },
-    {
-        field: 'definition',
-        headerName: 'Equation',
-        width: 350,
-        sortable: false,
-        valueGetter: (_value, row) => row.definition ?? 'N/A',
-    },
-    {
-        field: 'is_transport',
-        headerName: 'Transport',
-        width: 90,
-        valueGetter: (_value, row) => (row.is_transport ? 'Yes' : 'No'),
-    },
-    { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
-    { field: 'status', headerName: 'Status', width: 110 },
-    {
-        field: 'ec_numbers',
-        headerName: 'EC Numbers',
-        width: 130,
-        sortable: false,
-        valueGetter: (_value, row) => (row.ec_numbers ?? []).join('; '),
-    },
-    {
-        field: 'notes',
-        headerName: 'Notes',
-        width: 100,
-        sortable: false,
-        valueGetter: (_value, row) => (row.notes ?? []).join(' | '),
-    },
-    {
-        field: 'synonyms',
-        headerName: 'Synonyms',
-        width: 260,
-        sortable: false,
-        valueGetter: (_value, row) => parseSynonyms(row.aliases),
-    },
-    {
-        field: 'aliases',
-        headerName: 'Aliases',
-        width: 320,
-        sortable: false,
-        renderCell: (params) => parseAliases(params.row.aliases),
-    },
-    {
-        field: 'pathways',
-        headerName: 'Pathways',
-        width: 300,
-        sortable: false,
-        renderCell: (params) => parsePathways(params.row.pathways),
-    },
-    {
-        field: 'ontology',
-        headerName: 'Ontology',
-        width: 200,
-        valueGetter: (_value, row) => {
-            if (!row.ontology || row.ontology === 'class:null|context:null|step:null') return 'N/A';
-            return row.ontology;
-        },
-    },
-];
-
 /* ─── Page Component ─────────────────────────────────────────── */
 
 export default function ReactionsPage() {
@@ -159,6 +88,105 @@ export default function ReactionsPage() {
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [search, setSearch] = useState('');
     const [searchInput, setSearchInput] = useState('');
+
+    // Modal state
+    const [commentModalOpen, setCommentModalOpen] = useState(false);
+    const [commentReactionId, setCommentReactionId] = useState<string | null>(null);
+
+    const handleOpenComment = useCallback((id: string) => {
+        setCommentReactionId(id);
+        setCommentModalOpen(true);
+    }, []);
+
+    const columns = useMemo<GridColDef<Reaction>[]>(() => [
+        {
+            field: 'id',
+            headerName: 'ID',
+            width: 120,
+            renderCell: (params) => (
+                <Link href={`/biochem/reactions/${params.value}`} style={{ color: '#1976d2' }}>
+                    {params.value}
+                </Link>
+            ),
+        },
+        {
+            field: 'actions',
+            headerName: '',
+            width: 50,
+            sortable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => (
+                <IconButton
+                    size="small"
+                    title="Comment on this reaction"
+                    onClick={() => handleOpenComment(params.row.id)}
+                    sx={{ color: '#00acc1' }}
+                >
+                    <ChatBubbleOutlineIcon fontSize="small" />
+                </IconButton>
+            )
+        },
+        { field: 'name', headerName: 'Name', width: 220 },
+        {
+            field: 'definition',
+            headerName: 'Equation',
+            width: 350,
+            sortable: false,
+            renderCell: (params) => formatEquation(params.value),
+        },
+        {
+            field: 'is_transport',
+            headerName: 'Transport',
+            width: 90,
+            valueGetter: (_value, row) => (row.is_transport ? 'Yes' : 'No'),
+        },
+        { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
+        { field: 'status', headerName: 'Status', width: 110 },
+        {
+            field: 'ec_numbers',
+            headerName: 'EC Numbers',
+            width: 130,
+            sortable: false,
+            valueGetter: (_value, row) => (row.ec_numbers ?? []).join('; '),
+        },
+        {
+            field: 'notes',
+            headerName: 'Notes',
+            width: 100,
+            sortable: false,
+            valueGetter: (_value, row) => (row.notes ?? []).join(' | '),
+        },
+        {
+            field: 'synonyms',
+            headerName: 'Synonyms',
+            width: 260,
+            sortable: false,
+            valueGetter: (_value, row) => parseSynonyms(row.aliases),
+        },
+        {
+            field: 'aliases',
+            headerName: 'Aliases',
+            width: 320,
+            sortable: false,
+            renderCell: (params) => parseAliases(params.row.aliases),
+        },
+        {
+            field: 'pathways',
+            headerName: 'Pathways',
+            width: 300,
+            sortable: false,
+            renderCell: (params) => parsePathways(params.row.pathways),
+        },
+        {
+            field: 'ontology',
+            headerName: 'Ontology',
+            width: 200,
+            valueGetter: (_value, row) => {
+                if (!row.ontology || row.ontology === 'class:null|context:null|step:null') return 'N/A';
+                return row.ontology;
+            },
+        },
+    ], [handleOpenComment]);
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
         query: search || undefined,
@@ -218,6 +246,12 @@ export default function ReactionsPage() {
                     },
                 }}
                 autoHeight
+            />
+
+            <ReactionCommentModal
+                open={commentModalOpen}
+                onClose={() => setCommentModalOpen(false)}
+                reactionId={commentReactionId}
             />
         </>
     );

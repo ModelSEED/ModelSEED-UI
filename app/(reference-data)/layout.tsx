@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Box from '@mui/material/Box';
@@ -22,38 +23,52 @@ interface BiochemTab {
 const REF_DATA_TABS: BiochemTab[] = [
     {
         label: 'Public Plant Models',
-        href: '/reference-data/plants',
-        matchPaths: ['/reference-data/plants', '/genomes/Plants'],
+        href: '/genomes',
+        matchPaths: ['/genomes', '/genomes/Plants'],
     },
     {
         label: 'Subsystems',
-        href: '/reference-data/subsystems',
-        matchPaths: ['/reference-data/subsystems', '/genomes/Annotations'],
+        href: '/genomes/Annotations',
+        matchPaths: ['/genomes/Annotations'],
     },
     {
         label: 'Reactions',
-        href: '/reference-data/reactions',
-        matchPaths: ['/reference-data/reactions', '/rxn'],
+        href: '/biochem/reactions',
+        matchPaths: ['/biochem/reactions'],
     },
     {
         label: 'Compounds',
-        href: '/reference-data/compounds',
-        matchPaths: ['/reference-data/compounds', '/cpd'],
+        href: '/biochem/compounds',
+        matchPaths: ['/biochem/compounds'],
     },
     {
         label: 'Media',
-        href: '/reference-data/media',
-        matchPaths: ['/reference-data/media', '/list-media'],
+        href: '/list-media',
+        matchPaths: ['/list-media'],
     },
 ];
 
 export default function BiochemLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
-    // Determine active tab index from the current URL
-    const activeIndex = REF_DATA_TABS.findIndex((tab) =>
-        tab.matchPaths.some((p) => pathname.startsWith(p)),
-    );
+    // Determine active tab index from the current URL.
+    // Use the longest matching prefix so that more specific routes
+    // (e.g. `/genomes/Annotations`) win over broader ones like `/genomes`.
+    const activeIndex = useMemo(() => {
+        let bestIndex = -1;
+        let bestMatchLength = -1;
+
+        REF_DATA_TABS.forEach((tab, idx) => {
+            tab.matchPaths.forEach((p) => {
+                if (pathname.startsWith(p) && p.length > bestMatchLength) {
+                    bestIndex = idx;
+                    bestMatchLength = p.length;
+                }
+            });
+        });
+
+        return bestIndex;
+    }, [pathname]);
 
     return (
         <>

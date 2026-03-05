@@ -10,6 +10,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { formatEquation } from '@/components/utils/formatEquation';
 
 /* ─── Alias helper ───────────────────────────────────────────── */
 
@@ -101,13 +102,7 @@ export default function ReactionDetailPage() {
     const ecDisplay = (rxn.ec_numbers ?? []).join('; ').replace(/"/g, '');
     const pathwaysDisplay = (rxn.pathways ?? []).join('; ').replace(/"/g, '');
 
-    const backUrl = '/reference-data/reactions';
-    const eqDisplay = (rxn.equation ?? rxn.definition ?? '')
-        .replace(/\(1\)/g, '')
-        .replace(/\[0\]/g, '');
-    const defDisplay = (rxn.definition ?? '')
-        .replace(/\(1\)/g, '')
-        .replace(/\[0\]/g, '');
+    const backUrl = '/biochem/reactions';
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
@@ -121,7 +116,7 @@ export default function ReactionDetailPage() {
                     <Divider />
 
                     <DetailRow label="Equation">
-                        {rxn.definition ?? 'N/A'}
+                        {formatEquation(rxn.definition)}
                     </DetailRow>
                     <Divider />
 
@@ -130,11 +125,11 @@ export default function ReactionDetailPage() {
                     </DetailRow>
 
                     <DetailRow label="Reaction definition">
-                        {defDisplay}
+                        {formatEquation(rxn.definition)}
                     </DetailRow>
 
                     <DetailRow label="Equation with compound IDs">
-                        {eqDisplay}
+                        {formatEquation(rxn.equation)}
                     </DetailRow>
 
                     <DetailRow label="Gibbs free energy change ΔG">
@@ -159,7 +154,7 @@ export default function ReactionDetailPage() {
 
                     {isObsolete && replaceRxn && (
                         <DetailRow label="Linked reaction">
-                            <Link href={`/rxn/${replaceRxn}`} style={{ color: '#1976d2' }}>
+                            <Link href={`/biochem/reactions/${replaceRxn}`} style={{ color: '#1976d2' }}>
                                 {replaceRxn}
                             </Link>
                         </DetailRow>

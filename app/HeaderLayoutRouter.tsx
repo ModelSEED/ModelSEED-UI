@@ -13,9 +13,9 @@ import AppHeader from '@/components/layout/AppHeader';
 export default function HeaderLayoutRouter() {
     const pathname = usePathname();
 
-    const isAppRoute = pathname.startsWith('/reference-data') ||
-        pathname.startsWith('/rxn') ||
-        pathname.startsWith('/cpd') ||
+    const isAppRoute = pathname.startsWith('/genomes') ||
+        pathname.startsWith('/biochem') ||
+        pathname.startsWith('/list-media') ||
         pathname.startsWith('/user-data') ||
         pathname.startsWith('/build-model');
 

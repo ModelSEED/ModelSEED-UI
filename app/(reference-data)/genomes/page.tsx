@@ -19,10 +19,40 @@ interface PlantModelItem {
     modDate: string;
 }
 
+import Link from 'next/link';
+
 const columns: GridColDef<PlantModelItem>[] = [
-    { field: 'id', headerName: 'ID', width: 220 },
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'source', headerName: 'Source', width: 140 },
+    {
+        field: 'id',
+        headerName: 'Model ID',
+        width: 220,
+        renderCell: (params) => (
+            <Link
+                href={`https://modelseed.org/model/plantseed/plantseed/${params.value}`}
+                style={{ color: '#00acc1', textDecoration: 'none' }}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {params.value}
+            </Link>
+        )
+    },
+    {
+        field: 'name',
+        headerName: 'Species Name',
+        width: 200,
+        renderCell: (params) => (
+            <Link
+                href={`https://modelseed.org/model/plantseed/plantseed/${params.row.id}`}
+                style={{ color: '#00acc1', textDecoration: 'none' }}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {params.value}
+            </Link>
+        )
+    },
+    { field: 'source', headerName: 'Domain', width: 140 },
     { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
     { field: 'numGenes', headerName: 'Genes', width: 80, type: 'number' },
     { field: 'fbaCount', headerName: 'FBA', width: 80, type: 'number' },

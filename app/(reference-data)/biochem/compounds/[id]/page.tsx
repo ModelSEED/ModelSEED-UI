@@ -19,6 +19,8 @@ import {
     type Reaction,
     type SolrQueryOpts,
 } from '@/lib/api/biochem';
+import { formatFormula } from '@/components/utils/formatFormula';
+import { formatEquation } from '@/components/utils/formatEquation';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -80,7 +82,7 @@ const rxnColumns: GridColDef<Reaction>[] = [
         headerName: 'ID',
         width: 120,
         renderCell: (params) => (
-            <Link href={`/rxn/${params.value}`} style={{ color: '#1976d2' }}>
+            <Link href={`/biochem/reactions/${params.value}`} style={{ color: '#1976d2' }}>
                 {params.value}
             </Link>
         ),
@@ -91,7 +93,7 @@ const rxnColumns: GridColDef<Reaction>[] = [
         headerName: 'Equation',
         width: 350,
         sortable: false,
-        valueGetter: (_value, row) => row.definition ?? 'N/A',
+        renderCell: (params) => formatEquation(params.value),
     },
     {
         field: 'is_transport',
@@ -165,7 +167,7 @@ export default function CompoundDetailPage() {
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
             {/* ── Title ── */}
             <Typography variant="h6" sx={{ mb: 1 }}>
-                <strong>Compound:</strong>&nbsp;{cpd.id}&nbsp;({cpd.name},&nbsp;{cpd.formula})
+                <strong>Compound:</strong>&nbsp;{cpd.id}&nbsp;({cpd.name},&nbsp;{formatFormula(cpd.formula)})
             </Typography>
             <Divider sx={{ mb: 2 }} />
 

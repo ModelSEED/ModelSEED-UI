@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { formatFormula } from '@/components/utils/formatFormula';
 
 /* ─── Alias / formatting helpers ─────────────────────────────── */
 
@@ -68,13 +69,18 @@ const columns: GridColDef<Compound>[] = [
         headerName: 'ID',
         width: 120,
         renderCell: (params) => (
-            <Link href={`/cpd/${params.value}`} style={{ color: '#1976d2' }}>
+            <Link href={`/biochem/compounds/${params.value}`} style={{ color: '#1976d2' }}>
                 {params.value}
             </Link>
         ),
     },
     { field: 'name', headerName: 'Name', width: 220 },
-    { field: 'formula', headerName: 'Formula', width: 140 },
+    {
+        field: 'formula',
+        headerName: 'Formula',
+        width: 140,
+        renderCell: (params) => formatFormula(params.value)
+    },
     { field: 'mass', headerName: 'Mass', width: 100, type: 'number' },
     { field: 'charge', headerName: 'Charge', width: 80, type: 'number' },
     {
