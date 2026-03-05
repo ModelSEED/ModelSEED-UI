@@ -21,8 +21,8 @@ const AUTH_METHODS = {
     },
     patric: {
         name: 'PATRIC',
-        newAccountURL: 'https://user.patricbrc.org/register/',
-        forgotPasswordUrl: 'https://user.patricbrc.org/reset/',
+        newAccountURL: 'http://rast.nmpdr.org/rast.cgi?page=Register',
+        forgotPasswordUrl: 'http://rast.nmpdr.org/rast.cgi?page=RequestNewPassword',
     },
 };
 
@@ -288,61 +288,6 @@ export default function HomePage() {
                 </Container>
             </Box>
 
-            {/* ─── MAILING LIST CTA ─── */}
-            <Box component="section" className={styles.aboutSecondary}>
-                <Container maxWidth="sm">
-                    <Typography variant="h5" sx={{ mb: 3, fontWeight: 500 }}>
-                        Join the Mailing List!
-                    </Typography>
-                    <Box
-                        component="form"
-                        action="//theseed.us11.list-manage.com/subscribe/post?u=dcadcc832fbfbab13d3b62a5e&amp;id=4c3f21e2f7"
-                        method="post"
-                        target="_blank"
-                        noValidate
-                        sx={{ display: 'flex', justifyContent: 'center', gap: 0 }}
-                    >
-                        <input
-                            type="email"
-                            name="EMAIL"
-                            placeholder="you@example.com"
-                            style={{
-                                padding: '8px 12px',
-                                border: '1px solid #555',
-                                borderRight: 'none',
-                                borderRadius: 0,
-                                fontSize: '14px',
-                                width: '260px',
-                                backgroundColor: '#fff',
-                                color: '#333',
-                            }}
-                        />
-                        <div style={{ position: 'absolute', left: -5000 }} aria-hidden="true">
-                            <input
-                                type="text"
-                                name="b_dcadcc832fbfbab13d3b62a5e_4c3f21e2f7"
-                                tabIndex={-1}
-                                defaultValue=""
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            sx={{
-                                backgroundColor: '#30BCCF',
-                                borderRadius: 0,
-                                px: 3,
-                                '&:hover': { backgroundColor: '#1ba3b4' },
-                            }}
-                        >
-                            Subscribe
-                        </Button>
-                    </Box>
-                    <Typography className={styles.subText} sx={{ mt: 2 }}>
-                        Stay up to date with the latest on ModelSEED 2.0. Unsubscribe at any time.
-                    </Typography>
-                </Container>
-            </Box>
 
             {/* ─── MORE INFO ─── */}
             <Box component="section" className={styles.moreInfo}>
@@ -392,20 +337,9 @@ export default function HomePage() {
                         Questions, comments, and bug reports?
                     </Typography>
                     <Typography>
-                        Please direct questions, comments, and bug reports on our site to our development team via{' '}
                         <a href="mailto:help@modelseed.org" style={{ color: '#30BCCF', textDecoration: 'none' }}>
-                            email
-                        </a>{' '}
-                        or on{' '}
-                        <a
-                            href="https://github.com/ModelSEED/ModelSEED-UI/issues"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#30BCCF', textDecoration: 'none' }}
-                        >
-                            github
+                            Contact us
                         </a>
-                        .
                     </Typography>
                 </Container>
             </Box>

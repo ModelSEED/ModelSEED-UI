@@ -117,24 +117,7 @@
     }
 }
 
-/* ─── Mailing List CTA (About Secondary) ─── */
-.aboutSecondary {
-    color: #fff;
-    background-color: #201838;
-    text-align: center;
-    padding: 100px 0;
-}
 
-@media (max-width: 767px) {
-    .aboutSecondary {
-        padding: 50px 0;
-    }
-}
-
-.subText {
-    font-size: 16px;
-    opacity: 0.85;
-}
 
 /* ─── More Info Section ─── */
 .moreInfo {
