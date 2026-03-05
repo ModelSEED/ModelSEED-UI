@@ -59,7 +59,7 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Implement the "Model Detail" page to handle routes like `/model/plantseed/plantseed/...` using Next.js catch-all routing.
 
 ## Phase 8: Frontpage Links, Subscription, & About Page
-**Status**: 🏃 In Progress
+**Status**: ✅ Complete
 - Clean up the PATRIC/RAST login and account creation URLs to use functional links.
 - Remove the obsolete subscription section from the homepage.
 - Replace the bug report message with a "Contact Us" `mailto:` link.
@@ -73,3 +73,4 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Updated: 2026-03-05T09:32:00-06:00 - Phase 6 marked complete
 - Updated: 2026-03-05T14:02:00-06:00 - Phase 7 marked complete
 - Updated: 2026-03-05T14:26:00-06:00 - Added Phase 8
+- Updated: 2026-03-05T14:25:50-0600 - completed Phase 8 tasks
