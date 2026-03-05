@@ -5,6 +5,7 @@
 - [x] Remove the obsolete subscription section from the homepage — VERIFIED (evidence: Action form pointing to mailchimp and `aboutSecondary` class styles are completely removed from `app/page.tsx` and `app/home.module.css`)
 - [x] Replace the bug report message with a "Contact Us" `mailto:` link — VERIFIED (evidence: Replaced `mailto:help@modelseed.org` in `app/page.tsx` footer area instead of standard text)
 - [x] Rebuild the `/about` page to port legacy AngularJS content to Next.js using MUI layout — VERIFIED (evidence: `app/about/page.tsx` renders MUI with identical copy from `views/about.html` including KBase, PlantSEED, and DOE funding language)
+- [x] Rebuild remaining `/about` pages (Data Sources, Version) and implement nested Layout — VERIFIED (evidence: Sidebar added at `app/about/layout.tsx`. `/about/data-sources` matches `sources.html`. `/about/version` encapsulates status API tables matching `version.html`)
 
 ### Verdict: PASS
 
