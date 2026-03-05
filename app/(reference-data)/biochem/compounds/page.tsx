@@ -69,7 +69,7 @@ const columns: GridColDef<Compound>[] = [
         headerName: 'ID',
         width: 120,
         renderCell: (params) => (
-            <Link href={`/biochem/compounds/${params.value}`} style={{ color: '#1976d2' }}>
+            <Link href={`/biochem/compounds/${params.value}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
                 {params.value}
             </Link>
         ),

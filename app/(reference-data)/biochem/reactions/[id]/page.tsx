@@ -37,7 +37,7 @@ function AliasDisplay({ aliases }: { aliases?: string[] }) {
                         {values.map((v, j) => (
                             <span key={j}>
                                 {baseUrl ? (
-                                    <a href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer">{v}</a>
+                                    <Link href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1', textDecoration: 'none' }}>{v}</Link>
                                 ) : v}
                                 {j < values.length - 1 ? '; ' : ''}
                             </span>
@@ -154,7 +154,7 @@ export default function ReactionDetailPage() {
 
                     {isObsolete && replaceRxn && (
                         <DetailRow label="Linked reaction">
-                            <Link href={`/biochem/reactions/${replaceRxn}`} style={{ color: '#1976d2' }}>
+                            <Link href={`/biochem/reactions/${replaceRxn}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
                                 {replaceRxn}
                             </Link>
                         </DetailRow>
