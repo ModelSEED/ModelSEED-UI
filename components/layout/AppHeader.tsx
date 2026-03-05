@@ -31,8 +31,8 @@ export default function AppHeader() {
         pathname.startsWith('/biochem') ||
         pathname.startsWith('/list-media');
 
-    const isUserDataActive = pathname.startsWith('/user-data');
-    const isBuildModelActive = pathname.startsWith('/build-model');
+    const isUserDataActive = pathname.startsWith('/my-models') || pathname.startsWith('/myMedia') || pathname.startsWith('/data');
+    const isBuildModelActive = pathname.startsWith('/plant');
 
     const handleMoreClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMoreAnchorEl(event.currentTarget);
@@ -96,7 +96,7 @@ export default function AppHeader() {
 
                             <Button
                                 component={Link}
-                                href="/user-data"
+                                href="/my-models"
                                 onClick={handleProtectedNavigation}
                                 sx={{
                                     fontSize: '1.2rem',
@@ -116,7 +116,7 @@ export default function AppHeader() {
 
                             <Button
                                 component={Link}
-                                href="/build-model"
+                                href="/plant"
                                 onClick={handleProtectedNavigation}
                                 sx={{
                                     fontSize: '1.2rem',

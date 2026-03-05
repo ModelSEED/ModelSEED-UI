@@ -16,8 +16,11 @@ export default function HeaderLayoutRouter() {
     const isAppRoute = pathname.startsWith('/genomes') ||
         pathname.startsWith('/biochem') ||
         pathname.startsWith('/list-media') ||
-        pathname.startsWith('/user-data') ||
-        pathname.startsWith('/build-model');
+        pathname.startsWith('/my-models') ||
+        pathname.startsWith('/myMedia') ||
+        pathname.startsWith('/data') ||
+        pathname.startsWith('/plant') ||
+        pathname.startsWith('/model');
 
     if (isAppRoute) {
         return <AppHeader />;
