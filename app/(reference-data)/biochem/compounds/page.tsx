@@ -161,6 +161,7 @@ export default function CompoundsPage() {
                 filterMode="server"
                 filterModel={filterModel}
                 onFilterModelChange={setFilterModel}
+                showToolbar={true}
                 slots={{ toolbar: BiochemToolbar }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },

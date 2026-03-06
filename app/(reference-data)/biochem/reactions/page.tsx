@@ -14,7 +14,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 import BiochemToolbar from '@/components/BiochemToolbar';
 import { GridHighlightText } from '@/components/GridHighlightText';
-import { type GridFilterModel } from '@mui/x-data-grid';
+import { type GridFilterModel, GridToolbar } from '@mui/x-data-grid';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -235,6 +235,7 @@ export default function ReactionsPage() {
                 filterMode="server"
                 filterModel={filterModel}
                 onFilterModelChange={setFilterModel}
+                showToolbar={true}
                 slots={{ toolbar: BiochemToolbar }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
