@@ -1,13 +1,16 @@
 ## Current Position
-- **Phase**: 8 (completed)
-- **Task**: All tasks complete
-- **Status**: Verified
+- **Phase**: 9
+- **Task**: Planning complete
+- **Status**: Ready for execution
 
 ## Last Session Summary
-Phase 8 executed successfully. The homepage login links point to proper RAST registration, the subscription box has been stripped, and the contact bug report block converted to a mail link. The `about` page and its core subpages (Data Sources, Version) were completely ported from legacy AngularJS to MUI with 1-to-1 visual parity and functionality. The `StatusTable` logic implemented to match legacy real-time endpoint status trackers. Note: Per user instruction during debugging, extra legacy tabs (Team, Publications) were removed entirely, and API / FAQ were relocated to `app/_archive` out of sight.
+Phase 9 planning is complete. Two plans have been drafted:
+- **9.1-PLAN.md**: Build the events link pages for PlantSEED 2018, 2017, 2016, 2015 based on legacy templates and copy the header image into `public/img`.
+- **9.2-PLAN.md**: Migrate `escher_builder.html` and its assets into `public/escher` exactly as requested for highest safety and robust performance, keeping it identical to legacy code.
 
 ## Next Steps
-1. /plan 9
+1. /execute 9
 
 ## Timestamp Log
 - Updated: 2026-03-05T14:48:00-0600 - Verified Phase 8 with 1-to-1 UI parity mapped completely.
+- Updated: 2026-03-06T12:42:00-06:00 - Phase 9 planning complete.

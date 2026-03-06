@@ -65,6 +65,11 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Replace the bug report message with a "Contact Us" `mailto:` link.
 - Rebuild the `/about` page to port legacy AngularJS content to Next.js using MUI layout.
 
+## Phase 9: Events Pages & Escher Integration
+**Status**: ⏳ Pending
+- Build all the individual link pages for events (e.g., PlantSEED 2018, 2017, 2016, 2015). The main event page is built, but these subpages are missing.
+- Review legacy code in `external/ModelSEED-UI/escher/escher_builder.html` and transition methodologically so the Escher HTML link functions properly.
+
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
 - Updated: 2026-03-04T07:52:00-06:00 - Phase 4 marked complete
@@ -74,3 +79,4 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Updated: 2026-03-05T14:02:00-06:00 - Phase 7 marked complete
 - Updated: 2026-03-05T14:26:00-06:00 - Added Phase 8
 - Updated: 2026-03-05T14:25:50-0600 - completed Phase 8 tasks
+- Updated: 2026-03-06T12:35:00-06:00 - Added Phase 9
