@@ -1,48 +1,26 @@
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import Link from '@mui/material/Link';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import StatusTable from '@/app/about/version/StatusTable';
 
-const SERVICES = [
-    { service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', api: null },
-    { service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', api: null },
-    { service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', api: null },
-    { service: 'SOLR', endpoint: 'https://modelseed.org/solr/', api: null },
-    { service: 'API', endpoint: 'https://modelseed.org/api/test-service', api: null },
-    {
-        service: 'ProbModelSEED',
-        endpoint: 'https://p3.theseed.org/services/ProbModelSEED/',
-        link: 'https://github.com/ModelSEED/ProbModelSEED',
-        api: [
-            { label: 'Spec', url: 'https://github.com/ModelSEED/ProbModelSEED/blob/master/ProbModelSEED.spec' },
-            { label: 'Python', url: 'https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/biop3/ProbModelSEED/ProbModelSEEDClient.py' },
-            { label: 'Perl', url: 'https://github.com/ModelSEED/ProbModelSEED/blob/master/lib/Bio/ModelSEED/ProbModelSEED/ProbModelSEEDClient.pm' }
-        ]
-    },
-    {
-        service: 'Workspace',
-        endpoint: 'https://p3.theseed.org/services/Workspace',
-        link: 'https://github.com/PATRIC3/Workspace',
-        api: [
-            { label: 'Spec', url: 'https://github.com/PATRIC3/Workspace/blob/master/Workspace.spec' },
-            { label: 'Python', url: 'https://github.com/PATRIC3/Workspace/blob/master/lib/biop3/Workspace/WorkspaceClient.py' },
-            { label: 'Perl', url: 'https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm' }
-        ]
-    },
-    { service: 'ModelSEED Support Service', endpoint: 'https://modelseed.org/services/ms_fba', api: null },
-    { service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', api: null }
-];
+// Server side data loading
+async function getChangelog() {
+    try {
+        const filePath = path.join(process.cwd(), 'external/ModelSEED-UI/CHANGELOG.md');
+        return fs.readFileSync(filePath, 'utf8');
+    } catch (error) {
+        return 'Changelog not found or could not be loaded.';
+    }
+}
 
-export default function VersionPage() {
+export default async function VersionPage() {
+    const changelog = await getChangelog();
+
     return (
         <Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', mb: 5, gap: 4 }}>
@@ -66,41 +44,12 @@ export default function VersionPage() {
                 </Box>
             </Box>
 
-            <TableContainer component={Paper} elevation={0} variant="outlined">
-                <Table size="small" aria-label="version status table">
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                        <TableRow>
-                            <TableCell sx={{ fontWeight: 600 }}>Service</TableCell>
-                            <TableCell sx={{ fontWeight: 600 }}>Endpoint</TableCell>
-                            <TableCell sx={{ fontWeight: 600 }}>API</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {SERVICES.map((row) => (
-                            <TableRow key={row.service} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                <TableCell component="th" scope="row">
-                                    {row.link ? (
-                                        <Link href={row.link} target="_blank" rel="noreferrer">{row.service}</Link>
-                                    ) : (
-                                        row.service
-                                    )}
-                                </TableCell>
-                                <TableCell sx={{ wordBreak: 'break-all' }}>{row.endpoint}</TableCell>
-                                <TableCell>
-                                    {row.api ? (
-                                        row.api.map((apiLink, idx) => (
-                                            <React.Fragment key={apiLink.label}>
-                                                <Link href={apiLink.url} target="_blank" rel="noreferrer">{apiLink.label}</Link>
-                                                {idx < row.api.length - 1 && ', '}
-                                            </React.Fragment>
-                                        ))
-                                    ) : null}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            {/* Client-side table status checker */}
+            <StatusTable />
+
+            <Box sx={{ mt: 6, '& h2': { mt: 4, mb: 2, pb: 1, borderBottom: '1px solid #e0e0e0', color: '#333' } }}>
+                <ReactMarkdown>{changelog}</ReactMarkdown>
+            </Box>
         </Box>
     );
 }
