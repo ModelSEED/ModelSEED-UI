@@ -57,6 +57,20 @@ export interface Compound {
     structure?: string;
 }
 
+export interface GridFilterItem {
+    id?: number | string;
+    field: string;
+    value?: any;
+    operator: string;
+}
+
+export interface GridFilterModel {
+    items: GridFilterItem[];
+    logicOperator?: 'and' | 'or';
+    quickFilterValues?: any[];
+    quickFilterLogicOperator?: 'and' | 'or';
+}
+
 export interface SolrResponse<T> {
     numFound: number;
     start: number;
@@ -71,6 +85,7 @@ export interface SolrQueryOpts {
     searchFields?: string[];
     queryColumn?: Record<string, string>;
     visible?: string[];
+    filterModel?: GridFilterModel;
 }
 
 /* ─── External DB Links ──────────────────────────────────────── */
@@ -99,6 +114,7 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         searchFields,
         queryColumn,
         visible = [],
+        filterModel,
     } = opts;
 
     // Field list
@@ -106,31 +122,104 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         url += `&fl=${visible.join(',')}`;
     }
 
-    // Query construction (ported from legacy)
-    if (query || queryColumn) {
-        if (queryColumn) {
-            const filters: string[] = [];
-            for (const field in queryColumn) {
-                let val = queryColumn[field];
-                val = val.replace(/'/g, "'");
-                val = val.replace(/[;,:"'+.\-]/g, '');
-                const solrField = field === 'synonyms' ? 'aliases' : field;
-                filters.push(`${solrField}:(*${val}*)`);
+    // Query construction (ported from legacy + updated for DataGrid FilterModel)
+    const filters: string[] = [];
+
+    // Parse DataGrid advanced filter model
+    if (filterModel && filterModel.items.length > 0) {
+        for (const item of filterModel.items) {
+            if ((item.value == null || item.value === '') && item.operator !== 'isEmpty' && item.operator !== 'isNotEmpty') {
+                continue;
             }
-            url += `&q=${filters.join(' AND ')}`;
-        } else if (query && searchFields && searchFields.length > 0) {
-            const cleanQuery = sanitizeQuery(query);
-            const filters = searchFields.map((f) => {
-                const solrField = f === 'synonyms' ? 'aliases' : f;
-                return `${solrField}:(*${cleanQuery}*)`;
-            });
-            url += `&q=${filters.join(' OR ')}`;
-        } else if (query) {
-            const cleanQuery = sanitizeQuery(query);
-            url += `&q=*${cleanQuery}*`;
+
+            const field = item.field === 'synonyms' ? 'aliases' : item.field;
+            let val = '';
+            if (item.value != null) {
+                val = String(item.value).replace(/'/g, "'").replace(/[;,:"'+.\-]/g, '');
+            }
+
+            switch (item.operator) {
+                case '>':
+                    filters.push(`${field}:{${val} TO *]`);
+                    break;
+                case '>=':
+                    filters.push(`${field}:[${val} TO *]`);
+                    break;
+                case '<':
+                    filters.push(`${field}:[* TO ${val}}`);
+                    break;
+                case '<=':
+                    filters.push(`${field}:[* TO ${val}]`);
+                    break;
+                case 'isEmpty':
+                    filters.push(`-${field}:[* TO *]`);
+                    break;
+                case 'isNotEmpty':
+                    filters.push(`${field}:[* TO *]`);
+                    break;
+                case '=':
+                case 'equals':
+                case 'is':
+                    filters.push(`${field}:"${val}"`);
+                    break;
+                case '!=':
+                case 'not':
+                    filters.push(`-${field}:"${val}"`);
+                    break;
+                case 'startsWith':
+                    filters.push(`${field}:(${val}*)`);
+                    break;
+                case 'endsWith':
+                    filters.push(`${field}:(*${val})`);
+                    break;
+                case 'isAnyOf':
+                    if (Array.isArray(item.value)) {
+                        const anyOf = item.value.map(v => `${field}:"${String(v).replace(/"/g, '')}"`);
+                        if (anyOf.length > 0) {
+                            filters.push(`(${anyOf.join(' OR ')})`);
+                        }
+                    }
+                    break;
+                default:
+                    // default contains
+                    filters.push(`${field}:(*${val}*)`);
+            }
         }
+    }
+
+    if (queryColumn) {
+        for (const field in queryColumn) {
+            let val = queryColumn[field];
+            val = val.replace(/'/g, "'");
+            val = val.replace(/[;,:"'+.\-]/g, '');
+            const solrField = field === 'synonyms' ? 'aliases' : field;
+            filters.push(`${solrField}:(*${val}*)`);
+        }
+    }
+
+    let mainQueryStr = '';
+    const activeQuery = query || (filterModel && filterModel.quickFilterValues && filterModel.quickFilterValues.length > 0 ? filterModel.quickFilterValues.join(' ') : null);
+
+    if (activeQuery && searchFields && searchFields.length > 0) {
+        const cleanQuery = sanitizeQuery(activeQuery);
+        const searchFilters = searchFields.map((f) => {
+            const solrField = f === 'synonyms' ? 'aliases' : f;
+            return `${solrField}:(*${cleanQuery}*)`;
+        });
+        mainQueryStr = `(${searchFilters.join(' OR ')})`;
+    } else if (activeQuery) {
+        const cleanQuery = sanitizeQuery(activeQuery);
+        mainQueryStr = `*${cleanQuery}*`;
+    }
+
+    if (filters.length > 0 && mainQueryStr) {
+        url += `&q=(${mainQueryStr}) AND ${filters.join(' AND ')}`;
+    } else if (filters.length > 0) {
+        url += `&q=${filters.join(' AND ')}`;
+    } else if (mainQueryStr !== '') {
+        url += `&q=${mainQueryStr}`;
     } else {
-        url += '&q=*';
+        url += `&q=*`;
     }
 
     // Pagination

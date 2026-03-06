@@ -9,6 +9,9 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
+import BiochemToolbar from '@/components/BiochemToolbar';
+import { GridHighlightText } from '@/components/GridHighlightText';
+import { type GridFilterModel } from '@mui/x-data-grid';
 
 /* ─── Alias / formatting helpers ─────────────────────────────── */
 
@@ -70,11 +73,16 @@ const columns: GridColDef<Compound>[] = [
         width: 120,
         renderCell: (params) => (
             <Link href={`/biochem/compounds/${params.value}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
-                {params.value}
+                <GridHighlightText text={params.value as string} />
             </Link>
         ),
     },
-    { field: 'name', headerName: 'Name', width: 220 },
+    {
+        field: 'name',
+        headerName: 'Name',
+        width: 220,
+        renderCell: (params) => <GridHighlightText text={params.value as string} />
+    },
     {
         field: 'formula',
         headerName: 'Formula',
@@ -88,7 +96,7 @@ const columns: GridColDef<Compound>[] = [
         headerName: 'Synonyms',
         width: 300,
         sortable: false,
-        valueGetter: (_value, row) => parseSynonyms(row.aliases),
+        renderCell: (params) => <GridHighlightText text={parseSynonyms(params.row.aliases)} />,
     },
     {
         field: 'aliases',
@@ -116,43 +124,27 @@ export default function CompoundsPage() {
         pageSize: 25,
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
-    const [search, setSearch] = useState('');
-    const [searchInput, setSearchInput] = useState('');
+    const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
-        query: search || undefined,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
         sort: sortModel[0]
             ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
             : { field: 'id' },
-    }), [search, paginationModel, sortModel]);
+        filterModel,
+    }), [paginationModel, sortModel, filterModel]);
 
     const { data, isLoading } = useQuery({
         queryKey: ['compounds', queryOpts],
         queryFn: () => getCompounds(queryOpts),
     });
 
-    const handleSearch = useCallback(() => {
-        setSearch(searchInput);
-        setPaginationModel((prev) => ({ ...prev, page: 0 }));
-    }, [searchInput]);
-
     return (
         <>
-            <Typography variant="h5" fontWeight={600} gutterBottom>
+            <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
                 Compounds
             </Typography>
-            <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                <TextField
-                    size="small"
-                    placeholder="Enter term here (to search in all fields)"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                    sx={{ width: 400 }}
-                />
-            </Box>
 
             <DataGrid<Compound>
                 rows={data?.docs ?? []}
@@ -166,6 +158,13 @@ export default function CompoundsPage() {
                 sortingMode="server"
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                filterModel={filterModel}
+                onFilterModelChange={setFilterModel}
+                slots={{ toolbar: BiochemToolbar }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick

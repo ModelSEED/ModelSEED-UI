@@ -19,7 +19,10 @@ async function getChangelog() {
 }
 
 export default async function VersionPage() {
-    const changelog = await getChangelog();
+    const rawChangelog = await getChangelog();
+
+    // Fix: legacy changelog missing spaces after hashes (e.g., ####v2.6.1)
+    const changelog = rawChangelog.replace(/^(#+)(?!\s)/gm, '$1 ');
 
     return (
         <Box>
@@ -47,8 +50,17 @@ export default async function VersionPage() {
             {/* Client-side table status checker */}
             <StatusTable />
 
-            <Box sx={{ mt: 6, '& h2': { mt: 4, mb: 2, pb: 1, borderBottom: '1px solid #e0e0e0', color: '#333' } }}>
-                <ReactMarkdown>{changelog}</ReactMarkdown>
+            <Box sx={{
+                mt: 6,
+                '& .markdown-body h2': { mt: 4, mb: 2, pb: 1, borderBottom: '1px solid #e0e0e0', color: '#2D224E', fontWeight: 600 },
+                '& .markdown-body h4': { mt: 3, mb: 1, color: '#333', fontWeight: 600 },
+                '& .markdown-body ul': { pl: 3, mb: 2 },
+                '& .markdown-body li': { mb: 0.5 },
+                '& .markdown-body p': { mb: 2 }
+            }}>
+                <Box className="markdown-body">
+                    <ReactMarkdown>{changelog}</ReactMarkdown>
+                </Box>
             </Box>
         </Box>
     );

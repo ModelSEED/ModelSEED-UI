@@ -12,6 +12,9 @@ import { formatEquation } from '@/components/utils/formatEquation';
 import IconButton from '@mui/material/IconButton';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
+import BiochemToolbar from '@/components/BiochemToolbar';
+import { GridHighlightText } from '@/components/GridHighlightText';
+import { type GridFilterModel } from '@mui/x-data-grid';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -86,8 +89,7 @@ export default function ReactionsPage() {
         pageSize: 25,
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
-    const [search, setSearch] = useState('');
-    const [searchInput, setSearchInput] = useState('');
+    const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
 
     // Modal state
     const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -105,7 +107,7 @@ export default function ReactionsPage() {
             width: 120,
             renderCell: (params) => (
                 <Link href={`/biochem/reactions/${params.value}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
-                    {params.value}
+                    <GridHighlightText text={params.value as string} />
                 </Link>
             ),
         },
@@ -126,7 +128,12 @@ export default function ReactionsPage() {
                 </IconButton>
             )
         },
-        { field: 'name', headerName: 'Name', width: 220 },
+        {
+            field: 'name',
+            headerName: 'Name',
+            width: 220,
+            renderCell: (params) => <GridHighlightText text={params.value as string} />
+        },
         {
             field: 'definition',
             headerName: 'Equation',
@@ -138,30 +145,35 @@ export default function ReactionsPage() {
             field: 'is_transport',
             headerName: 'Transport',
             width: 90,
-            valueGetter: (_value, row) => (row.is_transport ? 'Yes' : 'No'),
+            renderCell: (params) => <GridHighlightText text={params.row.is_transport ? 'Yes' : 'No'} />,
         },
         { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
-        { field: 'status', headerName: 'Status', width: 110 },
+        {
+            field: 'status',
+            headerName: 'Status',
+            width: 110,
+            renderCell: (params) => <GridHighlightText text={params.value as string} />
+        },
         {
             field: 'ec_numbers',
             headerName: 'EC Numbers',
             width: 130,
             sortable: false,
-            valueGetter: (_value, row) => (row.ec_numbers ?? []).join('; '),
+            renderCell: (params) => <GridHighlightText text={(params.row.ec_numbers ?? []).join('; ')} />,
         },
         {
             field: 'notes',
             headerName: 'Notes',
             width: 100,
             sortable: false,
-            valueGetter: (_value, row) => (row.notes ?? []).join(' | '),
+            renderCell: (params) => <GridHighlightText text={(params.row.notes ?? []).join(' | ')} />,
         },
         {
             field: 'synonyms',
             headerName: 'Synonyms',
             width: 260,
             sortable: false,
-            valueGetter: (_value, row) => parseSynonyms(row.aliases),
+            renderCell: (params) => <GridHighlightText text={parseSynonyms(params.row.aliases)} />,
         },
         {
             field: 'aliases',
@@ -189,39 +201,24 @@ export default function ReactionsPage() {
     ], [handleOpenComment]);
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
-        query: search || undefined,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
         sort: sortModel[0]
             ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
             : { field: 'id' },
-    }), [search, paginationModel, sortModel]);
+        filterModel,
+    }), [paginationModel, sortModel, filterModel]);
 
     const { data, isLoading } = useQuery({
         queryKey: ['reactions', queryOpts],
         queryFn: () => getReactions(queryOpts),
     });
 
-    const handleSearch = useCallback(() => {
-        setSearch(searchInput);
-        setPaginationModel((prev) => ({ ...prev, page: 0 }));
-    }, [searchInput]);
-
     return (
         <>
-            <Typography variant="h5" fontWeight={600} gutterBottom>
+            <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
                 Reactions
             </Typography>
-            <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                <TextField
-                    size="small"
-                    placeholder="Enter term here (to search in all fields)"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                    sx={{ width: 400 }}
-                />
-            </Box>
 
             <DataGrid<Reaction>
                 rows={data?.docs ?? []}
@@ -235,6 +232,13 @@ export default function ReactionsPage() {
                 sortingMode="server"
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                filterModel={filterModel}
+                onFilterModelChange={setFilterModel}
+                slots={{ toolbar: BiochemToolbar }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
