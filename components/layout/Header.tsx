@@ -151,7 +151,7 @@ export default function Header() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
                             <Button
                                 component={Link}
-                                href="/reference-data/reactions"
+                                href="/biochem/reactions"
                                 variant="contained"
                                 size="small"
                                 sx={{
