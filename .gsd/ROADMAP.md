@@ -70,6 +70,13 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Build all the individual link pages for events (e.g., PlantSEED 2018, 2017, 2016, 2015). The main event page is built, but these subpages are missing.
 - Review legacy code in `external/ModelSEED-UI/escher/escher_builder.html` and transition methodologically so the Escher HTML link functions properly.
 
+## Phase 10: Advanced Biochem Table Actions
+**Status**: ⏳ Pending
+- Implement global search with highlighting (like Google Docs) across all Biochemistry DataGrids.
+- Integrate advanced column/row multi-filters (>, <, between, text matches) docked next to the global search.
+- Implement top-right pagination directly synced with MUI DataGrid across all reference data tables.
+- Upgrade `lib/api/biochem.ts` to parse complex mathematical filtering safely translating to Solr syntax.
+
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
 - Updated: 2026-03-04T07:52:00-06:00 - Phase 4 marked complete
@@ -81,3 +88,4 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Updated: 2026-03-05T14:25:50-0600 - completed Phase 8 tasks
 - Updated: 2026-03-06T12:35:00-06:00 - Added Phase 9
 - Updated: 2026-03-06T12:48:00-06:00 - Phase 9 marked complete
+- Updated: 2026-03-06T13:06:00-06:00 - Added Phase 10

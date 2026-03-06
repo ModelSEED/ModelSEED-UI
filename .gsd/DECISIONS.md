@@ -100,6 +100,25 @@ updated_at: 2026-03-03T16:16:00-06:00
 ### Constraints
 - Every link, button, vertical spacing, and feature must be identical to the original UI. Priority is absolute visual and structural fidelity.
 
+## Phase 10 Decisions
+
+**Date:** 2026-03-06
+
+### Scope
+- Implement Global Search across all Biochemistry Tables with partial hit highlighting (like Google Docs/Search).
+- Implement advanced row/column filters (greater than, less than, between, text matches) aligned next to the global search.
+- Implement Top-Right Pagination across all Biochemistry tables.
+- This goes beyond standard legacy 1:1 fidelity to deeply integrate an enhanced UI experience while remaining visually native.
+
+### Approach
+- Chose: **Option A (MUI DataGrid Custom Toolbar + Partially Client/Server filtering)**.
+- Reason: Option A seamlessly integrates with the `DataGrid` engine. We will map complex filters into native Solr Query Syntax (`q=*` plus `fq=field:[min TO max]`) inside `lib/api/biochem.ts` for server-side evaluation where appropriate, and apply client-side text highlighting logic via custom `renderCell` functions for the visible page data.
+- The `CustomToolbar` will replace the default `DataGrid` header, embedding the global search, filter dropdown, and a mirrored `TablePagination` component docked top-right.
+
+### Constraints
+- Solr API strictness: Solr requires URL encoded arrays and explicit `[X TO Y]` boolean operators. `buildSolrUrl` will need an upgrade to parse complex MUI `filterModel` items.
+
 ## Timestamp Log
 - Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
 - Updated: 2026-03-05T09:05:00-06:00 - Defined Phase 6 decisions
+- Updated: 2026-03-06T13:05:00-06:00 - Defined Phase 10 decisions
