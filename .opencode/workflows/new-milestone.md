@@ -1,0 +1,139 @@
+---
+description: Create a new milestone with phases
+argument-hint: "<milestone-name>"
+updated_at: 2026-03-03T13:45:14-06:00
+---
+
+# /new-milestone Workflow
+
+<objective>
+Define a new milestone with goal, phases, and success criteria.
+</objective>
+
+<process>
+
+## 1. Validate SPEC Exists
+
+**PowerShell:**
+```powershell
+if (-not (Test-Path ".gsd/SPEC.md")) {
+    Write-Error "SPEC.md required. Run /new-project first."
+}
+```
+
+**Bash:**
+```bash
+if [ ! -f ".gsd/SPEC.md" ]; then
+    echo "Error: SPEC.md required. Run /new-project first." >&2
+fi
+```
+
+---
+
+## 2. Gather Milestone Information
+
+Ask for:
+- **Name** — Milestone identifier (e.g., "v1.0", "MVP", "Beta")
+- **Goal** — What does this milestone achieve?
+- **Must-haves** — Non-negotiable deliverables
+- **Nice-to-haves** — Optional if time permits
+
+---
+
+## 3. Generate Phase Breakdown
+
+Based on goal and must-haves, suggest phases:
+
+```markdown
+## Suggested Phases
+
+Phase 1: {Foundation/Setup}
+Phase 2: {Core Feature A}
+Phase 3: {Core Feature B}
+Phase 4: {Integration/Polish}
+Phase 5: {Verification/Launch}
+```
+
+Ask user to confirm or modify.
+
+---
+
+## 4. Update ROADMAP.md
+
+```markdown
+# ROADMAP.md
+
+> **Current Milestone**: {name}
+> **Goal**: {goal}
+
+## Must-Haves
+- [ ] {must-have 1}
+- [ ] {must-have 2}
+
+## Phases
+
+### Phase 1: {name}
+**Status**: ⬜ Not Started
+**Objective**: {description}
+
+### Phase 2: {name}
+**Status**: ⬜ Not Started
+**Objective**: {description}
+
+...
+```
+
+---
+
+## 5. Update STATE.md
+
+```markdown
+## Current Position
+- **Milestone**: {name}
+- **Phase**: Not started
+- **Status**: Milestone planned
+```
+
+---
+
+## 6. Commit
+
+```bash
+git add .gsd/ROADMAP.md .gsd/STATE.md
+git commit -m "docs: create milestone {name}"
+```
+
+---
+
+## 7. Offer Next Steps
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► MILESTONE CREATED ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Milestone: {name}
+Phases: {N}
+
+───────────────────────────────────────────────────────
+
+▶ NEXT
+
+/plan 1 — Create Phase 1 execution plans
+
+───────────────────────────────────────────────────────
+```
+
+</process>
+
+
+<timestamp_tracking>
+
+## Date & Time Tracking
+**CRITICAL REQUIREMENT:** Whenever you create or update ANY Markdown file as part of this workflow, you MUST rigorously track the date and time.
+- **Do NOT overwrite `updated_at` frontmatter** or any existing timestamps. Leave `updated_at` in frontmatter alone if it exists.
+- **New Files**: You MUST add a `## Timestamp Log` section at the bottom of the file, with the first entry being `- Created: YYYY-MM-DD HH:MM:SS TZ`.
+- **File Updates**: You MUST append a new line to the `## Timestamp Log` section at the bottom of the file (e.g., `- Updated: YYYY-MM-DD HH:MM:SS TZ - <brief description of changes>`). If the section doesn't exist, create it.
+**Failure to append timestamps instead of overwriting them is a violation of the protocol.**
+
+</timestamp_tracking>
