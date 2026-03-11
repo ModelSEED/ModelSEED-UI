@@ -175,3 +175,21 @@ updated_at: 2026-03-03T16:16:00-06:00
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:08:00 -05:00 - Logged Phase 12 decisions from /discuss-phase
+- Updated: 2026-03-11 11:00:00 -05:00 - Logged Phase 13 decisions from /discuss-phase
+
+## Phase 13 Decisions
+
+**Date:** 2026-03-11
+
+### Scope
+- Validate and flawlessly align ALL local routes and `<Link>` tags to exactly emulate the legacy UI (AngularJS) URLs.
+- Placeholder Next.js pages must be created for missing legacy routes (`/data/...`, `/fba/...`, `/feature/...`) so user links do not 404.
+- Proper chemical formula parsing for reference data reactions' equations.
+
+### Approach
+- Chose: **Option A (Custom Formatting Regex Method)** for chemical equation rendering.
+- Reason: Lightweight and strictly matches stoichiometric structures without bloat. Differentiates stoichiometric multipliers `(2)` from compound subscripts `H2O` yielding `H₂O` correctly.
+- Ensure all app URLs are perfectly replicated for deployment readiness to maintain standard ModelSEED standards.
+
+### Constraints
+- URLs must be strictly 1-to-1 against legacy, or deployment breaks. No visual discrepancies for equations.

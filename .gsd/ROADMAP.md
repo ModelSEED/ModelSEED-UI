@@ -4,10 +4,11 @@
 
 ## Milestone 2: v1-beta — Data Analysis & Interactive Tools [NEXT]
 
-### Phase 13: Genome Selection & Analysis
+### Phase 13: Deployment Readiness (URL Parity & Equation Formatting)
 **Status**: ⚪ Not Started
-- Integrate genome selection tool with advanced filtering.
-- Implement genome-specific model building logic.
+- Audit and align all local routes and `<Link>` tags to exactly match the legacy UI's URL structures.
+- Ensure placeholder dynamic routes exist for legacy links (e.g., `/data/...`, `/fba/...`).
+- Implement custom React formatting utility (Option A) to parse Reaction equations for proper chemical formula subscripting.
 
 ### Phase 14: FBA & Simulation Results
 **Status**: ⚪ Not Started
