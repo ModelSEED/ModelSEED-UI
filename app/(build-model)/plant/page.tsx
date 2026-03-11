@@ -8,6 +8,14 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
+/**
+ * When true, the PlantSEED build pipeline is disabled in the UI.
+ * Toggle to `false` once PlantSEED v3 is deployed and ready.
+ */
+const PLANTSEED_MAINTENANCE = true;
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -57,9 +65,26 @@ export default function BuildModelPlantPage() {
                 </Typography>
             </Box>
 
+            {PLANTSEED_MAINTENANCE && (
+                <Alert
+                    severity="warning"
+                    variant="filled"
+                    sx={{ mb: 3, '& .MuiAlert-message': { width: '100%' } }}
+                >
+                    <AlertTitle sx={{ fontWeight: 700 }}>PlantSEED v3.0 Update In Progress</AlertTitle>
+                    PlantSEED is being updated to version 3.0. Annotation and reconstruction services
+                    are temporarily offline for updates and will be restored shortly with our improved
+                    protein annotation pipeline. Microbe model building remains available.
+                </Alert>
+            )}
+
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Build Model Tabs">
-                    <Tab label="UPLOAD Plants FASTA" {...a11yProps(0)} />
+                    <Tab
+                        label="UPLOAD Plants FASTA"
+                        disabled={PLANTSEED_MAINTENANCE}
+                        {...a11yProps(0)}
+                    />
                     <Tab label="UPLOAD Microbes FASTA" {...a11yProps(1)} />
                     <Tab label="PATRIC Microbes" {...a11yProps(2)} />
                     <Tab label="RAST Microbes" {...a11yProps(3)} />
