@@ -141,3 +141,18 @@ updated_at: 2026-03-03T16:16:00-06:00
 ### Constraints
 - The UI must handle dual-mode or gracefully degrade when the new proxy endpoints are being fully implemented on the backend.
 - Existing functionalities involving `modelseed_support` for async jobs MUST NOT break during the workspace transition.
+
+## Milestone 1 Final Wrap-up Discussion
+
+**Date:** 2026-03-11
+
+### Findings & Remaining Gaps:
+- The fundamental UI parity and data table features (Biochem, Public Models) are complete.
+- **Data Source Links:** JGI Gene Atlas URL broken during legacy switch (fixed from phytozome.jgi.doe.gov to plantgeneatlas.jgi.doe.gov).
+- **Authentication Flow:** Auth modal (`SignInModal`) successfully mocks login to allow accessing protected routes (`/plant`, `/my-models`), preventing a hard block on UI testing, and correctly links to PATRIC/RAST account creation strings. Real token generation and API injection (e.g. passing the Authorization header to `callWorkspaceApi`) remains outstanding since the backend auth proxy is not deployed.
+- **User Data Workspaces:** Actual viewing of `/my-models` and saving files is a stub. Requires real auth token passing, which goes hand-in-hand with backend proxy.
+- **Model Building Action:** `Build Model` initiates UI rendering but doesn't fire POST requests structurally configured to create async RAST tasks yet.
+
+### Approach to Close Milestone:
+- Considered UI-complete for the React transition.
+- Next milestone should focus strictly on "Backend Integrations & Authenticated User Data," where `modelseed_support` RAST jobs and proxy routing configurations are fully tied to live JWTs.
