@@ -4,11 +4,12 @@
  * Modern TypeScript port of the legacy AngularJS `Biochem` service
  * (external/ModelSEED-UI/app/services/biochem.js).
  *
- * Queries the ModelSEED Solr staging endpoint directly.
+ * Queries the ModelSEED Solr endpoint. The base URL is driven by
+ * `lib/api/config.ts` — toggle `USE_NEW_PROXY` to route through
+ * the unified proxy when available.
  */
 
-const SOLR_BASE = 'https://modelseed.org/solr/';
-const CPD_IMG_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
+import { SOLR_BASE, CPD_IMG_BASE } from './config';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 

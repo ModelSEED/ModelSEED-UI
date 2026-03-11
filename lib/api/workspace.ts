@@ -1,10 +1,13 @@
 // lib/api/workspace.ts
 /**
  * Utility functions for speaking to the ModelSEED Workspace API
- * using JSON-RPC version 1.1
+ * using JSON-RPC version 1.1.
+ *
+ * The endpoint is driven by `lib/api/config.ts` — toggle
+ * `USE_NEW_PROXY` to route through the unified proxy.
  */
 
-const WORKSPACE_URL = 'https://p3.theseed.org/services/Workspace';
+import { WORKSPACE_URL } from './config';
 
 export interface WorkspaceRpcRequest {
     version: '1.1';
@@ -26,7 +29,8 @@ export interface WorkspaceRpcResponse<T> {
 }
 
 /**
- * Perform a generic Workspace JSON-RPC call
+ * Perform a generic Workspace JSON-RPC call.
+ * Routes through the endpoint defined in config.ts.
  */
 async function callWorkspaceApi<T>(method: string, params: any[]): Promise<T> {
     const request: WorkspaceRpcRequest = {
