@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 // Using a temporary hardcoded workspace or one provided from auth state eventually
 // Assuming Vibhav's default structure: '/vibhav/home/models/'
@@ -120,68 +121,70 @@ export default function MyModelsPage() {
     });
 
     return (
-        <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    component={Link}
-                    href="/plant"
-                    sx={{ textTransform: 'none', fontWeight: 600 }}
-                >
-                    Build New Model
-                </Button>
+        <AuthGuard>
+            <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        component={Link}
+                        href="/plant"
+                        sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Build New Model
+                    </Button>
+                </Box>
+
+                <Box sx={{ borderBottom: '1px solid #ddd', pb: 1, mb: 1 }}>
+                    <Typography variant="h5" component="div">
+                        My Models
+                    </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <TextField
+                        size="small"
+                        placeholder="Search models..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        sx={{ flexGrow: 1, maxWidth: 400 }}
+                    />
+                </Box>
+
+                {error ? (
+                    <Typography color="error">
+                        Error loading models. Ensure you are signed in and the workspace path '{workspacePath}' exists.
+                    </Typography>
+                ) : (
+                    <DataGrid<MyModelItem>
+                        rows={filteredRows}
+                        columns={columns}
+                        loading={isLoading}
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        sortModel={sortModel}
+                        onSortModelChange={setSortModel}
+                        getRowId={(row) => row.id}
+                        disableRowSelectionOnClick
+                        autoHeight
+                        sx={{
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: '#fff',
+                            '& .MuiDataGrid-columnHeaders': {
+                                backgroundColor: '#f5f5f5',
+                                borderBottom: '1px solid #ddd',
+                            },
+                        }}
+                    />
+                )}
+
+                {!isLoading && filteredRows.length === 0 && !error && (
+                    <Typography sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
+                        You have no models. Consider reconstructing a model.
+                    </Typography>
+                )}
             </Box>
-
-            <Box sx={{ borderBottom: '1px solid #ddd', pb: 1, mb: 1 }}>
-                <Typography variant="h5" component="div">
-                    My Models
-                </Typography>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <TextField
-                    size="small"
-                    placeholder="Search models..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ flexGrow: 1, maxWidth: 400 }}
-                />
-            </Box>
-
-            {error ? (
-                <Typography color="error">
-                    Error loading models. Ensure you are signed in and the workspace path '{workspacePath}' exists.
-                </Typography>
-            ) : (
-                <DataGrid<MyModelItem>
-                    rows={filteredRows}
-                    columns={columns}
-                    loading={isLoading}
-                    pageSizeOptions={[10, 25, 50, 100]}
-                    paginationModel={paginationModel}
-                    onPaginationModelChange={setPaginationModel}
-                    sortModel={sortModel}
-                    onSortModelChange={setSortModel}
-                    getRowId={(row) => row.id}
-                    disableRowSelectionOnClick
-                    autoHeight
-                    sx={{
-                        border: '1px solid #e0e0e0',
-                        backgroundColor: '#fff',
-                        '& .MuiDataGrid-columnHeaders': {
-                            backgroundColor: '#f5f5f5',
-                            borderBottom: '1px solid #ddd',
-                        },
-                    }}
-                />
-            )}
-
-            {!isLoading && filteredRows.length === 0 && !error && (
-                <Typography sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
-                    You have no models. Consider reconstructing a model.
-                </Typography>
-            )}
-        </Box>
+        </AuthGuard>
     );
 }
