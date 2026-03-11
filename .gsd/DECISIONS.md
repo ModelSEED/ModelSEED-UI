@@ -122,3 +122,22 @@ updated_at: 2026-03-03T16:16:00-06:00
 - Updated: 2026-03-03T17:35:00-06:00 - Defined Phase 4 decisions
 - Updated: 2026-03-05T09:05:00-06:00 - Defined Phase 6 decisions
 - Updated: 2026-03-06T13:05:00-06:00 - Defined Phase 10 decisions
+- Updated: 2026-03-11T09:47:00-05:00 - Defined Phase 11 decisions
+
+## Phase 11 Decisions
+
+**Date:** 2026-03-11
+
+### Scope
+- **PlantSEED Maintenance**: Temporarily disable the PlantSEED build pipeline functionalities in the UI. We will hide or disable the "Build New Model" buttons/forms for PlantSEED genomes and replace them with a prominent warning banner explaining the migration to v3.0. A global banner will also be added to `/plant` and `/genomes` pages.
+- **Proxy All Workspaces**: Create an abstraction over the Workspace API URLs so that the frontend can route all operations (`.ls`, `.get`, etc.) through a new unified API proxy delivered by the backend team, sheltering the frontend from direct direct workspace interactions.
+- **Biochemistry Fetching**: Make the Solr biochem service endpoint configurable (as either reading from Solr or José's new API).
+- **RAST Job Segregation**: Explicitly keep RAST job polling pointing strictly to `modelseed_support` instead of the new proxy, as requested.
+
+### Approach
+- Chose: **Config-Driven Service Routing**.
+- Reason: The backend team's new endpoints are actively being developed. Hardcoding direct URLs right now will cause breakage. Creating an abstraction where the base URLs are read from a config file (e.g., `lib/api/config.ts`) allows us to quickly toggle between old/raw endpoints and the new proxy endpoints when José is ready. 
+
+### Constraints
+- The UI must handle dual-mode or gracefully degrade when the new proxy endpoints are being fully implemented on the backend.
+- Existing functionalities involving `modelseed_support` for async jobs MUST NOT break during the workspace transition.
