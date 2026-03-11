@@ -8,6 +8,7 @@
  */
 
 import { WORKSPACE_URL } from './config';
+import { AUTH_STORAGE_KEY } from './auth';
 
 export interface WorkspaceRpcRequest {
     version: '1.1';
@@ -29,23 +30,48 @@ export interface WorkspaceRpcResponse<T> {
 }
 
 /**
+ * Retrieve the stored auth token (client-side only).
+ * Returns null on the server or when no session exists.
+ */
+function getAuthToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed?.token ?? null;
+    } catch {
+        return null;
+    }
+}
+
+/**
  * Perform a generic Workspace JSON-RPC call.
  * Routes through the endpoint defined in config.ts.
+ * Automatically attaches the user's auth token when available.
  */
 async function callWorkspaceApi<T>(method: string, params: any[]): Promise<T> {
     const request: WorkspaceRpcRequest = {
         version: '1.1',
         method,
-        id: Math.floor(Math.random() * 100000), // Random ID for the request
+        id: Math.floor(Math.random() * 100000),
         params,
     };
 
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    };
+
+    // Inject auth token if available (raw token, no "Bearer " prefix — legacy compat)
+    const token = getAuthToken();
+    if (token) {
+        headers['Authorization'] = token;
+    }
+
     const response = await fetch(WORKSPACE_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
+        headers,
         body: JSON.stringify(request),
         // next caches fetch by default in some configurations, let's allow it but revalidate reasonably
         next: { revalidate: 3600 }

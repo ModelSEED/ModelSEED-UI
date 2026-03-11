@@ -17,15 +17,16 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 
 import SignInModal from './SignInModal';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function AppHeader() {
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { isAuthenticated, logout } = useAuth();
 
     const [moreAnchorEl, setMoreAnchorEl] = useState<null | HTMLElement>(null);
     const [signInOpen, setSignInOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     // If user is inside /genomes, /biochem, or /list-media
     const isReferenceDataActive = pathname.startsWith('/genomes') ||
@@ -166,7 +167,7 @@ export default function AppHeader() {
                                 <Button
                                     variant="outlined"
                                     color="inherit"
-                                    onClick={() => setIsAuthenticated(false)}
+                                    onClick={logout}
                                     sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(255,255,255,0.3)' }}
                                 >
                                     Sign Out
@@ -199,7 +200,6 @@ export default function AppHeader() {
             <SignInModal
                 open={signInOpen}
                 onClose={() => setSignInOpen(false)}
-                onSuccess={() => setIsAuthenticated(true)}
             />
         </>
     );

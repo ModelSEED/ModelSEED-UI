@@ -20,6 +20,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 
 import SignInModal from './SignInModal';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface NavItem {
     label: string;
@@ -38,16 +39,24 @@ const NAV_ITEMS: NavItem[] = [
 export default function Header() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [signInOpen, setSignInOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { isAuthenticated, logout } = useAuth();
 
     /** Check if a nav item is active based on the current pathname */
     const isActive = (href: string) => pathname.startsWith(href);
 
     const toggleDrawer = (open: boolean) => () => {
         setDrawerOpen(open);
+    };
+
+    const handleAuthAction = () => {
+        if (isAuthenticated) {
+            logout();
+        } else {
+            setSignInOpen(true);
+        }
     };
 
     const drawerContent = (
@@ -97,7 +106,7 @@ export default function Header() {
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={() => setSignInOpen(true)}>
+                    <ListItemButton onClick={handleAuthAction}>
                         <ListItemText
                             primary={isAuthenticated ? "Sign Out" : "Sign In"}
                             primaryTypographyProps={{ fontWeight: 600, color: 'primary' }}
@@ -228,7 +237,7 @@ export default function Header() {
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    onClick={() => setIsAuthenticated(false)}
+                                    onClick={logout}
                                     sx={{
                                         color: '#fff',
                                         fontWeight: 600,
@@ -287,7 +296,6 @@ export default function Header() {
             <SignInModal
                 open={signInOpen}
                 onClose={() => setSignInOpen(false)}
-                onSuccess={() => setIsAuthenticated(true)}
             />
         </>
     );

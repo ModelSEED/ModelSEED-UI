@@ -11,39 +11,63 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface SignInModalProps {
     open: boolean;
     onClose: () => void;
-    onSuccess?: () => void;
 }
 
-export default function SignInModal({ open, onClose, onSuccess }: SignInModalProps) {
+export default function SignInModal({ open, onClose }: SignInModalProps) {
+    const { login } = useAuth();
     const [method, setMethod] = useState<'RAST' | 'PATRIC'>('PATRIC');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (onSuccess) onSuccess();
-        onClose();
+        setError(null);
+        setLoading(true);
+
+        try {
+            await login(method, username, password);
+            // Success — clear form and close
+            setUsername('');
+            setPassword('');
+            onClose();
+        } catch (err: any) {
+            setError(err?.message ?? 'Authentication failed. Please check your credentials.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const toggleMethod = () => {
         setMethod(method === 'PATRIC' ? 'RAST' : 'PATRIC');
+        setError(null);
+    };
+
+    const handleClose = () => {
+        setError(null);
+        onClose();
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableScrollLock>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth disableScrollLock>
             <DialogTitle sx={{ m: 0, p: 2, backgroundColor: '#0288d1', color: '#fff', display: 'flex', alignItems: 'center' }}>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 400 }}>
                     Please sign in
                 </Typography>
                 <IconButton
                     aria-label="close"
-                    onClick={onClose}
+                    onClick={handleClose}
                     sx={{ color: '#fff' }}
                 >
                     <CloseIcon />
@@ -59,6 +83,12 @@ export default function SignInModal({ open, onClose, onSuccess }: SignInModalPro
                             Sign in with {method} account to continue
                         </Typography>
 
+                        {error && (
+                            <Alert severity="error" sx={{ mt: 1, mb: 1 }} onClose={() => setError(null)}>
+                                {error}
+                            </Alert>
+                        )}
+
                         <form id="signin-form" onSubmit={handleLogin}>
                             <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 <TextField
@@ -68,7 +98,8 @@ export default function SignInModal({ open, onClose, onSuccess }: SignInModalPro
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
-                                    onMouseDown={(e) => e.stopPropagation()} // Fix focus issue
+                                    disabled={loading}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                 />
                                 <TextField
                                     label="Password"
@@ -78,6 +109,7 @@ export default function SignInModal({ open, onClose, onSuccess }: SignInModalPro
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
+                                    disabled={loading}
                                     onMouseDown={(e) => e.stopPropagation()}
                                 />
 
@@ -86,9 +118,10 @@ export default function SignInModal({ open, onClose, onSuccess }: SignInModalPro
                                         type="submit"
                                         variant="contained"
                                         color="primary"
-                                        disabled={!username || !password}
+                                        disabled={!username || !password || loading}
+                                        startIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
                                     >
-                                        Sign In
+                                        {loading ? 'Signing in…' : 'Sign In'}
                                     </Button>
 
                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
@@ -147,13 +180,17 @@ export default function SignInModal({ open, onClose, onSuccess }: SignInModalPro
                                 </>
                             )}
                         </Box>
+
+                        <Typography variant="caption" sx={{ mt: 2, color: '#888' }}>
+                            Dev testing: use <strong>developer / developer</strong>
+                        </Typography>
                     </Box>
 
                 </Box>
             </DialogContent>
 
             <DialogActions sx={{ p: 2, justifyContent: 'flex-start' }}>
-                <Button onClick={onClose} component={Link} href="/" variant="text" sx={{ color: '#555', textTransform: 'none' }}>
+                <Button onClick={handleClose} component={Link} href="/" variant="text" sx={{ color: '#555', textTransform: 'none' }}>
                     Go to homepage
                 </Button>
             </DialogActions>
