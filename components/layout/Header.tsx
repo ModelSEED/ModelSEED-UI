@@ -19,6 +19,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 
+import SignInModal from './SignInModal';
+
 interface NavItem {
     label: string;
     href: string;
@@ -35,6 +37,8 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function Header() {
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [signInOpen, setSignInOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -93,9 +97,9 @@ export default function Header() {
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/">
+                    <ListItemButton onClick={() => setSignInOpen(true)}>
                         <ListItemText
-                            primary="Sign In"
+                            primary={isAuthenticated ? "Sign Out" : "Sign In"}
                             primaryTypographyProps={{ fontWeight: 600, color: 'primary' }}
                         />
                     </ListItemButton>
@@ -220,23 +224,38 @@ export default function Header() {
                                 About
                             </Button>
 
-                            <Button
-                                component={Link}
-                                href="/"
-                                variant="contained"
-                                size="small"
-                                sx={{
-                                    backgroundColor: theme.palette.primary.main,
-                                    color: '#fff',
-                                    fontWeight: 600,
-                                    px: 2,
-                                    '&:hover': {
-                                        backgroundColor: '#1ba3b4',
-                                    },
-                                }}
-                            >
-                                Sign In
-                            </Button>
+                            {isAuthenticated ? (
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setIsAuthenticated(false)}
+                                    sx={{
+                                        color: '#fff',
+                                        fontWeight: 600,
+                                        px: 2,
+                                        borderColor: 'rgba(255,255,255,0.3)',
+                                    }}
+                                >
+                                    Sign Out
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    onClick={() => setSignInOpen(true)}
+                                    sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: '#fff',
+                                        fontWeight: 600,
+                                        px: 2,
+                                        '&:hover': {
+                                            backgroundColor: '#1ba3b4',
+                                        },
+                                    }}
+                                >
+                                    Sign In
+                                </Button>
+                            )}
                         </Box>
                     )}
 
@@ -264,6 +283,12 @@ export default function Header() {
                 </Toolbar>
             </AppBar>
             <Toolbar sx={{ minHeight: { xs: 50, sm: 50 } }} />
+
+            <SignInModal
+                open={signInOpen}
+                onClose={() => setSignInOpen(false)}
+                onSuccess={() => setIsAuthenticated(true)}
+            />
         </>
     );
 }

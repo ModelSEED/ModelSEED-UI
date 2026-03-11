@@ -17,15 +17,17 @@ import Link from 'next/link';
 interface SignInModalProps {
     open: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-export default function SignInModal({ open, onClose }: SignInModalProps) {
+export default function SignInModal({ open, onClose, onSuccess }: SignInModalProps) {
     const [method, setMethod] = useState<'RAST' | 'PATRIC'>('PATRIC');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
+        if (onSuccess) onSuccess();
         onClose();
     };
 
@@ -91,12 +93,22 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
 
                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                         <Typography variant="body2">
-                                            <a href="https://p3.theseed.org/register" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>
+                                            <a
+                                                href={method === 'PATRIC' ? 'https://p3.theseed.org/register' : 'https://rast.nmpdr.org/rast.cgi?page=Register'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ color: '#1976d2', textDecoration: 'none' }}
+                                            >
                                                 Create new account
                                             </a>
                                         </Typography>
                                         <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                            <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>
+                                            <a
+                                                href={method === 'PATRIC' ? 'https://p3.theseed.org/reset_password' : 'https://rast.nmpdr.org/rast.cgi?page=RetrievePassword'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ color: '#1976d2', textDecoration: 'none' }}
+                                            >
                                                 Forgot password?
                                             </a>
                                         </Typography>

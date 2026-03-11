@@ -25,6 +25,7 @@ export default function AppHeader() {
 
     const [moreAnchorEl, setMoreAnchorEl] = useState<null | HTMLElement>(null);
     const [signInOpen, setSignInOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     // If user is inside /genomes, /biochem, or /list-media
     const isReferenceDataActive = pathname.startsWith('/genomes') ||
@@ -43,9 +44,10 @@ export default function AppHeader() {
     };
 
     const handleProtectedNavigation = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        // Mock authentication check. Always prompt login for now.
-        e.preventDefault();
-        setSignInOpen(true);
+        if (!isAuthenticated) {
+            e.preventDefault();
+            setSignInOpen(true);
+        }
     };
 
     return (
@@ -160,14 +162,25 @@ export default function AppHeader() {
                                 <MenuItem component={Link} href="/projects" onClick={handleMoreClose}>Related Projects</MenuItem>
                             </Menu>
 
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => setSignInOpen(true)}
-                                sx={{ textTransform: 'none', fontWeight: 600 }}
-                            >
-                                Sign In
-                            </Button>
+                            {isAuthenticated ? (
+                                <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    onClick={() => setIsAuthenticated(false)}
+                                    sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(255,255,255,0.3)' }}
+                                >
+                                    Sign Out
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setSignInOpen(true)}
+                                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                                >
+                                    Sign In
+                                </Button>
+                            )}
                         </Box>
                     )}
 
@@ -183,7 +196,11 @@ export default function AppHeader() {
                 </Toolbar>
             </AppBar>
 
-            <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
+            <SignInModal
+                open={signInOpen}
+                onClose={() => setSignInOpen(false)}
+                onSuccess={() => setIsAuthenticated(true)}
+            />
         </>
     );
 }
