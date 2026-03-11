@@ -1,102 +1,108 @@
-# ModelSEED-UI Documentation Index
+# ModelSEED-UI Project Documentation Index
 
-Welcome to the ModelSEED-UI developer documentation. This project is a modern Next.js 16 reconstruction of the legacy ModelSEED AngularJS application, optimized for scientific data visualization and metabolic modeling.
-
----
-
-## 🏗️ Architecture Overview
-
-The application is built on the **Next.js 16 App Router**, utilizing a modern React ecosystem to handle high-volume scientific data from KBase and ModelSEED.
-
-- **Framework**: [Next.js 16](https://nextjs.org/) (leveraging Server Components and optimized Client-side hydration).
-- **UI Components**: [MUI v7 (Beta)](https://mui.com/) with a specialized scientific design system.
-- **Data Fetching**: [TanStack Query v5](https://tanstack.com/query/latest) (React Query) for stateful caching and optimized API interactions.
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand) for minimal, performant global UI state.
-- **Styling**: A combination of CSS Modules and MUI's `sx` system, themed with the signature **ModelSEED Purple & Cyan** palette.
+This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 reboot. It is designed to be your primary **Control-F** search-ready reference for navigating, understanding, and modifying the codebase. 
 
 ---
 
-## 📁 Project Directory Map
+## 🔎 One-Stop Search Map (Quick-Find Table)
 
-| Directory | Description |
-|-----------|-------------|
-| [`app/`](./app/README.md) | **Routing Root**: Contains all page definitions, layouts, and route handlers. |
-| [`components/`](./components/README.md) | **UI components**: Reusable layouts, auth guards, and scientific data viewers. |
-| [`lib/`](./lib/README.md) | **Internal Library**: API clients, biological utilities, and the project theme. |
-| [`public/`](./public/README.md) | **Static Assets**: Logos, icons, and biological reference images. |
-| [`.gsd/`](./.gsd/README.md) | **GSD Tracking**: Roadmap, state management, and architectural decisions. |
-| [`types/`](./types/README.md) | **TypeScript**: Global type definitions for Compounds, Reactions, and Workspace objects. |
-
----
-
-## 🔗 The Routing Strategy: Legacy Parity
-
-One of the project's primary objectives is **Absolute URL Parity** with the legacy ModelSEED UI. This prevents over a decade of scientific citations from breaking.
-
-### 🌉 Catch-all Routing (`[...path]`)
-Biodata in ModelSEED (Models, FBA, Genomes) is identified by its **KBase Workspace Path**, which is naturally deeply nested. We handle this using Next.js catch-all routes:
-
-- **Folder Structure**: `app/model/[...path]/page.tsx`
-- **Captured URL**: `/model/user_id/my_work/my_model_name`
-- **Result**: The code receives an array `path: ['user_id', 'my_work', 'my_model_name']`.
-
-### 🗺️ Core Routing Locations
-
-| Page Path | Purpose | State |
-|-----------|---------|-------|
-| `/biochem` | The global reference biochemistry library (Reactions/Compounds). | Active |
-| `/model` | The main detail view for Metabolic Models. | Functional |
-| `/fba` | View results of Flux Balance Analysis. | Placeholder (Phase 14) |
-| `/genome` | View Genomic sequences and annotations. | Placeholder |
-| `/data` | Browser for the KBase Workspace (Files/Objects). | Placeholder |
+| To change/adjust... | ...Go to this file/folder | Why? |
+| :--- | :--- | :--- |
+| **Header / Navigation** | [`components/layout/Header.tsx`](./components/layout/Header.tsx) | Main top nav for home and docs. |
+| **Biochem Sidebar/Header** | [`components/layout/AppHeader.tsx`](./components/layout/AppHeader.tsx) | Sub-header for biological data tools. |
+| **Model Data Rendering** | [`app/model/[...path]/page.tsx`](./app/model/[...path]/page.tsx) | Handles model exploration UI. |
+| **Chemical Formulas** | [`components/ui/ChemicalEquation.tsx`](./components/ui/ChemicalEquation.tsx) | Logic for subscripting formulas like `H2O`. |
+| **Colors/Theme/Styles** | [`lib/theme.ts`](./lib/theme.ts) | Primary MUI v7 theme definition. |
+| **API Calls (Ref Data)** | [`lib/api/biochem.ts`](./lib/api/biochem.ts) | Solr queries for reactions/compounds. |
+| **API Calls (User Data)** | [`lib/api/workspace.ts`](./lib/api/workspace.ts) | KBase Workspace / RPC adapters. |
+| **Auth Logic** | [`components/auth/AuthProvider.tsx`](./components/auth/AuthProvider.tsx) | Authentication context and state. |
 
 ---
 
-## � Key Component Patterns
+## 🏗️ Folder Structure Tree & Descriptions
 
-### 🧬 Scientific Visualizers
-We implement specialized components to handle biological data that standard libraries often miss:
-- **`ChemicalEquation`**: Uses a complex regex engine to correctly subscript formulas while ignoring stoichiometric coefficients (e.g., `(2) H2O` → `(2) H₂O`).
-- **`GridHighlightText`**: Automatically highlights filtered keywords within DataGrid cells for faster searching.
+A recursive view of the codebase, detailing every major directory’s function and the files within them.
 
-### 🛡️ Authentication Architecture
-Authentication is managed via a shared **`AuthProvider`** in `components/auth/`.
-- **Zustand Store**: Keeps the user's name and token globally available.
-- **Protective Envelopes**: Pages requiring login are wrapped in the `<RequireAuth>` component, which displays a sign-in wall if the session is absent.
+### `📂 app/` — [View Folder README](./app/README.md)
+The core routing and page-level logic directory using the Next.js App Router.
+- `📂 (reference-data)/` — [View README](./app/(reference-data)/README.md)
+    - `📂 biochem/` — [View README](./app/(reference-data)/biochem/README.md)
+        - `📂 compounds/` — Searchable community compounds.
+        - `📂 reactions/` — Searchable metabolic reactions.
+    - `📂 genomes/` — Publicly available genome repository.
+- `📂 data/[...path]/` — [View README](./app/data/README.md)
+    - **Catch-all** route for legacy links to the Workspace system.
+- `📂 fba/[...path]/` — [View README](./app/fba/README.md)
+    - **Catch-all** for Flux Balance Analysis results. 
+- `📂 gapfill/[...path]/` — [View README](./app/gapfill/README.md)
+    - **Catch-all** for gapfilling reconstruction logs. 
+- `📂 model/[...path]/` — [View README](./app/model/README.md)
+    - **Catch-all** for the Metabolic Model viewer.
+- `📂 my-models/` — Protected route where users manage their own workspace models.
+- `📂 auth/` — Contains signup and login forms.
+- `📜 layout.tsx` — The root layout, wrapping every page in the `AuthProvider` and `QueryClient`.
+
+### `📂 components/` — [View Folder README](./components/README.md)
+Reusable pieces of the application.
+- `📂 auth/` — Authentication context, login, and signup modals.
+- `📂 layout/` — Global shell components: `Header.tsx`, `Footer.tsx`, and `AppHeader.tsx`.
+- `📂 ui/` — Scientific UI elements:
+    - `📜 ChemicalEquation.tsx` — Complex regex-based chemical formula renderer.
+    - `📜 GridHighlightText.tsx` — Component used in tables to highlight matches.
+- `📂 icons/` — Custom SVG icons used in the scientific dashboard.
+
+### `📂 lib/` — [View Folder README](./lib/README.md)
+The "Brain" of the application—logic, configuration, and API adapters.
+- `📂 api/` — Logic communicating with various ModelSEED/KBase servers.
+    - `📜 biochem.ts` — Solr-based biochemistry searching.
+    - `📜 workspace.ts` — High-level RPC (JSON-RPC) workspace service wrapper.
+    - `📜 auth.ts` — Direct interaction with KBase Auth services.
+- `📂 data/` — Hardcoded/static biological dictionaries and mappings.
+- `📜 theme.ts` — The source of truth for all styling tokens (MUI v7).
+
+### `📂 docs/` — [The Developer Manual](./docs/README.md) (NEW)
+Central repository for deep-dive developer guides.
+- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — High-level data flow and tech stack details.
+- **[ROUTING.md](./docs/ROUTING.md)** — Detailed mapping between legacy AngularJS paths and Next.js routes.
+- **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** — How the KBase session token flow works locally and globally.
+- **[BIOCHEMISTRY.md](./docs/BIOCHEMISTRY.md)** — Guide to indices and parsing scientific formulas.
 
 ---
 
-## 📑 Page Layouts & Tabs
+## 🧪 Key Biological Components to Control-F
 
-Most high-level data views (like the Model or Genome pages) use a **Tabbed Navigation** pattern to keep complex data reachable.
-
-### Model Page Tabs
-The model view (`/model`) demonstrates our standardized tab structure:
-1. **Reactions**: Functional list of metabolic transformations.
-2. **Compounds**: List of all metabolites.
-3. **Genes**: Genomic associations.
-4. **Biomass**: The objective function for FBA.
-5. **Pathways**: Higher-level metabolic groupings.
-
-These tabs utilize MUI's `<Tabs>` component for consistent interaction across the entire suite of tools.
+| Component | Search Tag (RegEx Friendly) | Location |
+| :--- | :--- | :--- |
+| **`ChemicalEquation`** | `React.FC<{ equation: string }>` | `components/ui/ChemicalEquation.tsx` |
+| **`BiochemTable`** | `<DataGrid ...>` | `app/(reference-data)/biochem/reactions/page.tsx` |
+| **`AuthProvider`** | `useAuth()` | `components/auth/AuthProvider.tsx` |
+| **`Workspace Client`** | `workspaceGet()` | `lib/api/workspace.ts` |
+| **`MUI v7 Palette`** | `createTheme({ ... })` | `lib/theme.ts` |
 
 ---
 
-## 🛠️ Development Workflow
+## ⚡ Developer Quick-Action Checklist
 
-We follow a strict **GSD (Get Shit Done)** methodology to maintain production-grade quality:
+- **Adding a new legacy route?**
+  1. Add a folder to `app/`.
+  2. Use a `[...path]` folder for catch-all behavior.
+  3. Ensure `page.tsx` uses `params.path` as its variable.
+  4. Link the new route in `docs/ROUTING.md`.
 
-1. **Strategic Planning**: Decompose requirements into Phases in `ROADMAP.md`.
-2. **Execution State**: Track active work in `STATE.md`.
-3. **Architectural Memory**: Log major design decisions in `DECISIONS.md`.
-4. **Empirical Proof**: Every feature must be verified against the specification before being marked complete.
+- **Style Adjustment?**
+  1. Check `lib/theme.ts` for global colors.
+  2. Use the `sx={ ... }` prop on MUI components for standard spacing (8px increments).
 
-### 🧪 Getting Started
-To start development, ensure you have the required environmental variables and run:
-```bash
-npm install
-npm run dev
-```
+- **New Data Fetching?**
+  1. Define the API call in `lib/api/`.
+  2. Use `useQuery` from `@tanstack/react-query` in your component.
+
+---
+
+## 📈 Roadmap & Tasks
+For current progress and upcoming feature implementation (e.g., Phase 14: FBA), refer to:
+- **[ROADMAP.md](./.gsd/ROADMAP.md)**
+- **[STATE.md](./.gsd/STATE.md)**
 
 ---
 *Created by the Advanced Agentic Coding team. Last Updated: 2026-03-11*
