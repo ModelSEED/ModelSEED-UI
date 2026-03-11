@@ -6,6 +6,8 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import { workspaceLs } from '@/lib/api/workspace';
 
 interface PlantModelItem {
@@ -100,6 +102,12 @@ export default function PlantsPage() {
             <Typography variant="h5" fontWeight={600} gutterBottom>
                 Public Plant Models
             </Typography>
+            <Alert severity="info" variant="outlined" sx={{ mb: 2 }}>
+                <AlertTitle sx={{ fontWeight: 700 }}>PlantSEED v3.0 Update In Progress</AlertTitle>
+                PlantSEED is being updated to version 3.0. Existing public plant models below remain
+                available for reference. New annotation and reconstruction services will be restored
+                shortly with an improved pipeline.
+            </Alert>
             <Box sx={{ mb: 2 }}>
                 <TextField
                     size="small"
