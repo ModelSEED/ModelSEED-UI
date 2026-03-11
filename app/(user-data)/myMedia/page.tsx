@@ -55,11 +55,8 @@ export default function MyMediaPage() {
     const [search, setSearch] = useState('');
     const { isAuthenticated } = useAuth();
 
-    // Default workspace path assumption for user media (legacy fallback).
-    const workspacePath = '/user/home/media/';
-
     const { data: rows = [], isLoading, error } = useQuery({
-        queryKey: ['myMedia', USE_MODELSEED_API, workspacePath],
+        queryKey: ['myMedia', USE_MODELSEED_API],
         enabled: isAuthenticated,
         queryFn: async () => {
             if (USE_MODELSEED_API) {
@@ -78,18 +75,9 @@ export default function MyMediaPage() {
                 })) as MyMediaItem[];
             }
 
-            const data = await workspaceLs([workspacePath]);
-            const items = data[workspacePath] || [];
-
-            return items.map((item: any) => ({
-                id: item[0],
-                name: item[7]?.name || item[0],
-                isMinimal: item[7]?.isMinimal ? 'Yes' : 'No',
-                isDefined: item[7]?.isDefined ? 'Yes' : 'No',
-                type: item[7]?.type || '-',
-                modDate: item[3],
-                path: item[2] + item[0],
-            })) as MyMediaItem[];
+            throw new Error(
+                'My Media requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_MODELSEED_API_URL at a running modelseed-api instance.',
+            );
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -136,8 +124,7 @@ export default function MyMediaPage() {
 
                 {error ? (
                     <Typography color="error">
-                        Error loading media. Ensure you are signed in and that either modelseed-api is
-                        running or the workspace path '{workspacePath}' exists.
+                        {error.message}
                     </Typography>
                 ) : (
                     <DataGrid<MyMediaItem>

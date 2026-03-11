@@ -83,11 +83,8 @@ export default function MyModelsPage() {
     const [search, setSearch] = useState('');
     const { isAuthenticated } = useAuth();
 
-    // Legacy Workspace path retained for environments that are not yet using modelseed-api.
-    const workspacePath = '/user/home/models/';
-
     const { data: rows = [], isLoading, error } = useQuery({
-        queryKey: ['myModels', USE_MODELSEED_API, workspacePath],
+        queryKey: ['myModels', USE_MODELSEED_API],
         enabled: isAuthenticated,
         queryFn: async () => {
             if (USE_MODELSEED_API) {
@@ -106,21 +103,13 @@ export default function MyModelsPage() {
                 })) as MyModelItem[];
             }
 
-            const data = await workspaceLs([workspacePath]);
-            const items = data[workspacePath] || [];
-
-            return items.map((item: any) => ({
-                id: item[0], // filename
-                name: item[7]?.name || item[0],
-                orgName: item[7]?.orgName || item[7]?.name || '', // Map to orgName
-                numReactions: item[7]?.num_reactions || item[7]?.rxnCount || 0,
-                numGenes: item[7]?.num_genes || item[7]?.geneCount || 0,
-                fbaCount: item[7]?.fba_count || item[7]?.fbaCount || 0,
-                gapfills: item[7]?.integrated_gapfills || item[7]?.gapfillCount || 0,
-                status: item[7]?.status || 'complete', // legacy default assumption
-                modDate: item[3],
-                path: item[2] + item[0], // path + name
-            })) as MyModelItem[];
+            // When modelseed-api is not enabled, avoid calling the legacy
+            // Workspace directly, since many users will not have permission
+            // for the legacy paths. Instead, surface a clear configuration
+            // error so the environment can be fixed explicitly.
+            throw new Error(
+                'My Models requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_MODELSEED_API_URL at a running modelseed-api instance.',
+            );
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -164,8 +153,7 @@ export default function MyModelsPage() {
 
                 {error ? (
                     <Typography color="error">
-                        Error loading models. Ensure you are signed in and that either modelseed-api is
-                        running or the workspace path '{workspacePath}' exists.
+                        {error.message}
                     </Typography>
                 ) : (
                     <DataGrid<MyModelItem>
