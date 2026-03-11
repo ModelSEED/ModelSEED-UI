@@ -22,10 +22,12 @@
 - Apply consistent headers across all dynamic reference data subtabs.
 - Fix UI/UX issues: tooltips on disabled elements, passive model indicators, and home page login logic.
 
-### Phase 17: Media Optimization Tools
+### Phase 17: Authenticated User Data & Workspace/API Integration
 **Status**: ⚪ Not Started
-- Wired media creation API for persisting workspaces.
-- Media adjustment and comparison views.
+- Fix authentication and permissions so signed-in users can reliably access **My Models** and **My Media**.
+- Resolve Workspace permission errors by integrating with the appropriate backend (P3 Workspace or the new `modelseed-api` workspace proxy).
+- Ensure Build Model UX defaults to the active "UPLOAD Microbes FASTA" tab while keeping the Plant tab disabled with tooltip.
+- Exercise and validate user flows against the new `modelseed-api` backend using test RAST/PATRIC accounts.
 
 ### Phase 18: Final Polishing & Performance
 **Status**: ⚪ Not Started
@@ -38,3 +40,4 @@
 - Updated: 2026-03-11 11:18:00 -05:00 - Fixed parameter naming in catch-all stubs and refined equation formatting logic.
 - Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete (service status auth fix).
 - Updated: 2026-03-11 19:36:00 -06:00 - Phase 16 complete (UI/UX refinement and data consistency).
+- Updated: 2026-03-11 20:05:00 -06:00 - Re-scoped Phase 17 for authenticated user data and Workspace/modelseed-api integration.

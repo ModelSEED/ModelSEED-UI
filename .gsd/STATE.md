@@ -1,19 +1,17 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 16 (executed)
-- **Task**: All Phase 16 plans executed and verification report written
-- **Status**: Phase 16 implementation complete; partial verification (UI flows to be exercised in a running browser)
+- **Phase**: 17 (planning complete)
+- **Task**: Plans 17.1–17.3 created for authenticated user data and Workspace/modelseed-api integration
+- **Status**: Ready for execution of Phase 17
 
 ## Last Session Summary
-Executed all Phase 16 plans:
-- Standardized Biochem data table headers and disabled per-column menus in Reactions, Compounds, Genomes, Subsystems, and Media tables.
-- Fixed tooltip behavior for the disabled PlantSEED tab and converted model detail actions into passive indicators.
-- Wired the home page login to `useAuth` and added authenticated-state UI.
-Recorded findings in `.gsd/phases/16/VERIFICATION.md` with a PARTIAL verdict due to lack of live browser verification.
+Created execution plans for Phase 17 focusing on:
+- Researching current Workspace JSON-RPC usage, auth token flow, and the new `modelseed-api` workspace proxy (Plan 17.1).
+- Fixing authenticated access to `/my-models`, `/myMedia`, and correcting the default active tab on `/plant` (Plan 17.2).
+- Adding a configuration switch and performing end-to-end verification against a running `modelseed-api` instance (Plan 17.3).
 
 ## Next Steps
-1. Manually test the updated UI in a local browser (tooltips, reference table headers, model detail cards, and home page login).
-2. If any issues are found, create additional gap-closure plans for Phase 16.
+1. /execute 17 — implement and verify the Phase 17 plans.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -23,3 +21,4 @@ Recorded findings in `.gsd/phases/16/VERIFICATION.md` with a PARTIAL verdict due
 - Updated: 2026-03-11 11:25:00 -05:00 - Planned Phase 14.
 - Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete.
 - Updated: 2026-03-11 19:37:00 -06:00 - Phase 16 executed and partially verified.
+- Updated: 2026-03-11 20:14:00 -06:00 - Planned Phase 17 (auth + Workspace/modelseed-api integration).
