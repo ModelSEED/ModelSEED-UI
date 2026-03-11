@@ -16,12 +16,18 @@
 - Display FBA results in interactive tables and charts.
 - Implement simulation status tracking for queued jobs.
 
-### Phase 15: Media Optimization Tools
+### Phase 15: Data Table Refining & UI/UX Polish
+**Status**: ✅ Complete
+- Standardize search, filter, and pagination across all reference data tables.
+- Fix pagination reset bugs in custom toolbar.
+- Refine "Build Model" page maintenance behavior and authentication provider links.
+
+### Phase 16: Media Optimization Tools
 **Status**: ⚪ Not Started
 - Wired media creation API for persisting workspaces.
 - Media adjustment and comparison views.
 
-### Phase 16: Final Polishing & Performance
+### Phase 17: Final Polishing & Performance
 **Status**: ⚪ Not Started
 - Global state optimization and bundle reduction.
 - End-to-end testing and production build verification.

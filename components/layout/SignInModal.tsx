@@ -127,7 +127,7 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                         <Typography variant="body2">
                                             <a
-                                                href={method === 'PATRIC' ? 'https://p3.theseed.org/register' : 'https://rast.nmpdr.org/rast.cgi?page=Register'}
+                                                href={method === 'PATRIC' ? 'https://user.bv-brc.org/register' : 'https://rast.nmpdr.org/rast.cgi?page=Register'}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ color: '#1976d2', textDecoration: 'none' }}
@@ -137,7 +137,7 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
                                         </Typography>
                                         <Typography variant="body2" sx={{ mt: 0.5 }}>
                                             <a
-                                                href={method === 'PATRIC' ? 'https://p3.theseed.org/reset_password' : 'https://rast.nmpdr.org/rast.cgi?page=RetrievePassword'}
+                                                href={method === 'PATRIC' ? 'https://user.bv-brc.org/reset-password' : 'https://rast.nmpdr.org/rast.cgi?page=RetrievePassword'}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ color: '#1976d2', textDecoration: 'none' }}

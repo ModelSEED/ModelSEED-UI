@@ -10,6 +10,8 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import Tooltip from '@mui/material/Tooltip';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AuthGuard from '@/components/auth/AuthGuard';
 
 /**
@@ -67,23 +69,21 @@ export default function BuildModelPlantPage() {
                     </Typography>
                 </Box>
 
-                {PLANTSEED_MAINTENANCE && (
-                    <Alert
-                        severity="warning"
-                        variant="filled"
-                        sx={{ mb: 3, '& .MuiAlert-message': { width: '100%' } }}
-                    >
-                        <AlertTitle sx={{ fontWeight: 700 }}>PlantSEED v3.0 Update In Progress</AlertTitle>
-                        PlantSEED is being updated to version 3.0. Annotation and reconstruction services
-                        are temporarily offline for updates and will be restored shortly with our improved
-                        protein annotation pipeline. Microbe model building remains available.
-                    </Alert>
-                )}
+
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Build Model Tabs">
                         <Tab
-                            label="UPLOAD Plants FASTA"
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    UPLOAD Plants FASTA
+                                    {PLANTSEED_MAINTENANCE && (
+                                        <Tooltip title="PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.">
+                                            <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
+                                        </Tooltip>
+                                    )}
+                                </Box>
+                            }
                             disabled={PLANTSEED_MAINTENANCE}
                             {...a11yProps(0)}
                         />
@@ -95,35 +95,33 @@ export default function BuildModelPlantPage() {
 
                 <TabPanel value={tabIndex} index={0}>
                     {/* UPLOAD Plants FASTA content skeleton */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 600 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 600, opacity: PLANTSEED_MAINTENANCE ? 0.6 : 1, pointerEvents: PLANTSEED_MAINTENANCE ? 'none' : 'auto' }}>
                         <Box>
                             <Typography variant="subtitle1" gutterBottom sx={{ fontStyle: 'italic' }}>
                                 Select FASTA file:
                             </Typography>
-                            <Button variant="contained" color="primary" component="label">
+                            <Button variant="contained" color="primary" component="label" disabled={PLANTSEED_MAINTENANCE}>
                                 Choose File...
-                                <input type="file" hidden />
+                                <input type="file" hidden disabled={PLANTSEED_MAINTENANCE} />
                             </Button>
                         </Box>
-
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <Box>
-                                <Button variant="outlined" size="small" sx={{ mb: 1 }}>
+                                <Button variant="outlined" size="small" sx={{ mb: 1 }} disabled={PLANTSEED_MAINTENANCE}>
                                     Change Media (Optional)
                                 </Button>
                                 <Typography variant="body2" color="primary">
                                     (Selected media: Complete)
                                 </Typography>
                             </Box>
-
                             <TextField
                                 fullWidth
                                 label="Name Model to build -- Required"
                                 required
                                 variant="outlined"
+                                disabled={PLANTSEED_MAINTENANCE}
                             />
-
-                            <Button variant="contained" color="primary" sx={{ width: 'fit-content', mt: 1 }}>
+                            <Button variant="contained" color="primary" sx={{ width: 'fit-content', mt: 1 }} disabled={PLANTSEED_MAINTENANCE}>
                                 Build Model
                             </Button>
                         </Box>
@@ -215,6 +213,6 @@ export default function BuildModelPlantPage() {
                     </Typography>
                 </TabPanel>
             </Box>
-        </AuthGuard>
+        </AuthGuard >
     );
 }
