@@ -7,6 +7,7 @@ import Image from 'next/image';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -23,7 +24,7 @@ export default function AppHeader() {
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, user, logout } = useAuth();
 
     const [moreAnchorEl, setMoreAnchorEl] = useState<null | HTMLElement>(null);
     const [signInOpen, setSignInOpen] = useState(false);
@@ -164,14 +165,19 @@ export default function AppHeader() {
                             </Menu>
 
                             {isAuthenticated ? (
-                                <Button
-                                    variant="outlined"
-                                    color="inherit"
-                                    onClick={logout}
-                                    sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(255,255,255,0.3)' }}
-                                >
-                                    Sign Out
-                                </Button>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="body2" sx={{ color: '#EBEBEB', fontWeight: 500 }}>
+                                        {user}
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        color="inherit"
+                                        onClick={logout}
+                                        sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(255,255,255,0.3)' }}
+                                    >
+                                        Sign Out
+                                    </Button>
+                                </Box>
                             ) : (
                                 <Button
                                     variant="contained"

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Drawer from '@mui/material/Drawer';
@@ -42,7 +43,7 @@ export default function Header() {
     const pathname = usePathname();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, user, logout } = useAuth();
 
     /** Check if a nav item is active based on the current pathname */
     const isActive = (href: string) => pathname.startsWith(href);
@@ -234,19 +235,24 @@ export default function Header() {
                             </Button>
 
                             {isAuthenticated ? (
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={logout}
-                                    sx={{
-                                        color: '#fff',
-                                        fontWeight: 600,
-                                        px: 2,
-                                        borderColor: 'rgba(255,255,255,0.3)',
-                                    }}
-                                >
-                                    Sign Out
-                                </Button>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="body2" sx={{ color: '#EBEBEB', fontWeight: 500 }}>
+                                        {user}
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={logout}
+                                        sx={{
+                                            color: '#fff',
+                                            fontWeight: 600,
+                                            px: 2,
+                                            borderColor: 'rgba(255,255,255,0.3)',
+                                        }}
+                                    >
+                                        Sign Out
+                                    </Button>
+                                </Box>
                             ) : (
                                 <Button
                                     variant="contained"
