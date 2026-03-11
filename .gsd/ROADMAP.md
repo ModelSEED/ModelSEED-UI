@@ -2,10 +2,10 @@
 
 ## Milestone 1: v1-alpha — Base Application Migration [COMPLETE]
 
-## Milestone 2: v1-beta — Data Analysis & Interactive Tools [NEXT]
+## Milestone 2: v1-beta — Data Analysis & Interactive Tools [IN PROGRESS]
 
 ### Phase 13: Deployment Readiness (URL Parity & Equation Formatting)
-**Status**: ⚪ Not Started
+**Status**: ✅ Complete
 - Audit and align all local routes and `<Link>` tags to exactly match the legacy UI's URL structures.
 - Ensure placeholder dynamic routes exist for legacy links (e.g., `/data/...`, `/fba/...`).
 - Implement custom React formatting utility (Option A) to parse Reaction equations for proper chemical formula subscripting.
@@ -27,3 +27,4 @@
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
+- Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).

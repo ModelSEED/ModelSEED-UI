@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
-import { formatEquation } from '@/components/utils/formatEquation';
+import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import IconButton from '@mui/material/IconButton';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
@@ -139,7 +139,7 @@ export default function ReactionsPage() {
             headerName: 'Equation',
             width: 350,
             sortable: false,
-            renderCell: (params) => formatEquation(params.value),
+            renderCell: (params) => <ChemicalEquation equation={params.value} />,
         },
         {
             field: 'is_transport',

@@ -10,7 +10,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
-import { formatEquation } from '@/components/utils/formatEquation';
+import ChemicalEquation from '@/components/ui/ChemicalEquation';
 
 /* ─── Alias helper ───────────────────────────────────────────── */
 
@@ -116,7 +116,7 @@ export default function ReactionDetailPage() {
                     <Divider />
 
                     <DetailRow label="Equation">
-                        {formatEquation(rxn.definition)}
+                        <ChemicalEquation equation={rxn.definition} />
                     </DetailRow>
                     <Divider />
 
@@ -125,11 +125,11 @@ export default function ReactionDetailPage() {
                     </DetailRow>
 
                     <DetailRow label="Reaction definition">
-                        {formatEquation(rxn.definition)}
+                        <ChemicalEquation equation={rxn.definition} />
                     </DetailRow>
 
                     <DetailRow label="Equation with compound IDs">
-                        {formatEquation(rxn.equation)}
+                        <ChemicalEquation equation={rxn.equation} />
                     </DetailRow>
 
                     <DetailRow label="Gibbs free energy change ΔG">

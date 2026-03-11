@@ -48,9 +48,9 @@ function a11yProps(index: number) {
     };
 }
 
-export default function ModelDetailPage({ params }: { params: Promise<{ slug: string[] }> }) {
+export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
-    const workspacePath = `/${resolvedParams.slug.join('/')}`;
+    const workspacePath = `/${resolvedParams.path.join('/')}`;
     // E.g., /plantseed/plantseed/Alyrata-v1.0
 
     const { data: modelData, isLoading, error } = useQuery({
@@ -90,7 +90,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ slug: st
     }
 
     // Extract basic Model attributes (simulating old data)
-    const modelName = modelData?.data?.id || resolvedParams.slug[resolvedParams.slug.length - 1];
+    const modelName = modelData?.data?.id || resolvedParams.path[resolvedParams.path.length - 1];
 
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
