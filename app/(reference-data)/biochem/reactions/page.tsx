@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -209,9 +209,10 @@ export default function ReactionsPage() {
         filterModel,
     }), [paginationModel, sortModel, filterModel]);
 
-    const { data, isLoading } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ['reactions', queryOpts],
         queryFn: () => getReactions(queryOpts),
+        placeholderData: keepPreviousData,
     });
 
     return (
@@ -224,7 +225,7 @@ export default function ReactionsPage() {
                 rows={data?.docs ?? []}
                 columns={columns}
                 rowCount={data?.numFound ?? 0}
-                loading={isLoading}
+                loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
@@ -243,6 +244,7 @@ export default function ReactionsPage() {
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
+                hideFooter
                 sx={{
                     border: '1px solid #e0e0e0',
                     '& .MuiDataGrid-cell': {

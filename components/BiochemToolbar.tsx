@@ -25,7 +25,7 @@ function CustomPagination() {
             page={page}
             onPageChange={(event, newPage) => apiRef.current.setPaginationModel({ page: newPage, pageSize })}
             rowsPerPage={pageSize}
-            onRowsPerPageChange={(event) => apiRef.current.setPaginationModel({ page, pageSize: parseInt(event.target.value, 10) })}
+            onRowsPerPageChange={(event) => apiRef.current.setPaginationModel({ page: 0, pageSize: parseInt(event.target.value, 10) })}
             rowsPerPageOptions={[10, 25, 50, 100]}
             sx={{
                 borderBottom: 'none',

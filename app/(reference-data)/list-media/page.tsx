@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { workspaceLs } from '@/lib/api/workspace';
+import BiochemToolbar from '@/components/BiochemToolbar';
 
 interface MediaItem {
     id: string;
@@ -34,8 +35,6 @@ const columns: GridColDef<MediaItem>[] = [
 export default function MediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
-    const [search, setSearch] = useState('');
-
     const { data: rows = [], isLoading } = useQuery({
         queryKey: ['mediaWorkspaceLs'],
         queryFn: async () => {
@@ -55,28 +54,13 @@ export default function MediaPage() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const filteredRows = rows.filter((row) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return row.id.toLowerCase().includes(q) || row.name.toLowerCase().includes(q);
-    });
-
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
                 Media Formulations
             </Typography>
-            <Box sx={{ mb: 2 }}>
-                <TextField
-                    size="small"
-                    placeholder="Search media..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ width: 400 }}
-                />
-            </Box>
             <DataGrid<MediaItem>
-                rows={filteredRows}
+                rows={rows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -84,6 +68,11 @@ export default function MediaPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                slots={{ toolbar: BiochemToolbar }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
+                hideFooter
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 autoHeight

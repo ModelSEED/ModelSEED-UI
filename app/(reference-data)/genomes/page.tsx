@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import { workspaceLs } from '@/lib/api/workspace';
+import BiochemToolbar from '@/components/BiochemToolbar';
 
 interface PlantModelItem {
     id: string;
@@ -70,8 +71,6 @@ const columns: GridColDef<PlantModelItem>[] = [
 export default function PlantsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
-    const [search, setSearch] = useState('');
-
     const { data: rows = [], isLoading } = useQuery({
         queryKey: ['plantsWorkspaceLs'],
         queryFn: async () => {
@@ -91,12 +90,6 @@ export default function PlantsPage() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const filteredRows = rows.filter((row) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return row.id.toLowerCase().includes(q) || row.name.toLowerCase().includes(q);
-    });
-
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -108,17 +101,8 @@ export default function PlantsPage() {
                 available for reference, these were generated as part of <a href="https://onlinelibrary.wiley.com/doi/10.1111/tpj.14003" target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1', textDecoration: 'underline' }}>PlantSEED v2</a>. New annotation and reconstruction services will be restored
                 shortly with an improved pipeline.
             </Alert>
-            <Box sx={{ mb: 2 }}>
-                <TextField
-                    size="small"
-                    placeholder="Search plant models..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ width: 400 }}
-                />
-            </Box>
             <DataGrid<PlantModelItem>
-                rows={filteredRows}
+                rows={rows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -126,6 +110,11 @@ export default function PlantsPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                slots={{ toolbar: BiochemToolbar }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
+                hideFooter
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 autoHeight

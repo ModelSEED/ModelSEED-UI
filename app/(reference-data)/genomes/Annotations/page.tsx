@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Link from 'next/link';
 import { workspaceGet } from '@/lib/api/workspace';
+import BiochemToolbar from '@/components/BiochemToolbar';
 
 interface SubsystemItem {
     id: string; // role
@@ -89,7 +90,6 @@ function FeatureLinks({ ids }: { ids: string[] }) {
 export default function SubsystemsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'role', sort: 'asc' }]);
-    const [search, setSearch] = useState('');
 
     const { data: rows = [], isLoading } = useQuery({
         queryKey: ['subsystemsWorkspaceGet'],
@@ -122,14 +122,10 @@ export default function SubsystemsPage() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const filteredRows = rows.filter((row) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return (row.role.toLowerCase().includes(q) ||
-            row.subsystems.join(' ').toLowerCase().includes(q) ||
-            row.classes.join(' ').toLowerCase().includes(q) ||
-            row.pathways.join(' ').toLowerCase().includes(q));
-    });
+    const [toolbarSearch, setToolbarSearch] = useState('');
+    // Note: Since we are using client-side filtering with QuickFilter in the toolbar,
+    // we don't strictly need the local 'search' state anymore if we use the grid's internal filter.
+    // But for consistency with the user's request, we'll let the toolbar handle it.
 
     const columns: GridColDef<SubsystemItem>[] = useMemo(
         () => [
@@ -182,17 +178,8 @@ export default function SubsystemsPage() {
             <Typography variant="h5" fontWeight={600} gutterBottom>
                 Subsystems
             </Typography>
-            <Box sx={{ mb: 2 }}>
-                <TextField
-                    size="small"
-                    placeholder="Search subsystems..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ width: 400 }}
-                />
-            </Box>
             <DataGrid<SubsystemItem>
-                rows={filteredRows}
+                rows={rows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -200,6 +187,11 @@ export default function SubsystemsPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                slots={{ toolbar: BiochemToolbar }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
+                hideFooter
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 getRowHeight={() => 'auto'}
