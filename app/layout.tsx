@@ -5,6 +5,7 @@ import theme from '@/lib/theme';
 import Box from '@mui/material/Box';
 import HeaderLayoutRouter from '@/app/HeaderLayoutRouter';
 import Providers from '@/components/Providers';
+import { AuthProvider } from '@/components/auth/AuthProvider';
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -32,17 +33,19 @@ export default function RootLayout({
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>
                         <Providers>
-                            <CssBaseline />
-                            <HeaderLayoutRouter />
-                            <Box
-                                component="main"
-                                sx={{
-                                    flexGrow: 1,
-                                    backgroundColor: '#f5f5f5',  // Slight off-white background similar to legacy
-                                }}
-                            >
-                                {children}
-                            </Box>
+                            <AuthProvider>
+                                <CssBaseline />
+                                <HeaderLayoutRouter />
+                                <Box
+                                    component="main"
+                                    sx={{
+                                        flexGrow: 1,
+                                        backgroundColor: '#f5f5f5',
+                                    }}
+                                >
+                                    {children}
+                                </Box>
+                            </AuthProvider>
                         </Providers>
                     </ThemeProvider>
                 </AppRouterCacheProvider>
