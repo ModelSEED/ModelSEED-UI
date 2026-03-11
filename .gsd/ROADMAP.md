@@ -77,6 +77,20 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Implement top-right pagination directly synced with MUI DataGrid across all reference data tables.
 - Upgrade `lib/api/biochem.ts` to parse complex mathematical filtering safely translating to Solr syntax.
 
+## Phase 11: Service Layer & Maintenance Banners
+**Status**: ✅ Complete
+- Display temporary maintenance banners on `/plant` and `/genomes` for PlantSEED v3.0 update.
+- Disable actual execution in "Build Model" for plants.
+- Create a centralized endpoint configuration (`lib/api/config.ts`).
+- Set up dual-routing for Workspace and Biochemistry proxy integrations.
+
+## Phase 12: True Authentication Integration
+**Status**: 🏗 In Progress (Planning)
+- Implement actual JWT token fetching for PATRIC and RAST logins.
+- Manage auth state persistently across browser sessions (e.g. `localStorage`).
+- Include a mock `developer` override for testing protected routes without breaking true validation for other users.
+- Inject the Bearer token into all downstream workspace API calls.
+
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
 - Updated: 2026-03-04T07:52:00-06:00 - Phase 4 marked complete

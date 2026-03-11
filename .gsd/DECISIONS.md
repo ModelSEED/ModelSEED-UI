@@ -156,3 +156,22 @@ updated_at: 2026-03-03T16:16:00-06:00
 ### Approach to Close Milestone:
 - Considered UI-complete for the React transition.
 - Next milestone should focus strictly on "Backend Integrations & Authenticated User Data," where `modelseed_support` RAST jobs and proxy routing configurations are fully tied to live JWTs.
+
+## Phase 12 Decisions
+
+**Date:** 2026-03-11
+
+### Scope
+- Replace the mock UI-only authentication with functional authentication against live REST endpoints for PATRIC (`user.patricbrc.org/authenticate`) and RAST (`p3.theseed.org/Sessions/Login`).
+- Persist the authentication token dynamically (e.g. `localStorage` or Next.js cookies) so it's globally available for `callWorkspaceApi`.
+- Create a designated testing bypass specifically for local development testing.
+
+### Approach
+- Chose: Maintain an exact 1:1 mapping of the AngularJS `$http` POST schemas for the authentication endpoints. Introduce an explicit credential intercept: if `username === 'developer'` and `password === 'developer'`, immediately resolve a mock token without making external HTTP requests.
+- Reason: The backend components (Workspace API, MS_FBA) depend heavily on the token format returning from PATRIC/RAST. Calling them through the Next.js Client is acceptable since these are public authentication APIs, though typically this would be handled server-side to prevent CORS. (Needs verification on CORS). The developer bypass facilitates testing in pipelines or environments where external network calls fail.
+
+### Constraints
+- Handling CORS: Calling external authentication APIs directly from the browser (Client Components) might trigger CORS issues depending on how PATRIC/RAST servers are configured. If CORS blocks the browser, we will have to build a Next.js Server Action (`app/api/auth/route.ts`) to proxy the authentication handshake.
+
+## Timestamp Log
+- Updated: 2026-03-11 10:08:00 -05:00 - Logged Phase 12 decisions from /discuss-phase
