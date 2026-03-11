@@ -85,11 +85,13 @@ updated_at: 2026-03-03T16:21:00-06:00
 - Set up dual-routing for Workspace and Biochemistry proxy integrations.
 
 ## Phase 12: True Authentication Integration
-**Status**: ✅ Complete
+**Status**: 🏗 In Progress (Additional Requirements)
 - Implement actual JWT token fetching for PATRIC and RAST logins.
 - Manage auth state persistently across browser sessions (e.g. `localStorage`).
 - Include a mock `developer` override for testing protected routes without breaking true validation for other users.
 - Inject the Bearer token into all downstream workspace API calls.
+- **NEW**: Ensure protected pages (`/user-data`, `/build-model` sections) verify authentication state and prompt login if unauthenticated.
+- **NEW**: Display the logged-in user's username in the global Header and AppHeader components.
 
 ## Timestamp Log
 - Updated: 2026-03-03T16:49:44-06:00 - Phase 3 marked complete
