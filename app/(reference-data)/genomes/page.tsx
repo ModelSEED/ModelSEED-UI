@@ -115,6 +115,7 @@ export default function PlantsPage() {
                     toolbar: { showQuickFilter: true },
                 }}
                 hideFooter
+                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 autoHeight

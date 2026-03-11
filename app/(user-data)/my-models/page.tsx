@@ -81,6 +81,7 @@ export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [search, setSearch] = useState('');
+    const [loadError, setLoadError] = useState(false);
 
     // Hardcode paths to poll based on the legacy structure "/{user}/home/models/"
     // Currently relying on auth token in cookie + static user string or just public paths?
@@ -106,8 +107,8 @@ export default function MyModelsPage() {
                     modDate: item[3],
                     path: item[2] + item[0], // path + name
                 })) as MyModelItem[];
-            } catch (err) {
-                console.error("Failed to load My Models", err);
+            } catch {
+                setLoadError(true);
                 return [];
             }
         },
@@ -151,7 +152,7 @@ export default function MyModelsPage() {
                     />
                 </Box>
 
-                {error ? (
+                {error || loadError ? (
                     <Typography color="error">
                         Error loading models. Ensure you are signed in and the workspace path '{workspacePath}' exists.
                     </Typography>

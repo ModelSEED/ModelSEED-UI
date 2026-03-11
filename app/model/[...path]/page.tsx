@@ -4,7 +4,6 @@ import { use, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -105,13 +104,31 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
             <Divider sx={{ mb: 3 }} />
 
-            {/* Action Buttons */}
+            {/* Passive Action Indicators (temporarily non-interactive) */}
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
-                <Button variant="contained" color="primary">Rebuild Model</Button>
-                <Button variant="contained" color="primary">Blast Genome</Button>
-                <Button variant="contained" color="primary">Add Expression</Button>
-                <Button variant="contained" color="primary">Run FBA</Button>
-                <Button variant="contained" color="primary">Run GapFilling</Button>
+                {[
+                    'Rebuild Model',
+                    'Blast Genome',
+                    'Add Expression',
+                    'Run FBA',
+                    'Run GapFilling',
+                ].map((label) => (
+                    <Box
+                        key={label}
+                        sx={{
+                            px: 2,
+                            py: 1,
+                            borderRadius: 1,
+                            bgcolor: '#f5f5f5',
+                            color: 'text.secondary',
+                            border: '1px solid #e0e0e0',
+                            fontSize: 14,
+                            fontWeight: 500,
+                        }}
+                    >
+                        {label}
+                    </Box>
+                ))}
             </Box>
 
             <Divider sx={{ mb: 3 }} />

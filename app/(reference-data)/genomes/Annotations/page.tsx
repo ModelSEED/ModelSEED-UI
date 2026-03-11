@@ -192,6 +192,7 @@ export default function SubsystemsPage() {
                     toolbar: { showQuickFilter: true },
                 }}
                 hideFooter
+                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 getRowHeight={() => 'auto'}

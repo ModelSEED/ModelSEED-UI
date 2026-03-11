@@ -10,6 +10,9 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import styles from './home.module.css';
+import { useAuth } from '@/components/auth/AuthProvider';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 
 type AuthMethod = 'rast' | 'patric';
 
@@ -78,9 +81,25 @@ export default function HomePage() {
     const [method, setMethod] = useState<AuthMethod>('rast');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    const { login, isAuthenticated, user, loading } = useAuth();
 
     const currentMethod = AUTH_METHODS[method];
     const altMethod = method === 'rast' ? 'patric' : 'rast';
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!username || !password || loading) return;
+        setError(null);
+        try {
+            const authMethod = method === 'rast' ? 'RAST' : 'PATRIC';
+            await login(authMethod, username, password);
+        } catch (err) {
+            console.error('Failed to login from home page', err);
+            setError('Sign in failed. Please check your credentials and try again.');
+        }
+    };
 
     return (
         <>
@@ -123,88 +142,119 @@ export default function HomePage() {
                             </Box>
                         </Grid>
 
-                        {/* Center: Login Form */}
+                        {/* Center: Login Form or Authenticated Summary */}
                         <Grid size={{ xs: 12, md: 5 }}>
                             <Box className={styles.login}>
-                                <Typography variant="h6" sx={{ mb: 2 }}>
-                                    Sign in with {currentMethod.name} account to continue
-                                </Typography>
-                                <Box component="form" noValidate autoComplete="off">
-                                    <TextField
-                                        label={`${currentMethod.name} Username`}
-                                        variant="standard"
-                                        fullWidth
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        sx={{ mb: 2 }}
-                                    />
-                                    <TextField
-                                        label="Password"
-                                        type="password"
-                                        variant="standard"
-                                        fullWidth
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        sx={{ mb: 2 }}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        type="submit"
-                                        disabled={!username || !password}
-                                        onClick={(e) => e.preventDefault()}
-                                        sx={{
-                                            backgroundColor: '#30BCCF',
-                                            '&:hover': { backgroundColor: '#1ba3b4' },
-                                        }}
-                                    >
-                                        Sign In
-                                    </Button>
-                                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                        <Typography
-                                            component="a"
-                                            href={currentMethod.newAccountURL}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            variant="body2"
-                                            sx={{ color: '#30BCCF', textDecoration: 'none', '&:hover': { color: '#006C86' } }}
-                                        >
-                                            Create new account
+                                {isAuthenticated ? (
+                                    <>
+                                        <Typography variant="h6" sx={{ mb: 2 }}>
+                                            Welcome back{user ? `, ${user}` : ''}.
                                         </Typography>
-                                        <Typography
-                                            component="a"
-                                            href={currentMethod.forgotPasswordUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            variant="body2"
-                                            sx={{ color: '#30BCCF', textDecoration: 'none', '&:hover': { color: '#006C86' } }}
-                                        >
-                                            Forgot password?
+                                        <Typography sx={{ mb: 2 }}>
+                                            You are signed in. Continue exploring ModelSEED resources.
                                         </Typography>
-                                    </Box>
-                                </Box>
+                                        <Button
+                                            component={Link}
+                                            href="/biochem/reactions"
+                                            variant="contained"
+                                            sx={{
+                                                backgroundColor: '#30BCCF',
+                                                '&:hover': { backgroundColor: '#1ba3b4' },
+                                            }}
+                                        >
+                                            Continue to ModelSEED
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography variant="h6" sx={{ mb: 2 }}>
+                                            Sign in with {currentMethod.name} account to continue
+                                        </Typography>
+                                        {error && (
+                                            <Alert severity="error" sx={{ mb: 2 }}>
+                                                <AlertTitle>Error</AlertTitle>
+                                                {error}
+                                            </Alert>
+                                        )}
+                                        <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
+                                            <TextField
+                                                label={`${currentMethod.name} Username`}
+                                                variant="standard"
+                                                fullWidth
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                                sx={{ mb: 2 }}
+                                            />
+                                            <TextField
+                                                label="Password"
+                                                type="password"
+                                                variant="standard"
+                                                fullWidth
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                sx={{ mb: 2 }}
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                type="submit"
+                                                disabled={!username || !password || loading}
+                                                sx={{
+                                                    backgroundColor: '#30BCCF',
+                                                    '&:hover': { backgroundColor: '#1ba3b4' },
+                                                }}
+                                            >
+                                                {loading ? 'Signing In…' : 'Sign In'}
+                                            </Button>
+                                            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                                <Typography
+                                                    component="a"
+                                                    href={currentMethod.newAccountURL}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    variant="body2"
+                                                    sx={{ color: '#30BCCF', textDecoration: 'none', '&:hover': { color: '#006C86' } }}
+                                                >
+                                                    Create new account
+                                                </Typography>
+                                                <Typography
+                                                    component="a"
+                                                    href={currentMethod.forgotPasswordUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    variant="body2"
+                                                    sx={{ color: '#30BCCF', textDecoration: 'none', '&:hover': { color: '#006C86' } }}
+                                                >
+                                                    Forgot password?
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </>
+                                )}
                             </Box>
                         </Grid>
 
-                        {/* Right: Alt Login Toggle */}
-                        <Grid size={{ xs: 12, md: 3 }}>
-                            <Box className={styles.altLoginContainer}>
-                                <Typography variant="body2">Or, sign in with:</Typography>
-                                <Box
-                                    className={styles.altLogin}
-                                    onClick={() => setMethod(altMethod)}
-                                >
-                                    <Image
-                                        src={altMethod === 'patric' ? '/img/patric.jpg' : '/img/seed.png'}
-                                        alt={AUTH_METHODS[altMethod].name}
-                                        width={50}
-                                        height={50}
-                                    />
-                                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                        {AUTH_METHODS[altMethod].name}
-                                    </Typography>
+                        {/* Right: Alt Login Toggle (hidden when already authenticated) */}
+                        {!isAuthenticated && (
+                            <Grid size={{ xs: 12, md: 3 }}>
+                                <Box className={styles.altLoginContainer}>
+                                    <Typography variant="body2">Or, sign in with:</Typography>
+                                    <Box
+                                        className={styles.altLogin}
+                                        onClick={() => setMethod(altMethod)}
+                                    >
+                                        <Image
+                                            src={altMethod === 'patric' ? '/img/patric.jpg' : '/img/seed.png'}
+                                            alt={AUTH_METHODS[altMethod].name}
+                                            width={50}
+                                            height={50}
+                                        />
+                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                            {AUTH_METHODS[altMethod].name}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Grid>
+                            </Grid>
+                        )}
                     </Grid>
                 </Container>
             </Box>

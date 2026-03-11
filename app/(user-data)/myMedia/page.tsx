@@ -50,6 +50,7 @@ export default function MyMediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [search, setSearch] = useState('');
+    const [loadError, setLoadError] = useState(false);
 
     // Default workspace path assumption for user media
     const workspacePath = '/user/home/media/';
@@ -70,8 +71,8 @@ export default function MyMediaPage() {
                     modDate: item[3],
                     path: item[2] + item[0],
                 })) as MyMediaItem[];
-            } catch (err) {
-                console.error("Failed to load My Media", err);
+            } catch {
+                setLoadError(true);
                 return [];
             }
         },
@@ -118,7 +119,7 @@ export default function MyMediaPage() {
                     />
                 </Box>
 
-                {error ? (
+                {error || loadError ? (
                     <Typography color="error">
                         Error loading media. Ensure you are signed in and the workspace path '{workspacePath}' exists.
                     </Typography>

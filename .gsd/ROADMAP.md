@@ -16,18 +16,18 @@
 - Display FBA results in interactive tables and charts.
 - Implement simulation status tracking for queued jobs.
 
-### Phase 15: Data Table Refining & UI/UX Polish
+### Phase 16: UI/UX Refinement & Data Consistency
 **Status**: ✅ Complete
-- Standardize search, filter, and pagination across all reference data tables.
-- Fix pagination reset bugs in custom toolbar.
-- Refine "Build Model" page maintenance behavior and authentication provider links.
+- Standardize data table headers with search, filters, manage columns, and pagination.
+- Apply consistent headers across all dynamic reference data subtabs.
+- Fix UI/UX issues: tooltips on disabled elements, passive model indicators, and home page login logic.
 
-### Phase 16: Media Optimization Tools
+### Phase 17: Media Optimization Tools
 **Status**: ⚪ Not Started
 - Wired media creation API for persisting workspaces.
 - Media adjustment and comparison views.
 
-### Phase 17: Final Polishing & Performance
+### Phase 18: Final Polishing & Performance
 **Status**: ⚪ Not Started
 - Global state optimization and bundle reduction.
 - End-to-end testing and production build verification.
@@ -37,3 +37,4 @@
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
 - Updated: 2026-03-11 11:18:00 -05:00 - Fixed parameter naming in catch-all stubs and refined equation formatting logic.
 - Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete (service status auth fix).
+- Updated: 2026-03-11 19:36:00 -06:00 - Phase 16 complete (UI/UX refinement and data consistency).

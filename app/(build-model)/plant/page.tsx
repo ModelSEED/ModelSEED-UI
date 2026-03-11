@@ -8,8 +8,6 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 import Tooltip from '@mui/material/Tooltip';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -73,20 +71,29 @@ export default function BuildModelPlantPage() {
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Build Model Tabs">
-                        <Tab
-                            label={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    UPLOAD Plants FASTA
-                                    {PLANTSEED_MAINTENANCE && (
-                                        <Tooltip title="PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.">
-                                            <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
-                                        </Tooltip>
-                                    )}
-                                </Box>
+                        <Tooltip
+                            title={
+                                PLANTSEED_MAINTENANCE
+                                    ? 'PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
+                                    : ''
                             }
-                            disabled={PLANTSEED_MAINTENANCE}
-                            {...a11yProps(0)}
-                        />
+                            disableHoverListener={!PLANTSEED_MAINTENANCE}
+                        >
+                            <span>
+                                <Tab
+                                    label={
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            UPLOAD Plants FASTA
+                                            {PLANTSEED_MAINTENANCE && (
+                                                <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
+                                            )}
+                                        </Box>
+                                    }
+                                    disabled={PLANTSEED_MAINTENANCE}
+                                    {...a11yProps(0)}
+                                />
+                            </span>
+                        </Tooltip>
                         <Tab label="UPLOAD Microbes FASTA" {...a11yProps(1)} />
                         <Tab label="PATRIC Microbes" {...a11yProps(2)} />
                         <Tab label="RAST Microbes" {...a11yProps(3)} />

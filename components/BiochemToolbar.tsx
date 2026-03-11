@@ -3,6 +3,7 @@ import {
     GridToolbarContainer,
     GridToolbarFilterButton,
     GridToolbarQuickFilter,
+    GridToolbarColumnsButton,
     useGridApiContext,
     useGridSelector,
     gridPageSelector,
@@ -51,7 +52,20 @@ export default function BiochemToolbar() {
                 }}>
                     <GridToolbarQuickFilter debounceMs={500} />
                 </Box>
-                <GridToolbarFilterButton />
+                <GridToolbarFilterButton
+                    variant="outlined"
+                    sx={{ textTransform: 'none' }}
+                    title="Filters"
+                >
+                    Filters
+                </GridToolbarFilterButton>
+                <GridToolbarColumnsButton
+                    variant="outlined"
+                    sx={{ textTransform: 'none' }}
+                    title="Manage Columns"
+                >
+                    Manage Columns
+                </GridToolbarColumnsButton>
             </Box>
             <CustomPagination />
         </GridToolbarContainer>
