@@ -10,8 +10,9 @@
 - Ensure placeholder dynamic routes exist for legacy links (e.g., `/data/...`, `/fba/...`).
 - Implement custom React formatting utility (Option A) to parse Reaction equations for proper chemical formula subscripting.
 
-### Phase 14: FBA & Simulation Results
-**Status**: ⚪ Not Started
+### Phase 14: FBA & Simulation Results / Service Status Auth Fix
+**Status**: ✅ Complete
+- Fix service status authentication (useAuth integration, mock token support)
 - Display FBA results in interactive tables and charts.
 - Implement simulation status tracking for queued jobs.
 
@@ -29,3 +30,4 @@
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
 - Updated: 2026-03-11 11:18:00 -05:00 - Fixed parameter naming in catch-all stubs and refined equation formatting logic.
+- Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete (service status auth fix).

@@ -105,7 +105,7 @@ export default function PlantsPage() {
             <Alert severity="info" variant="outlined" sx={{ mb: 2 }}>
                 <AlertTitle sx={{ fontWeight: 700 }}>PlantSEED v3.0 Update In Progress</AlertTitle>
                 PlantSEED is being updated to version 3.0. Existing public plant models below remain
-                available for reference. New annotation and reconstruction services will be restored
+                available for reference, these were generated as part of <a href="https://onlinelibrary.wiley.com/doi/10.1111/tpj.14003" target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1', textDecoration: 'underline' }}>PlantSEED v2</a>. New annotation and reconstruction services will be restored
                 shortly with an improved pipeline.
             </Alert>
             <Box sx={{ mb: 2 }}>

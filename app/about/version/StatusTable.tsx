@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,19 +11,30 @@ import Paper from '@mui/material/Paper';
 import Link from '@mui/material/Link';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { WORKSPACE_URL, PROBMODELSEED_URL } from '@/lib/api/config';
 
-const SERVICES = [
-    { id: 'auth', service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', pingUrl: null, api: null },
-    { id: 'patric', service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', pingUrl: null, api: null },
-    { id: 'shock', service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', pingUrl: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', api: null },
-    { id: 'solr', service: 'SOLR', endpoint: 'https://modelseed.org/solr/', pingUrl: 'https://modelseed.org/solr/', api: null },
-    { id: 'api', service: 'API', endpoint: 'https://modelseed.org/api/test-service', pingUrl: 'https://modelseed.org/api/test-service', api: null },
+interface ServiceConfig {
+    id: string;
+    service: string;
+    endpoint: string;
+    pingUrl: string | null;
+    authReq: boolean;
+    link?: string;
+    api?: { label: string; url: string }[];
+}
+
+const SERVICES: ServiceConfig[] = [
+    { id: 'auth', service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', pingUrl: null, authReq: false },
+    { id: 'patric', service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', pingUrl: null, authReq: false },
+    { id: 'shock', service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', pingUrl: 'https://p3.theseed.org/services/shock_api', authReq: false, api: [{ label: 'GitHub', url: 'https://github.com/MG-RAST/Shock' }] },
+    { id: 'solr', service: 'SOLR', endpoint: 'https://modelseed.org/solr/', pingUrl: 'https://modelseed.org/solr/', authReq: false },
+    { id: 'api', service: 'API', endpoint: 'https://modelseed.org/api/test-service', pingUrl: 'https://modelseed.org/api/test-service', authReq: false },
     {
         id: 'pms',
         service: 'ProbModelSEED',
-        endpoint: 'https://p3.theseed.org/services/ProbModelSEED/',
-        link: 'https://github.com/ModelSEED/ProbModelSEED',
-        pingUrl: 'https://p3.theseed.org/services/ProbModelSEED/',
+        endpoint: PROBMODELSEED_URL,
+        pingUrl: PROBMODELSEED_URL,
         authReq: true,
         api: [
             { label: 'Spec', url: 'https://github.com/ModelSEED/ProbModelSEED/blob/master/ProbModelSEED.spec' },
@@ -34,9 +45,8 @@ const SERVICES = [
     {
         id: 'ws',
         service: 'Workspace',
-        endpoint: 'https://p3.theseed.org/services/Workspace',
-        link: 'https://github.com/PATRIC3/Workspace',
-        pingUrl: 'https://p3.theseed.org/services/Workspace',
+        endpoint: WORKSPACE_URL,
+        pingUrl: WORKSPACE_URL,
         authReq: true,
         api: [
             { label: 'Spec', url: 'https://github.com/PATRIC3/Workspace/blob/master/Workspace.spec' },
@@ -44,24 +54,58 @@ const SERVICES = [
             { label: 'Perl', url: 'https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm' }
         ]
     },
-    { id: 'support', service: 'ModelSEED Support Service', endpoint: 'https://modelseed.org/services/ms_fba', authReq: true, pingUrl: null, api: null },
-    { id: 'app', service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', authReq: true, pingUrl: null, api: null }
+    { id: 'support', service: 'ModelSEED Support Service', endpoint: 'https://modelseed.org/services/ms_fba', pingUrl: 'https://modelseed.org/services/ms_fba', authReq: true },
+    { id: 'app', service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', pingUrl: 'https://p3.theseed.org/services/app_service', authReq: true }
 ];
 
 export default function StatusTable() {
     const [status, setStatus] = useState<Record<string, 'loading' | 'success' | 'error' | 'unauth' | 'skip'>>({});
+    const { isAuthenticated, token } = useAuth();
 
-    // In legacy, many of these require a real token.
-    // For now we assume unauthenticated state mapping exactly like "login required"
-    // And for public endpoints, we will just perform a small fetch or mark as success since CORs blocks raw fetches across some.
-    const userLoggedIn = false; // Add actual auth check integration here later
+    const isMockToken = token?.startsWith('mock:');
+
+    const checkWorkspaceService = useCallback(async (authToken: string | null): Promise<'success' | 'error' | 'unauth'> => {
+        if (isMockToken) {
+            return 'success';
+        }
+
+        if (!authToken) {
+            return 'unauth';
+        }
+
+        try {
+            const response = await fetch(WORKSPACE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
+                },
+                body: JSON.stringify({
+                    version: '1.1',
+                    method: 'Workspace.ls',
+                    id: Math.floor(Math.random() * 100000),
+                    params: [{ paths: [] }],
+                }),
+            });
+
+            if (response.ok) {
+                return 'success';
+            } else if (response.status === 401 || response.status === 403) {
+                return 'unauth';
+            } else {
+                return 'error';
+            }
+        } catch {
+            return 'error';
+        }
+    }, [isMockToken]);
 
     useEffect(() => {
         const checkStatuses = async () => {
             const tempStatus: Record<string, 'loading' | 'success' | 'error' | 'unauth' | 'skip'> = {};
 
             for (const s of SERVICES) {
-                if (s.authReq && !userLoggedIn) {
+                if (s.authReq && !isAuthenticated && !isMockToken) {
                     tempStatus[s.id] = 'unauth';
                     continue;
                 }
@@ -71,12 +115,20 @@ export default function StatusTable() {
                     continue;
                 }
 
+                if (s.id === 'ws' || s.id === 'pms') {
+                    tempStatus[s.id] = 'loading';
+                    setStatus(prev => ({ ...prev, ...tempStatus }));
+
+                    const result = await checkWorkspaceService(token);
+                    tempStatus[s.id] = result;
+                    setStatus(prev => ({ ...prev, ...tempStatus }));
+                    continue;
+                }
+
                 tempStatus[s.id] = 'loading';
                 setStatus(prev => ({ ...prev, ...tempStatus }));
 
                 try {
-                    // Attempt to ping. We resolve simple ok or cors error as "success" enough for it being up in external environments
-                    // if it actively rejects due to 404 or down server then it fails
                     await fetch(s.pingUrl, { mode: 'no-cors', method: 'GET' });
                     tempStatus[s.id] = 'success';
                 } catch {
@@ -88,7 +140,7 @@ export default function StatusTable() {
         };
 
         checkStatuses();
-    }, [userLoggedIn]);
+    }, [isAuthenticated, token, isMockToken, checkWorkspaceService]);
 
     return (
         <TableContainer component={Paper} elevation={0} variant="outlined">
@@ -124,10 +176,10 @@ export default function StatusTable() {
 
                             <TableCell>
                                 {row.api ? (
-                                    row.api.map((apiLink, idx) => (
+                                    row.api.map((apiLink, idx, arr) => (
                                         <React.Fragment key={apiLink.label}>
                                             <Link href={apiLink.url} target="_blank" rel="noreferrer">{apiLink.label}</Link>
-                                            {idx < row.api.length - 1 && ', '}
+                                            {idx < arr.length - 1 && ', '}
                                         </React.Fragment>
                                     ))
                                 ) : null}
