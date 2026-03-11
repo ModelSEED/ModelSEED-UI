@@ -10,6 +10,9 @@ import Button from '@mui/material/Button';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { workspaceLs } from '@/lib/api/workspace';
+import { USE_MODELSEED_API } from '@/lib/api/config';
+import { listUserMediaFromApi } from '@/lib/api/modelseed';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface MyMediaItem {
     id: string;
@@ -50,31 +53,43 @@ export default function MyMediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [search, setSearch] = useState('');
-    const [loadError, setLoadError] = useState(false);
+    const { isAuthenticated } = useAuth();
 
-    // Default workspace path assumption for user media
+    // Default workspace path assumption for user media (legacy fallback).
     const workspacePath = '/user/home/media/';
 
     const { data: rows = [], isLoading, error } = useQuery({
-        queryKey: ['myMediaWorkspaceLs', workspacePath],
+        queryKey: ['myMedia', USE_MODELSEED_API, workspacePath],
+        enabled: isAuthenticated,
         queryFn: async () => {
-            try {
-                const data = await workspaceLs([workspacePath]);
-                const items = data[workspacePath] || [];
-
-                return items.map((item: any) => ({
-                    id: item[0],
-                    name: item[7]?.name || item[0],
-                    isMinimal: item[7]?.isMinimal ? 'Yes' : 'No',
-                    isDefined: item[7]?.isDefined ? 'Yes' : 'No',
-                    type: item[7]?.type || '-',
-                    modDate: item[3],
-                    path: item[2] + item[0],
+            if (USE_MODELSEED_API) {
+                const apiMedia = await listUserMediaFromApi();
+                return apiMedia.map((m) => ({
+                    id: m.id,
+                    name: m.name || m.id,
+                    isMinimal:
+                        m.isMinimal === true || m.isMinimal === '1' ? 'Yes' : 'No',
+                    isDefined:
+                        m.isDefined === true || m.isDefined === '1' ? 'Yes' : 'No',
+                    type: m.type || 'unknown',
+                    modDate: m.modDate ?? new Date().toISOString(),
+                    // Until modelseed-api exposes a direct workspace ref, link by id only.
+                    path: `/${m.id}`,
                 })) as MyMediaItem[];
-            } catch {
-                setLoadError(true);
-                return [];
             }
+
+            const data = await workspaceLs([workspacePath]);
+            const items = data[workspacePath] || [];
+
+            return items.map((item: any) => ({
+                id: item[0],
+                name: item[7]?.name || item[0],
+                isMinimal: item[7]?.isMinimal ? 'Yes' : 'No',
+                isDefined: item[7]?.isDefined ? 'Yes' : 'No',
+                type: item[7]?.type || '-',
+                modDate: item[3],
+                path: item[2] + item[0],
+            })) as MyMediaItem[];
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -119,9 +134,10 @@ export default function MyMediaPage() {
                     />
                 </Box>
 
-                {error || loadError ? (
+                {error ? (
                     <Typography color="error">
-                        Error loading media. Ensure you are signed in and the workspace path '{workspacePath}' exists.
+                        Error loading media. Ensure you are signed in and that either modelseed-api is
+                        running or the workspace path '{workspacePath}' exists.
                     </Typography>
                 ) : (
                     <DataGrid<MyMediaItem>

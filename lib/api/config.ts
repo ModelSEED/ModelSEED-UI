@@ -9,7 +9,7 @@
  * endpoint regardless of this toggle (per Chris Henry's directive).
  */
 
-/* ─── Feature Flag ───────────────────────────────────────────── */
+/* ─── Feature Flags ──────────────────────────────────────────── */
 
 /**
  * When `true`, Workspace and Biochemistry calls are routed through
@@ -17,6 +17,17 @@
  * using the legacy direct endpoints while the proxy is in development.
  */
 export const USE_NEW_PROXY = false;
+
+/**
+ * When `true`, user-data pages (My Models, My Media, and related flows)
+ * should talk to the new modelseed-api backend instead of legacy JSON-RPC
+ * services. This is wired as a NEXT_PUBLIC_ env so it can be toggled per
+ * environment without code changes.
+ */
+export const USE_MODELSEED_API =
+    typeof process !== 'undefined'
+        ? process.env.NEXT_PUBLIC_USE_MODELSEED_API === 'true'
+        : false;
 
 /* ─── Workspace Service ─────────────────────────────────────── */
 
@@ -79,3 +90,13 @@ export const PROBMODELSEED_URL = USE_NEW_PROXY
 /* ─── Compound Images ───────────────────────────────────────── */
 
 export const CPD_IMG_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
+
+/* ─── modelseed-api Base URL ─────────────────────────────────── */
+
+/**
+ * Base URL for the new ModelSEED REST API. In development this typically
+ * points at `http://localhost:8000` when running the FastAPI server locally.
+ */
+export const MODELSEED_API_URL =
+    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_MODELSEED_API_URL) ||
+    'http://localhost:8000';
