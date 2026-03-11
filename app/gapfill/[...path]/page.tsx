@@ -5,9 +5,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 
-export default function GapfillPage({ params }: { params: Promise<{ slug: string[] }> }) {
+export default function GapfillPage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
-    const workspacePath = `/${resolvedParams.slug.join('/')}`;
+    const workspacePath = `/${resolvedParams.path.join('/')}`;
 
     return (
         <Container maxWidth="lg">
