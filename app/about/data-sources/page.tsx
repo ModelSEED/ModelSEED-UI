@@ -37,7 +37,7 @@ const DATA_SOURCES = [
     {
         data: 'Plant Gene Atlas<br/><sub>With thanks to Avinash Sreedasyam of <a href="https://hudsonalpha.org/" target="_blank" rel="noreferrer">HudsonAlpha</a></sub>',
         sources: [
-            { name: 'JGI Gene Atlas', url: 'https://phytozome.jgi.doe.gov/phytomine/aspect.do?name=Expression' }
+            { name: 'JGI Gene Atlas', url: 'https://plantgeneatlas.jgi.doe.gov/' }
         ]
     }
 ];
