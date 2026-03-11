@@ -12,7 +12,7 @@ import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 
 // Using a temporary hardcoded workspace or one provided from auth state eventually
-// Assuming Vibhav's default structure: '/vibhav/home/models/'
+// Assuming the user's default structure: '/user/home/models/'
 import { workspaceLs } from '@/lib/api/workspace';
 
 interface MyModelItem {
@@ -84,8 +84,8 @@ export default function MyModelsPage() {
 
     // Hardcode paths to poll based on the legacy structure "/{user}/home/models/"
     // Currently relying on auth token in cookie + static user string or just public paths?
-    // We assume /vibhav/home/models/ for this task per plan
-    const workspacePath = '/vibhav/home/models/';
+    // We assume /user/home/models/ for this task per plan
+    const workspacePath = '/user/home/models/';
 
     const { data: rows = [], isLoading, error } = useQuery({
         queryKey: ['myModelsWorkspaceLs', workspacePath],

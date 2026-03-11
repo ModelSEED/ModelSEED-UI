@@ -13,7 +13,7 @@ We do not use a heavy SDK. Instead, we use a lightweight `fetch`-based JSON-RPC 
 
 #### `workspaceGet(paths: string[])`
 The primary method for retrieving objects (Models, FBA, Genomes).
-- **Arguments**: An array of full workspace paths (e.g., `["vibhav/models/model1"]`).
+- **Arguments**: An array of full workspace paths (e.g., `["user/models/model1"]`).
 - **Response**: The raw data object returned by the `get_objects2` method of the Workspace API.
 
 #### `listObjects(params: ListParams)`

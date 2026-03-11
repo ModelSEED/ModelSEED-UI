@@ -52,7 +52,7 @@ export default function MyMediaPage() {
     const [search, setSearch] = useState('');
 
     // Default workspace path assumption for user media
-    const workspacePath = '/vibhav/home/media/';
+    const workspacePath = '/user/home/media/';
 
     const { data: rows = [], isLoading, error } = useQuery({
         queryKey: ['myMediaWorkspaceLs', workspacePath],

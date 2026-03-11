@@ -1,6 +1,6 @@
 # ModelSEED-UI Project Documentation Index
 
-This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 reboot. It is designed to be your primary **Control-F** search-ready reference for navigating, understanding, and modifying the codebase. 
+This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 reboot. It is designed to be your primary **Control-F** search-ready reference for navigating, understanding, and modifying the codebase.
 
 ---
 
@@ -62,14 +62,29 @@ The "Brain" of the application—logic, configuration, and API adapters.
 
 ### `📂 docs/` — [The Developer Manual](./docs/README.md) (NEW)
 Central repository for deep-dive developer guides.
+- **[LEGACY_TRANSITION.md](./docs/LEGACY_TRANSITION.md)** — **New!** Guide on transitioning from AngularJS to Next.js.
 - **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — High-level data flow and tech stack details.
 - **[ROUTING.md](./docs/ROUTING.md)** — Detailed mapping between legacy AngularJS paths and Next.js routes.
 - **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** — How the KBase session token flow works locally and globally.
 - **[BIOCHEMISTRY.md](./docs/BIOCHEMISTRY.md)** — Guide to indices and parsing scientific formulas.
+- **[WORKSPACE.md](./docs/WORKSPACE.md)** — Guide to interacting with KBase Workspace JSON-RPC services.
 
 ---
 
-## 🧪 Key Biological Components to Control-F
+## 🔗 Legacy vs. Modern Parity
+
+| Feature | Legacy (AngularJS) | Modern (Next.js 16) |
+| :--- | :--- | :--- |
+| **Routing** | Client-side `ui-router` | Server-based App Router |
+| **URL Parity** | `/model/path/to/obj` | `/model/[...path]` (Catch-all) |
+| **Auth** | KBase Session Cookie | Zustand `useAuth` + LocalStorage |
+| **Logic** | Manual `$http` calls | Typed `lib/api/` + React Query |
+
+We maintain **100% URL parity** to ensure existing biological citations continue to work. For a deep dive into how we handle the complex nesting of metabolic models, see **[ROUTING.md](./docs/ROUTING.md)**.
+
+---
+
+## 🧬 Key Biological Components to Control-F
 
 | Component | Search Tag (RegEx Friendly) | Location |
 | :--- | :--- | :--- |
@@ -78,6 +93,15 @@ Central repository for deep-dive developer guides.
 | **`AuthProvider`** | `useAuth()` | `components/auth/AuthProvider.tsx` |
 | **`Workspace Client`** | `workspaceGet()` | `lib/api/workspace.ts` |
 | **`MUI v7 Palette`** | `createTheme({ ... })` | `lib/theme.ts` |
+
+---
+
+## 🛠️ GitHub & Repository Info
+
+- **Repository**: [https://github.com/VibhavSetlur/ModelSEED-UI](https://github.com/VibhavSetlur/ModelSEED-UI)
+- **Primary Branches**: 
+    - `master`: Production-ready code.
+    - `develop`: Active feature integration and testing.
 
 ---
 

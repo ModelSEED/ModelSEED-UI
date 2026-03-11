@@ -5,7 +5,7 @@ This document defines the **URL Management Strategy** for the ModelSEED-UI. A pr
 ## 🔗 The Problem: Deep Nesting in Workspace Data
 In the legacy ModelSEED UI, biological data objects like Models, FBA results, and Genomes were located at paths matching their KBase Workspace location. These paths could be highly dynamic and deeply nested:
 
-- **Legacy URL example**: `modelseed.org/model/vibhav/my_models/folder_A/the_model_name`
+- **Legacy URL example**: `modelseed.org/model/user/my_models/folder_A/the_model_name`
 
 ## 🌉 The Solution: Catch-all Dynamic Routes
 We use the **Next.js 16 Catch-all Routing** pattern (`[...path]`) to capture these dynamic segments and pass them as an array to a single page component.
