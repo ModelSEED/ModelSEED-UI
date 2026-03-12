@@ -56,9 +56,38 @@ Initial context from José:
    - The backend `modelseed-api` stack is behaving as expected for health, models, and media (with the caveat about `/api/media` 404), and the test harness script `scripts/test-modelseed-api.sh` is a reliable way to re-verify it.  
    - The main blocker for full Phase 17/18 end-to-end verification is the frontend auth flow (RAST login), not the `modelseed-api` itself.
 
+## Discovery: Media Endpoint Response Format Bug
+
+During end-to-end testing, the error `apiMedia.map is not a function` was observed on the `/myMedia` page. 
+
+### Technical Analysis
+- **Endpoint**: `GET /api/media/public` (via `modelseed-api` on Poplar).
+- **Expected Format (Frontend)**: `ModelseedMediaSummary[]` (a flat array of objects).
+- **Actual Format (Backend)**: An object (dictionary) where keys are workspace paths and values are lists of Workspace objects in positional array format.
+
+**Example Actual Response:**
+```json
+{
+  "/chenry/public/modelsupport/media": [
+    ["Sulfate-N-Acetyl-D-galactosamine", "media", "/chenry/public/modelsupport/media/", "2015-05-11T05:39:01Z", "ID", "chenry", 605, {"name": "...", ...}, ...],
+    ...
+  ]
+}
+```
+
+### Impacts
+- `listUserMediaFromApi()` in `lib/api/modelseed.ts` returns the raw object, which lacks the `.map()` method, causing the frontend to crash.
+- The `ModelseedMediaSummary` interface doesn't match the positional array format used by the workspace.
+
+### Required Fixes
+1.  **Backend Adjustment (Recommended)**: Ideally, `modelseed-api` should return a flat list of normalized media objects.
+2.  **Frontend Workaround**: Update `lib/api/modelseed.ts` to flatten the dictionary and map the positional arrays to named objects.
+
 ## Timestamp Log
 - Created: 2026-03-12 15:35:00 -05:00
 - Updated: 2026-03-12 12:55:00 -05:00 (Auth tests confirmed)
 - Updated: 2026-03-12 13:05:00 -05:00 (Tunnel & API verification complete)
 - Updated: 2026-03-12 16:10:00 -05:00 (Backend script results and frontend UI findings recorded)
+- Updated: 2026-03-12T13:30:00-05:00 (Discovered media endpoint response format bug)
+
 

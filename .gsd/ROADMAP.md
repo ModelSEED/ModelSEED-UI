@@ -32,6 +32,7 @@
 ### Phase 18: modelseed-api Verification and System Testing
 **Status**: ⚪ Not Started
 - Rigorous testing and verification of the `modelseed-api` backend (Poplar instance) for models, media, jobs, workspace proxy, and health.
+- **Bug Fix**: Resolve `apiMedia.map is not a function` by correctly handling the dictionary/workspace-array format returned by `/api/media/public`.
 - Frontend end-to-end testing of authenticated user flows (My Models, My Media, Build Model, and reference data) against `modelseed-api`.
 - Regression checks and readiness assessment for promoting the new stack as the primary ModelSEED UI.
 
