@@ -76,12 +76,14 @@ During end-to-end testing, the error `apiMedia.map is not a function` was observ
 ```
 
 ### Impacts
-- `listUserMediaFromApi()` in `lib/api/modelseed.ts` returns the raw object, which lacks the `.map()` method, causing the frontend to crash.
-- The `ModelseedMediaSummary` interface doesn't match the positional array format used by the workspace.
+- **CRITICAL**: The personal media endpoint `GET /api/media` returns a **404 Not Found** on the current Poplar deployment. 
+- **Frontend Behavior**: `listUserMediaFromApi()` is configured to attempt the private endpoint. If it fails (as it does now), it returns an empty array `[]` and logs a warning to prevent a page crash.
+- **Reference Data**: The public endpoint `/api/media/public` works but is **not** used for the "My Media" page to maintain technical accuracy.
 
 ### Required Fixes
-1.  **Backend Adjustment (Recommended)**: Ideally, `modelseed-api` should return a flat list of normalized media objects.
-2.  **Frontend Workaround**: Update `lib/api/modelseed.ts` to flatten the dictionary and map the positional arrays to named objects.
+1.  **Backend Activation**: The private `/api/media` endpoint needs to be enabled on the Poplar server.
+2.  **Verify Endpoint Contract**: Once activated, ensure it returns data in a consistent format (objects or positional arrays).
+
 
 ## Timestamp Log
 - Created: 2026-03-12 15:35:00 -05:00

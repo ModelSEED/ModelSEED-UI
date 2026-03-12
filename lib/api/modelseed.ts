@@ -117,42 +117,35 @@ export async function listUserMediaFromApi(): Promise<ModelseedMediaSummary[]> {
 
     type RawMediaResponse = Record<string, RawMediaEntry[]>;
 
-    const raw = await modelseedFetch<RawMediaResponse>('/api/media/public');
+    try {
+        const raw = await modelseedFetch<RawMediaResponse>('/api/media');
+        const summaries: ModelseedMediaSummary[] = [];
 
-    const summaries: ModelseedMediaSummary[] = [];
-
-    for (const entries of Object.values(raw)) {
-        if (!Array.isArray(entries)) continue;
-
-        for (const entry of entries) {
-            if (!Array.isArray(entry)) continue;
-
-            const [name, type, _path, modDate, id, , , metadata] = entry;
-
-            const meta = metadata && typeof metadata === 'object'
-                ? (metadata as Record<string, unknown>)
-                : undefined;
-
-            const isMinimal = (meta?.isMinimal ?? meta?.is_minimal) as
-                | boolean
-                | string
-                | undefined;
-            const isDefined = (meta?.isDefined ?? meta?.is_defined) as
-                | boolean
-                | string
-                | undefined;
-
-            summaries.push({
-                id: id ? String(id) : String(name ?? ''),
-                name: String(name ?? ''),
-                type: type ? String(type) : undefined,
-                modDate: modDate ? String(modDate) : undefined,
-                isMinimal,
-                isDefined,
-            });
+        for (const entries of Object.values(raw)) {
+            if (!Array.isArray(entries)) continue;
+            for (const entry of entries) {
+                if (!Array.isArray(entry)) continue;
+                const [name, type, _path, modDate, id, , , metadata] = entry;
+                const meta = metadata && typeof metadata === 'object'
+                    ? (metadata as Record<string, unknown>)
+                    : undefined;
+                summaries.push({
+                    id: id ? String(id) : String(name ?? ''),
+                    name: String(name ?? ''),
+                    type: type ? String(type) : undefined,
+                    modDate: modDate ? String(modDate) : undefined,
+                    isMinimal: (meta?.isMinimal ?? meta?.is_minimal) as boolean | string | undefined,
+                    isDefined: (meta?.isDefined ?? meta?.is_defined) as boolean | string | undefined,
+                });
+            }
         }
+        return summaries;
+    } catch (err) {
+        // If the backend returns 404, it means the private media endpoint isn't implemented/enabled.
+        // We log it and return an empty array to prevent a page crash.
+        console.warn('modelseed-api: /api/media returned an error (likely not implemented):', err);
+        return [];
     }
 
-    return summaries;
 }
 
