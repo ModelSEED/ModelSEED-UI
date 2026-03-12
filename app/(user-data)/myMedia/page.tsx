@@ -4,15 +4,16 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { workspaceLs } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { listMyMediaFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface MyMediaItem {
     id: string;
@@ -91,15 +92,20 @@ export default function MyMediaPage() {
     return (
         <AuthGuard>
             <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Alert severity="warning" variant="outlined" sx={{ mb: 2 }}>
+                    <AlertTitle>Service Notice</AlertTitle>
+                    Individual user media formulas are currently experiencing synchronization issues with the legacy workspace backend. 
+                    Management of private media is temporarily read-only. We apologize for the inconvenience.
+                </Alert>
+
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
                     <Button
                         variant="contained"
                         color="primary"
+                        disabled
                         sx={{ textTransform: 'none', fontWeight: 600 }}
-                        // Note: This would typically navigate to a "Create New media" route
-                        onClick={() => alert("Creating media is functional conceptually, not wired yet in React UI.")}
                     >
-                        Create New media
+                        Create New Media
                     </Button>
                 </Box>
 
@@ -113,12 +119,11 @@ export default function MyMediaPage() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <TextField
-                        size="small"
+                    <DataControlHeader
                         placeholder="Search my media..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        sx={{ flexGrow: 1, maxWidth: 400 }}
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        totalRows={filteredRows.length}
                     />
                 </Box>
 

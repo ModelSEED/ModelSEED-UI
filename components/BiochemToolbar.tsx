@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     GridToolbarContainer,
     GridToolbarFilterButton,
@@ -15,6 +15,16 @@ import TablePagination from '@mui/material/TablePagination';
 
 function CustomPagination() {
     const apiRef = useGridApiContext();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return null;
+    }
+
     const page = useGridSelector(apiRef, gridPageSelector);
     const pageSize = useGridSelector(apiRef, gridPageSizeSelector);
     const rowCount = useGridSelector(apiRef, gridRowCountSelector);
@@ -53,19 +63,11 @@ export default function BiochemToolbar() {
                     <GridToolbarQuickFilter debounceMs={500} />
                 </Box>
                 <GridToolbarFilterButton
-                    variant="outlined"
-                    sx={{ textTransform: 'none' }}
-                    title="Filters"
-                >
-                    Filters
-                </GridToolbarFilterButton>
+                    aria-label="Filters"
+                />
                 <GridToolbarColumnsButton
-                    variant="outlined"
-                    sx={{ textTransform: 'none' }}
-                    title="Manage Columns"
-                >
-                    Manage Columns
-                </GridToolbarColumnsButton>
+                    aria-label="Manage Columns"
+                />
             </Box>
             <CustomPagination />
         </GridToolbarContainer>

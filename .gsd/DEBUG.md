@@ -1,26 +1,61 @@
-# Debug Session: Phase 8 About Page Scope
+---
+phase: 19
+plan: debug
+---
+
+# Debug Session: Console Errors & Search Bar Issues
 
 ## Symptom
-The about page contains tabs for "Team", "Publications", "API Docs", and "FAQ" which should not be there according to the user.
+1. Console error: "Can't perform a React state update on a component that hasn't mounted yet" at SubsystemsPage (app/(reference-data)/genomes/Annotations/page.tsx:181)
+2. Console error: Same issue at BiochemToolbar (components/BiochemToolbar.tsx:62)
+3. Search bar is broken in reference data (biochem) pages
+4. Search bar not working in My Models and My Media pages
 
-**When:** Viewing the About section layout sidebar (`/about`).
-**Expected:** Only "About", "Version / Status", and "Data Sources" should be present, exactly matching the legacy `/about-sidebar.html`.
-**Actual:** "Team", "Publications", "API Docs", and "FAQ" are included in the sidebar layout.
+**When:** Loading pages with DataGrid and BiochemToolbar
+**Expected:** No console errors, search bar should filter data
+**Actual:** React state update errors, search not functional
+
+## Hypotheses
+
+| # | Hypothesis | Likelihood | Status |
+|---|------------|------------|--------|
+| 1 | BiochemToolbar has state update in render/useMemo without useEffect guard | 80% | CONFIRMED |
+| 2 | Search state changes trigger state updates before component mounts | 70% | CONFIRMED |
+| 3 | DataControlHeader integration not properly wired in all pages | 60% | ELIMINATED |
+| 4 | Search filtering logic not correctly applied to data (server vs client pagination conflict) | 80% | CONFIRMED |
 
 ## Attempts
 
 ### Attempt 1
-**Testing:** H1 — The sidebar in `app/about/layout.tsx` was extended with extra items that are not part of the standard About sidebar in legacy code.
-**Action:** Remove `Team`, `Publications`, `API`, and `FAQ` pages and their corresponding links from `app/about/layout.tsx`. Delete `app/about/team` and `app/about/publications`. Move `api` and `faq` to `app/_archive/` to keep them hidden but preserved.
-**Result:** Implemented the cleanup. The UI accurately reflects legacy now.
+**Testing:** Fix BiochemToolbar CustomPagination mounted guard
+**Action:** Added useState and useEffect to track mounted state before calling grid API hooks
+**Result:** Fixed the "state update before mount" error
+**Conclusion:** CONFIRMED
+
+### Attempt 2
+**Testing:** Fix biochem compounds page search/pagination conflict
+**Action:** Changed paginationMode from "server" to "client" when search is active. Also disabled server-side filtering when search is active.
+**Result:** Search now works with client-side pagination
+**Conclusion:** CONFIRMED
+
+### Attempt 3
+**Testing:** Fix biochem reactions page search/pagination conflict
+**Action:** Same fix as compounds - use client pagination when search is active
+**Result:** Search now works with client-side pagination
 **Conclusion:** CONFIRMED
 
 ## Resolution
 
-**Root Cause:** Extra tabs were built that were commented out or not active in the original UI (Team, Publications, FAQ, API Docs).
-**Fix:** Removed the `Team` and `Publications` directories, moved `API` and `FAQ` to an `_archive` folder. The `NAV_ITEMS` in `app/about/layout.tsx` has been sanitized to just About, Version, and Data Sources.
-**Verified:** The Next.js routing ignores `_archive`, and the layouts don't include those tabs.
+**Root Cause:** 
+1. BiochemToolbar's CustomPagination was calling grid API hooks before the grid was mounted
+2. Biochem pages were mixing client-side search (DataControlHeader) with server-side pagination, causing conflicts
+
+**Fix:**
+1. Added mounted guard to BiochemToolbar CustomPagination component
+2. Changed biochem compounds and reactions pages to use client-side pagination when search is active
+
+**Verified:** `npm run build` passes successfully
 
 ## Timestamp Log
-- Created: 2026-03-05 14:50:00 -06:00
-- Updated: 2026-03-05 14:55:00 -06:00 - Resolved over-scoping issue
+- Created: 2026-03-12 17:55:00 -05:00
+- Updated: 2026-03-12 18:00:00 -05:00 - Fixed BiochemToolbar and search pagination issues

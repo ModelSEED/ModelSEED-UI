@@ -2,9 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
@@ -14,7 +12,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 import BiochemToolbar from '@/components/BiochemToolbar';
 import { GridHighlightText } from '@/components/GridHighlightText';
-import { type GridFilterModel, GridToolbar } from '@mui/x-data-grid';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -90,6 +88,7 @@ export default function ReactionsPage() {
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
+    const [search, setSearch] = useState('');
 
     // Modal state
     const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -215,27 +214,46 @@ export default function ReactionsPage() {
         placeholderData: keepPreviousData,
     });
 
+    const filteredDocs = useMemo(() => {
+        if (!search || !data?.docs) return data?.docs ?? [];
+        const q = search.toLowerCase();
+        return data.docs.filter((doc) =>
+            doc.id?.toLowerCase().includes(q) ||
+            doc.name?.toLowerCase().includes(q) ||
+            doc.definition?.toLowerCase().includes(q) ||
+            doc.aliases?.some((a) => a.toLowerCase().includes(q)) ||
+            doc.pathways?.some((p) => p.toLowerCase().includes(q))
+        );
+    }, [data, search]);
+
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
                 Reactions
             </Typography>
 
+            <DataControlHeader
+                placeholder="Search reactions..."
+                searchValue={search}
+                onSearchChange={setSearch}
+                totalRows={data?.numFound ?? 0}
+            />
+
             <DataGrid<Reaction>
-                rows={data?.docs ?? []}
+                rows={search ? filteredDocs : (data?.docs ?? [])}
                 columns={columns}
-                rowCount={data?.numFound ?? 0}
+                rowCount={search ? filteredDocs.length : (data?.numFound ?? 0)}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                paginationMode="server"
-                sortingMode="server"
+                paginationMode={search ? 'client' : 'server'}
+                sortingMode={search ? 'client' : 'server'}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
-                filterMode="server"
-                filterModel={filterModel}
-                onFilterModelChange={setFilterModel}
+                filterMode={search ? undefined : 'server'}
+                filterModel={search ? { items: [] } : filterModel}
+                onFilterModelChange={search ? undefined : setFilterModel}
                 showToolbar={true}
                 slots={{ toolbar: BiochemToolbar }}
                 slotProps={{
@@ -244,7 +262,7 @@ export default function ReactionsPage() {
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
-                hideFooter
+                hideFooter={search ? false : true}
                 disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',

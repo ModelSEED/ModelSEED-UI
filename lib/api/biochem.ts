@@ -256,6 +256,45 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
     return json.response as SolrResponse<T>;
 }
 
+/**
+ * Fetcher for the new modelseed-api (Poplar) REST biochemistry endpoints.
+ * Currently limited to simple query-based search.
+ */
+async function fetchModelseedApiBiochem<T>(
+    endpoint: string,
+    opts: SolrQueryOpts = {}
+): Promise<SolrResponse<T>> {
+    const { query, limit = 25, offset = 0, filterModel } = opts;
+    const baseUrl = `${SOLR_BASE.replace('/solr/', '')}${endpoint}`; // Adjusting to REST path
+
+    // Map SolrQueryOpts to REST params
+    // Note: Poplar currently only supports simple 'query' and 'limit'
+    let activeQuery = query;
+    if (!activeQuery && filterModel?.quickFilterValues?.[0]) {
+        activeQuery = String(filterModel.quickFilterValues[0]);
+    }
+
+    let url = `${baseUrl}?limit=${limit}`;
+    if (activeQuery) {
+        url = `${SOLR_BASE.replace('/solr/', '')}/api/biochem/search?query=${encodeURIComponent(activeQuery)}&limit=${limit}&type=${endpoint.includes('compounds') ? 'compounds' : 'reactions'}`;
+    } else {
+        // Poplar doesn't have a broad "list all" without IDs yet, 
+        // fallback to search with empty or universal query if possible, or just return empty
+        url = `${baseUrl}?limit=${limit}`; 
+    }
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`modelseed-api request failed: ${res.status}`);
+    const data = await res.json();
+
+    // Map REST array response to SolrResponse format for compatibility
+    return {
+        numFound: data.length, // REST API doesn't return total count yet
+        start: offset,
+        docs: data as T[],
+    };
+}
+
 /* ─── Public API ─────────────────────────────────────────────── */
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
@@ -286,6 +325,17 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
         visible: RXN_VISIBLE,
         ...opts,
     };
+
+    if (SOLR_BASE.includes('/api/')) {
+        const res = await fetchModelseedApiBiochem<Reaction>('/api/biochem/reactions', mergedOpts);
+        res.docs.forEach((doc) => {
+            if (doc.is_obsolete === '1') {
+                doc.status += ' (and is obsolete)';
+            }
+        });
+        return res;
+    }
+
     const url = buildSolrUrl('reactions', mergedOpts);
     const res = await fetchSolr<Reaction>(url);
 
@@ -308,6 +358,11 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
         visible: CPD_VISIBLE,
         ...opts,
     };
+
+    if (SOLR_BASE.includes('/api/')) {
+        return fetchModelseedApiBiochem<Compound>('/api/biochem/compounds', mergedOpts);
+    }
+
     const url = buildSolrUrl('compounds', mergedOpts);
     return fetchSolr<Compound>(url);
 }

@@ -95,11 +95,46 @@ async function callWorkspaceApi<T>(method: string, params: any[]): Promise<T> {
 }
 
 /**
+ * Perform a REST call to the new modelseed-api (Poplar) Workspace endpoints.
+ */
+async function callWorkspaceRestApi<T>(method: string, body: any): Promise<T> {
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    };
+
+    const token = getAuthToken();
+    if (token) {
+        headers['Authorization'] = token;
+    }
+
+    // method 'ls' -> '/api/workspace/ls'
+    const endpoint = method.toLowerCase().replace('workspace.', '');
+    const url = `${WORKSPACE_URL}/${endpoint}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.detail ?? `Workspace REST error! status: ${response.status}`);
+    }
+
+    return await response.json() as T;
+}
+
+/**
  * List objects or directories
  * Method: Workspace.ls
  * @param paths Array of workspace paths to list (e.g. ['/plantseed/plantseed/'])
  */
 export async function workspaceLs(paths: string[]): Promise<Record<string, any>> {
+    if (WORKSPACE_URL.includes('/api/')) {
+        return callWorkspaceRestApi<Record<string, any>>('ls', { paths });
+    }
     return callWorkspaceApi('Workspace.ls', [{ paths }]);
 }
 
@@ -109,5 +144,8 @@ export async function workspaceLs(paths: string[]): Promise<Record<string, any>>
  * @param objects Array of workspace paths to get (e.g. ['/plantseed/Data/annotation_overview'])
  */
 export async function workspaceGet(objects: string[]): Promise<any[]> {
+    if (WORKSPACE_URL.includes('/api/')) {
+        return callWorkspaceRestApi<any[]>('get', { objects });
+    }
     return callWorkspaceApi('Workspace.get', [{ objects }]);
 }

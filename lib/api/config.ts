@@ -9,6 +9,17 @@
  * endpoint regardless of this toggle (per Chris Henry's directive).
  */
 
+/* ─── modelseed-api Base URL ─────────────────────────────────── */
+
+/**
+ * Base URL for the new ModelSEED REST API. In development this typically
+ * points at `http://localhost:8000` when running the FastAPI server locally.
+ */
+export const MODELSEED_API_URL =
+    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_MODELSEED_API_URL) ||
+    // Poplar demo instance provided by José for development/testing.
+    'http://poplar.cels.anl.gov:8000';
+
 /* ─── Feature Flags ──────────────────────────────────────────── */
 
 /**
@@ -16,7 +27,12 @@
  * the new unified proxy service. Set to `false` (default) to keep
  * using the legacy direct endpoints while the proxy is in development.
  */
-export const USE_NEW_PROXY = false;
+let useNewProxyDefault = false;
+if (typeof process !== 'undefined') {
+    const raw = process.env.NEXT_PUBLIC_USE_NEW_PROXY;
+    if (raw === 'true') useNewProxyDefault = true;
+}
+export const USE_NEW_PROXY = useNewProxyDefault;
 
 /**
  * When `true`, user-data pages (My Models, My Media, and related flows)
@@ -47,7 +63,7 @@ export const WORKSPACE_URL_LEGACY = 'https://p3.theseed.org/services/Workspace';
  * New unified proxy endpoint for Workspace operations.
  * Update this URL once José deploys the production proxy.
  */
-export const WORKSPACE_URL_PROXY = 'https://modelseed.org/api/workspace';
+export const WORKSPACE_URL_PROXY = `${MODELSEED_API_URL}/api/workspace`;
 
 /** Resolved Workspace URL based on feature flag. */
 export const WORKSPACE_URL = USE_NEW_PROXY
@@ -63,7 +79,7 @@ export const SOLR_BASE_LEGACY = 'https://modelseed.org/solr/';
  * New proxy endpoint for biochemistry queries.
  * Update this URL once the new service supports biochem lookups.
  */
-export const SOLR_BASE_PROXY = 'https://modelseed.org/api/solr/';
+export const SOLR_BASE_PROXY = `${MODELSEED_API_URL}/api/solr/`;
 
 /** Resolved Solr base URL based on feature flag. */
 export const SOLR_BASE = USE_NEW_PROXY
@@ -100,13 +116,4 @@ export const PROBMODELSEED_URL = USE_NEW_PROXY
 
 export const CPD_IMG_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
 
-/* ─── modelseed-api Base URL ─────────────────────────────────── */
 
-/**
- * Base URL for the new ModelSEED REST API. In development this typically
- * points at `http://localhost:8000` when running the FastAPI server locally.
- */
-export const MODELSEED_API_URL =
-    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_MODELSEED_API_URL) ||
-    // Poplar demo instance provided by José for development/testing.
-    'http://poplar.cels.anl.gov:8000';

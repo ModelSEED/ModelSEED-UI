@@ -80,6 +80,52 @@ export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> 
     return modelseedFetch<ModelseedModelSummary[]>('/api/models');
 }
 
+/**
+ * Returns a Blob containing the exported model file.
+ * formats: 'sbml' | 'json' | 'tsv'
+ */
+export async function exportModelFromApi(ref: string, format: string): Promise<Blob> {
+    const auth = getStoredAuthClientSide();
+    if (!auth?.token) throw new Error('Auth required');
+
+    const response = await fetch(
+        `${MODELSEED_API_URL}/api/models/export?ref=${encodeURIComponent(ref)}&format=${format}`,
+        {
+            headers: {
+                Authorization: auth.token,
+            },
+        },
+    );
+
+    if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+    }
+
+    return response.blob();
+}
+
+/**
+ * Deletes a model from the workspace via the modelseed-api proxy.
+ */
+export async function deleteModelFromApi(ref: string): Promise<void> {
+    const auth = getStoredAuthClientSide();
+    if (!auth?.token) throw new Error('Auth required');
+
+    const response = await fetch(
+        `${MODELSEED_API_URL}/api/models?ref=${encodeURIComponent(ref)}`,
+        {
+            method: 'DELETE',
+            headers: {
+                Authorization: auth.token,
+            },
+        },
+    );
+
+    if (!response.ok) {
+        throw new Error(`Delete failed: ${response.statusText}`);
+    }
+}
+
 export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     return listMediaGeneric('/api/media/public');
 }

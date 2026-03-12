@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { workspaceLs } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { listUserModelsFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
+import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
+import DeleteModelModal from '@/components/ui/DeleteModelModal';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface MyModelItem {
     id: string; // Model name / filename
@@ -28,62 +28,13 @@ interface MyModelItem {
     path: string;
 }
 
-const columns: GridColDef<MyModelItem>[] = [
-    {
-        field: 'id',
-        headerName: 'Model ID',
-        width: 250,
-        renderCell: (params) => (
-            <Link
-                href={`/model${params.row.path}`}
-                style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
-            >
-                {params.value}
-            </Link>
-        )
-    },
-    {
-        field: 'orgName',
-        headerName: 'Species Name',
-        width: 220,
-        renderCell: (params) => (
-            <Link
-                href={`/model${params.row.path}`}
-                style={{ color: '#00acc1', textDecoration: 'none' }}
-            >
-                {params.value || '-'}
-            </Link>
-        )
-    },
-    { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
-    { field: 'numGenes', headerName: 'Genes', width: 100, type: 'number' },
-    { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
-    { field: 'gapfills', headerName: 'Gapfilling', width: 100, type: 'number' },
-    {
-        field: 'status',
-        headerName: 'Status',
-        width: 140,
-        renderCell: (params) => (
-            <Box sx={{ fontWeight: params.value === 'complete' ? 'normal' : 'bold' }}>
-                {params.value || 'None'}
-            </Box>
-        )
-    },
-    {
-        field: 'modDate',
-        headerName: 'Modification Date',
-        width: 220,
-        valueGetter: (_value, row) => new Date(row.modDate).toLocaleString(),
-    },
-];
-
 export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [search, setSearch] = useState('');
     const { isAuthenticated } = useAuth();
 
-    const { data: rows = [], isLoading, error } = useQuery({
+    const { data: rows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myModels', USE_MODELSEED_API],
         enabled: isAuthenticated,
         queryFn: async () => {
@@ -99,7 +50,7 @@ export default function MyModelsPage() {
                     gapfills: (m.unintegrated_gapfills ?? 0) + (m.integrated_gapfills ?? 0),
                     status: m.status ?? 'complete',
                     modDate: m.rundate ?? new Date().toISOString(),
-                    path: m.ref,
+                    path: m.ref.startsWith('/') ? m.ref : `/${m.ref}`,
                 })) as MyModelItem[];
             }
 
@@ -113,6 +64,77 @@ export default function MyModelsPage() {
         },
         staleTime: 5 * 60 * 1000,
     });
+
+    const handleModelDeleted = useCallback(() => {
+        void refetch();
+    }, [refetch]);
+
+    const columns = useMemo<GridColDef<MyModelItem>[]>(() => [
+        {
+            field: 'id',
+            headerName: 'Model ID',
+            width: 250,
+            renderCell: (params) => (
+                <Link
+                    href={`/model${params.row.path}`}
+                    style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
+                >
+                    {params.value}
+                </Link>
+            )
+        },
+        {
+            field: 'orgName',
+            headerName: 'Species Name',
+            width: 220,
+            renderCell: (params) => (
+                <Link
+                    href={`/model${params.row.path}`}
+                    style={{ color: '#00acc1', textDecoration: 'none' }}
+                >
+                    {params.value || '-'}
+                </Link>
+            )
+        },
+        { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
+        { field: 'numGenes', headerName: 'Genes', width: 100, type: 'number' },
+        { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
+        { field: 'gapfills', headerName: 'Gapfilling', width: 100, type: 'number' },
+        {
+            field: 'status',
+            headerName: 'Status',
+            width: 140,
+            renderCell: (params) => (
+                <Box sx={{ fontWeight: params.value === 'complete' ? 'normal' : 'bold' }}>
+                    {params.value || 'None'}
+                </Box>
+            )
+        },
+        {
+            field: 'modDate',
+            headerName: 'Modification Date',
+            width: 220,
+            valueGetter: (_value, row) => new Date(row.modDate).toLocaleString(),
+        },
+        {
+            field: 'commands',
+            headerName: 'Commands',
+            width: 170,
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <DownloadModelMenu modelRef={params.row.path} modelId={params.row.id} />
+                    <DeleteModelModal
+                        modelRef={params.row.path}
+                        modelId={params.row.id}
+                        onDeleted={handleModelDeleted}
+                    />
+                </Box>
+            ),
+        },
+    ], [handleModelDeleted]);
 
     const filteredRows = rows.filter((row) => {
         if (!search) return true;
@@ -142,12 +164,11 @@ export default function MyModelsPage() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <TextField
-                        size="small"
+                    <DataControlHeader
                         placeholder="Search models..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        sx={{ flexGrow: 1, maxWidth: 400 }}
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        totalRows={filteredRows.length}
                     />
                 </Box>
 

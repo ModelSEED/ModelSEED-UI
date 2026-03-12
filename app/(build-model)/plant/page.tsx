@@ -54,7 +54,7 @@ function a11yProps(index: number) {
 export default function BuildModelPlantPage() {
     const [tabIndex, setTabIndex] = useState(PLANTSEED_MAINTENANCE ? 1 : 0);
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };
 
@@ -71,29 +71,28 @@ export default function BuildModelPlantPage() {
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Build Model Tabs">
-                        <Tooltip
-                            title={
-                                PLANTSEED_MAINTENANCE
-                                    ? 'PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
-                                    : ''
-                            }
-                            disableHoverListener={!PLANTSEED_MAINTENANCE}
-                        >
-                            <span>
-                                <Tab
-                                    label={
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            UPLOAD Plants FASTA
-                                            {PLANTSEED_MAINTENANCE && (
-                                                <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
-                                            )}
-                                        </Box>
+                        <Tab
+                            label={
+                                <Tooltip
+                                    title={
+                                        PLANTSEED_MAINTENANCE
+                                            ? 'PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
+                                            : ''
                                     }
-                                    disabled={PLANTSEED_MAINTENANCE}
-                                    {...a11yProps(0)}
-                                />
-                            </span>
-                        </Tooltip>
+                                    disableHoverListener={!PLANTSEED_MAINTENANCE}
+                                    placement="top"
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        UPLOAD Plants FASTA
+                                        {PLANTSEED_MAINTENANCE && (
+                                            <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
+                                        )}
+                                    </Box>
+                                </Tooltip>
+                            }
+                            disabled={PLANTSEED_MAINTENANCE}
+                            {...a11yProps(0)}
+                        />
                         <Tab label="UPLOAD Microbes FASTA" {...a11yProps(1)} />
                         <Tab label="PATRIC Microbes" {...a11yProps(2)} />
                         <Tab label="RAST Microbes" {...a11yProps(3)} />

@@ -29,12 +29,20 @@
 - Ensure Build Model UX defaults to the active "UPLOAD Microbes FASTA" tab while keeping the Plant tab disabled with tooltip.
 - Exercise and validate user flows against the new `modelseed-api` backend using test RAST/PATRIC accounts.
 
-### Phase 18: modelseed-api Verification and System Testing
-**Status**: 🚧 In Progress (Research Complete)
-- Rigorous testing and verification of the `modelseed-api` backend (Poplar instance) for models, media, jobs, workspace proxy, and health.
-- **Bug Fix**: Resolve `apiMedia.map is not a function` by correctly handling the dictionary/workspace-array format returned by `/api/media/public`.
-- Frontend end-to-end testing of authenticated user flows (My Models, My Media, Build Model, and reference data) against `modelseed-api`.
 - Regression checks and readiness assessment for promoting the new stack as the primary ModelSEED UI.
+
+### Phase 19: UI Reliability and Functional Parity
+**Status**: ✅ Complete
+- Fixed console errors in the Build Model flow and add maintenance banners where features are in-progress.
+- Implemented the "Commands" column in My Models for downloading (SBML, JSON, TSV) and deleting models with confirmation.
+- Reconstructed the Model Detail page with full tabbed data tables (Reactions, Compounds, etc.) matching legacy visuals.
+- Integrated the standard `DataControlHeader` into all user data tables for consistent filtering and column management.
+
+### Phase 19.4: DataControlHeader Integration & Search Fix
+**Status**: ✅ Complete
+- Fixed DataControlHeader search functionality to be clickable and searchable.
+- Integrated DataControlHeader into My Models and My Media pages.
+- Added DataControlHeader to biochem reference data tabs (compounds, reactions).
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
@@ -44,3 +52,7 @@
 - Updated: 2026-03-11 19:36:00 -06:00 - Phase 16 complete (UI/UX refinement and data consistency).
 - Updated: 2026-03-11 20:05:00 -06:00 - Re-scoped Phase 17 for authenticated user data and Workspace/modelseed-api integration.
 - Updated: 2026-03-12 15:30:00 -05:00 - Re-scoped Phase 18 for modelseed-api verification and end-to-end testing.
+- Updated: 2026-03-12 17:15:00 -05:00 - Added Phase 19 for UI Reliability and functional parity.
+- Updated: 2026-03-12 17:30:33 -05:00 - Executed Phase 19 plans and produced summaries/verification; pending manual browser checks.
+- Updated: 2026-03-12 17:40:00 -05:00 - Added Phase 19.4 plan for DataControlHeader integration.
+- Updated: 2026-03-12 17:45:00 -05:00 - Phase 19.4 complete: DataControlHeader integrated into all user data and biochem pages.
