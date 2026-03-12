@@ -80,10 +80,15 @@ export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> 
     return modelseedFetch<ModelseedModelSummary[]>('/api/models');
 }
 
-export async function listUserMediaFromApi(): Promise<ModelseedMediaSummary[]> {
-    // API currently exposes public media; if/when a user-specific endpoint appears,
-    // this function can be switched over without touching the callers.
-    //
+export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]> {
+    return listMediaGeneric('/api/media/public');
+}
+
+export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
+    return listMediaGeneric('/api/media/mine');
+}
+
+async function listMediaGeneric(path: string): Promise<ModelseedMediaSummary[]> {
     // The Poplar deployment returns a dictionary of workspace paths to arrays of
     // positional workspace tuples, rather than a flat list of objects. Each entry
     // looks like:
@@ -118,7 +123,7 @@ export async function listUserMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     type RawMediaResponse = Record<string, RawMediaEntry[]>;
 
     try {
-        const raw = await modelseedFetch<RawMediaResponse>('/api/media');
+        const raw = await modelseedFetch<RawMediaResponse>(path);
         const summaries: ModelseedMediaSummary[] = [];
 
         for (const entries of Object.values(raw)) {
@@ -141,11 +146,9 @@ export async function listUserMediaFromApi(): Promise<ModelseedMediaSummary[]> {
         }
         return summaries;
     } catch (err) {
-        // If the backend returns 404, it means the private media endpoint isn't implemented/enabled.
-        // We log it and return an empty array to prevent a page crash.
-        console.warn('modelseed-api: /api/media returned an error (likely not implemented):', err);
+        // If the backend returns 404/500, it might mean the endpoint isn't implemented/enabled
+        // for this user or path. We log it and return an empty array to prevent a page crash.
+        console.warn(`modelseed-api: ${path} returned an error:`, err);
         return [];
     }
-
 }
-

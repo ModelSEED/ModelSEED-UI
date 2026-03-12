@@ -61,19 +61,17 @@ Initial context from José:
 During end-to-end testing, the error `apiMedia.map is not a function` was observed on the `/myMedia` page. 
 
 ### Technical Analysis
-- **Endpoint**: `GET /api/media/public` (via `modelseed-api` on Poplar).
-- **Expected Format (Frontend)**: `ModelseedMediaSummary[]` (a flat array of objects).
-- **Actual Format (Backend)**: An object (dictionary) where keys are workspace paths and values are lists of Workspace objects in positional array format.
+- **Endpoint**: `GET /api/media/public` and `GET /api/media/mine` (verified via `openapi.json` and Poplar debug).
+- **Format**: Dictionary of workspace folders to positional arrays: `{"/path": [[name, type, path, date, id, ...], ...]}`.
+- **Root Cause**: The frontend was calling `/api/media` (which is invalid/404) or expecting a flat array of objects, but the API requires specific sub-paths and returns a nested dictionary of tuples.
 
-**Example Actual Response:**
-```json
-{
-  "/chenry/public/modelsupport/media": [
-    ["Sulfate-N-Acetyl-D-galactosamine", "media", "/chenry/public/modelsupport/media/", "2015-05-11T05:39:01Z", "ID", "chenry", 605, {"name": "...", ...}, ...],
-    ...
-  ]
-}
-```
+### New Discovery: Mine vs Public Media
+- **Endpoints**:
+  - `GET /api/media/public`: Returns reference media (e.g., from `/chenry/public/modelsupport/media`).
+  - `GET /api/media/mine`: Returns custom media formulas for the authenticated user.
+- **Observed Bug**: `GET /api/media/mine` currently returns a 500 Internal Server Error for the test account (`seaver@patricbrc.org`) on Poplar. The backend error body indicates a failure to communicate with the legacy Workspace service:
+  `{"detail":"500 Server Error: Internal Server Error for url: https://p3.theseed.org/services/Workspace"}`
+- **Workaround**: The frontend now handles both endpoints, flattens the dictionary response, and gracefully handles 500/404 errors by returning an empty list (preventing the `apiMedia.map` crash).
 
 ### Impacts
 - **CRITICAL**: The personal media endpoint `GET /api/media` returns a **404 Not Found** on the current Poplar deployment. 

@@ -11,7 +11,7 @@ import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { workspaceLs } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
-import { listUserMediaFromApi } from '@/lib/api/modelseed';
+import { listMyMediaFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
 
 interface MyMediaItem {
@@ -60,7 +60,7 @@ export default function MyMediaPage() {
         enabled: isAuthenticated,
         queryFn: async () => {
             if (USE_MODELSEED_API) {
-                const apiMedia = await listUserMediaFromApi();
+                const apiMedia = await listMyMediaFromApi();
                 return apiMedia.map((m) => ({
                     id: m.id,
                     name: m.name || m.id,

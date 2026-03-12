@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { workspaceLs } from '@/lib/api/workspace';
+import { listPublicMediaFromApi } from '@/lib/api/modelseed';
+import { USE_MODELSEED_API } from '@/lib/api/config';
 import BiochemToolbar from '@/components/BiochemToolbar';
 
 interface MediaItem {
@@ -36,8 +38,20 @@ export default function MediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const { data: rows = [], isLoading } = useQuery({
-        queryKey: ['mediaWorkspaceLs'],
+        queryKey: ['mediaWorkspaceLs', USE_MODELSEED_API],
         queryFn: async () => {
+            if (USE_MODELSEED_API) {
+                const apiMedia = await listPublicMediaFromApi();
+                return apiMedia.map((m) => ({
+                    id: m.id,
+                    name: m.name || m.id,
+                    type: m.type || 'unknown',
+                    isDefined: m.isDefined === true || m.isDefined === '1' ? 'Yes' : 'No',
+                    isMinimal: m.isMinimal === true || m.isMinimal === '1' ? 'Yes' : 'No',
+                    modDate: m.modDate ?? new Date().toISOString(),
+                })) as MediaItem[];
+            }
+
             const data = await workspaceLs(['/chenry/public/modelsupport/media']);
             const items = data['/chenry/public/modelsupport/media'] || [];
             return items
