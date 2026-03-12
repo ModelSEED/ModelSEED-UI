@@ -4,7 +4,7 @@ The heart of ModelSEED’s user data and public reference data is the **PATRIC W
 
 ---
 
-## 🏗️ JSON‑RPC Client (`lib/api/workspace.ts`)
+## JSON‑RPC Client (`lib/api/workspace.ts`)
 
 We use a lightweight `fetch`‑based JSON‑RPC 1.1 client to communicate with:
 
@@ -12,7 +12,7 @@ We use a lightweight `fetch`‑based JSON‑RPC 1.1 client to communicate with:
 https://p3.theseed.org/services/Workspace
 ```
 
-### 🧪 Core Helpers
+### Core Helpers
 
 - `workspaceLs(paths: string[]): Promise<Record<string, any>>`  
   - Wraps the `Workspace.ls` method.
@@ -29,7 +29,7 @@ All of these helpers go through a shared `callWorkspaceApi()` function that:
 
 ---
 
-## 🔁 REST Proxy Client (`lib/api/modelseed.ts`)
+## REST Proxy Client (`lib/api/modelseed.ts`)
 
 Wherever possible, we prefer to call **modelseed‑api** instead of talking directly to Workspace or ProbModelSEED:
 
@@ -49,7 +49,7 @@ The helper `modelseedFetch()` in `lib/api/modelseed.ts`:
 
 ---
 
-## 🛡️ Authentication in Requests
+## Authentication in Requests
 
 - Tokens come from `lib/api/auth.ts` and `AuthProvider.tsx` (see `AUTHENTICATION.md`).
 - For both Workspace and modelseed‑api:
@@ -58,7 +58,7 @@ The helper `modelseedFetch()` in `lib/api/modelseed.ts`:
 
 ---
 
-## ⚡ Performance: Caching with TanStack Query
+## Performance: Caching with TanStack Query
 
 Because Workspace/model objects can be large, we rely on **TanStack Query**:
 
@@ -70,7 +70,7 @@ Because Workspace/model objects can be large, we rely on **TanStack Query**:
 
 ---
 
-## 🛠️ Debugging Workspace & modelseed‑api Calls
+## Debugging Workspace & modelseed‑api Calls
 
 If user data fails to load:
 

@@ -2,15 +2,15 @@
 
 This document defines the **URL Management Strategy** for the ModelSEED-UI. A primary goal is **1:1 URL parity** with the legacy AngularJS application.
 
-## 🔗 The Problem: Deep Nesting in Workspace Data
+## The Problem: Deep Nesting in Workspace Data
 In the legacy ModelSEED UI, biological data objects like Models, FBA results, and Genomes were located at paths matching their KBase Workspace location. These paths could be highly dynamic and deeply nested:
 
 - **Legacy URL example**: `modelseed.org/model/user/my_models/folder_A/the_model_name`
 
-## 🌉 The Solution: Catch-all Dynamic Routes
+## The Solution: Catch-all Dynamic Routes
 We use the **Next.js 16 Catch-all Routing** pattern (`[...path]`) to capture these dynamic segments and pass them as an array to a single page component.
 
-### 🗺️ Route Mapping Table
+### Route Mapping Table
 
 | Legacy URL Pattern | New Next.js Page Location | Implementation Type |
 | :--- | :--- | :--- |
@@ -21,7 +21,7 @@ We use the **Next.js 16 Catch-all Routing** pattern (`[...path]`) to capture the
 | `/gapfill/*` | `app/gapfill/[...path]/page.tsx` | Placeholder |
 | `/data/*` | `app/data/[...path]/page.tsx` | Folder Browser Placeholder |
 
-### 🛠️ Developer Implementation Details
+### Developer Implementation Details
 
 When adding to or modifying these catch-all routes:
 

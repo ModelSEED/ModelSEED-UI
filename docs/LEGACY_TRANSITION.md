@@ -4,7 +4,7 @@ This document details the architectural shift from the legacy **AngularJS** appl
 
 ---
 
-## 🏛️ Architecture Comparison
+## Architecture Comparison
 
 | Feature | Legacy System (AngularJS) | Modern System (Next.js 16) |
 | :--- | :--- | :--- |
@@ -17,11 +17,11 @@ This document details the architectural shift from the legacy **AngularJS** appl
 
 ---
 
-## 🔗 URL Parity & Matching
+## URL Parity & Matching
 
 A critical requirement for this transition is maintaining **1:1 URL parity**. Scientific citations and external links must continue to function.
 
-### 🗺️ Route Translation Map
+### Route Translation Map
 
 | Legacy Path Pattern | Functional Role | New Next.js Root |
 | :--- | :--- | :--- |
@@ -31,7 +31,7 @@ A critical requirement for this transition is maintaining **1:1 URL parity**. Sc
 | `/biochem/compounds` | Compound Reference | `app/(reference-data)/biochem/compounds` |
 | `/workspace/*` | File Browser | `app/data/[...path]` |
 
-### 🌉 Implementation: The Catch-All Bridge
+### Implementation: The Catch-All Bridge
 In AngularJS, routes like `/model/:path*` allowed for dynamic nested paths. In Next.js, we achieve this using the **Catch-all Segment** `[...path]`.
 
 - **Legacy logic**: `$stateProvider.state('model', { url: '/model/{path:.*}' ... })`
@@ -39,7 +39,7 @@ In AngularJS, routes like `/model/:path*` allowed for dynamic nested paths. In N
 
 ---
 
-## 🧬 Scientific Logic Preservation
+## Scientific Logic Preservation
 
 While the framework has changed, the underlying scientific logic must remain identical.
 
@@ -49,7 +49,7 @@ While the framework has changed, the underlying scientific logic must remain ide
 
 ---
 
-## 🛠️ Onboarding for Legacy Developers
+## Onboarding for Legacy Developers
 
 If you are coming from the AngularJS codebase, keep these mental model shifts in mind:
 

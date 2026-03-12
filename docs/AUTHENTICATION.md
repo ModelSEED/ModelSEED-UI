@@ -4,7 +4,7 @@ ModelSEED‑UI authenticates against **RAST** and **PATRIC/BV‑BRC** services, 
 
 ---
 
-## 🏗️ The Global Auth Provider (`AuthProvider.tsx`)
+## The Global Auth Provider (`AuthProvider.tsx`)
 
 Location: `components/auth/AuthProvider.tsx`
 
@@ -15,7 +15,7 @@ Location: `components/auth/AuthProvider.tsx`
   - Listens for `storage` events so logout in one tab logs out all tabs.
 - Tokens are stored **only** in localStorage (no cookies) and sent in the `Authorization` header for all downstream API calls.
 
-### 🧬 Sample Usage in a Component
+### Sample Usage in a Component
 
 ```tsx
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -31,7 +31,7 @@ export default function MyProtectedComponent() {
 
 ---
 
-## 🌉 Sign‑In Flow (RAST & PATRIC)
+## Sign‑In Flow (RAST & PATRIC)
 
 Low‑level calls live in `lib/api/auth.ts`:
 
@@ -62,11 +62,11 @@ Low‑level calls live in `lib/api/auth.ts`:
 
 ---
 
-## 🛡️ Protecting Pages and Routes
+## Protecting Pages and Routes
 
 We use **page‑level guards** plus dedicated components:
 
-### 🎒 `AuthGuard` component
+### `AuthGuard` component
 
 - Location: `components/auth/AuthGuard.tsx`.
 - Wraps protected pages such as:
@@ -76,7 +76,7 @@ We use **page‑level guards** plus dedicated components:
   - If `isAuthenticated === false`, renders a sign‑in prompt or redirect.
   - If `true`, renders children normally.
 
-### 🛣️ Conditional Logic in Pages
+### Conditional Logic in Pages
 
 - Pages can also branch on `isAuthenticated` to:
   - Short‑circuit API calls (`enabled: isAuthenticated` in `useQuery`).
@@ -84,7 +84,7 @@ We use **page‑level guards** plus dedicated components:
 
 ---
 
-## ⚡ Development & Testing Notes
+## Development & Testing Notes
 
 - The **developer bypass** in `lib/api/auth.ts` lets you log in with `developer/developer` to get a fixed token without hitting remote services; use this only in local environments.
 - When integrating new backend services (e.g. additional `modelseed-api` endpoints), always:

@@ -4,11 +4,11 @@ This document defines how **Biological Information** (Reactions, Compounds, and 
 
 ---
 
-## 🧬 Data Sources: The Solr Biochemistry Index
+## Data Sources: The Solr Biochemistry Index
 
 To support fast, sub-second searching of tens of thousands of reagents, the ModelSEED-UI fetches its biochemistry reference library from a **Solr core**.
 
-### 🔍 API Consumption (`lib/api/biochem.ts`)
+### API Consumption (`lib/api/biochem.ts`)
 The `getReactions` and `getCompounds` methods in this file are high-level wrappers for the Solr API. They handle:
 1.  **Pagination**: Fetching only 25 or 50 records at a time.
 2.  **Sorting**: Dynamically adjusting Solr sort params (e.g., `sort: id asc`).
@@ -23,7 +23,7 @@ Reaction definitions in ModelSEED are typically stored as plain text with stoich
 
 In the UI, these must be rendered with proper **Chemical Notation** and **Hyperlinked Compounds**.
 
-### 📜 The `ChemicalEquation` Component (`components/ui/ChemicalEquation.tsx`)
+### The `ChemicalEquation` Component (`components/ui/ChemicalEquation.tsx`)
 
 This component uses a specialized **Regex Engine** to transform raw text into a React tree:
 
@@ -34,7 +34,7 @@ This component uses a specialized **Regex Engine** to transform raw text into a 
 
 ---
 
-## 🧪 External Cross-References
+## External Cross-References
 
 ModelSEED identifiers are linked to the global biological ecosystem. We provide helpers in the `EXTERNAL_DBS` constant for:
 - **KEGG**: Kyoto Encyclopedia of Genes and Genomes.
@@ -45,7 +45,7 @@ Linking to these external sites occurs in the detail views (`app/(reference-data
 
 ---
 
-## ⚡ Developer Guidelines for Biochem Data
+## Developer Guidelines for Biochem Data
 
 1.  **Never render raw strings**: Always wrap reaction definitions in the `ChemicalEquation` component to handle subscripting.
 2.  **Solr-First**: Avoid making local filtering logic if possible. Use the server-side Solr filtering in `lib/api/biochem.ts` for performance.

@@ -4,7 +4,7 @@ This document defines the **high‑level design** and **information flow** for t
 
 ---
 
-## 🏗️ High‑Level Component Stack
+## High‑Level Component Stack
 
 ModelSEED‑UI is a **React 19 app** built with the Next.js App Router:
 
@@ -15,7 +15,7 @@ ModelSEED‑UI is a **React 19 app** built with the Next.js App Router:
 
 ---
 
-## 🧬 Information Flow & Data Layer
+## Information Flow & Data Layer
 
 All API code lives in `lib/api/`. The app talks to three main backends:
 
@@ -35,7 +35,7 @@ All API code lives in `lib/api/`. The app talks to three main backends:
    - Base: `SOLR_BASE` from `lib/api/config.ts`.  
    - Client: `lib/api/biochem.ts` for reactions/compounds lookups.
 
-### 🔄 Data Fetching Lifecycle (TanStack Query)
+### Data Fetching Lifecycle (TanStack Query)
 
 We use a **query‑first** approach:
 
@@ -46,7 +46,7 @@ We use a **query‑first** approach:
 
 ---
 
-## 🛡️ Theme & Design System
+## Theme & Design System
 
 The app uses a shared MUI theme (see `lib/theme.ts`):
 
@@ -62,7 +62,7 @@ Key patterns:
 
 ---
 
-## ⚡ Developer Performance Guidelines
+## Developer Performance Guidelines
 
 1. **Server vs Client Components**  
    - Default to Server Components in `app/` when you do not need React state or effects.  

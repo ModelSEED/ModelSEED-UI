@@ -4,7 +4,7 @@ This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 rebo
 
 ---
 
-## 🔎 One-Stop Search Map (Quick-Find Table)
+## One-Stop Search Map (Quick-Find Table)
 
 | To change/adjust... | ...Go to this file/folder | Why? |
 | :--- | :--- | :--- |
@@ -19,48 +19,48 @@ This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 rebo
 
 ---
 
-## 🏗️ Folder Structure Tree & Descriptions
+## Folder Structure Tree & Descriptions
 
 A recursive view of the codebase, detailing every major directory’s function and the files within them.
 
-### `📂 app/` — [View Folder README](./app/README.md)
+### `app/` — [View Folder README](./app/README.md)
 The core routing and page-level logic directory using the Next.js App Router.
-- `📂 (reference-data)/` — [View README](./app/(reference-data)/README.md)
-    - `📂 biochem/` — [View README](./app/(reference-data)/biochem/README.md)
-        - `📂 compounds/` — Searchable community compounds.
-        - `📂 reactions/` — Searchable metabolic reactions.
-    - `📂 genomes/` — Publicly available genome repository.
-- `📂 data/[...path]/` — [View README](./app/data/README.md)
+- `(reference-data)/` — [View README](./app/(reference-data)/README.md)
+    - `biochem/` — [View README](./app/(reference-data)/biochem/README.md)
+        - `compounds/` — Searchable community compounds.
+        - `reactions/` — Searchable metabolic reactions.
+    - `genomes/` — Publicly available genome repository.
+- `data/[...path]/` — [View README](./app/data/README.md)
     - **Catch-all** route for legacy links to the Workspace system.
-- `📂 fba/[...path]/` — [View README](./app/fba/README.md)
+- `fba/[...path]/` — [View README](./app/fba/README.md)
     - **Catch-all** for Flux Balance Analysis results. 
-- `📂 gapfill/[...path]/` — [View README](./app/gapfill/README.md)
+- `gapfill/[...path]/` — [View README](./app/gapfill/README.md)
     - **Catch-all** for gapfilling reconstruction logs. 
-- `📂 model/[...path]/` — [View README](./app/model/README.md)
+- `model/[...path]/` — [View README](./app/model/README.md)
     - **Catch-all** for the Metabolic Model viewer.
-- `📂 my-models/` — Protected route where users manage their own workspace models.
-- `📂 auth/` — Contains signup and login forms.
-- `📜 layout.tsx` — The root layout, wrapping every page in the `AuthProvider` and `QueryClient`.
+- `my-models/` — Protected route where users manage their own workspace models.
+- `auth/` — Contains signup and login forms.
+- `layout.tsx` — The root layout, wrapping every page in the `AuthProvider` and `QueryClient`.
 
-### `📂 components/` — [View Folder README](./components/README.md)
+### `components/` — [View Folder README](./components/README.md)
 Reusable pieces of the application.
-- `📂 auth/` — Authentication context, login, and signup modals.
-- `📂 layout/` — Global shell components: `Header.tsx`, `Footer.tsx`, and `AppHeader.tsx`.
-- `📂 ui/` — Scientific UI elements:
-    - `📜 ChemicalEquation.tsx` — Complex regex-based chemical formula renderer.
-    - `📜 GridHighlightText.tsx` — Component used in tables to highlight matches.
-- `📂 icons/` — Custom SVG icons used in the scientific dashboard.
+- `auth/` — Authentication context, login, and signup modals.
+- `layout/` — Global shell components: `Header.tsx`, `Footer.tsx`, and `AppHeader.tsx`.
+- `ui/` — Scientific UI elements:
+    - `ChemicalEquation.tsx` — Complex regex-based chemical formula renderer.
+    - `GridHighlightText.tsx` — Component used in tables to highlight matches.
+- `icons/` — Custom SVG icons used in the scientific dashboard.
 
-### `📂 lib/` — [View Folder README](./lib/README.md)
+### `lib/` — [View Folder README](./lib/README.md)
 The "Brain" of the application—logic, configuration, and API adapters.
-- `📂 api/` — Logic communicating with various ModelSEED/KBase servers.
-    - `📜 biochem.ts` — Solr-based biochemistry searching.
-    - `📜 workspace.ts` — High-level RPC (JSON-RPC) workspace service wrapper.
-    - `📜 auth.ts` — Direct interaction with KBase Auth services.
-- `📂 data/` — Hardcoded/static biological dictionaries and mappings.
-- `📜 theme.ts` — The source of truth for all styling tokens (MUI v7).
+- `api/` — Logic communicating with various ModelSEED/PATRIC services.
+    - `biochem.ts` — Solr-based biochemistry searching.
+    - `workspace.ts` — High-level RPC (JSON-RPC) workspace service wrapper.
+    - `auth.ts` — Direct interaction with auth services.
+- `data/` — Hardcoded/static biological dictionaries and mappings.
+- `theme.ts` — The source of truth for all styling tokens (MUI v7).
 
-### `📂 docs/` — [The Developer Manual](./docs/README.md) (NEW)
+### `docs/` — [The Developer Manual](./docs/README.md)
 Central repository for deep-dive developer guides.
 - **[LEGACY_TRANSITION.md](./docs/LEGACY_TRANSITION.md)** — **New!** Guide on transitioning from AngularJS to Next.js.
 - **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — High-level data flow and tech stack details.
@@ -71,7 +71,7 @@ Central repository for deep-dive developer guides.
 
 ---
 
-## 🔗 Legacy vs. Modern Parity
+## Legacy vs. Modern Parity
 
 | Feature | Legacy (AngularJS) | Modern (Next.js 16) |
 | :--- | :--- | :--- |
@@ -84,7 +84,7 @@ We maintain **100% URL parity** to ensure existing biological citations continue
 
 ---
 
-## 🧬 Key Biological Components to Control-F
+## Key Biological Components to Control-F
 
 | Component | Search Tag (RegEx Friendly) | Location |
 | :--- | :--- | :--- |
@@ -96,7 +96,7 @@ We maintain **100% URL parity** to ensure existing biological citations continue
 
 ---
 
-## 🛠️ GitHub & Repository Info
+## GitHub & Repository Info
 
 - **Repository**: [https://github.com/VibhavSetlur/ModelSEED-UI](https://github.com/VibhavSetlur/ModelSEED-UI)
 - **Primary Branches**: 
@@ -105,7 +105,7 @@ We maintain **100% URL parity** to ensure existing biological citations continue
 
 ---
 
-## ⚡ Developer Quick-Action Checklist
+## Developer Quick-Action Checklist
 
 - **Adding a new legacy route?**
   1. Add a folder to `app/`.
@@ -123,7 +123,7 @@ We maintain **100% URL parity** to ensure existing biological citations continue
 
 ---
 
-## 📈 Roadmap & Tasks
+## Roadmap & Tasks
 For current progress and upcoming feature implementation (e.g., Phase 14: FBA), refer to:
 - **[ROADMAP.md](./.gsd/ROADMAP.md)**
 - **[STATE.md](./.gsd/STATE.md)**

@@ -4,7 +4,7 @@ This guide explains **how to use and extend** the documentation in the `docs/` d
 
 ---
 
-## 📚 How the Documentation Is Organized
+## How the Documentation Is Organized
 
 - `docs/README.md` — the **index**. This is the entry point for developers and should always contain an up‑to‑date table of contents.
 - One deep‑dive Markdown file per subsystem:
@@ -18,7 +18,7 @@ When you introduce a new subsystem (e.g. **Jobs**, **FBA UI**, **GapFill tools**
 
 ---
 
-## ✏️ Adding a New Documentation Page
+## Adding a New Documentation Page
 
 1. **Create the file**
    - Place it directly under `docs/`, e.g. `docs/JOBS.md`.
@@ -40,7 +40,7 @@ When you introduce a new subsystem (e.g. **Jobs**, **FBA UI**, **GapFill tools**
 
 ---
 
-## ✅ Style & Content Guidelines
+## Style & Content Guidelines
 
 - **Audience**: Assume the reader is a senior developer new to this codebase, not a beginner.
 - **Tone**: Concise and factual. Show code paths and decisions; avoid prose that just restates the code.
@@ -53,7 +53,7 @@ When you introduce a new subsystem (e.g. **Jobs**, **FBA UI**, **GapFill tools**
 
 ---
 
-## 🔄 Keeping Docs in Sync with Code
+## Keeping Docs in Sync with Code
 
 Whenever you ship a non‑trivial change to one of these areas, **treat docs as part of the work**:
 
@@ -65,7 +65,7 @@ Commit messages for docs should explain *why* the behavior changed (e.g. `docs: 
 
 ---
 
-## 🔍 Quick Checklist Before Merging
+## Quick Checklist Before Merging
 
 1. Does every new subsystem have a corresponding `docs/*.md` file?
 2. Is `docs/README.md`’s table of contents up to date?

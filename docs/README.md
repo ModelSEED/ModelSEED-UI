@@ -2,7 +2,7 @@
 
 This directory is the **documentation index** for the modern **ModelSEED‑UI** (Next.js 16 + MUI 7). Treat this file as the table of contents for all deep‑dive docs.
 
-## 📁 Deep‑Dive Document Library
+## Deep‑Dive Document Library
 
 | Document | Purpose |
 | :--- | :--- |
@@ -16,7 +16,7 @@ This directory is the **documentation index** for the modern **ModelSEED‑UI** 
 
 ---
 
-## 🛠️ Project Design Principles
+## Project Design Principles
 
 1. **Scientific accuracy first**: Chemical formulas, stoichiometry, and biological identifiers must follow IUPAC and domain standards (see `BIOCHEMISTRY.md`).
 2. **Legacy compatibility**: All published URLs from the previous site should continue to work, either directly or via compatible redirects (see `ROUTING.md` and `LEGACY_TRANSITION.md`).
