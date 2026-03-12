@@ -23,11 +23,20 @@ export const USE_NEW_PROXY = false;
  * should talk to the new modelseed-api backend instead of legacy JSON-RPC
  * services. This is wired as a NEXT_PUBLIC_ env so it can be toggled per
  * environment without code changes.
+ *
+ * Default: true, so that a running modelseed-api instance is used whenever
+ * available. Set NEXT_PUBLIC_USE_MODELSEED_API=false to force legacy behavior.
  */
-export const USE_MODELSEED_API =
-    typeof process !== 'undefined'
-        ? process.env.NEXT_PUBLIC_USE_MODELSEED_API === 'true'
-        : false;
+let useModelseedApiDefault = true;
+if (typeof process !== 'undefined') {
+    const raw = process.env.NEXT_PUBLIC_USE_MODELSEED_API;
+    if (raw === 'false') {
+        useModelseedApiDefault = false;
+    } else if (raw === 'true') {
+        useModelseedApiDefault = true;
+    }
+}
+export const USE_MODELSEED_API = useModelseedApiDefault;
 
 /* ─── Workspace Service ─────────────────────────────────────── */
 
@@ -99,4 +108,5 @@ export const CPD_IMG_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/Mo
  */
 export const MODELSEED_API_URL =
     (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_MODELSEED_API_URL) ||
-    'http://localhost:8000';
+    // Poplar demo instance provided by José for development/testing.
+    'http://poplar.cels.anl.gov:8000';
