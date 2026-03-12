@@ -1,17 +1,19 @@
 # Authentication & Security Strategy (`AUTHENTICATION.md`)
 
-The ModelSEED-UI is powered by the **KBase Authentication System**. This document outlines how users are logged in, how tokens are stored, and how pages are protected.
+ModelSEED‑UI authenticates against **RAST** and **PATRIC/BV‑BRC** services, then reuses the returned token for Workspace, ProbModelSEED, and `modelseed-api` calls. This document outlines how users are logged in, how tokens are stored, and how pages are protected.
 
 ---
 
 ## 🏗️ The Global Auth Provider (`AuthProvider.tsx`)
 
-Located at: `components/auth/AuthProvider.tsx`
+Location: `components/auth/AuthProvider.tsx`
 
-We use a **Zustand store** wrapped in a **React Context Provider** to manage authentication globally. This pattern allows us to:
-1.  **Initialize Once**: The root layout initializes the provider.
-2.  **Persistent Session**: Logic checks for existing tokens in local storage on page load.
-3.  **Global Access**: Any functional component can call `useAuth()` to get the current user and their token.
+- Wraps the app with a React Context that exposes:
+  - `isAuthenticated`, `user`, `token`, `method` (`'RAST' | 'PATRIC'`), `login()`, and `logout()`.
+- On mount, it:
+  - Reads the last `AuthResult` from `localStorage['auth']`.
+  - Listens for `storage` events so logout in one tab logs out all tabs.
+- Tokens are stored **only** in localStorage (no cookies) and sent in the `Authorization` header for all downstream API calls.
 
 ### 🧬 Sample Usage in a Component
 
@@ -19,52 +21,76 @@ We use a **Zustand store** wrapped in a **React Context Provider** to manage aut
 import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function MyProtectedComponent() {
-    const { isAuthenticated, user, token } = useAuth();
+    const { isAuthenticated, user } = useAuth();
 
     if (!isAuthenticated) return <p>Please log in.</p>;
-    
-    return <p>Welcome, {user}! Your token is: {token.substring(0, 5)}...</p>;
+
+    return <p>Welcome, {user}!</p>;
 }
 ```
 
 ---
 
-## 🌉 Sign-In Flow
+## 🌉 Sign‑In Flow (RAST & PATRIC)
 
-ModelSEED-UI connects to a **Backend Proxy** or the **KBase Auth API** directly (see `lib/api/auth.ts`).
+Low‑level calls live in `lib/api/auth.ts`:
 
-1.  **User Input**: User enters credentials through the `SignInModal.tsx`.
-2.  **KBase Auth**: A request is sent to `https://kbase.us/services/auth/api/legacy/KBase/Sessions/Login`.
-3.  **Token Processing**: On success, the backend returns a KBase session token and user metadata.
-4.  **Local Storage**: The token is securely stored in the browser's local storage for session persistence across refreshes.
+1. **User input**  
+   - On the home page or in `SignInModal.tsx`, the user selects **RAST** or **PATRIC** and enters credentials.
+
+2. **Backend login**
+   - PATRIC: `POST https://user.patricbrc.org/authenticate` with `application/x-www-form-urlencoded`.  
+   - RAST: `POST https://p3.theseed.org/Sessions/Login` with `application/x-www-form-urlencoded`.
+
+3. **Token handling**
+   - Both flows resolve to an `AuthResult`:
+     ```ts
+     interface AuthResult {
+       user_id: string;
+       token: string;     // raw PATRIC/RAST token
+       method: 'PATRIC' | 'RAST';
+     }
+     ```
+   - `persistAuth()` serializes this into `localStorage['auth']`.
+
+4. **Usage downstream**
+   - `lib/api/workspace.ts` and `lib/api/modelseed.ts` read the stored token and send:
+     - `Authorization: <token>` for:
+       - `https://p3.theseed.org/services/Workspace`
+       - `https://p3.theseed.org/services/ProbModelSEED`
+       - `${MODELSEED_API_URL}/api/*`
 
 ---
 
 ## 🛡️ Protecting Pages and Routes
 
-We offer two primary ways to protect user data from unauthorized access:
+We use **page‑level guards** plus dedicated components:
 
-### 🎒 Method 1: The `<RequireAuth>` Wrapper
-Best for protecting specific components inside a page.
-```tsx
-import { RequireAuth } from '@/components/auth/RequireAuth';
+### 🎒 `AuthGuard` component
 
-export default function MyPage() {
-    return (
-        <RequireAuth>
-            <MySecretDataViewer />
-        </RequireAuth>
-    );
-}
-```
+- Location: `components/auth/AuthGuard.tsx`.
+- Wraps protected pages such as:
+  - `app/(user-data)/my-models/page.tsx`
+  - `app/(user-data)/myMedia/page.tsx`
+- Behavior:
+  - If `isAuthenticated === false`, renders a sign‑in prompt or redirect.
+  - If `true`, renders children normally.
 
-### 🛣️ Method 2: Conditional Navigation (Page-Level)
-Best for preventing a user from even reaching a URL (e.g., `app/my-models/page.tsx`). We use a simple logic check in the page component to redirect or show a "Sign-in required" view.
+### 🛣️ Conditional Logic in Pages
+
+- Pages can also branch on `isAuthenticated` to:
+  - Short‑circuit API calls (`enabled: isAuthenticated` in `useQuery`).
+  - Swap full tables for “Please sign in to view your data” copy.
+
+---
+
+## ⚡ Development & Testing Notes
+
+- The **developer bypass** in `lib/api/auth.ts` lets you log in with `developer/developer` to get a fixed token without hitting remote services; use this only in local environments.
+- When integrating new backend services (e.g. additional `modelseed-api` endpoints), always:
+  - Read the token via `getStoredAuth()` or `useAuth()`.
+  - Send it in the `Authorization` header as‑is (no extra `Bearer ` prefix unless the backend explicitly requires it).
 
 ---
 
-## ⚡ Mock Authentication Mode (Development)
-For local development where a real KBase session isn't required, the `AuthProvider` can be configured to use a **Mock User** for testing UI behaviors without a live network connection.
-
----
-*Refer to `lib/api/auth.ts` for the low-level RPC calls.*
+*Refer to `WORKSPACE.md` and `ARCHITECTURE.md` for how auth tokens flow into Workspace and `modelseed-api` calls.*
