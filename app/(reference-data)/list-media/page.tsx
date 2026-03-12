@@ -68,6 +68,7 @@ export default function MediaPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                showToolbar
                 slots={{ toolbar: BiochemToolbar }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
