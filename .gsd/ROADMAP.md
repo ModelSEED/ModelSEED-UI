@@ -29,10 +29,11 @@
 - Ensure Build Model UX defaults to the active "UPLOAD Microbes FASTA" tab while keeping the Plant tab disabled with tooltip.
 - Exercise and validate user flows against the new `modelseed-api` backend using test RAST/PATRIC accounts.
 
-### Phase 18: Final Polishing & Performance
+### Phase 18: modelseed-api Verification and System Testing
 **Status**: ⚪ Not Started
-- Global state optimization and bundle reduction.
-- End-to-end testing and production build verification.
+- Rigorous testing and verification of the `modelseed-api` backend (Poplar instance) for models, media, jobs, workspace proxy, and health.
+- Frontend end-to-end testing of authenticated user flows (My Models, My Media, Build Model, and reference data) against `modelseed-api`.
+- Regression checks and readiness assessment for promoting the new stack as the primary ModelSEED UI.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
@@ -41,3 +42,4 @@
 - Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete (service status auth fix).
 - Updated: 2026-03-11 19:36:00 -06:00 - Phase 16 complete (UI/UX refinement and data consistency).
 - Updated: 2026-03-11 20:05:00 -06:00 - Re-scoped Phase 17 for authenticated user data and Workspace/modelseed-api integration.
+- Updated: 2026-03-12 15:30:00 -05:00 - Re-scoped Phase 18 for modelseed-api verification and end-to-end testing.
