@@ -59,3 +59,4 @@ plan: debug
 ## Timestamp Log
 - Created: 2026-03-12 17:55:00 -05:00
 - Updated: 2026-03-12 18:00:00 -05:00 - Fixed BiochemToolbar and search pagination issues
+- Updated: 2026-03-12 18:05:00 -05:00 - Fixed BiochemToolbar hooks order issue (v2 fix)

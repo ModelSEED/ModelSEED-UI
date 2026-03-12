@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     GridToolbarContainer,
     GridToolbarFilterButton,
@@ -15,19 +15,14 @@ import TablePagination from '@mui/material/TablePagination';
 
 function CustomPagination() {
     const apiRef = useGridApiContext();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return null;
-    }
-
+    
     const page = useGridSelector(apiRef, gridPageSelector);
     const pageSize = useGridSelector(apiRef, gridPageSizeSelector);
     const rowCount = useGridSelector(apiRef, gridRowCountSelector);
+
+    if (page === undefined || pageSize === undefined || rowCount === undefined) {
+        return null;
+    }
 
     return (
         <TablePagination
