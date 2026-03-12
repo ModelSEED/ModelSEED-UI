@@ -1,6 +1,7 @@
 ---
 description: Mark current milestone as complete and archive
 globs: 
+alwaysApply: true
 ---
 # /complete-milestone Workflow
 

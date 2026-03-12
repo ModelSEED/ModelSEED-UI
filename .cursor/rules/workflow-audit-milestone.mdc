@@ -1,6 +1,7 @@
 ---
 description: Audit a milestone for quality and completeness
 globs: 
+alwaysApply: true
 ---
 # /audit-milestone Workflow
 

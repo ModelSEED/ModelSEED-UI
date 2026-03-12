@@ -1,6 +1,7 @@
 ---
 description: Update GSD to the latest version from GitHub
 globs: 
+alwaysApply: true
 ---
 # /update Workflow
 

@@ -1,6 +1,7 @@
 ---
 description: The Architect — Analyze codebase and update ARCHITECTURE.md and STACK.md
 globs: 
+alwaysApply: true
 ---
 # /map Workflow
 

@@ -1,6 +1,7 @@
 ---
 description: Capture a todo item for later
 globs: 
+alwaysApply: true
 ---
 # /add-todo Workflow
 

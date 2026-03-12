@@ -1,6 +1,7 @@
 ---
 description: Remove a phase from the roadmap (with safety checks)
 globs: 
+alwaysApply: true
 ---
 # /remove-phase Workflow
 

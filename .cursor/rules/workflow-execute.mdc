@@ -1,6 +1,7 @@
 ---
 description: The Engineer — Execute a specific phase with focused context
 globs: 
+alwaysApply: true
 ---
 # /execute Workflow
 

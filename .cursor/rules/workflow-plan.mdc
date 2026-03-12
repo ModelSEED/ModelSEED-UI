@@ -1,6 +1,7 @@
 ---
 description: The Strategist — Decompose requirements into executable phases in ROADMAP.md
 globs: 
+alwaysApply: true
 ---
 # /plan Workflow
 

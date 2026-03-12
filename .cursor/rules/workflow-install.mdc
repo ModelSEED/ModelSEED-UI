@@ -1,6 +1,7 @@
 ---
 description: Install GSD into the current project from GitHub
 globs: 
+alwaysApply: true
 ---
 # /install Workflow
 

@@ -1,6 +1,7 @@
 ---
 description: Create plans to address gaps found in milestone audit
 globs: 
+alwaysApply: true
 ---
 # /plan-milestone-gaps Workflow
 

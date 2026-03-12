@@ -1,6 +1,7 @@
 ---
 description: Initialize a new project with deep context gathering
 globs: 
+alwaysApply: true
 ---
 # /new-project Workflow
 

@@ -1,6 +1,7 @@
 ---
 description: Show current position in roadmap and next steps
 globs: 
+alwaysApply: true
 ---
 # /progress Workflow
 

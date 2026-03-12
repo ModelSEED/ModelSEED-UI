@@ -1,6 +1,7 @@
 ---
 description: Search the web for information to inform decisions
 globs: 
+alwaysApply: true
 ---
 # /web-search Workflow
 

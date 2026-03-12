@@ -1,6 +1,7 @@
 ---
 description: Show recent GSD changes and new features
 globs: 
+alwaysApply: true
 ---
 # /whats-new Workflow
 

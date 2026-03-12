@@ -1,6 +1,7 @@
 ---
 description: List assumptions made during phase planning
 globs: 
+alwaysApply: true
 ---
 # /list-phase-assumptions Workflow
 

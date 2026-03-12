@@ -1,6 +1,7 @@
 ---
 description: Create a new milestone with phases
 globs: 
+alwaysApply: true
 ---
 # /new-milestone Workflow
 

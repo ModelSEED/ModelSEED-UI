@@ -1,6 +1,7 @@
 ---
 description: Restore context from previous session
 globs: 
+alwaysApply: true
 ---
 # /resume Workflow
 

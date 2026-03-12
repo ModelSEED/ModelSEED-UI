@@ -1,6 +1,7 @@
 ---
 description: Systematic debugging with persistent state
 globs: 
+alwaysApply: true
 ---
 # /debug Workflow
 

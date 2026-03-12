@@ -1,6 +1,7 @@
 ---
 description: List all pending todo items
 globs: 
+alwaysApply: true
 ---
 # /check-todos Workflow
 

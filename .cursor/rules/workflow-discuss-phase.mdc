@@ -1,6 +1,7 @@
 ---
 description: Discuss a phase before planning (clarify scope and approach)
 globs: 
+alwaysApply: true
 ---
 # /discuss-phase Workflow
 

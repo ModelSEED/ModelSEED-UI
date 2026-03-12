@@ -1,6 +1,7 @@
 ---
 description: Deep technical research for a phase
 globs: 
+alwaysApply: true
 ---
 # /research-phase Workflow
 

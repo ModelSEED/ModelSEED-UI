@@ -1,6 +1,7 @@
 ---
 description: The Auditor — Validate work against spec with empirical evidence
 globs: 
+alwaysApply: true
 ---
 # /verify Workflow
 

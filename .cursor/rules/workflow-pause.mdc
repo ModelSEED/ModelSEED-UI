@@ -1,6 +1,7 @@
 ---
 description: Context hygiene — dump state for clean session handoff
 globs: 
+alwaysApply: true
 ---
 # /pause Workflow
 

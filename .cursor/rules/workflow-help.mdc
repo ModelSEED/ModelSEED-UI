@@ -1,6 +1,7 @@
 ---
 description: Show all available GSD commands
 globs: 
+alwaysApply: true
 ---
 # /help Workflow
 

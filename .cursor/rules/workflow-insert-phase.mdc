@@ -1,6 +1,7 @@
 ---
 description: Insert a phase between existing phases (renumbers subsequent)
 globs: 
+alwaysApply: true
 ---
 # /insert-phase Workflow
 

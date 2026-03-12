@@ -1,6 +1,7 @@
 ---
 description: Add a new phase to the end of the roadmap
 globs: 
+alwaysApply: true
 ---
 # /add-phase Workflow
 
