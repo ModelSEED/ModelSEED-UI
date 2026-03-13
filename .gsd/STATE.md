@@ -1,22 +1,20 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
 - **Phase**: 20 (in progress)
-- **Task**: Plan 20.1 API client coverage implemented
-- **Status**: Executing wave 1
+- **Task**: Phase 20 implementation committed; authenticated verification pending
+- **Status**: Verification blocked on live PATRIC token/browser session
 
 ## Last Session Summary
-Phase 20 has started after planning:
-- Completed endpoint-gap audit and created Phase 20 research/plan artifacts.
-- Implemented wave-1 API client work:
-  - Added typed model endpoints (`/api/models/data`, `copy`, `gapfills`, `gapfills/manage`, `fba`).
-  - Added typed jobs endpoints (`/api/jobs`, `reconstruct`, `gapfill`, `fba`, `manage`).
-  - Added shared raw-token auth header helper used by model and workspace clients.
-  - Added workspace proxy helper methods for `create/delete/copy/metadata/permissions/download-url`.
+Phase 20 implementation is complete:
+- Plan 20.1: added typed model/jobs coverage and centralized raw-token auth handling.
+- Plan 20.2: switched workspace consumers to proxy-first behavior and fixed status checks for active backend mode.
+- Plan 20.3: wired Build Model reconstruct submission plus in-app job tracking/polling/cancel surfaces.
+- Verification artifacts created for 20.1, 20.2, 20.3, and the phase overall.
 
 ## Next Steps
-1. Continue Plan 20.2 by migrating page-level workspace consumers and status checks to proxy-safe behavior.
-2. Execute Plan 20.3 to wire Build Model tabs to jobs submission and polling.
-3. Produce `.gsd/phases/20/VERIFICATION.md` with tunnel-backed empirical evidence.
+1. Provide a real PATRIC token or authenticate in the browser against Poplar.
+2. Re-run Phase 20 authenticated smoke tests for reconstruct, gapfill, FBA, and job cancel flows.
+3. If those pass, mark Phase 20 verified and complete in `ROADMAP.md`.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -37,3 +35,4 @@ Phase 20 has started after planning:
 - Updated: 2026-03-12 18:00:00 -05:00 - Debug fix: BiochemToolbar mounted guard, biochem search pagination conflict resolved
 - Updated: 2026-03-12 19:26:13 -05:00 - Planned Phase 20 for model/job/workspace proxy consolidation and Build Model activation.
 - Updated: 2026-03-12 19:26:13 -05:00 - Started Phase 20 execution with API client endpoint expansion and shared auth header wiring.
+- Updated: 2026-03-12 19:55:16 CDT - Phase 20 implementation complete; verification partial pending authenticated Poplar access.
