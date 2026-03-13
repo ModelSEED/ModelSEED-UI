@@ -4,12 +4,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import { workspaceLs } from '@/lib/api/workspace';
 import { listPublicMediaFromApi } from '@/lib/api/modelseed';
 import { USE_MODELSEED_API } from '@/lib/api/config';
-import BiochemToolbar from '@/components/BiochemToolbar';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface MediaItem {
     id: string;
@@ -55,15 +53,28 @@ export default function MediaPage() {
             const data = await workspaceLs(['/chenry/public/modelsupport/media']);
             const items = data['/chenry/public/modelsupport/media'] || [];
             return items
-                .filter((item: any) => item[1] === 'media') // ensure we only list media items
-                .map((item: any) => ({
-                    id: item[0],
-                    name: item[7]?.name || item[0],
-                    type: item[7]?.type || 'N/A',
-                    isDefined: item[7]?.isDefined === '1' || item[7]?.isDefined === 1 ? 'Yes' : 'No',
-                    isMinimal: item[7]?.isMinimal === '1' || item[7]?.isMinimal === 1 ? 'Yes' : 'No',
-                    modDate: item[3],
-                })) as MediaItem[];
+                .filter((item: unknown) => {
+                    const tuple = item as [string, string];
+                    return tuple[1] === 'media';
+                })
+                .map((item: unknown) => {
+                    const tuple = item as [string, string, unknown, string, unknown, unknown, unknown, Record<string, unknown>?];
+                    const meta = tuple[7] || {};
+                    const m = meta as {
+                        name?: string;
+                        type?: string;
+                        isDefined?: string | number;
+                        isMinimal?: string | number;
+                    };
+                    return {
+                        id: tuple[0],
+                        name: m.name || tuple[0],
+                        type: m.type || 'N/A',
+                        isDefined: m.isDefined === '1' || m.isDefined === 1 ? 'Yes' : 'No',
+                        isMinimal: m.isMinimal === '1' || m.isMinimal === 1 ? 'Yes' : 'No',
+                        modDate: tuple[3],
+                    } as MediaItem;
+                });
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -83,7 +94,7 @@ export default function MediaPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 showToolbar
-                slots={{ toolbar: BiochemToolbar }}
+                slots={{ toolbar: DataControlHeader }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
                 }}

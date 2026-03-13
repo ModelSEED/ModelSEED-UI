@@ -4,11 +4,9 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import Link from 'next/link';
 import { workspaceGet } from '@/lib/api/workspace';
-import BiochemToolbar from '@/components/BiochemToolbar';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface SubsystemItem {
     id: string; // role
@@ -98,10 +96,10 @@ export default function SubsystemsPage() {
             // Workspace API wraps "get" differently. result[0] is the main item, and result[0][0] has the payload.
             // Inside result[0][0][1], there's the stringified JSON or structured dict depending on python RPC. 
             // Often it's JSON string in data[0][1].
-            let payloadStr = data[0]?.[1];
+            const payloadStr = data[0]?.[1] as string | undefined;
             if (!payloadStr) return [];
 
-            let parsed: any[];
+            let parsed: unknown[];
             try {
                 parsed = JSON.parse(payloadStr);
             } catch (e) {
@@ -109,23 +107,28 @@ export default function SubsystemsPage() {
                 return [];
             }
 
-            return parsed.map((item: any, idx: number) => ({
-                id: item.role || `subsystem-${idx}`,
-                role: item.role || 'N/A',
-                subsystems: item.subsystems ? Object.keys(item.subsystems) : [],
-                classes: item.classes ? Object.keys(item.classes) : [],
-                pathways: item.pathways ? Object.keys(item.pathways) : [],
-                reactions: item.reactions ? Object.keys(item.reactions) : [],
-                features: item.features ? Object.keys(item.features) : [],
-            })) as SubsystemItem[];
+            return parsed.map((item, idx) => {
+                const row = item as {
+                    role?: string;
+                    subsystems?: Record<string, unknown>;
+                    classes?: Record<string, unknown>;
+                    pathways?: Record<string, unknown>;
+                    reactions?: Record<string, unknown>;
+                    features?: Record<string, unknown>;
+                };
+                return {
+                    id: row.role || `subsystem-${idx}`,
+                    role: row.role || 'N/A',
+                    subsystems: row.subsystems ? Object.keys(row.subsystems) : [],
+                    classes: row.classes ? Object.keys(row.classes) : [],
+                    pathways: row.pathways ? Object.keys(row.pathways) : [],
+                    reactions: row.reactions ? Object.keys(row.reactions) : [],
+                    features: row.features ? Object.keys(row.features) : [],
+                } as SubsystemItem;
+            });
         },
         staleTime: 5 * 60 * 1000,
     });
-
-    const [toolbarSearch, setToolbarSearch] = useState('');
-    // Note: Since we are using client-side filtering with QuickFilter in the toolbar,
-    // we don't strictly need the local 'search' state anymore if we use the grid's internal filter.
-    // But for consistency with the user's request, we'll let the toolbar handle it.
 
     const columns: GridColDef<SubsystemItem>[] = useMemo(
         () => [
@@ -188,7 +191,7 @@ export default function SubsystemsPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 showToolbar
-                slots={{ toolbar: BiochemToolbar }}
+                slots={{ toolbar: DataControlHeader }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
                 }}

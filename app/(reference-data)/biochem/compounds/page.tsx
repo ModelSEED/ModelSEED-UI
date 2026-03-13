@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
-import BiochemToolbar from '@/components/BiochemToolbar';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -125,6 +124,11 @@ export default function CompoundsPage() {
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
     const [search, setSearch] = useState('');
 
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
+        setSearch(newModel.quickFilterValues?.[0] ?? '');
+        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+    }, []);
+
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
@@ -157,13 +161,6 @@ export default function CompoundsPage() {
                 Compounds
             </Typography>
 
-            <DataControlHeader
-                placeholder="Search compounds..."
-                searchValue={search}
-                onSearchChange={setSearch}
-                totalRows={data?.numFound ?? 0}
-            />
-
             <DataGrid<Compound>
                 rows={search ? filteredDocs : (data?.docs ?? [])}
                 columns={columns}
@@ -177,17 +174,20 @@ export default function CompoundsPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 filterMode={search ? undefined : 'server'}
-                filterModel={search ? { items: [] } : filterModel}
-                onFilterModelChange={search ? undefined : setFilterModel}
-                showToolbar={true}
-                slots={{ toolbar: BiochemToolbar }}
+                filterModel={{
+                    ...(search ? { items: [] } : filterModel),
+                    quickFilterValues: search ? [search] : [],
+                }}
+                onFilterModelChange={handleFilterModelChange}
+                showToolbar
+                slots={{ toolbar: DataControlHeader }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
                 }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
-                hideFooter={search ? false : true}
+                hideFooter
                 disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',

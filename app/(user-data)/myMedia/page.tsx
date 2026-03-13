@@ -53,7 +53,6 @@ const columns: GridColDef<MyMediaItem>[] = [
 export default function MyMediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
-    const [search, setSearch] = useState('');
     const { isAuthenticated } = useAuth();
 
     const { data: rows = [], isLoading, error } = useQuery({
@@ -81,12 +80,6 @@ export default function MyMediaPage() {
             );
         },
         staleTime: 5 * 60 * 1000,
-    });
-
-    const filteredRows = rows.filter((row) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return row.name.toLowerCase().includes(q) || row.type.toLowerCase().includes(q);
     });
 
     return (
@@ -118,22 +111,13 @@ export default function MyMediaPage() {
                     </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <DataControlHeader
-                        placeholder="Search my media..."
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        totalRows={filteredRows.length}
-                    />
-                </Box>
-
                 {error ? (
                     <Typography color="error">
                         {error.message}
                     </Typography>
                 ) : (
                     <DataGrid<MyMediaItem>
-                        rows={filteredRows}
+                        rows={rows}
                         columns={columns}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
@@ -141,6 +125,13 @@ export default function MyMediaPage() {
                         onPaginationModelChange={setPaginationModel}
                         sortModel={sortModel}
                         onSortModelChange={setSortModel}
+                        showToolbar
+                        slots={{ toolbar: DataControlHeader }}
+                        slotProps={{
+                            toolbar: { showQuickFilter: true },
+                        }}
+                        hideFooter
+                        disableColumnMenu
                         getRowId={(row) => row.id}
                         disableRowSelectionOnClick
                         autoHeight
@@ -155,7 +146,7 @@ export default function MyMediaPage() {
                     />
                 )}
 
-                {!isLoading && filteredRows.length === 0 && !error && (
+                {!isLoading && rows.length === 0 && !error && (
                     <Typography sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
                         You have no media formulations.
                     </Typography>

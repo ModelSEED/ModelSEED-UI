@@ -31,7 +31,6 @@ interface MyModelItem {
 export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
-    const [search, setSearch] = useState('');
     const { isAuthenticated } = useAuth();
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -136,12 +135,6 @@ export default function MyModelsPage() {
         },
     ], [handleModelDeleted]);
 
-    const filteredRows = rows.filter((row) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return row.id.toLowerCase().includes(q) || (row.orgName && row.orgName.toLowerCase().includes(q));
-    });
-
     return (
         <AuthGuard>
             <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -163,22 +156,13 @@ export default function MyModelsPage() {
                     </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <DataControlHeader
-                        placeholder="Search models..."
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        totalRows={filteredRows.length}
-                    />
-                </Box>
-
                 {error ? (
                     <Typography color="error">
                         {error.message}
                     </Typography>
                 ) : (
                     <DataGrid<MyModelItem>
-                        rows={filteredRows}
+                        rows={rows}
                         columns={columns}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
@@ -186,6 +170,13 @@ export default function MyModelsPage() {
                         onPaginationModelChange={setPaginationModel}
                         sortModel={sortModel}
                         onSortModelChange={setSortModel}
+                        showToolbar
+                        slots={{ toolbar: DataControlHeader }}
+                        slotProps={{
+                            toolbar: { showQuickFilter: true },
+                        }}
+                        hideFooter
+                        disableColumnMenu
                         getRowId={(row) => row.id}
                         disableRowSelectionOnClick
                         autoHeight
@@ -200,7 +191,7 @@ export default function MyModelsPage() {
                     />
                 )}
 
-                {!isLoading && filteredRows.length === 0 && !error && (
+                {!isLoading && rows.length === 0 && !error && (
                     <Typography sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
                         You have no models. Consider reconstructing a model.
                     </Typography>

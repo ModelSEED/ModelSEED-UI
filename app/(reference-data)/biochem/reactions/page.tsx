@@ -10,7 +10,6 @@ import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import IconButton from '@mui/material/IconButton';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
-import BiochemToolbar from '@/components/BiochemToolbar';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -89,6 +88,11 @@ export default function ReactionsPage() {
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
     const [search, setSearch] = useState('');
+
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
+        setSearch(newModel.quickFilterValues?.[0] ?? '');
+        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+    }, []);
 
     // Modal state
     const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -232,13 +236,6 @@ export default function ReactionsPage() {
                 Reactions
             </Typography>
 
-            <DataControlHeader
-                placeholder="Search reactions..."
-                searchValue={search}
-                onSearchChange={setSearch}
-                totalRows={data?.numFound ?? 0}
-            />
-
             <DataGrid<Reaction>
                 rows={search ? filteredDocs : (data?.docs ?? [])}
                 columns={columns}
@@ -252,17 +249,20 @@ export default function ReactionsPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 filterMode={search ? undefined : 'server'}
-                filterModel={search ? { items: [] } : filterModel}
-                onFilterModelChange={search ? undefined : setFilterModel}
-                showToolbar={true}
-                slots={{ toolbar: BiochemToolbar }}
+                filterModel={{
+                    ...(search ? { items: [] } : filterModel),
+                    quickFilterValues: search ? [search] : [],
+                }}
+                onFilterModelChange={handleFilterModelChange}
+                showToolbar
+                slots={{ toolbar: DataControlHeader }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
                 }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
-                hideFooter={search ? false : true}
+                hideFooter
                 disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',

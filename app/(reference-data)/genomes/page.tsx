@@ -4,12 +4,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import { workspaceLs } from '@/lib/api/workspace';
-import BiochemToolbar from '@/components/BiochemToolbar';
+import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface PlantModelItem {
     id: string;
@@ -76,16 +74,28 @@ export default function PlantsPage() {
         queryFn: async () => {
             const data = await workspaceLs(['/plantseed/plantseed/']);
             const items = data['/plantseed/plantseed/'] || [];
-            return items.map((item: any) => ({
-                id: item[0],
-                name: item[7]?.name || 'N/A',
-                source: item[7]?.source || 'N/A',
-                numReactions: item[7]?.num_reactions || 0,
-                numGenes: item[7]?.num_genes || 0,
-                fbaCount: item[7]?.fba_count || 0,
-                gapfills: item[7]?.integrated_gapfills || 0,
-                modDate: item[3],
-            })) as PlantModelItem[];
+            return items.map((item: unknown) => {
+                const tuple = item as [string, unknown, unknown, string, unknown, unknown, unknown, Record<string, unknown>?];
+                const meta = tuple[7] || {};
+                const m = meta as {
+                    name?: string;
+                    source?: string;
+                    num_reactions?: number;
+                    num_genes?: number;
+                    fba_count?: number;
+                    integrated_gapfills?: number;
+                };
+                return {
+                    id: tuple[0],
+                    name: m.name || 'N/A',
+                    source: m.source || 'N/A',
+                    numReactions: m.num_reactions || 0,
+                    numGenes: m.num_genes || 0,
+                    fbaCount: m.fba_count || 0,
+                    gapfills: m.integrated_gapfills || 0,
+                    modDate: tuple[3],
+                } as PlantModelItem;
+            });
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -111,7 +121,7 @@ export default function PlantsPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 showToolbar
-                slots={{ toolbar: BiochemToolbar }}
+                slots={{ toolbar: DataControlHeader }}
                 slotProps={{
                     toolbar: { showQuickFilter: true },
                 }}

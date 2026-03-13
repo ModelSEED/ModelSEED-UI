@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { workspaceGet } from '@/lib/api/workspace';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import DataControlHeader from '@/components/layout/DataControlHeader';
-import BiochemToolbar from '@/components/BiochemToolbar';
 
 type TabKey =
     | 'overview'
@@ -339,7 +338,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     });
 
     const [visualizeOption, setVisualizeOption] = useState('');
-    const [searchByTab, setSearchByTab] = useState<Record<string, string>>({});
     const [paginationByTab, setPaginationByTab] = useState<Record<string, GridPaginationModel>>({});
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
 
@@ -368,12 +366,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const tableConfig = buildTableConfig(modelObject);
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
-
-    const selectedTable = activeTab === 'overview' ? null : tableConfig[activeTab];
-    const currentSearch = searchByTab[activeTab] ?? '';
-    const filteredRows = selectedTable ? tableFilter(selectedTable.rows, currentSearch) : [];
-    const paginationModel = paginationByTab[activeTab] ?? { page: 0, pageSize: 25 };
-    const sortModel = sortByTab[activeTab] ?? [];
 
     const modelMetadata = [
         { label: 'Model ID', value: String(modelObject.id ?? modelName) },
@@ -424,28 +416,26 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         </Box>
                     ) : (
                         <>
-                            <DataControlHeader
-                                placeholder={tab.searchPlaceholder}
-                                searchValue={searchByTab[tab.key] ?? ''}
-                                onSearchChange={(value) =>
-                                    setSearchByTab((prev) => ({ ...prev, [tab.key]: value }))
-                                }
-                                totalRows={tab.key === activeTab ? filteredRows.length : tableConfig[tab.key].rows.length}
-                            />
                             <DataGrid<Record<string, unknown>>
-                                rows={tab.key === activeTab ? filteredRows : tableConfig[tab.key].rows}
+                                rows={tableConfig[tab.key].rows}
                                 columns={tableConfig[tab.key].columns}
                                 pageSizeOptions={[10, 25, 50, 100]}
-                                paginationModel={tab.key === activeTab ? paginationModel : (paginationByTab[tab.key] ?? { page: 0, pageSize: 25 })}
+                                paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
                                 onPaginationModelChange={(model) =>
                                     setPaginationByTab((prev) => ({ ...prev, [tab.key]: model }))
                                 }
-                                sortModel={tab.key === activeTab ? sortModel : (sortByTab[tab.key] ?? [])}
+                                sortModel={sortByTab[tab.key] ?? []}
                                 onSortModelChange={(model) =>
                                     setSortByTab((prev) => ({ ...prev, [tab.key]: model }))
                                 }
                                 showToolbar
-                                slots={{ toolbar: BiochemToolbar }}
+                                slots={{ toolbar: DataControlHeader }}
+                                slotProps={{
+                                    toolbar: { showQuickFilter: true },
+                                }}
+                                hideFooter
+                                disableColumnMenu
+                                getRowId={(row) => String(row.id ?? '')}
                                 disableRowSelectionOnClick
                                 autoHeight
                                 sx={{
