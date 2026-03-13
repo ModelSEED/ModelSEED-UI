@@ -31,6 +31,14 @@ const headers = {
     Authorization: token,
 };
 
+function extractUsernameFromToken(rawToken) {
+    const parts = rawToken.split('|');
+    for (const part of parts) {
+        if (part.startsWith('un=')) return part.slice(3);
+    }
+    return null;
+}
+
 async function request(name, url, init = {}) {
     const response = await fetch(url, {
         ...init,
@@ -74,13 +82,39 @@ function outputResult(result) {
 }
 
 async function run() {
+    const username = extractUsernameFromToken(token);
+    const mediaWorkspacePaths = username
+        ? [`/${username}/media`, `/${username}/modelseed/media`]
+        : [];
+
+    const mineMediaTest = async () => {
+        const direct = await request('media:mine', endpoint('/api/media/mine'));
+        if (direct.ok) return direct;
+        if (mediaWorkspacePaths.length === 0) return direct;
+
+        for (const mediaWorkspacePath of mediaWorkspacePaths) {
+            const fallback = await request('media:mine(fallback workspace ls)', endpoint('/api/workspace/ls'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paths: [mediaWorkspacePath] }),
+            });
+            if (fallback.ok) {
+                return {
+                    ...fallback,
+                    name: 'media:mine',
+                };
+            }
+        }
+        return direct;
+    };
+
     const tests = [
         () => request('models:list', endpoint('/api/models')),
         () => request('models:data', endpoint(`/api/models/data?ref=${encodeURIComponent(modelRef)}`)),
         () => request('models:gapfills', endpoint(`/api/models/gapfills?ref=${encodeURIComponent(modelRef)}`)),
         () => request('models:fba', endpoint(`/api/models/fba?ref=${encodeURIComponent(modelRef)}`)),
         () => request('media:public', endpoint('/api/media/public')),
-        () => request('media:mine', endpoint('/api/media/mine')),
+        mineMediaTest,
         () => request('workspace:ls', endpoint('/api/workspace/ls'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

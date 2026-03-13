@@ -7,8 +7,14 @@
  * touching the UI components again.
  */
 
-import { MODELSEED_API_URL, MODELSEED_SUPPORT_URL, USE_MODELSEED_API } from './config';
-import { withRawTokenAuth } from './requestAuth';
+import {
+    MODELSEED_API_URL,
+    MODELSEED_SUPPORT_URL,
+    USE_MODELSEED_API,
+    USE_NEW_PROXY,
+    WORKSPACE_URL,
+} from './config';
+import { getStoredAuthUsername, withRawTokenAuth } from './requestAuth';
 
 export interface ModelseedModelSummary {
     ref: string;
@@ -364,7 +370,27 @@ export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]>
 }
 
 export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
-    return listMediaGeneric('/api/media/mine');
+    const primary = await listMediaGeneric('/api/media/mine');
+    if (primary.length > 0) return primary;
+
+    if (!USE_NEW_PROXY) return primary;
+    const username = getStoredAuthUsername();
+    if (!username) return primary;
+
+    try {
+        const fallbackPaths = [
+            `/${username}/media`,
+            `/${username}/modelseed/media`,
+        ];
+        for (const path of fallbackPaths) {
+            const viaWorkspace = await listMediaViaWorkspaceLs(path);
+            if (viaWorkspace.length > 0) return viaWorkspace;
+        }
+        return primary;
+    } catch (err) {
+        console.warn('modelseed-api: fallback /api/workspace/ls media lookup failed:', err);
+        return primary;
+    }
 }
 
 async function listMediaGeneric(path: string): Promise<ModelseedMediaSummary[]> {
@@ -403,31 +429,77 @@ async function listMediaGeneric(path: string): Promise<ModelseedMediaSummary[]> 
 
     try {
         const raw = await modelseedFetch<RawMediaResponse>(path);
-        const summaries: ModelseedMediaSummary[] = [];
-
-        for (const entries of Object.values(raw)) {
-            if (!Array.isArray(entries)) continue;
-            for (const entry of entries) {
-                if (!Array.isArray(entry)) continue;
-                const [name, type, , modDate, id, , , metadata] = entry;
-                const meta = metadata && typeof metadata === 'object'
-                    ? (metadata as Record<string, unknown>)
-                    : undefined;
-                summaries.push({
-                    id: id ? String(id) : String(name ?? ''),
-                    name: String(name ?? ''),
-                    type: type ? String(type) : undefined,
-                    modDate: modDate ? String(modDate) : undefined,
-                    isMinimal: (meta?.isMinimal ?? meta?.is_minimal) as boolean | string | undefined,
-                    isDefined: (meta?.isDefined ?? meta?.is_defined) as boolean | string | undefined,
-                });
-            }
-        }
-        return summaries;
+        return mapRawMediaResponse(raw);
     } catch (err) {
         // If the backend returns 404/500, it might mean the endpoint isn't implemented/enabled
         // for this user or path. We log it and return an empty array to prevent a page crash.
         console.warn(`modelseed-api: ${path} returned an error:`, err);
         return [];
     }
+}
+
+async function listMediaViaWorkspaceLs(path: string): Promise<ModelseedMediaSummary[]> {
+    const response = await fetch(`${WORKSPACE_URL}/ls`, {
+        method: 'POST',
+        headers: withRawTokenAuth(
+            {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            true,
+        ),
+        body: JSON.stringify({ paths: [path] }),
+    });
+
+    const { payload, rawText } = await parseJsonResponse(response);
+    if (!response.ok) {
+        const detail = extractApiErrorMessage(payload);
+        throw new Error(
+            `workspace media ls failed (${response.status})${detail ? `: ${detail}` : rawText ? `: ${rawText}` : ''}`,
+        );
+    }
+
+    const unwrapped = (
+        payload &&
+        typeof payload === 'object' &&
+        'result' in (payload as Record<string, unknown>) &&
+        Array.isArray((payload as { result?: unknown[] }).result)
+    )
+        ? (payload as { result: unknown[] }).result[0]
+        : payload;
+
+    if (!unwrapped || typeof unwrapped !== 'object') return [];
+    return mapRawMediaResponse(unwrapped as Record<string, unknown[]>);
+}
+
+function mapRawMediaResponse(raw: Record<string, unknown[]>): ModelseedMediaSummary[] {
+    const summaries: ModelseedMediaSummary[] = [];
+    for (const entries of Object.values(raw)) {
+        if (!Array.isArray(entries)) continue;
+        for (const entry of entries) {
+            if (!Array.isArray(entry)) continue;
+            const [name, type, , modDate, id, , , metadata] = entry as [
+                unknown,
+                unknown,
+                unknown,
+                unknown,
+                unknown,
+                unknown?,
+                unknown?,
+                unknown?,
+            ];
+            const meta = metadata && typeof metadata === 'object'
+                ? (metadata as Record<string, unknown>)
+                : undefined;
+            summaries.push({
+                id: id ? String(id) : String(name ?? ''),
+                name: String(name ?? ''),
+                type: type ? String(type) : undefined,
+                modDate: modDate ? String(modDate) : undefined,
+                isMinimal: (meta?.isMinimal ?? meta?.is_minimal) as boolean | string | undefined,
+                isDefined: (meta?.isDefined ?? meta?.is_defined) as boolean | string | undefined,
+            });
+        }
+    }
+    return summaries;
 }

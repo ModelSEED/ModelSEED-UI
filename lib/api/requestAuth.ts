@@ -27,3 +27,16 @@ export function withRawTokenAuth(
         Authorization: token,
     };
 }
+
+export function getStoredAuthUsername(): string | null {
+    const token = getStoredAuthToken();
+    if (!token) return null;
+    const parts = token.split('|');
+    for (const part of parts) {
+        if (part.startsWith('un=')) {
+            const value = part.slice(3).trim();
+            return value || null;
+        }
+    }
+    return null;
+}

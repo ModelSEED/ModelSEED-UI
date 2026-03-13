@@ -1,21 +1,22 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 22 (planning complete)
-- **Task**: Poplar endpoint parity plans created for model/user-data reliability
-- **Status**: Ready for execution
+- **Phase**: 22 (completed)
+- **Task**: Demo-aligned API integration for myMedia/build-model/model-detail verified
+- **Status**: Verified (PASS)
 
 ## Last Session Summary
-Phase 22 planning completed with discovery-level research and executable plans:
-- Added `.gsd/phases/22/RESEARCH.md` for Poplar endpoint behavior and workspace-get risk analysis.
-- Created `22.1-PLAN.md` for API error normalization and smoke test harness.
-- Created `22.2-PLAN.md` for model detail migration to `/api/models/*` endpoint-first loading.
-- Created `22.3-PLAN.md` for My Models click-through hardening and authenticated end-to-end verification.
-- Re-scoped plans to explicitly include `/myMedia` stabilization (including broken banner removal), `/plant` full build+jobs flow, and the target model route `/model/seaver@patricbrc.org/modelseed/patrictest_121620`.
+Phase 22 executed end-to-end:
+- API error handling normalized across workspace/modelseed clients.
+- Added authenticated smoke command `npm run test:poplar-smoke`.
+- Model detail now loads endpoint-first from `/api/models/*` with workspace fallback.
+- `/myMedia` broken banner removed and media loading hardened with workspace fallback paths.
+- `/plant` Build Model table actions guarded during in-flight submissions.
+- Verified against localhost demo API with raw token auth (`8/8` smoke checks passed).
 
 ## Next Steps
-1. /execute 22
-2. Run authenticated Poplar smoke checks with raw PATRIC token.
-3. Produce `.gsd/phases/22/VERIFICATION.md` with empirical evidence.
+1. Run `/progress` to confirm current milestone/phase status.
+2. Start planning next phase focused on remaining auth/workspace edge cases if needed.
+3. Optionally run `/verify 21` to close out outstanding Phase 21 manual checks.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -42,3 +43,4 @@ Phase 22 planning completed with discovery-level research and executable plans:
 - Updated: 2026-03-13 10:05:09 CDT - Simplified Build Model PATRIC/RAST UX to table-only flow and fixed HTTP-500 RPC fallback parsing.
 - Updated: 2026-03-13 10:56:00 CDT - Planned Phase 22 for Poplar endpoint parity and model flow reliability.
 - Updated: 2026-03-13 11:01:38 CDT - Re-planned Phase 22 with explicit demo-aligned outcomes for `/myMedia`, `/plant`, and `/model/...`.
+- Updated: 2026-03-13 11:12:24 CDT - Executed and verified Phase 22 with endpoint smoke tests and page integration fixes.
