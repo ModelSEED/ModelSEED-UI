@@ -44,6 +44,15 @@
 - Integrated DataControlHeader into My Models and My Media pages.
 - Added DataControlHeader to biochem reference data tabs (compounds, reactions).
 
+### Phase 20: New API Consolidation (Models, Jobs, Workspace Proxy)
+**Status**: ⬜ Not Started
+- Replace fragmented frontend backend calls with a single typed `modelseed-api` client covering:
+  - Models: `/api/models`, `/api/models/data`, `/api/models/export`, `/api/models` (DELETE), `/api/models/copy`, `/api/models/gapfills`, `/api/models/gapfills/manage`, `/api/models/fba`.
+  - Jobs: `/api/jobs`, `/api/jobs/reconstruct`, `/api/jobs/gapfill`, `/api/jobs/fba`, `/api/jobs/manage`.
+  - Workspace proxy: `/api/workspace/{ls|get|create|delete|copy|metadata|permissions|download-url}`.
+- Ensure auth compatibility for PATRIC/RAST tokens through the SSH tunnel target and verify all requests under `USE_NEW_PROXY=true` and `USE_MODELSEED_API=true`.
+- Implement Build Model end-to-end flows (submit, poll jobs, manage outputs) against the new API and remove remaining placeholder tables in Build Model tabs.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -56,3 +65,4 @@
 - Updated: 2026-03-12 17:30:33 -05:00 - Executed Phase 19 plans and produced summaries/verification; pending manual browser checks.
 - Updated: 2026-03-12 17:40:00 -05:00 - Added Phase 19.4 plan for DataControlHeader integration.
 - Updated: 2026-03-12 17:45:00 -05:00 - Phase 19.4 complete: DataControlHeader integrated into all user data and biochem pages.
+- Updated: 2026-03-12 19:26:13 -05:00 - Added Phase 20 scope for models/jobs/workspace proxy and Build Model end-to-end integration.

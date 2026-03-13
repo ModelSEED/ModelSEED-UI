@@ -1,21 +1,22 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 19 (verified)
-- **Task**: All Phase 19 tasks complete and verified
-- **Status**: ✅ Complete and verified
+- **Phase**: 20 (planned)
+- **Task**: Phase 20 planning complete
+- **Status**: Ready for execution
 
 ## Last Session Summary
-Executed Phase 19 implementation plans:
-- Phase 19.1: Build Model maintenance and My Media disabled create button
-- Phase 19.2: My Models Commands column (download + delete)
-- Phase 19.3: Model Detail tabbed UI with URL sync
-- Phase 19.4: DataControlHeader integration into My Models, My Media, Biochem Compounds, Biochem Reactions
-- All phases verified with PASS verdict
+Completed migration planning for new API consolidation as Phase 20:
+- Audited current integration coverage for models/jobs/workspace proxy
+- Documented endpoint gaps and auth/proxy risks in `.gsd/phases/20/RESEARCH.md`
+- Created execution plans:
+  - 20.1 API client completion (models/jobs/auth)
+  - 20.2 Workspace proxy migration and page wiring
+  - 20.3 Build Model + jobs end-to-end activation
 
 ## Next Steps
-1. Proceed to Phase 17 or Phase 20 planning.
-2. Phase 17: Authenticated User Data & Workspace/API Integration
-3. Consider legacy parity features and enhancements
+1. /execute 20 — implement all Phase 20 plans in wave order.
+2. Verify tunnel-backed operation with `USE_NEW_PROXY=true` and `USE_MODELSEED_API=true`.
+3. Produce `.gsd/phases/20/VERIFICATION.md` with empirical evidence.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -34,3 +35,4 @@ Executed Phase 19 implementation plans:
 - Updated: 2026-03-12 17:45:00 -05:00 - Phase 19.4 executed: DataControlHeader integrated into My Models, My Media, Biochem Compounds, Biochem Reactions.
 - Updated: 2026-03-12 17:50:00 -05:00 - Phase 19 fully verified (PASS)
 - Updated: 2026-03-12 18:00:00 -05:00 - Debug fix: BiochemToolbar mounted guard, biochem search pagination conflict resolved
+- Updated: 2026-03-12 19:26:13 -05:00 - Planned Phase 20 for model/job/workspace proxy consolidation and Build Model activation.
