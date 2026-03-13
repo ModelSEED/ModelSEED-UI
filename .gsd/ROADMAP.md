@@ -63,6 +63,15 @@
 - Use `DataControlHeader` for consistent search and pagination in PATRIC/RAST tabs.
 - Ensure the "Build Model" action from the table correctly initiates reconstruction.
 
+### Phase 22: Poplar API Endpoint Parity and Model Flow Reliability
+**Status**: ⚪ Not Started
+- Align frontend API usage with Poplar `/demo`-validated endpoint behavior for models/jobs/media/workspace (excluding biochem table serving).
+- Remove model detail's hard dependency on workspace `/get` by preferring `/api/models/data`, `/api/models/gapfills`, and `/api/models/fba`.
+- Add repeatable smoke verification for authenticated endpoint coverage against Poplar.
+- Ensure My Models click-through and downstream model detail rendering are stable with real user refs and raw PATRIC token auth.
+- Finalize `/myMedia` endpoint-backed behavior and remove broken banner once stable.
+- Finalize `/plant` build model and jobs workflows end-to-end using authenticated API calls.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -80,3 +89,5 @@
 - Updated: 2026-03-12 19:55:16 CDT - Phase 20 implementation committed; final authenticated Poplar verification still pending.
 - Updated: 2026-03-13 09:30:00 -05:00 - Added Phase 21 for PATRIC/RAST Genome Selection Fix in Build Model page.
 - Updated: 2026-03-13 09:57:09 CDT - Executed Phase 21 plans; implementation complete with build verification, awaiting authenticated browser validation.
+- Updated: 2026-03-13 10:56:00 CDT - Added Phase 22 for Poplar endpoint parity and model flow reliability hardening.
+- Updated: 2026-03-13 11:01:38 CDT - Re-scoped Phase 22 with explicit `/myMedia`, `/plant`, and target `/model/...` outcomes aligned to demo behavior.

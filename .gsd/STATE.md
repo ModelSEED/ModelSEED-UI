@@ -1,24 +1,21 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 21 (execution complete, verification partial)
-- **Task**: PATRIC/RAST table integration implemented and build-verified
-- **Status**: Waiting for authenticated browser validation
+- **Phase**: 22 (planning complete)
+- **Task**: Poplar endpoint parity plans created for model/user-data reliability
+- **Status**: Ready for execution
 
 ## Last Session Summary
-Phase 21 implementation is complete at code/build level:
-- Plan 21.1: added `lib/api/patric.ts` and `listRastGenomes` API support in `lib/api/modelseed.ts`.
-- Plan 21.2: added `PatricGenomesTable` and `RastGenomesTable` with Build Model action wiring in `app/(build-model)/plant/page.tsx`.
-- `npm run build` passes after integration.
-- Debug follow-up fixed runtime API issues:
-  - PATRIC query builder now falls back to `keyword(*)` for empty/invalid search input.
-  - RAST RPC now retries with `list_rast_jobs` when `msSupport` package prefix is unsupported.
-- Follow-up UI simplification:
-  - Removed the Selected Genome Configuration blocks from PATRIC/RAST tabs; table row action is now the only build trigger.
+Phase 22 planning completed with discovery-level research and executable plans:
+- Added `.gsd/phases/22/RESEARCH.md` for Poplar endpoint behavior and workspace-get risk analysis.
+- Created `22.1-PLAN.md` for API error normalization and smoke test harness.
+- Created `22.2-PLAN.md` for model detail migration to `/api/models/*` endpoint-first loading.
+- Created `22.3-PLAN.md` for My Models click-through hardening and authenticated end-to-end verification.
+- Re-scoped plans to explicitly include `/myMedia` stabilization (including broken banner removal), `/plant` full build+jobs flow, and the target model route `/model/seaver@patricbrc.org/modelseed/patrictest_121620`.
 
 ## Next Steps
-1. Authenticate in browser with a valid PATRIC/RAST token.
-2. Verify PATRIC search and RAST job listing populate in `/plant` tabs.
-3. Submit one reconstruction from each tab and confirm job tracking in `/my-models`.
+1. /execute 22
+2. Run authenticated Poplar smoke checks with raw PATRIC token.
+3. Produce `.gsd/phases/22/VERIFICATION.md` with empirical evidence.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -43,3 +40,5 @@ Phase 21 implementation is complete at code/build level:
 - Updated: 2026-03-13 09:57:09 CDT - Phase 21 executed with build-verified API/table integration; manual authenticated verification pending.
 - Updated: 2026-03-13 10:02:46 CDT - Debugged Phase 21 runtime API failures and applied PATRIC/RAST compatibility fixes.
 - Updated: 2026-03-13 10:05:09 CDT - Simplified Build Model PATRIC/RAST UX to table-only flow and fixed HTTP-500 RPC fallback parsing.
+- Updated: 2026-03-13 10:56:00 CDT - Planned Phase 22 for Poplar endpoint parity and model flow reliability.
+- Updated: 2026-03-13 11:01:38 CDT - Re-planned Phase 22 with explicit demo-aligned outcomes for `/myMedia`, `/plant`, and `/model/...`.
