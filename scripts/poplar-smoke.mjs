@@ -1,0 +1,120 @@
+#!/usr/bin/env node
+
+const argv = new Set(process.argv.slice(2));
+
+if (argv.has('--help') || argv.has('-h')) {
+    console.log(`Usage: node scripts/poplar-smoke.mjs
+
+Environment variables:
+  PATRIC_TOKEN        Raw PATRIC auth token (required)
+  MODELSEED_API_URL   API base URL (default: http://poplar.cels.anl.gov:8000)
+  MODEL_REF           Model workspace ref for detail checks
+                      (default: /seaver@patricbrc.org/modelseed/Test)
+  WORKSPACE_PATH      Workspace path for ls/get checks
+                      (default: /seaver@patricbrc.org/modelseed/)
+`);
+    process.exit(0);
+}
+
+const token = process.env.PATRIC_TOKEN;
+if (!token) {
+    console.error('Missing PATRIC_TOKEN. Export a raw token before running smoke tests.');
+    process.exit(1);
+}
+
+const baseUrl = (process.env.MODELSEED_API_URL || 'http://poplar.cels.anl.gov:8000').replace(/\/$/, '');
+const modelRef = process.env.MODEL_REF || '/seaver@patricbrc.org/modelseed/Test';
+const workspacePath = process.env.WORKSPACE_PATH || '/seaver@patricbrc.org/modelseed/';
+
+const headers = {
+    Accept: 'application/json',
+    Authorization: token,
+};
+
+async function request(name, url, init = {}) {
+    const response = await fetch(url, {
+        ...init,
+        headers: {
+            ...headers,
+            ...(init.headers || {}),
+        },
+    });
+    const text = await response.text().catch(() => '');
+    let json;
+    try {
+        json = text ? JSON.parse(text) : null;
+    } catch {
+        json = null;
+    }
+    return {
+        name,
+        url,
+        status: response.status,
+        ok: response.ok,
+        text,
+        json,
+    };
+}
+
+function endpoint(path) {
+    return `${baseUrl}${path}`;
+}
+
+function outputResult(result) {
+    if (result.ok) {
+        console.log(`PASS ${result.name} -> ${result.status}`);
+        return;
+    }
+    const detail = result.json?.detail
+        || result.json?.error?.message
+        || result.json?.message
+        || result.text
+        || 'Unknown error';
+    console.log(`FAIL ${result.name} -> ${result.status}: ${detail}`);
+}
+
+async function run() {
+    const tests = [
+        () => request('models:list', endpoint('/api/models')),
+        () => request('models:data', endpoint(`/api/models/data?ref=${encodeURIComponent(modelRef)}`)),
+        () => request('models:gapfills', endpoint(`/api/models/gapfills?ref=${encodeURIComponent(modelRef)}`)),
+        () => request('models:fba', endpoint(`/api/models/fba?ref=${encodeURIComponent(modelRef)}`)),
+        () => request('media:public', endpoint('/api/media/public')),
+        () => request('media:mine', endpoint('/api/media/mine')),
+        () => request('workspace:ls', endpoint('/api/workspace/ls'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paths: [workspacePath] }),
+        }),
+        () => request('workspace:get', endpoint('/api/workspace/get'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ objects: [modelRef] }),
+        }),
+    ];
+
+    console.log(`Running smoke tests against ${baseUrl}`);
+    console.log(`Model ref: ${modelRef}`);
+    console.log(`Workspace path: ${workspacePath}`);
+    console.log('');
+
+    const results = [];
+    for (const test of tests) {
+        const result = await test();
+        results.push(result);
+        outputResult(result);
+    }
+
+    const failures = results.filter((r) => !r.ok);
+    console.log('');
+    console.log(`Summary: ${results.length - failures.length}/${results.length} passed`);
+
+    if (failures.length > 0) {
+        process.exit(1);
+    }
+}
+
+run().catch((error) => {
+    console.error('Smoke test crashed:', error instanceof Error ? error.message : String(error));
+    process.exit(1);
+});
