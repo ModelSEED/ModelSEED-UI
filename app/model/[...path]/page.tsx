@@ -11,8 +11,12 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import { useRouter } from 'next/navigation';
 
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
-import { USE_NEW_PROXY } from '@/lib/api/config';
-import { submitFbaJobFromApi, submitGapfillJobFromApi } from '@/lib/api/modelseed';
+import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
+import {
+    getModelDetailBundleFromApi,
+    submitFbaJobFromApi,
+    submitGapfillJobFromApi,
+} from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import DataControlHeader from '@/components/layout/DataControlHeader';
@@ -306,9 +310,20 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     }, [workspacePath]);
 
     const { data: modelData, isLoading, error } = useQuery({
-        queryKey: ['workspaceGet', USE_NEW_PROXY, ...workspaceCandidates],
+        queryKey: ['modelDetail', USE_MODELSEED_API, USE_NEW_PROXY, ...workspaceCandidates],
         queryFn: async () => {
             const failures: string[] = [];
+            if (USE_MODELSEED_API) {
+                for (const candidate of workspaceCandidates) {
+                    try {
+                        const detail = await getModelDetailBundleFromApi(candidate);
+                        return detail.data;
+                    } catch (err) {
+                        const reason = err instanceof Error ? err.message : 'Unknown model endpoint error';
+                        failures.push(`model-api ${candidate}: ${reason}`);
+                    }
+                }
+            }
             for (const candidate of workspaceCandidates) {
                 try {
                     const result = await workspaceGet([candidate]);
@@ -316,7 +331,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     if (object) return object;
                 } catch (err) {
                     const reason = err instanceof Error ? err.message : 'Unknown workspace error';
-                    failures.push(`${candidate}: ${reason}`);
+                    failures.push(`workspace ${candidate}: ${reason}`);
                 }
             }
             throw new Error(`Failed to load model object. Tried refs: ${failures.join(' | ')}`);

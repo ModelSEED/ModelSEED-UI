@@ -49,6 +49,12 @@ interface TrackedJobWithStatus extends TrackedJob {
     type?: string;
 }
 
+function normalizeModelRef(ref: string): string {
+    const trimmed = ref.trim();
+    if (!trimmed) return '/';
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
+
 export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
@@ -81,7 +87,7 @@ export default function MyModelsPage() {
                     gapfills: (m.unintegrated_gapfills ?? 0) + (m.integrated_gapfills ?? 0),
                     status: m.status ?? 'complete',
                     modDate: m.rundate ?? new Date().toISOString(),
-                    path: m.ref.startsWith('/') ? m.ref : `/${m.ref}`,
+                    path: normalizeModelRef(m.ref),
                 })) as MyModelItem[];
             }
 
