@@ -11,9 +11,10 @@ import { listRastGenomes, RastGenomeJob } from '@/lib/api/modelseed';
 
 interface RastGenomesTableProps {
     onSelectGenome: (job: RastGenomeJob) => void;
+    disabled?: boolean;
 }
 
-export default function RastGenomesTable({ onSelectGenome }: RastGenomesTableProps) {
+export default function RastGenomesTable({ onSelectGenome, disabled = false }: RastGenomesTableProps) {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'mod_time', sort: 'desc' }]);
 
@@ -46,6 +47,7 @@ export default function RastGenomesTable({ onSelectGenome }: RastGenomesTablePro
                     <Button
                         size="small"
                         variant="outlined"
+                        disabled={disabled}
                         onClick={() => onSelectGenome(params.row)}
                     >
                         Build Model
@@ -53,7 +55,7 @@ export default function RastGenomesTable({ onSelectGenome }: RastGenomesTablePro
                 ),
             },
         ],
-        [onSelectGenome],
+        [disabled, onSelectGenome],
     );
 
     return (

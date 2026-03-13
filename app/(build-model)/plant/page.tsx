@@ -376,7 +376,10 @@ export default function BuildModelPlantPage() {
                             Search PATRIC genomes and click <strong>Build Model</strong> in the table to
                             submit directly with default settings.
                         </Typography>
-                        <PatricGenomesTable onSelectGenome={handlePatricGenomeSelect} />
+                        <PatricGenomesTable
+                            onSelectGenome={handlePatricGenomeSelect}
+                            disabled={submitting !== null}
+                        />
                     </Stack>
                 </TabPanel>
 
@@ -387,7 +390,10 @@ export default function BuildModelPlantPage() {
                             Select one of your RAST genome jobs and click <strong>Build Model</strong> in
                             the table to submit directly with default settings.
                         </Typography>
-                        <RastGenomesTable onSelectGenome={handleRastGenomeSelect} />
+                        <RastGenomesTable
+                            onSelectGenome={handleRastGenomeSelect}
+                            disabled={submitting !== null}
+                        />
                     </Stack>
                 </TabPanel>
 

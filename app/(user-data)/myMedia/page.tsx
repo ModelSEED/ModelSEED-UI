@@ -6,9 +6,6 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { listMyMediaFromApi } from '@/lib/api/modelseed';
@@ -31,13 +28,10 @@ const columns: GridColDef<MyMediaItem>[] = [
         headerName: 'Media ID',
         width: 250,
         renderCell: (params) => (
-            <Link
-                href={`/media${params.row.path}`}
-                style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
-            >
+            <Box sx={{ color: '#00acc1', fontWeight: 500 }}>
                 {params.value}
-            </Link>
-        )
+            </Box>
+        ),
     },
     { field: 'isMinimal', headerName: 'Minimal?', width: 150 },
     { field: 'isDefined', headerName: 'Defined?', width: 150 },
@@ -85,12 +79,6 @@ export default function MyMediaPage() {
     return (
         <AuthGuard>
             <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Alert severity="warning" variant="outlined" sx={{ mb: 2 }}>
-                    <AlertTitle>Service Notice</AlertTitle>
-                    Individual user media formulas are currently experiencing synchronization issues with the legacy workspace backend. 
-                    Management of private media is temporarily read-only. We apologize for the inconvenience.
-                </Alert>
-
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
                     <Button
                         variant="contained"

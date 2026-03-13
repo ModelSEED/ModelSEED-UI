@@ -17,6 +17,7 @@ import { PatricGenome, searchPatricGenomes } from '@/lib/api/patric';
 
 interface PatricGenomesTableProps {
     onSelectGenome: (genome: PatricGenome) => void;
+    disabled?: boolean;
 }
 
 function toSortToken(sortModel: GridSortModel): string {
@@ -31,7 +32,7 @@ function extractQuickFilterQuery(filterModel: GridFilterModel): string {
     return String(values[0] ?? '').trim();
 }
 
-export default function PatricGenomesTable({ onSelectGenome }: PatricGenomesTableProps) {
+export default function PatricGenomesTable({ onSelectGenome, disabled = false }: PatricGenomesTableProps) {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'genome_name', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [], quickFilterValues: [] });
@@ -74,6 +75,7 @@ export default function PatricGenomesTable({ onSelectGenome }: PatricGenomesTabl
                     <Button
                         size="small"
                         variant="outlined"
+                        disabled={disabled}
                         onClick={() => onSelectGenome(params.row)}
                     >
                         Build Model
@@ -81,7 +83,7 @@ export default function PatricGenomesTable({ onSelectGenome }: PatricGenomesTabl
                 ),
             },
         ],
-        [onSelectGenome],
+        [disabled, onSelectGenome],
     );
 
     return (
