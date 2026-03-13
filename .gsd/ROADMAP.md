@@ -55,6 +55,14 @@
 - **Biochemistry:** Do not switch reference data tables to new API; keep using Solr for biochem search and table serving.
 - Implement Build Model end-to-end flows (submit, poll jobs, manage outputs) against the new API.
 
+### Phase 21: PATRIC & RAST Genome Selection Fix
+**Status**: ⚪ Not Started
+- Replace basic text inputs for PATRIC/RAST genomes in the "Build Model" page with functional, searchable data grids.
+- Implement PATRIC Data API (RQL) for genome searching.
+- Implement RAST job listing API via modelseed_support service.
+- Use `DataControlHeader` for consistent search and pagination in PATRIC/RAST tabs.
+- Ensure the "Build Model" action from the table correctly initiates reconstruction.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -70,3 +78,4 @@
 - Updated: 2026-03-12 19:26:13 -05:00 - Added Phase 20 scope for models/jobs/workspace proxy and Build Model end-to-end integration.
 - Updated: 2026-03-12 19:50:00 -05:00 - Phase 20: workspace transition to POST /api/workspace/*; new API for all except Solr biochem tables; Poplar URL and PATRIC auth.
 - Updated: 2026-03-12 19:55:16 CDT - Phase 20 implementation committed; final authenticated Poplar verification still pending.
+- Updated: 2026-03-13 09:30:00 -05:00 - Added Phase 21 for PATRIC/RAST Genome Selection Fix in Build Model page.
