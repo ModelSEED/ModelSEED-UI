@@ -52,6 +52,13 @@ export interface RastGenomeJob {
     type: 'Genome';
 }
 
+export interface ModelDetailBundle {
+    ref: string;
+    data: Record<string, unknown>;
+    gapfills: Record<string, unknown>[];
+    fba: Record<string, unknown> | Record<string, unknown>[] | null;
+}
+
 function buildQueryString(params: Record<string, string | undefined>): string {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
@@ -153,6 +160,20 @@ export async function getModelFbaFromApi(ref: string): Promise<Record<string, un
     return modelseedFetch<Record<string, unknown>>(
         `/api/models/fba${buildQueryString({ ref })}`,
     );
+}
+
+export async function getModelDetailBundleFromApi(ref: string): Promise<ModelDetailBundle> {
+    const [data, gapfills, fba] = await Promise.all([
+        getModelDataFromApi(ref),
+        listModelGapfillsFromApi(ref).catch(() => []),
+        getModelFbaFromApi(ref).catch(() => null),
+    ]);
+    return {
+        ref,
+        data,
+        gapfills,
+        fba,
+    };
 }
 
 /**
