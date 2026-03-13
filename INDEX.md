@@ -13,8 +13,8 @@ This is the ultimate developer’s guide to the **ModelSEED-UI** Next.js 16 rebo
 | **Model Data Rendering** | [`app/model/[...path]/page.tsx`](./app/model/[...path]/page.tsx) | Handles model exploration UI. |
 | **Chemical Formulas** | [`components/ui/ChemicalEquation.tsx`](./components/ui/ChemicalEquation.tsx) | Logic for subscripting formulas like `H2O`. |
 | **Colors/Theme/Styles** | [`lib/theme.ts`](./lib/theme.ts) | Primary MUI v7 theme definition. |
-| **API Calls (Ref Data)** | [`lib/api/biochem.ts`](./lib/api/biochem.ts) | Solr queries for reactions/compounds. |
-| **API Calls (User Data)** | [`lib/api/workspace.ts`](./lib/api/workspace.ts) | KBase Workspace / RPC adapters. |
+| **API Calls (Ref Data)** | [`lib/api/biochem.ts`](./lib/api/biochem.ts) | Solr queries for reactions/compounds (biochem tables). |
+| **API Calls (User Data)** | [`lib/api/modelseed.ts`](./lib/api/modelseed.ts) | `modelseed-api` client for models, jobs, media, and workspace proxy. |
 | **Auth Logic** | [`components/auth/AuthProvider.tsx`](./components/auth/AuthProvider.tsx) | Authentication context and state. |
 
 ---
@@ -54,20 +54,21 @@ Reusable pieces of the application.
 ### `lib/` — [View Folder README](./lib/README.md)
 The "Brain" of the application—logic, configuration, and API adapters.
 - `api/` — Logic communicating with various ModelSEED/PATRIC services.
+    - `modelseed.ts` — REST client for `MODELSEED_API_URL` (models, jobs, media, workspace proxy).
+    - `workspace.ts` — JSON-RPC Workspace wrapper plus REST proxy adapter keyed by `USE_NEW_PROXY`.
     - `biochem.ts` — Solr-based biochemistry searching.
-    - `workspace.ts` — High-level RPC (JSON-RPC) workspace service wrapper.
     - `auth.ts` — Direct interaction with auth services.
 - `data/` — Hardcoded/static biological dictionaries and mappings.
 - `theme.ts` — The source of truth for all styling tokens (MUI v7).
 
 ### `docs/` — [The Developer Manual](./docs/README.md)
 Central repository for deep-dive developer guides.
-- **[LEGACY_TRANSITION.md](./docs/LEGACY_TRANSITION.md)** — **New!** Guide on transitioning from AngularJS to Next.js.
-- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — High-level data flow and tech stack details.
+- **[LEGACY_TRANSITION.md](./docs/LEGACY_TRANSITION.md)** — Guide on transitioning from AngularJS to Next.js.
+- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — High-level data flow and tech stack details, including `modelseed-api` and the workspace proxy.
 - **[ROUTING.md](./docs/ROUTING.md)** — Detailed mapping between legacy AngularJS paths and Next.js routes.
-- **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** — How the KBase session token flow works locally and globally.
-- **[BIOCHEMISTRY.md](./docs/BIOCHEMISTRY.md)** — Guide to indices and parsing scientific formulas.
-- **[WORKSPACE.md](./docs/WORKSPACE.md)** — Guide to interacting with KBase Workspace JSON-RPC services.
+- **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** — How the RAST/PATRIC token flow works and how tokens are reused for API calls.
+- **[BIOCHEMISTRY.md](./docs/BIOCHEMISTRY.md)** — Guide to Solr indices and parsing scientific formulas.
+- **[WORKSPACE.md](./docs/WORKSPACE.md)** — Guide to interacting with Workspace JSON-RPC and REST via `modelseed-api`.
 
 ---
 
@@ -124,9 +125,10 @@ We maintain **100% URL parity** to ensure existing biological citations continue
 ---
 
 ## Roadmap & Tasks
-For current progress and upcoming feature implementation (e.g., Phase 14: FBA), refer to:
+For current progress and upcoming feature implementation (for example, Phase 20: new API consolidation), refer to:
 - **[ROADMAP.md](./.gsd/ROADMAP.md)**
 - **[STATE.md](./.gsd/STATE.md)**
 
----
-*Created by the Advanced Agentic Coding team. Last Updated: 2026-03-11*
+## Timestamp Log
+- Created: 2026-03-11 00:00:00 CDT
+- Updated: 2026-03-12 20:18:13 CDT - Documented `modelseed-api` usage, workspace proxy, and Solr biochem split.

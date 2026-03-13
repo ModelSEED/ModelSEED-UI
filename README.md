@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ModelSEED-UI (Next.js 16)
 
-## Getting Started
+ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 reboot of the ModelSEED web front end. It provides biochemistry reference tables, public genomes/media, and authenticated user workflows (Build Model, My Models, My Media) against the new `modelseed-api` backend while preserving legacy URL parity.
 
-First, run the development server:
+## Stack Overview
+
+- Next.js 16 (App Router, Turbopack)
+- React 19
+- MUI 7
+- TanStack Query 5
+- TypeScript (strict)
+- Backends:
+  - PATRIC/RAST auth services
+  - PATRIC Workspace (legacy JSON-RPC)
+  - ModelSEED REST API (`modelseed-api`, Poplar)
+  - Solr biochemistry index for reactions/compounds
+
+Key configuration constants live in `lib/api/config.ts`:
+
+- `MODELSEED_API_URL` – base URL for Poplar (currently `http://poplar.cels.anl.gov:8000` in development).
+- `USE_MODELSEED_API` – when `true`, user data flows (My Models, My Media, jobs) use `modelseed-api`.
+- `USE_NEW_PROXY` – when `true`, workspace calls route through the REST proxy at `${MODELSEED_API_URL}/api/workspace`.
+- `SOLR_BASE` / `USE_NEW_BIOCHEM` – control whether biochem lookups use legacy Solr or the new biochem endpoints (by default, tables stay on Solr).
+
+## Running the App Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000` in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For a production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Authentication
 
-To learn more about Next.js, take a look at the following resources:
+Authentication is handled by `components/auth/AuthProvider.tsx` and `lib/api/auth.ts`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Users log in against RAST or PATRIC/BV-BRC.
+- The resulting token is stored in `localStorage['auth']`.
+- API clients (`lib/api/modelseed.ts`, `lib/api/workspace.ts`, `lib/api/biochem.ts`) attach the raw token as:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+Authorization: <raw-token>
+```
 
-## Deploy on Vercel
+There is a local-only developer bypass for testing:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Username: `developer`
+- Password: `developer`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This returns a fixed developer token without hitting remote auth services. Use this only for local development.
+
+## Data Flows
+
+- **Biochem tables** (compounds, reactions):
+  - Served from Solr via `lib/api/biochem.ts`.
+  - Tables and detail views under `app/(reference-data)/biochem/...`.
+
+- **Workspace-backed reference data** (public plant models, genomes, reference media):
+  - Use `workspaceLs` / `workspaceGet` from `lib/api/workspace.ts`.
+  - When `USE_NEW_PROXY=true`, these calls post to `${MODELSEED_API_URL}/api/workspace/*`; otherwise they fall back to the legacy JSON-RPC Workspace service.
+
+- **User Models, Media, Jobs**:
+  - Use `lib/api/modelseed.ts` for:
+    - `GET /api/models`, `GET /api/models/data`, export, delete, copy, gapfills, FBA.
+    - `GET /api/media/public`, `GET /api/media/mine`.
+    - `GET /api/jobs`, `POST /api/jobs/reconstruct`, `/gapfill`, `/fba`, `/manage`.
+  - Front-end surfaces:
+    - `app/(user-data)/my-models/page.tsx`
+    - `app/(user-data)/myMedia/page.tsx`
+    - `app/model/[...path]/page.tsx`
+    - `app/(build-model)/plant/page.tsx`
+
+- **Jobs and Build Model**:
+  - Reconstruct jobs are created via `submitReconstructJobFromApi`.
+  - FBA and gapfill jobs use `submitFbaJobFromApi` and `submitGapfillJobFromApi`.
+  - `lib/api/jobTracker.ts` stores submitted job IDs so `My Models` and `Model Detail` can surface job status and cancellation controls.
+
+For a deeper architectural view, see:
+
+- `docs/ARCHITECTURE.md`
+- `docs/WORKSPACE.md`
+- `docs/AUTHENTICATION.md`
+
+## Documentation Entry Points
+
+- `INDEX.md` – high-level map of files and folders.
+- `docs/README.md` – developer manual index.
+- `.gsd/ROADMAP.md` – current phases and milestones (GSD methodology).
+
+## Timestamp Log
+
+- Created: 2026-03-12 20:18:13 CDT
