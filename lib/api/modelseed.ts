@@ -255,7 +255,7 @@ async function listMediaGeneric(path: string): Promise<ModelseedMediaSummary[]> 
             if (!Array.isArray(entries)) continue;
             for (const entry of entries) {
                 if (!Array.isArray(entry)) continue;
-                const [name, type, _path, modDate, id, , , metadata] = entry;
+                const [name, type, , modDate, id, , , metadata] = entry;
                 const meta = metadata && typeof metadata === 'object'
                     ? (metadata as Record<string, unknown>)
                     : undefined;
