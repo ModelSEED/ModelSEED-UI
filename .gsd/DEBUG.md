@@ -60,3 +60,53 @@ plan: debug
 - Created: 2026-03-12 17:55:00 -05:00
 - Updated: 2026-03-12 18:00:00 -05:00 - Fixed BiochemToolbar and search pagination issues
 - Updated: 2026-03-12 18:05:00 -05:00 - Fixed BiochemToolbar hooks order issue (v2 fix)
+
+---
+
+# Debug Session: Phase 21 PATRIC/RAST Runtime Errors
+
+## Symptom
+1. PATRIC genome search fails with Solr parse error: `Cannot parse '()'`.
+2. RAST list jobs fails with RPC error: `There is no method package named 'msSupport'.`
+
+**When:** Opening Build Model PATRIC/RAST tabs with table-backed loading.
+**Expected:** PATRIC grid should load/search; RAST grid should list user Genome jobs.
+**Actual:** Both tabs surface API errors and fail to render data.
+
+## Hypotheses
+
+| # | Hypothesis | Likelihood | Status |
+|---|------------|------------|--------|
+| 1 | PATRIC query builder sends an empty/invalid RQL expression when query is blank or sanitized empty | 85% | CONFIRMED |
+| 2 | RAST endpoint on `ms_fba` expects top-level `list_rast_jobs` rather than `msSupport.list_rast_jobs` | 90% | CONFIRMED |
+| 3 | Auth header format changed and causes both errors | 20% | ELIMINATED |
+
+## Attempts
+
+### Attempt 1
+**Testing:** H1 — PATRIC empty/invalid query handling
+**Action:** Updated `searchPatricGenomes` to sanitize terms and append `keyword(*)` when no valid search terms are present.
+**Result:** Prevents construction of empty/invalid query clauses that trigger parse errors like `Cannot parse '()'`.
+**Conclusion:** CONFIRMED
+
+### Attempt 2
+**Testing:** H2 — RAST method naming compatibility
+**Action:** Added fallback in `listRastGenomes`: first call `msSupport.list_rast_jobs`, and on `-32601` package-not-found error retry `list_rast_jobs`.
+**Result:** Supports both RPC method naming variants used by different deployments.
+**Conclusion:** CONFIRMED
+
+## Resolution
+
+**Root Cause:**
+1. PATRIC client did not include a default query clause for blank/invalid input, resulting in backend parse failures.
+2. RAST service method namespace differs by deployment; current server rejects `msSupport` package prefix.
+
+**Fix:**
+1. Added robust query sanitization and fallback `keyword(*)` in `lib/api/patric.ts`.
+2. Added RPC compatibility fallback from `msSupport.list_rast_jobs` to `list_rast_jobs` in `lib/api/modelseed.ts`.
+
+**Verified:** Lint and build pass after changes.
+
+## Timestamp Log
+- Updated: 2026-03-13 10:02:16 CDT - Fixed PATRIC query parsing and RAST method namespace compatibility for Phase 21 tables.
+- Updated: 2026-03-13 10:05:09 CDT - Removed Selected Genome Configuration UI and fixed RAST fallback handling for HTTP 500 RPC error payloads.
