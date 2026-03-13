@@ -1,4 +1,5 @@
 ---
+name: discuss-phase
 description: Discuss a phase before planning (clarify scope and approach)
 argument-hint: "<phase-number>"
 updated_at: 2026-03-03T13:45:14-06:00

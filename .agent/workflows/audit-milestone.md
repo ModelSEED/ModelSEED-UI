@@ -1,4 +1,5 @@
 ---
+name: audit-milestone
 description: Audit a milestone for quality and completeness
 argument-hint: "[milestone-name]"
 updated_at: 2026-03-03T13:45:14-06:00

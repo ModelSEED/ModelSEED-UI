@@ -1,4 +1,5 @@
 ---
+name: web-search
 description: Search the web for information to inform decisions
 argument-hint: "<query> [--domain <site>]"
 updated_at: 2026-03-03T13:45:14-07:59

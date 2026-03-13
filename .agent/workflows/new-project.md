@@ -1,4 +1,5 @@
 ---
+name: new-project
 description: Initialize a new project with deep context gathering
 updated_at: 2026-03-03T13:45:14-06:00
 ---

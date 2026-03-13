@@ -1,4 +1,5 @@
 ---
+name: list-phase-assumptions
 description: List assumptions made during phase planning
 argument-hint: "<phase-number>"
 updated_at: 2026-03-03T13:45:14-07:59

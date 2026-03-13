@@ -1,4 +1,5 @@
 ---
+name: complete-milestone
 description: Mark current milestone as complete and archive
 updated_at: 2026-03-03T13:45:14-07:59
 ---

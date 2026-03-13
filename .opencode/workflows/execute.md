@@ -1,4 +1,5 @@
 ---
+name: execute
 description: The Engineer — Execute a specific phase with focused context
 argument-hint: "<phase-number> [--gaps-only]"
 updated_at: 2026-03-03T13:45:14-06:00

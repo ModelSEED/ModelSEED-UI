@@ -1,4 +1,5 @@
 ---
+name: debug
 description: Systematic debugging with persistent state
 argument-hint: "[description of issue]"
 updated_at: 2026-03-03T13:45:14-07:59

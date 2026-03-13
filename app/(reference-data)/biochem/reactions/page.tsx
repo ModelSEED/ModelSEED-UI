@@ -239,7 +239,7 @@ export default function ReactionsPage() {
             <DataGrid<Reaction>
                 rows={search ? filteredDocs : (data?.docs ?? [])}
                 columns={columns}
-                rowCount={search ? filteredDocs.length : (data?.numFound ?? 0)}
+                rowCount={!search ? (data?.numFound ?? 0) : undefined}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}

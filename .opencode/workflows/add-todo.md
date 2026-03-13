@@ -1,4 +1,5 @@
 ---
+name: add-todo
 description: Capture a todo item for later
 argument-hint: "<description> [--priority high|medium|low]"
 updated_at: 2026-03-03T13:45:14-06:00

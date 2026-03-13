@@ -1,4 +1,5 @@
 ---
+name: map
 description: The Architect — Analyze codebase and update ARCHITECTURE.md and STACK.md
 updated_at: 2026-03-03T13:45:14-07:59
 ---

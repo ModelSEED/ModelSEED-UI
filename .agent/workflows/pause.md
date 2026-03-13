@@ -1,4 +1,5 @@
 ---
+name: pause
 description: Context hygiene — dump state for clean session handoff
 updated_at: 2026-03-03T13:45:14-06:00
 ---

@@ -1,4 +1,5 @@
 ---
+name: whats-new
 description: Show recent GSD changes and new features
 updated_at: 2026-03-03T13:45:14-06:00
 ---

@@ -48,6 +48,11 @@
 - Cursor should reference this file and the `.agent` skills for behavior.
 - Use `@SKILL.md` for specific domain knowledge.
 
+### For Antigravity / Windsurf
+- Antigravity must follow instructions in `.windsurfrules`.
+- Use the slash commands defined in `.opencode/commands`.
+- Workflows are located in `.agent/workflows`.
+
 ### For Claude Code
 - Claude should follow the `CLAUDE.md` adapter (if present) and adhere to GSD workflows.
 

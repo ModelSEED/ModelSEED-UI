@@ -1,4 +1,5 @@
 ---
+name: research-phase
 description: Deep technical research for a phase
 argument-hint: "<phase-number> [--level 1|2|3]"
 updated_at: 2026-03-03T13:45:14-06:00

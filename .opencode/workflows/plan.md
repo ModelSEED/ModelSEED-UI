@@ -1,4 +1,5 @@
 ---
+name: plan
 description: The Strategist — Decompose requirements into executable phases in ROADMAP.md
 argument-hint: "[phase] [--research] [--skip-research] [--gaps]"
 updated_at: 2026-03-03T13:45:14-06:00

@@ -1,4 +1,5 @@
 ---
+name: add-phase
 description: Add a new phase to the end of the roadmap
 argument-hint: "<phase-name>"
 updated_at: 2026-03-03T13:45:14-06:00

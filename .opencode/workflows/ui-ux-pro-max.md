@@ -1,4 +1,5 @@
 ---
+name: ui-ux-pro-max
 description: AI-powered design intelligence with 50+ styles, 95+ color palettes, and automated design system generation 
 updated_at: 2026-03-03T13:45:14-07:59
 ---
