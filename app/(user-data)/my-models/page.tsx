@@ -1,19 +1,34 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
-import { listUserModelsFromApi } from '@/lib/api/modelseed';
+import {
+    getJobsFromApi,
+    listUserModelsFromApi,
+    manageJobFromApi,
+    ModelseedJobSummary,
+} from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DeleteModelModal from '@/components/ui/DeleteModelModal';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import {
+    isActiveJobStatus,
+    listTrackedJobs,
+    removeTrackedJob,
+    TrackedJob,
+} from '@/lib/api/jobTracker';
 
 interface MyModelItem {
     id: string; // Model name / filename
@@ -28,10 +43,27 @@ interface MyModelItem {
     path: string;
 }
 
+interface TrackedJobWithStatus extends TrackedJob {
+    status?: string;
+    app?: string;
+    type?: string;
+}
+
 export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
+    const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
+    const [jobActionError, setJobActionError] = useState<string | null>(null);
     const { isAuthenticated } = useAuth();
+
+    useEffect(() => {
+        const syncTrackedJobs = () => {
+            setTrackedJobs(listTrackedJobs());
+        };
+        syncTrackedJobs();
+        window.addEventListener('storage', syncTrackedJobs);
+        return () => window.removeEventListener('storage', syncTrackedJobs);
+    }, []);
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myModels', USE_MODELSEED_API],
@@ -64,9 +96,69 @@ export default function MyModelsPage() {
         staleTime: 5 * 60 * 1000,
     });
 
+    const trackedJobIds = useMemo(
+        () => trackedJobs.map((job) => job.id),
+        [trackedJobs],
+    );
+
+    const { data: trackedJobStatuses = [], refetch: refetchTrackedJobs } = useQuery({
+        queryKey: ['trackedJobs', trackedJobIds],
+        enabled: isAuthenticated && USE_MODELSEED_API && trackedJobIds.length > 0,
+        queryFn: async () => getJobsFromApi(trackedJobIds),
+        refetchInterval: trackedJobIds.length > 0 ? 15000 : false,
+        staleTime: 5000,
+    });
+
     const handleModelDeleted = useCallback(() => {
         void refetch();
     }, [refetch]);
+
+    const trackedJobStatusMap = useMemo(() => {
+        return new Map(
+            trackedJobStatuses.map((job) => [job.id, job] satisfies [string, ModelseedJobSummary]),
+        );
+    }, [trackedJobStatuses]);
+
+    const trackedJobsWithStatus = useMemo<TrackedJobWithStatus[]>(() => {
+        return trackedJobs.map((job) => {
+            const status = trackedJobStatusMap.get(job.id);
+            return {
+                ...job,
+                status: typeof status?.status === 'string' ? status.status : undefined,
+                app: typeof status?.app === 'string' ? status.app : undefined,
+                type: typeof status?.type === 'string' ? status.type : undefined,
+            };
+        });
+    }, [trackedJobs, trackedJobStatusMap]);
+
+    const recentJobByRow = useMemo(() => {
+        const map = new Map<string, TrackedJobWithStatus>();
+        for (const job of trackedJobsWithStatus) {
+            if (job.relatedRef) {
+                map.set(`ref:${job.relatedRef}`, job);
+            }
+            if (job.modelId) {
+                map.set(`model:${job.modelId}`, job);
+            }
+        }
+        return map;
+    }, [trackedJobsWithStatus]);
+
+    const handleDismissJob = useCallback((jobId: string) => {
+        removeTrackedJob(jobId);
+        setTrackedJobs(listTrackedJobs());
+    }, []);
+
+    const handleCancelJob = useCallback(async (jobId: string) => {
+        setJobActionError(null);
+        try {
+            await manageJobFromApi({ ids: [jobId], action: 'cancel' });
+            await refetchTrackedJobs();
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to cancel job';
+            setJobActionError(message);
+        }
+    }, [refetchTrackedJobs]);
 
     const columns = useMemo<GridColDef<MyModelItem>[]>(() => [
         {
@@ -110,6 +202,30 @@ export default function MyModelsPage() {
             )
         },
         {
+            field: 'recentJob',
+            headerName: 'Recent Job',
+            width: 160,
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => {
+                const trackedJob =
+                    recentJobByRow.get(`ref:${params.row.path}`) ??
+                    recentJobByRow.get(`model:${params.row.id}`);
+                if (!trackedJob) {
+                    return <Box sx={{ color: 'text.secondary' }}>-</Box>;
+                }
+                return (
+                    <Chip
+                        size="small"
+                        label={trackedJob.status ?? 'submitted'}
+                        color={isActiveJobStatus(trackedJob.status) ? 'warning' : 'default'}
+                        variant={isActiveJobStatus(trackedJob.status) ? 'filled' : 'outlined'}
+                    />
+                );
+            },
+        },
+        {
             field: 'modDate',
             headerName: 'Modification Date',
             width: 220,
@@ -133,7 +249,7 @@ export default function MyModelsPage() {
                 </Box>
             ),
         },
-    ], [handleModelDeleted]);
+    ], [handleModelDeleted, recentJobByRow]);
 
     return (
         <AuthGuard>
@@ -155,6 +271,61 @@ export default function MyModelsPage() {
                         My Models
                     </Typography>
                 </Box>
+
+                {trackedJobsWithStatus.length > 0 && (
+                    <Alert severity="info" variant="outlined">
+                        <AlertTitle>Tracked jobs</AlertTitle>
+                        <Stack spacing={1.5}>
+                            {trackedJobsWithStatus.map((job) => (
+                                <Box
+                                    key={job.id}
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 1,
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                                        <Typography variant="body2" fontWeight={600}>
+                                            {job.label}
+                                        </Typography>
+                                        <Chip size="small" label={job.kind} variant="outlined" />
+                                        <Chip
+                                            size="small"
+                                            label={job.status ?? 'submitted'}
+                                            color={isActiveJobStatus(job.status) ? 'warning' : 'default'}
+                                            variant={isActiveJobStatus(job.status) ? 'filled' : 'outlined'}
+                                        />
+                                        <Typography variant="caption" color="text.secondary">
+                                            {new Date(job.submittedAt).toLocaleString()}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        {isActiveJobStatus(job.status) && (
+                                            <Button
+                                                size="small"
+                                                color="warning"
+                                                onClick={() => void handleCancelJob(job.id)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        )}
+                                        <Button size="small" onClick={() => handleDismissJob(job.id)}>
+                                            Dismiss
+                                        </Button>
+                                    </Box>
+                                </Box>
+                            ))}
+                            {jobActionError && (
+                                <Typography variant="caption" color="error">
+                                    {jobActionError}
+                                </Typography>
+                            )}
+                        </Stack>
+                    </Alert>
+                )}
 
                 {error ? (
                     <Typography color="error">

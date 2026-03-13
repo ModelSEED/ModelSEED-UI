@@ -1,22 +1,32 @@
 'use client';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
+import Alert from '@mui/material/Alert';
 
 interface ModelDetailHeaderProps {
     modelName: string;
     visualizeOption: string;
     onVisualizeChange: (value: string) => void;
+    onRunFba?: () => void;
+    onRunGapfill?: () => void;
+    actionLoading?: 'fba' | 'gapfill' | null;
+    actionMessage?: string | null;
 }
 
 export default function ModelDetailHeader({
     modelName,
     visualizeOption,
     onVisualizeChange,
+    onRunFba,
+    onRunGapfill,
+    actionLoading,
+    actionMessage,
 }: ModelDetailHeaderProps) {
     return (
         <>
@@ -32,13 +42,7 @@ export default function ModelDetailHeader({
             <Divider sx={{ mb: 3 }} />
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
-                {[
-                    'Rebuild Model',
-                    'Blast Genome',
-                    'Add Expression',
-                    'Run FBA',
-                    'Run GapFilling',
-                ].map((label) => (
+                {['Rebuild Model', 'Blast Genome', 'Add Expression'].map((label) => (
                     <Box
                         key={label}
                         sx={{
@@ -55,7 +59,30 @@ export default function ModelDetailHeader({
                         {label}
                     </Box>
                 ))}
+                <Button
+                    variant="contained"
+                    onClick={onRunFba}
+                    disabled={!onRunFba || actionLoading !== null}
+                    sx={{ textTransform: 'none' }}
+                >
+                    {actionLoading === 'fba' ? 'Submitting FBA...' : 'Run FBA'}
+                </Button>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={onRunGapfill}
+                    disabled={!onRunGapfill || actionLoading !== null}
+                    sx={{ textTransform: 'none' }}
+                >
+                    {actionLoading === 'gapfill' ? 'Submitting Gapfill...' : 'Run GapFilling'}
+                </Button>
             </Box>
+
+            {actionMessage && (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                    {actionMessage}
+                </Alert>
+            )}
 
             <Divider sx={{ mb: 3 }} />
 
