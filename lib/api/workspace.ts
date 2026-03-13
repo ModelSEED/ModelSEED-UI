@@ -31,6 +31,30 @@ export interface WorkspaceRpcResponse<T> {
 
 type WorkspaceGetTuple = [unknown, unknown, ...unknown[]];
 
+function extractWorkspaceErrorMessage(payload: unknown): string | null {
+    if (!payload || typeof payload !== 'object') return null;
+    const rec = payload as Record<string, unknown>;
+    if (typeof rec.detail === 'string' && rec.detail) return rec.detail;
+    if (typeof rec.message === 'string' && rec.message) return rec.message;
+    const err = rec.error;
+    if (err && typeof err === 'object') {
+        const rpcErr = err as Record<string, unknown>;
+        if (typeof rpcErr.message === 'string' && rpcErr.message) return rpcErr.message;
+        if (typeof rpcErr.error === 'string' && rpcErr.error) return rpcErr.error;
+    }
+    return null;
+}
+
+async function parseJsonResponse(response: Response): Promise<unknown> {
+    const raw = await response.text().catch(() => '');
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw) as unknown;
+    } catch {
+        return { raw };
+    }
+}
+
 function unwrapWorkspaceResponse<T>(payload: unknown): T {
     if (
         payload &&
@@ -100,11 +124,15 @@ async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T
         next: { revalidate: 3600 }
     });
 
+    const payload = await parseJsonResponse(response);
     if (!response.ok) {
-        throw new Error(`Workspace API HTTP error! status: ${response.status}`);
+        const message = extractWorkspaceErrorMessage(payload);
+        throw new Error(
+            `Workspace JSON-RPC ${method} failed (${response.status})${message ? `: ${message}` : ''}`,
+        );
     }
 
-    const data: WorkspaceRpcResponse<T> = await response.json();
+    const data = payload as WorkspaceRpcResponse<T>;
 
     if (data.error) {
         throw new Error(`Workspace API error: ${data.error.message}`);
@@ -137,12 +165,14 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
         body: JSON.stringify(body),
     });
 
+    const payload = await parseJsonResponse(response);
     if (!response.ok) {
-        const err = await response.json().catch(() => null);
-        throw new Error(err?.detail ?? `Workspace REST error! status: ${response.status}`);
+        const message = extractWorkspaceErrorMessage(payload);
+        throw new Error(
+            `Workspace REST ${endpoint} failed (${response.status})${message ? `: ${message}` : ''}`,
+        );
     }
 
-    const payload = await response.json() as unknown;
     return unwrapWorkspaceResponse<T>(payload);
 }
 

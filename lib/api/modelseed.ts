@@ -61,6 +61,30 @@ function buildQueryString(params: Record<string, string | undefined>): string {
     return encoded ? `?${encoded}` : '';
 }
 
+function extractApiErrorMessage(payload: unknown): string | null {
+    if (!payload || typeof payload !== 'object') return null;
+    const rec = payload as Record<string, unknown>;
+    if (typeof rec.detail === 'string' && rec.detail) return rec.detail;
+    if (typeof rec.message === 'string' && rec.message) return rec.message;
+    const err = rec.error;
+    if (err && typeof err === 'object') {
+        const rpcErr = err as Record<string, unknown>;
+        if (typeof rpcErr.message === 'string' && rpcErr.message) return rpcErr.message;
+        if (typeof rpcErr.error === 'string' && rpcErr.error) return rpcErr.error;
+    }
+    return null;
+}
+
+async function parseJsonResponse(response: Response): Promise<{ payload: unknown; rawText: string }> {
+    const rawText = await response.text().catch(() => '');
+    if (!rawText) return { payload: null, rawText: '' };
+    try {
+        return { payload: JSON.parse(rawText) as unknown, rawText };
+    } catch {
+        return { payload: { raw: rawText }, rawText };
+    }
+}
+
 async function modelseedFetch<T>(path: string, init: RequestInit = {}, requireAuth = true): Promise<T> {
     if (!USE_MODELSEED_API) {
         throw new Error('modelseed-api client called but USE_MODELSEED_API is false');
@@ -77,14 +101,16 @@ async function modelseedFetch<T>(path: string, init: RequestInit = {}, requireAu
         headers,
     });
 
+    const { payload, rawText } = await parseJsonResponse(response);
+
     if (!response.ok) {
-        const text = await response.text().catch(() => '');
+        const detail = extractApiErrorMessage(payload);
         throw new Error(
-            `modelseed-api error ${response.status} on ${path}: ${text || response.statusText}`,
+            `modelseed-api ${path} failed (${response.status})${detail ? `: ${detail}` : rawText ? `: ${rawText}` : ''}`,
         );
     }
 
-    return (await response.json()) as T;
+    return payload as T;
 }
 
 export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> {
@@ -250,15 +276,8 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
                 params: [{}],
             }),
         });
-        const rawText = await response.text().catch(() => '');
-        let payload: RastJobsRpcResponse | null = null;
-        if (rawText) {
-            try {
-                payload = JSON.parse(rawText) as RastJobsRpcResponse;
-            } catch {
-                payload = null;
-            }
-        }
+        const { payload: rawPayload, rawText } = await parseJsonResponse(response);
+        const payload = rawPayload as RastJobsRpcResponse | null;
 
         if (!response.ok) {
             // Some deployments return RPC JSON error payloads with HTTP 500.
@@ -267,7 +286,7 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
                 return payload;
             }
             throw new Error(
-                `RAST list jobs failed (${response.status}): ${rawText || response.statusText}`,
+                `RAST list jobs ${method} failed (${response.status})${rawText ? `: ${rawText}` : ''}`,
             );
         }
 
