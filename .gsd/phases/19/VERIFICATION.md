@@ -42,6 +42,8 @@ updated_at: 2026-03-12 17:50:00 -05:00
 - All pages have working search with local filtering (useState + useMemo for filteredDocs).
 
 ## Verification Commands
+- Targeted lint for header/search work:
+  - `npx eslint components/layout/DataControlHeader.tsx app/(user-data)/my-models/page.tsx app/(user-data)/myMedia/page.tsx app/(reference-data)/biochem/compounds/page.tsx app/(reference-data)/biochem/reactions/page.tsx app/(reference-data)/genomes/Annotations/page.tsx app/(reference-data)/list-media/page.tsx app/(reference-data)/genomes/page.tsx app/model/[...path]/page.tsx`
 - `npm run build` — **PASS** (compiled successfully, 23 routes generated)
 
 ## Verdict
@@ -52,3 +54,4 @@ updated_at: 2026-03-12 17:50:00 -05:00
 - Updated: 2026-03-12 17:35:00 -05:00 - Verified code/build level checks pass
 - Updated: 2026-03-12 17:45:00 -05:00 - Phase 19.4 complete
 - Updated: 2026-03-12 17:50:00 -05:00 - Full Phase 19 verification PASS
+- Updated: 2026-03-12 18:50:44 -05:00 - Re-verified lint/build after expanding shared header usage.

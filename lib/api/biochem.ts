@@ -9,7 +9,7 @@
  * the unified proxy when available.
  */
 
-import { SOLR_BASE, CPD_IMG_BASE } from './config';
+import { SOLR_BASE, CPD_IMG_BASE, MODELSEED_API_URL } from './config';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -265,7 +265,7 @@ async function fetchModelseedApiBiochem<T>(
     opts: SolrQueryOpts = {}
 ): Promise<SolrResponse<T>> {
     const { query, limit = 25, offset = 0, filterModel } = opts;
-    const baseUrl = `${SOLR_BASE.replace('/solr/', '')}${endpoint}`; // Adjusting to REST path
+    const baseUrl = `${MODELSEED_API_URL}/api/biochem/${endpoint}`;
 
     // Map SolrQueryOpts to REST params
     // Note: Poplar currently only supports simple 'query' and 'limit'
@@ -276,7 +276,7 @@ async function fetchModelseedApiBiochem<T>(
 
     let url = `${baseUrl}?limit=${limit}`;
     if (activeQuery) {
-        url = `${SOLR_BASE.replace('/solr/', '')}/api/biochem/search?query=${encodeURIComponent(activeQuery)}&limit=${limit}&type=${endpoint.includes('compounds') ? 'compounds' : 'reactions'}`;
+        url = `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeQuery)}&limit=${limit}&type=${endpoint}`;
     } else {
         // Poplar doesn't have a broad "list all" without IDs yet, 
         // fallback to search with empty or universal query if possible, or just return empty
@@ -327,7 +327,7 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     if (SOLR_BASE.includes('/api/')) {
-        const res = await fetchModelseedApiBiochem<Reaction>('/api/biochem/reactions', mergedOpts);
+        const res = await fetchModelseedApiBiochem<Reaction>('reactions', mergedOpts);
         res.docs.forEach((doc) => {
             if (doc.is_obsolete === '1') {
                 doc.status += ' (and is obsolete)';
@@ -360,7 +360,7 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     if (SOLR_BASE.includes('/api/')) {
-        return fetchModelseedApiBiochem<Compound>('/api/biochem/compounds', mergedOpts);
+        return fetchModelseedApiBiochem<Compound>('compounds', mergedOpts);
     }
 
     const url = buildSolrUrl('compounds', mergedOpts);

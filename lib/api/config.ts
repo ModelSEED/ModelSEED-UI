@@ -81,8 +81,20 @@ export const SOLR_BASE_LEGACY = 'https://modelseed.org/solr/';
  */
 export const SOLR_BASE_PROXY = `${MODELSEED_API_URL}/api/solr/`;
 
-/** Resolved Solr base URL based on feature flag. */
-export const SOLR_BASE = USE_NEW_PROXY
+/**
+ * When `true`, Biochemistry calls are routed through the new modelseed-api.
+ * Set to `false` (default) to keep using legacy Solr for the main tables,
+ * as recommended by the backend team for now.
+ */
+let useNewBiochemDefault = false;
+if (typeof process !== 'undefined') {
+    const raw = process.env.NEXT_PUBLIC_USE_NEW_BIOCHEM;
+    if (raw === 'true') useNewBiochemDefault = true;
+}
+export const USE_NEW_BIOCHEM = useNewBiochemDefault;
+
+/** Resolved Solr base URL. */
+export const SOLR_BASE = USE_NEW_BIOCHEM
     ? SOLR_BASE_PROXY
     : SOLR_BASE_LEGACY;
 
