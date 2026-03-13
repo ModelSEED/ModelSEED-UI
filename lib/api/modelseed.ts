@@ -7,7 +7,7 @@
  * touching the UI components again.
  */
 
-import { MODELSEED_API_URL, USE_MODELSEED_API } from './config';
+import { MODELSEED_API_URL, MODELSEED_SUPPORT_URL, USE_MODELSEED_API } from './config';
 import { withRawTokenAuth } from './requestAuth';
 
 export interface ModelseedModelSummary {
@@ -41,6 +41,15 @@ export interface ModelseedJobSummary {
     created_at?: string;
     completed_at?: string;
     [key: string]: unknown;
+}
+
+export interface RastGenomeJob {
+    id: string;
+    genome_id: string;
+    genome_name: string;
+    contig_count?: number;
+    mod_time?: string;
+    type: 'Genome';
 }
 
 function buildQueryString(params: Record<string, string | undefined>): string {
@@ -203,6 +212,111 @@ export async function manageJobFromApi(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     });
+}
+
+interface RastJobsRpcResponse {
+    result?: unknown;
+    error?: {
+        code?: number;
+        message?: string;
+        error?: string;
+    };
+}
+
+type RawRastJob = {
+    id?: unknown;
+    genome_id?: unknown;
+    genome_name?: unknown;
+    contig_count?: unknown;
+    mod_time?: unknown;
+    type?: unknown;
+};
+
+export async function listRastGenomes(): Promise<RastGenomeJob[]> {
+    const callRastList = async (method: string) => {
+        const response = await fetch(MODELSEED_SUPPORT_URL, {
+            method: 'POST',
+            headers: withRawTokenAuth(
+                {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                true,
+            ),
+            body: JSON.stringify({
+                version: '1.1',
+                method,
+                id: 'list-rast-genomes',
+                params: [{}],
+            }),
+        });
+        const rawText = await response.text().catch(() => '');
+        let payload: RastJobsRpcResponse | null = null;
+        if (rawText) {
+            try {
+                payload = JSON.parse(rawText) as RastJobsRpcResponse;
+            } catch {
+                payload = null;
+            }
+        }
+
+        if (!response.ok) {
+            // Some deployments return RPC JSON error payloads with HTTP 500.
+            // Preserve payload so caller can apply compatibility fallbacks.
+            if (payload?.error) {
+                return payload;
+            }
+            throw new Error(
+                `RAST list jobs failed (${response.status}): ${rawText || response.statusText}`,
+            );
+        }
+
+        if (!payload) {
+            throw new Error('RAST list jobs returned an empty or non-JSON response');
+        }
+
+        return payload;
+    };
+
+    let payload = await callRastList('msSupport.list_rast_jobs');
+    if (
+        payload.error?.code === -32601 &&
+        (payload.error.message?.includes("package named 'msSupport'") ||
+            payload.error.message?.includes("package named \"msSupport\""))
+    ) {
+        // Some deployments expose this as a top-level method on ms_fba.
+        payload = await callRastList('list_rast_jobs');
+    }
+    if (payload.error) {
+        throw new Error(payload.error.message || payload.error.error || 'RAST list jobs RPC error');
+    }
+
+    const rawResult = payload.result;
+    const jobsArray = Array.isArray(rawResult)
+        ? (Array.isArray(rawResult[0]) ? rawResult[0] : rawResult)
+        : [];
+
+    return jobsArray
+        .filter((item): item is RawRastJob => item != null && typeof item === 'object')
+        .filter((job) => String(job.type ?? '') === 'Genome')
+        .map((job) => {
+            const id = String(job.id ?? '');
+            const genomeId = String(job.genome_id ?? '');
+            return {
+                id,
+                genome_id: genomeId,
+                genome_name: String(job.genome_name ?? genomeId ?? id),
+                contig_count:
+                    typeof job.contig_count === 'number'
+                        ? job.contig_count
+                        : Number.isFinite(Number(job.contig_count))
+                            ? Number(job.contig_count)
+                            : undefined,
+                mod_time: job.mod_time ? String(job.mod_time) : undefined,
+                type: 'Genome',
+            } satisfies RastGenomeJob;
+        })
+        .filter((job) => job.genome_id.length > 0 || job.id.length > 0);
 }
 
 export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]> {
