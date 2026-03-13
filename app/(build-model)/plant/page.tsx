@@ -16,8 +16,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { submitReconstructJobFromApi } from '@/lib/api/modelseed';
+import { RastGenomeJob, submitReconstructJobFromApi } from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
+import PatricGenomesTable from '@/components/build-model/PatricGenomesTable';
+import RastGenomesTable from '@/components/build-model/RastGenomesTable';
+import { PatricGenome } from '@/lib/api/patric';
 
 /**
  * When true, the PlantSEED build pipeline is disabled in the UI.
@@ -35,26 +38,8 @@ interface MicrobeUploadForm {
     modelName: string;
 }
 
-interface MicrobeReferenceForm {
-    genomeId: string;
-    genomeName: string;
-    template: string;
-    genomeType: string;
-    media: string;
-    modelName: string;
-}
-
 const DEFAULT_UPLOAD_FORM: MicrobeUploadForm = {
     file: null,
-    template: 'auto',
-    genomeType: 'microbial_contigs',
-    media: '',
-    modelName: '',
-};
-
-const DEFAULT_REFERENCE_FORM: MicrobeReferenceForm = {
-    genomeId: '',
-    genomeName: '',
     template: 'auto',
     genomeType: 'microbial_contigs',
     media: '',
@@ -105,8 +90,6 @@ function isValidModelName(name: string): boolean {
 export default function BuildModelPlantPage() {
     const [tabIndex, setTabIndex] = useState(PLANTSEED_MAINTENANCE ? 1 : 0);
     const [uploadForm, setUploadForm] = useState<MicrobeUploadForm>(DEFAULT_UPLOAD_FORM);
-    const [patricForm, setPatricForm] = useState<MicrobeReferenceForm>(DEFAULT_REFERENCE_FORM);
-    const [rastForm, setRastForm] = useState<MicrobeReferenceForm>(DEFAULT_REFERENCE_FORM);
     const [submitting, setSubmitting] = useState<SubmissionKey>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -189,11 +172,12 @@ export default function BuildModelPlantPage() {
     const handleReferenceSubmit = async (
         key: 'patric' | 'rast',
         source: 'PATRIC' | 'RAST',
-        form: MicrobeReferenceForm,
+        genomeId: string,
+        genomeName?: string,
     ) => {
-        const genomeId = form.genomeId.trim();
-        const modelName = sanitizeModelName(form.modelName || genomeId.replace(/[^\w]/g, '_'));
-        if (!genomeId) {
+        const normalizedGenomeId = genomeId.trim();
+        const modelName = sanitizeModelName(normalizedGenomeId.replace(/[^\w]/g, '_'));
+        if (!normalizedGenomeId) {
             setErrorMessage(`${source} genome ID is required.`);
             return;
         }
@@ -205,17 +189,26 @@ export default function BuildModelPlantPage() {
         await submitTrackedReconstruct(
             key,
             {
-                genome: `${source}:${genomeId}`,
-                genome_id: genomeId,
-                genome_name: form.genomeName || undefined,
+                genome: `${source}:${normalizedGenomeId}`,
+                genome_id: normalizedGenomeId,
+                genome_name: genomeName || undefined,
                 output_file: modelName,
-                genome_type: form.genomeType,
-                template: form.template,
-                media: form.media || undefined,
+                genome_type: 'microbial_contigs',
+                template: 'auto',
+                media: undefined,
             },
-            form.genomeName || genomeId,
+            genomeName || normalizedGenomeId,
             modelName,
         );
+    };
+
+    const handlePatricGenomeSelect = (genome: PatricGenome) => {
+        void handleReferenceSubmit('patric', 'PATRIC', genome.genome_id, genome.genome_name);
+    };
+
+    const handleRastGenomeSelect = (job: RastGenomeJob) => {
+        const genomeId = job.genome_id || job.id;
+        void handleReferenceSubmit('rast', 'RAST', genomeId, job.genome_name);
     };
 
     return (
@@ -377,134 +370,24 @@ export default function BuildModelPlantPage() {
                 </TabPanel>
 
                 <TabPanel value={tabIndex} index={2}>
-                    <Stack spacing={2} sx={{ maxWidth: 680 }}>
+                    <Stack spacing={2}>
                         <Typography variant="h6" gutterBottom>PATRIC Microbes</Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Enter a PATRIC genome ID and optionally a display name to submit a reconstruction job through the new API.
+                            Search PATRIC genomes and click <strong>Build Model</strong> in the table to
+                            submit directly with default settings.
                         </Typography>
-                        <TextField
-                            label="PATRIC Genome ID"
-                            value={patricForm.genomeId}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, genomeId: event.target.value }))}
-                        />
-                        <TextField
-                            label="Genome Name (optional)"
-                            value={patricForm.genomeName}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, genomeName: event.target.value }))}
-                        />
-                        <TextField
-                            label="Model Name"
-                            helperText="Letters, numbers, and underscores only."
-                            value={patricForm.modelName}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, modelName: event.target.value }))}
-                        />
-                        <TextField
-                            select
-                            label="Template"
-                            value={patricForm.template}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, template: event.target.value }))}
-                        >
-                            <MenuItem value="auto">Automatically select</MenuItem>
-                            <MenuItem value="gramneg">Gram Negative</MenuItem>
-                            <MenuItem value="grampos">Gram Positive</MenuItem>
-                            <MenuItem value="core">Core</MenuItem>
-                        </TextField>
-                        <TextField
-                            select
-                            label="Genome Type"
-                            value={patricForm.genomeType}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, genomeType: event.target.value }))}
-                        >
-                            <MenuItem value="microbial_contigs">Contigs</MenuItem>
-                            <MenuItem value="microbial_genome">Complete genome</MenuItem>
-                        </TextField>
-                        <TextField
-                            label="Media (optional)"
-                            placeholder="Complete (leave blank to use backend default)"
-                            value={patricForm.media}
-                            onChange={(event) => setPatricForm((prev) => ({ ...prev, media: event.target.value }))}
-                        />
-                        <Button
-                            variant="contained"
-                            sx={{ width: 'fit-content' }}
-                            onClick={() => handleReferenceSubmit('patric', 'PATRIC', patricForm)}
-                            disabled={submitting !== null}
-                        >
-                            {submitting === 'patric' ? (
-                                <>
-                                    <CircularProgress size={16} sx={{ mr: 1 }} />
-                                    Submitting...
-                                </>
-                            ) : (
-                                'Build from PATRIC Genome'
-                            )}
-                        </Button>
+                        <PatricGenomesTable onSelectGenome={handlePatricGenomeSelect} />
                     </Stack>
                 </TabPanel>
 
                 <TabPanel value={tabIndex} index={3}>
-                    <Stack spacing={2} sx={{ maxWidth: 680 }}>
+                    <Stack spacing={2}>
                         <Typography variant="h6" gutterBottom>RAST Microbes</Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Enter a RAST genome ID and submit the reconstruction directly to Poplar.
+                            Select one of your RAST genome jobs and click <strong>Build Model</strong> in
+                            the table to submit directly with default settings.
                         </Typography>
-                        <TextField
-                            label="RAST Genome ID"
-                            value={rastForm.genomeId}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, genomeId: event.target.value }))}
-                        />
-                        <TextField
-                            label="Genome Name (optional)"
-                            value={rastForm.genomeName}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, genomeName: event.target.value }))}
-                        />
-                        <TextField
-                            label="Model Name"
-                            helperText="Letters, numbers, and underscores only."
-                            value={rastForm.modelName}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, modelName: event.target.value }))}
-                        />
-                        <TextField
-                            select
-                            label="Template"
-                            value={rastForm.template}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, template: event.target.value }))}
-                        >
-                            <MenuItem value="auto">Automatically select</MenuItem>
-                            <MenuItem value="gramneg">Gram Negative</MenuItem>
-                            <MenuItem value="grampos">Gram Positive</MenuItem>
-                            <MenuItem value="core">Core</MenuItem>
-                        </TextField>
-                        <TextField
-                            select
-                            label="Genome Type"
-                            value={rastForm.genomeType}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, genomeType: event.target.value }))}
-                        >
-                            <MenuItem value="microbial_contigs">Contigs</MenuItem>
-                            <MenuItem value="microbial_genome">Complete genome</MenuItem>
-                        </TextField>
-                        <TextField
-                            label="Media (optional)"
-                            placeholder="Complete (leave blank to use backend default)"
-                            value={rastForm.media}
-                            onChange={(event) => setRastForm((prev) => ({ ...prev, media: event.target.value }))}
-                        />
-                        <Button
-                            variant="contained"
-                            sx={{ width: 'fit-content' }}
-                            onClick={() => handleReferenceSubmit('rast', 'RAST', rastForm)}
-                            disabled={submitting !== null}
-                        >
-                            {submitting === 'rast' ? (
-                                <>
-                                    <CircularProgress size={16} sx={{ mr: 1 }} />
-                                    Submitting...
-                                </>
-                            ) : (
-                                'Build from RAST Genome'
-                            )}
-                        </Button>
+                        <RastGenomesTable onSelectGenome={handleRastGenomeSelect} />
                     </Stack>
                 </TabPanel>
 
