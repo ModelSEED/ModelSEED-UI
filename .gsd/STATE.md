@@ -1,22 +1,22 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 20 (planned)
-- **Task**: Phase 20 planning complete
-- **Status**: Ready for execution
+- **Phase**: 20 (in progress)
+- **Task**: Plan 20.1 API client coverage implemented
+- **Status**: Executing wave 1
 
 ## Last Session Summary
-Completed migration planning for new API consolidation as Phase 20:
-- Audited current integration coverage for models/jobs/workspace proxy
-- Documented endpoint gaps and auth/proxy risks in `.gsd/phases/20/RESEARCH.md`
-- Created execution plans:
-  - 20.1 API client completion (models/jobs/auth)
-  - 20.2 Workspace proxy migration and page wiring
-  - 20.3 Build Model + jobs end-to-end activation
+Phase 20 has started after planning:
+- Completed endpoint-gap audit and created Phase 20 research/plan artifacts.
+- Implemented wave-1 API client work:
+  - Added typed model endpoints (`/api/models/data`, `copy`, `gapfills`, `gapfills/manage`, `fba`).
+  - Added typed jobs endpoints (`/api/jobs`, `reconstruct`, `gapfill`, `fba`, `manage`).
+  - Added shared raw-token auth header helper used by model and workspace clients.
+  - Added workspace proxy helper methods for `create/delete/copy/metadata/permissions/download-url`.
 
 ## Next Steps
-1. /execute 20 — implement all Phase 20 plans in wave order.
-2. Verify tunnel-backed operation with `USE_NEW_PROXY=true` and `USE_MODELSEED_API=true`.
-3. Produce `.gsd/phases/20/VERIFICATION.md` with empirical evidence.
+1. Continue Plan 20.2 by migrating page-level workspace consumers and status checks to proxy-safe behavior.
+2. Execute Plan 20.3 to wire Build Model tabs to jobs submission and polling.
+3. Produce `.gsd/phases/20/VERIFICATION.md` with tunnel-backed empirical evidence.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -36,3 +36,4 @@ Completed migration planning for new API consolidation as Phase 20:
 - Updated: 2026-03-12 17:50:00 -05:00 - Phase 19 fully verified (PASS)
 - Updated: 2026-03-12 18:00:00 -05:00 - Debug fix: BiochemToolbar mounted guard, biochem search pagination conflict resolved
 - Updated: 2026-03-12 19:26:13 -05:00 - Planned Phase 20 for model/job/workspace proxy consolidation and Build Model activation.
+- Updated: 2026-03-12 19:26:13 -05:00 - Started Phase 20 execution with API client endpoint expansion and shared auth header wiring.
