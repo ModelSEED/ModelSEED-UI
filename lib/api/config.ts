@@ -2,8 +2,8 @@
 /**
  * Centralized API endpoint configuration.
  *
- * Toggle USE_NEW_PROXY to route Workspace and Biochemistry calls
- * through José's unified proxy instead of the legacy direct endpoints.
+ * Toggle USE_NEW_PROXY to route Workspace calls through José's
+ * unified proxy instead of the legacy direct endpoints.
  *
  * RAST / modelseed_support calls are ALWAYS routed to the legacy
  * endpoint regardless of this toggle (per Chris Henry's directive).
@@ -23,14 +23,19 @@ export const MODELSEED_API_URL =
 /* ─── Feature Flags ──────────────────────────────────────────── */
 
 /**
- * When `true`, Workspace and Biochemistry calls are routed through
- * the new unified proxy service. Set to `false` (default) to keep
- * using the legacy direct endpoints while the proxy is in development.
+ * When `true`, Workspace calls are routed through the new unified
+ * proxy service. Phase 20 targets the new workspace proxy by default;
+ * set `NEXT_PUBLIC_USE_NEW_PROXY=false` only when intentionally
+ * falling back to the legacy JSON-RPC Workspace service.
  */
-let useNewProxyDefault = false;
+let useNewProxyDefault = true;
 if (typeof process !== 'undefined') {
     const raw = process.env.NEXT_PUBLIC_USE_NEW_PROXY;
-    if (raw === 'true') useNewProxyDefault = true;
+    if (raw === 'false') {
+        useNewProxyDefault = false;
+    } else if (raw === 'true') {
+        useNewProxyDefault = true;
+    }
 }
 export const USE_NEW_PROXY = useNewProxyDefault;
 

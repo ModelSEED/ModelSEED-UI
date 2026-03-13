@@ -6,7 +6,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import Typography from '@mui/material/Typography';
 import { workspaceLs } from '@/lib/api/workspace';
 import { listPublicMediaFromApi } from '@/lib/api/modelseed';
-import { USE_MODELSEED_API } from '@/lib/api/config';
+import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface MediaItem {
@@ -36,7 +36,7 @@ export default function MediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const { data: rows = [], isLoading } = useQuery({
-        queryKey: ['mediaWorkspaceLs', USE_MODELSEED_API],
+        queryKey: ['mediaWorkspaceLs', USE_MODELSEED_API, USE_NEW_PROXY],
         queryFn: async () => {
             if (USE_MODELSEED_API) {
                 const apiMedia = await listPublicMediaFromApi();

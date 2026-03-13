@@ -12,7 +12,13 @@ import Link from '@mui/material/Link';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { WORKSPACE_URL, PROBMODELSEED_URL } from '@/lib/api/config';
+import {
+    MODELSEED_API_URL,
+    PROBMODELSEED_URL,
+    USE_MODELSEED_API,
+    USE_NEW_PROXY,
+    WORKSPACE_URL,
+} from '@/lib/api/config';
 
 interface ServiceConfig {
     id: string;
@@ -64,6 +70,24 @@ export default function StatusTable() {
 
     const isMockToken = token?.startsWith('mock:');
 
+    const parseServiceResponse = async (
+        response: Response,
+    ): Promise<'success' | 'error' | 'unauth'> => {
+        if (response.status === 401 || response.status === 403) {
+            return 'unauth';
+        }
+        if (!response.ok) {
+            return 'error';
+        }
+        const body = await response.json().catch(() => null) as
+            | { error?: unknown }
+            | null;
+        if (body && typeof body === 'object' && 'error' in body && body.error) {
+            return 'error';
+        }
+        return 'success';
+    };
+
     const checkWorkspaceService = useCallback(async (authToken: string | null): Promise<'success' | 'error' | 'unauth'> => {
         if (isMockToken) {
             return 'success';
@@ -74,7 +98,55 @@ export default function StatusTable() {
         }
 
         try {
-            const response = await fetch(WORKSPACE_URL, {
+            const response = await fetch(
+                USE_NEW_PROXY ? `${WORKSPACE_URL}/ls` : WORKSPACE_URL,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken,
+                    },
+                    body: JSON.stringify(
+                        USE_NEW_PROXY
+                            ? { paths: ['/plantseed/plantseed/'] }
+                            : {
+                                version: '1.1',
+                                method: 'Workspace.ls',
+                                id: Math.floor(Math.random() * 100000),
+                                params: [{ paths: ['/plantseed/plantseed/'] }],
+                            },
+                    ),
+                },
+            );
+
+            return parseServiceResponse(response);
+        } catch {
+            return 'error';
+        }
+    }, [isMockToken]);
+
+    const checkProbModelseedService = useCallback(async (authToken: string | null): Promise<'success' | 'error' | 'unauth'> => {
+        if (isMockToken) {
+            return 'success';
+        }
+
+        if (!authToken) {
+            return 'unauth';
+        }
+
+        try {
+            if (USE_MODELSEED_API) {
+                const response = await fetch(`${MODELSEED_API_URL}/api/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': authToken,
+                    },
+                });
+                return parseServiceResponse(response);
+            }
+
+            const response = await fetch(PROBMODELSEED_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -82,19 +154,12 @@ export default function StatusTable() {
                 },
                 body: JSON.stringify({
                     version: '1.1',
-                    method: 'Workspace.ls',
+                    method: 'ProbModelSEED.list_models',
                     id: Math.floor(Math.random() * 100000),
-                    params: [{ paths: [] }],
+                    params: [{}],
                 }),
             });
-
-            if (response.ok) {
-                return 'success';
-            } else if (response.status === 401 || response.status === 403) {
-                return 'unauth';
-            } else {
-                return 'error';
-            }
+            return parseServiceResponse(response);
         } catch {
             return 'error';
         }
@@ -115,11 +180,21 @@ export default function StatusTable() {
                     continue;
                 }
 
-                if (s.id === 'ws' || s.id === 'pms') {
+                if (s.id === 'ws') {
                     tempStatus[s.id] = 'loading';
                     setStatus(prev => ({ ...prev, ...tempStatus }));
 
                     const result = await checkWorkspaceService(token);
+                    tempStatus[s.id] = result;
+                    setStatus(prev => ({ ...prev, ...tempStatus }));
+                    continue;
+                }
+
+                if (s.id === 'pms') {
+                    tempStatus[s.id] = 'loading';
+                    setStatus(prev => ({ ...prev, ...tempStatus }));
+
+                    const result = await checkProbModelseedService(token);
                     tempStatus[s.id] = result;
                     setStatus(prev => ({ ...prev, ...tempStatus }));
                     continue;
@@ -140,7 +215,7 @@ export default function StatusTable() {
         };
 
         checkStatuses();
-    }, [isAuthenticated, token, isMockToken, checkWorkspaceService]);
+    }, [isAuthenticated, token, isMockToken, checkProbModelseedService, checkWorkspaceService]);
 
     return (
         <TableContainer component={Paper} elevation={0} variant="outlined">

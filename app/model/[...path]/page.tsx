@@ -10,7 +10,10 @@ import Tab from '@mui/material/Tab';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 
-import { workspaceGet } from '@/lib/api/workspace';
+import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
+import { USE_NEW_PROXY } from '@/lib/api/config';
+import { submitFbaJobFromApi, submitGapfillJobFromApi } from '@/lib/api/modelseed';
+import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -65,22 +68,6 @@ function toSearchableString(value: unknown): string {
     if (Array.isArray(value)) return value.map((item) => toSearchableString(item)).join(' ');
     if (typeof value === 'object') return Object.values(value as Record<string, unknown>).map((item) => toSearchableString(item)).join(' ');
     return '';
-}
-
-function tableFilter(rows: Record<string, unknown>[], query: string): Record<string, unknown>[] {
-    if (!query) return rows;
-    const normalized = query.toLowerCase();
-    return rows.filter((row) =>
-        Object.values(row).some((value) => toSearchableString(value).toLowerCase().includes(normalized)),
-    );
-}
-
-function unwrapWorkspaceObject(raw: unknown): Record<string, unknown> {
-    if (!raw || typeof raw !== 'object') return {};
-    const candidate = raw as Record<string, unknown>;
-    const data = candidate.data;
-    if (data && typeof data === 'object') return data as Record<string, unknown>;
-    return candidate;
 }
 
 function buildReactionRows(model: Record<string, unknown>): Record<string, unknown>[] {
@@ -319,13 +306,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     }, [workspacePath]);
 
     const { data: modelData, isLoading, error } = useQuery({
-        queryKey: ['workspaceGet', ...workspaceCandidates],
+        queryKey: ['workspaceGet', USE_NEW_PROXY, ...workspaceCandidates],
         queryFn: async () => {
             const failures: string[] = [];
             for (const candidate of workspaceCandidates) {
                 try {
                     const result = await workspaceGet([candidate]);
-                    const object = Array.isArray(result) ? (result[0] ?? result) : result;
+                    const object = parseWorkspaceGetObject<Record<string, unknown>>(result);
                     if (object) return object;
                 } catch (err) {
                     const reason = err instanceof Error ? err.message : 'Unknown workspace error';
@@ -340,6 +327,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [visualizeOption, setVisualizeOption] = useState('');
     const [paginationByTab, setPaginationByTab] = useState<Record<string, GridPaginationModel>>({});
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
+    const [actionLoading, setActionLoading] = useState<'fba' | 'gapfill' | null>(null);
+    const [actionMessage, setActionMessage] = useState<string | null>(null);
 
     if (error) {
         return (
@@ -360,10 +349,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         );
     }
 
-    const modelObject = unwrapWorkspaceObject(modelData);
+    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(modelData) ?? {};
     const modelName = String(modelObject.id ?? modelSegments[modelSegments.length - 1] ?? 'Unknown Model');
     const modelSpecies = String(modelObject.name ?? '');
     const tableConfig = buildTableConfig(modelObject);
+    const defaultMedia = workspacePath.includes('/plantseed/')
+        ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
+        : 'Complete';
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
@@ -383,12 +375,56 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         router.push(nextPath);
     };
 
+    const submitModelJob = async (kind: 'fba' | 'gapfill') => {
+        setActionLoading(kind);
+        setActionMessage(null);
+        try {
+            const payload =
+                kind === 'fba'
+                    ? await submitFbaJobFromApi({
+                        model: workspaceCandidates[0],
+                        media: defaultMedia,
+                        media_supplement: [],
+                    })
+                    : await submitGapfillJobFromApi({
+                        model: workspaceCandidates[0],
+                        media: defaultMedia,
+                    });
+
+            const jobId = extractTrackedJobId(payload);
+            if (jobId) {
+                trackJob({
+                    id: jobId,
+                    kind,
+                    label: `${modelName} (${kind.toUpperCase()})`,
+                    modelId: modelName,
+                    relatedRef: workspacePath,
+                    submittedAt: new Date().toISOString(),
+                });
+            }
+            setActionMessage(
+                jobId
+                    ? `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted. Job ID: ${jobId}`
+                    : `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted.`,
+            );
+        } catch (err) {
+            const message = err instanceof Error ? err.message : `Failed to submit ${kind} job`;
+            setActionMessage(message);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
             <ModelDetailHeader
                 modelName={modelName}
                 visualizeOption={visualizeOption}
                 onVisualizeChange={setVisualizeOption}
+                onRunFba={() => void submitModelJob('fba')}
+                onRunGapfill={() => void submitModelJob('gapfill')}
+                actionLoading={actionLoading}
+                actionMessage={actionMessage}
             />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

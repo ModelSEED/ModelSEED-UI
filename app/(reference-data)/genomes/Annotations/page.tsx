@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
-import { workspaceGet } from '@/lib/api/workspace';
+import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
+import { USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface SubsystemItem {
@@ -90,20 +91,11 @@ export default function SubsystemsPage() {
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'role', sort: 'asc' }]);
 
     const { data: rows = [], isLoading } = useQuery({
-        queryKey: ['subsystemsWorkspaceGet'],
+        queryKey: ['subsystemsWorkspaceGet', USE_NEW_PROXY],
         queryFn: async () => {
             const data = await workspaceGet(['/plantseed/Data/annotation_overview']);
-            // Workspace API wraps "get" differently. result[0] is the main item, and result[0][0] has the payload.
-            // Inside result[0][0][1], there's the stringified JSON or structured dict depending on python RPC. 
-            // Often it's JSON string in data[0][1].
-            const payloadStr = data[0]?.[1] as string | undefined;
-            if (!payloadStr) return [];
-
-            let parsed: unknown[];
-            try {
-                parsed = JSON.parse(payloadStr);
-            } catch (e) {
-                console.error("Failed to parse subsystems JSON", e);
+            const parsed = parseWorkspaceGetObject<unknown[]>(data);
+            if (!Array.isArray(parsed)) {
                 return [];
             }
 

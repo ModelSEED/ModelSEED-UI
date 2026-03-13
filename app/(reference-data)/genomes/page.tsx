@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import { workspaceLs } from '@/lib/api/workspace';
+import { USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 interface PlantModelItem {
@@ -70,7 +71,7 @@ export default function PlantsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const { data: rows = [], isLoading } = useQuery({
-        queryKey: ['plantsWorkspaceLs'],
+        queryKey: ['plantsWorkspaceLs', USE_NEW_PROXY],
         queryFn: async () => {
             const data = await workspaceLs(['/plantseed/plantseed/']);
             const items = data['/plantseed/plantseed/'] || [];

@@ -14,7 +14,7 @@ export interface WorkspaceRpcRequest {
     version: '1.1';
     method: string;
     id: number;
-    params: any[];
+    params: unknown[];
 }
 
 export interface WorkspaceRpcResponse<T> {
@@ -29,12 +29,56 @@ export interface WorkspaceRpcResponse<T> {
     id: number;
 }
 
+type WorkspaceGetTuple = [unknown, unknown, ...unknown[]];
+
+function unwrapWorkspaceResponse<T>(payload: unknown): T {
+    if (
+        payload &&
+        typeof payload === 'object' &&
+        'result' in payload &&
+        Array.isArray((payload as WorkspaceRpcResponse<T>).result)
+    ) {
+        return ((payload as WorkspaceRpcResponse<T>).result?.[0]) as T;
+    }
+    return payload as T;
+}
+
+export function parseWorkspaceGetObject<T = unknown>(payload: unknown, index = 0): T | null {
+    const unwrapped = unwrapWorkspaceResponse<unknown>(payload);
+
+    let candidate: unknown = unwrapped;
+    if (Array.isArray(unwrapped)) {
+        const entry = unwrapped[index] ?? unwrapped[0];
+        if (Array.isArray(entry)) {
+            const tuple = entry as WorkspaceGetTuple;
+            candidate = tuple.length > 1 ? tuple[1] : tuple[0];
+        } else {
+            candidate = entry;
+        }
+    }
+
+    if (candidate && typeof candidate === 'object' && 'data' in (candidate as Record<string, unknown>)) {
+        candidate = (candidate as { data?: unknown }).data;
+    }
+
+    if (typeof candidate === 'string') {
+        try {
+            return JSON.parse(candidate) as T;
+        } catch {
+            return candidate as T;
+        }
+    }
+
+    if (candidate == null) return null;
+    return candidate as T;
+}
+
 /**
  * Perform a generic Workspace JSON-RPC call.
  * Routes through the endpoint defined in config.ts.
  * Automatically attaches the user's auth token when available.
  */
-async function callWorkspaceApi<T>(method: string, params: any[]): Promise<T> {
+async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T> {
     const request: WorkspaceRpcRequest = {
         version: '1.1',
         method,
@@ -76,7 +120,7 @@ async function callWorkspaceApi<T>(method: string, params: any[]): Promise<T> {
 /**
  * Perform a REST call to the new modelseed-api (Poplar) Workspace endpoints.
  */
-async function callWorkspaceRestApi<T>(method: string, body: any): Promise<T> {
+async function callWorkspaceRestApi<T>(method: string, body: Record<string, unknown>): Promise<T> {
     const baseHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -98,7 +142,8 @@ async function callWorkspaceRestApi<T>(method: string, body: any): Promise<T> {
         throw new Error(err?.detail ?? `Workspace REST error! status: ${response.status}`);
     }
 
-    return await response.json() as T;
+    const payload = await response.json() as unknown;
+    return unwrapWorkspaceResponse<T>(payload);
 }
 
 /**
@@ -106,9 +151,9 @@ async function callWorkspaceRestApi<T>(method: string, body: any): Promise<T> {
  * Method: Workspace.ls
  * @param paths Array of workspace paths to list (e.g. ['/plantseed/plantseed/'])
  */
-export async function workspaceLs(paths: string[]): Promise<Record<string, any>> {
+export async function workspaceLs(paths: string[]): Promise<Record<string, unknown[]>> {
     if (USE_NEW_PROXY) {
-        return callWorkspaceRestApi<Record<string, any>>('ls', { paths });
+        return callWorkspaceRestApi<Record<string, unknown[]>>('ls', { paths });
     }
     return callWorkspaceApi('Workspace.ls', [{ paths }]);
 }
@@ -118,9 +163,9 @@ export async function workspaceLs(paths: string[]): Promise<Record<string, any>>
  * Method: Workspace.get
  * @param objects Array of workspace paths to get (e.g. ['/plantseed/Data/annotation_overview'])
  */
-export async function workspaceGet(objects: string[]): Promise<any[]> {
+export async function workspaceGet(objects: string[]): Promise<unknown[]> {
     if (USE_NEW_PROXY) {
-        return callWorkspaceRestApi<any[]>('get', { objects });
+        return callWorkspaceRestApi<unknown[]>('get', { objects });
     }
     return callWorkspaceApi('Workspace.get', [{ objects }]);
 }
