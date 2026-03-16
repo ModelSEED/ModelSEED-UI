@@ -96,7 +96,7 @@
 - Implement delete-model UI behavior wired to existing delete API, with tests constrained to non-supervisor/test models.
 
 ### Phase 26: Model Detail Legacy Parity and Validation Readiness
-**Status**: ⬜ Not Started
+**Status**: 🔄 In Progress
 - Translate legacy model-detail "Visualize Data" behavior into functional modern UI (FBA, Gapfill, Expression states) without requiring new Run FBA/Run Gapfill button behavior.
 - Implement remaining model-detail parity features identified during validation review (download/detail surfaces, translated tabs/panels, and unsupported-feature UX where backend capability is missing).
 - Produce a complete translated-vs-not-translated inventory for the model detail flow and close high-priority parity gaps needed for full validation sign-off.
@@ -127,3 +127,4 @@
 - Updated: 2026-03-16 10:17:02 CDT - Added Phase 25 scope for remaining workflow UIs (merge, edit, history, media CRUD, delete model).
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation work; code/build verification passed and live authenticated destructive-flow checks remain pending.
 - Updated: 2026-03-16 11:07:14 CDT - Added Phase 26 scope for model detail legacy parity completion and validation readiness.
+- Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 implementation work; live model-detail validation is partially blocked by backend Workspace 500 responses.

@@ -1,20 +1,20 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 26 (planned)
-- **Task**: Model-detail legacy parity planning complete
-- **Status**: Ready for execution
+- **Phase**: 26 (executed, verification partial)
+- **Task**: Model-detail parity implementation complete; backend-blocked runtime validation remains
+- **Status**: Waiting on live model-detail backend recovery for final sign-off
 
 ## Last Session Summary
-Phase 26 planned:
-- Added roadmap scope for model-detail legacy parity and validation readiness.
-- Documented untranslated model-detail features in `.gsd/phases/26/RESEARCH.md`.
-- Created executable plans for Visualize Data translation, model detail parity surfaces, and validation/inventory closure.
-- Preserved current Run FBA/Run Gapfill button integration behavior as requested.
+Phase 26 executed:
+- Implemented functional Visualize Data panels for FBA, GapFill, and Expression states.
+- Added reaction/compound detail drill-in drawers and a model-local download/options surface.
+- Created `.gsd/phases/26/PARITY-INVENTORY.md` and `.gsd/phases/26/VERIFICATION.md` to document translated vs deferred model-detail features.
+- Confirmed lint/build success, but live browser validation is blocked by backend `Workspace` 500 errors on `/api/models` and `/api/models/data`.
 
 ## Next Steps
-1. /execute 26 to implement Visualize Data and remaining model-detail parity surfaces.
-2. Run browser/API validation for `/model/...` non-destructive parity checks.
-3. Update Phase 26 verification artifacts and status after execution.
+1. Restore backend model/workspace reads so `/api/models` and `/api/models/data` stop returning `Workspace` 500 responses.
+2. Re-run browser validation on `/model/...` to confirm Visualize Data, drill-ins, and download/options behavior against live data.
+3. Mark Phase 26 complete after empirical model-detail validation passes.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -46,3 +46,4 @@ Phase 26 planned:
 - Updated: 2026-03-16 09:54:51 CDT - Planned/executed Phase 24 page API adoption and browser validation; partial due backend `media:mine` and remaining unbuilt merge/edit/media CRUD pages.
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation and verification artifacts; lint/build passed and live authenticated destructive-flow checks remain pending.
 - Updated: 2026-03-16 11:07:14 CDT - Planned Phase 26 model-detail legacy parity work with research and executable plan files.
+- Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 code changes and parity inventory; live model-detail verification remains partial due backend Workspace 500 errors.
