@@ -336,19 +336,22 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
     };
 
     const candidateMethods = [
+        // Legacy ModelSEED UI used `service=msSupport` + `method=list_rast_jobs`,
+        // which resolved to `MSSeedSupportServer.list_rast_jobs`.
+        'MSSeedSupportServer.list_rast_jobs',
+        // Keep compatibility fallbacks for any non-standard deployments.
         'msSupport.list_rast_jobs',
         'ms_fba.list_rast_jobs',
-        'msFBA.list_rast_jobs',
     ];
 
     let payload: RastJobsRpcResponse | null = null;
-    let lastErrorMessage: string | null = null;
+    const methodErrors: string[] = [];
 
     for (const method of candidateMethods) {
         const attempt = await callRastList(method);
         if (attempt.error) {
             const message = attempt.error.message || attempt.error.error || '';
-            lastErrorMessage = message || lastErrorMessage;
+            methodErrors.push(`${method}: ${message || `error code ${attempt.error.code ?? 'unknown'}`}`);
             // -32601 indicates "method not found" in most deployments. Some gateways also use it
             // for "package not found". Either way, move to the next compatible method name.
             if (attempt.error.code === -32601) {
@@ -364,7 +367,7 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
     if (!payload) {
         throw new Error(
             `RAST list jobs method not available. Tried: ${candidateMethods.join(', ')}`
-            + (lastErrorMessage ? `. Last error: ${lastErrorMessage}` : ''),
+            + (methodErrors.length > 0 ? `. Errors: ${methodErrors.join(' | ')}` : ''),
         );
     }
 
