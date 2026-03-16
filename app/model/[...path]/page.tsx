@@ -18,7 +18,9 @@ import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import {
     editModelFromApi,
     getModelDetailBundleFromApi,
+    getModelFbaFromApi,
     listModelEditsFromApi,
+    listModelGapfillsFromApi,
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
@@ -300,21 +302,98 @@ function a11yProps(index: number) {
     };
 }
 
+function formatRelativeTimestamp(value: unknown): string {
+    if (typeof value !== 'string' && typeof value !== 'number') return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
+}
+
+function summarizeMediaRef(value: unknown): string {
+    if (typeof value !== 'string' || !value) return 'N/A';
+    const pieces = value.split('/');
+    return pieces[pieces.length - 1] || value;
+}
+
+function extractExpressionRows(model: Record<string, unknown>): Array<{ id: string; name: string; ids: string[] }> {
+    const expressionData = model.expression_data;
+    if (!expressionData) return [];
+
+    if (Array.isArray(expressionData)) {
+        return expressionData.map((item, index) => {
+            if (typeof item === 'string') {
+                return { id: `expression-${index}`, name: item, ids: [] };
+            }
+            if (item && typeof item === 'object') {
+                const record = item as Record<string, unknown>;
+                return {
+                    id: String(record.id ?? record.name ?? `expression-${index}`),
+                    name: String(record.name ?? record.id ?? `Expression ${index + 1}`),
+                    ids: asArray<unknown>(record.ids).map((entry) => String(entry)),
+                };
+            }
+            return { id: `expression-${index}`, name: `Expression ${index + 1}`, ids: [] };
+        });
+    }
+
+    if (typeof expressionData === 'object') {
+        return Object.entries(expressionData as Record<string, unknown>).map(([name, ids], index) => ({
+            id: `${name}-${index}`,
+            name,
+            ids: asArray<unknown>(ids).map((entry) => String(entry)),
+        }));
+    }
+
+    return [];
+}
+
+function extractFbaRows(fbaData: Record<string, unknown> | null | undefined): Record<string, unknown>[] {
+    if (!fbaData) return [];
+
+    const nestedCandidates = [
+        asArray<Record<string, unknown>>(fbaData.fbas),
+        asArray<Record<string, unknown>>(fbaData.results),
+        asArray<Record<string, unknown>>(fbaData.data),
+    ];
+    const nestedRows = nestedCandidates.find((rows) => rows.length > 0) ?? [];
+
+    const rows = nestedRows.length > 0 ? nestedRows : [fbaData];
+    return rows.map((fba, index) => ({
+        id: String(fba.id ?? extractRefId(fba.ref) ?? `fba-${index}`),
+        objective: String(fba.objective ?? '-'),
+        objectiveFunction: String(fba.objective_function ?? 'N/A'),
+        media: summarizeMediaRef(fba.media),
+        timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
+    }));
+}
+
+function extractGapfillRows(gapfills: Record<string, unknown>[] | undefined): Record<string, unknown>[] {
+    return asArray<Record<string, unknown>>(gapfills).map((gapfill, index) => ({
+        id: String(gapfill.id ?? extractRefId(gapfill.ref) ?? `gapfill-${index}`),
+        integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
+        media: summarizeMediaRef(gapfill.media),
+        timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
+    }));
+}
+
 function VisualizeDataPanel({
     option,
     modelName,
+    fbaRows,
+    gapfillRows,
+    expressionRows,
+    fbaError,
+    gapfillError,
 }: {
     option: string;
     modelName: string;
+    fbaRows: Record<string, unknown>[];
+    gapfillRows: Record<string, unknown>[];
+    expressionRows: Array<{ id: string; name: string; ids: string[] }>;
+    fbaError: string | null;
+    gapfillError: string | null;
 }) {
     if (!option) return null;
-
-    const emptyMessage =
-        option === 'FBA'
-            ? `No FBA simulations for ${modelName}.`
-            : option === 'GapFill'
-                ? `No gapfills for ${modelName}.`
-                : `No expression data uploaded for ${modelName}.`;
 
     return (
         <Box
@@ -326,10 +405,93 @@ function VisualizeDataPanel({
                 borderLeft: '4px solid #66bb6a',
             }}
         >
-            <Typography variant="body1" color="text.secondary">
-                {emptyMessage}
-            </Typography>
-            <Divider sx={{ mt: 1, opacity: 0.6 }} />
+            {option === 'FBA' && (
+                <Box>
+                    {fbaError ? (
+                        <Typography variant="body2" color="error">
+                            FBA data is currently unavailable: {fbaError}
+                        </Typography>
+                    ) : fbaRows.length === 0 ? (
+                        <Typography variant="body1" color="text.secondary">
+                            No FBA simulations for {modelName}.
+                        </Typography>
+                    ) : (
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.8fr 1.5fr 1.2fr 1.2fr', gap: 1, fontWeight: 600 }}>
+                                <Typography variant="body2">ID</Typography>
+                                <Typography variant="body2">Objective</Typography>
+                                <Typography variant="body2">Objective Function</Typography>
+                                <Typography variant="body2">Media</Typography>
+                                <Typography variant="body2">Time</Typography>
+                            </Box>
+                            <Divider />
+                            {fbaRows.map((row) => (
+                                <Box key={String(row.id)} sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.8fr 1.5fr 1.2fr 1.2fr', gap: 1 }}>
+                                    <Typography variant="body2">{String(row.id ?? '-')}</Typography>
+                                    <Typography variant="body2">{String(row.objective ?? '-')}</Typography>
+                                    <Typography variant="body2">{String(row.objectiveFunction ?? 'N/A')}</Typography>
+                                    <Typography variant="body2">{String(row.media ?? 'N/A')}</Typography>
+                                    <Typography variant="body2">{String(row.timestamp ?? '-')}</Typography>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            )}
+            {option === 'GapFill' && (
+                <Box>
+                    {gapfillError ? (
+                        <Typography variant="body2" color="error">
+                            Gapfill data is currently unavailable: {gapfillError}
+                        </Typography>
+                    ) : gapfillRows.length === 0 ? (
+                        <Typography variant="body1" color="text.secondary">
+                            No gapfills for {modelName}.
+                        </Typography>
+                    ) : (
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1.5fr 1.2fr', gap: 1, fontWeight: 600 }}>
+                                <Typography variant="body2">ID</Typography>
+                                <Typography variant="body2">Integrated?</Typography>
+                                <Typography variant="body2">Media</Typography>
+                                <Typography variant="body2">Time</Typography>
+                            </Box>
+                            <Divider />
+                            {gapfillRows.map((row) => (
+                                <Box key={String(row.id)} sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1.5fr 1.2fr', gap: 1 }}>
+                                    <Typography variant="body2">{String(row.id ?? '-')}</Typography>
+                                    <Typography variant="body2">{String(row.integrated ?? '-')}</Typography>
+                                    <Typography variant="body2">{String(row.media ?? 'N/A')}</Typography>
+                                    <Typography variant="body2">{String(row.timestamp ?? '-')}</Typography>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            )}
+            {option === 'Expression' && (
+                <Box>
+                    {expressionRows.length === 0 ? (
+                        <Typography variant="body1" color="text.secondary">
+                            No expression data uploaded for {modelName}.
+                        </Typography>
+                    ) : (
+                        <Box sx={{ display: 'grid', gap: 1 }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 1, fontWeight: 600 }}>
+                                <Typography variant="body2">Expression Name</Typography>
+                                <Typography variant="body2">IDs</Typography>
+                            </Box>
+                            <Divider />
+                            {expressionRows.map((row) => (
+                                <Box key={row.id} sx={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 1 }}>
+                                    <Typography variant="body2">{row.name}</Typography>
+                                    <Typography variant="body2">{row.ids.length > 0 ? row.ids.join(', ') : '-'}</Typography>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            )}
         </Box>
     );
 }
@@ -402,6 +564,22 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         staleTime: 30_000,
     });
 
+    const { data: modelFba, error: modelFbaError } = useQuery({
+        queryKey: ['modelFba', USE_MODELSEED_API, workspaceCandidates[0]],
+        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
+        queryFn: async () => getModelFbaFromApi(workspaceCandidates[0]),
+        retry: 0,
+        staleTime: 30_000,
+    });
+
+    const { data: modelGapfills, error: modelGapfillsError } = useQuery({
+        queryKey: ['modelGapfills', USE_MODELSEED_API, workspaceCandidates[0]],
+        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
+        queryFn: async () => listModelGapfillsFromApi(workspaceCandidates[0]),
+        retry: 0,
+        staleTime: 30_000,
+    });
+
     const [visualizeOption, setVisualizeOption] = useState('');
     const [paginationByTab, setPaginationByTab] = useState<Record<string, GridPaginationModel>>({});
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
@@ -435,6 +613,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const modelName = String(modelObject.id ?? modelSegments[modelSegments.length - 1] ?? 'Unknown Model');
     const modelSpecies = String(modelObject.name ?? '');
     const tableConfig = buildTableConfig(modelObject);
+    const fbaRows = extractFbaRows(modelFba);
+    const gapfillRows = extractGapfillRows(modelGapfills);
+    const expressionRows = extractExpressionRows(modelObject);
     const defaultMedia = workspacePath.includes('/plantseed/')
         ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
         : 'Complete';
@@ -585,7 +766,15 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionMessage={actionMessage}
             />
 
-            <VisualizeDataPanel option={visualizeOption} modelName={modelName} />
+            <VisualizeDataPanel
+                option={visualizeOption}
+                modelName={modelName}
+                fbaRows={fbaRows}
+                gapfillRows={gapfillRows}
+                expressionRows={expressionRows}
+                fbaError={modelFbaError instanceof Error ? modelFbaError.message : null}
+                gapfillError={modelGapfillsError instanceof Error ? modelGapfillsError.message : null}
+            />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
