@@ -205,7 +205,7 @@ function buildPathwayRows(model: Record<string, unknown>): Record<string, unknow
     }));
 }
 
-function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey, 'overview'>, DataTableConfig> {
+function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey, 'overview' | 'edits'>, DataTableConfig> {
     return {
         reactions: {
             rows: buildReactionRows(model),

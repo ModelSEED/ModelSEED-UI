@@ -14,6 +14,10 @@ Environment variables:
                       (default: /chenry/public/modelsupport/media/Complete)
   WORKSPACE_PATH      Workspace path for ls/get checks
                       (default: /seaver@patricbrc.org/modelseed/)
+  DELETE_MODEL_REF    Disposable model ref for optional delete smoke check
+
+Optional flags:
+  --allow-delete-model  Run the opt-in delete-model smoke check
 `);
     process.exit(0);
 }
@@ -28,6 +32,8 @@ const baseUrl = (process.env.MODELSEED_API_URL || 'http://poplar.cels.anl.gov:80
 const modelRef = process.env.MODEL_REF || '/seaver@patricbrc.org/modelseed/Test';
 const mediaRef = process.env.MEDIA_REF || '/chenry/public/modelsupport/media/Complete';
 const workspacePath = process.env.WORKSPACE_PATH || '/seaver@patricbrc.org/modelseed/';
+const deleteModelRef = process.env.DELETE_MODEL_REF;
+const allowDeleteModel = argv.has('--allow-delete-model');
 
 const headers = {
     Accept: 'application/json',
@@ -177,10 +183,27 @@ async function run() {
         }),
     ];
 
+    if (allowDeleteModel) {
+        if (!deleteModelRef) {
+            throw new Error('DELETE_MODEL_REF is required when --allow-delete-model is set.');
+        }
+        tests.push(() => requestWithExpectedStatuses(
+            'models:delete(opt-in)',
+            endpoint(`/api/models?ref=${encodeURIComponent(deleteModelRef)}`),
+            [200, 202, 204, 404, 422, 502],
+            { method: 'DELETE' },
+        ));
+    }
+
     console.log(`Running smoke tests against ${baseUrl}`);
     console.log(`Model ref: ${modelRef}`);
     console.log(`Media ref: ${mediaRef}`);
     console.log(`Workspace path: ${workspacePath}`);
+    if (allowDeleteModel) {
+        console.log(`Delete model ref (opt-in): ${deleteModelRef}`);
+    } else {
+        console.log('Delete model smoke: skipped (opt-in only)');
+    }
     console.log('');
 
     const results = [];
