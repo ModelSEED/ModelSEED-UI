@@ -1,21 +1,21 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 24 (implemented, verification partial)
-- **Task**: Page-level API adoption + browser verification for key authenticated routes
-- **Status**: Verification PARTIAL (browser pass for core pages; smoke 11/12)
+- **Phase**: 25 (implemented, verification partial)
+- **Task**: Missing workflow UIs executed; awaiting live authenticated verification for merge/media/delete safety
+- **Status**: Verification PARTIAL (lint/build PASS; live destructive-flow checks intentionally deferred)
 
 ## Last Session Summary
-Phase 24 executed:
-- Planned Phase 24 (`RESEARCH.md`, `1-PLAN.md`, `2-PLAN.md`, `3-PLAN.md`) for page-level API adoption and browser verification.
-- Applied `/api/media/export` usage into `myMedia` and public `list-media` pages with row-level export commands.
-- Applied `/api/models/edits` usage into model detail overview and fixed encoded-model-path loading by decoding route segments.
-- Completed browser validation for `/my-models`, `/model/...`, `/myMedia`, `/list-media`, `/plant` with non-destructive actions only.
-- Re-ran localhost smoke suite: `11/12` passed; `media:mine` remains upstream `500`.
+Phase 25 executed:
+- Added merge-model selection/submission UI on `/my-models` with tracked merge jobs.
+- Added model edit tab, edit submission flow, and structured edit-history table on `/model/...`.
+- Added create/delete workflows on `/myMedia` using workspace proxy helpers.
+- Hardened delete-model confirmation UX and added an opt-in delete smoke strategy requiring `--allow-delete-model` plus `DELETE_MODEL_REF`.
+- Verified edited surfaces with targeted eslint runs and a full `npm run build` pass.
 
 ## Next Steps
-1. Debug `/api/media/mine` backend workspace failure and re-test `myMedia` rows/exports.
-2. Build missing merge-model and model-edit workflow pages for full endpoint-to-UI parity.
-3. Re-run browser + smoke verification and mark Phase 24 complete when all checks pass.
+1. Run authenticated localhost browser verification for merge-model and media create/delete using disposable test objects only.
+2. Optionally run `DELETE_MODEL_REF=\"/path/to/disposable/model\" node scripts/poplar-smoke.mjs --allow-delete-model` against a disposable model only.
+3. Re-run localhost smoke/browser verification and mark Phase 25 complete when live checks pass.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -45,3 +45,4 @@ Phase 24 executed:
 - Updated: 2026-03-13 11:12:24 CDT - Executed and verified Phase 22 with endpoint smoke tests and page integration fixes.
 - Updated: 2026-03-16 09:39:45 CDT - Planned/executed Phase 23 endpoint coverage; localhost token smoke is partial (11/12) due `/api/media/mine` upstream 500.
 - Updated: 2026-03-16 09:54:51 CDT - Planned/executed Phase 24 page API adoption and browser validation; partial due backend `media:mine` and remaining unbuilt merge/edit/media CRUD pages.
+- Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation and verification artifacts; lint/build passed and live authenticated destructive-flow checks remain pending.

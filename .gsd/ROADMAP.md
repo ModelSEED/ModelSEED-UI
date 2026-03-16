@@ -88,7 +88,7 @@
 - Document remaining unbuilt or intentionally deferred legacy-equivalent pages/features.
 
 ### Phase 25: Missing Workflow UIs (Merge, Edit, History, Media CRUD, Delete)
-**Status**: ⬜ Not Started
+**Status**: 🔄 In Progress
 - Design and implement dedicated merge-model workflow UI for `POST /api/jobs/merge`.
 - Design and implement dedicated model editing workflow UI for `POST /api/models/edit`.
 - Build a richer model edit-history interface (beyond counts) using `/api/models/edits`.
@@ -118,3 +118,4 @@
 - Updated: 2026-03-16 09:36:04 CDT - Added Phase 23 for full non-biochem endpoint coverage and localhost tunnel validation.
 - Updated: 2026-03-16 09:46:46 CDT - Added Phase 24 for page-level API adoption and browser final verification.
 - Updated: 2026-03-16 10:17:02 CDT - Added Phase 25 scope for remaining workflow UIs (merge, edit, history, media CRUD, delete model).
+- Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation work; code/build verification passed and live authenticated destructive-flow checks remain pending.
