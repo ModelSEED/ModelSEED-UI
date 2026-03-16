@@ -10,6 +10,7 @@ import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 
@@ -90,6 +91,7 @@ function buildReactionRows(model: Record<string, unknown>): Record<string, unkno
         direction: String(reaction.direction ?? ''),
         equation: String(reaction.definition ?? reaction.equation ?? ''),
         gapfilled: Boolean(reaction.is_gapfilled) ? 'Yes' : 'No',
+        raw: reaction,
     }));
 }
 
@@ -100,6 +102,7 @@ function buildCompoundRows(model: Record<string, unknown>): Record<string, unkno
         formula: String(compound.formula ?? ''),
         charge: Number(compound.charge ?? 0),
         compartment: String(compound.modelcompartment_ref ?? compound.compartment_ref ?? ''),
+        raw: compound,
     }));
 }
 
@@ -376,6 +379,32 @@ function extractGapfillRows(gapfills: Record<string, unknown>[] | undefined): Re
     }));
 }
 
+function stringifyDetailValue(value: unknown): string {
+    if (value == null || value === '') return '-';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return String(value);
+    }
+    if (Array.isArray(value)) {
+        if (value.length === 0) return '-';
+        return value.map((entry) => stringifyDetailValue(entry)).join(', ');
+    }
+    try {
+        return JSON.stringify(value);
+    } catch {
+        return String(value);
+    }
+}
+
+function extractDetailEntries(row: Record<string, unknown>): Array<{ key: string; value: string }> {
+    const source = row.raw && typeof row.raw === 'object' ? row.raw as Record<string, unknown> : row;
+    return Object.entries(source)
+        .filter(([key]) => key !== 'raw')
+        .map(([key, value]) => ({
+            key,
+            value: stringifyDetailValue(value),
+        }));
+}
+
 function VisualizeDataPanel({
     option,
     modelName,
@@ -589,6 +618,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [editSummary, setEditSummary] = useState('');
     const [editSubmitting, setEditSubmitting] = useState(false);
     const [editMessage, setEditMessage] = useState<string | null>(null);
+    const [detailDrawer, setDetailDrawer] = useState<{ title: string; row: Record<string, unknown> } | null>(null);
 
     if (error) {
         return (
@@ -672,6 +702,60 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         { field: 'user', headerName: 'User', width: 220 },
         { field: 'operation', headerName: 'Operation', width: 180 },
         { field: 'summary', headerName: 'Summary', flex: 1, minWidth: 280 },
+    ];
+
+    const openDetailDrawer = (kind: 'reaction' | 'compound', row: Record<string, unknown>) => {
+        const itemName = String(row.name ?? row.id ?? '');
+        setDetailDrawer({
+            title: kind === 'reaction'
+                ? `Reaction ${itemName || row.id || ''}`
+                : `Compound ${itemName || row.id || ''}`,
+            row,
+        });
+    };
+
+    const reactionColumns: GridColDef<Record<string, unknown>>[] = [
+        ...tableConfig.reactions.columns,
+        {
+            field: 'details',
+            headerName: 'Details',
+            width: 120,
+            sortable: false,
+            filterable: false,
+            renderCell: ({ row }) => (
+                <Button
+                    size="small"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        openDetailDrawer('reaction', row);
+                    }}
+                >
+                    View
+                </Button>
+            ),
+        },
+    ];
+
+    const compoundColumns: GridColDef<Record<string, unknown>>[] = [
+        ...tableConfig.compounds.columns,
+        {
+            field: 'details',
+            headerName: 'Details',
+            width: 120,
+            sortable: false,
+            filterable: false,
+            renderCell: ({ row }) => (
+                <Button
+                    size="small"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        openDetailDrawer('compound', row);
+                    }}
+                >
+                    View
+                </Button>
+            ),
+        },
     ];
 
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
@@ -886,7 +970,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         <>
                             <DataGrid<Record<string, unknown>>
                                 rows={tableConfig[tab.key].rows}
-                                columns={tableConfig[tab.key].columns}
+                                columns={
+                                    tab.key === 'reactions'
+                                        ? reactionColumns
+                                        : tab.key === 'compounds'
+                                            ? compoundColumns
+                                            : tableConfig[tab.key].columns
+                                }
                                 pageSizeOptions={[10, 25, 50, 100]}
                                 paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
                                 onPaginationModelChange={(model) =>
@@ -904,6 +994,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                 hideFooter
                                 disableColumnMenu
                                 getRowId={(row) => String(row.id ?? '')}
+                                onRowClick={
+                                    tab.key === 'reactions'
+                                        ? ({ row }) => openDetailDrawer('reaction', row)
+                                        : tab.key === 'compounds'
+                                            ? ({ row }) => openDetailDrawer('compound', row)
+                                            : undefined
+                                }
                                 disableRowSelectionOnClick
                                 autoHeight
                                 sx={{
@@ -913,12 +1010,43 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                         backgroundColor: '#f5f5f5',
                                         borderBottom: '1px solid #ddd',
                                     },
+                                    '& .MuiDataGrid-row:hover': {
+                                        cursor: tab.key === 'reactions' || tab.key === 'compounds' ? 'pointer' : 'default',
+                                    },
                                 }}
                             />
                         </>
                     )}
                 </TabPanel>
             ))}
+
+            <Drawer
+                anchor="right"
+                open={Boolean(detailDrawer)}
+                onClose={() => setDetailDrawer(null)}
+            >
+                <Box sx={{ width: { xs: 320, md: 420 }, p: 3, display: 'grid', gap: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
+                        <Typography variant="h6">{detailDrawer?.title ?? 'Details'}</Typography>
+                        <Button onClick={() => setDetailDrawer(null)} sx={{ textTransform: 'none' }}>
+                            Close
+                        </Button>
+                    </Box>
+                    <Divider />
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 1.25 }}>
+                        {(detailDrawer ? extractDetailEntries(detailDrawer.row) : []).map((entry) => (
+                            <Box key={entry.key} sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 1.5 }}>
+                                <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                                    {entry.key}
+                                </Typography>
+                                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                    {entry.value}
+                                </Typography>
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+            </Drawer>
         </Box>
     );
 }
