@@ -355,6 +355,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const {
         data: modelEdits = [],
         error: modelEditsError,
+        refetch: refetchModelEdits,
     } = useQuery({
         queryKey: ['modelEdits', USE_MODELSEED_API, workspaceCandidates[0]],
         enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
@@ -523,6 +524,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 biomass_changes: [],
                 summary: editSummary.trim() || undefined,
             });
+            await refetchModelEdits();
             setEditMessage(`Edit request submitted for reaction ${trimmedReactionId}.`);
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to submit model edit';
