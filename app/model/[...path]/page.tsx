@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import {
+    editModelFromApi,
     getModelDetailBundleFromApi,
     listModelEditsFromApi,
     submitFbaJobFromApi,
@@ -372,6 +373,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [editReactionId, setEditReactionId] = useState('');
     const [editSummary, setEditSummary] = useState('');
+    const [editSubmitting, setEditSubmitting] = useState(false);
+    const [editMessage, setEditMessage] = useState<string | null>(null);
 
     if (error) {
         return (
@@ -467,6 +470,37 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         }
     };
 
+    const handleSubmitEdit = async () => {
+        const trimmedReactionId = editReactionId.trim();
+        if (!trimmedReactionId) {
+            setEditMessage('Reaction ID is required to submit an edit.');
+            return;
+        }
+
+        setEditSubmitting(true);
+        setEditMessage(null);
+        try {
+            await editModelFromApi({
+                model: workspaceCandidates[0],
+                reactions_to_remove: [trimmedReactionId],
+                reactions_to_add: [],
+                reactions_to_modify: [],
+                biomass_changes: [],
+                summary: editSummary.trim() || undefined,
+            });
+            setEditMessage(`Edit request submitted for reaction ${trimmedReactionId}.`);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to submit model edit';
+            setEditMessage(
+                message.includes('501')
+                    ? 'Model editing is not supported yet on this backend deployment.'
+                    : message,
+            );
+        } finally {
+            setEditSubmitting(false);
+        }
+    };
+
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
             <ModelDetailHeader
@@ -524,9 +558,21 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                 multiline
                                 minRows={2}
                             />
+                            {editMessage && (
+                                <Typography
+                                    variant="body2"
+                                    color={editMessage.includes('submitted') ? 'success.main' : 'error'}
+                                >
+                                    {editMessage}
+                                </Typography>
+                            )}
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                <Button variant="contained" disabled>
-                                    Submit Edit
+                                <Button
+                                    variant="contained"
+                                    onClick={() => void handleSubmitEdit()}
+                                    disabled={editSubmitting || !editReactionId.trim()}
+                                >
+                                    {editSubmitting ? 'Submitting Edit...' : 'Submit Edit'}
                                 </Button>
                             </Box>
                         </Box>
