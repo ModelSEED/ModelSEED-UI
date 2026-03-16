@@ -29,6 +29,8 @@ import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import ChemicalEquation from '@/components/ui/ChemicalEquation';
+import { formatFormula } from '@/components/utils/formatFormula';
 
 type TabKey =
     | 'overview'
@@ -220,7 +222,13 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { field: 'id', headerName: 'ID', width: 210 },
                 { field: 'name', headerName: 'Name', width: 260 },
                 { field: 'direction', headerName: 'Direction', width: 120 },
-                { field: 'equation', headerName: 'Equation', flex: 1, minWidth: 280 },
+                {
+                    field: 'equation',
+                    headerName: 'Equation',
+                    flex: 1,
+                    minWidth: 280,
+                    renderCell: (params) => <ChemicalEquation equation={String(params.value ?? '')} />,
+                },
                 { field: 'gapfilled', headerName: 'Gapfilled', width: 120 },
             ],
         },
@@ -229,7 +237,12 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
             columns: [
                 { field: 'id', headerName: 'ID', width: 210 },
                 { field: 'name', headerName: 'Name', width: 260 },
-                { field: 'formula', headerName: 'Formula', width: 180 },
+                {
+                    field: 'formula',
+                    headerName: 'Formula',
+                    width: 180,
+                    renderCell: (params) => formatFormula(String(params.value ?? '')),
+                },
                 { field: 'charge', headerName: 'Charge', width: 120, type: 'number' },
                 { field: 'compartment', headerName: 'Compartment', width: 180 },
             ],
