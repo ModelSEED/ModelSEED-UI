@@ -27,6 +27,7 @@ import {
 } from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
+import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 type TabKey =
@@ -849,6 +850,21 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
             />
+
+            <Box
+                sx={{
+                    mb: 3,
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                }}
+            >
+                <DownloadModelMenu
+                    modelRef={workspaceCandidates[0]}
+                    modelId={modelName}
+                    buttonLabel="Download options"
+                    helperText="Export this model as SBML, JSON, or TSV."
+                />
+            </Box>
 
             <VisualizeDataPanel
                 option={visualizeOption}
