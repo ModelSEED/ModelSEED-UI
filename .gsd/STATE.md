@@ -1,20 +1,20 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 26 (executed, verification partial)
-- **Task**: Model-detail parity implementation complete; backend-blocked runtime validation remains
-- **Status**: Waiting on live model-detail backend recovery for final sign-off
+- **Phase**: 27 (completed, verified)
+- **Task**: Formatting/link parity and legacy-surface UX closure complete
+- **Status**: Ready to return to Phase 26 backend-blocked validation follow-up
 
 ## Last Session Summary
-Phase 26 executed:
-- Implemented functional Visualize Data panels for FBA, GapFill, and Expression states.
-- Added reaction/compound detail drill-in drawers and a model-local download/options surface.
-- Created `.gsd/phases/26/PARITY-INVENTORY.md` and `.gsd/phases/26/VERIFICATION.md` to document translated vs deferred model-detail features.
-- Confirmed lint/build success, but live browser validation is blocked by backend `Workspace` 500 errors on `/api/models` and `/api/models/data`.
+Phase 27 executed and verified:
+- Aligned model-detail chemical formatting with existing reference formatting utilities (`ChemicalEquation`, `formatFormula`).
+- Added reaction/compound/genome cross-links from model-detail and direct FBA/GapFill links in Visualize Data rows.
+- Added explicit deferred-feature messaging for legacy Predictions/dynamic pathway tabs and organism image/links fallback UX.
+- Produced `.gsd/phases/27/FORMATTING-LINK-AUDIT.md` plus plan summaries and verification artifact.
 
 ## Next Steps
 1. Restore backend model/workspace reads so `/api/models` and `/api/models/data` stop returning `Workspace` 500 responses.
-2. Re-run browser validation on `/model/...` to confirm Visualize Data, drill-ins, and download/options behavior against live data.
-3. Mark Phase 26 complete after empirical model-detail validation passes.
+2. Re-run browser validation on `/model/...` to confirm Visualize Data, drill-ins, download/options, and new link/formatting parity against live data.
+3. Close out Phase 26 final validation once backend health allows empirical model-detail checks.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -47,3 +47,5 @@ Phase 26 executed:
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation and verification artifacts; lint/build passed and live authenticated destructive-flow checks remain pending.
 - Updated: 2026-03-16 11:07:14 CDT - Planned Phase 26 model-detail legacy parity work with research and executable plan files.
 - Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 code changes and parity inventory; live model-detail verification remains partial due backend Workspace 500 errors.
+- Updated: 2026-03-16 11:39:55 CDT - Planned Phase 27 for formatting/link parity and remaining legacy surface completion.
+- Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27; formatting/link parity and legacy-surface UX closure complete.

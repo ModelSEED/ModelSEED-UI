@@ -102,6 +102,12 @@
 - Produce a complete translated-vs-not-translated inventory for the model detail flow and close high-priority parity gaps needed for full validation sign-off.
 - Execute browser/API validation against localhost token-auth session for `/model/...` to confirm functional parity on non-destructive flows.
 
+### Phase 27: Formatting, Cross-Links, and Legacy Surface Completion
+**Status**: ✅ Complete
+- Align model-detail reaction/compound/biomass/pathway tables with legacy chemical formatting and cross-links (IDs → biochem detail, genome refs → genome detail).
+- Implement or explicitly mark deferred the remaining legacy model-detail surfaces (Predictions, dynamic pathway tabs, organism image/links block) with clear modern UX.
+- Close remaining formatting/link inconsistencies across user models vs reference data and produce an updated audit ready for final v1-beta validation.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -128,3 +134,5 @@
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation work; code/build verification passed and live authenticated destructive-flow checks remain pending.
 - Updated: 2026-03-16 11:07:14 CDT - Added Phase 26 scope for model detail legacy parity completion and validation readiness.
 - Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 implementation work; live model-detail validation is partially blocked by backend Workspace 500 responses.
+- Updated: 2026-03-16 11:39:55 CDT - Added Phase 27 for formatting/link parity and remaining legacy surface completion on model-detail and related flows.
+- Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27 formatting/link parity and legacy-surface UX closure.
