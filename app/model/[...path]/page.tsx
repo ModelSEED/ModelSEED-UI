@@ -422,6 +422,41 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
     ];
 
+    const editHistoryRows = modelEdits.map((edit, index) => {
+        const timestamp =
+            typeof edit.timestamp === 'string'
+                ? edit.timestamp
+                : typeof edit.rundate === 'string'
+                    ? edit.rundate
+                    : '';
+        const removed = asArray<unknown>(edit.reactions_removed).length;
+        const added = asArray<unknown>(edit.reactions_added).length;
+        const modified = asArray<unknown>(edit.reactions_modified).length;
+        const biomassChanged = asArray<unknown>(edit.biomass_changed).length;
+
+        return {
+            id: String(edit.id ?? `edit-${index}`),
+            timestamp,
+            user: String(edit.user ?? edit.owner ?? '-'),
+            operation: [added > 0 && 'add', removed > 0 && 'remove', modified > 0 && 'modify', biomassChanged > 0 && 'biomass']
+                .filter(Boolean)
+                .join(', ') || 'update',
+            summary: `${added} added, ${removed} removed, ${modified} modified, ${biomassChanged} biomass updates`,
+        };
+    });
+
+    const editHistoryColumns: GridColDef<Record<string, unknown>>[] = [
+        {
+            field: 'timestamp',
+            headerName: 'Timestamp',
+            width: 220,
+            valueGetter: (value) => (value ? new Date(String(value)).toLocaleString() : '-'),
+        },
+        { field: 'user', headerName: 'User', width: 220 },
+        { field: 'operation', headerName: 'Operation', width: 180 },
+        { field: 'summary', headerName: 'Summary', flex: 1, minWidth: 280 },
+    ];
+
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
         const tab = MODEL_TABS[nextIndex];
         if (!tab) return;
@@ -574,6 +609,49 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                 >
                                     {editSubmitting ? 'Submitting Edit...' : 'Submit Edit'}
                                 </Button>
+                            </Box>
+                            <Box sx={{ mt: 2 }}>
+                                <Typography variant="h6" sx={{ mb: 1.5 }}>
+                                    Edit History
+                                </Typography>
+                                {modelEditsError ? (
+                                    <Typography variant="body2" color="text.secondary">
+                                        {modelEditsError instanceof Error && modelEditsError.message.includes('501')
+                                            ? 'Edit history is not supported yet on this backend deployment.'
+                                            : 'Edit history is currently unavailable.'}
+                                    </Typography>
+                                ) : editHistoryRows.length === 0 ? (
+                                    <Typography variant="body2" color="text.secondary">
+                                        No edits recorded for this model yet.
+                                    </Typography>
+                                ) : (
+                                    <DataGrid<Record<string, unknown>>
+                                        rows={editHistoryRows}
+                                        columns={editHistoryColumns}
+                                        pageSizeOptions={[10, 25, 50]}
+                                        paginationModel={paginationByTab.edits ?? { page: 0, pageSize: 10 }}
+                                        onPaginationModelChange={(model) =>
+                                            setPaginationByTab((prev) => ({ ...prev, edits: model }))
+                                        }
+                                        sortModel={sortByTab.edits ?? [{ field: 'timestamp', sort: 'desc' }]}
+                                        onSortModelChange={(model) =>
+                                            setSortByTab((prev) => ({ ...prev, edits: model }))
+                                        }
+                                        hideFooter
+                                        disableColumnMenu
+                                        disableRowSelectionOnClick
+                                        autoHeight
+                                        sx={{
+                                            mt: 1,
+                                            border: '1px solid #e0e0e0',
+                                            backgroundColor: '#fff',
+                                            '& .MuiDataGrid-columnHeaders': {
+                                                backgroundColor: '#f5f5f5',
+                                                borderBottom: '1px solid #ddd',
+                                            },
+                                        }}
+                                    />
+                                )}
                             </Box>
                         </Box>
                     ) : (
