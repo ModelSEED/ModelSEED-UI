@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
+import {
+    DataGrid,
+    GridColDef,
+    GridPaginationModel,
+    GridRowSelectionModel,
+    GridSortModel,
+} from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -10,6 +16,10 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
@@ -58,6 +68,8 @@ function normalizeModelRef(ref: string): string {
 export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
+    const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
+    const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const [jobActionError, setJobActionError] = useState<string | null>(null);
     const { isAuthenticated } = useAuth();
@@ -166,6 +178,11 @@ export default function MyModelsPage() {
         }
     }, [refetchTrackedJobs]);
 
+    const selectedModels = useMemo(
+        () => rows.filter((row) => selectedModelIds.includes(row.id)),
+        [rows, selectedModelIds],
+    );
+
     const columns = useMemo<GridColDef<MyModelItem>[]>(() => [
         {
             field: 'id',
@@ -261,15 +278,27 @@ export default function MyModelsPage() {
         <AuthGuard>
             <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        component={Link}
-                        href="/plant"
-                        sx={{ textTransform: 'none', fontWeight: 600 }}
-                    >
-                        Build New Model
-                    </Button>
+                    <Stack direction="row" spacing={1.5}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            component={Link}
+                            href="/plant"
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Build New Model
+                        </Button>
+                        {selectedModelIds.length >= 2 && (
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => setMergeDialogOpen(true)}
+                                sx={{ textTransform: 'none', fontWeight: 600 }}
+                            >
+                                Merge Models ({selectedModelIds.length})
+                            </Button>
+                        )}
+                    </Stack>
                 </Box>
 
                 <Box sx={{ borderBottom: '1px solid #ddd', pb: 1, mb: 1 }}>
@@ -354,6 +383,19 @@ export default function MyModelsPage() {
                         }}
                         hideFooter
                         disableColumnMenu
+                        checkboxSelection
+                        disableMultipleRowSelection={false}
+                        rowSelectionModel={{
+                            type: 'include',
+                            ids: new Set(selectedModelIds),
+                        }}
+                        onRowSelectionModelChange={(selectionModel: GridRowSelectionModel) => {
+                            const ids =
+                                Array.isArray(selectionModel)
+                                    ? selectionModel.map((value) => String(value))
+                                    : Array.from(selectionModel.ids, (value) => String(value));
+                            setSelectedModelIds(ids);
+                        }}
                         getRowId={(row) => row.id}
                         disableRowSelectionOnClick
                         autoHeight
@@ -373,6 +415,30 @@ export default function MyModelsPage() {
                         You have no models. Consider reconstructing a model.
                     </Typography>
                 )}
+
+                <Dialog
+                    open={mergeDialogOpen}
+                    onClose={() => setMergeDialogOpen(false)}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle>Merge Models</DialogTitle>
+                    <DialogContent>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                            Merge configuration will use the selected models below. Submission wiring is added in the next task.
+                        </Typography>
+                        <Stack spacing={1}>
+                            {selectedModels.map((model) => (
+                                <Typography key={model.id} variant="body2">
+                                    {model.id} <Box component="span" sx={{ color: 'text.secondary' }}>({model.path})</Box>
+                                </Typography>
+                            ))}
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setMergeDialogOpen(false)}>Close</Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </AuthGuard>
     );
