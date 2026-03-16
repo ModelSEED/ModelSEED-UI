@@ -11,6 +11,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -484,6 +487,34 @@ function extractDetailEntries(row: Record<string, unknown>): Array<{ key: string
         }));
 }
 
+function LegacySurfaceStatus({
+    isPlantModel,
+}: {
+    isPlantModel: boolean;
+}) {
+    return (
+        <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
+            <AlertTitle>Legacy surface status</AlertTitle>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {isPlantModel && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                        <Chip size="small" label="Predictions tab" color="warning" />
+                        <Typography variant="body2" color="text.secondary">
+                            Plant-only legacy Predictions is not yet supported in v1-beta and is intentionally deferred.
+                        </Typography>
+                    </Box>
+                )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip size="small" label="Dynamic pathway tabs" color="warning" />
+                    <Typography variant="body2" color="text.secondary">
+                        Legacy dynamic map tabs are represented by the Pathways tab summary in this UI and are deferred for full parity.
+                    </Typography>
+                </Box>
+            </Box>
+        </Alert>
+    );
+}
+
 function VisualizeDataPanel({
     option,
     modelName,
@@ -728,6 +759,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const defaultMedia = workspacePath.includes('/plantseed/')
         ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
         : 'Complete';
+    const isPlantModel = workspacePath.includes('/plantseed/')
+        || String(modelObject.type ?? '').toLowerCase().includes('plant');
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
@@ -966,6 +999,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 fbaError={modelFbaError instanceof Error ? modelFbaError.message : null}
                 gapfillError={modelGapfillsError instanceof Error ? modelGapfillsError.message : null}
             />
+
+            <LegacySurfaceStatus isPlantModel={isPlantModel} />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
