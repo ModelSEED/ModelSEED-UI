@@ -33,6 +33,7 @@ export interface ModelseedModelSummary {
 export interface ModelseedMediaSummary {
     id: string;
     name: string;
+    ref?: string;
     isMinimal?: boolean | string;
     isDefined?: boolean | string;
     type?: string;
@@ -267,6 +268,16 @@ export async function manageJobFromApi(
     });
 }
 
+export async function submitMergeJobFromApi(
+    payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+    return modelseedFetch<Record<string, unknown>>('/api/jobs/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+}
+
 interface RastJobsRpcResponse {
     result?: unknown;
     error?: {
@@ -393,6 +404,29 @@ export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     }
 }
 
+export async function exportMediaFromApi(ref: string): Promise<Record<string, unknown>> {
+    return modelseedFetch<Record<string, unknown>>(
+        `/api/media/export${buildQueryString({ ref })}`,
+    );
+}
+
+export async function listModelEditsFromApi(ref: string): Promise<Record<string, unknown>[]> {
+    return modelseedFetch<Record<string, unknown>[]>(
+        `/api/models/edits${buildQueryString({ ref })}`,
+    );
+}
+
+export async function editModelFromApi(
+    payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+    // Route currently exists for forward-compatibility and may return 501 on some deployments.
+    return modelseedFetch<Record<string, unknown>>('/api/models/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+}
+
 async function listMediaGeneric(path: string): Promise<ModelseedMediaSummary[]> {
     // The Poplar deployment returns a dictionary of workspace paths to arrays of
     // positional workspace tuples, rather than a flat list of objects. Each entry
@@ -478,7 +512,7 @@ function mapRawMediaResponse(raw: Record<string, unknown[]>): ModelseedMediaSumm
         if (!Array.isArray(entries)) continue;
         for (const entry of entries) {
             if (!Array.isArray(entry)) continue;
-            const [name, type, , modDate, id, , , metadata] = entry as [
+            const [name, type, path, modDate, id, , , metadata] = entry as [
                 unknown,
                 unknown,
                 unknown,
@@ -494,6 +528,7 @@ function mapRawMediaResponse(raw: Record<string, unknown[]>): ModelseedMediaSumm
             summaries.push({
                 id: id ? String(id) : String(name ?? ''),
                 name: String(name ?? ''),
+                ref: path ? String(path) : undefined,
                 type: type ? String(type) : undefined,
                 modDate: modDate ? String(modDate) : undefined,
                 isMinimal: (meta?.isMinimal ?? meta?.is_minimal) as boolean | string | undefined,

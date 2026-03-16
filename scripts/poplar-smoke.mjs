@@ -10,6 +10,8 @@ Environment variables:
   MODELSEED_API_URL   API base URL (default: http://poplar.cels.anl.gov:8000)
   MODEL_REF           Model workspace ref for detail checks
                       (default: /seaver@patricbrc.org/modelseed/Test)
+  MEDIA_REF           Media workspace ref for export checks
+                      (default: /chenry/public/modelsupport/media/Complete)
   WORKSPACE_PATH      Workspace path for ls/get checks
                       (default: /seaver@patricbrc.org/modelseed/)
 `);
@@ -24,6 +26,7 @@ if (!token) {
 
 const baseUrl = (process.env.MODELSEED_API_URL || 'http://poplar.cels.anl.gov:8000').replace(/\/$/, '');
 const modelRef = process.env.MODEL_REF || '/seaver@patricbrc.org/modelseed/Test';
+const mediaRef = process.env.MEDIA_REF || '/chenry/public/modelsupport/media/Complete';
 const workspacePath = process.env.WORKSPACE_PATH || '/seaver@patricbrc.org/modelseed/';
 
 const headers = {
@@ -58,7 +61,9 @@ async function request(name, url, init = {}) {
         name,
         url,
         status: response.status,
-        ok: response.ok,
+        httpOk: response.ok,
+        pass: response.ok,
+        expectedStatuses: null,
         text,
         json,
     };
@@ -68,9 +73,18 @@ function endpoint(path) {
     return `${baseUrl}${path}`;
 }
 
+function requestWithExpectedStatuses(name, url, expectedStatuses, init = {}) {
+    return request(name, url, init).then((result) => ({
+        ...result,
+        expectedStatuses,
+        pass: expectedStatuses.includes(result.status),
+    }));
+}
+
 function outputResult(result) {
-    if (result.ok) {
-        console.log(`PASS ${result.name} -> ${result.status}`);
+    if (result.pass) {
+        const qualifier = result.expectedStatuses ? ' (contract)' : '';
+        console.log(`PASS${qualifier} ${result.name} -> ${result.status}`);
         return;
     }
     const detail = result.json?.detail
@@ -115,6 +129,42 @@ async function run() {
         () => request('models:fba', endpoint(`/api/models/fba?ref=${encodeURIComponent(modelRef)}`)),
         () => request('media:public', endpoint('/api/media/public')),
         mineMediaTest,
+        () => requestWithExpectedStatuses(
+            'media:export(contract)',
+            endpoint(`/api/media/export?ref=${encodeURIComponent(mediaRef)}`),
+            [200, 404, 422, 502],
+        ),
+        () => requestWithExpectedStatuses(
+            'models:edits(contract)',
+            endpoint(`/api/models/edits?ref=${encodeURIComponent(modelRef)}`),
+            [200, 404, 501, 502],
+        ),
+        () => requestWithExpectedStatuses(
+            'models:edit(contract)',
+            endpoint('/api/models/edit'),
+            [200, 400, 422, 501],
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: modelRef,
+                    operation: 'noop',
+                }),
+            },
+        ),
+        () => requestWithExpectedStatuses(
+            'jobs:merge(contract)',
+            endpoint('/api/jobs/merge'),
+            [200, 400, 422, 502],
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    models: [],
+                    output_path: workspacePath,
+                }),
+            },
+        ),
         () => request('workspace:ls', endpoint('/api/workspace/ls'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -129,6 +179,7 @@ async function run() {
 
     console.log(`Running smoke tests against ${baseUrl}`);
     console.log(`Model ref: ${modelRef}`);
+    console.log(`Media ref: ${mediaRef}`);
     console.log(`Workspace path: ${workspacePath}`);
     console.log('');
 
@@ -139,7 +190,7 @@ async function run() {
         outputResult(result);
     }
 
-    const failures = results.filter((r) => !r.ok);
+    const failures = results.filter((r) => !r.pass);
     console.log('');
     console.log(`Summary: ${results.length - failures.length}/${results.length} passed`);
 

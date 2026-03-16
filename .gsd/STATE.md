@@ -1,22 +1,21 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 22 (completed)
-- **Task**: Demo-aligned API integration for myMedia/build-model/model-detail verified
-- **Status**: Verified (PASS)
+- **Phase**: 24 (implemented, verification partial)
+- **Task**: Page-level API adoption + browser verification for key authenticated routes
+- **Status**: Verification PARTIAL (browser pass for core pages; smoke 11/12)
 
 ## Last Session Summary
-Phase 22 executed end-to-end:
-- API error handling normalized across workspace/modelseed clients.
-- Added authenticated smoke command `npm run test:poplar-smoke`.
-- Model detail now loads endpoint-first from `/api/models/*` with workspace fallback.
-- `/myMedia` broken banner removed and media loading hardened with workspace fallback paths.
-- `/plant` Build Model table actions guarded during in-flight submissions.
-- Verified against localhost demo API with raw token auth (`8/8` smoke checks passed).
+Phase 24 executed:
+- Planned Phase 24 (`RESEARCH.md`, `1-PLAN.md`, `2-PLAN.md`, `3-PLAN.md`) for page-level API adoption and browser verification.
+- Applied `/api/media/export` usage into `myMedia` and public `list-media` pages with row-level export commands.
+- Applied `/api/models/edits` usage into model detail overview and fixed encoded-model-path loading by decoding route segments.
+- Completed browser validation for `/my-models`, `/model/...`, `/myMedia`, `/list-media`, `/plant` with non-destructive actions only.
+- Re-ran localhost smoke suite: `11/12` passed; `media:mine` remains upstream `500`.
 
 ## Next Steps
-1. Run `/progress` to confirm current milestone/phase status.
-2. Start planning next phase focused on remaining auth/workspace edge cases if needed.
-3. Optionally run `/verify 21` to close out outstanding Phase 21 manual checks.
+1. Debug `/api/media/mine` backend workspace failure and re-test `myMedia` rows/exports.
+2. Build missing merge-model and model-edit workflow pages for full endpoint-to-UI parity.
+3. Re-run browser + smoke verification and mark Phase 24 complete when all checks pass.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -44,3 +43,5 @@ Phase 22 executed end-to-end:
 - Updated: 2026-03-13 10:56:00 CDT - Planned Phase 22 for Poplar endpoint parity and model flow reliability.
 - Updated: 2026-03-13 11:01:38 CDT - Re-planned Phase 22 with explicit demo-aligned outcomes for `/myMedia`, `/plant`, and `/model/...`.
 - Updated: 2026-03-13 11:12:24 CDT - Executed and verified Phase 22 with endpoint smoke tests and page integration fixes.
+- Updated: 2026-03-16 09:39:45 CDT - Planned/executed Phase 23 endpoint coverage; localhost token smoke is partial (11/12) due `/api/media/mine` upstream 500.
+- Updated: 2026-03-16 09:54:51 CDT - Planned/executed Phase 24 page API adoption and browser validation; partial due backend `media:mine` and remaining unbuilt merge/edit/media CRUD pages.

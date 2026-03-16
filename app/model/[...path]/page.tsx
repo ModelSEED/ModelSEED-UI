@@ -14,6 +14,7 @@ import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import {
     getModelDetailBundleFromApi,
+    listModelEditsFromApi,
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
@@ -296,11 +297,18 @@ function a11yProps(index: number) {
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
     const resolvedParams = use(params);
-    const urlSegments = resolvedParams.path ?? [];
+    const urlSegments = useMemo(
+        () => resolvedParams.path ?? [],
+        [resolvedParams.path],
+    );
+    const decodedSegments = useMemo(
+        () => urlSegments.map((segment) => decodeURIComponent(segment)),
+        [urlSegments],
+    );
 
-    const lastSegment = urlSegments[urlSegments.length - 1]?.toLowerCase();
+    const lastSegment = decodedSegments[decodedSegments.length - 1]?.toLowerCase();
     const activeTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
-    const modelSegments = isTabKey(lastSegment) ? urlSegments.slice(0, -1) : urlSegments;
+    const modelSegments = isTabKey(lastSegment) ? decodedSegments.slice(0, -1) : decodedSegments;
     const workspacePath = `/${modelSegments.join('/')}`;
 
     const workspaceCandidates = useMemo(() => {
@@ -337,6 +345,20 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             throw new Error(`Failed to load model object. Tried refs: ${failures.join(' | ')}`);
         },
         retry: 1,
+    });
+
+    const {
+        data: modelEdits = [],
+        error: modelEditsError,
+    } = useQuery({
+        queryKey: ['modelEdits', USE_MODELSEED_API, workspaceCandidates[0]],
+        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
+        queryFn: async () => {
+            const edits = await listModelEditsFromApi(workspaceCandidates[0]);
+            return Array.isArray(edits) ? edits : [];
+        },
+        retry: 0,
+        staleTime: 30_000,
     });
 
     const [visualizeOption, setVisualizeOption] = useState('');
@@ -380,6 +402,15 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         { label: 'Source', value: String(modelObject.source ?? '-') },
         { label: 'Genome Ref', value: String(modelObject.genome_ref ?? '-') },
         { label: 'Type', value: String(modelObject.type ?? '-') },
+        {
+            label: 'Edits',
+            value: modelEditsError
+                ? (modelEditsError instanceof Error
+                    && modelEditsError.message.includes('501')
+                    ? 'Not supported by backend yet'
+                    : 'Unavailable')
+                : String(modelEdits.length),
+        },
     ];
 
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {

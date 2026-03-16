@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
-import { listMyMediaFromApi } from '@/lib/api/modelseed';
+import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -22,31 +22,24 @@ interface MyMediaItem {
     path: string;
 }
 
-const columns: GridColDef<MyMediaItem>[] = [
-    {
-        field: 'name',
-        headerName: 'Media ID',
-        width: 250,
-        renderCell: (params) => (
-            <Box sx={{ color: '#00acc1', fontWeight: 500 }}>
-                {params.value}
-            </Box>
-        ),
-    },
-    { field: 'isMinimal', headerName: 'Minimal?', width: 150 },
-    { field: 'isDefined', headerName: 'Defined?', width: 150 },
-    { field: 'type', headerName: 'Type', width: 200 },
-    {
-        field: 'modDate',
-        headerName: 'Modification Date',
-        width: 250,
-        valueGetter: (_value, row) => new Date(row.modDate).toLocaleString(),
-    },
-];
+function downloadJsonPayload(payload: unknown, filename: string): void {
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+}
 
 export default function MyMediaPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
+    const [exportingMediaId, setExportingMediaId] = useState<string | null>(null);
+    const [exportError, setExportError] = useState<string | null>(null);
     const { isAuthenticated } = useAuth();
 
     const { data: rows = [], isLoading, error } = useQuery({
@@ -64,8 +57,7 @@ export default function MyMediaPage() {
                         m.isDefined === true || m.isDefined === '1' ? 'Yes' : 'No',
                     type: m.type || 'unknown',
                     modDate: m.modDate ?? new Date().toISOString(),
-                    // Until modelseed-api exposes a direct workspace ref, link by id only.
-                    path: `/${m.id}`,
+                    path: m.ref || `/${m.id}`,
                 })) as MyMediaItem[];
             }
 
@@ -75,6 +67,62 @@ export default function MyMediaPage() {
         },
         staleTime: 5 * 60 * 1000,
     });
+
+    const handleExportMedia = async (row: MyMediaItem) => {
+        setExportError(null);
+        setExportingMediaId(row.id);
+        try {
+            const payload = await exportMediaFromApi(row.path);
+            const safeId = row.id.replace(/[^A-Za-z0-9._-]/g, '_');
+            downloadJsonPayload(payload, `${safeId}.media.json`);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to export media';
+            setExportError(message);
+        } finally {
+            setExportingMediaId(null);
+        }
+    };
+
+    const columns = useMemo<GridColDef<MyMediaItem>[]>(() => [
+        {
+            field: 'name',
+            headerName: 'Media ID',
+            width: 250,
+            renderCell: (params) => (
+                <Box sx={{ color: '#00acc1', fontWeight: 500 }}>
+                    {params.value}
+                </Box>
+            ),
+        },
+        { field: 'isMinimal', headerName: 'Minimal?', width: 150 },
+        { field: 'isDefined', headerName: 'Defined?', width: 150 },
+        { field: 'type', headerName: 'Type', width: 200 },
+        {
+            field: 'modDate',
+            headerName: 'Modification Date',
+            width: 250,
+            valueGetter: (_value, row) => new Date(row.modDate).toLocaleString(),
+        },
+        {
+            field: 'commands',
+            headerName: 'Commands',
+            width: 170,
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => (
+                <Button
+                    variant="text"
+                    size="small"
+                    sx={{ textTransform: 'none', minWidth: 0 }}
+                    disabled={exportingMediaId !== null}
+                    onClick={() => void handleExportMedia(params.row)}
+                >
+                    {exportingMediaId === params.row.id ? 'Exporting...' : 'Export'}
+                </Button>
+            ),
+        },
+    ], [exportingMediaId]);
 
     return (
         <AuthGuard>
@@ -132,6 +180,12 @@ export default function MyMediaPage() {
                             },
                         }}
                     />
+                )}
+
+                {exportError && (
+                    <Typography color="error" variant="body2">
+                        {exportError}
+                    </Typography>
                 )}
 
                 {!isLoading && rows.length === 0 && !error && (

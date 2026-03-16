@@ -72,6 +72,29 @@
 - Finalize `/myMedia` endpoint-backed behavior and remove broken banner once stable.
 - Finalize `/plant` build model and jobs workflows end-to-end using authenticated API calls.
 
+### Phase 23: Full Non-Biochem Endpoint Coverage and Localhost Demo Validation
+**Status**: 🔄 In Progress
+- Add frontend API client coverage for all modelseed-api non-biochem endpoints used by `/demo` and documented in `modelseed-api` README.
+- Keep Solr as the source for biochemistry reactions and compounds tables.
+- Extend token-auth smoke validation against `http://localhost:8000` tunnel to cover non-destructive checks for models/jobs/media/workspace endpoints.
+- Verify primary user pages (`/my-models`, `/myMedia`, `/plant`, `/model/...`) remain functional and visually aligned with legacy layout expectations.
+- Exclude destructive delete-model testing from automated verification.
+
+### Phase 24: Page-Level API Adoption and Browser Final Verification
+**Status**: 🔄 In Progress
+- Apply newly added non-biochem API endpoints in the relevant UI pages, using legacy pages only for parity reference.
+- Complete page-level API wiring for authenticated user flows (`/my-models`, `/myMedia`, `/plant`, `/model/...`) while preserving current delete restrictions in tests.
+- Execute real browser validation on localhost with token-authenticated session and verify route behavior end-to-end.
+- Document remaining unbuilt or intentionally deferred legacy-equivalent pages/features.
+
+### Phase 25: Missing Workflow UIs (Merge, Edit, History, Media CRUD, Delete)
+**Status**: ⬜ Not Started
+- Design and implement dedicated merge-model workflow UI for `POST /api/jobs/merge`.
+- Design and implement dedicated model editing workflow UI for `POST /api/models/edit`.
+- Build a richer model edit-history interface (beyond counts) using `/api/models/edits`.
+- Implement full my-media CRUD parity (create/delete media) with safe delete UX.
+- Implement delete-model UI behavior wired to existing delete API, with tests constrained to non-supervisor/test models.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -92,3 +115,6 @@
 - Updated: 2026-03-13 10:56:00 CDT - Added Phase 22 for Poplar endpoint parity and model flow reliability hardening.
 - Updated: 2026-03-13 11:01:38 CDT - Re-scoped Phase 22 with explicit `/myMedia`, `/plant`, and target `/model/...` outcomes aligned to demo behavior.
 - Updated: 2026-03-13 11:12:24 CDT - Phase 22 executed and verified (PASS) with authenticated localhost demo smoke checks.
+- Updated: 2026-03-16 09:36:04 CDT - Added Phase 23 for full non-biochem endpoint coverage and localhost tunnel validation.
+- Updated: 2026-03-16 09:46:46 CDT - Added Phase 24 for page-level API adoption and browser final verification.
+- Updated: 2026-03-16 10:17:02 CDT - Added Phase 25 scope for remaining workflow UIs (merge, edit, history, media CRUD, delete model).
