@@ -487,6 +487,97 @@ function extractDetailEntries(row: Record<string, unknown>): Array<{ key: string
         }));
 }
 
+interface ExternalLinkItem {
+    name: string;
+    url: string;
+}
+
+function extractExternalLinks(model: Record<string, unknown>): ExternalLinkItem[] {
+    const candidates = [
+        model.links,
+        model.external_links,
+        model.organism_links,
+    ];
+
+    for (const candidate of candidates) {
+        if (!Array.isArray(candidate)) continue;
+        const links = candidate
+            .map((entry) => {
+                if (!entry || typeof entry !== 'object') return null;
+                const record = entry as Record<string, unknown>;
+                const url = String(record.url ?? record.href ?? '').trim();
+                if (!url) return null;
+                const name = String(record.name ?? record.label ?? url).trim();
+                return { name, url };
+            })
+            .filter((entry): entry is ExternalLinkItem => Boolean(entry));
+        if (links.length > 0) return links;
+    }
+    return [];
+}
+
+function OrganismLinksCard({
+    model,
+}: {
+    model: Record<string, unknown>;
+}) {
+    const imageUrl = String(model.image ?? model.image_url ?? model.organism_image ?? '').trim();
+    const organismName = String(model.organism ?? model.scientific_name ?? model.name ?? '').trim();
+    const links = extractExternalLinks(model);
+
+    return (
+        <Box
+            sx={{
+                p: 2,
+                border: '1px solid #e0e0e0',
+                borderRadius: 1,
+                backgroundColor: '#fff',
+                minWidth: 300,
+            }}
+        >
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Organism details
+            </Typography>
+            {imageUrl ? (
+                <Box
+                    component="img"
+                    src={imageUrl}
+                    alt={organismName || 'Organism image'}
+                    sx={{ width: 140, height: 140, objectFit: 'cover', borderRadius: 1, mb: 1 }}
+                />
+            ) : (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    Organism image not available in this backend response.
+                </Typography>
+            )}
+
+            <Typography variant="body2" sx={{ mb: 1 }}>
+                {organismName || 'Organism metadata unavailable'}
+            </Typography>
+
+            {links.length > 0 ? (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {links.map((link) => (
+                        <a
+                            key={`${link.name}-${link.url}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: '#00acc1', textDecoration: 'none', fontSize: 13 }}
+                        >
+                            {link.name}
+                        </a>
+                    ))}
+                </Box>
+            ) : (
+                <Typography variant="caption" color="text.secondary">
+                    Legacy external links are not available for this model payload.
+                </Typography>
+            )}
+        </Box>
+    );
+}
+
 function LegacySurfaceStatus({
     isPlantModel,
 }: {
@@ -975,13 +1066,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionMessage={actionMessage}
             />
 
-            <Box
-                sx={{
-                    mb: 3,
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                }}
-            >
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                <OrganismLinksCard model={modelObject} />
                 <DownloadModelMenu
                     modelRef={workspaceCandidates[0]}
                     modelId={modelName}
