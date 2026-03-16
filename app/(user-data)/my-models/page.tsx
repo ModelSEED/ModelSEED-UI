@@ -20,6 +20,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
@@ -28,6 +29,7 @@ import {
     listUserModelsFromApi,
     manageJobFromApi,
     ModelseedJobSummary,
+    submitMergeJobFromApi,
 } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
@@ -35,8 +37,10 @@ import DeleteModelModal from '@/components/ui/DeleteModelModal';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import {
     isActiveJobStatus,
+    extractTrackedJobId,
     listTrackedJobs,
     removeTrackedJob,
+    trackJob,
     TrackedJob,
 } from '@/lib/api/jobTracker';
 
@@ -70,9 +74,13 @@ export default function MyModelsPage() {
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
     const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+    const [mergeModelName, setMergeModelName] = useState('merged_model');
+    const [mergeOutputPath, setMergeOutputPath] = useState('');
+    const [isSubmittingMerge, setIsSubmittingMerge] = useState(false);
+    const [mergeMessage, setMergeMessage] = useState<string | null>(null);
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const [jobActionError, setJobActionError] = useState<string | null>(null);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
 
     useEffect(() => {
         const syncTrackedJobs = () => {
@@ -182,6 +190,72 @@ export default function MyModelsPage() {
         () => rows.filter((row) => selectedModelIds.includes(row.id)),
         [rows, selectedModelIds],
     );
+
+    useEffect(() => {
+        if (selectedModels.length === 0) return;
+        const firstPath = selectedModels[0]?.path ?? '';
+        const basePath = firstPath.includes('/')
+            ? firstPath.slice(0, firstPath.lastIndexOf('/')) || `/${user ?? ''}/modelseed`
+            : `/${user ?? ''}/modelseed`;
+        setMergeOutputPath(basePath);
+    }, [selectedModels, user]);
+
+    const handleMergeDialogClose = useCallback(() => {
+        if (isSubmittingMerge) return;
+        setMergeDialogOpen(false);
+        setMergeMessage(null);
+    }, [isSubmittingMerge]);
+
+    const handleSubmitMerge = useCallback(async () => {
+        if (selectedModels.length < 2) {
+            setMergeMessage('Select at least two models to merge.');
+            return;
+        }
+        const trimmedName = mergeModelName.trim();
+        const trimmedPath = mergeOutputPath.trim();
+        if (!trimmedName) {
+            setMergeMessage('Merged model name is required.');
+            return;
+        }
+        if (!trimmedPath) {
+            setMergeMessage('Output workspace path is required.');
+            return;
+        }
+
+        setMergeMessage(null);
+        setIsSubmittingMerge(true);
+        try {
+            const payload = await submitMergeJobFromApi({
+                models: selectedModels.map((model) => [model.path, 1]),
+                output_file: trimmedName,
+                output_path: trimmedPath,
+            });
+            const jobId = extractTrackedJobId(payload);
+            if (jobId) {
+                trackJob({
+                    id: jobId,
+                    kind: 'merge',
+                    label: `Merge ${selectedModels.length} models`,
+                    modelId: trimmedName,
+                    relatedRef: `${trimmedPath}/${trimmedName}`,
+                    submittedAt: new Date().toISOString(),
+                });
+                setTrackedJobs(listTrackedJobs());
+            }
+            setMergeMessage(
+                jobId
+                    ? `Merge job submitted. Job ID: ${jobId}`
+                    : 'Merge job submitted successfully.',
+            );
+            setMergeDialogOpen(false);
+            setSelectedModelIds([]);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to submit merge job';
+            setMergeMessage(message);
+        } finally {
+            setIsSubmittingMerge(false);
+        }
+    }, [mergeModelName, mergeOutputPath, selectedModels]);
 
     const columns = useMemo<GridColDef<MyModelItem>[]>(() => [
         {
@@ -362,6 +436,12 @@ export default function MyModelsPage() {
                     </Alert>
                 )}
 
+                {mergeMessage && (
+                    <Alert severity={mergeMessage.includes('failed') || mergeMessage.includes('required') ? 'error' : 'success'} variant="outlined">
+                        {mergeMessage}
+                    </Alert>
+                )}
+
                 {error ? (
                     <Typography color="error">
                         {error.message}
@@ -418,15 +498,31 @@ export default function MyModelsPage() {
 
                 <Dialog
                     open={mergeDialogOpen}
-                    onClose={() => setMergeDialogOpen(false)}
+                    onClose={handleMergeDialogClose}
                     maxWidth="sm"
                     fullWidth
                 >
                     <DialogTitle>Merge Models</DialogTitle>
                     <DialogContent>
                         <Typography variant="body2" sx={{ mb: 2 }}>
-                            Merge configuration will use the selected models below. Submission wiring is added in the next task.
+                            Merge the selected models into a new workspace object. Each selected model currently uses an equal abundance weight of `1`.
                         </Typography>
+                        <Stack spacing={2} sx={{ mb: 2 }}>
+                            <TextField
+                                label="Merged Model Name"
+                                value={mergeModelName}
+                                onChange={(event) => setMergeModelName(event.target.value)}
+                                fullWidth
+                                disabled={isSubmittingMerge}
+                            />
+                            <TextField
+                                label="Output Workspace Path"
+                                value={mergeOutputPath}
+                                onChange={(event) => setMergeOutputPath(event.target.value)}
+                                fullWidth
+                                disabled={isSubmittingMerge}
+                            />
+                        </Stack>
                         <Stack spacing={1}>
                             {selectedModels.map((model) => (
                                 <Typography key={model.id} variant="body2">
@@ -436,7 +532,14 @@ export default function MyModelsPage() {
                         </Stack>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => setMergeDialogOpen(false)}>Close</Button>
+                        <Button onClick={handleMergeDialogClose} disabled={isSubmittingMerge}>Cancel</Button>
+                        <Button
+                            variant="contained"
+                            onClick={() => void handleSubmitMerge()}
+                            disabled={isSubmittingMerge || selectedModels.length < 2}
+                        >
+                            {isSubmittingMerge ? 'Submitting...' : 'Submit Merge'}
+                        </Button>
                     </DialogActions>
                 </Dialog>
             </Box>
