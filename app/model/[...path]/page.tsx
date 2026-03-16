@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 
@@ -29,7 +31,8 @@ type TabKey =
     | 'genes'
     | 'compartments'
     | 'biomass'
-    | 'pathways';
+    | 'pathways'
+    | 'edits';
 
 interface TabConfig {
     key: TabKey;
@@ -50,6 +53,7 @@ const MODEL_TABS: TabConfig[] = [
     { key: 'compartments', label: 'Compartments', searchPlaceholder: 'Search compartments...' },
     { key: 'biomass', label: 'Biomass', searchPlaceholder: 'Search biomass...' },
     { key: 'pathways', label: 'Pathways', searchPlaceholder: 'Search pathways...' },
+    { key: 'edits', label: 'Edit Model', searchPlaceholder: 'Search edits...' },
 ];
 
 function isTabKey(value: string | undefined): value is TabKey {
@@ -366,6 +370,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
     const [actionLoading, setActionLoading] = useState<'fba' | 'gapfill' | null>(null);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [editReactionId, setEditReactionId] = useState('');
+    const [editSummary, setEditSummary] = useState('');
 
     if (error) {
         return (
@@ -495,6 +501,34 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                     </Typography>
                                 </Box>
                             ))}
+                        </Box>
+                    ) : tab.key === 'edits' ? (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
+                            <Typography variant="h6">Edit Model</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Submit a basic model edit request. The first supported workflow here is removing a reaction by ID, subject to backend support on this deployment.
+                            </Typography>
+                            <TextField
+                                label="Reaction ID to remove"
+                                value={editReactionId}
+                                onChange={(event) => setEditReactionId(event.target.value)}
+                                placeholder="rxn00001_c0"
+                                fullWidth
+                            />
+                            <TextField
+                                label="Edit summary"
+                                value={editSummary}
+                                onChange={(event) => setEditSummary(event.target.value)}
+                                placeholder="Optional note for this change"
+                                fullWidth
+                                multiline
+                                minRows={2}
+                            />
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button variant="contained" disabled>
+                                    Submit Edit
+                                </Button>
+                            </Box>
                         </Box>
                     ) : (
                         <>
