@@ -1,21 +1,20 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 25 (implemented, verification partial)
-- **Task**: Missing workflow UIs executed; awaiting live authenticated verification for merge/media/delete safety
-- **Status**: Verification PARTIAL (lint/build PASS; live destructive-flow checks intentionally deferred)
+- **Phase**: 26 (planned)
+- **Task**: Model-detail legacy parity planning complete
+- **Status**: Ready for execution
 
 ## Last Session Summary
-Phase 25 executed:
-- Added merge-model selection/submission UI on `/my-models` with tracked merge jobs.
-- Added model edit tab, edit submission flow, and structured edit-history table on `/model/...`.
-- Added create/delete workflows on `/myMedia` using workspace proxy helpers.
-- Hardened delete-model confirmation UX and added an opt-in delete smoke strategy requiring `--allow-delete-model` plus `DELETE_MODEL_REF`.
-- Verified edited surfaces with targeted eslint runs and a full `npm run build` pass.
+Phase 26 planned:
+- Added roadmap scope for model-detail legacy parity and validation readiness.
+- Documented untranslated model-detail features in `.gsd/phases/26/RESEARCH.md`.
+- Created executable plans for Visualize Data translation, model detail parity surfaces, and validation/inventory closure.
+- Preserved current Run FBA/Run Gapfill button integration behavior as requested.
 
 ## Next Steps
-1. Run authenticated localhost browser verification for merge-model and media create/delete using disposable test objects only.
-2. Optionally run `DELETE_MODEL_REF=\"/path/to/disposable/model\" node scripts/poplar-smoke.mjs --allow-delete-model` against a disposable model only.
-3. Re-run localhost smoke/browser verification and mark Phase 25 complete when live checks pass.
+1. /execute 26 to implement Visualize Data and remaining model-detail parity surfaces.
+2. Run browser/API validation for `/model/...` non-destructive parity checks.
+3. Update Phase 26 verification artifacts and status after execution.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -46,3 +45,4 @@ Phase 25 executed:
 - Updated: 2026-03-16 09:39:45 CDT - Planned/executed Phase 23 endpoint coverage; localhost token smoke is partial (11/12) due `/api/media/mine` upstream 500.
 - Updated: 2026-03-16 09:54:51 CDT - Planned/executed Phase 24 page API adoption and browser validation; partial due backend `media:mine` and remaining unbuilt merge/edit/media CRUD pages.
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation and verification artifacts; lint/build passed and live authenticated destructive-flow checks remain pending.
+- Updated: 2026-03-16 11:07:14 CDT - Planned Phase 26 model-detail legacy parity work with research and executable plan files.
