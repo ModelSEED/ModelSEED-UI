@@ -6,9 +6,19 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import Checkbox from '@mui/material/Checkbox';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
+import { workspaceCreate } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -40,9 +50,16 @@ export default function MyMediaPage() {
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [exportingMediaId, setExportingMediaId] = useState<string | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
-    const { isAuthenticated } = useAuth();
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [newMediaName, setNewMediaName] = useState('');
+    const [newMediaType, setNewMediaType] = useState('custom');
+    const [newMediaMinimal, setNewMediaMinimal] = useState(false);
+    const [newMediaDefined, setNewMediaDefined] = useState(false);
+    const [createMessage, setCreateMessage] = useState<string | null>(null);
+    const [isCreatingMedia, setIsCreatingMedia] = useState(false);
+    const { isAuthenticated, user } = useAuth();
 
-    const { data: rows = [], isLoading, error } = useQuery({
+    const { data: rows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myMedia', USE_MODELSEED_API],
         enabled: isAuthenticated,
         queryFn: async () => {
@@ -80,6 +97,51 @@ export default function MyMediaPage() {
             setExportError(message);
         } finally {
             setExportingMediaId(null);
+        }
+    };
+
+    const handleCreateMedia = async () => {
+        const trimmedName = newMediaName.trim();
+        if (!trimmedName) {
+            setCreateMessage('Media name is required.');
+            return;
+        }
+        if (!user) {
+            setCreateMessage('You must be authenticated to create media.');
+            return;
+        }
+
+        setCreateMessage(null);
+        setIsCreatingMedia(true);
+        try {
+            const mediaPath = `/${user}/media/${trimmedName}`;
+            const mediaTable = 'id\tname\tconcentration\tminflux\tmaxflux\r\n';
+            await workspaceCreate({
+                objects: [[
+                    mediaPath,
+                    'media',
+                    {
+                        name: trimmedName,
+                        isMinimal: newMediaMinimal ? 1 : 0,
+                        isDefined: newMediaDefined ? 1 : 0,
+                        type: newMediaType.trim() || 'custom',
+                    },
+                    mediaTable,
+                ]],
+                overwrite: false,
+            });
+            await refetch();
+            setCreateDialogOpen(false);
+            setNewMediaName('');
+            setNewMediaType('custom');
+            setNewMediaMinimal(false);
+            setNewMediaDefined(false);
+            setCreateMessage(`Created media ${trimmedName}.`);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to create media';
+            setCreateMessage(message);
+        } finally {
+            setIsCreatingMedia(false);
         }
     };
 
@@ -131,7 +193,7 @@ export default function MyMediaPage() {
                     <Button
                         variant="contained"
                         color="primary"
-                        disabled
+                        onClick={() => setCreateDialogOpen(true)}
                         sx={{ textTransform: 'none', fontWeight: 600 }}
                     >
                         Create New Media
@@ -146,6 +208,12 @@ export default function MyMediaPage() {
                         Click on a media row to view format details and properties.
                     </Typography>
                 </Box>
+
+                {createMessage && (
+                    <Alert severity={createMessage.startsWith('Created media') ? 'success' : 'error'} variant="outlined">
+                        {createMessage}
+                    </Alert>
+                )}
 
                 {error ? (
                     <Typography color="error">
@@ -193,6 +261,56 @@ export default function MyMediaPage() {
                         You have no media formulations.
                     </Typography>
                 )}
+
+                <Dialog open={createDialogOpen} onClose={() => !isCreatingMedia && setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
+                    <DialogTitle>Create New Media</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                label="Media Name"
+                                value={newMediaName}
+                                onChange={(event) => setNewMediaName(event.target.value)}
+                                fullWidth
+                                disabled={isCreatingMedia}
+                            />
+                            <TextField
+                                label="Media Type"
+                                value={newMediaType}
+                                onChange={(event) => setNewMediaType(event.target.value)}
+                                fullWidth
+                                disabled={isCreatingMedia}
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        checked={newMediaMinimal}
+                                        onChange={(event) => setNewMediaMinimal(event.target.checked)}
+                                        disabled={isCreatingMedia}
+                                    />
+                                )}
+                                label="Minimal media"
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        checked={newMediaDefined}
+                                        onChange={(event) => setNewMediaDefined(event.target.checked)}
+                                        disabled={isCreatingMedia}
+                                    />
+                                )}
+                                label="Defined media"
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setCreateDialogOpen(false)} disabled={isCreatingMedia}>
+                            Cancel
+                        </Button>
+                        <Button variant="contained" onClick={() => void handleCreateMedia()} disabled={isCreatingMedia}>
+                            {isCreatingMedia ? 'Creating...' : 'Create Media'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </AuthGuard>
     );
