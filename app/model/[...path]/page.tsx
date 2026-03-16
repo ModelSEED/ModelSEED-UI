@@ -9,6 +9,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 
@@ -299,6 +300,40 @@ function a11yProps(index: number) {
     };
 }
 
+function VisualizeDataPanel({
+    option,
+    modelName,
+}: {
+    option: string;
+    modelName: string;
+}) {
+    if (!option) return null;
+
+    const emptyMessage =
+        option === 'FBA'
+            ? `No FBA simulations for ${modelName}.`
+            : option === 'GapFill'
+                ? `No gapfills for ${modelName}.`
+                : `No expression data uploaded for ${modelName}.`;
+
+    return (
+        <Box
+            sx={{
+                mb: 4,
+                p: 2.5,
+                backgroundColor: '#fff',
+                border: '1px solid #e0e0e0',
+                borderLeft: '4px solid #66bb6a',
+            }}
+        >
+            <Typography variant="body1" color="text.secondary">
+                {emptyMessage}
+            </Typography>
+            <Divider sx={{ mt: 1, opacity: 0.6 }} />
+        </Box>
+    );
+}
+
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
     const resolvedParams = use(params);
@@ -549,6 +584,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
             />
+
+            <VisualizeDataPanel option={visualizeOption} modelName={modelName} />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
