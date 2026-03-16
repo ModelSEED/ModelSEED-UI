@@ -18,7 +18,7 @@ import TextField from '@mui/material/TextField';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
-import { workspaceCreate } from '@/lib/api/workspace';
+import { workspaceCreate, workspaceDelete } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -57,6 +57,9 @@ export default function MyMediaPage() {
     const [newMediaDefined, setNewMediaDefined] = useState(false);
     const [createMessage, setCreateMessage] = useState<string | null>(null);
     const [isCreatingMedia, setIsCreatingMedia] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<MyMediaItem | null>(null);
+    const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+    const [isDeletingMedia, setIsDeletingMedia] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -145,6 +148,27 @@ export default function MyMediaPage() {
         }
     };
 
+    const handleDeleteMedia = async () => {
+        if (!deleteTarget) return;
+        setDeleteMessage(null);
+        setIsDeletingMedia(true);
+        try {
+            await workspaceDelete({
+                objects: [deleteTarget.path],
+                deleteDirectories: false,
+                force: false,
+            });
+            await refetch();
+            setDeleteMessage(`Deleted media ${deleteTarget.name}.`);
+            setDeleteTarget(null);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to delete media';
+            setDeleteMessage(message);
+        } finally {
+            setIsDeletingMedia(false);
+        }
+    };
+
     const columns = useMemo<GridColDef<MyMediaItem>[]>(() => [
         {
             field: 'name',
@@ -173,18 +197,30 @@ export default function MyMediaPage() {
             filterable: false,
             disableColumnMenu: true,
             renderCell: (params) => (
-                <Button
-                    variant="text"
-                    size="small"
-                    sx={{ textTransform: 'none', minWidth: 0 }}
-                    disabled={exportingMediaId !== null}
-                    onClick={() => void handleExportMedia(params.row)}
-                >
-                    {exportingMediaId === params.row.id ? 'Exporting...' : 'Export'}
-                </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button
+                        variant="text"
+                        size="small"
+                        sx={{ textTransform: 'none', minWidth: 0 }}
+                        disabled={exportingMediaId !== null}
+                        onClick={() => void handleExportMedia(params.row)}
+                    >
+                        {exportingMediaId === params.row.id ? 'Exporting...' : 'Export'}
+                    </Button>
+                    <Button
+                        variant="text"
+                        size="small"
+                        color="error"
+                        sx={{ textTransform: 'none', minWidth: 0 }}
+                        disabled={isDeletingMedia}
+                        onClick={() => setDeleteTarget(params.row)}
+                    >
+                        Delete
+                    </Button>
+                </Box>
             ),
         },
-    ], [exportingMediaId]);
+    ], [exportingMediaId, isDeletingMedia]);
 
     return (
         <AuthGuard>
@@ -212,6 +248,12 @@ export default function MyMediaPage() {
                 {createMessage && (
                     <Alert severity={createMessage.startsWith('Created media') ? 'success' : 'error'} variant="outlined">
                         {createMessage}
+                    </Alert>
+                )}
+
+                {deleteMessage && (
+                    <Alert severity={deleteMessage.startsWith('Deleted media') ? 'success' : 'error'} variant="outlined">
+                        {deleteMessage}
                     </Alert>
                 )}
 
@@ -308,6 +350,31 @@ export default function MyMediaPage() {
                         </Button>
                         <Button variant="contained" onClick={() => void handleCreateMedia()} disabled={isCreatingMedia}>
                             {isCreatingMedia ? 'Creating...' : 'Create Media'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog open={deleteTarget !== null} onClose={() => !isDeletingMedia && setDeleteTarget(null)} maxWidth="sm" fullWidth>
+                    <DialogTitle>Delete Media</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={1} sx={{ mt: 1 }}>
+                            <Typography variant="body2">
+                                Delete <strong>{deleteTarget?.name}</strong> from your workspace?
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Path: {deleteTarget?.path}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Only delete media you created for this account or this test session.
+                            </Typography>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDeleteTarget(null)} disabled={isDeletingMedia}>
+                            Cancel
+                        </Button>
+                        <Button color="error" variant="contained" onClick={() => void handleDeleteMedia()} disabled={isDeletingMedia}>
+                            {isDeletingMedia ? 'Deleting...' : 'Delete Media'}
                         </Button>
                     </DialogActions>
                 </Dialog>
