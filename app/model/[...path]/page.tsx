@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo, useState } from 'react';
+import { use, useMemo, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -13,6 +13,7 @@ import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
@@ -76,6 +77,28 @@ function extractRefId(ref: unknown): string {
     if (typeof ref !== 'string') return '';
     const pieces = ref.split('/');
     return pieces[pieces.length - 1] || ref;
+}
+
+function normalizeBiochemReactionId(value: unknown): string {
+    const raw = String(value ?? '');
+    const match = raw.match(/rxn\d{5}/);
+    return match?.[0] ?? '';
+}
+
+function normalizeBiochemCompoundId(value: unknown): string {
+    const raw = String(value ?? '');
+    const match = raw.match(/cpd\d{5}/);
+    return match?.[0] ?? '';
+}
+
+function toEncodedCatchallHref(prefix: string, workspaceRef: string): string {
+    const clean = workspaceRef.startsWith('/') ? workspaceRef.slice(1) : workspaceRef;
+    const encoded = clean
+        .split('/')
+        .filter(Boolean)
+        .map((segment) => encodeURIComponent(segment))
+        .join('/');
+    return encoded ? `${prefix}/${encoded}` : prefix;
 }
 
 function toSearchableString(value: unknown): string {
@@ -219,7 +242,21 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
         reactions: {
             rows: buildReactionRows(model),
             columns: [
-                { field: 'id', headerName: 'ID', width: 210 },
+                {
+                    field: 'id',
+                    headerName: 'ID',
+                    width: 210,
+                    renderCell: (params) => {
+                        const reactionId = normalizeBiochemReactionId(params.value);
+                        return reactionId ? (
+                            <Link href={`/biochem/reactions/${reactionId}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                                {String(params.value ?? '')}
+                            </Link>
+                        ) : (
+                            <>{String(params.value ?? '')}</>
+                        );
+                    },
+                },
                 { field: 'name', headerName: 'Name', width: 260 },
                 { field: 'direction', headerName: 'Direction', width: 120 },
                 {
@@ -235,7 +272,21 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
         compounds: {
             rows: buildCompoundRows(model),
             columns: [
-                { field: 'id', headerName: 'ID', width: 210 },
+                {
+                    field: 'id',
+                    headerName: 'ID',
+                    width: 210,
+                    renderCell: (params) => {
+                        const compoundId = normalizeBiochemCompoundId(params.value);
+                        return compoundId ? (
+                            <Link href={`/biochem/compounds/${compoundId}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                                {String(params.value ?? '')}
+                            </Link>
+                        ) : (
+                            <>{String(params.value ?? '')}</>
+                        );
+                    },
+                },
                 { field: 'name', headerName: 'Name', width: 260 },
                 {
                     field: 'formula',
@@ -268,7 +319,21 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
             rows: buildBiomassRows(model),
             columns: [
                 { field: 'biomass', headerName: 'Biomass', width: 180 },
-                { field: 'compound', headerName: 'Compound', width: 280 },
+                {
+                    field: 'compound',
+                    headerName: 'Compound',
+                    width: 280,
+                    renderCell: (params) => {
+                        const compoundId = normalizeBiochemCompoundId(params.value);
+                        return compoundId ? (
+                            <Link href={`/biochem/compounds/${compoundId}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                                {String(params.value ?? '')}
+                            </Link>
+                        ) : (
+                            <>{String(params.value ?? '')}</>
+                        );
+                    },
+                },
                 { field: 'name', headerName: 'Name', width: 220 },
                 { field: 'coefficient', headerName: 'Coefficient', width: 140, type: 'number' },
                 { field: 'compartment', headerName: 'Compartment', width: 180 },
@@ -666,11 +731,24 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
-    const modelMetadata = [
+    const genomeRef = String(modelObject.genome_ref ?? '');
+    const modelMetadata: Array<{ label: string; value: ReactNode }> = [
         { label: 'Model ID', value: String(modelObject.id ?? modelName) },
         { label: 'Species', value: modelSpecies || '-' },
         { label: 'Source', value: String(modelObject.source ?? '-') },
-        { label: 'Genome Ref', value: String(modelObject.genome_ref ?? '-') },
+        {
+            label: 'Genome Ref',
+            value: genomeRef
+                ? (
+                    <Link
+                        href={toEncodedCatchallHref('/genome', genomeRef)}
+                        style={{ color: '#00acc1', textDecoration: 'none' }}
+                    >
+                        {genomeRef}
+                    </Link>
+                )
+                : '-',
+        },
         { label: 'Type', value: String(modelObject.type ?? '-') },
         {
             label: 'Edits',
