@@ -95,6 +95,13 @@
 - Implement full my-media CRUD parity (create/delete media) with safe delete UX.
 - Implement delete-model UI behavior wired to existing delete API, with tests constrained to non-supervisor/test models.
 
+### Phase 26: Model Detail Legacy Parity and Validation Readiness
+**Status**: ⬜ Not Started
+- Translate legacy model-detail "Visualize Data" behavior into functional modern UI (FBA, Gapfill, Expression states) without requiring new Run FBA/Run Gapfill button behavior.
+- Implement remaining model-detail parity features identified during validation review (download/detail surfaces, translated tabs/panels, and unsupported-feature UX where backend capability is missing).
+- Produce a complete translated-vs-not-translated inventory for the model detail flow and close high-priority parity gaps needed for full validation sign-off.
+- Execute browser/API validation against localhost token-auth session for `/model/...` to confirm functional parity on non-destructive flows.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -119,3 +126,4 @@
 - Updated: 2026-03-16 09:46:46 CDT - Added Phase 24 for page-level API adoption and browser final verification.
 - Updated: 2026-03-16 10:17:02 CDT - Added Phase 25 scope for remaining workflow UIs (merge, edit, history, media CRUD, delete model).
 - Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation work; code/build verification passed and live authenticated destructive-flow checks remain pending.
+- Updated: 2026-03-16 11:07:14 CDT - Added Phase 26 scope for model detail legacy parity completion and validation readiness.
