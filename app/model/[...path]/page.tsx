@@ -445,6 +445,7 @@ function extractFbaRows(fbaData: Record<string, unknown> | null | undefined): Re
     const rows = nestedRows.length > 0 ? nestedRows : [fbaData];
     return rows.map((fba, index) => ({
         id: String(fba.id ?? extractRefId(fba.ref) ?? `fba-${index}`),
+        ref: typeof fba.ref === 'string' ? fba.ref : (typeof fba.path === 'string' ? fba.path : ''),
         objective: String(fba.objective ?? '-'),
         objectiveFunction: String(fba.objective_function ?? 'N/A'),
         media: summarizeMediaRef(fba.media),
@@ -455,6 +456,7 @@ function extractFbaRows(fbaData: Record<string, unknown> | null | undefined): Re
 function extractGapfillRows(gapfills: Record<string, unknown>[] | undefined): Record<string, unknown>[] {
     return asArray<Record<string, unknown>>(gapfills).map((gapfill, index) => ({
         id: String(gapfill.id ?? extractRefId(gapfill.ref) ?? `gapfill-${index}`),
+        ref: typeof gapfill.ref === 'string' ? gapfill.ref : (typeof gapfill.path === 'string' ? gapfill.path : ''),
         integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
         media: summarizeMediaRef(gapfill.media),
         timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
@@ -657,7 +659,18 @@ function VisualizeDataPanel({
                             <Divider />
                             {fbaRows.map((row) => (
                                 <Box key={String(row.id)} sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.8fr 1.5fr 1.2fr 1.2fr', gap: 1 }}>
-                                    <Typography variant="body2">{String(row.id ?? '-')}</Typography>
+                                    <Typography variant="body2">
+                                        {typeof row.ref === 'string' && row.ref
+                                            ? (
+                                                <Link
+                                                    href={toEncodedCatchallHref('/fba', row.ref)}
+                                                    style={{ color: '#00acc1', textDecoration: 'none' }}
+                                                >
+                                                    {String(row.id ?? '-')}
+                                                </Link>
+                                            )
+                                            : String(row.id ?? '-')}
+                                    </Typography>
                                     <Typography variant="body2">{String(row.objective ?? '-')}</Typography>
                                     <Typography variant="body2">{String(row.objectiveFunction ?? 'N/A')}</Typography>
                                     <Typography variant="body2">{String(row.media ?? 'N/A')}</Typography>
@@ -689,7 +702,18 @@ function VisualizeDataPanel({
                             <Divider />
                             {gapfillRows.map((row) => (
                                 <Box key={String(row.id)} sx={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 1.5fr 1.2fr', gap: 1 }}>
-                                    <Typography variant="body2">{String(row.id ?? '-')}</Typography>
+                                    <Typography variant="body2">
+                                        {typeof row.ref === 'string' && row.ref
+                                            ? (
+                                                <Link
+                                                    href={toEncodedCatchallHref('/gapfill', row.ref)}
+                                                    style={{ color: '#00acc1', textDecoration: 'none' }}
+                                                >
+                                                    {String(row.id ?? '-')}
+                                                </Link>
+                                            )
+                                            : String(row.id ?? '-')}
+                                    </Typography>
                                     <Typography variant="body2">{String(row.integrated ?? '-')}</Typography>
                                     <Typography variant="body2">{String(row.media ?? 'N/A')}</Typography>
                                     <Typography variant="body2">{String(row.timestamp ?? '-')}</Typography>
