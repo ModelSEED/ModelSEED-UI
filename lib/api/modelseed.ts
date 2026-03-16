@@ -341,8 +341,12 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
         (payload.error.message?.includes("package named 'msSupport'") ||
             payload.error.message?.includes("package named \"msSupport\""))
     ) {
-        // Some deployments expose this as a top-level method on ms_fba.
-        payload = await callRastList('list_rast_jobs');
+        // Some deployments expose this on a different package name.
+        // Note: JSON-RPC 1.1 requires the "Service.method" shape.
+        payload = await callRastList('ms_fba.list_rast_jobs');
+        if (payload.error?.code === -32601) {
+            payload = await callRastList('msFBA.list_rast_jobs');
+        }
     }
     if (payload.error) {
         throw new Error(payload.error.message || payload.error.error || 'RAST list jobs RPC error');
