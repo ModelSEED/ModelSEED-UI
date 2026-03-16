@@ -335,21 +335,37 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
         return payload;
     };
 
-    let payload = await callRastList('msSupport.list_rast_jobs');
-    if (
-        payload.error?.code === -32601 &&
-        (payload.error.message?.includes("package named 'msSupport'") ||
-            payload.error.message?.includes("package named \"msSupport\""))
-    ) {
-        // Some deployments expose this on a different package name.
-        // Note: JSON-RPC 1.1 requires the "Service.method" shape.
-        payload = await callRastList('ms_fba.list_rast_jobs');
-        if (payload.error?.code === -32601) {
-            payload = await callRastList('msFBA.list_rast_jobs');
+    const candidateMethods = [
+        'msSupport.list_rast_jobs',
+        'ms_fba.list_rast_jobs',
+        'msFBA.list_rast_jobs',
+    ];
+
+    let payload: RastJobsRpcResponse | null = null;
+    let lastErrorMessage: string | null = null;
+
+    for (const method of candidateMethods) {
+        const attempt = await callRastList(method);
+        if (attempt.error) {
+            const message = attempt.error.message || attempt.error.error || '';
+            lastErrorMessage = message || lastErrorMessage;
+            // -32601 indicates "method not found" in most deployments. Some gateways also use it
+            // for "package not found". Either way, move to the next compatible method name.
+            if (attempt.error.code === -32601) {
+                continue;
+            }
+            throw new Error(message || `RAST list jobs RPC error (${attempt.error.code})`);
         }
+
+        payload = attempt;
+        break;
     }
-    if (payload.error) {
-        throw new Error(payload.error.message || payload.error.error || 'RAST list jobs RPC error');
+
+    if (!payload) {
+        throw new Error(
+            `RAST list jobs method not available. Tried: ${candidateMethods.join(', ')}`
+            + (lastErrorMessage ? `. Last error: ${lastErrorMessage}` : ''),
+        );
     }
 
     const rawResult = payload.result;
