@@ -118,10 +118,15 @@
 - Ensure all URLs match legacy patterns exactly (`/fba/<ref>`, `/gapfill/<ref>`, `/genome/<ref>`, `/my-jobs`).
 
 ### Phase 29: User Testing Readiness — Feature Page, Header Fix, Cleanup
-**Status**: 🔄 In Progress
+**Status**: ✅ Complete
 - Implement functional Feature detail page (`/feature/[...path]`) with function, subsystems, aliases, and protein sequence — replacing "under construction" placeholder.
 - Fix AppHeader `isUserDataActive` detection to include `/my-jobs` for correct tab highlighting.
 - Remove stale READMEs in `/fba` and `/gapfill` that incorrectly describe pages as "under construction."
+### Phase 30: Analytical Tools — Model Comparison & Workspace Browser
+**Status**: ⚪ Not Started
+- Implement functional Model Comparison route (`/compare`) allowing users to selection 2-3 models for side-by-side comparison of reactions, biomass, and gapfills.
+- Upgrade the generic `/data/[...path]` from a placeholder to a functional raw workspace browser (listing files/metadata and providing download links).
+- Ensure parity with legacy "Comparison" and "Workspace" views.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
