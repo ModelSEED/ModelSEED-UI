@@ -117,6 +117,12 @@
 - Add "My Jobs" tab to user-data layout navigation.
 - Ensure all URLs match legacy patterns exactly (`/fba/<ref>`, `/gapfill/<ref>`, `/genome/<ref>`, `/my-jobs`).
 
+### Phase 29: User Testing Readiness — Feature Page, Header Fix, Cleanup
+**Status**: 🔄 In Progress
+- Implement functional Feature detail page (`/feature/[...path]`) with function, subsystems, aliases, and protein sequence — replacing "under construction" placeholder.
+- Fix AppHeader `isUserDataActive` detection to include `/my-jobs` for correct tab highlighting.
+- Remove stale READMEs in `/fba` and `/gapfill` that incorrectly describe pages as "under construction."
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).

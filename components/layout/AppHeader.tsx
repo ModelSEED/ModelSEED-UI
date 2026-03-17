@@ -34,7 +34,7 @@ export default function AppHeader() {
         pathname.startsWith('/biochem') ||
         pathname.startsWith('/list-media');
 
-    const isUserDataActive = pathname.startsWith('/my-models') || pathname.startsWith('/myMedia') || pathname.startsWith('/data');
+    const isUserDataActive = pathname.startsWith('/my-models') || pathname.startsWith('/myMedia') || pathname.startsWith('/my-jobs') || pathname.startsWith('/data');
     const isBuildModelActive = pathname.startsWith('/plant');
 
     const handleMoreClick = (event: React.MouseEvent<HTMLButtonElement>) => {
