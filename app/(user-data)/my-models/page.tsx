@@ -140,8 +140,9 @@ export default function MyModelsPage() {
     }, [refetch]);
 
     const trackedJobStatusMap = useMemo(() => {
+        const list = Array.isArray(trackedJobStatuses) ? trackedJobStatuses : [];
         return new Map(
-            trackedJobStatuses.map((job) => [job.id, job] satisfies [string, ModelseedJobSummary]),
+            list.map((job) => [job.id, job] satisfies [string, ModelseedJobSummary]),
         );
     }, [trackedJobStatuses]);
 
@@ -180,6 +181,8 @@ export default function MyModelsPage() {
         try {
             await manageJobFromApi({ ids: [jobId], action: 'cancel' });
             await refetchTrackedJobs();
+            removeTrackedJob(jobId);
+            setTrackedJobs(listTrackedJobs());
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to cancel job';
             setJobActionError(message);

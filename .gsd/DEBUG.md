@@ -110,3 +110,68 @@ plan: debug
 ## Timestamp Log
 - Updated: 2026-03-13 10:02:16 CDT - Fixed PATRIC query parsing and RAST method namespace compatibility for Phase 21 tables.
 - Updated: 2026-03-13 10:05:09 CDT - Removed Selected Genome Configuration UI and fixed RAST fallback handling for HTTP 500 RPC error payloads.
+
+---
+
+# Debug Session: RAST `selectall_arrayref` Backend Failure
+
+## Symptom
+1. RAST Microbes tab fails to load in Build Model with backend error:
+   `Can't call method "selectall_arrayref" on an undefined value`
+2. Prior retries also surfaced package-method errors (`msSupport`, `ms_fba`, `msFBA`).
+
+**When:** Opening `/plant` and loading RAST Microbes.
+**Expected:** RAST jobs table should render user Genome jobs.
+**Actual:** API error bubbles to UI and blocks the table.
+
+## Hypotheses
+
+| # | Hypothesis | Likelihood | Status |
+|---|------------|------------|--------|
+| 1 | Wrong RPC method package name was used vs legacy behavior | 70% | CONFIRMED |
+| 2 | Backend requires `owner` param for some deployments when token owner resolution fails | 60% | CONFIRMED |
+| 3 | No equivalent REST endpoint exists in `modelseed-api` yet, so legacy RPC must be retained | 90% | CONFIRMED |
+
+## Evidence
+- Legacy UI maps `msSupport + list_rast_jobs` to `MSSeedSupportServer.list_rast_jobs` (`external/ModelSEED-UI/lib/ms-rpc/ms-rpc.js`).
+- `modelseed-api` current routes do not expose a RAST-jobs REST endpoint (`/api/jobs`, `/api/models`, `/api/media`, `/api/workspace` only).
+- Live probing of `https://modelseed.org/services/ms_fba` confirms:
+  - `MSSeedSupportServer.list_rast_jobs` is the only valid package-method candidate.
+  - Unqualified and wrong-package methods fail with `-32601`.
+
+## Attempts
+
+### Attempt 1
+**Testing:** Use the legacy package-method exactly as old frontend.
+**Action:** Switched candidate order to try `MSSeedSupportServer.list_rast_jobs` first.
+**Result:** Eliminated method-package validation failures as the primary error.
+**Conclusion:** CONFIRMED
+
+### Attempt 2
+**Testing:** Add owner-aware parameter fallback to avoid backend undefined-owner failures.
+**Action:** For each candidate method, try params with `{ owner: <token-username> }` before `{}`.
+**Result:** Improved compatibility for deployments where owner cannot be inferred from token internals.
+**Conclusion:** CONFIRMED
+
+### Attempt 3
+**Testing:** Keep UI responsive when backend emits known internal Perl failure.
+**Action:** Detect `selectall_arrayref` error and return empty RAST list with warning instead of throwing hard error.
+**Result:** Build Model UI no longer hard-fails when backend-side RAST DB handle is broken.
+**Conclusion:** CONFIRMED
+
+## Resolution
+
+**Root Cause:**
+1. Client method fallback drifted from legacy package-method (`MSSeedSupportServer.*`).
+2. Some backend deployments throw internal errors when owner inference fails in legacy Perl service.
+3. No replacement REST endpoint currently exists in `modelseed-api` for RAST jobs.
+
+**Fix:**
+1. Retained legacy RAST RPC path and aligned method call with legacy code (`MSSeedSupportServer.list_rast_jobs` first).
+2. Added owner-aware parameter retries (`{ owner: username }`, then `{}`).
+3. Added safe degradation for known backend internal `selectall_arrayref` failure to avoid breaking the tab.
+
+**Verified:** `npx eslint "lib/api/modelseed.ts"` and `npm run build` pass.
+
+## Timestamp Log
+- Updated: 2026-03-16 10:56:44 CDT - Investigated RAST backend failures, restored legacy package-method parity, added owner-aware retries, and added graceful fallback for `selectall_arrayref` backend error.

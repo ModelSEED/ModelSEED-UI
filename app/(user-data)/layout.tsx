@@ -30,6 +30,11 @@ const USER_DATA_TABS: UserDataTab[] = [
         href: '/myMedia',
         matchPaths: ['/myMedia'],
     },
+    {
+        label: 'My Jobs',
+        href: '/my-jobs',
+        matchPaths: ['/my-jobs'],
+    },
 ];
 
 export default function UserDataLayout({ children }: { children: React.ReactNode }) {

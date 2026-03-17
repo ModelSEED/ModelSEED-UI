@@ -1,20 +1,22 @@
 ## Current Position
 - **Milestone**: 2 (v1-beta)
-- **Phase**: 27 (completed, verified)
-- **Task**: Formatting/link parity and legacy-surface UX closure complete
-- **Status**: Ready to return to Phase 26 backend-blocked validation follow-up
+- **Phase**: 28 (completed, verified)
+- **Task**: Legacy Feature Parity — Detail Pages, Jobs Page, Dead Link Closure
+- **Status**: All plans executed and build-verified
 
 ## Last Session Summary
-Phase 27 executed and verified:
-- Aligned model-detail chemical formatting with existing reference formatting utilities (`ChemicalEquation`, `formatFormula`).
-- Added reaction/compound/genome cross-links from model-detail and direct FBA/GapFill links in Visualize Data rows.
-- Added explicit deferred-feature messaging for legacy Predictions/dynamic pathway tabs and organism image/links fallback UX.
-- Produced `.gsd/phases/27/FORMATTING-LINK-AUDIT.md` plus plan summaries and verification artifact.
+Phase 28 executed and verified:
+- Replaced FBA/Gapfill/Genome placeholder pages with full DataGrid detail views matching legacy patterns.
+- Created My Jobs page (`/my-jobs`) with status counts, auto-polling jobs table, and stderr links.
+- Added "My Jobs" tab to user-data navigation.
+- All URLs match legacy patterns exactly.
+- TypeScript and Next.js build pass clean.
 
 ## Next Steps
-1. Restore backend model/workspace reads so `/api/models` and `/api/models/data` stop returning `Workspace` 500 responses.
-2. Re-run browser validation on `/model/...` to confirm Visualize Data, drill-ins, download/options, and new link/formatting parity against live data.
-3. Close out Phase 26 final validation once backend health allows empirical model-detail checks.
+1. Browser-validate `/fba/<ref>`, `/gapfill/<ref>`, `/genome/<ref>` with live data (requires backend access).
+2. Browser-validate `/my-jobs` with authenticated session to confirm job listing and polling.
+3. Consider restoring API Docs page from `_archive/` if still relevant for users.
+4. Continue to next phase or final deployment validation.
 
 ## Timestamp Log
 - Updated: 2026-03-11 10:51:00 -05:00 - Milestone 1 archived.
@@ -49,3 +51,4 @@ Phase 27 executed and verified:
 - Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 code changes and parity inventory; live model-detail verification remains partial due backend Workspace 500 errors.
 - Updated: 2026-03-16 11:39:55 CDT - Planned Phase 27 for formatting/link parity and remaining legacy surface completion.
 - Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27; formatting/link parity and legacy-surface UX closure complete.
+- Updated: 2026-03-17 09:23:45 CDT - Phase 28 planned and executed: FBA/Gapfill/Genome detail pages, My Jobs page, user-data nav update. Build verified clean.

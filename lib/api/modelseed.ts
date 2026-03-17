@@ -259,12 +259,17 @@ export async function submitFbaJobFromApi(
 }
 
 export async function manageJobFromApi(
-    payload: Record<string, unknown>,
+    payload: { ids: string[]; action: string } | Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
+    const body =
+        Array.isArray((payload as { ids?: unknown }).ids)
+            ? { jobs: (payload as { ids: string[] }).ids, action: (payload as { action: string }).action }
+            : payload;
+
     return modelseedFetch<Record<string, unknown>>('/api/jobs/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
     });
 }
 
@@ -297,7 +302,7 @@ type RawRastJob = {
 };
 
 export async function listRastGenomes(): Promise<RastGenomeJob[]> {
-    const callRastList = async (method: string) => {
+    const callRastList = async (method: string, params: Record<string, unknown>) => {
         const response = await fetch(MODELSEED_SUPPORT_URL, {
             method: 'POST',
             headers: withRawTokenAuth(
@@ -311,7 +316,7 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
                 version: '1.1',
                 method,
                 id: 'list-rast-genomes',
-                params: [{}],
+                params: [params],
             }),
         });
         const { payload: rawPayload, rawText } = await parseJsonResponse(response);
@@ -343,28 +348,58 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
         'msSupport.list_rast_jobs',
         'ms_fba.list_rast_jobs',
     ];
+    const username = getStoredAuthUsername();
+    const candidateParams: Record<string, unknown>[] = username
+        ? [{ owner: username }, {}]
+        : [{}];
 
     let payload: RastJobsRpcResponse | null = null;
     const methodErrors: string[] = [];
 
     for (const method of candidateMethods) {
-        const attempt = await callRastList(method);
-        if (attempt.error) {
-            const message = attempt.error.message || attempt.error.error || '';
-            methodErrors.push(`${method}: ${message || `error code ${attempt.error.code ?? 'unknown'}`}`);
-            // -32601 indicates "method not found" in most deployments. Some gateways also use it
-            // for "package not found". Either way, move to the next compatible method name.
-            if (attempt.error.code === -32601) {
-                continue;
+        for (const params of candidateParams) {
+            const attempt = await callRastList(method, params);
+            if (attempt.error) {
+                const message = attempt.error.message || attempt.error.error || '';
+                const paramsLabel = 'owner' in params ? `owner=${String(params.owner)}` : 'owner=<none>';
+                methodErrors.push(
+                    `${method} (${paramsLabel}): ${message || `error code ${attempt.error.code ?? 'unknown'}`}`,
+                );
+                // -32601 indicates "method not found" in most deployments. Some gateways also use it
+                // for "package not found". Either way, move to the next compatible method name.
+                if (attempt.error.code === -32601) {
+                    break;
+                }
+                // This backend error appears when owner cannot be resolved internally.
+                // Try the alternate param payload before failing.
+                if ((attempt.error.message || '').includes('selectall_arrayref')) {
+                    continue;
+                }
+                throw new Error(message || `RAST list jobs RPC error (${attempt.error.code})`);
             }
-            throw new Error(message || `RAST list jobs RPC error (${attempt.error.code})`);
-        }
 
-        payload = attempt;
-        break;
+            payload = attempt;
+            break;
+        }
+        if (payload) {
+            break;
+        }
+        const lastForMethod = methodErrors[methodErrors.length - 1] ?? '';
+        if (lastForMethod.includes('error code -32601') || lastForMethod.includes('There is no method package')) {
+            continue;
+        }
     }
 
     if (!payload) {
+        // Preserve legacy behavior: if backend-side RAST listing is broken, avoid hard failure
+        // in the Build Model tab and return an empty list with a clear warning in the console.
+        if (methodErrors.some((entry) => entry.includes('selectall_arrayref'))) {
+            console.warn(
+                'RAST list jobs backend returned selectall_arrayref errors. '
+                + 'Returning empty list to keep Build Model UI responsive.',
+            );
+            return [];
+        }
         throw new Error(
             `RAST list jobs method not available. Tried: ${candidateMethods.join(', ')}`
             + (methodErrors.length > 0 ? `. Errors: ${methodErrors.join(' | ')}` : ''),

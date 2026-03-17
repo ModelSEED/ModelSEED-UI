@@ -108,6 +108,15 @@
 - Implement or explicitly mark deferred the remaining legacy model-detail surfaces (Predictions, dynamic pathway tabs, organism image/links block) with clear modern UX.
 - Close remaining formatting/link inconsistencies across user models vs reference data and produce an updated audit ready for final v1-beta validation.
 
+### Phase 28: Legacy Feature Parity — Detail Pages, Jobs Page, and Dead Link Closure
+**Status**: ✅ Complete
+- Implement functional FBA detail page (`/fba/[...path]`) with Reaction Fluxes, Exchange Fluxes, and Pathways tabs using existing `getModelFbaFromApi`.
+- Implement functional Gapfill detail page (`/gapfill/[...path]`) showing gapfill reactions table using existing `listModelGapfillsFromApi`.
+- Implement functional Genome detail page (`/genome/[...path]`) with Features and Annotations tabs reading workspace genome objects.
+- Add dedicated My Jobs page (`/my-jobs`) under user-data layout with status counts, full jobs table with polling, and stderr/stdout links — matching legacy URL `/my-jobs`.
+- Add "My Jobs" tab to user-data layout navigation.
+- Ensure all URLs match legacy patterns exactly (`/fba/<ref>`, `/gapfill/<ref>`, `/genome/<ref>`, `/my-jobs`).
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
