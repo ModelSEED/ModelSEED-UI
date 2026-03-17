@@ -1,61 +1,59 @@
-# Legacy Transition Guide (AngularJS to Next.js)
+# Legacy Transition Guide (`LEGACY_TRANSITION.md`)
+
+> **🤖 AI Agent Quick-Start**
+> If you are tasked with migrating a feature from the `external/ModelSEED-UI` AngularJS source code into the modern Next.js 16 app, this document provides your exact translation matrix. **Do not copy AngularJS code.** Re-implement the logic using modern React patterns.
 
 This document details the architectural shift from the legacy **AngularJS** application to the modern **Next.js 16** implementation of ModelSEED.
 
 ---
 
-## Architecture Comparison
+## 🏗️ Architecture Translation Matrix
 
-| Feature | Legacy System (AngularJS) | Modern System (Next.js 16) |
+| Concept | Legacy System (AngularJS) | Modern System (Next.js 16 / React 19) |
 | :--- | :--- | :--- |
-| **Framework** | AngularJS 1.x | Next.js 16 (React 19) |
-| **UI Library** | Bootstrap 3 + Custom CSS | MUI v7 (Beta) + Vanilla CSS |
-| **Routing** | `ui-router` (Client-side) | App Router (Server-side + Client) |
-| **Data Fetching** | `$http` with manual caching | TanStack Query v5 (Auto-caching) |
-| **State** | `$rootScope` & Services | Zustand + React Context |
-| **Language** | JavaScript (ES5) | TypeScript (Strict Mode) |
+| **UI Framework** | Bootstrap 3 + Custom CSS | **MUI v7** (Material UI) + Vanilla CSS |
+| **Routing** | `ui-router` (Client-side) | **App Router** (Server & Client) |
+| **Data Fetching** | `$http` with manual promises | **TanStack Query v5** (`useQuery`) |
+| **Global State** | `$rootScope` & Custom Services | **Zustand** + React Context (`useAuth`) |
+| **Language** | JavaScript (ES5) | **TypeScript** (Strict Mode) |
+| **Tables/Lists** | `ng-repeat` | array `.map()` or **MUI DataGrid** |
 
 ---
 
-## URL Parity & Matching
+## 🗺️ Migrating a Legacy Route
 
-A critical requirement for this transition is maintaining **1:1 URL parity**. Scientific citations and external links must continue to function.
+When converting an old AngularJS page into a new Next.js route, observe the following protocol:
 
-### Route Translation Map
+### 1. Identify the Source
+Legacy views are located in `external/ModelSEED-UI/app/views/`. Find the HTML template and its corresponding controller in `external/ModelSEED-UI/app/scripts/ctrls/`.
 
-| Legacy Path Pattern | Functional Role | New Next.js Root |
-| :--- | :--- | :--- |
-| `/model/*` | Metabolic Model Detail | `app/model/[...path]` |
-| `/fba/*` | FBA Result Analysis | `app/fba/[...path]` |
-| `/biochem/reactions` | Reaction Reference | `app/(reference-data)/biochem/reactions` |
-| `/biochem/compounds` | Compound Reference | `app/(reference-data)/biochem/compounds` |
-| `/workspace/*` | File Browser | `app/data/[...path]` |
+### 2. Determine the URL Structure (The "URL Parity" Rule)
+Scientific citations rely on exact URL matching.
+- **Old Router:** `$stateProvider.state('model', { url: '/model/{path:.*}' ... })`
+- **New Router:** Create a folder named `app/model/[...path]/` and put your `page.tsx` inside. See `ROUTING.md`.
 
-### Implementation: The Catch-All Bridge
-In AngularJS, routes like `/model/:path*` allowed for dynamic nested paths. In Next.js, we achieve this using the **Catch-all Segment** `[...path]`.
-
-- **Legacy logic**: `$stateProvider.state('model', { url: '/model/{path:.*}' ... })`
-- **Next.js logic**: A folder named `app/model/[...path]/` containing `page.tsx`.
+### 3. Rip and Replace Data Fetching
+- **Old Way:** An AngularJS `$http.post` call buried in a controller.
+- **New Way:** 
+  1. Define the network wrapper in `lib/api/` (either `modelseed.ts` or `workspace.ts`).
+  2. Implement `useQuery` from `@tanstack/react-query` inside your React component to execute it.
 
 ---
 
-## Scientific Logic Preservation
+## 🧪 Preserving Scientific Logic
 
-While the framework has changed, the underlying scientific logic must remain identical.
+While the framework has changed, the underlying scientific logic and presentation MUST remain identical.
 
-1.  **Chemical Equations**: The legacy system used various formatters. We have centralized this in the `ChemicalEquation` component to ensure consistent, accurate rendering of subscripts and stoichiometry across all views.
-2.  **Workspace RPC**: The transition involves moving from KBase's dynamic SDK (often injected via script tags) to a lightweight, typed `lib/api/workspace.ts` that interacts directly with the JSON-RPC endpoints.
-3.  **Solr Index**: Both systems consume the same Solr indices for biochemistry, ensuring data consistency during the transition.
-
----
-
-## Onboarding for Legacy Developers
-
-If you are coming from the AngularJS codebase, keep these mental model shifts in mind:
-
-- **Components vs Directives**: Instead of AngularJS directives (`ng-repeat`, `ng-if`), use React's map function and conditional rendering.
-- **Hooks vs Services**: Global data services are replaced by Custom Hooks (e.g., `useAuth`, `useQuery`).
-- **Server Components**: Remember that by default, files in the `app/` directory are **Server Components**. If you need interactivity (buttons, state, effects), add the `'use client'` directive at the top.
+1. **Chemical Equations**: The legacy system used various `$scope` formatters. We centralized this. **You must use the `<ChemicalEquation>` component** to ensure consistent, accurate rendering of subscripts and stoichiometry.
+2. **Workspace RPC**: The transition moves from KBase's dynamic SDK (often injected via script tags) to a lightweight, typed `lib/api/workspace.ts` that interacts directly with the JSON-RPC endpoints.
+3. **Solr Index**: Both systems consume the exact same Solr indices for biochemistry (`lib/api/biochem.ts` vs the legacy Javascript services).
 
 ---
-*Maintained at: `docs/LEGACY_TRANSITION.md`*
+
+## 🧠 Mental Model Shifts for Legacy Developers
+
+If you are a human reading this and coming from the AngularJS codebase:
+
+- **Components vs Directives**: Instead of AngularJS directives (`ng-repeat`, `ng-if`, `ng-show`), use React's array `.map()` function and JS conditional rendering (`{condition && <Component />}`).
+- **Hooks vs Services**: Global data services (`Auth`, `Jobs`) are replaced by Custom Hooks (e.g., `useAuth()`).
+- **Server Components by Default**: Files in the `app/` directory are **Server Components** by default. If your page uses `useState()`, `useEffect()`, or user event handlers (`onClick`), you must add the `'use client'` directive at the absolute top of the file.

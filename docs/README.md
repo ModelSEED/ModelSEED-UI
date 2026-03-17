@@ -1,27 +1,36 @@
-# ModelSEED‑UI Developer Manual
+# ModelSEED-UI Documentation Registry
 
-This directory is the **documentation index** for the modern **ModelSEED‑UI** (Next.js 16 + MUI 7). Treat this file as the table of contents for all deep‑dive docs.
+> **🤖 AI Agent Quick-Start**  
+> If you are an AI navigating this directory, use this file to understand the architecture domains before making assumptions about how auth, routing, or the workspace operates.
 
-## Deep‑Dive Document Library
-
-| Document | Purpose |
-| :--- | :--- |
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | **Data Flow & Tech Stack**: Next.js App Router, MUI 7, TanStack Query, and how we talk to the PATRIC Workspace and `modelseed-api`. |
-| **[ROUTING.md](./ROUTING.md)** | **URL Management**: Mapping from the legacy AngularJS UI to modern catch‑all routes while preserving external links. |
-| **[AUTHENTICATION.md](./AUTHENTICATION.md)** | **Security & Auth**: RAST/PATRIC login flows, token storage, and the global `AuthProvider` contract. |
-| **[BIOCHEMISTRY.md](./BIOCHEMISTRY.md)** | **Scientific Data**: How the Solr‑indexed reactions/compounds are queried and rendered (including equation formatting). |
-| **[WORKSPACE.md](./WORKSPACE.md)** | **Workspace & modelseed‑api**: JSON‑RPC calls to `https://p3.theseed.org/services/Workspace` and how `modelseed-api` proxies workspace operations. |
-| **[LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md)** | **AngularJS → Next.js**: Mental‑model shift for legacy contributors and details on preserving scientific behavior. |
-| **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** | **How to use these docs**: Conventions for adding new documentation and keeping this index accurate. |
+This directory is the **deep-dive documentation library** for the modern **ModelSEED-UI** (Next.js 16 + MUI 7). Treat this file as the master index for technical specifications.
 
 ---
 
-## Project Design Principles
+## 📚 Deep-Dive Document Library
 
-1. **Scientific accuracy first**: Chemical formulas, stoichiometry, and biological identifiers must follow IUPAC and domain standards (see `BIOCHEMISTRY.md`).
-2. **Legacy compatibility**: All published URLs from the previous site should continue to work, either directly or via compatible redirects (see `ROUTING.md` and `LEGACY_TRANSITION.md`).
-3. **Modern UI/UX**: Use **MUI 7** components and the shared theme for any new UI surface; avoid ad‑hoc CSS where possible.
-4. **Performance & reliability**: Prefer TanStack Query for data fetching, keep Workspace and `modelseed-api` access in `lib/api/`, and avoid client‑side auth or workspace logic spread across pages.
+Depending on the feature or system you are working on, select the appropriate manual:
+
+| System Domain | Target Document | Core Topics Covered |
+| :--- | :--- | :--- |
+| **High-Level Design** | **[ARCHITECTURE.md](./ARCHITECTURE.md)** | Tech stack, TanStack Query data flow, API clients, and the MUI v7 theming system. |
+| **URL Parity** | **[ROUTING.md](./ROUTING.md)** | Algorithms for mapping legacy AngularJS Hash-bang routes to Next.js App Router catch-all (`[...path]`) URLs. |
+| **User Sessions** | **[AUTHENTICATION.md](./AUTHENTICATION.md)** | RAST/PATRIC login flow, `useAuth` Zustand store, and Token management for API requests. |
+| **External Data** | **[WORKSPACE.md](./WORKSPACE.md)** | Handling PATRIC Workspace JSON-RPC objects and the `modelseed-api` proxy endpoints. |
+| **Scientific Data** | **[BIOCHEMISTRY.md](./BIOCHEMISTRY.md)** | Solr-indexed reactions/compounds lookup and chemical formula/stoichiometry UX rendering rules. |
+| **Legacy Codebase** | **[LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md)** | Transitioning from the AngularJS `external/ModelSEED-UI` source code to modern React patterns. |
+| **Contributing** | **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** | Rules for maintaining these documents and keeping this registry up-to-date. |
 
 ---
-*Last Updated: 2026‑03‑12*
+
+## 🏛️ Project Design Principles
+
+When modifying the codebase, refer back to these core invariants:
+
+1. **Scientific Accuracy Above All**: We render biological identifiers, chemical formulas, and network models. Subscripts ($H_2O$) and correct casing must strictly follow IUPAC/KEGG/SEED domain standards. See `BIOCHEMISTRY.md`.
+2. **Ironclad Catch-all Routing**: Every previously published URL referring to the old site must redirect to an identical page on this site. Never break a legacy link. See `ROUTING.md`.
+3. **Decoupled API Architecture**: Do not put `fetch()` inside React components. All interactions with PATRIC, RAST, or Solr routing occur exclusively via wrappers inside `lib/api/`, utilizing `@tanstack/react-query` for state. See `ARCHITECTURE.md`.
+4. **MUI-Native Styling**: Use MUI v7 themes (`lib/theme.ts`) and the `sx` prop over ad-hoc CSS files. We prioritize a dense, clean, and functional dashboard UX.
+
+---
+*Maintained per GSD methodology. Keep docs in sync with `.gsd/STATE.md` phase changes.*

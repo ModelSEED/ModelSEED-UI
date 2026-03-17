@@ -1,96 +1,94 @@
 # Authentication & Security Strategy (`AUTHENTICATION.md`)
 
-ModelSEED‑UI authenticates against **RAST** and **PATRIC/BV‑BRC** services, then reuses the returned token for Workspace, ProbModelSEED, and `modelseed-api` calls. This document outlines how users are logged in, how tokens are stored, and how pages are protected.
+> **🤖 AI Agent Quick-Start**
+> All downstream API calls to Workspace or `modelseed-api` **require** the raw PATRIC token in the `Authorization` header. Do not prepend `Bearer `. Always use `getStoredAuth()` from `lib/api/auth.ts` to access the token outside of React lifecycle methods.
+
+ModelSEED-UI authenticates against **RAST** and **PATRIC/BV-BRC** services. This document outlines how users are logged in, how tokens are securely managed, and how private routes are guarded.
 
 ---
 
-## The Global Auth Provider (`AuthProvider.tsx`)
+## 🛡️ The Global Auth Provider
 
-Location: `components/auth/AuthProvider.tsx`
+**Location:** `components/auth/AuthProvider.tsx`
 
-- Wraps the app with a React Context that exposes:
-  - `isAuthenticated`, `user`, `token`, `method` (`'RAST' | 'PATRIC'`), `login()`, and `logout()`.
-- On mount, it:
-  - Reads the last `AuthResult` from `localStorage['auth']`.
-  - Listens for `storage` events so logout in one tab logs out all tabs.
-- Tokens are stored **only** in localStorage (no cookies) and sent in the `Authorization` header for all downstream API calls.
+The application enforces auth state via a React Context. It provides:
+- `isAuthenticated` (boolean)
+- `user` (string ID)
+- `token` (raw authorization string)
+- `login()` and `logout()` mutators.
 
-### Sample Usage in a Component
+### Storage & Persistence
+Tokens are stored **exclusively in `localStorage['auth']`**. We do not use cookies.
+The `AuthProvider` listens to cross-tab `storage` events, ensuring that if a user logs out in Tab A, they are immediately stripped of credentials in Tab B.
+
+---
+
+## 🚪 Sign-In Flow
+
+Low-level communication lives in `lib/api/auth.ts`.
+
+1. **User Action:** The user submits credentials via the `SignInModal.tsx` specifying either PATRIC or RAST.
+2. **Backend Authentication:**
+   - **PATRIC:** `POST https://user.patricbrc.org/authenticate`
+   - **RAST:** `POST https://p3.theseed.org/Sessions/Login`
+   *Note: Both require `application/x-www-form-urlencoded` payloads.*
+3. **Token Resolution:** The response is destructured into an `AuthResult`:
+   ```ts
+   interface AuthResult {
+     user_id: string;
+     token: string; // The exact string to pass in network headers
+     method: 'PATRIC' | 'RAST';
+   }
+   ```
+4. **Hydration:** `persistAuth()` fires, writing to LocalStorage, and triggering the React Context to re-render the app in an authenticated state.
+
+---
+
+## 💂 Protecting Routes
+
+We enforce privacy using the `<AuthGuard>` wrapper. 
+
+**Location:** `components/auth/AuthGuard.tsx`
+
+If an entire page (like `/my-models` or `/my-jobs`) requires authentication, wrap the page's output:
 
 ```tsx
-import { useAuth } from '@/components/auth/AuthProvider';
-
-export default function MyProtectedComponent() {
-    const { isAuthenticated, user } = useAuth();
-
-    if (!isAuthenticated) return <p>Please log in.</p>;
-
-    return <p>Welcome, {user}!</p>;
+export default function ProtectedPage() {
+    return (
+        <AuthGuard>
+            <MySecretDataComponent />
+        </AuthGuard>
+    );
 }
+```
+
+**Behavior:**
+- Unauthenticated users will see an "Authentication Required" prompt.
+- It prevents React Query from firing unauthorized `workspaceGet()` requests and returning 401/403 errors.
+
+### Component-Level Guarding
+If a page is public but has private features (e.g., a "Save to My Workspace" button on a public biochemistry page), use the hook:
+```tsx
+const { isAuthenticated } = useAuth();
+<Button disabled={!isAuthenticated}>Save</Button>
 ```
 
 ---
 
-## Sign‑In Flow (RAST & PATRIC)
+## 📡 Sending Tokens to Backends
 
-Low‑level calls live in `lib/api/auth.ts`:
+When writing new `lib/api/` abstractions, retrieve the token globally and attach it:
+```typescript
+import { getStoredAuth } from './auth';
 
-1. **User input**  
-   - On the home page or in `SignInModal.tsx`, the user selects **RAST** or **PATRIC** and enters credentials.
+export async function fetchMyPrivateData() {
+    const auth = getStoredAuth();
+    if (!auth) throw new Error("Unauthorized");
 
-2. **Backend login**
-   - PATRIC: `POST https://user.patricbrc.org/authenticate` with `application/x-www-form-urlencoded`.  
-   - RAST: `POST https://p3.theseed.org/Sessions/Login` with `application/x-www-form-urlencoded`.
-
-3. **Token handling**
-   - Both flows resolve to an `AuthResult`:
-     ```ts
-     interface AuthResult {
-       user_id: string;
-       token: string;     // raw PATRIC/RAST token
-       method: 'PATRIC' | 'RAST';
-     }
-     ```
-   - `persistAuth()` serializes this into `localStorage['auth']`.
-
-4. **Usage downstream**
-   - `lib/api/workspace.ts` and `lib/api/modelseed.ts` read the stored token and send:
-     - `Authorization: <token>` for:
-       - `https://p3.theseed.org/services/Workspace`
-       - `https://p3.theseed.org/services/ProbModelSEED`
-       - `${MODELSEED_API_URL}/api/*`
-
----
-
-## Protecting Pages and Routes
-
-We use **page‑level guards** plus dedicated components:
-
-### `AuthGuard` component
-
-- Location: `components/auth/AuthGuard.tsx`.
-- Wraps protected pages such as:
-  - `app/(user-data)/my-models/page.tsx`
-  - `app/(user-data)/myMedia/page.tsx`
-- Behavior:
-  - If `isAuthenticated === false`, renders a sign‑in prompt or redirect.
-  - If `true`, renders children normally.
-
-### Conditional Logic in Pages
-
-- Pages can also branch on `isAuthenticated` to:
-  - Short‑circuit API calls (`enabled: isAuthenticated` in `useQuery`).
-  - Swap full tables for “Please sign in to view your data” copy.
-
----
-
-## Development & Testing Notes
-
-- The **developer bypass** in `lib/api/auth.ts` lets you log in with `developer/developer` to get a fixed token without hitting remote services; use this only in local environments.
-- When integrating new backend services (e.g. additional `modelseed-api` endpoints), always:
-  - Read the token via `getStoredAuth()` or `useAuth()`.
-  - Send it in the `Authorization` header as‑is (no extra `Bearer ` prefix unless the backend explicitly requires it).
-
----
-
-*Refer to `WORKSPACE.md` and `ARCHITECTURE.md` for how auth tokens flow into Workspace and `modelseed-api` calls.*
+    const res = await fetch("...", {
+        headers: {
+            "Authorization": auth.token // DO NOT prepend 'Bearer'
+        }
+    });
+}
+```
