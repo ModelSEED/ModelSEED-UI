@@ -1,18 +1,20 @@
-# Current State - Phase 29 Complete
+# Current State - Phase 23 Complete, Milestone 2 In-Progress
 
 ## Goal
-The goal of Phase 29 was to finalize the UI for user testing by implementing the Feature detail page, fixing navigation highlighting bugs, and cleaning up documentation.
+The goal is to transition all backend operations (excluding biochemistry reference data) to the new ModelSEED API (`poplar.cels.anl.gov:8000`) and achieve full functional parity with the legacy UI.
 
 ## Current Position
-- **Active Phase**: Phase 29 (User Testing Readiness)
-- **Status**: ✅ Verified (see `.gsd/phases/29/VERIFICATION.md`)
-- **Last Commit**: `09cf2b0` - "feat(phase-29): implement feature detail page, fix header highlighting, cleanup stale READMEs"
+- **Active Phase**: Phase 24 (Page-Level API Adoption)
+- **Status**: 🔄 In Progress
+- **Last Commit**: `37d5b79` - "docs(phase-23): mark endpoint coverage and smoke validation complete"
 
 ## Accomplishments
-1. **Feature Detail Page**: Fully implemented at `/feature/[...path]`. Shows function, subsystems, aliases, and protein sequences. Matches legacy URL patterns.
-2. **AppHeader Highlighting**: Fixed the "User Data" tab highlighting to include the `/my-jobs` page.
-3. **Docs**: Deleted stale "under construction" READMEs in `/fba` and `/gapfill`.
-4. **Verified**: All pages compile and render data correctly via workspace APIs.
+1. **API Coverage (Phase 23)**: Achieved full coverage for non-biochem endpoints and implemented `scripts/poplar-smoke.mjs` for validation.
+2. **Workspace Migration (Phase 20)**: Fully transitioned `ls` and `get` operations to the REST proxy (no legacy fallback).
+3. **PATRIC Support**: Fixed genome search fallback and parsing logic for better reliability.
+4. **Auth Readiness**: Implemented sign-out redirects and `AuthGuard` auto-redirects to improve user testing UX.
+5. **Feature Detail Page**: Fully implemented at `/feature/[...path]`. Shows function, subsystems, aliases, and protein sequences.
+6. **Data Highlighting**: Fixed `/my-jobs` tab highlighting in the user-data layout.
 
 ## Next Steps for New Session
 1. **Model Comparison**: Consider implementing the `/compare` route if multi-model analysis is required for testing.
