@@ -73,7 +73,7 @@
 - Finalize `/plant` build model and jobs workflows end-to-end using authenticated API calls.
 
 ### Phase 23: Full Non-Biochem Endpoint Coverage and Localhost Demo Validation
-**Status**: 🔄 In Progress
+**Status**: ✅ Complete
 - Add frontend API client coverage for all modelseed-api non-biochem endpoints used by `/demo` and documented in `modelseed-api` README.
 - Keep Solr as the source for biochemistry reactions and compounds tables.
 - Extend token-auth smoke validation against `http://localhost:8000` tunnel to cover non-destructive checks for models/jobs/media/workspace endpoints.
@@ -156,3 +156,4 @@
 - Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 implementation work; live model-detail validation is partially blocked by backend Workspace 500 responses.
 - Updated: 2026-03-16 11:39:55 CDT - Added Phase 27 for formatting/link parity and remaining legacy surface completion on model-detail and related flows.
 - Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27 formatting/link parity and legacy-surface UX closure.
+- Updated: 2026-03-19 10:15:00 CDT - Phase 23 complete: full non-biochem API client coverage and poplar smoke validation.
