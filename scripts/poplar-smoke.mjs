@@ -32,6 +32,7 @@ const baseUrl = (process.env.MODELSEED_API_URL || 'http://poplar.cels.anl.gov:80
 const modelRef = process.env.MODEL_REF || '/seaver@patricbrc.org/modelseed/Test';
 const mediaRef = process.env.MEDIA_REF || '/chenry/public/modelsupport/media/Complete';
 const workspacePath = process.env.WORKSPACE_PATH || '/seaver@patricbrc.org/modelseed/';
+const workspaceRoot = process.env.WORKSPACE_ROOT || '/seaver/';
 const deleteModelRef = process.env.DELETE_MODEL_REF;
 const allowDeleteModel = argv.has('--allow-delete-model');
 
@@ -171,6 +172,7 @@ async function run() {
                 }),
             },
         ),
+        // Workspace proxy basic ls/get
         () => request('workspace:ls', endpoint('/api/workspace/ls'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -181,6 +183,54 @@ async function run() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ objects: [modelRef] }),
         }),
+        // Workspace proxy create/metadata/permissions/download-url/delete
+        async () => {
+            const tempFolder = `${workspaceRoot.replace(/\/$/, '')}/modelseed-ui-smoke-${Date.now()}`;
+            const created = await requestWithExpectedStatuses(
+                'workspace:create(contract)',
+                endpoint('/api/workspace/create'),
+                [200, 400, 409, 422],
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        objects: [[tempFolder, 'folder', {}, null]],
+                        overwrite: false,
+                    }),
+                },
+            );
+            return created;
+        },
+        () => requestWithExpectedStatuses(
+            'workspace:metadata(contract)',
+            endpoint('/api/workspace/metadata'),
+            [200, 404, 422],
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ objects: [workspacePath] }),
+            },
+        ),
+        () => requestWithExpectedStatuses(
+            'workspace:permissions(contract)',
+            endpoint('/api/workspace/permissions'),
+            [200, 404, 422],
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ objects: [workspacePath] }),
+            },
+        ),
+        () => requestWithExpectedStatuses(
+            'workspace:download-url(contract)',
+            endpoint('/api/workspace/download-url'),
+            [200, 400, 404, 422],
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ objects: [workspacePath] }),
+            },
+        ),
     ];
 
     if (allowDeleteModel) {
