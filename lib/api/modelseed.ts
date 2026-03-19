@@ -223,9 +223,17 @@ export async function deleteModelFromApi(ref: string): Promise<void> {
 
 export async function getJobsFromApi(ids: string[]): Promise<ModelseedJobSummary[]> {
     const query = ids.length > 0 ? { ids: ids.join(',') } : {};
-    return modelseedFetch<ModelseedJobSummary[]>(
-        `/api/jobs${buildQueryString(query)}`,
-    );
+    const payload = await modelseedFetch<unknown>(`/api/jobs${buildQueryString(query)}`);
+
+    if (Array.isArray(payload)) {
+        return payload as ModelseedJobSummary[];
+    }
+
+    if (payload && typeof payload === 'object') {
+        return Object.values(payload as Record<string, ModelseedJobSummary>);
+    }
+
+    return [];
 }
 
 export async function submitReconstructJobFromApi(
