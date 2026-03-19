@@ -18,6 +18,7 @@ export default function HeaderLayoutRouter() {
         pathname.startsWith('/list-media') ||
         pathname.startsWith('/my-models') ||
         pathname.startsWith('/myMedia') ||
+        pathname.startsWith('/my-jobs') ||
         pathname.startsWith('/data') ||
         pathname.startsWith('/plant') ||
         pathname.startsWith('/model');

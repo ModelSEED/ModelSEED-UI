@@ -22,6 +22,7 @@ import { useTheme } from '@mui/material/styles';
 
 import SignInModal from './SignInModal';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useRouter } from 'next/navigation';
 
 interface NavItem {
     label: string;
@@ -41,6 +42,7 @@ export default function Header() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [signInOpen, setSignInOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { isAuthenticated, user, logout } = useAuth();
@@ -52,9 +54,14 @@ export default function Header() {
         setDrawerOpen(open);
     };
 
+    const handleSignOut = () => {
+        logout();
+        router.push('/');
+    };
+
     const handleAuthAction = () => {
         if (isAuthenticated) {
-            logout();
+            handleSignOut();
         } else {
             setSignInOpen(true);
         }
@@ -242,7 +249,7 @@ export default function Header() {
                                     <Button
                                         variant="outlined"
                                         size="small"
-                                        onClick={logout}
+                                        onClick={handleSignOut}
                                         sx={{
                                             color: '#fff',
                                             fontWeight: 600,

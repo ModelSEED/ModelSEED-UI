@@ -19,9 +19,11 @@ import { useTheme } from '@mui/material/styles';
 
 import SignInModal from './SignInModal';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useRouter } from 'next/navigation';
 
 export default function AppHeader() {
     const pathname = usePathname();
+    const router = useRouter();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { isAuthenticated, user, logout } = useAuth();
@@ -50,6 +52,14 @@ export default function AppHeader() {
             e.preventDefault();
             setSignInOpen(true);
         }
+    };
+
+    const handleSignOut = () => {
+        logout();
+        // After logging out, send the user back to the home page so that
+        // any open protected routes are exited and refreshed under the
+        // unauthenticated state.
+        router.push('/');
     };
 
     return (
@@ -172,7 +182,7 @@ export default function AppHeader() {
                                     <Button
                                         variant="outlined"
                                         color="inherit"
-                                        onClick={logout}
+                                        onClick={handleSignOut}
                                         sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(255,255,255,0.3)' }}
                                     >
                                         Sign Out

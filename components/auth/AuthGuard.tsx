@@ -1,9 +1,10 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 
 interface AuthGuardProps {
@@ -12,6 +13,15 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps) {
     const { isAuthenticated, loading } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            const search = pathname ? `?returnTo=${encodeURIComponent(pathname)}` : '';
+            void router.replace(`/${search}`);
+        }
+    }, [loading, isAuthenticated, pathname, router]);
 
     if (loading) {
         return (
@@ -28,7 +38,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
                     Authentication Required
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Please sign in to view this page.
+                    Redirecting to the sign-in page. Please sign in to view this page.
                 </Typography>
             </Box>
         );
