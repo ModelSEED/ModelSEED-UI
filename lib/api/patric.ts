@@ -90,12 +90,35 @@ export async function searchPatricGenomes(
         .join('&')}`;
     const url = `${PATRIC_GENOME_API_URL}?${queryString}`;
 
-    const response = await fetch(url, {
-        headers: withRawTokenAuth({ Accept: 'application/json' }, true),
-    });
+    const doFetch = async (useAuth: boolean): Promise<Response> => {
+        const baseHeaders: Record<string, string> = { Accept: 'application/json' };
+        const headers = useAuth ? withRawTokenAuth(baseHeaders, true) : baseHeaders;
+        return fetch(url, { headers });
+    };
+
+    let response = await doFetch(true);
+    let body = '';
 
     if (!response.ok) {
-        const body = await response.text().catch(() => '');
+        body = await response.text().catch(() => '');
+
+        // Some BV-BRC deployments are misconfigured and throw a 500 with
+        // "signingSubjectURL is not defined" when an Authorization header
+        // is present. In that case, retry once without auth so that public
+        // genome search still works for the UI instead of hard-failing.
+        if (
+            response.status === 500
+            && body.includes('signingSubjectURL is not defined')
+        ) {
+            console.warn(
+                'PATRIC genome search: backend returned signingSubjectURL error; retrying without Authorization header.',
+            );
+            response = await doFetch(false);
+            body = await response.text().catch(() => '');
+        }
+    }
+
+    if (!response.ok) {
         throw new Error(
             `PATRIC genome search failed (${response.status}): ${body || response.statusText}`,
         );
@@ -103,10 +126,11 @@ export async function searchPatricGenomes(
 
     let data: RawPatricResponse;
     try {
-        data = (await response.json()) as RawPatricResponse;
+        data = (JSON.parse(body || (await response.text())) ?? {}) as RawPatricResponse;
     } catch (error) {
         throw new Error(
-            `Failed to parse PATRIC genome response: ${error instanceof Error ? error.message : 'unknown error'
+            `Failed to parse PATRIC genome response: ${
+                error instanceof Error ? error.message : 'unknown error'
             }`,
         );
     }
