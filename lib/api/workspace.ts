@@ -182,10 +182,9 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
  * @param paths Array of workspace paths to list (e.g. ['/plantseed/plantseed/'])
  */
 export async function workspaceLs(paths: string[]): Promise<Record<string, unknown[]>> {
-    if (USE_NEW_PROXY) {
-        return callWorkspaceRestApi<Record<string, unknown[]>>('ls', { paths });
-    }
-    return callWorkspaceApi('Workspace.ls', [{ paths }]);
+    // Always route through the new REST proxy (`/api/workspace/ls`).
+    // Legacy JSON-RPC `Workspace.ls` is no longer used.
+    return callWorkspaceRestApi<Record<string, unknown[]>>('ls', { paths });
 }
 
 /**
@@ -194,10 +193,9 @@ export async function workspaceLs(paths: string[]): Promise<Record<string, unkno
  * @param objects Array of workspace paths to get (e.g. ['/plantseed/Data/annotation_overview'])
  */
 export async function workspaceGet(objects: string[]): Promise<unknown[]> {
-    if (USE_NEW_PROXY) {
-        return callWorkspaceRestApi<unknown[]>('get', { objects });
-    }
-    return callWorkspaceApi('Workspace.get', [{ objects }]);
+    // Always route through the new REST proxy (`/api/workspace/get`).
+    // Legacy JSON-RPC `Workspace.get` is no longer used.
+    return callWorkspaceRestApi<unknown[]>('get', { objects });
 }
 
 function ensureProxyMode(operation: string): void {
