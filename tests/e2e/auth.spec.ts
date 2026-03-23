@@ -5,22 +5,19 @@ test.describe('Auth Flow', () => {
     // Navigate to homepage
     await page.goto('/');
 
-    // Wait for the Sign In button
-    const signInBtn = page.getByRole('button', { name: 'Sign In' });
-    await expect(signInBtn).toBeVisible();
+    // Click the Sign In button in header to open modal
+    await page.getByRole('banner').getByRole('button', { name: 'Sign In' }).click();
 
-    // The method typically defaults to RAST. Let's toggle to PATRIC
-    const patricToggle = page.getByText('PATRIC', { exact: true });
-    if (await patricToggle.isVisible()) {
-      await patricToggle.click();
-    }
+    // Wait for modal to appear
+    await expect(page.getByRole('dialog')).toBeVisible();
 
-    // Fill the credentials
-    await page.getByLabel('PATRIC Username').fill('seaver');
-    await page.getByLabel('Password').fill('bollocks');
+    // Default method is PATRIC, so just fill credentials in the dialog
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('PATRIC Username').fill('seaver');
+    await dialog.getByLabel('Password').fill('bollocks');
 
-    // Click Sign In
-    await signInBtn.click();
+    // Submit the form
+    await dialog.getByRole('button', { name: 'Sign In' }).click();
 
     // Assert that we log in successfully
     await expect(page.getByText(/Welcome back/i)).toBeVisible({ timeout: 15000 });
