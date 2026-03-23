@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo, useState, type ReactNode } from 'react';
+import { use, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -14,9 +14,12 @@ import Drawer from '@mui/material/Drawer';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Chip from '@mui/material/Chip';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
+import Stack from '@mui/material/Stack';
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
@@ -35,6 +38,7 @@ import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import { formatFormula } from '@/components/utils/formatFormula';
+import AddReactionsDialog from '@/components/ui/AddReactionsDialog';
 
 type TabKey =
     | 'overview'
@@ -844,6 +848,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [editSubmitting, setEditSubmitting] = useState(false);
     const [editMessage, setEditMessage] = useState<string | null>(null);
     const [detailDrawer, setDetailDrawer] = useState<{ title: string; row: Record<string, unknown> } | null>(null);
+    // Enhanced editing states
+    const [addReactionsOpen, setAddReactionsOpen] = useState(false);
+    const [reactionsToAdd, setReactionsToAdd] = useState<{ id: string; name: string; equation?: string; direction?: string }[]>([]);
+    const [selectedReactionsToRemove, setSelectedReactionsToRemove] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
+    const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
 
     if (error) {
         return (
@@ -1078,6 +1087,70 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         }
     };
 
+    // Enhanced edit handlers
+    const handleAddReactions = useCallback((reactions: { id: string; name: string; equation?: string }[]) => {
+        setReactionsToAdd((prev) => {
+            const existingIds = new Set(prev.map((r) => r.id));
+            const newRxns = reactions.filter((r) => !existingIds.has(r.id));
+            return [...prev, ...newRxns];
+        });
+        setAddReactionsOpen(false);
+    }, []);
+
+    const handleRemovePendingReaction = useCallback((id: string) => {
+        setReactionsToAdd((prev) => prev.filter((r) => r.id !== id));
+    }, []);
+
+    const handleSubmitBatchEdit = async () => {
+        // GridRowSelectionModel is now { type: 'include', ids: Set<string> }
+        const removeIds = selectedReactionsToRemove.type === 'include' 
+            ? Array.from(selectedReactionsToRemove.ids).map(String).filter(Boolean)
+            : [];
+        const addIds = reactionsToAdd.map((r) => r.id);
+        
+        if (removeIds.length === 0 && addIds.length === 0) {
+            setEditMessage('No reactions selected to add or remove.');
+            return;
+        }
+
+        setEditSubmitting(true);
+        setEditMessage(null);
+        try {
+            await editModelFromApi({
+                model: workspaceCandidates[0],
+                reactions_to_remove: removeIds,
+                reactions_to_add: addIds.map((id) => ({ id, compartment: 'c0', direction: '=' })),
+                reactions_to_modify: [],
+                biomass_changes: [],
+                summary: editSummary.trim() || `Added ${addIds.length} reactions, removed ${removeIds.length} reactions`,
+            });
+            await refetchModelEdits();
+            setEditMessage(`Edit submitted: added ${addIds.length} reactions, removed ${removeIds.length} reactions.`);
+            // Clear pending changes
+            setReactionsToAdd([]);
+            setSelectedReactionsToRemove({ type: 'include', ids: new Set<string>() });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to submit model edit';
+            setEditMessage(
+                message.includes('501')
+                    ? 'Model editing is not supported yet on this backend deployment.'
+                    : message,
+            );
+        } finally {
+            setEditSubmitting(false);
+        }
+    };
+
+    // Number of selected reactions to remove
+    const numSelectedToRemove = selectedReactionsToRemove.type === 'include' 
+        ? selectedReactionsToRemove.ids.size 
+        : 0;
+
+    const existingReactionIds = useMemo(() => 
+        tableConfig.reactions.rows.map((r) => String(r.id ?? '').replace(/_[a-z]\d+$/, '')),
+        [tableConfig.reactions.rows]
+    );
+
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
             <ModelDetailHeader
@@ -1136,45 +1209,146 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                             ))}
                         </Box>
                     ) : tab.key === 'edits' ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
-                            <Typography variant="h6">Edit Model</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Submit a basic model edit request. The first supported workflow here is removing a reaction by ID, subject to backend support on this deployment.
-                            </Typography>
-                            <TextField
-                                label="Reaction ID to remove"
-                                value={editReactionId}
-                                onChange={(event) => setEditReactionId(event.target.value)}
-                                placeholder="rxn00001_c0"
-                                fullWidth
-                            />
-                            <TextField
-                                label="Edit summary"
-                                value={editSummary}
-                                onChange={(event) => setEditSummary(event.target.value)}
-                                placeholder="Optional note for this change"
-                                fullWidth
-                                multiline
-                                minRows={2}
-                            />
-                            {editMessage && (
-                                <Typography
-                                    variant="body2"
-                                    color={editMessage.includes('submitted') ? 'success.main' : 'error'}
-                                >
-                                    {editMessage}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            {/* Enhanced Model Editor */}
+                            <Box>
+                                <Typography variant="h6" gutterBottom>Add Reactions</Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    Search and select reactions from the ModelSEED biochemistry database to add to this model.
                                 </Typography>
-                            )}
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => void handleSubmitEdit()}
-                                    disabled={editSubmitting || !editReactionId.trim()}
-                                >
-                                    {editSubmitting ? 'Submitting Edit...' : 'Submit Edit'}
-                                </Button>
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<AddIcon />}
+                                        onClick={() => setAddReactionsOpen(true)}
+                                    >
+                                        Add Reactions
+                                    </Button>
+                                    {reactionsToAdd.length > 0 && (
+                                        <Chip 
+                                            label={`${reactionsToAdd.length} pending`} 
+                                            color="primary" 
+                                            size="small" 
+                                        />
+                                    )}
+                                </Stack>
+                                {reactionsToAdd.length > 0 && (
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="subtitle2" gutterBottom>
+                                            Reactions to add:
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                            {reactionsToAdd.map((rxn) => (
+                                                <Chip
+                                                    key={rxn.id}
+                                                    label={`${rxn.id} - ${rxn.name}`}
+                                                    onDelete={() => handleRemovePendingReaction(rxn.id)}
+                                                    size="small"
+                                                />
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )}
                             </Box>
-                            <Box sx={{ mt: 2 }}>
+
+                            <Divider />
+
+                            {/* Remove Reactions Section */}
+                            <Box>
+                                <Typography variant="h6" gutterBottom>Remove Reactions</Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    Select reactions from the model to remove. Changes are applied when you submit the edit.
+                                </Typography>
+                                <Box sx={{ height: 300 }}>
+                                    <DataGrid<Record<string, unknown>>
+                                        rows={tableConfig.reactions.rows}
+                                        columns={[
+                                            { field: 'id', headerName: 'ID', flex: 0.8 },
+                                            { field: 'name', headerName: 'Name', flex: 1.5 },
+                                            { field: 'direction', headerName: 'Dir', flex: 0.3 },
+                                            { field: 'equation', headerName: 'Equation', flex: 2 },
+                                        ]}
+                                        checkboxSelection
+                                        disableRowSelectionOnClick
+                                        rowSelectionModel={selectedReactionsToRemove}
+                                        onRowSelectionModelChange={setSelectedReactionsToRemove}
+                                        pageSizeOptions={[10, 25, 50]}
+                                        getRowId={(row) => String(row.id ?? '')}
+                                        density="compact"
+                                    />
+                                </Box>
+                                {numSelectedToRemove > 0 && (
+                                    <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                                        {numSelectedToRemove} reaction{numSelectedToRemove > 1 ? 's' : ''} selected for removal
+                                    </Typography>
+                                )}
+                            </Box>
+
+                            <Divider />
+
+                            {/* Submit Section */}
+                            <Box sx={{ maxWidth: 720 }}>
+                                <Typography variant="h6" gutterBottom>Submit Changes</Typography>
+                                <TextField
+                                    label="Edit summary"
+                                    value={editSummary}
+                                    onChange={(event) => setEditSummary(event.target.value)}
+                                    placeholder="Optional note for this change"
+                                    fullWidth
+                                    multiline
+                                    minRows={2}
+                                    sx={{ mb: 2 }}
+                                />
+                                {editMessage && (
+                                    <Alert 
+                                        severity={editMessage.includes('submitted') || editMessage.includes('Edit submitted') ? 'success' : 'error'}
+                                        sx={{ mb: 2 }}
+                                    >
+                                        {editMessage}
+                                    </Alert>
+                                )}
+                                <Stack direction="row" spacing={2}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => void handleSubmitBatchEdit()}
+                                        disabled={editSubmitting || (reactionsToAdd.length === 0 && numSelectedToRemove === 0)}
+                                    >
+                                        {editSubmitting ? 'Submitting...' : `Submit Edit (${reactionsToAdd.length} add, ${numSelectedToRemove} remove)`}
+                                    </Button>
+                                </Stack>
+                            </Box>
+
+                            <Divider />
+
+                            {/* Legacy single reaction remove (kept for backwards compatibility) */}
+                            <Box sx={{ maxWidth: 720 }}>
+                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                    Quick remove (legacy)
+                                </Typography>
+                                <Stack direction="row" spacing={1} alignItems="flex-start">
+                                    <TextField
+                                        label="Reaction ID to remove"
+                                        value={editReactionId}
+                                        onChange={(event) => setEditReactionId(event.target.value)}
+                                        placeholder="rxn00001_c0"
+                                        size="small"
+                                        sx={{ flex: 1 }}
+                                    />
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => void handleSubmitEdit()}
+                                        disabled={editSubmitting || !editReactionId.trim()}
+                                        size="small"
+                                    >
+                                        Remove
+                                    </Button>
+                                </Stack>
+                            </Box>
+
+                            <Divider />
+
+                            {/* Edit History */}
+                            <Box>
                                 <Typography variant="h6" sx={{ mb: 1.5 }}>
                                     Edit History
                                 </Typography>
@@ -1217,6 +1391,14 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                     />
                                 )}
                             </Box>
+
+                            {/* Add Reactions Dialog */}
+                            <AddReactionsDialog
+                                open={addReactionsOpen}
+                                onClose={() => setAddReactionsOpen(false)}
+                                onAdd={handleAddReactions}
+                                excludeIds={existingReactionIds}
+                            />
                         </Box>
                     ) : (
                         <>

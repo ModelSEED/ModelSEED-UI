@@ -74,7 +74,10 @@ export async function loginPatric(
 
     // Extract user_id from un=<user> segment
     const userIdMatch = token.match(/un=([^|]+)/);
-    const user_id = userIdMatch ? userIdMatch[1] : username;
+    let user_id = userIdMatch ? userIdMatch[1] : username;
+    if (!user_id.includes('@')) {
+        user_id = `${user_id}@patricbrc.org`;
+    }
 
     return { user_id, token: token.trim(), method: 'PATRIC' };
 }

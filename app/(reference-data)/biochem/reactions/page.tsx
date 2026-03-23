@@ -4,6 +4,9 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import DownloadIcon from '@mui/icons-material/Download';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
@@ -12,6 +15,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { exportToCsv } from '@/lib/utils/exportCsv';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -230,11 +234,53 @@ export default function ReactionsPage() {
         );
     }, [data, search]);
 
+    const handleExportCsv = useCallback(() => {
+        const docs = search ? filteredDocs : (data?.docs ?? []);
+        if (docs.length === 0) return;
+
+        exportToCsv(docs.map((d) => ({
+            id: d.id,
+            name: d.name,
+            definition: d.definition,
+            deltag: d.deltag,
+            reversibility: d.reversibility,
+            status: d.status,
+            ec_numbers: d.ec_numbers?.join('; ') || '',
+            pathways: d.pathways?.join('; ') || '',
+            is_transport: d.is_transport ? 'Yes' : 'No',
+        })), {
+            filename: 'modelseed_reactions.csv',
+            columns: ['id', 'name', 'definition', 'deltag', 'reversibility', 'status', 'ec_numbers', 'pathways', 'is_transport'],
+            columnLabels: {
+                id: 'ID',
+                name: 'Name',
+                definition: 'Equation',
+                deltag: 'ΔG',
+                reversibility: 'Reversibility',
+                status: 'Status',
+                ec_numbers: 'EC Numbers',
+                pathways: 'Pathways',
+                is_transport: 'Transport',
+            },
+        });
+    }, [data, search, filteredDocs]);
+
     return (
         <>
-            <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
-                Reactions
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
+                <Typography variant="h5" fontWeight={600}>
+                    Reactions
+                </Typography>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleExportCsv}
+                    disabled={!data?.docs?.length}
+                >
+                    Export CSV
+                </Button>
+            </Box>
 
             <DataGrid<Reaction>
                 rows={search ? filteredDocs : (data?.docs ?? [])}

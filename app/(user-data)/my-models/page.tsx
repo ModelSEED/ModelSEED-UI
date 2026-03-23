@@ -22,6 +22,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import {
@@ -70,6 +71,7 @@ function normalizeModelRef(ref: string): string {
 }
 
 export default function MyModelsPage() {
+    const router = useRouter();
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
@@ -365,6 +367,19 @@ export default function MyModelsPage() {
                         >
                             Build New Model
                         </Button>
+                        {selectedModelIds.length >= 2 && selectedModelIds.length <= 3 && (
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={() => {
+                                    const modelPaths = selectedModels.map((m) => m.path).join(',');
+                                    router.push(`/compare?models=${encodeURIComponent(modelPaths)}`);
+                                }}
+                                sx={{ textTransform: 'none', fontWeight: 600 }}
+                            >
+                                Compare ({selectedModelIds.length})
+                            </Button>
+                        )}
                         {selectedModelIds.length >= 2 && (
                             <Button
                                 variant="outlined"

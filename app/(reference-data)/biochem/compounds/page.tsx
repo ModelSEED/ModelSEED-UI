@@ -4,11 +4,15 @@ import { useState, useMemo, useCallback } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import DownloadIcon from '@mui/icons-material/Download';
 import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { exportToCsv } from '@/lib/utils/exportCsv';
 
 /* ─── Alias / formatting helpers ─────────────────────────────── */
 
@@ -155,11 +159,51 @@ export default function CompoundsPage() {
         );
     }, [data, search]);
 
+    const handleExportCsv = useCallback(() => {
+        const docs = search ? filteredDocs : (data?.docs ?? []);
+        if (docs.length === 0) return;
+
+        exportToCsv(docs.map((d) => ({
+            id: d.id,
+            name: d.name,
+            formula: d.formula,
+            mass: d.mass,
+            charge: d.charge,
+            deltag: d.deltag,
+            synonyms: parseSynonyms(d.aliases),
+            aliases: d.aliases?.slice(1).join('; ') || '',
+        })), {
+            filename: 'modelseed_compounds.csv',
+            columns: ['id', 'name', 'formula', 'mass', 'charge', 'deltag', 'synonyms', 'aliases'],
+            columnLabels: {
+                id: 'ID',
+                name: 'Name',
+                formula: 'Formula',
+                mass: 'Mass',
+                charge: 'Charge',
+                deltag: 'ΔG',
+                synonyms: 'Synonyms',
+                aliases: 'Aliases',
+            },
+        });
+    }, [data, search, filteredDocs]);
+
     return (
         <>
-            <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
-                Compounds
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
+                <Typography variant="h5" fontWeight={600}>
+                    Compounds
+                </Typography>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleExportCsv}
+                    disabled={!data?.docs?.length}
+                >
+                    Export CSV
+                </Button>
+            </Box>
 
             <DataGrid<Compound>
                 rows={search ? filteredDocs : (data?.docs ?? [])}

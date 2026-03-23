@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -16,9 +16,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import AuthGuard from '@/components/auth/AuthGuard';
+import MediaEditor from '@/components/ui/MediaEditor';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
-import { workspaceCreate, workspaceDelete } from '@/lib/api/workspace';
+import { workspaceCreate, workspaceDelete, workspaceGet } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -60,6 +61,7 @@ export default function MyMediaPage() {
     const [deleteTarget, setDeleteTarget] = useState<MyMediaItem | null>(null);
     const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
     const [isDeletingMedia, setIsDeletingMedia] = useState(false);
+    const [editingMedia, setEditingMedia] = useState<MyMediaItem | null>(null);
     const { isAuthenticated, user } = useAuth();
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -86,6 +88,60 @@ export default function MyMediaPage() {
             );
         },
         staleTime: 5 * 60 * 1000,
+    });
+
+    const { data: mediaData, isLoading: isLoadingMedia } = useQuery({
+        queryKey: ['mediaData', editingMedia?.path, USE_MODELSEED_API],
+        enabled: !!editingMedia,
+        queryFn: async () => {
+            if (!editingMedia) return null;
+            
+            if (USE_MODELSEED_API) {
+                const data = await exportMediaFromApi(editingMedia.path);
+                return {
+                    id: editingMedia.id,
+                    name: editingMedia.name,
+                    type: 'media' as const,
+                    compounds: ((data as Record<string, unknown>).compounds as Array<Record<string, unknown>> || []).map((c: Record<string, unknown>) => ({
+                        id: String(c.id || c.compound_id || ''),
+                        name: String(c.name || c.compound_name || ''),
+                        formula: c.formula as string | undefined,
+                        charge: c.charge as number | undefined,
+                        concentration: Number(c.concentration) || 0,
+                        minFlux: Number(c.minflux) || -1000,
+                        maxFlux: Number(c.maxflux) || 1000,
+                    })),
+                    isDefined: editingMedia.isDefined === 'Yes',
+                    isMinimal: editingMedia.isMinimal === 'Yes',
+                };
+            }
+
+            const wsData = await workspaceGet([editingMedia.path]);
+            const obj = wsData[0] as unknown as [string, string, string, string] | null;
+            if (!obj) throw new Error('Media not found');
+            if (!obj) throw new Error('Media not found');
+            
+            const lines = (obj[3] as string || '').split('\n').filter(l => l.trim());
+            const compounds = lines.slice(1).map(line => {
+                const parts = line.split('\t');
+                return {
+                    id: parts[0] || '',
+                    name: parts[0] || '',
+                    concentration: Number(parts[2]) || 0,
+                    minFlux: Number(parts[3]) || -1000,
+                    maxFlux: Number(parts[4]) || 1000,
+                };
+            });
+            
+            return {
+                id: editingMedia.id,
+                name: editingMedia.name,
+                type: 'media' as const,
+                compounds,
+                isDefined: editingMedia.isDefined === 'Yes',
+                isMinimal: editingMedia.isMinimal === 'Yes',
+            };
+        },
     });
 
     const handleExportMedia = async (row: MyMediaItem) => {
@@ -206,6 +262,14 @@ export default function MyMediaPage() {
                         onClick={() => void handleExportMedia(params.row)}
                     >
                         {exportingMediaId === params.row.id ? 'Exporting...' : 'Export'}
+                    </Button>
+                    <Button
+                        variant="text"
+                        size="small"
+                        sx={{ textTransform: 'none', minWidth: 0 }}
+                        onClick={() => setEditingMedia(params.row)}
+                    >
+                        Edit
                     </Button>
                     <Button
                         variant="text"
@@ -378,6 +442,30 @@ export default function MyMediaPage() {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                {editingMedia && (
+                    <Dialog open={!!editingMedia} onClose={() => setEditingMedia(null)} maxWidth="lg" fullWidth>
+                        <DialogTitle>Edit Media: {editingMedia.name}</DialogTitle>
+                        <DialogContent>
+                            {isLoadingMedia ? (
+                                <Typography>Loading media data...</Typography>
+                            ) : mediaData ? (
+                                <MediaEditor
+                                    initialMedia={mediaData}
+                                    onSave={async (updatedMedia) => {
+                                        console.log('Saving media:', updatedMedia);
+                                        return true;
+                                    }}
+                                    readOnly={!USE_MODELSEED_API}
+                                    saveDisabled={!USE_MODELSEED_API}
+                                    saveDisabledMessage={USE_MODELSEED_API ? '' : 'API not available. Enable NEXT_PUBLIC_USE_MODELSEED_API=true.'}
+                                />
+                            ) : (
+                                <Typography color="error">Failed to load media data</Typography>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+                )}
             </Box>
         </AuthGuard>
     );
