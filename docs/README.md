@@ -14,12 +14,18 @@ Depending on the feature or system you are working on, select the appropriate ma
 | System Domain | Target Document | Core Topics Covered |
 | :--- | :--- | :--- |
 | **High-Level Design** | **[ARCHITECTURE.md](./ARCHITECTURE.md)** | Tech stack, TanStack Query data flow, API clients, and the MUI v7 theming system. |
-| **URL Parity** | **[ROUTING.md](./ROUTING.md)** | Algorithms for mapping legacy AngularJS Hash-bang routes to Next.js App Router catch-all (`[...path]`) URLs. |
+| **URL Parity** | **[ROUTING.md](./ROUTING.md)** | Algorithms for mapping legacy AngularJS Hash-bundle routes to Next.js App Router catch-all (`[...path]`) URLs. |
 | **User Sessions** | **[AUTHENTICATION.md](./AUTHENTICATION.md)** | RAST/PATRIC login flow, `useAuth` Zustand store, and Token management for API requests. |
 | **External Data** | **[WORKSPACE.md](./WORKSPACE.md)** | Handling PATRIC Workspace JSON-RPC objects and the `modelseed-api` proxy endpoints. |
 | **Scientific Data** | **[BIOCHEMISTRY.md](./BIOCHEMISTRY.md)** | Solr-indexed reactions/compounds lookup and chemical formula/stoichiometry UX rendering rules. |
 | **Legacy Codebase** | **[LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md)** | Transitioning from the AngularJS `external/ModelSEED-UI` source code to modern React patterns. |
 | **Contributing** | **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** | Rules for maintaining these documents and keeping this registry up-to-date. |
+
+---
+
+## ⚠️ Known Issues & Action Items
+
+For a curated list of UI bugs, API limitations, backend blockers, and developer action items, see the project root [`issues.md`](../issues.md).
 
 ---
 
@@ -33,4 +39,4 @@ When modifying the codebase, refer back to these core invariants:
 4. **MUI-Native Styling**: Use MUI v7 themes (`lib/theme.ts`) and the `sx` prop over ad-hoc CSS files. We prioritize a dense, clean, and functional dashboard UX.
 
 ---
-*Maintained per GSD methodology. Keep docs in sync with `.gsd/STATE.md` phase changes.*
+*Maintained per GSD methodology. Keep docs in sync with `.gsd/STATE.md` phase changes and add new issues to `../issues.md`.*

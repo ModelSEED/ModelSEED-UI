@@ -13,6 +13,7 @@ When starting a new task, follow this exact sequence:
 3. **Understand the Rules**: Read `PROJECT_RULES.md` and `.gemini/GEMINI.md`.
 4. **Locate Target Files**: Use the **One-Stop Search Map** below to find the files relevant to your task.
 5. **Read Subsystem Docs**: If working on a specific subsystem (Auth, Routing, Workspace), read its exact file in the `docs/` folder first.
+6. **Check Known Issues**: See [`issues.md`](./issues.md) for a curated list of known bugs, API limitations, and developer action items.
 
 ---
 
@@ -21,6 +22,7 @@ When starting a new task, follow this exact sequence:
 | Target Domain | ...Start Here | Why? |
 | :--- | :--- | :--- |
 | **System State / Next Tasks** | `.gsd/STATE.md` & `.gsd/ROADMAP.md` | Single source of truth for task progress and handoffs. |
+| **Known Issues & Bugs** | `issues.md` | Curated list of UI bugs, API limitations, and developer action items. |
 | **Header / Main Navigation** | `components/layout/Header.tsx` | Global top navigation for home and docs. |
 | **Biochem / Tools Header** | `components/layout/AppHeader.tsx` | Secondary sub-header for all biological tool pages. |
 | **Model Data & Detail UI** | `app/model/[...path]/page.tsx` | Primary entry point for viewing metabolic models. |
@@ -48,12 +50,13 @@ The Next.js 16 App Router. Everything here maps directly to a URL.
 Stateless or purely presentational UI elements.
 - `auth/` — Login/Signup forms and guards.
 - `layout/` — Headers, Footers, and shell wrappers.
-- `ui/` — Generic components (e.g., Data Grids, Syntax Highlighters).
+- `ui/` — Generic components (e.g., Data Grids, Dialogs, Editors).
 
 ### deep-dive documentation (`docs/`) — [README](./docs/README.md)
 Detailed subsystem manuals. 
 - See `docs/ARCHITECTURE.md` for tech stack details.
 - See `docs/ROUTING.md` for legacy vs modern URL parity algorithms.
+- See [`issues.md`](./issues.md) for known bugs and API limitations.
 
 ---
 
@@ -75,11 +78,12 @@ Detailed subsystem manuals.
 ## ⚡ Developer & Agent Quick-Action Checklist
 
 > **When adding a new feature or migrating a legacy route:**
-1. **Identify Legacy URL**: Find the exact URL path used in the AngularJS app.
-2. **Create Catch-all**: Add a folder in `app/` using `[...path]` to handle arbitrary trailing paths (due to workspace encodings).
-3. **Use React Query**: Define your fetch logic in `lib/api/` and use `useQuery` inside your new `page.tsx`.
-4. **Style with MUI**: Import components from `@mui/material`. Check `lib/theme.ts` before adding custom hex colors.
-5. **Update Roadmap**: Check off your progress in `.gsd/STATE.md` and `.gsd/ROADMAP.md` before committing.
+> 1. **Identify Legacy URL**: Find the exact URL path used in the AngularJS app.
+> 2. **Create Catch-all**: Add a folder in `app/` using `[...path]` to handle arbitrary trailing paths (due to workspace encodings).
+> 3. **Use React Query**: Define your fetch logic in `lib/api/` and use `useQuery` inside your new `page.tsx`.
+> 4. **Style with MUI**: Import components from `@mui/material`. Check `lib/theme.ts` before adding custom hex colors.
+> 5. **Update Roadmap**: Check off your progress in `.gsd/STATE.md` and `.gsd/ROADMAP.md` before committing.
+> 6. **Document Issues**: If you encounter new bugs or API limitations, add them to `issues.md`.
 
 ## Repository Information
 - **URL**: [https://github.com/VibhavSetlur/ModelSEED-UI](https://github.com/VibhavSetlur/ModelSEED-UI)
