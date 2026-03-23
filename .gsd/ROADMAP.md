@@ -128,6 +128,18 @@
 - Upgrade the generic `/data/[...path]` from a placeholder to a functional raw workspace browser (listing files/metadata and providing download links).
 - Ensure parity with legacy "Comparison" and "Workspace" views.
 
+### Phase 31: UI Transition Completion for User Testing
+**Status**: ⚪ Not Started
+**Objective**: Complete all UI-side logic to achieve parity with legacy AngularJS UI, ready for user testing once backend API issues resolved.
+- **Data Browser** (`/data/[...path]`): Implement functional workspace file browser with directory listing, breadcrumb navigation, file metadata display, and download links.
+- **Model Comparison** (`/compare`): Implement side-by-side model comparison view with reaction/flux comparison tables and pathway tabs.
+- **Media Editor**: Add compound-level editing to media formulations (add/remove compounds, edit concentration/flux bounds).
+- **Model Editor Enhancement**: Enable reaction-level editing in model detail (add/remove reactions, edit directions, gene associations).
+- **Missing Dialogs**: Implement SaveAs, SelectMedia, AddCompounds, AddReactions, ShowMetadata dialogs.
+- **Bulk Download**: Add CSV export for biochem search results.
+- **API Fallbacks**: Graceful error handling when backend APIs unavailable.
+- **Note**: Workspace API write operations (create/delete/copy/metadata/permissions) and `editModelFromApi` are blocked by backend team fixes.
+
 ## Timestamp Log
 - Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
 - Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
@@ -157,3 +169,4 @@
 - Updated: 2026-03-16 11:39:55 CDT - Added Phase 27 for formatting/link parity and remaining legacy surface completion on model-detail and related flows.
 - Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27 formatting/link parity and legacy-surface UX closure.
 - Updated: 2026-03-19 10:15:00 CDT - Phase 23 complete: full non-biochem API client coverage and poplar smoke validation.
+- Updated: 2026-03-23 13:30:00 CDT - Added Phase 31 for UI transition completion and user testing readiness (gap analysis complete).
