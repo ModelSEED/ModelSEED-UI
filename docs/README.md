@@ -19,6 +19,7 @@ Depending on the feature or system you are working on, select the appropriate ma
 | **External Data** | **[WORKSPACE.md](./WORKSPACE.md)** | Handling PATRIC Workspace JSON-RPC objects and the `modelseed-api` proxy endpoints. |
 | **Scientific Data** | **[BIOCHEMISTRY.md](./BIOCHEMISTRY.md)** | Solr-indexed reactions/compounds lookup and chemical formula/stoichiometry UX rendering rules. |
 | **Legacy Codebase** | **[LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md)** | Transitioning from the AngularJS `external/ModelSEED-UI` source code to modern React patterns. |
+| **Testing Platform** | **[TESTING.md](./TESTING.md)** | Vitest unit tests, Playwright E2E tests, and GitHub Actions CI/CD pipeline. |
 | **Contributing** | **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** | Rules for maintaining these documents and keeping this registry up-to-date. |
 
 ---

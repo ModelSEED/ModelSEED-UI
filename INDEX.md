@@ -23,6 +23,7 @@ When starting a new task, follow this exact sequence:
 | :--- | :--- | :--- |
 | **System State / Next Tasks** | `.gsd/STATE.md` & `.gsd/ROADMAP.md` | Single source of truth for task progress and handoffs. |
 | **Known Issues & Bugs** | `issues.md` | Curated list of UI bugs, API limitations, and developer action items. |
+| **Testing Platform** | `tests/README.md` | Vitest, Playwright, and CI/CD configuration for automated testing. |
 | **Header / Main Navigation** | `components/layout/Header.tsx` | Global top navigation for home and docs. |
 | **Biochem / Tools Header** | `components/layout/AppHeader.tsx` | Secondary sub-header for all biological tool pages. |
 | **Model Data & Detail UI** | `app/model/[...path]/page.tsx` | Primary entry point for viewing metabolic models. |
