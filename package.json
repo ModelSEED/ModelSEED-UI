@@ -18,7 +18,7 @@
     "@mui/material-nextjs": "^7.3.8",
     "@mui/x-data-grid": "^8.27.3",
     "@tanstack/react-query": "^5.90.21",
-    "next": "16.1.6",
+    "next": "16.2.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
@@ -29,7 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.1",
     "typescript": "^5"
   }
 }
