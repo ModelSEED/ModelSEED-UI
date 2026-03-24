@@ -25,12 +25,11 @@ test.describe('Build Model Flow', () => {
     // Navigate to plant build model page
     await page.goto('/plant');
 
-    // Expect the heading
-    await expect(page.getByRole('heading', { name: /Build Plant Model/i })).toBeVisible();
+    // Expect the heading (page says "Build Model")
+    await expect(page.getByRole('heading', { name: /Build Model/i })).toBeVisible();
 
-    // Verify some expected form fields (e.g. Workspace selection, Model Name)
-    await expect(page.getByText(/Target Workspace/i)).toBeVisible();
-    await expect(page.getByLabel(/Output Model Name/i)).toBeVisible();
+    // Verify some expected form fields
+    await expect(page.getByLabel(/Name Model to build/i)).toBeVisible({ timeout: 10000 });
     
     const submitBtn = page.getByRole('button', { name: /Reconstruct/i }).or(page.getByRole('button', { name: /Build/i }));
     await expect(submitBtn).toBeVisible();

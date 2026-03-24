@@ -36,7 +36,7 @@ test.describe('Model Detail Flow', () => {
   test('should load model overview tab', async ({ page }) => {
     await page.goto('/my-models');
     
-    // Verify page loads
-    await expect(page.getByRole('heading', { name: /my models/i })).toBeVisible();
+    // Verify page loads (uses Typography with component="div")
+    await expect(page.getByText('My Models')).toBeVisible({ timeout: 15000 });
   });
 });

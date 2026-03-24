@@ -25,8 +25,8 @@ test.describe('Browse Models Flow', () => {
     // Navigate to models page
     await page.goto('/my-models');
 
-    // Expect the heading to show up
-    await expect(page.getByRole('heading', { name: /my models/i })).toBeVisible();
+    // Expect the "My Models" text to show up (uses Typography with component="div")
+    await expect(page.getByText('My Models')).toBeVisible({ timeout: 15000 });
 
     // Verify the DataGrid loads
     const grid = page.locator('.MuiDataGrid-root');

@@ -19,15 +19,15 @@ test.describe('Media Workflow Flow', () => {
   });
 
   test('should display My Media page', async ({ page }) => {
-    // Navigate to My Media page
-    await page.goto('/my-media');
+    // Navigate to My Media page (path is /myMedia not /my-media)
+    await page.goto('/myMedia');
     
-    // Verify page loads
-    await expect(page.getByRole('heading', { name: /my media/i })).toBeVisible({ timeout: 15000 });
+    // Verify page loads (uses Typography with component="div")
+    await expect(page.getByText('My Media')).toBeVisible({ timeout: 15000 });
   });
 
   test('should display media DataGrid', async ({ page }) => {
-    await page.goto('/my-media');
+    await page.goto('/myMedia');
     
     // Verify DataGrid loads
     const grid = page.locator('.MuiDataGrid-root');
