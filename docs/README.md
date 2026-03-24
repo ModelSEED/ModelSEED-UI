@@ -1,13 +1,13 @@
 # ModelSEED-UI Documentation Registry
 
-> **🤖 AI Agent Quick-Start**  
+> **AI Agent Quick-Start**  
 > If you are an AI navigating this directory, use this file to understand the architecture domains before making assumptions about how auth, routing, or the workspace operates.
 
 This directory is the **deep-dive documentation library** for the modern **ModelSEED-UI** (Next.js 16 + MUI 7). Treat this file as the master index for technical specifications.
 
 ---
 
-## 📚 Deep-Dive Document Library
+## Deep-Dive Document Library
 
 Depending on the feature or system you are working on, select the appropriate manual:
 
@@ -24,13 +24,13 @@ Depending on the feature or system you are working on, select the appropriate ma
 
 ---
 
-## ⚠️ Known Issues & Action Items
+## Known Issues & Action Items
 
 For a curated list of UI bugs, API limitations, backend blockers, and developer action items, see the project root [`issues.md`](../issues.md).
 
 ---
 
-## 🏛️ Project Design Principles
+## Project Design Principles
 
 When modifying the codebase, refer back to these core invariants:
 

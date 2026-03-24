@@ -29,7 +29,6 @@ The application has undergone technical validation and is **Ready for Production
 
 **Not Ready / Pending API Intervention:**
 - Generating models from RAST genomes. The UI connects directly to a defunct legacy endpoint for genome listings.
-- Executing model edits through the UI (`/api/models/edits` throws 501 Not Implemented).
 - Model organism and taxonomy metadata details (Pending backend schema delivery in `api/models` responses). 
 
 ---
