@@ -14,6 +14,10 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { RastGenomeJob, submitReconstructJobFromApi } from '@/lib/api/modelseed';
@@ -93,8 +97,13 @@ export default function BuildModelPlantPage() {
     const [submitting, setSubmitting] = useState<SubmissionKey>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [plantseedDialogOpen, setPlantseedDialogOpen] = useState(false);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+        if (PLANTSEED_MAINTENANCE && newValue === 0) {
+            setPlantseedDialogOpen(true);
+            return;
+        }
         setTabIndex(newValue);
     };
 
@@ -234,7 +243,7 @@ export default function BuildModelPlantPage() {
                                 <Tooltip
                                     title={
                                         PLANTSEED_MAINTENANCE
-                                            ? 'PlantSEED v3.0 Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
+                                            ? 'PlantSEED v2.0\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
                                             : ''
                                     }
                                     disableHoverListener={!PLANTSEED_MAINTENANCE}
@@ -402,6 +411,27 @@ export default function BuildModelPlantPage() {
                         View tracked jobs and models
                     </Button>
                 </Box>
+
+                <Dialog
+                    open={plantseedDialogOpen}
+                    onClose={() => setPlantseedDialogOpen(false)}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{ fontWeight: 600 }}>
+                        PlantSEED v2.0
+                    </DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setPlantseedDialogOpen(false)}>
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </AuthGuard >
     );

@@ -11,7 +11,7 @@ import StatusTable from '@/app/about/version/StatusTable';
 // Server side data loading
 async function getChangelog() {
     try {
-        const filePath = path.join(process.cwd(), 'external/ModelSEED-UI/CHANGELOG.md');
+        const filePath = path.join(process.cwd(), 'CHANGELOG.md');
         return fs.readFileSync(filePath, 'utf8');
     } catch (error) {
         return 'Changelog not found or could not be loaded.';

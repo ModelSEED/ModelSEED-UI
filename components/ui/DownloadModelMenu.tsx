@@ -80,7 +80,7 @@ export default function DownloadModelMenu({
                 variant="text"
                 size="small"
                 onClick={handleOpen}
-                sx={{ textTransform: 'none', minWidth: 0 }}
+                sx={{ textTransform: 'none', minWidth: 0, verticalAlign: 'baseline' }}
             >
                 {buttonLabel}
             </Button>
@@ -119,7 +119,7 @@ export default function DownloadModelMenu({
                 </Typography>
             )}
             {helperText && !error && !successMessage && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 0.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 0.5, mt: 0.5 }}>
                     {helperText}
                 </Typography>
             )}

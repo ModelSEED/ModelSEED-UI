@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -8,13 +9,14 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Alert from '@mui/material/Alert';
+import MediaSelectionDialog from './MediaSelectionDialog';
 
 interface ModelDetailHeaderProps {
     modelName: string;
     visualizeOption: string;
     onVisualizeChange: (value: string) => void;
-    onRunFba?: () => void;
-    onRunGapfill?: () => void;
+    onRunFba?: (mediaId?: string, mediaName?: string) => void;
+    onRunGapfill?: (mediaId?: string, mediaName?: string) => void;
     actionLoading?: 'fba' | 'gapfill' | null;
     actionMessage?: string | null;
 }
@@ -28,6 +30,26 @@ export default function ModelDetailHeader({
     actionLoading,
     actionMessage,
 }: ModelDetailHeaderProps) {
+    const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
+    const [mediaDialogType, setMediaDialogType] = useState<'fba' | 'gapfill' | null>(null);
+    const [selectedMedia, setSelectedMedia] = useState<{ id: string; name: string } | null>(null);
+
+    const handleOpenMediaDialog = (type: 'fba' | 'gapfill') => {
+        setMediaDialogType(type);
+        setMediaDialogOpen(true);
+    };
+
+    const handleMediaConfirm = (mediaId: string, mediaName: string) => {
+        setSelectedMedia({ id: mediaId, name: mediaName });
+        setMediaDialogOpen(false);
+        
+        if (mediaDialogType === 'fba' && onRunFba) {
+            onRunFba(mediaId, mediaName);
+        } else if (mediaDialogType === 'gapfill' && onRunGapfill) {
+            onRunGapfill(mediaId, mediaName);
+        }
+    };
+
     return (
         <>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 2 }}>
@@ -61,7 +83,7 @@ export default function ModelDetailHeader({
                 ))}
                 <Button
                     variant="contained"
-                    onClick={onRunFba}
+                    onClick={() => handleOpenMediaDialog('fba')}
                     disabled={!onRunFba || actionLoading !== null}
                     sx={{ textTransform: 'none' }}
                 >
@@ -70,7 +92,7 @@ export default function ModelDetailHeader({
                 <Button
                     variant="contained"
                     color="secondary"
-                    onClick={onRunGapfill}
+                    onClick={() => handleOpenMediaDialog('gapfill')}
                     disabled={!onRunGapfill || actionLoading !== null}
                     sx={{ textTransform: 'none' }}
                 >
@@ -105,6 +127,13 @@ export default function ModelDetailHeader({
                     </Select>
                 </FormControl>
             </Box>
+
+            <MediaSelectionDialog
+                open={mediaDialogOpen}
+                onClose={() => setMediaDialogOpen(false)}
+                onConfirm={handleMediaConfirm}
+                title={mediaDialogType === 'fba' ? 'Select Media for FBA' : 'Select Media for Gapfilling'}
+            />
         </>
     );
 }

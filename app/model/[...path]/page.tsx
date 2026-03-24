@@ -186,10 +186,21 @@ function buildCompartmentRows(model: Record<string, unknown>): Record<string, un
 
 function buildBiomassRows(model: Record<string, unknown>): Record<string, unknown>[] {
     const rows: Record<string, unknown>[] = [];
-    const biomasses = asArray<Record<string, unknown>>(model.biomasses ?? model.biomass);
+    const biomasses = asArray<Record<string, unknown>>(
+        model.biomasses ?? model.biomass ?? model.modelbiomasses ?? model.biomass_reactions ?? []
+    );
+    if (biomasses.length === 0) {
+        return rows;
+    }
     biomasses.forEach((biomass, biomassIndex) => {
-        const biomassId = String(biomass.id ?? `bio-${biomassIndex}`);
-        const compounds = asArray<Record<string, unknown>>(biomass.biomasscompounds ?? biomass.compounds);
+        const biomassId = String(biomass.id ?? biomass.label ?? biomass.name ?? `bio-${biomassIndex}`);
+        const compounds = asArray<Record<string, unknown>>(
+            biomass.biomasscompounds ?? 
+            biomass.compounds ?? 
+            biomass.modelbiomasscompounds ?? 
+            biomass.biomass_compounds ?? 
+            []
+        );
         if (compounds.length === 0) {
             rows.push({
                 id: `${biomassId}-empty`,
@@ -205,10 +216,10 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
             rows.push({
                 id: `${biomassId}-${compoundIndex}`,
                 biomass: biomassId,
-                compound: String(compound.modelcompound_ref ?? compound.compound_ref ?? ''),
-                name: String(compound.name ?? ''),
-                coefficient: Number(compound.coefficient ?? 0),
-                compartment: String(compound.modelcompartment_ref ?? ''),
+                compound: String(compound.modelcompound_ref ?? compound.compound_ref ?? compound.compound_id ?? ''),
+                name: String(compound.name ?? compound.compound_name ?? ''),
+                coefficient: Number(compound.coefficient ?? compound.coefficent ?? 0),
+                compartment: String(compound.modelcompartment_ref ?? compound.compartment_ref ?? compound.compartment ?? ''),
             });
         });
     });
@@ -1037,20 +1048,21 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         router.push(nextPath);
     };
 
-    const submitModelJob = async (kind: 'fba' | 'gapfill') => {
+    const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string) => {
         setActionLoading(kind);
         setActionMessage(null);
+        const selectedMedia = media || defaultMedia;
         try {
             const payload =
                 kind === 'fba'
                     ? await submitFbaJobFromApi({
                         model: workspaceCandidates[0],
-                        media: defaultMedia,
+                        media: selectedMedia,
                         media_supplement: [],
                     })
                     : await submitGapfillJobFromApi({
                         model: workspaceCandidates[0],
-                        media: defaultMedia,
+                        media: selectedMedia,
                     });
 
             const jobId = extractTrackedJobId(payload);
@@ -1164,8 +1176,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 modelName={modelName}
                 visualizeOption={visualizeOption}
                 onVisualizeChange={setVisualizeOption}
-                onRunFba={() => void submitModelJob('fba')}
-                onRunGapfill={() => void submitModelJob('gapfill')}
+                onRunFba={(mediaId?: string, mediaName?: string) => void submitModelJob('fba', mediaId)}
+                onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaId)}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
             />
@@ -1466,21 +1478,20 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 open={Boolean(detailDrawer)}
                 onClose={() => setDetailDrawer(null)}
             >
-                <Box sx={{ width: { xs: 320, md: 420 }, p: 3, display: 'grid', gap: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
-                        <Typography variant="h6">{detailDrawer?.title ?? 'Details'}</Typography>
+                <Box sx={{ width: { xs: 320, md: 420 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center', borderBottom: 1, borderColor: 'divider' }}>
+                        <Typography variant="h6" fontWeight={600}>{detailDrawer?.title ?? 'Details'}</Typography>
                         <Button onClick={() => setDetailDrawer(null)} sx={{ textTransform: 'none' }}>
                             Close
                         </Button>
                     </Box>
-                    <Divider />
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 1.25 }}>
+                    <Box sx={{ flex: 1, overflow: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {(detailDrawer ? extractDetailEntries(detailDrawer.row) : []).map((entry) => (
-                            <Box key={entry.key} sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 1.5 }}>
-                                <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                                    {entry.key}
+                            <Box key={entry.key}>
+                                <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ mb: 0.5 }}>
+                                    {entry.key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                 </Typography>
-                                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                <Typography variant="body2" sx={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
                                     {entry.value}
                                 </Typography>
                             </Box>
