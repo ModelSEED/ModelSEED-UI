@@ -126,9 +126,23 @@ async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T
 
     const payload = await parseJsonResponse(response);
     if (!response.ok) {
-        const message = extractWorkspaceErrorMessage(payload);
+        const backendMessage = extractWorkspaceErrorMessage(payload);
+        const statusMessage = STATUS_MESSAGES[response.status] || 'Request failed';
+        
+        // Log full error details for debugging
+        console.error(`Workspace JSON-RPC ${method} error:`, {
+            status: response.status,
+            statusMessage,
+            backendMessage,
+            payload,
+        });
+        
+        const userMessage = backendMessage
+            ? `${statusMessage} - ${backendMessage}`
+            : statusMessage;
+        
         throw new Error(
-            `Workspace JSON-RPC ${method} failed (${response.status})${message ? `: ${message}` : ''}`,
+            `Workspace ${method} failed (${response.status}): ${userMessage}`,
         );
     }
 
@@ -146,7 +160,22 @@ async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T
 }
 
 /**
+ * User-friendly descriptions for common HTTP status codes from the Poplar backend.
+ */
+const STATUS_MESSAGES: Record<number, string> = {
+    400: 'Bad request - check input parameters',
+    401: 'Authentication required',
+    403: 'Permission denied - you don\'t have access to this resource',
+    404: 'Object not found - the requested resource does not exist',
+    422: 'Invalid request format',
+    500: 'Internal server error - please try again later',
+    502: 'Upstream service unavailable - backend is temporarily unavailable',
+    503: 'Service unavailable - please try again later',
+};
+
+/**
  * Perform a REST call to the new modelseed-api (Poplar) Workspace endpoints.
+ * Returns proper HTTP status codes (404/403/502) with meaningful error messages.
  */
 async function callWorkspaceRestApi<T>(method: string, body: Record<string, unknown>): Promise<T> {
     const baseHeaders: Record<string, string> = {
@@ -167,9 +196,24 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
 
     const payload = await parseJsonResponse(response);
     if (!response.ok) {
-        const message = extractWorkspaceErrorMessage(payload);
+        const backendMessage = extractWorkspaceErrorMessage(payload);
+        const statusMessage = STATUS_MESSAGES[response.status] || 'Request failed';
+        
+        // Log full error details for debugging
+        console.error(`Workspace ${endpoint} error:`, {
+            status: response.status,
+            statusMessage,
+            backendMessage,
+            payload,
+        });
+        
+        // Construct user-friendly error message
+        const userMessage = backendMessage
+            ? `${statusMessage} - ${backendMessage}`
+            : statusMessage;
+        
         throw new Error(
-            `Workspace REST ${endpoint} failed (${response.status})${message ? `: ${message}` : ''}`,
+            `Workspace ${endpoint} failed (${response.status}): ${userMessage}`,
         );
     }
 
