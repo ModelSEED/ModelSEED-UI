@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -11,6 +11,8 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import QueueIcon from '@mui/icons-material/HourglassEmpty';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -32,11 +34,21 @@ interface JobRow {
     started: string;
     status: string;
     rawStatus: string;
+    isStuck?: boolean;
 }
 
-/* ---------- helpers ---------- */
+interface JobStatusHistory {
+    status: string;
+    timestamp: number;
+    sameCount: number;
+}
+
+/* ---------- constants ---------- */
 
 const STDERR_BASE = 'https://p3c.theseed.org/services/app_service/task_info';
+const STUCK_THRESHOLD_POLLS = 3; // Consider job stuck after 3 same-status polls (~30s)
+
+/* ---------- helpers ---------- */
 
 function relativeTime(timestamp: string | undefined): string {
     if (!timestamp) return '—';
@@ -54,7 +66,8 @@ function relativeTime(timestamp: string | undefined): string {
     return `${days}d ago`;
 }
 
-function statusColor(status: string): 'error' | 'success' | 'warning' | 'info' | 'default' {
+function statusColor(status: string, isStuck?: boolean): 'error' | 'success' | 'warning' | 'info' | 'default' {
+    if (isStuck) return 'warning';
     const s = status.toLowerCase();
     if (s === 'failed' || s === 'error') return 'error';
     if (s === 'completed') return 'success';
@@ -73,9 +86,11 @@ function normalizeStatus(status: string): 'queued' | 'running' | 'completed' {
 function mergeApiAndTrackedJobs(
     apiJobs: Record<string, unknown>[],
     trackedJobs: TrackedJob[],
+    statusHistory: Map<string, JobStatusHistory>,
 ): JobRow[] {
     const seen = new Set<string>();
     const rows: JobRow[] = [];
+    const now = Date.now();
 
     // API jobs take precedence
     for (const job of apiJobs) {
@@ -89,14 +104,39 @@ function mergeApiAndTrackedJobs(
             ? Object.entries(args).map(([k, v]) => `${k}: ${String(v)}`).join(', ')
             : '';
 
+        const status = String(job.status ?? 'unknown');
+        
+        // Track status history for stuck detection
+        const history = statusHistory.get(id);
+        let isStuck = false;
+        
+        if (history) {
+            if (history.status === status) {
+                history.sameCount++;
+                history.timestamp = now;
+            } else {
+                history.status = status;
+                history.sameCount = 1;
+                history.timestamp = now;
+            }
+            // Mark as stuck if same non-terminal status for too many polls
+            const isNonTerminal = ['queued', 'submitted', 'running', 'in-progress'].includes(status.toLowerCase());
+            if (isNonTerminal && history.sameCount >= STUCK_THRESHOLD_POLLS) {
+                isStuck = true;
+            }
+        } else {
+            statusHistory.set(id, { status, timestamp: now, sameCount: 1 });
+        }
+
         rows.push({
             id,
             task: String(params?.command ?? job.app ?? job.type ?? 'Unknown'),
             params: paramStr,
             submitted: String(job.submitTimestamp ?? job.created_at ?? job.submit_time ?? ''),
             started: String(job.startTimestamp ?? job.start_time ?? ''),
-            status: String(job.status ?? 'unknown'),
-            rawStatus: String(job.status ?? 'unknown'),
+            status,
+            rawStatus: status,
+            isStuck,
         });
     }
 
@@ -112,6 +152,7 @@ function mergeApiAndTrackedJobs(
             started: '',
             status: 'queued',
             rawStatus: 'queued',
+            isStuck: false,
         });
     }
 
@@ -123,8 +164,11 @@ function mergeApiAndTrackedJobs(
 function MyJobsContent() {
     const [pagination, setPagination] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'submitted', sort: 'desc' }]);
+    
+    // Track job status history for stuck detection
+    const statusHistoryRef = useRef<Map<string, JobStatusHistory>>(new Map());
 
-    const { data: jobRows = [], isLoading, error } = useQuery({
+    const { data: jobRows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myJobs'],
         queryFn: async () => {
             const tracked = listTrackedJobs();
@@ -142,11 +186,17 @@ function MyJobsContent() {
                 }
             }
 
-            return mergeApiAndTrackedJobs(apiJobs, tracked);
+            return mergeApiAndTrackedJobs(apiJobs, tracked, statusHistoryRef.current);
         },
         refetchInterval: 10_000, // Poll every 10 seconds
         staleTime: 5_000,
     });
+    
+    const handleRefreshJob = useCallback(() => {
+        // Clear history to reset stuck detection
+        statusHistoryRef.current.clear();
+        refetch();
+    }, [refetch]);
 
     const counts = useMemo(() => {
         const result = { queued: 0, running: 0, completed: 0 };
@@ -174,24 +224,34 @@ function MyJobsContent() {
         {
             field: 'status',
             headerName: 'Status',
-            width: 140,
+            width: 180,
             renderCell: (p) => (
-                <Chip
-                    label={p.row.status}
-                    size="small"
-                    color={statusColor(p.row.status)}
-                    variant="outlined"
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Chip
+                        label={p.row.isStuck ? `${p.row.status} (possibly stuck)` : p.row.status}
+                        size="small"
+                        color={statusColor(p.row.status, p.row.isStuck)}
+                        variant="outlined"
+                        icon={p.row.isStuck ? <WarningAmberIcon /> : undefined}
+                    />
+                </Box>
             ),
         },
         {
             field: 'actions',
             headerName: '',
-            width: 60,
+            width: 80,
             sortable: false,
-            renderCell: (p) => {
-                if (p.row.rawStatus.toLowerCase() === 'failed') {
-                    return (
+            renderCell: (p) => (
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {p.row.isStuck && (
+                        <Tooltip title="Job may be stuck - click to refresh">
+                            <IconButton size="small" onClick={handleRefreshJob}>
+                                <RefreshIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {p.row.rawStatus.toLowerCase() === 'failed' && (
                         <Tooltip title="View stderr">
                             <IconButton
                                 size="small"
@@ -203,12 +263,11 @@ function MyJobsContent() {
                                 <InfoOutlinedIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
-                    );
-                }
-                return null;
-            },
+                    )}
+                </Box>
+            ),
         },
-    ], []);
+    ], [handleRefreshJob]);
 
     return (
         <>
