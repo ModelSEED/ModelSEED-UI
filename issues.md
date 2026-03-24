@@ -1,7 +1,7 @@
 # Known Issues & Developer Action Items
 
-> **🤖 AI Agent & Developer Reference**
-> This document catalogs known UI bugs, API limitations, backend blockers, and developer action items. Before starting work on a new feature or debugging, check this file to understand the current landscape.
+> **AI Agent & Developer Reference**
+> This document catalogs known UI bugs, API limitations, backend blockers, and developer action items. Before modifying functionality, referencing legacy code, or attempting bug reports, review this log to verify whether an issue is an unintentional regression or a pending backend limitation.
 
 ---
 
@@ -13,6 +13,24 @@
 4. [Missing Features / Parity Gaps](#missing-features--parity-gaps)
 5. [Performance Considerations](#performance-considerations)
 6. [Documentation TODO Items](#documentation-todo-items)
+
+---
+
+## Current Testing & Release Status (March 2026)
+
+The application has undergone technical validation and is **Ready for Production User Testing**, with specific restrictions. 
+
+**Ready for Testing:**
+- JWT Authentication via PATRIC/RAST.
+- Viewing and interrogating legacy reference models via the Workspace layer.
+- Submitting Reconstruct, FBA, and Gapfill jobs.
+- Viewing My Models, My Media, and My Jobs data tables natively in React.
+- Interactive model details (Reactions, Compounds, Genes, Biomass, FBA pathways).
+
+**Not Ready / Pending API Intervention:**
+- Generating models from RAST genomes. The UI connects directly to a defunct legacy endpoint for genome listings.
+- Executing model edits through the UI (`/api/models/edits` throws 501 Not Implemented).
+- Model organism and taxonomy metadata details (Pending backend schema delivery in `api/models` responses). 
 
 ---
 
@@ -367,6 +385,6 @@ When adding new issues to this document, follow this template:
 
 ---
 
-*Last Updated: 2026-03-23*
+*Last Updated: 2026-03-24*
 *Maintained by: Development Team*
-*Document Version: 1.0*
+*Document Version: 1.1*

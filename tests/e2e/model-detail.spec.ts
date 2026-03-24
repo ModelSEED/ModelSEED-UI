@@ -36,7 +36,7 @@ test.describe('Model Detail Flow', () => {
   test('should load model overview tab', async ({ page }) => {
     await page.goto('/my-models');
     
-    // Verify page loads (uses Typography with component="div")
-    await expect(page.getByText('My Models')).toBeVisible({ timeout: 15000 });
+    // Verify page loads (use heading class to avoid matching tab)
+    await expect(page.locator('div.MuiTypography-h5').filter({ hasText: 'My Models' })).toBeVisible({ timeout: 15000 });
   });
 });

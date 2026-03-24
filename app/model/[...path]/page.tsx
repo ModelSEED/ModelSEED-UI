@@ -854,6 +854,28 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [selectedReactionsToRemove, setSelectedReactionsToRemove] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
     const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
 
+    // Enhanced edit handlers — MUST be before early returns to satisfy Rules of Hooks
+    const handleAddReactions = useCallback((reactions: { id: string; name: string; equation?: string }[]) => {
+        setReactionsToAdd((prev) => {
+            const existingIds = new Set(prev.map((r) => r.id));
+            const newRxns = reactions.filter((r) => !existingIds.has(r.id));
+            return [...prev, ...newRxns];
+        });
+        setAddReactionsOpen(false);
+    }, []);
+
+    const handleRemovePendingReaction = useCallback((id: string) => {
+        setReactionsToAdd((prev) => prev.filter((r) => r.id !== id));
+    }, []);
+
+    // Must be above early returns to satisfy Rules of Hooks
+    const existingReactionIds = useMemo(() => {
+        if (!modelData) return [];
+        const obj = parseWorkspaceGetObject<Record<string, unknown>>(modelData) ?? {};
+        const config = buildTableConfig(obj);
+        return config.reactions.rows.map((r) => String(r.id ?? '').replace(/_[a-z]\d+$/, ''));
+    }, [modelData]);
+
     if (error) {
         return (
             <Box sx={{ p: 4, maxWidth: '1400px', mx: 'auto' }}>
@@ -1087,19 +1109,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         }
     };
 
-    // Enhanced edit handlers
-    const handleAddReactions = useCallback((reactions: { id: string; name: string; equation?: string }[]) => {
-        setReactionsToAdd((prev) => {
-            const existingIds = new Set(prev.map((r) => r.id));
-            const newRxns = reactions.filter((r) => !existingIds.has(r.id));
-            return [...prev, ...newRxns];
-        });
-        setAddReactionsOpen(false);
-    }, []);
-
-    const handleRemovePendingReaction = useCallback((id: string) => {
-        setReactionsToAdd((prev) => prev.filter((r) => r.id !== id));
-    }, []);
+    // handleAddReactions and handleRemovePendingReaction moved above early returns
 
     const handleSubmitBatchEdit = async () => {
         // GridRowSelectionModel is now { type: 'include', ids: Set<string> }
@@ -1146,10 +1156,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         ? selectedReactionsToRemove.ids.size 
         : 0;
 
-    const existingReactionIds = useMemo(() => 
-        tableConfig.reactions.rows.map((r) => String(r.id ?? '').replace(/_[a-z]\d+$/, '')),
-        [tableConfig.reactions.rows]
-    );
+    // existingReactionIds moved above early returns
 
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>

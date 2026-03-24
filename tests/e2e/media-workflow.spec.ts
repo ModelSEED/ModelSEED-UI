@@ -22,8 +22,8 @@ test.describe('Media Workflow Flow', () => {
     // Navigate to My Media page (path is /myMedia not /my-media)
     await page.goto('/myMedia');
     
-    // Verify page loads (uses Typography with component="div")
-    await expect(page.getByText('My Media')).toBeVisible({ timeout: 15000 });
+    // Verify page loads (use heading class to avoid matching tab)
+    await expect(page.locator('div.MuiTypography-h5').filter({ hasText: 'My Media' })).toBeVisible({ timeout: 15000 });
   });
 
   test('should display media DataGrid', async ({ page }) => {

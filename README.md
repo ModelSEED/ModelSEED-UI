@@ -1,6 +1,8 @@
 # ModelSEED-UI (Next.js 16)
 
-ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 reboot of the ModelSEED web front end. It provides biochemistry reference tables, public genomes/media, and authenticated user workflows (Build Model, My Models, My Media) against the new `modelseed-api` backend while preserving legacy URL parity.
+ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the ModelSEED platform. It provides biochemistry reference tables, public genomes/media, and authenticated user workflows (Build Model, My Models, My Media, My Jobs) interacting with the new `modelseed-api` backend while preserving legacy URL parity.
+
+**Status (March 2026):** Core workflows and job execution are fully tested and stable against the popar `modelseed-api` layer. The UI is ready for production user testing, with specific backend limitations managed gracefully. Legacy endpoints are documented in `issues.md` and `docs/WORKSPACE.md`.
 
 ## Stack Overview
 
@@ -98,9 +100,13 @@ For a deeper architectural view, see:
 
 ## Documentation Entry Points
 
-- `INDEX.md` – high-level map of files and folders.
-- `docs/README.md` – developer manual index.
-- `.gsd/ROADMAP.md` – current phases and milestones (GSD methodology).
+- `INDEX.md` – High-level map of files and folders (Primary entry point for onboarding).
+- `docs/README.md` – Developer manual index.
+- `issues.md` - Verified current API limitations and bug tracker.
+- `.gsd/ROADMAP.md` – Current phases and milestones.
+
+### Note for AI Agents
+When initializing a debugging or feature session, start by reading `INDEX.md` for the context protocol, then review `issues.md` to ensure you are not debugging a known backend limitation (such as 501 Not Implemented endpoints).
 
 ## Timestamp Log
 

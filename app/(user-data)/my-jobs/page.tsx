@@ -35,6 +35,9 @@ interface JobRow {
     status: string;
     rawStatus: string;
     isStuck?: boolean;
+    errorMsg?: string;
+    outputPath?: string;
+    app?: string;
 }
 
 interface JobStatusHistory {
@@ -128,15 +131,22 @@ function mergeApiAndTrackedJobs(
             statusHistory.set(id, { status, timestamp: now, sameCount: 1 });
         }
 
+        const errorMsg = job.error ? String(job.error) : undefined;
+        const outputPath = args?.output_path ? String(args.output_path) : undefined;
+        const app = String(params?.command ?? job.app ?? job.type ?? 'Unknown');
+
         rows.push({
             id,
-            task: String(params?.command ?? job.app ?? job.type ?? 'Unknown'),
+            task: app,
             params: paramStr,
             submitted: String(job.submitTimestamp ?? job.created_at ?? job.submit_time ?? ''),
             started: String(job.startTimestamp ?? job.start_time ?? ''),
             status,
             rawStatus: status,
             isStuck,
+            errorMsg,
+            outputPath,
+            app,
         });
     }
 
@@ -207,7 +217,32 @@ function MyJobsContent() {
     }, [jobRows]);
 
     const columns: GridColDef<JobRow>[] = useMemo(() => [
-        { field: 'task', headerName: 'Task', width: 200 },
+        { 
+            field: 'task', 
+            headerName: 'Task', 
+            width: 200,
+            renderCell: (p) => {
+                if (p.row.rawStatus.toLowerCase() === 'completed' && p.row.outputPath && p.row.app?.includes('Model')) {
+                    return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                            <Box 
+                                component="a" 
+                                href={`/model${p.row.outputPath}`}
+                                sx={{ 
+                                    textDecoration: 'none', 
+                                    color: 'primary.main',
+                                    fontWeight: 500,
+                                    '&:hover': { textDecoration: 'underline' } 
+                                }}
+                            >
+                                {p.row.task}
+                            </Box>
+                        </Box>
+                    );
+                }
+                return p.row.task;
+            }
+        },
         { field: 'params', headerName: 'Parameters', width: 340, sortable: false },
         {
             field: 'submitted',
@@ -252,15 +287,24 @@ function MyJobsContent() {
                         </Tooltip>
                     )}
                     {p.row.rawStatus.toLowerCase() === 'failed' && (
-                        <Tooltip title="View stderr">
+                        <Tooltip title={p.row.errorMsg || "Job failed. No error details provided by API."}>
+                            <IconButton
+                                size="small"
+                                color="error"
+                            >
+                                <InfoOutlinedIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {p.row.rawStatus.toLowerCase() === 'completed' && p.row.outputPath && p.row.app?.includes('Model') && (
+                        <Tooltip title="View Model">
                             <IconButton
                                 size="small"
                                 component="a"
-                                href={`${STDERR_BASE}/${p.row.id}/stderr`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={`/model${p.row.outputPath}`}
+                                color="primary"
                             >
-                                <InfoOutlinedIcon fontSize="small" />
+                                <PlayCircleOutlineIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}

@@ -25,8 +25,8 @@ test.describe('Browse Models Flow', () => {
     // Navigate to models page
     await page.goto('/my-models');
 
-    // Expect the "My Models" text to show up (uses Typography with component="div")
-    await expect(page.getByText('My Models')).toBeVisible({ timeout: 15000 });
+    // Expect the "My Models" heading (use nth to avoid matching the tab)
+    await expect(page.locator('div.MuiTypography-h5').filter({ hasText: 'My Models' })).toBeVisible({ timeout: 15000 });
 
     // Verify the DataGrid loads
     const grid = page.locator('.MuiDataGrid-root');

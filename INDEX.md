@@ -1,11 +1,11 @@
 # ModelSEED-UI Project Documentation Index
 
-> **🚨 AI AGENT & DEVELOPER START HERE 🚨**
-> This file is your primary **Control-F** reference and context map. Read this *before* exploring the codebase. If you are an AI, use the directories and files linked here to quickly narrow your search space rather than blindly traversing the repository.
+> **AI AGENT & DEVELOPER START HERE**
+> This file serves as the primary reference and context map. Read this *before* exploring the codebase. For AI agents: utilize the defined directories and files to narrow your search space rather than exhaustively traversing the repository.
 
 ---
 
-## 🤖 AI Agent Context Protocol
+## AI Agent Context Protocol
 
 When starting a new task, follow this exact sequence:
 1. **Understand Current State**: Read `.gsd/STATE.md` to know what was just completed and what is currently active.
@@ -17,7 +17,7 @@ When starting a new task, follow this exact sequence:
 
 ---
 
-## 🗺️ One-Stop Search Map (Quick-Find Table)
+## One-Stop Search Map (Quick-Find Table)
 
 | Target Domain | ...Start Here | Why? |
 | :--- | :--- | :--- |
@@ -36,7 +36,7 @@ When starting a new task, follow this exact sequence:
 
 ---
 
-## 📂 Codebase Geography (Folder Matrix)
+## Codebase Geography (Folder Matrix)
 
 ### Core Logic (`lib/`) — [README](./lib/README.md)
 The "Brain". All external API communication and core app configuration lives here. Always encapsulate network calls in `lib/api/` instead of putting `fetch()` inside UI components.
@@ -61,7 +61,7 @@ Detailed subsystem manuals.
 
 ---
 
-## 🏗️ Legacy vs. Modern Parity Matrix
+## Legacy vs. Modern Parity Matrix
 
 **CRITICAL GSD RULE**: We maintain **100% URL parity** with the legacy AngularJS app. Existing bookmarks and publication citations *must not break*.
 
@@ -76,7 +76,7 @@ Detailed subsystem manuals.
 
 ---
 
-## ⚡ Developer & Agent Quick-Action Checklist
+## Developer & Agent Quick-Action Checklist
 
 > **When adding a new feature or migrating a legacy route:**
 > 1. **Identify Legacy URL**: Find the exact URL path used in the AngularJS app.
