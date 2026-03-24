@@ -127,8 +127,58 @@ async function modelseedFetch<T>(path: string, init: RequestInit = {}, requireAu
     return payload as T;
 }
 
+/**
+ * Safely parse a value as a number, handling edge cases like "N/A", empty strings, or invalid values.
+ * Returns undefined if the value cannot be parsed as a finite number.
+ */
+function safeParseNumber(val: unknown): number | undefined {
+    if (val === null || val === undefined) return undefined;
+    if (typeof val === 'number' && Number.isFinite(val)) return val;
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (trimmed === '' || trimmed.toLowerCase() === 'n/a') return undefined;
+        const parsed = Number(trimmed);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return undefined;
+}
+
+/**
+ * Process model summary data with defensive number parsing to handle edge cases.
+ */
+function processModelSummary(raw: Record<string, unknown>): ModelseedModelSummary {
+    return {
+        ref: String(raw.ref ?? ''),
+        id: String(raw.id ?? ''),
+        name: String(raw.name ?? ''),
+        status: raw.status != null ? String(raw.status) : undefined,
+        num_genes: safeParseNumber(raw.num_genes),
+        num_reactions: safeParseNumber(raw.num_reactions),
+        num_compounds: safeParseNumber(raw.num_compounds),
+        fba_count: safeParseNumber(raw.fba_count),
+        unintegrated_gapfills: safeParseNumber(raw.unintegrated_gapfills),
+        integrated_gapfills: safeParseNumber(raw.integrated_gapfills),
+        rundate: raw.rundate != null ? String(raw.rundate) : undefined,
+    };
+}
+
 export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> {
-    return modelseedFetch<ModelseedModelSummary[]>('/api/models');
+    const rawModels = await modelseedFetch<Record<string, unknown>[]>('/api/models');
+    
+    // Process each model with defensive parsing to handle edge case metadata
+    return rawModels.map((raw, index) => {
+        try {
+            return processModelSummary(raw);
+        } catch (err) {
+            console.warn(`Failed to process model at index ${index}:`, err, raw);
+            // Return a minimal valid model object rather than crashing
+            return {
+                ref: String(raw.ref ?? ''),
+                id: String(raw.id ?? `unknown-${index}`),
+                name: String(raw.name ?? 'Unknown'),
+            };
+        }
+    });
 }
 
 export async function getModelDataFromApi(ref: string): Promise<Record<string, unknown>> {
