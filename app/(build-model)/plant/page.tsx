@@ -198,7 +198,7 @@ export default function BuildModelPlantPage() {
         await submitTrackedReconstruct(
             key,
             {
-                genome: `${source}:${normalizedGenomeId}`,
+                genome: normalizedGenomeId,
                 genome_id: normalizedGenomeId,
                 genome_name: genomeName || undefined,
                 output_file: modelName,
@@ -226,6 +226,10 @@ export default function BuildModelPlantPage() {
                 <Box sx={{ mb: 3 }}>
                     <Typography variant="h4" component="h1" fontWeight={600} gutterBottom>
                         Build Model
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: '800px' }}>
+                        ModelSEED enables the high-throughput generation and optimization of genome-scale metabolic models from microbial and plant genomes. 
+                        Users can reconstruct models from public databases like PATRIC and RAST or upload their own annotated sequences for comprehensive metabolic analysis.
                     </Typography>
                 </Box>
 

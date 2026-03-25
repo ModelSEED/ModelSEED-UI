@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-03-25
+
+Overview: Improved Build Model clarity and fixed reconstruction submission errors.
+
+### Added
+
+- Professional 2-sentence description to the "Build Model" page.
+
+### Fixed
+
+- Removed prefixing from genome IDs in reconstruction jobs which was causing backend API failures (e.g. PATRIC: prefix).
+
 ## [0.1.2] - 2026-03-25
 
 Overview: Final UI polish and parity fixes.
