@@ -28,6 +28,9 @@ export interface ModelseedModelSummary {
     unintegrated_gapfills?: number;
     integrated_gapfills?: number;
     rundate?: string;
+    genome_id?: string;
+    organism_name?: string;
+    taxonomy?: string;
 }
 
 export interface ModelseedMediaSummary {
@@ -159,6 +162,9 @@ function processModelSummary(raw: Record<string, unknown>): ModelseedModelSummar
         unintegrated_gapfills: safeParseNumber(raw.unintegrated_gapfills),
         integrated_gapfills: safeParseNumber(raw.integrated_gapfills),
         rundate: raw.rundate != null ? String(raw.rundate) : undefined,
+        genome_id: raw.genome_id != null ? String(raw.genome_id) : undefined,
+        organism_name: raw.organism_name != null ? String(raw.organism_name) : undefined,
+        taxonomy: raw.taxonomy != null ? String(raw.taxonomy) : undefined,
     };
 }
 
