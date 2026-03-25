@@ -243,7 +243,7 @@ export default function BuildModelPlantPage() {
                                 <Tooltip
                                     title={
                                         PLANTSEED_MAINTENANCE
-                                            ? 'PlantSEED v2.0\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
+                                            ? 'PlantSEED v2.0\nPlantSEED v3.0\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
                                             : ''
                                     }
                                     slotProps={{
@@ -252,7 +252,15 @@ export default function BuildModelPlantPage() {
                                     disableHoverListener={!PLANTSEED_MAINTENANCE}
                                     placement="top"
                                 >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Box 
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+                                        onClick={(e) => {
+                                            if (PLANTSEED_MAINTENANCE) {
+                                                e.stopPropagation();
+                                                setPlantseedDialogOpen(true);
+                                            }
+                                        }}
+                                    >
                                         UPLOAD Plants FASTA
                                         {PLANTSEED_MAINTENANCE && (
                                             <WarningAmberIcon sx={{ fontSize: 20, color: '#ed6c02' }} />
@@ -423,9 +431,11 @@ export default function BuildModelPlantPage() {
                 >
                     <DialogTitle sx={{ fontWeight: 600 }}>
                         PlantSEED v2.0
+                        <br />
+                        PlantSEED v3.0
                     </DialogTitle>
                     <DialogContent>
-                        <Typography>
+                        <Typography sx={{ mt: 1 }}>
                             Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.
                         </Typography>
                     </DialogContent>
