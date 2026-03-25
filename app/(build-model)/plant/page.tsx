@@ -246,6 +246,9 @@ export default function BuildModelPlantPage() {
                                             ? 'PlantSEED v2.0\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
                                             : ''
                                     }
+                                    slotProps={{
+                                        tooltip: { sx: { whiteSpace: 'pre-wrap' } },
+                                    }}
                                     disableHoverListener={!PLANTSEED_MAINTENANCE}
                                     placement="top"
                                 >
@@ -257,7 +260,7 @@ export default function BuildModelPlantPage() {
                                     </Box>
                                 </Tooltip>
                             }
-                            disabled={PLANTSEED_MAINTENANCE}
+                            sx={PLANTSEED_MAINTENANCE ? { opacity: 0.5 } : {}}
                             {...a11yProps(0)}
                         />
                         <Tab label="UPLOAD Microbes FASTA" {...a11yProps(1)} />

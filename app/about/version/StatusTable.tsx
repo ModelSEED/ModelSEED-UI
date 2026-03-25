@@ -33,7 +33,7 @@ interface ServiceConfig {
 const SERVICES: ServiceConfig[] = [
     { id: 'auth', service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', pingUrl: null, authReq: false },
     { id: 'patric', service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', pingUrl: null, authReq: false },
-    { id: 'shock', service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', pingUrl: 'https://p3.theseed.org/services/shock_api', authReq: false, api: [{ label: 'GitHub', url: 'https://github.com/MG-RAST/Shock' }] },
+    { id: 'shock', service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', pingUrl: 'https://p3.theseed.org/services/shock_api/', authReq: false, api: [{ label: 'GitHub', url: 'https://github.com/MG-RAST/Shock' }] },
     { id: 'solr', service: 'SOLR', endpoint: 'https://modelseed.org/solr/', pingUrl: 'https://modelseed.org/solr/', authReq: false },
     { id: 'api', service: 'API', endpoint: 'https://modelseed.org/api/test-service', pingUrl: 'https://modelseed.org/api/test-service', authReq: false },
     {
@@ -60,8 +60,8 @@ const SERVICES: ServiceConfig[] = [
             { label: 'Perl', url: 'https://github.com/PATRIC3/Workspace/blob/master/lib/Bio/P3/Workspace/WorkspaceClient.pm' }
         ]
     },
-    { id: 'support', service: 'ModelSEED Support Service', endpoint: 'https://modelseed.org/services/ms_fba', pingUrl: 'https://modelseed.org/services/ms_fba', authReq: true },
-    { id: 'app', service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', pingUrl: 'https://p3.theseed.org/services/app_service', authReq: true }
+    { id: 'support', service: 'ModelSEED Support Service', endpoint: 'https://modelseed.org/services/ms_fba', pingUrl: null, authReq: true },
+    { id: 'app', service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', pingUrl: 'https://p3.theseed.org/services/app_service/ping', authReq: true }
 ];
 
 export default function StatusTable() {

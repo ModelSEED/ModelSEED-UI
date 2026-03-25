@@ -11,6 +11,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 import { listPublicMediaFromApi, ModelseedMediaSummary } from '@/lib/api/modelseed';
 
 interface MediaSelectionDialogProps {
@@ -66,7 +67,7 @@ export default function MediaSelectionDialog({
                     <CircularProgress sx={{ display: 'block', mx: 'auto', my: 2 }} />
                 )}
                 {error && (
-                    <DialogContent sx={{ color: 'error.main' }}>{error}</DialogContent>
+                    <Typography sx={{ color: 'error.main' }}>{error}</Typography>
                 )}
                 {!loading && !error && (
                     <FormControl fullWidth sx={{ mt: 1 }}>
