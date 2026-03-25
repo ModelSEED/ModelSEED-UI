@@ -187,7 +187,12 @@ function buildCompartmentRows(model: Record<string, unknown>): Record<string, un
 function buildBiomassRows(model: Record<string, unknown>): Record<string, unknown>[] {
     const rows: Record<string, unknown>[] = [];
     const biomasses = asArray<Record<string, unknown>>(
-        model.biomasses ?? model.biomass ?? model.modelbiomasses ?? model.biomass_reactions ?? []
+        model.biomasses ?? 
+        model.biomass ?? 
+        model.modelbiomasses ?? 
+        model.biomass_reactions ?? 
+        model.model_biomasses ??
+        []
     );
     if (biomasses.length === 0) {
         return rows;
@@ -486,14 +491,17 @@ function stringifyDetailValue(value: unknown): string {
         return String(value);
     }
     if (Array.isArray(value)) {
-        if (value.length === 0) return '-';
+        if (value.length === 0) return 'None';
         return value.map((entry) => stringifyDetailValue(entry)).join(', ');
     }
-    try {
-        return JSON.stringify(value);
-    } catch {
-        return String(value);
+    if (typeof value === 'object') {
+        try {
+            return JSON.stringify(value, null, 2);
+        } catch {
+            return String(value);
+        }
     }
+    return String(value);
 }
 
 function extractDetailEntries(row: Record<string, unknown>): Array<{ key: string; value: string }> {
@@ -1247,9 +1255,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionMessage={actionMessage}
             />
 
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <OrganismLinksCard model={modelObject} />
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box>
                     <DownloadModelMenu
                         modelRef={workspaceCandidates[0]}
                         modelId={modelName}

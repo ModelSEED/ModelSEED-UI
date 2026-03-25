@@ -5,14 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - 2026-03-24
+## [0.1.2] - 2026-03-25
 
-Overview: UI fixes and improvements for Phase 33.
+Overview: Final UI polish and parity fixes.
 
 ### Added
 
-- Media selection dialog for FBA and Gapfilling job submission
-- Pop-up dialog for PlantSEED maintenance message when clicking disabled "UPLOAD Plants FASTA" tab
+- Interactive pop-up for PlantSEED v2/v3 maintenance banner on Build Model page
+- Expanded fallback discovery for biomass data in model objects
+
+### Changed
+
+- PlantSEED banner now correctly shows "v2.0 / v3.0" with requested linebreak
+- Improved Reaction/Compound detail drawer with pretty-printed JSON and better array formatting
+- Re-aligned Download Options menu to better match descriptive text
+
+## [0.1.1] - 2026-03-24
 
 ### Changed
 
