@@ -199,6 +199,8 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
             biomass.compounds ?? 
             biomass.modelbiomasscompounds ?? 
             biomass.biomass_compounds ?? 
+            biomass.modelbiomass_compounds ??
+            biomass.model_biomass_compounds ??
             []
         );
         if (compounds.length === 0) {
@@ -510,6 +512,25 @@ interface ExternalLinkItem {
 }
 
 function extractExternalLinks(model: Record<string, unknown>): ExternalLinkItem[] {
+    const links: ExternalLinkItem[] = [];
+
+    // Add explicit genome links if metadata exists
+    const genomeId = String(model.genome_id ?? '').trim();
+    if (genomeId) {
+        if (genomeId.includes('rast')) {
+            links.push({
+                name: 'RAST Genome',
+                url: `https://rast.nmpdr.org/rast.cgi?page=GenomeView&genome=${genomeId}`,
+            });
+        } else {
+            // Default to PATRIC (BV-BRC) link for standard genome IDs
+            links.push({
+                name: 'PATRIC Genome',
+                url: `https://www.bv-brc.org/view/Genome/${genomeId}`,
+            });
+        }
+    }
+
     const candidates = [
         model.links,
         model.external_links,
@@ -518,7 +539,7 @@ function extractExternalLinks(model: Record<string, unknown>): ExternalLinkItem[
 
     for (const candidate of candidates) {
         if (!Array.isArray(candidate)) continue;
-        const links = candidate
+        const candidateLinks = candidate
             .map((entry) => {
                 if (!entry || typeof entry !== 'object') return null;
                 const record = entry as Record<string, unknown>;
@@ -528,9 +549,14 @@ function extractExternalLinks(model: Record<string, unknown>): ExternalLinkItem[
                 return { name, url };
             })
             .filter((entry): entry is ExternalLinkItem => Boolean(entry));
-        if (links.length > 0) return links;
+        
+        // Use candidate links if we don't have better ones yet
+        if (candidateLinks.length > 0) {
+            links.push(...candidateLinks);
+            break;
+        }
     }
-    return [];
+    return links;
 }
 
 function OrganismLinksCard({
@@ -539,56 +565,95 @@ function OrganismLinksCard({
     model: Record<string, unknown>;
 }) {
     const imageUrl = String(model.image ?? model.image_url ?? model.organism_image ?? '').trim();
-    const organismName = String(model.organism ?? model.scientific_name ?? model.name ?? '').trim();
+    const organismName = String(model.organism_name ?? model.organism ?? model.scientific_name ?? model.name ?? '').trim();
+    const taxonomy = String(model.taxonomy ?? '').trim();
+    const genomeId = String(model.genome_id ?? '').trim();
     const links = extractExternalLinks(model);
 
     return (
         <Box
             sx={{
-                p: 2,
+                p: 2.5,
                 border: '1px solid #e0e0e0',
-                borderRadius: 1,
+                borderRadius: 1.5,
                 backgroundColor: '#fff',
-                minWidth: 300,
+                minWidth: 320,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             }}
         >
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Organism details
+            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+                Organism & Taxonomy
             </Typography>
-            {imageUrl ? (
-                <Box
-                    component="img"
-                    src={imageUrl}
-                    alt={organismName || 'Organism image'}
-                    sx={{ width: 140, height: 140, objectFit: 'cover', borderRadius: 1, mb: 1 }}
-                />
-            ) : (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                    Organism image not available in this backend response.
-                </Typography>
+            
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                {imageUrl && (
+                    <Box
+                        component="img"
+                        src={imageUrl}
+                        alt={organismName || 'Organism image'}
+                        sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1, border: '1px solid #eee' }}
+                    />
+                )}
+                <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5 }}>
+                        {organismName || 'Organism metadata unavailable'}
+                    </Typography>
+                    {genomeId && (
+                        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontWeight: 500 }}>
+                            Genome ID: {genomeId}
+                        </Typography>
+                    )}
+                </Box>
+            </Box>
+
+            {taxonomy && (
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        Taxonomy
+                    </Typography>
+                    <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
+                        {taxonomy}
+                    </Typography>
+                </Box>
             )}
 
-            <Typography variant="body2" sx={{ mb: 1 }}>
-                {organismName || 'Organism metadata unavailable'}
-            </Typography>
+            <Divider sx={{ my: 1.5, opacity: 0.6 }} />
 
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 1 }}>
+                External Resources
+            </Typography>
             {links.length > 0 ? (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {links.map((link) => (
-                        <a
+                        <Button
                             key={`${link.name}-${link.url}`}
+                            component="a"
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            style={{ color: '#00acc1', textDecoration: 'none', fontSize: 13 }}
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                                py: 0.5,
+                                px: 1,
+                                height: 24,
+                                fontSize: '0.7rem',
+                                textTransform: 'none',
+                                borderColor: 'info.light',
+                                color: 'info.main',
+                                '&:hover': {
+                                    borderColor: 'info.main',
+                                    backgroundColor: 'info.50',
+                                }
+                            }}
                         >
                             {link.name}
-                        </a>
+                        </Button>
                     ))}
                 </Box>
             ) : (
-                <Typography variant="caption" color="text.secondary">
-                    Legacy external links are not available for this model payload.
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    No external portal links available.
                 </Typography>
             )}
         </Box>
@@ -1184,12 +1249,14 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
                 <OrganismLinksCard model={modelObject} />
-                <DownloadModelMenu
-                    modelRef={workspaceCandidates[0]}
-                    modelId={modelName}
-                    buttonLabel="Download options"
-                    helperText="Export this model as SBML, JSON, or TSV."
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <DownloadModelMenu
+                        modelRef={workspaceCandidates[0]}
+                        modelId={modelName}
+                        buttonLabel="Download options"
+                        helperText="Export this model as SBML, JSON, or TSV."
+                    />
+                </Box>
             </Box>
 
             <VisualizeDataPanel
@@ -1485,13 +1552,23 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                             Close
                         </Button>
                     </Box>
-                    <Box sx={{ flex: 1, overflow: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ flex: 1, overflow: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                         {(detailDrawer ? extractDetailEntries(detailDrawer.row) : []).map((entry) => (
-                            <Box key={entry.key}>
-                                <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ mb: 0.5 }}>
+                            <Box key={entry.key} sx={{ borderBottom: '1px solid #f0f0f0', pb: 1.5, '&:last-child': { borderBottom: 0 } }}>
+                                <Typography 
+                                    variant="caption" 
+                                    color="text.secondary" 
+                                    fontWeight={700} 
+                                    sx={{ 
+                                        mb: 0.5, 
+                                        display: 'block',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em'
+                                    }}
+                                >
                                     {entry.key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                 </Typography>
-                                <Typography variant="body2" sx={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                                <Typography variant="body2" sx={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', color: 'text.primary', lineHeight: 1.6 }}>
                                     {entry.value}
                                 </Typography>
                             </Box>
