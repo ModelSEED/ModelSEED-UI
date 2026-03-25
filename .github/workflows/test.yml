@@ -18,7 +18,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm install
       - run: npm run test:coverage
       - uses: actions/upload-artifact@v4
@@ -40,7 +39,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm install
       - run: npx playwright install --with-deps
       - name: Run E2E tests
