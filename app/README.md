@@ -14,6 +14,7 @@ These folders use **Catch-all Routes (`[...path]`)** to capture deeply nested pa
 | `/feature` | Genomic Features (Genes) | `app/feature/[...path]/page.tsx` |
 | `/gapfill` | GapFilling Results | `app/gapfill/[...path]/page.tsx` |
 | `/data` | Workspace File Browser | `app/data/[...path]/page.tsx` |
+| `/media` | Media Editor / Viewer | `app/media/[...path]/page.tsx` |
 
 > [!IMPORTANT]
 > **Parameter Naming**: For a folder named `[...path]`, the `params` prop in the page component MUST be accessed as `params.path`. Using any other name (like `slug`) will result in `undefined` errors.

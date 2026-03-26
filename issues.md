@@ -384,6 +384,45 @@ When adding new issues to this document, follow this template:
 
 ---
 
-*Last Updated: 2026-03-24*
+---
+
+## API Investigation Notes (2026-03-25)
+
+### APIINV001: Reconstruct Job Completes But My Models Table Update Delayed
+**Date:** 2026-03-25T21:02:26Z
+**Severity:** Low (Resolved itself - documentation for awareness)
+**Investigated By:** AI Agent Session
+
+**Observed Behavior:**
+- User submitted reconstruct job (Job ID: `91ab3c9b-1ebc-4fb3-99b7-26782bde2083`)
+- Parameters: `genome: 551115.6, template_type: gn, atp_safe: true, gapfill: false, media: null`
+- Output path: `/seaver@patricbrc.org/modelseed/551115_6`
+- Job status transitioned: `in-progress` → `completed` successfully
+- My Models table initially showed 2 models (did not include new model)
+- After job completion, table updated to 3 models with new model `551115.6` visible
+
+**Status:** WORKING AS EXPECTED
+- The job did complete successfully
+- The table did update (may have been a cache/refresh timing issue)
+- New model shows: `551115.6`, 1017 reactions, 862 genes, status `completed`
+
+**Areas Previously Flagged for Investigation:**
+1. **Workspace TLS/Certificate Environment** - Verify SSL/TLS certificate chain on Poplar backend for workspace operations
+2. **Reconstruct Output Path Persistence Contract** - Verify the output path format (`/user@domain/modelseed/genome_id`) is correctly parsed and persisted
+
+**Backend Team Action Items:**
+1. Confirm Workspace API TLS certificates are valid and properly configured
+2. Verify reconstruct job output path contract:
+   - Input: `output_path: /seaver@patricbrc.org/modelseed/551115_6`
+   - Expected: Model persisted at that workspace location
+   - Verify model listing API (`/api/models`) correctly queries this path
+3. Check if any workspace operations are failing silently due to certificate issues
+
+**Local API Session Note:**
+An SSH tunnel (`ssh -L 8000:localhost:8000 poplar`) was running to proxy the modelseed-api locally. This has been terminated as of 2026-03-25T21:02Z. Any future testing should use the production Poplar endpoint directly or re-establish the tunnel as needed.
+
+---
+
+*Last Updated: 2026-03-25*
 *Maintained by: Development Team*
-*Document Version: 1.1*
+*Document Version: 1.2*
