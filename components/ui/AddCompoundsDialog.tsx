@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import NextLink from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -9,6 +10,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
+import Link from '@mui/material/Link';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import { getCompounds, type Compound, type SolrQueryOpts } from '@/lib/api/biochem';
@@ -22,8 +24,41 @@ interface AddCompoundsDialogProps {
 }
 
 const columns: GridColDef<Compound>[] = [
-    { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'name', headerName: 'Name', width: 180, flex: 1 },
+    {
+        field: 'id',
+        headerName: 'ID',
+        width: 120,
+        renderCell: (params) => (
+            <Link
+                component={NextLink}
+                href={`/biochem/compounds/${params.row.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                sx={{ color: '#00acc1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+            >
+                {String(params.value ?? '')}
+            </Link>
+        ),
+    },
+    {
+        field: 'name',
+        headerName: 'Name',
+        width: 180,
+        flex: 1,
+        renderCell: (params) => (
+            <Link
+                component={NextLink}
+                href={`/biochem/compounds/${params.row.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                sx={{ color: '#00acc1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+            >
+                {String(params.value ?? params.row.id)}
+            </Link>
+        ),
+    },
     {
         field: 'formula',
         headerName: 'Formula',
@@ -36,7 +71,7 @@ const columns: GridColDef<Compound>[] = [
 
 export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = [] }: AddCompoundsDialogProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('*');
     const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
 
     // Debounce search
@@ -44,7 +79,7 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
         setSearchQuery(value);
         // Simple debounce using setTimeout
         const timeoutId = setTimeout(() => {
-            setDebouncedQuery(value);
+            setDebouncedQuery(value || '*');
         }, 300);
         return () => clearTimeout(timeoutId);
     };
@@ -59,7 +94,7 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
     const { data, isLoading, error } = useQuery({
         queryKey: ['compounds-picker', queryOpts],
         queryFn: () => getCompounds(queryOpts),
-        enabled: open && debouncedQuery.length >= 2,
+        enabled: open,
     });
 
     // Filter out excluded IDs
@@ -67,7 +102,7 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
         if (!data?.docs) return [];
         const excludeSet = new Set(excludeIds);
         return data.docs.filter((c) => !excludeSet.has(c.id));
-    }, [data?.docs, excludeIds]);
+    }, [data, excludeIds]);
 
     const handleAdd = () => {
         const selectedIds = selectionModel.type === 'include' 
@@ -82,7 +117,7 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
 
     const handleClose = () => {
         setSearchQuery('');
-        setDebouncedQuery('');
+        setDebouncedQuery('*');
         setSelectionModel({ type: 'include', ids: new Set<string>() });
         onClose();
     };
@@ -117,7 +152,7 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
                     </Box>
                 )}
 
-                {!isLoading && debouncedQuery.length >= 2 && (
+                {!isLoading && data && (
                     <DataGrid
                         rows={filteredDocs}
                         columns={columns}
@@ -135,9 +170,9 @@ export default function AddCompoundsDialog({ open, onClose, onAdd, excludeIds = 
                     />
                 )}
 
-                {!isLoading && debouncedQuery.length < 2 && (
+                {!isLoading && !data && (
                     <Box sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}>
-                        Enter at least 2 characters to search compounds
+                        Enter a search term to find compounds
                     </Box>
                 )}
             </DialogContent>

@@ -201,16 +201,38 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     let mainQueryStr = '';
     const activeQuery = query || (filterModel && filterModel.quickFilterValues && filterModel.quickFilterValues.length > 0 ? filterModel.quickFilterValues.join(' ') : null);
 
-    if (activeQuery && searchFields && searchFields.length > 0) {
+    // Handle special "match all" case - don't wrap with wildcards
+    if (activeQuery === '*' || activeQuery === '*:*') {
+        mainQueryStr = '*';
+    } else if (activeQuery && searchFields && searchFields.length > 0) {
         const cleanQuery = sanitizeQuery(activeQuery);
-        const searchFilters = searchFields.map((f) => {
-            const solrField = f === 'synonyms' ? 'aliases' : f;
-            return `${solrField}:(*${cleanQuery}*)`;
-        });
-        mainQueryStr = `(${searchFilters.join(' OR ')})`;
+        // Skip if query is empty after sanitization
+        if (cleanQuery.length === 0) {
+            mainQueryStr = '*';
+        } else if (cleanQuery.length < 3) {
+            // For short queries, do exact prefix match without wildcards
+            const searchFilters = searchFields.map((f) => {
+                const solrField = f === 'synonyms' ? 'aliases' : f;
+                return `${solrField}:${cleanQuery}*`;
+            });
+            mainQueryStr = `(${searchFilters.join(' OR ')})`;
+        } else {
+            const searchFilters = searchFields.map((f) => {
+                const solrField = f === 'synonyms' ? 'aliases' : f;
+                return `${solrField}:*${cleanQuery}*`;
+            });
+            mainQueryStr = `(${searchFilters.join(' OR ')})`;
+        }
     } else if (activeQuery) {
         const cleanQuery = sanitizeQuery(activeQuery);
-        mainQueryStr = `*${cleanQuery}*`;
+        // Skip if query is empty after sanitization
+        if (cleanQuery.length === 0) {
+            mainQueryStr = '*';
+        } else if (cleanQuery.length < 3) {
+            mainQueryStr = `${cleanQuery}*`;
+        } else {
+            mainQueryStr = `*${cleanQuery}*`;
+        }
     }
 
     if (filters.length > 0 && mainQueryStr) {

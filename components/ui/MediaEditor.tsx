@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import NextLink from 'next/link';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -13,6 +14,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import Link from '@mui/material/Link';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -49,6 +51,10 @@ interface MediaEditorProps {
     initialMedia: MediaData;
     /** Called when user saves changes. Returns true if save succeeded. */
     onSave?: (media: MediaData) => Promise<boolean>;
+    /** Called when user requests Save As. */
+    onRequestSaveAs?: (media: MediaData) => void;
+    /** Optional cancel action for editor flows like new-media drafts. */
+    onCancel?: () => void;
     /** If true, save button is disabled (API unavailable) */
     saveDisabled?: boolean;
     /** Message to show when save is disabled */
@@ -84,6 +90,8 @@ function EditNumericCell(props: GridRenderEditCellParams<MediaCompound, number>)
 export default function MediaEditor({
     initialMedia,
     onSave,
+    onRequestSaveAs,
+    onCancel,
     saveDisabled = false,
     saveDisabledMessage = 'Save is currently unavailable. Backend API requires fixes.',
     readOnly = false,
@@ -110,12 +118,36 @@ export default function MediaEditor({
                 headerName: 'ID',
                 flex: 1,
                 minWidth: 100,
+                renderCell: (params) => (
+                    <Link
+                        component={NextLink}
+                        href={`/biochem/compounds/${params.row.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(event) => event.stopPropagation()}
+                        sx={{ color: '#00acc1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                    >
+                        {String(params.value ?? '')}
+                    </Link>
+                ),
             },
             {
                 field: 'name',
                 headerName: 'Name',
                 flex: 2,
                 minWidth: 150,
+                renderCell: (params) => (
+                    <Link
+                        component={NextLink}
+                        href={`/biochem/compounds/${params.row.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(event) => event.stopPropagation()}
+                        sx={{ color: '#00acc1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                    >
+                        {String(params.value ?? params.row.id)}
+                    </Link>
+                ),
             },
             {
                 field: 'formula',
@@ -185,7 +217,7 @@ export default function MediaEditor({
         setConfirmDeleteOpen(false);
     }, [selectedIds]);
 
-    const handleCellEdit = useCallback((newRow: MediaCompound, oldRow: MediaCompound) => {
+    const handleCellEdit = useCallback((newRow: MediaCompound) => {
         setMedia((prev) => ({
             ...prev,
             compounds: prev.compounds.map((c) => (c.id === newRow.id ? newRow : c)),
@@ -222,6 +254,9 @@ export default function MediaEditor({
     const existingCompoundIds = useMemo(() => media.compounds.map((c) => c.id), [media.compounds]);
 
     const selectedCount = selectedIds.type === 'include' ? selectedIds.ids.size : 0;
+    const showSaveButton = !readOnly && !!onSave;
+    const showSaveAsButton = !readOnly && !!onRequestSaveAs;
+    const showCancelButton = !readOnly && !!onCancel;
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
@@ -267,26 +302,48 @@ export default function MediaEditor({
                                 </IconButton>
                             </span>
                         </Tooltip>
-                        <Tooltip title={saveDisabled ? saveDisabledMessage : 'Save changes'}>
-                            <span>
-                                <Button
-                                    variant="contained"
-                                    size="small"
-                                    startIcon={<SaveIcon />}
-                                    onClick={handleSave}
-                                    disabled={saveDisabled || !hasUnsavedChanges || isSaving}
-                                    loading={isSaving}
-                                >
-                                    Save
-                                </Button>
-                            </span>
-                        </Tooltip>
+                        {showSaveAsButton && (
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => onRequestSaveAs?.(media)}
+                                disabled={isSaving}
+                            >
+                                Save as...
+                            </Button>
+                        )}
+                        {showSaveButton && (
+                            <Tooltip title={saveDisabled ? saveDisabledMessage : 'Save changes'}>
+                                <span>
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<SaveIcon />}
+                                        onClick={handleSave}
+                                        disabled={saveDisabled || !hasUnsavedChanges || isSaving}
+                                        loading={isSaving}
+                                    >
+                                        Save
+                                    </Button>
+                                </span>
+                            </Tooltip>
+                        )}
+                        {showCancelButton && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={onCancel}
+                                disabled={isSaving}
+                            >
+                                Cancel
+                            </Button>
+                        )}
                     </Stack>
                 )}
             </Box>
 
             {/* API unavailable warning */}
-            {saveDisabled && !readOnly && (
+            {saveDisabled && showSaveButton && (
                 <Alert severity="warning">
                     {saveDisabledMessage}
                 </Alert>
