@@ -186,8 +186,7 @@ function MyJobsContent() {
 
             if (USE_MODELSEED_API) {
                 try {
-                    const trackedIds = tracked.map((t) => t.id);
-                    const result = await getJobsFromApi(trackedIds);
+                    const result = await getJobsFromApi([]);
                     if (Array.isArray(result)) {
                         apiJobs = result as Record<string, unknown>[];
                     }
