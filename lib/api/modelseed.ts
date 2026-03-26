@@ -210,12 +210,14 @@ export async function listModelGapfillsFromApi(ref: string): Promise<Record<stri
 }
 
 export async function manageModelGapfillsFromApi(
-    payload: Record<string, unknown>,
+    model: string,
+    commands: Record<string, string>,
+    selectedSolutions?: Record<string, number>,
 ): Promise<Record<string, unknown>> {
     return modelseedFetch<Record<string, unknown>>('/api/models/gapfills/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ model, commands, selected_solutions: selectedSolutions }),
     });
 }
 
@@ -526,9 +528,31 @@ export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     }
 }
 
+/**
+ * Safely decode a path/ref string that might be URL-encoded.
+ * Handles double-encoding by decoding until no change occurs.
+ */
+function safeDecodePath(path: string): string {
+    try {
+        let decoded = path;
+        let prev = '';
+        // Decode until stable (handles double-encoding)
+        while (decoded !== prev) {
+            prev = decoded;
+            decoded = decodeURIComponent(decoded);
+        }
+        return decoded;
+    } catch {
+        return path; // If decoding fails, use original
+    }
+}
+
 export async function exportMediaFromApi(ref: string): Promise<Record<string, unknown>> {
+    // Decode ref to handle cases where it might already be URL-encoded
+    // This prevents double-encoding when buildQueryString uses URLSearchParams
+    const decodedRef = safeDecodePath(ref);
     return modelseedFetch<Record<string, unknown>>(
-        `/api/media/export${buildQueryString({ ref })}`,
+        `/api/media/export${buildQueryString({ ref: decodedRef })}`,
     );
 }
 

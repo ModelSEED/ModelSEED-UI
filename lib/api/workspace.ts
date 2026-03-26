@@ -174,6 +174,25 @@ const STATUS_MESSAGES: Record<number, string> = {
 };
 
 /**
+ * Safely decode a path string that might be URL-encoded.
+ * Handles double-encoding by decoding until no change occurs.
+ */
+function safeDecodePath(path: string): string {
+    try {
+        let decoded = path;
+        let prev = '';
+        // Decode until stable (handles double-encoding)
+        while (decoded !== prev) {
+            prev = decoded;
+            decoded = decodeURIComponent(decoded);
+        }
+        return decoded;
+    } catch {
+        return path; // If decoding fails, use original
+    }
+}
+
+/**
  * Perform a REST call to the new modelseed-api (Poplar) Workspace endpoints.
  * Returns proper HTTP status codes (404/403/502) with meaningful error messages.
  */
@@ -228,7 +247,9 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
 export async function workspaceLs(paths: string[]): Promise<Record<string, unknown[]>> {
     // Always route through the new REST proxy (`/api/workspace/ls`).
     // Legacy JSON-RPC `Workspace.ls` is no longer used.
-    return callWorkspaceRestApi<Record<string, unknown[]>>('ls', { paths });
+    // Decode paths to handle cases where they might be URL-encoded
+    const decodedPaths = paths.map(p => safeDecodePath(p));
+    return callWorkspaceRestApi<Record<string, unknown[]>>('ls', { paths: decodedPaths });
 }
 
 /**
@@ -239,7 +260,9 @@ export async function workspaceLs(paths: string[]): Promise<Record<string, unkno
 export async function workspaceGet(objects: string[]): Promise<unknown[]> {
     // Always route through the new REST proxy (`/api/workspace/get`).
     // Legacy JSON-RPC `Workspace.get` is no longer used.
-    return callWorkspaceRestApi<unknown[]>('get', { objects });
+    // Decode paths to handle cases where they might be URL-encoded (e.g., from route params)
+    const decodedObjects = objects.map(obj => safeDecodePath(obj));
+    return callWorkspaceRestApi<unknown[]>('get', { objects: decodedObjects });
 }
 
 function ensureProxyMode(operation: string): void {
