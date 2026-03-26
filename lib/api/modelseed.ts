@@ -630,7 +630,7 @@ async function listMediaViaWorkspaceLs(path: string): Promise<ModelseedMediaSumm
 
 function mapRawMediaResponse(raw: Record<string, unknown[]>): ModelseedMediaSummary[] {
     const summaries: ModelseedMediaSummary[] = [];
-    for (const entries of Object.values(raw)) {
+    for (const [folderPath, entries] of Object.entries(raw)) {
         if (!Array.isArray(entries)) continue;
         for (const entry of entries) {
             if (!Array.isArray(entry)) continue;
@@ -647,10 +647,21 @@ function mapRawMediaResponse(raw: Record<string, unknown[]>): ModelseedMediaSumm
             const meta = metadata && typeof metadata === 'object'
                 ? (metadata as Record<string, unknown>)
                 : undefined;
+            
+            // Construct the full path: prefer the tuple's path if it includes the name,
+            // otherwise construct from folder path + name
+            const nameStr = String(name ?? '');
+            let fullPath = path ? String(path) : '';
+            if (!fullPath || !fullPath.includes(nameStr)) {
+                // Path is missing or doesn't include the media name - construct it
+                const folder = folderPath.endsWith('/') ? folderPath.slice(0, -1) : folderPath;
+                fullPath = `${folder}/${nameStr}`;
+            }
+            
             summaries.push({
-                id: id ? String(id) : String(name ?? ''),
-                name: String(name ?? ''),
-                ref: path ? String(path) : undefined,
+                id: id ? String(id) : nameStr,
+                name: nameStr,
+                ref: fullPath,
                 type: type ? String(type) : undefined,
                 modDate: modDate ? String(modDate) : undefined,
                 isMinimal: (meta?.isMinimal ?? meta?.is_minimal) as boolean | string | undefined,
