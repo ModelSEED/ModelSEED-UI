@@ -13,9 +13,17 @@ Overview: Improved Build Model clarity and fixed reconstruction submission error
 
 - Professional 2-sentence description to the "Build Model" page.
 
+### Changed
+
+- PlantSEED banner now correctly shows "v2.0 / v3.0" with requested double linebreak for clarity.
+- Improved Reaction/Compound detail drawer with improved typography and monospace formatting for data values.
+- Re-aligned Download Options menu to better match descriptive text on Model Landing page.
+- Enhanced Biomass tab with auto-discovery fallback for models with missing biomass metadata.
+
 ### Fixed
 
-- Removed prefixing from genome IDs in reconstruction jobs which was causing backend API failures (e.g. PATRIC: prefix).
+- Version page now correctly displays v0.1.3 and loads changelog from project root.
+- Removed prefixing from genome IDs in reconstruction jobs which was causing backend API failures.
 
 ## [0.1.2] - 2026-03-25
 

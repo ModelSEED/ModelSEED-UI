@@ -31,7 +31,7 @@ export default async function VersionPage() {
                     <Image src="/img/ModelSEED-logo-vertical-small.png" alt="ModelSEED" width={125} height={125} style={{ objectFit: 'contain' }} />
                 </Box>
                 <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>v2.6.1</Typography>
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>v0.1.3</Typography>
                     <Typography variant="body2" color="text.secondary">
                         Deployed: N/A<br />
                         Commit: dev
