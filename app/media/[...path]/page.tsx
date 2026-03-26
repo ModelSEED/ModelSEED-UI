@@ -231,10 +231,10 @@ export default function MediaPathPage({ params }: { params: Promise<{ path: stri
     const content = (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Breadcrumbs separator=">" sx={{ mt: 1 }}>
-                <Link component={NextLink} href="/list-media" underline="hover" color="inherit">
+                <Link component={NextLink} href="/list-media" underline="hover" sx={{ color: '#00acc1' }}>
                     Public Media
                 </Link>
-                <Link component={NextLink} href="/myMedia" underline="hover" color="inherit">
+                <Link component={NextLink} href="/myMedia" underline="hover" sx={{ color: '#00acc1' }}>
                     My Media
                 </Link>
             </Breadcrumbs>
