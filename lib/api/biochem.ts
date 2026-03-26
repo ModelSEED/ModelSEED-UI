@@ -402,6 +402,25 @@ export async function getCompoundById(id: string): Promise<Compound> {
 }
 
 /**
+ * Fetch multiple compounds by their IDs in a single query.
+ * Returns a map of id -> Compound for easy lookup.
+ */
+export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Compound>> {
+    if (ids.length === 0) return new Map();
+    
+    // Build OR query for all IDs
+    const idQuery = ids.map(id => `id:${id}`).join(' OR ');
+    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,name,formula,charge,mass`;
+    
+    const res = await fetchSolr<Compound>(url);
+    const map = new Map<string, Compound>();
+    for (const doc of res.docs) {
+        map.set(doc.id, doc);
+    }
+    return map;
+}
+
+/**
  * Find reactions containing a given compound.
  * Mirrors legacy `findReactions_solr`.
  */

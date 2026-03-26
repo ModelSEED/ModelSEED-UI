@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import UndoIcon from '@mui/icons-material/Undo';
 import AddCompoundsDialog from './AddCompoundsDialog';
+import { formatFormula } from '@/components/utils/formatFormula';
 
 /** Compound entry in media */
 export interface MediaCompound {
@@ -154,6 +155,7 @@ export default function MediaEditor({
                 headerName: 'Formula',
                 flex: 1.5,
                 minWidth: 100,
+                renderCell: (params) => formatFormula(params.value),
             },
             {
                 field: 'concentration',

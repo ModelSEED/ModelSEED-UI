@@ -17,6 +17,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi } from '@/lib/api/modelseed';
 import { parseWorkspaceGetObject, workspaceCreate, workspaceGet } from '@/lib/api/workspace';
+import { getCompoundsByIds } from '@/lib/api/biochem';
 
 function toNumber(value: unknown, fallback: number): number {
     const parsed = Number(value);
@@ -115,20 +116,20 @@ export default function MediaPathPage({ params }: { params: Promise<{ path: stri
                 };
             }
 
+            let compounds: MediaCompound[] = [];
+            let mediaMetadata = { isDefined: false, isMinimal: false, name: mediaName };
+
             // Try modelseed-api first if enabled, then fall back to workspace
             if (USE_MODELSEED_API) {
                 try {
                     const payload = await exportMediaFromApi(mediaPath);
                     // Check if payload has valid data
                     if (payload && (Array.isArray(payload.compounds) || payload.id || payload.name)) {
-                        const compounds = parseCompoundsFromExport(payload);
-                        return {
-                            id: mediaName,
-                            name: String(payload.name ?? mediaName),
-                            type: 'media',
-                            compounds,
+                        compounds = parseCompoundsFromExport(payload);
+                        mediaMetadata = {
                             isDefined: toBooleanFlag(payload.isDefined ?? payload.is_defined),
                             isMinimal: toBooleanFlag(payload.isMinimal ?? payload.is_minimal),
+                            name: String(payload.name ?? mediaName),
                         };
                     }
                 } catch {
@@ -136,20 +137,45 @@ export default function MediaPathPage({ params }: { params: Promise<{ path: stri
                 }
             }
 
-            // Fallback: use workspace API directly
-            const payload = await workspaceGet([mediaPath]);
-            const tableText = parseWorkspaceGetObject<string>(payload);
-            if (!tableText || typeof tableText !== 'string') {
-                throw new Error('Unable to load media table data.');
+            // If no compounds yet, try workspace API
+            if (compounds.length === 0) {
+                const payload = await workspaceGet([mediaPath]);
+                const tableText = parseWorkspaceGetObject<string>(payload);
+                if (!tableText || typeof tableText !== 'string') {
+                    throw new Error('Unable to load media table data.');
+                }
+                compounds = parseCompoundsFromTable(tableText);
+            }
+
+            // Enrich compounds with formula data from biochemistry database
+            const compoundIds = compounds.map(c => c.id).filter(id => id);
+            if (compoundIds.length > 0) {
+                try {
+                    const biochemData = await getCompoundsByIds(compoundIds);
+                    compounds = compounds.map(c => {
+                        const biochem = biochemData.get(c.id);
+                        if (biochem) {
+                            return {
+                                ...c,
+                                formula: c.formula || biochem.formula,
+                                charge: c.charge ?? biochem.charge,
+                                name: c.name || biochem.name,
+                            };
+                        }
+                        return c;
+                    });
+                } catch (err) {
+                    console.warn('Failed to fetch compound formulas:', err);
+                }
             }
 
             return {
                 id: mediaName,
-                name: mediaName,
+                name: mediaMetadata.name,
                 type: 'media',
-                compounds: parseCompoundsFromTable(tableText),
-                isDefined: false,
-                isMinimal: false,
+                compounds,
+                isDefined: mediaMetadata.isDefined,
+                isMinimal: mediaMetadata.isMinimal,
             };
         },
     });
