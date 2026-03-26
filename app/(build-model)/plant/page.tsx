@@ -20,6 +20,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { RastGenomeJob, submitReconstructJobFromApi } from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import PatricGenomesTable from '@/components/build-model/PatricGenomesTable';
@@ -91,7 +92,12 @@ function isValidModelName(name: string): boolean {
     return /^\w+$/.test(name);
 }
 
+function buildDefaultOutputPath(username: string, modelName: string): string {
+    return `/${username}/modelseed/${modelName}`;
+}
+
 export default function BuildModelPlantPage() {
+    const { user } = useAuth();
     const [tabIndex, setTabIndex] = useState(PLANTSEED_MAINTENANCE ? 1 : 0);
     const [uploadForm, setUploadForm] = useState<MicrobeUploadForm>(DEFAULT_UPLOAD_FORM);
     const [submitting, setSubmitting] = useState<SubmissionKey>(null);
@@ -159,15 +165,20 @@ export default function BuildModelPlantPage() {
             setErrorMessage('Select a FASTA file before submitting.');
             return;
         }
+        if (!user) {
+            setErrorMessage('Unable to determine your workspace path. Please sign in again and retry.');
+            return;
+        }
+
+        const outputPath = buildDefaultOutputPath(user, modelName);
 
         const fastaText = await uploadForm.file.text();
         await submitTrackedReconstruct(
             'upload',
             {
                 genome: modelName,
-                output_file: modelName,
-                genome_type: uploadForm.genomeType,
-                template: uploadForm.template,
+                output_path: outputPath,
+                template_type: uploadForm.template === 'auto' ? 'gn' : uploadForm.template,
                 media: uploadForm.media || undefined,
                 filename: uploadForm.file.name,
                 fasta: fastaText,
@@ -175,6 +186,7 @@ export default function BuildModelPlantPage() {
             },
             uploadForm.file.name,
             modelName,
+            outputPath,
         );
     };
 
@@ -194,20 +206,24 @@ export default function BuildModelPlantPage() {
             setErrorMessage('Model name must contain only letters, numbers, and underscores.');
             return;
         }
+        if (!user) {
+            setErrorMessage('Unable to determine your workspace path. Please sign in again and retry.');
+            return;
+        }
+
+        const outputPath = buildDefaultOutputPath(user, modelName);
 
         await submitTrackedReconstruct(
             key,
             {
                 genome: normalizedGenomeId,
-                genome_id: normalizedGenomeId,
-                genome_name: genomeName || undefined,
-                output_file: modelName,
-                genome_type: 'microbial_contigs',
-                template: 'auto',
+                output_path: outputPath,
+                template_type: 'gn',
                 media: undefined,
             },
             genomeName || normalizedGenomeId,
             modelName,
+            outputPath,
         );
     };
 
