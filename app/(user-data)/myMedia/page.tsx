@@ -1,25 +1,22 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
-import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import AuthGuard from '@/components/auth/AuthGuard';
-import MediaEditor from '@/components/ui/MediaEditor';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
-import { workspaceCreate, workspaceDelete, workspaceGet } from '@/lib/api/workspace';
+import { workspaceDelete } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -47,21 +44,14 @@ function downloadJsonPayload(payload: unknown, filename: string): void {
 }
 
 export default function MyMediaPage() {
+    const router = useRouter();
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [exportingMediaId, setExportingMediaId] = useState<string | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
-    const [createDialogOpen, setCreateDialogOpen] = useState(false);
-    const [newMediaName, setNewMediaName] = useState('');
-    const [newMediaType, setNewMediaType] = useState('custom');
-    const [newMediaMinimal, setNewMediaMinimal] = useState(false);
-    const [newMediaDefined, setNewMediaDefined] = useState(false);
-    const [createMessage, setCreateMessage] = useState<string | null>(null);
-    const [isCreatingMedia, setIsCreatingMedia] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<MyMediaItem | null>(null);
     const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
     const [isDeletingMedia, setIsDeletingMedia] = useState(false);
-    const [editingMedia, setEditingMedia] = useState<MyMediaItem | null>(null);
     const { isAuthenticated, user } = useAuth();
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -90,59 +80,11 @@ export default function MyMediaPage() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const { data: mediaData, isLoading: isLoadingMedia } = useQuery({
-        queryKey: ['mediaData', editingMedia?.path, USE_MODELSEED_API],
-        enabled: !!editingMedia,
-        queryFn: async () => {
-            if (!editingMedia) return null;
-            
-            if (USE_MODELSEED_API) {
-                const data = await exportMediaFromApi(editingMedia.path);
-                return {
-                    id: editingMedia.id,
-                    name: editingMedia.name,
-                    type: 'media' as const,
-                    compounds: ((data as Record<string, unknown>).compounds as Array<Record<string, unknown>> || []).map((c: Record<string, unknown>) => ({
-                        id: String(c.id || c.compound_id || ''),
-                        name: String(c.name || c.compound_name || ''),
-                        formula: c.formula as string | undefined,
-                        charge: c.charge as number | undefined,
-                        concentration: Number(c.concentration) || 0,
-                        minFlux: Number(c.minflux) || -1000,
-                        maxFlux: Number(c.maxflux) || 1000,
-                    })),
-                    isDefined: editingMedia.isDefined === 'Yes',
-                    isMinimal: editingMedia.isMinimal === 'Yes',
-                };
-            }
-
-            const wsData = await workspaceGet([editingMedia.path]);
-            const obj = wsData[0] as unknown as [string, string, string, string] | null;
-            if (!obj) throw new Error('Media not found');
-            if (!obj) throw new Error('Media not found');
-            
-            const lines = (obj[3] as string || '').split('\n').filter(l => l.trim());
-            const compounds = lines.slice(1).map(line => {
-                const parts = line.split('\t');
-                return {
-                    id: parts[0] || '',
-                    name: parts[0] || '',
-                    concentration: Number(parts[2]) || 0,
-                    minFlux: Number(parts[3]) || -1000,
-                    maxFlux: Number(parts[4]) || 1000,
-                };
-            });
-            
-            return {
-                id: editingMedia.id,
-                name: editingMedia.name,
-                type: 'media' as const,
-                compounds,
-                isDefined: editingMedia.isDefined === 'Yes',
-                isMinimal: editingMedia.isMinimal === 'Yes',
-            };
-        },
-    });
+    const goToMediaPath = useCallback((path: string) => {
+        if (!path) return;
+        const target = path.startsWith('/') ? `/media${path}` : `/media/${path}`;
+        router.push(target);
+    }, [router]);
 
     const handleExportMedia = async (row: MyMediaItem) => {
         setExportError(null);
@@ -156,51 +98,6 @@ export default function MyMediaPage() {
             setExportError(message);
         } finally {
             setExportingMediaId(null);
-        }
-    };
-
-    const handleCreateMedia = async () => {
-        const trimmedName = newMediaName.trim();
-        if (!trimmedName) {
-            setCreateMessage('Media name is required.');
-            return;
-        }
-        if (!user) {
-            setCreateMessage('You must be authenticated to create media.');
-            return;
-        }
-
-        setCreateMessage(null);
-        setIsCreatingMedia(true);
-        try {
-            const mediaPath = `/${user}/media/${trimmedName}`;
-            const mediaTable = 'id\tname\tconcentration\tminflux\tmaxflux\r\n';
-            await workspaceCreate({
-                objects: [[
-                    mediaPath,
-                    'media',
-                    {
-                        name: trimmedName,
-                        isMinimal: newMediaMinimal ? 1 : 0,
-                        isDefined: newMediaDefined ? 1 : 0,
-                        type: newMediaType.trim() || 'custom',
-                    },
-                    mediaTable,
-                ]],
-                overwrite: false,
-            });
-            await refetch();
-            setCreateDialogOpen(false);
-            setNewMediaName('');
-            setNewMediaType('custom');
-            setNewMediaMinimal(false);
-            setNewMediaDefined(false);
-            setCreateMessage(`Created media ${trimmedName}.`);
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to create media';
-            setCreateMessage(message);
-        } finally {
-            setIsCreatingMedia(false);
         }
     };
 
@@ -259,7 +156,10 @@ export default function MyMediaPage() {
                         size="small"
                         sx={{ textTransform: 'none', minWidth: 0 }}
                         disabled={exportingMediaId !== null}
-                        onClick={() => void handleExportMedia(params.row)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            void handleExportMedia(params.row);
+                        }}
                     >
                         {exportingMediaId === params.row.id ? 'Exporting...' : 'Export'}
                     </Button>
@@ -267,7 +167,10 @@ export default function MyMediaPage() {
                         variant="text"
                         size="small"
                         sx={{ textTransform: 'none', minWidth: 0 }}
-                        onClick={() => setEditingMedia(params.row)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            goToMediaPath(params.row.path);
+                        }}
                     >
                         Edit
                     </Button>
@@ -277,14 +180,17 @@ export default function MyMediaPage() {
                         color="error"
                         sx={{ textTransform: 'none', minWidth: 0 }}
                         disabled={isDeletingMedia}
-                        onClick={() => setDeleteTarget(params.row)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setDeleteTarget(params.row);
+                        }}
                     >
                         Delete
                     </Button>
                 </Box>
             ),
         },
-    ], [exportingMediaId, isDeletingMedia]);
+    ], [exportingMediaId, isDeletingMedia, goToMediaPath]);
 
     return (
         <AuthGuard>
@@ -293,7 +199,10 @@ export default function MyMediaPage() {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => setCreateDialogOpen(true)}
+                        onClick={() => {
+                            if (!user) return;
+                            router.push(`/media/${user}/media/new-media`);
+                        }}
                         sx={{ textTransform: 'none', fontWeight: 600 }}
                     >
                         Create New Media
@@ -308,12 +217,6 @@ export default function MyMediaPage() {
                         Click on a media row to view format details and properties.
                     </Typography>
                 </Box>
-
-                {createMessage && (
-                    <Alert severity={createMessage.startsWith('Created media') ? 'success' : 'error'} variant="outlined">
-                        {createMessage}
-                    </Alert>
-                )}
 
                 {deleteMessage && (
                     <Alert severity={deleteMessage.startsWith('Deleted media') ? 'success' : 'error'} variant="outlined">
@@ -344,6 +247,7 @@ export default function MyMediaPage() {
                         disableColumnMenu
                         getRowId={(row) => row.id}
                         disableRowSelectionOnClick
+                        onRowClick={(params) => goToMediaPath(params.row.path)}
                         autoHeight
                         sx={{
                             border: '1px solid #e0e0e0',
@@ -367,56 +271,6 @@ export default function MyMediaPage() {
                         You have no media formulations.
                     </Typography>
                 )}
-
-                <Dialog open={createDialogOpen} onClose={() => !isCreatingMedia && setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-                    <DialogTitle>Create New Media</DialogTitle>
-                    <DialogContent>
-                        <Stack spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                label="Media Name"
-                                value={newMediaName}
-                                onChange={(event) => setNewMediaName(event.target.value)}
-                                fullWidth
-                                disabled={isCreatingMedia}
-                            />
-                            <TextField
-                                label="Media Type"
-                                value={newMediaType}
-                                onChange={(event) => setNewMediaType(event.target.value)}
-                                fullWidth
-                                disabled={isCreatingMedia}
-                            />
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        checked={newMediaMinimal}
-                                        onChange={(event) => setNewMediaMinimal(event.target.checked)}
-                                        disabled={isCreatingMedia}
-                                    />
-                                )}
-                                label="Minimal media"
-                            />
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        checked={newMediaDefined}
-                                        onChange={(event) => setNewMediaDefined(event.target.checked)}
-                                        disabled={isCreatingMedia}
-                                    />
-                                )}
-                                label="Defined media"
-                            />
-                        </Stack>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setCreateDialogOpen(false)} disabled={isCreatingMedia}>
-                            Cancel
-                        </Button>
-                        <Button variant="contained" onClick={() => void handleCreateMedia()} disabled={isCreatingMedia}>
-                            {isCreatingMedia ? 'Creating...' : 'Create Media'}
-                        </Button>
-                    </DialogActions>
-                </Dialog>
 
                 <Dialog open={deleteTarget !== null} onClose={() => !isDeletingMedia && setDeleteTarget(null)} maxWidth="sm" fullWidth>
                     <DialogTitle>Delete Media</DialogTitle>
@@ -442,30 +296,6 @@ export default function MyMediaPage() {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {editingMedia && (
-                    <Dialog open={!!editingMedia} onClose={() => setEditingMedia(null)} maxWidth="lg" fullWidth>
-                        <DialogTitle>Edit Media: {editingMedia.name}</DialogTitle>
-                        <DialogContent>
-                            {isLoadingMedia ? (
-                                <Typography>Loading media data...</Typography>
-                            ) : mediaData ? (
-                                <MediaEditor
-                                    initialMedia={mediaData}
-                                    onSave={async (updatedMedia) => {
-                                        console.log('Saving media:', updatedMedia);
-                                        return true;
-                                    }}
-                                    readOnly={!USE_MODELSEED_API}
-                                    saveDisabled={!USE_MODELSEED_API}
-                                    saveDisabledMessage={USE_MODELSEED_API ? '' : 'API not available. Enable NEXT_PUBLIC_USE_MODELSEED_API=true.'}
-                                />
-                            ) : (
-                                <Typography color="error">Failed to load media data</Typography>
-                            )}
-                        </DialogContent>
-                    </Dialog>
-                )}
             </Box>
         </AuthGuard>
     );
