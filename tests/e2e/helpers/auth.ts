@@ -8,37 +8,52 @@
 import { test as base, Page } from '@playwright/test';
 
 export interface TestUser {
-    token: string;
-    username: string;
+    token?: string;
+    username?: string;
+    password?: string;
 }
 
 export function getTestUser(): TestUser | null {
     const token = process.env.PATRIC_TOKEN || process.env.PATRIC_TEST_TOKEN;
-    if (!token) {
+    const username = process.env.PATRIC_USERNAME;
+    const password = process.env.PATRIC_PASSWORD;
+    
+    if (!token && (!username || !password)) {
         return null;
     }
     
-    // Extract username from token if possible
-    let username = 'testuser';
-    const parts = token.split('|');
-    for (const part of parts) {
-        if (part.startsWith('un=')) {
-            username = part.slice(3);
-            break;
-        }
-    }
-    
-    return { token, username };
+    return { token, username, password };
 }
 
 export const test = base.extend<{ authenticatedPage: Page }>({
     authenticatedPage: async ({ page }, use) => {
         const user = getTestUser();
-        
+
         if (!user) {
-            // No token available - tests using this fixture will fail
-            // This is expected in CI without PATRIC_TOKEN secret
-            console.warn('⚠️ PATRIC_TOKEN not available - authenticated tests will be skipped');
+            console.warn('⚠️ No PATRIC credentials available - authenticated tests will be skipped');
+            await use(page);
+            return;
+        }
+
+        let token = user.token;
+        let username = user.username || 'testuser';
+
+        // If we have credentials but no token, perform login
+        if (!token && user.username && user.password) {
+            try {
+                // We use a dynamic import to avoid potential issues with Node/Browser environment mismatches
+                // in the top-level scope of a Playwright config-loaded file.
+                const { loginPatric } = await import('@/lib/api/auth');
+                const auth = await loginPatric(user.username, user.password);
+                token = auth.token;
+                username = auth.user_id;
+            } catch (err) {
+                console.error('❌ Failed to login with PATRIC_USERNAME/PASSWORD:', err);
+            }
+        }
+
+        if (!token) {
+            console.warn('⚠️ No PATRIC authentication available - authenticated tests will be skipped');
             await use(page);
             return;
         }
@@ -47,14 +62,14 @@ export const test = base.extend<{ authenticatedPage: Page }>({
         await page.goto('/');
         
         // Store token in localStorage (simulate login)
-        await page.evaluate((token: string) => {
+        await page.evaluate(({ token, username }) => {
             localStorage.setItem('auth', JSON.stringify({
                 token: token,
-                user: 'testuser',
+                user: username,
                 method: 'PATRIC',
                 timestamp: Date.now()
             }));
-        }, user.token);
+        }, { token, username });
         
         await use(page);
     }
