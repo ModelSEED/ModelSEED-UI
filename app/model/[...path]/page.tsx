@@ -195,6 +195,26 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
         []
     );
     if (biomasses.length === 0) {
+        // Fallback: search reactions for ones with 'biomass' in their ID or name
+        const reactionRows = asArray<Record<string, unknown>>(model.modelreactions ?? model.reactions);
+        const autoBiomasses = reactionRows.filter((rxn) => {
+            const id = String(rxn.id ?? '').toLowerCase();
+            const name = String(rxn.name ?? '').toLowerCase();
+            return id.includes('biomass') || name.includes('biomass');
+        });
+        
+        if (autoBiomasses.length > 0) {
+            autoBiomasses.forEach((rxn) => {
+                rows.push({
+                    id: String(rxn.id ?? ''),
+                    biomass: String(rxn.id ?? 'Biomass'),
+                    compound: '---',
+                    name: String(rxn.name ?? 'Biomass reaction'),
+                    coefficient: 0,
+                    compartment: '',
+                });
+            });
+        }
         return rows;
     }
     biomasses.forEach((biomass, biomassIndex) => {
@@ -1255,9 +1275,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionMessage={actionMessage}
             />
 
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
                 <OrganismLinksCard model={modelObject} />
-                <Box>
+                <Box sx={{ mt: 1 }}>
                     <DownloadModelMenu
                         modelRef={workspaceCandidates[0]}
                         modelId={modelName}
@@ -1565,18 +1585,32 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                             <Box key={entry.key} sx={{ borderBottom: '1px solid #f0f0f0', pb: 1.5, '&:last-child': { borderBottom: 0 } }}>
                                 <Typography 
                                     variant="caption" 
-                                    color="text.secondary" 
-                                    fontWeight={700} 
+                                    color="primary" 
+                                    fontWeight={800} 
                                     sx={{ 
-                                        mb: 0.5, 
+                                        mb: 0.75, 
                                         display: 'block',
                                         textTransform: 'uppercase',
-                                        letterSpacing: '0.05em'
+                                        letterSpacing: '0.08em',
+                                        fontSize: '0.65rem'
                                     }}
                                 >
                                     {entry.key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                 </Typography>
-                                <Typography variant="body2" sx={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', color: 'text.primary', lineHeight: 1.6 }}>
+                                <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                        wordBreak: 'break-word', 
+                                        whiteSpace: 'pre-wrap', 
+                                        color: 'text.primary', 
+                                        lineHeight: 1.6,
+                                        backgroundColor: entry.value.startsWith('{') || entry.value.startsWith('[') ? '#fcfcfc' : 'transparent',
+                                        fontFamily: entry.value.startsWith('{') || entry.value.startsWith('[') ? 'monospace' : 'inherit',
+                                        p: entry.value.startsWith('{') || entry.value.startsWith('[') ? 1 : 0,
+                                        borderRadius: 0.5,
+                                        fontSize: entry.value.startsWith('{') || entry.value.startsWith('[') ? '0.75rem' : '0.875rem'
+                                    }}
+                                >
                                     {entry.value}
                                 </Typography>
                             </Box>
