@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
     DataGrid,
@@ -38,6 +38,7 @@ import DeleteModelModal from '@/components/ui/DeleteModelModal';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import {
     isActiveJobStatus,
+    isTerminalJobStatus,
     extractTrackedJobId,
     listTrackedJobs,
     removeTrackedJob,
@@ -64,6 +65,29 @@ interface TrackedJobWithStatus extends TrackedJob {
     type?: string;
 }
 
+const MODEL_APPEARANCE_RETRY_DELAYS_MS = [0, 4000, 9000, 18000];
+
+function normalizeJobStatus(status: string | undefined): string | undefined {
+    if (!status) return undefined;
+    const normalized = status.trim().toLowerCase();
+    if (!normalized) return undefined;
+    if (normalized === 'complete') return 'completed';
+    return normalized;
+}
+
+function rowMatchesTrackedJob(row: MyModelItem, job: TrackedJob): boolean {
+    const expectedModelId = job.modelId?.trim().toLowerCase();
+    const expectedRef = job.relatedRef ? normalizeModelRef(job.relatedRef) : null;
+
+    if (expectedModelId && row.id.trim().toLowerCase() === expectedModelId) {
+        return true;
+    }
+    if (expectedRef && normalizeModelRef(row.path) === expectedRef) {
+        return true;
+    }
+    return false;
+}
+
 function normalizeModelRef(ref: string): string {
     const trimmed = ref.trim();
     if (!trimmed) return '/';
@@ -82,6 +106,10 @@ export default function MyModelsPage() {
     const [mergeMessage, setMergeMessage] = useState<string | null>(null);
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const [jobActionError, setJobActionError] = useState<string | null>(null);
+    const [jobSyncNotice, setJobSyncNotice] = useState<string | null>(null);
+    const lastTrackedJobStatusesRef = useRef(new Map<string, string | undefined>());
+    const modelSyncAttemptRef = useRef(new Map<string, number>());
+    const modelSyncTimerRef = useRef(new Map<string, number>());
     const { isAuthenticated, user } = useAuth();
 
     useEffect(() => {
@@ -107,7 +135,7 @@ export default function MyModelsPage() {
                     numGenes: m.num_genes ?? 0,
                     fbaCount: m.fba_count ?? 0,
                     gapfills: (m.unintegrated_gapfills ?? 0) + (m.integrated_gapfills ?? 0),
-                    status: m.status ?? 'complete',
+                    status: normalizeJobStatus(m.status) ?? 'completed',
                     modDate: m.rundate ?? new Date().toISOString(),
                     path: normalizeModelRef(m.ref),
                 })) as MyModelItem[];
@@ -121,7 +149,7 @@ export default function MyModelsPage() {
                 'My Models requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_MODELSEED_API_URL at a running modelseed-api instance.',
             );
         },
-        staleTime: 5 * 60 * 1000,
+        staleTime: 30 * 1000,
     });
 
     const trackedJobIds = useMemo(
@@ -150,21 +178,116 @@ export default function MyModelsPage() {
 
     const trackedJobsWithStatus = useMemo<TrackedJobWithStatus[]>(() => {
         return trackedJobs.map((job) => {
-            const status = trackedJobStatusMap.get(job.id);
+            const jobSummary = trackedJobStatusMap.get(job.id);
             return {
                 ...job,
-                status: typeof status?.status === 'string' ? status.status : undefined,
-                app: typeof status?.app === 'string' ? status.app : undefined,
-                type: typeof status?.type === 'string' ? status.type : undefined,
+                status: normalizeJobStatus(typeof jobSummary?.status === 'string' ? jobSummary.status : undefined),
+                app: typeof jobSummary?.app === 'string' ? jobSummary.app : undefined,
+                type: typeof jobSummary?.type === 'string' ? jobSummary.type : undefined,
             };
         });
     }, [trackedJobs, trackedJobStatusMap]);
+
+    const startModelAppearanceSync = useCallback((job: TrackedJobWithStatus) => {
+        if (job.kind !== 'reconstruct' && job.kind !== 'merge') {
+            void refetch();
+            return;
+        }
+
+        if (modelSyncAttemptRef.current.has(job.id)) {
+            return;
+        }
+
+        if (!job.modelId && !job.relatedRef) {
+            void refetch();
+            return;
+        }
+
+        modelSyncAttemptRef.current.set(job.id, 0);
+
+        const runAttempt = async () => {
+            const attempt = modelSyncAttemptRef.current.get(job.id) ?? 0;
+            const result = await refetch();
+            const latestRows = result.data ?? [];
+            const found = latestRows.some((row) => rowMatchesTrackedJob(row, job));
+
+            if (found) {
+                const pendingTimer = modelSyncTimerRef.current.get(job.id);
+                if (pendingTimer != null) {
+                    window.clearTimeout(pendingTimer);
+                    modelSyncTimerRef.current.delete(job.id);
+                }
+                modelSyncAttemptRef.current.delete(job.id);
+                setJobSyncNotice(null);
+                return;
+            }
+
+            if (attempt >= MODEL_APPEARANCE_RETRY_DELAYS_MS.length - 1) {
+                modelSyncAttemptRef.current.delete(job.id);
+                modelSyncTimerRef.current.delete(job.id);
+                setJobSyncNotice(
+                    `Job "${job.label}" is completed, but the new model is not visible yet. It may still be indexing.`,
+                );
+                return;
+            }
+
+            const nextAttempt = attempt + 1;
+            modelSyncAttemptRef.current.set(job.id, nextAttempt);
+            const delay = MODEL_APPEARANCE_RETRY_DELAYS_MS[nextAttempt];
+            const timeoutId = window.setTimeout(() => {
+                void runAttempt();
+            }, delay);
+            modelSyncTimerRef.current.set(job.id, timeoutId);
+        };
+
+        void runAttempt();
+    }, [refetch]);
+
+    useEffect(() => {
+        return () => {
+            for (const timeoutId of modelSyncTimerRef.current.values()) {
+                window.clearTimeout(timeoutId);
+            }
+            modelSyncTimerRef.current.clear();
+            modelSyncAttemptRef.current.clear();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (trackedJobsWithStatus.length === 0) {
+            lastTrackedJobStatusesRef.current.clear();
+            return;
+        }
+        const nextStatuses = new Map<string, string | undefined>();
+
+        for (const job of trackedJobsWithStatus) {
+            const currentStatus = normalizeJobStatus(job.status);
+            const previousStatus = lastTrackedJobStatusesRef.current.get(job.id);
+            const becameTerminal = Boolean(
+                currentStatus
+                && isTerminalJobStatus(currentStatus)
+                && !isTerminalJobStatus(previousStatus),
+            );
+
+            if (becameTerminal) {
+                if (currentStatus === 'completed') {
+                    startModelAppearanceSync(job);
+                } else {
+                    void refetch();
+                }
+            }
+
+            nextStatuses.set(job.id, currentStatus);
+        }
+
+        lastTrackedJobStatusesRef.current = nextStatuses;
+    }, [trackedJobsWithStatus, refetch, startModelAppearanceSync]);
 
     const recentJobByRow = useMemo(() => {
         const map = new Map<string, TrackedJobWithStatus>();
         for (const job of trackedJobsWithStatus) {
             if (job.relatedRef) {
-                map.set(`ref:${job.relatedRef}`, job);
+                map.set(`ref:${normalizeModelRef(job.relatedRef)}`, job);
             }
             if (job.modelId) {
                 map.set(`model:${job.modelId}`, job);
@@ -174,6 +297,12 @@ export default function MyModelsPage() {
     }, [trackedJobsWithStatus]);
 
     const handleDismissJob = useCallback((jobId: string) => {
+        const timeoutId = modelSyncTimerRef.current.get(jobId);
+        if (timeoutId != null) {
+            window.clearTimeout(timeoutId);
+            modelSyncTimerRef.current.delete(jobId);
+        }
+        modelSyncAttemptRef.current.delete(jobId);
         removeTrackedJob(jobId);
         setTrackedJobs(listTrackedJobs());
     }, []);
@@ -298,7 +427,7 @@ export default function MyModelsPage() {
             headerName: 'Status',
             width: 140,
             renderCell: (params) => (
-                <Box sx={{ fontWeight: params.value === 'complete' ? 'normal' : 'bold' }}>
+                <Box sx={{ fontWeight: params.value === 'complete' || params.value === 'completed' ? 'normal' : 'bold' }}>
                     {params.value || 'None'}
                 </Box>
             )
@@ -457,6 +586,26 @@ export default function MyModelsPage() {
                 {mergeMessage && (
                     <Alert severity={mergeMessage.includes('failed') || mergeMessage.includes('required') ? 'error' : 'success'} variant="outlined">
                         {mergeMessage}
+                    </Alert>
+                )}
+
+                {jobSyncNotice && (
+                    <Alert
+                        severity="warning"
+                        variant="outlined"
+                        action={(
+                            <Button
+                                size="small"
+                                onClick={() => {
+                                    setJobSyncNotice(null);
+                                    void refetch();
+                                }}
+                            >
+                                Refresh
+                            </Button>
+                        )}
+                    >
+                        {jobSyncNotice}
                     </Alert>
                 )}
 
