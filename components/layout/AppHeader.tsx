@@ -31,12 +31,20 @@ export default function AppHeader() {
     const [moreAnchorEl, setMoreAnchorEl] = useState<null | HTMLElement>(null);
     const [signInOpen, setSignInOpen] = useState(false);
 
+    const isMediaDetailRoute = pathname.startsWith('/media');
+    const isPublicMediaDetail = isMediaDetailRoute && pathname.includes('/public/');
+
     // If user is inside /genomes, /biochem, or /list-media
     const isReferenceDataActive = pathname.startsWith('/genomes') ||
         pathname.startsWith('/biochem') ||
-        pathname.startsWith('/list-media');
+        pathname.startsWith('/list-media') ||
+        isPublicMediaDetail;
 
-    const isUserDataActive = pathname.startsWith('/my-models') || pathname.startsWith('/myMedia') || pathname.startsWith('/my-jobs') || pathname.startsWith('/data');
+    const isUserDataActive = pathname.startsWith('/my-models') ||
+        pathname.startsWith('/myMedia') ||
+        pathname.startsWith('/my-jobs') ||
+        pathname.startsWith('/data') ||
+        (isMediaDetailRoute && !isPublicMediaDetail);
     const isBuildModelActive = pathname.startsWith('/plant');
 
     const handleMoreClick = (event: React.MouseEvent<HTMLButtonElement>) => {

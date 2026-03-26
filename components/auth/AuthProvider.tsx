@@ -35,7 +35,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [authData, setAuthData] = useState<AuthResult | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // Hydrate from localStorage on mount (client-side only)
     useEffect(() => {
@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (stored) {
             setAuthData(stored);
         }
+        setLoading(false);
     }, []);
 
     // Listen for cross-tab logout (mirrors legacy storageEventHandler)

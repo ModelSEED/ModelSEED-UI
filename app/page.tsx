@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Container from '@mui/material/Container';
@@ -83,10 +84,21 @@ export default function HomePage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { login, isAuthenticated, user, loading } = useAuth();
 
     const currentMethod = AUTH_METHODS[method];
     const altMethod = method === 'rast' ? 'patric' : 'rast';
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const returnTo = searchParams.get('returnTo');
+            if (returnTo) {
+                router.push(returnTo);
+            }
+        }
+    }, [isAuthenticated, searchParams, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
