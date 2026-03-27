@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 
 import { listModelGapfillsFromApi } from '@/lib/api/modelseed';
-import { workspaceGet, parseWorkspaceGetObject } from '@/lib/api/workspace';
+import { workspaceGet, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
@@ -29,15 +29,24 @@ interface GapfillReaction {
 /* ---------- helpers ---------- */
 
 function extractModelRef(gfPath: string): string {
+    const normalized = normalizeWorkspaceRef(gfPath);
+
+    if (normalized.toLowerCase().endsWith('/gapfilling')) {
+        return normalized.slice(0, -('/gapfilling'.length));
+    }
+    if (normalized.toLowerCase().endsWith('/gapfill')) {
+        return normalized.slice(0, -('/gapfill'.length));
+    }
+
     // Legacy paths: /<user>/models/<Model>/gapfilling/gf.0
-    const gfIdx = gfPath.lastIndexOf('/gapfilling/');
-    if (gfIdx > 0) return gfPath.substring(0, gfIdx);
+    const gfIdx = normalized.toLowerCase().lastIndexOf('/gapfilling/');
+    if (gfIdx > 0) return normalized.substring(0, gfIdx);
     // Also try /gapfill/ segment pattern
-    const gfIdx2 = gfPath.lastIndexOf('/gapfill/');
-    if (gfIdx2 > 0) return gfPath.substring(0, gfIdx2);
+    const gfIdx2 = normalized.toLowerCase().lastIndexOf('/gapfill/');
+    if (gfIdx2 > 0) return normalized.substring(0, gfIdx2);
     const segments = gfPath.split('/').filter(Boolean);
     if (segments.length >= 3) return '/' + segments.slice(0, -2).join('/');
-    return gfPath;
+    return normalized;
 }
 
 function extractGapfillName(gfPath: string): string {
@@ -51,24 +60,103 @@ function extractModelName(gfPath: string): string {
     return parts[parts.length - 1] || 'Model';
 }
 
+function normalizeWorkspaceRef(value: string): string {
+    if (!value) return '';
+    return value.startsWith('/') ? value : `/${value}`;
+}
+
+function asArray<T>(value: unknown): T[] {
+    return Array.isArray(value) ? value as T[] : [];
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' ? value as Record<string, unknown> : {};
+}
+
+function parseReactionRecords(raw: unknown): Record<string, unknown>[] {
+    const reactions = asArray<unknown>(raw);
+    const normalized: Record<string, unknown>[] = [];
+
+    for (const item of reactions) {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+            normalized.push(item as Record<string, unknown>);
+            continue;
+        }
+
+        if (Array.isArray(item) && item.length > 0) {
+            const tupleRecord = asRecord(item[item.length - 1]);
+            if (Object.keys(tupleRecord).length > 0) {
+                normalized.push(tupleRecord);
+            }
+        }
+    }
+
+    return normalized;
+}
+
+function parseGapfillSolutions(gfData: Record<string, unknown>): Record<string, unknown>[] {
+    return asArray<Record<string, unknown>>(
+        gfData.gapfillingSolutions
+        ?? gfData.gapfilling_solutions
+        ?? gfData.solutions
+        ?? gfData.gapfill_solutions,
+    );
+}
+
+function extractDownloadUrl(payload: unknown): string | null {
+    if (Array.isArray(payload)) {
+        for (const entry of payload) {
+            if (typeof entry === 'string' && entry.startsWith('http')) return entry;
+        }
+    }
+    if (payload && typeof payload === 'object') {
+        const rec = payload as Record<string, unknown>;
+        if (typeof rec.url === 'string' && rec.url.startsWith('http')) return rec.url;
+    }
+    return null;
+}
+
+async function downloadWorkspaceObjectJson(objectRef: string): Promise<Record<string, unknown> | null> {
+    try {
+        const downloadPayload = await workspaceDownloadUrl({ objects: [objectRef] }) as unknown;
+        const downloadUrl = extractDownloadUrl(downloadPayload);
+        if (!downloadUrl) return null;
+
+        const response = await fetch(downloadUrl, { method: 'GET' });
+        if (!response.ok) return null;
+
+        const text = await response.text();
+        if (!text) return null;
+        const parsed = JSON.parse(text) as unknown;
+        return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : null;
+    } catch {
+        return null;
+    }
+}
+
 function parseGapfillReactions(gfData: Record<string, unknown>): GapfillReaction[] {
     // Gapfill data shape varies: may have `gapfillingSolutions` or `reactions` array
-    const solutions = gfData.gapfillingSolutions as Record<string, unknown>[] | undefined;
+    const solutions = parseGapfillSolutions(gfData);
     const reactions: GapfillReaction[] = [];
 
-    if (Array.isArray(solutions)) {
+    if (solutions.length > 0) {
         solutions.forEach((sol, solIdx) => {
-            const rxns = sol.gapfillingSolutionReactions as Record<string, unknown>[] | undefined;
-            if (!Array.isArray(rxns)) return;
+            const rxns = parseReactionRecords(
+                sol.gapfillingSolutionReactions
+                ?? sol.gapfilling_solution_reactions
+                ?? sol.solution_reactions
+                ?? sol.reactions,
+            );
+            if (rxns.length === 0) return;
             rxns.forEach((r, rxnIdx) => {
                 const rxnRef = String(r.reaction_ref ?? r.modelreaction_ref ?? '');
-                const rxnId = rxnRef.split('/').pop() ?? `rxn-${solIdx}-${rxnIdx}`;
+                const rxnId = String(r.reaction ?? r.id ?? rxnRef.split('/').pop() ?? `rxn-${solIdx}-${rxnIdx}`);
                 reactions.push({
                     id: `${solIdx}-${rxnIdx}-${rxnId}`,
                     reaction: rxnId,
                     name: String(r.name ?? rxnId),
                     direction: String(r.direction ?? r.directionality ?? '>'),
-                    compartment: String(r.compartment_ref ?? '').split('/').pop() ?? '',
+                    compartment: String(r.compartment_ref ?? r.compartment ?? '').split('/').pop() ?? '',
                     equation: r.equation ? String(r.equation) : undefined,
                 });
             });
@@ -77,16 +165,23 @@ function parseGapfillReactions(gfData: Record<string, unknown>): GapfillReaction
 
     // Direct reactions array fallback
     if (reactions.length === 0) {
-        const directRxns = gfData.reactions as Record<string, unknown>[] | undefined;
-        if (Array.isArray(directRxns)) {
+        const directRxns = parseReactionRecords(
+            gfData.reactions
+            ?? gfData.gapfill_reactions
+            ?? gfData.gapfillingSolutionReactions
+            ?? gfData.solution_reactions,
+        );
+        if (directRxns.length > 0) {
             directRxns.forEach((r, idx) => {
-                const rxnId = String(r.reaction ?? r.id ?? `rxn-${idx}`);
+                const rxnRef = String(r.reaction_ref ?? r.modelreaction_ref ?? '');
+                const rxnId = String(r.reaction ?? r.id ?? rxnRef.split('/').pop() ?? `rxn-${idx}`);
                 reactions.push({
                     id: `direct-${idx}-${rxnId}`,
                     reaction: rxnId,
                     name: String(r.name ?? rxnId),
-                    direction: String(r.direction ?? '>'),
-                    compartment: String(r.compartment ?? ''),
+                    direction: String(r.direction ?? r.directionality ?? '>'),
+                    compartment: String(r.compartment_ref ?? r.compartment ?? '').split('/').pop() ?? '',
+                    equation: r.equation ? String(r.equation) : undefined,
                 });
             });
         }
@@ -115,17 +210,58 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
                 try {
                     const allGapfills = await listModelGapfillsFromApi(modelRef);
                     if (Array.isArray(allGapfills)) {
+                        const targetRef = normalizeWorkspaceRef(workspacePath);
                         // Find the specific gapfill matching our name
                         const match = allGapfills.find(
                             (gf) => {
-                                const gfRef = String((gf as Record<string, unknown>).id ?? (gf as Record<string, unknown>).ref ?? '');
-                                return gfRef === gfName || gfRef.endsWith('/' + gfName);
+                                const record = gf as Record<string, unknown>;
+                                const gfId = String(record.id ?? record.name ?? '').toLowerCase();
+                                const gfRef = normalizeWorkspaceRef(String(record.ref ?? record.path ?? ''));
+                                return gfRef === targetRef
+                                    || gfRef.endsWith(`/${gfName}`)
+                                    || gfId === gfName.toLowerCase();
                             },
                         );
-                        if (match) return parseGapfillReactions(match as Record<string, unknown>);
+
+                        if (match) {
+                            const matchRecord = match as Record<string, unknown>;
+                            const parsedMatch = parseGapfillReactions(matchRecord);
+                            if (parsedMatch.length > 0) {
+                                return parsedMatch;
+                            }
+
+                            const nestedRef = normalizeWorkspaceRef(String(matchRecord.ref ?? matchRecord.path ?? ''));
+                            if (nestedRef) {
+                                try {
+                                    const nestedPayload = await workspaceGet([nestedRef]);
+                                    const nestedObject = parseWorkspaceGetObject<unknown>(nestedPayload);
+                                    if (nestedObject && typeof nestedObject === 'object') {
+                                        const nestedReactions = parseGapfillReactions(nestedObject as Record<string, unknown>);
+                                        if (nestedReactions.length > 0) {
+                                            return nestedReactions;
+                                        }
+                                    }
+                                } catch {
+                                    // Fall through to workspace direct fetch.
+                                }
+
+                                const downloaded = await downloadWorkspaceObjectJson(nestedRef);
+                                if (downloaded) {
+                                    const nestedReactions = parseGapfillReactions(downloaded);
+                                    if (nestedReactions.length > 0) {
+                                        return nestedReactions;
+                                    }
+                                }
+                            }
+                        }
+
                         // If no specific match, try first one
                         if (allGapfills.length > 0) {
-                            return parseGapfillReactions(allGapfills[0] as Record<string, unknown>);
+                            const first = allGapfills[0] as Record<string, unknown>;
+                            const firstParsed = parseGapfillReactions(first);
+                            if (firstParsed.length > 0) {
+                                return firstParsed;
+                            }
                         }
                     }
                 } catch { /* fall through */ }
@@ -133,9 +269,17 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
             // Fallback: workspace get
             try {
                 const wsData = await workspaceGet([workspacePath]);
-                const parsed = parseWorkspaceGetObject<Record<string, unknown>>(wsData);
-                if (parsed) return parseGapfillReactions(parsed);
+                const parsed = parseWorkspaceGetObject<unknown>(wsData);
+                if (parsed && typeof parsed === 'object') {
+                    return parseGapfillReactions(parsed as Record<string, unknown>);
+                }
             } catch { /* handled below */ }
+
+            const downloaded = await downloadWorkspaceObjectJson(workspacePath);
+            if (downloaded) {
+                return parseGapfillReactions(downloaded);
+            }
+
             return [];
         },
         staleTime: 5 * 60 * 1000,

@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo, useState, useCallback, type ReactNode } from 'react';
+import { use, useMemo, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -21,18 +21,27 @@ import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { parseWorkspaceGetObject, workspaceGet, workspaceLs } from '@/lib/api/workspace';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import {
     editModelFromApi,
     getModelDetailBundleFromApi,
     getModelFbaFromApi,
+    getJobsFromApi,
     listModelEditsFromApi,
     listModelGapfillsFromApi,
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
-import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
+import {
+    extractTrackedJobId,
+    isTerminalJobStatus,
+    listTrackedJobs,
+    removeTrackedJob,
+    trackJob,
+    type TrackedJob,
+} from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader from '@/components/layout/DataControlHeader';
@@ -48,6 +57,7 @@ type TabKey =
     | 'compartments'
     | 'biomass'
     | 'pathways'
+    | 'fba'
     | 'edits';
 
 interface TabConfig {
@@ -69,6 +79,7 @@ const MODEL_TABS: TabConfig[] = [
     { key: 'compartments', label: 'Compartments', searchPlaceholder: 'Search compartments...' },
     { key: 'biomass', label: 'Biomass', searchPlaceholder: 'Search biomass...' },
     { key: 'pathways', label: 'Pathways', searchPlaceholder: 'Search pathways...' },
+    { key: 'fba', label: 'FBA', searchPlaceholder: 'Search FBA results...' },
     { key: 'edits', label: 'Edit Model', searchPlaceholder: 'Search edits...' },
 ];
 
@@ -98,12 +109,27 @@ function normalizeBiochemCompoundId(value: unknown): string {
     return match?.[0] ?? '';
 }
 
+function decodePathSegment(segment: string): string {
+    let current = segment;
+    try {
+        // Decode repeatedly to normalize values that may already be percent-encoded.
+        while (true) {
+            const decoded = decodeURIComponent(current);
+            if (decoded === current) break;
+            current = decoded;
+        }
+    } catch {
+        // If decode fails, keep the original segment.
+    }
+    return current;
+}
+
 function toEncodedCatchallHref(prefix: string, workspaceRef: string): string {
     const clean = workspaceRef.startsWith('/') ? workspaceRef.slice(1) : workspaceRef;
     const encoded = clean
         .split('/')
         .filter(Boolean)
-        .map((segment) => encodeURIComponent(segment))
+        .map((segment) => encodeURIComponent(decodePathSegment(segment)))
         .join('/');
     return encoded ? `${prefix}/${encoded}` : prefix;
 }
@@ -145,7 +171,7 @@ function buildGeneRows(model: Record<string, unknown>): Record<string, unknown>[
         return explicitGenes.map((gene, index) => ({
             id: String((gene.id ?? extractRefId(gene.feature_ref)) || `gene-${index}`),
             reactions: toSearchableString(gene.reactions ?? []),
-            functions: toSearchableString(gene.functions ?? ''),
+            functions: gene.functions ? toSearchableString(gene.functions) : 'N/A',
         }));
     }
 
@@ -171,7 +197,7 @@ function buildGeneRows(model: Record<string, unknown>): Record<string, unknown>[
     return Array.from(geneToReactions.entries()).map(([gene, reactions]) => ({
         id: gene,
         reactions: Array.from(reactions).join(', '),
-        functions: '',
+        functions: 'View details',
     }));
 }
 
@@ -221,15 +247,25 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
     }
     biomasses.forEach((biomass, biomassIndex) => {
         const biomassId = String(biomass.id ?? biomass.label ?? biomass.name ?? `bio-${biomassIndex}`);
-        const compounds = asArray<Record<string, unknown>>(
+        let compounds = asArray<Record<string, unknown>>(
             biomass.biomasscompounds ?? 
-            biomass.compounds ?? 
             biomass.modelbiomasscompounds ?? 
             biomass.biomass_compounds ?? 
             biomass.modelbiomass_compounds ??
             biomass.model_biomass_compounds ??
             []
         );
+        
+        // Handle array of arrays format: [[cpd_id, coefficient, ""], ...]
+        const rawCompounds = biomass.compounds;
+        if (Array.isArray(rawCompounds) && rawCompounds.length > 0 && Array.isArray(rawCompounds[0])) {
+            compounds = rawCompounds.map((c: unknown[], idx: number) => ({
+                compound_id: Array.isArray(c) ? c[0] : '',
+                coefficient: Array.isArray(c) ? c[1] : 0,
+                compartment: Array.isArray(c) ? c[2] : '',
+            }));
+        }
+        
         if (compounds.length === 0) {
             rows.push({
                 id: `${biomassId}-empty`,
@@ -242,11 +278,12 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
             return;
         }
         compounds.forEach((compound, compoundIndex) => {
+            const compoundId = String(compound.compound_id ?? compound.modelcompound_ref ?? compound.compound_ref ?? compound.compound_id ?? '');
             rows.push({
                 id: `${biomassId}-${compoundIndex}`,
                 biomass: biomassId,
-                compound: String(compound.modelcompound_ref ?? compound.compound_ref ?? compound.compound_id ?? ''),
-                name: String(compound.name ?? compound.compound_name ?? ''),
+                compound: compoundId,
+                name: compoundId ? `Compound ${compoundId}` : '',
                 coefficient: Number(compound.coefficient ?? compound.coefficent ?? 0),
                 compartment: String(compound.modelcompartment_ref ?? compound.compartment_ref ?? compound.compartment ?? ''),
             });
@@ -395,6 +432,16 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { field: 'compounds', headerName: 'Cpds', width: 120, type: 'number' },
             ],
         },
+        fba: {
+            rows: [],
+            columns: [
+                { field: 'id', headerName: 'ID', width: 180 },
+                { field: 'objective', headerName: 'Objective', width: 140 },
+                { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
+                { field: 'media', headerName: 'Media', width: 180 },
+                { field: 'timestamp', headerName: 'Time', width: 180 },
+            ],
+        },
     };
 }
 
@@ -444,6 +491,198 @@ function summarizeMediaRef(value: unknown): string {
     return pieces[pieces.length - 1] || value;
 }
 
+function normalizeWorkspaceRef(value: unknown): string {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
+
+function hasFbaPayloadFields(fba: Record<string, unknown>): boolean {
+    const keys = [
+        'id',
+        'ref',
+        'path',
+        'objective',
+        'objective_function',
+        'media',
+        'rundate',
+        'timestamp',
+        'FBAReactionVariables',
+    ];
+
+    return keys.some((key) => {
+        if (!(key in fba)) return false;
+        const value = fba[key];
+        if (Array.isArray(value)) return value.length > 0;
+        return value != null && String(value).trim().length > 0;
+    });
+}
+
+function extractRefs(value: unknown): string[] {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+        const refs: string[] = [];
+        for (const entry of value) {
+            if (typeof entry === 'string') {
+                const ref = normalizeWorkspaceRef(entry);
+                if (ref) refs.push(ref);
+                continue;
+            }
+
+            if (entry && typeof entry === 'object') {
+                const record = entry as Record<string, unknown>;
+                const ref = normalizeWorkspaceRef(record.ref ?? record.path ?? record.workspace_ref);
+                if (ref) {
+                    refs.push(ref);
+                } else if (typeof record.id === 'string' && record.id) {
+                    refs.push(record.id);
+                }
+            }
+        }
+        return refs;
+    }
+
+    if (typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+        const ref = normalizeWorkspaceRef(record.ref ?? record.path ?? record.workspace_ref);
+        if (ref) return [ref];
+    }
+
+    return [];
+}
+
+function dedupeRefs(refs: string[]): string[] {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const ref of refs) {
+        const normalized = normalizeWorkspaceRef(ref);
+        if (!normalized || seen.has(normalized)) continue;
+        seen.add(normalized);
+        out.push(normalized);
+    }
+    return out;
+}
+
+function ownerAliasRef(ref: string, authMethod?: string | null): string {
+    if (authMethod === 'PATRIC') return ref;
+    const normalized = normalizeWorkspaceRef(ref);
+    if (!normalized) return '';
+    const match = normalized.match(/^\/([^/@]+)@[^/]+\/(.*)$/);
+    if (!match) return normalized;
+    return `/${match[1]}/${match[2]}`;
+}
+
+function expandOwnerRef(ref: string, authMethod?: string | null): string {
+    if (authMethod !== 'PATRIC') return ref;
+    const normalized = normalizeWorkspaceRef(ref);
+    if (!normalized) return '';
+    const match = normalized.match(/^\/([^/@]+)\/modelseed\/(.+)$/);
+    if (!match) return normalized;
+    return `/${match[1]}@patricbrc.org/modelseed/${match[2]}`;
+}
+
+interface WorkspaceListingEntry {
+    ref: string;
+    id: string;
+    type: string;
+    timestamp: string;
+}
+
+function resolveWorkspaceLsRef(entry: unknown[]): string {
+    const name = String(entry[0] ?? '').trim();
+    const basePath = normalizeWorkspaceRef(entry[2]);
+    if (!basePath && !name) return '';
+    if (!basePath) return normalizeWorkspaceRef(name);
+
+    // Workspace.ls returns parent folder path in entry[2], not full object path.
+    if (name) {
+        const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+        return normalizeWorkspaceRef(`${normalizedBase}${name}`);
+    }
+
+    return basePath;
+}
+
+function isContainerRef(ref: string, kind: 'fba' | 'gapfill'): boolean {
+    const normalized = normalizeWorkspaceRef(ref).toLowerCase();
+    if (!normalized) return false;
+    if (kind === 'fba') {
+        return normalized.endsWith('/fba');
+    }
+    return normalized.endsWith('/gapfill') || normalized.endsWith('/gapfilling');
+}
+
+function extractEntriesFromWorkspaceListing(
+    payload: Record<string, unknown[]>,
+    kind: 'fba' | 'gapfill',
+): WorkspaceListingEntry[] {
+    const entries: WorkspaceListingEntry[] = [];
+    for (const value of Object.values(payload)) {
+        if (!Array.isArray(value)) continue;
+        for (const entry of value) {
+            if (!Array.isArray(entry)) continue;
+
+            const type = String(entry[1] ?? '').toLowerCase();
+            if (!type || type.includes('folder')) continue;
+            if (kind === 'fba' && type !== 'fba') continue;
+            if (kind === 'gapfill' && !(type === 'gapfill' || type === 'gapfilling')) continue;
+
+            const name = String(entry[0] ?? '');
+            const ref = resolveWorkspaceLsRef(entry);
+            if (!ref) continue;
+
+            const id = name || ref.split('/').filter(Boolean).pop() || '';
+            entries.push({
+                ref,
+                id,
+                type,
+                timestamp: formatRelativeTimestamp(entry[3]),
+            });
+        }
+    }
+
+    const deduped = new Map<string, WorkspaceListingEntry>();
+    for (const entry of entries) {
+        deduped.set(entry.ref, entry);
+    }
+    return Array.from(deduped.values());
+}
+
+function makeRowFromRef(ref: string, kind: 'fba' | 'gapfill', index: number): Record<string, unknown> {
+    const normalized = normalizeWorkspaceRef(ref) || String(ref);
+    const fallbackId = `${kind}-${index}`;
+    const id = normalized.split('/').filter(Boolean).pop() || fallbackId;
+
+    if (kind === 'fba') {
+        return {
+            id,
+            ref: normalized,
+            objective: '-',
+            objectiveFunction: 'N/A',
+            media: 'N/A',
+            timestamp: '-',
+        };
+    }
+
+    return {
+        id,
+        ref: normalized,
+        integrated: '-',
+        media: 'N/A',
+        timestamp: '-',
+    };
+}
+
+function normalizeJobStatus(status: string | undefined): string | undefined {
+    if (!status) return undefined;
+    const normalized = status.toLowerCase();
+    if (normalized === 'complete') return 'completed';
+    if (normalized === 'canceled') return 'cancelled';
+    return normalized;
+}
+
 function extractExpressionRows(model: Record<string, unknown>): Array<{ id: string; name: string; ids: string[] }> {
     const expressionData = model.expression_data;
     if (!expressionData) return [];
@@ -476,35 +715,161 @@ function extractExpressionRows(model: Record<string, unknown>): Array<{ id: stri
     return [];
 }
 
-function extractFbaRows(fbaData: Record<string, unknown> | null | undefined): Record<string, unknown>[] {
-    if (!fbaData) return [];
+function extractFbaRows(
+    fbaData: Record<string, unknown> | null | undefined,
+    modelObject?: Record<string, unknown>,
+    fallbackEntries: WorkspaceListingEntry[] = [],
+): Record<string, unknown>[] {
+    const rows: Record<string, unknown>[] = [];
+    const seenRefs = new Set<string>();
 
-    const nestedCandidates = [
-        asArray<Record<string, unknown>>(fbaData.fbas),
-        asArray<Record<string, unknown>>(fbaData.results),
-        asArray<Record<string, unknown>>(fbaData.data),
-    ];
-    const nestedRows = nestedCandidates.find((rows) => rows.length > 0) ?? [];
+    if (fbaData) {
+        let rawRows: Record<string, unknown>[] = [];
+        if (Array.isArray(fbaData)) {
+            rawRows = fbaData;
+        } else {
+            const nestedCandidates = [
+                asArray<Record<string, unknown>>(fbaData.fbas),
+                asArray<Record<string, unknown>>(fbaData.results),
+                asArray<Record<string, unknown>>(fbaData.data),
+            ];
+            const nestedRows = nestedCandidates.find((candidate) => candidate.length > 0) ?? [];
+            rawRows = nestedRows.length > 0 ? nestedRows : (hasFbaPayloadFields(fbaData) ? [fbaData] : []);
+        }
 
-    const rows = nestedRows.length > 0 ? nestedRows : [fbaData];
-    return rows.map((fba, index) => ({
-        id: String(fba.id ?? extractRefId(fba.ref) ?? `fba-${index}`),
-        ref: typeof fba.ref === 'string' ? fba.ref : (typeof fba.path === 'string' ? fba.path : ''),
-        objective: String(fba.objective ?? '-'),
-        objectiveFunction: String(fba.objective_function ?? 'N/A'),
-        media: summarizeMediaRef(fba.media),
-        timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
-    }));
+        for (let index = 0; index < rawRows.length; index += 1) {
+            const fba = rawRows[index];
+            const ref = normalizeWorkspaceRef(fba.ref ?? fba.path ?? fba.workspace_ref);
+            if (ref && isContainerRef(ref, 'fba')) continue;
+            const id = String(fba.id ?? extractRefId(ref) ?? `fba-${index}`);
+            if (!ref && id.toLowerCase() === 'fba') continue;
+            if (ref) seenRefs.add(ref);
+
+            rows.push({
+                id,
+                ref,
+                objective: String(fba.objective ?? '-'),
+                objectiveFunction: String(fba.objective_function ?? 'N/A'),
+                media: summarizeMediaRef(fba.media),
+                timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
+            });
+        }
+    }
+
+    const modelRefs = modelObject
+        ? [
+            ...extractRefs(modelObject.fba_refs),
+            ...extractRefs(modelObject.fbas),
+            ...extractRefs(modelObject.fba),
+        ]
+        : [];
+
+    const fallbackRefs = fallbackEntries.map((entry) => entry.ref);
+    const allRefs = dedupeRefs([...modelRefs, ...fallbackRefs]);
+    const nonContainerRefs = allRefs.filter((ref) => !isContainerRef(ref, 'fba'));
+    const refsToUse = nonContainerRefs.length > 0 ? nonContainerRefs : allRefs;
+
+    const fallbackByRef = new Map<string, WorkspaceListingEntry>(
+        fallbackEntries.map((entry) => [entry.ref, entry]),
+    );
+
+    for (let index = 0; index < refsToUse.length; index += 1) {
+        const ref = refsToUse[index];
+        if (!ref || seenRefs.has(ref)) continue;
+
+        const fallback = fallbackByRef.get(ref);
+        if (fallback) {
+            rows.push({
+                id: fallback.id || makeRowFromRef(ref, 'fba', index).id,
+                ref,
+                objective: '-',
+                objectiveFunction: 'N/A',
+                media: 'N/A',
+                timestamp: fallback.timestamp || '-',
+            });
+        } else {
+            rows.push(makeRowFromRef(ref, 'fba', index));
+        }
+    }
+
+    const deduped = new Map<string, Record<string, unknown>>();
+    for (const row of rows) {
+        const key = String(row.ref ?? row.id ?? '');
+        if (!key) continue;
+        deduped.set(key, row);
+    }
+
+    return Array.from(deduped.values());
 }
 
-function extractGapfillRows(gapfills: Record<string, unknown>[] | undefined): Record<string, unknown>[] {
-    return asArray<Record<string, unknown>>(gapfills).map((gapfill, index) => ({
-        id: String(gapfill.id ?? extractRefId(gapfill.ref) ?? `gapfill-${index}`),
-        ref: typeof gapfill.ref === 'string' ? gapfill.ref : (typeof gapfill.path === 'string' ? gapfill.path : ''),
-        integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
-        media: summarizeMediaRef(gapfill.media),
-        timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
-    }));
+function extractGapfillRows(
+    gapfills: Record<string, unknown>[] | undefined,
+    modelObject?: Record<string, unknown>,
+    fallbackEntries: WorkspaceListingEntry[] = [],
+): Record<string, unknown>[] {
+    const rows: Record<string, unknown>[] = [];
+    const seenRefs = new Set<string>();
+
+    for (const [index, gapfill] of asArray<Record<string, unknown>>(gapfills).entries()) {
+        const ref = normalizeWorkspaceRef(gapfill.ref ?? gapfill.path ?? gapfill.workspace_ref);
+        if (ref && isContainerRef(ref, 'gapfill')) continue;
+        const id = String(gapfill.id ?? extractRefId(ref) ?? `gapfill-${index}`);
+        if (!ref && (id.toLowerCase() === 'gapfill' || id.toLowerCase() === 'gapfilling')) continue;
+        if (ref) seenRefs.add(ref);
+
+        rows.push({
+            id,
+            ref,
+            integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
+            media: summarizeMediaRef(gapfill.media),
+            timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
+        });
+    }
+
+    const modelRefs = modelObject
+        ? [
+            ...extractRefs(modelObject.gapfill_refs),
+            ...extractRefs(modelObject.gapfilling_refs),
+            ...extractRefs(modelObject.gapfills),
+            ...extractRefs(modelObject.gapfillings),
+        ]
+        : [];
+
+    const fallbackRefs = fallbackEntries.map((entry) => entry.ref);
+    const allRefs = dedupeRefs([...modelRefs, ...fallbackRefs]);
+    const nonContainerRefs = allRefs.filter((ref) => !isContainerRef(ref, 'gapfill'));
+    const refsToUse = nonContainerRefs.length > 0 ? nonContainerRefs : allRefs;
+
+    const fallbackByRef = new Map<string, WorkspaceListingEntry>(
+        fallbackEntries.map((entry) => [entry.ref, entry]),
+    );
+
+    for (let index = 0; index < refsToUse.length; index += 1) {
+        const ref = refsToUse[index];
+        if (!ref || seenRefs.has(ref)) continue;
+
+        const fallback = fallbackByRef.get(ref);
+        if (fallback) {
+            rows.push({
+                id: fallback.id || makeRowFromRef(ref, 'gapfill', index).id,
+                ref,
+                integrated: '-',
+                media: 'N/A',
+                timestamp: fallback.timestamp || '-',
+            });
+        } else {
+            rows.push(makeRowFromRef(ref, 'gapfill', index));
+        }
+    }
+
+    const deduped = new Map<string, Record<string, unknown>>();
+    for (const row of rows) {
+        const key = String(row.ref ?? row.id ?? '');
+        if (!key) continue;
+        deduped.set(key, row);
+    }
+
+    return Array.from(deduped.values());
 }
 
 function stringifyDetailValue(value: unknown): string {
@@ -710,7 +1075,7 @@ function LegacySurfaceStatus({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Chip size="small" label="Dynamic pathway tabs" color="warning" />
                     <Typography variant="body2" color="text.secondary">
-                        Legacy dynamic map tabs are represented by the Pathways tab summary in this UI and are deferred for full parity.
+                        Legacy dynamic pathway maps are available from the FBA detail page via Visualize {'>'} FBA links.
                     </Typography>
                 </Box>
             </Box>
@@ -862,6 +1227,7 @@ function VisualizeDataPanel({
 
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
+    const { method: authMethod } = useAuth();
     const resolvedParams = use(params);
     const urlSegments = useMemo(
         () => resolvedParams.path ?? [],
@@ -876,6 +1242,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const activeTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
     const modelSegments = isTabKey(lastSegment) ? decodedSegments.slice(0, -1) : decodedSegments;
     const workspacePath = `/${modelSegments.join('/')}`;
+    const modelRootPath = workspacePath.endsWith('/model')
+        ? workspacePath.slice(0, -('/model'.length))
+        : workspacePath;
+    const modelRootCandidates = useMemo(
+        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, authMethod)]),
+        [modelRootPath, authMethod],
+    );
 
     const workspaceCandidates = useMemo(() => {
         if (!workspacePath || workspacePath === '/') return [workspacePath];
@@ -883,7 +1256,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         return base.endsWith('/model') ? [base] : [base, `${base}/model`];
     }, [workspacePath]);
 
-    const { data: modelData, isLoading, error } = useQuery({
+    const { data: modelData, isLoading, error, refetch: refetchModelData } = useQuery({
         queryKey: ['modelDetail', USE_MODELSEED_API, USE_NEW_PROXY, ...workspaceCandidates],
         queryFn: async () => {
             const failures: string[] = [];
@@ -928,20 +1301,69 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         staleTime: 30_000,
     });
 
-    const { data: modelFba, error: modelFbaError } = useQuery({
+    const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, workspaceCandidates[0]],
         enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
         queryFn: async () => getModelFbaFromApi(workspaceCandidates[0]),
         retry: 0,
-        staleTime: 30_000,
+        staleTime: 0,
     });
 
-    const { data: modelGapfills, error: modelGapfillsError } = useQuery({
+    const { data: modelGapfills, error: modelGapfillsError, refetch: refetchModelGapfills } = useQuery({
         queryKey: ['modelGapfills', USE_MODELSEED_API, workspaceCandidates[0]],
         enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
         queryFn: async () => listModelGapfillsFromApi(workspaceCandidates[0]),
         retry: 0,
-        staleTime: 30_000,
+        staleTime: 0,
+    });
+
+    const { data: workspaceFbaEntries = [], refetch: refetchWorkspaceFbaRefs } = useQuery({
+        queryKey: ['modelWorkspaceFbaRefs', ...modelRootCandidates],
+        enabled: modelRootCandidates.length > 0,
+        queryFn: async () => {
+            const candidates = dedupeRefs(modelRootCandidates.flatMap((root) => [
+                `${root}/fba`,
+                `${root}/FBA`,
+            ]));
+            const entries: WorkspaceListingEntry[] = [];
+            for (const path of candidates) {
+                try {
+                    const payload = await workspaceLs([path]);
+                    entries.push(...extractEntriesFromWorkspaceListing(payload, 'fba'));
+                } catch {
+                    // Ignore missing folders and try next candidate.
+                }
+            }
+            const byRef = new Map<string, WorkspaceListingEntry>();
+            for (const entry of entries) byRef.set(entry.ref, entry);
+            return Array.from(byRef.values());
+        },
+        staleTime: 0,
+    });
+
+    const { data: workspaceGapfillEntries = [], refetch: refetchWorkspaceGapfillRefs } = useQuery({
+        queryKey: ['modelWorkspaceGapfillRefs', ...modelRootCandidates],
+        enabled: modelRootCandidates.length > 0,
+        queryFn: async () => {
+            const candidates = dedupeRefs(modelRootCandidates.flatMap((root) => [
+                `${root}/gapfill`,
+                `${root}/gapfilling`,
+                `${root}/Gapfill`,
+            ]));
+            const entries: WorkspaceListingEntry[] = [];
+            for (const path of candidates) {
+                try {
+                    const payload = await workspaceLs([path]);
+                    entries.push(...extractEntriesFromWorkspaceListing(payload, 'gapfill'));
+                } catch {
+                    // Ignore missing folders and try next candidate.
+                }
+            }
+            const byRef = new Map<string, WorkspaceListingEntry>();
+            for (const entry of entries) byRef.set(entry.ref, entry);
+            return Array.from(byRef.values());
+        },
+        staleTime: 0,
     });
 
     const [visualizeOption, setVisualizeOption] = useState('');
@@ -959,6 +1381,123 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [reactionsToAdd, setReactionsToAdd] = useState<{ id: string; name: string; equation?: string; direction?: string }[]>([]);
     const [selectedReactionsToRemove, setSelectedReactionsToRemove] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
     const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+    const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
+    const lastTrackedStatusesRef = useRef(new Map<string, string | undefined>());
+
+    // Hooks that must be before early returns
+    const pathname = usePathname();
+    const userDataTabs = [
+        { label: 'My Models', href: '/my-models' },
+        { label: 'My Media', href: '/myMedia' },
+        { label: 'My Jobs', href: '/my-jobs' },
+    ];
+    const activeUserTab = useMemo(() => {
+        const idx = userDataTabs.findIndex((t) => pathname.startsWith(t.href));
+        return idx >= 0 ? idx : 0;
+    }, [pathname]);
+    const isUserDataModel = useMemo(() => {
+        return true;
+    }, []);
+
+    useEffect(() => {
+        const syncTrackedJobs = () => {
+            setTrackedJobs(listTrackedJobs());
+        };
+
+        syncTrackedJobs();
+        window.addEventListener('storage', syncTrackedJobs);
+        return () => window.removeEventListener('storage', syncTrackedJobs);
+    }, []);
+
+    const trackedJobsForModel = useMemo(() => {
+        return trackedJobs.filter((job) => {
+            const jobRelatedRef = typeof job.relatedRef === 'string' ? job.relatedRef : '';
+            const normalizedRef = jobRelatedRef.startsWith('/') ? jobRelatedRef : `/${jobRelatedRef}`;
+            return normalizedRef === workspacePath;
+        });
+    }, [trackedJobs, workspacePath]);
+
+    const trackedJobIds = useMemo(() => trackedJobsForModel.map((job) => job.id), [trackedJobsForModel]);
+
+    const { data: trackedJobStatuses = [] } = useQuery({
+        queryKey: ['modelDetailTrackedJobs', trackedJobIds],
+        enabled: USE_MODELSEED_API && trackedJobIds.length > 0,
+        queryFn: async () => getJobsFromApi(trackedJobIds),
+        refetchInterval: trackedJobIds.length > 0 ? 5000 : false,
+        staleTime: 0,
+    });
+
+    const trackedStatusById = useMemo(() => {
+        const map = new Map<string, string | undefined>();
+        for (const statusEntry of trackedJobStatuses) {
+            if (!statusEntry || typeof statusEntry.id !== 'string') continue;
+            map.set(statusEntry.id, normalizeJobStatus(statusEntry.status));
+        }
+        return map;
+    }, [trackedJobStatuses]);
+
+    useEffect(() => {
+        if (trackedJobsForModel.length === 0) {
+            lastTrackedStatusesRef.current.clear();
+            return;
+        }
+
+        const nextStatuses = new Map<string, string | undefined>();
+        const terminalJobIds: string[] = [];
+        let shouldRefetchFba = false;
+        let shouldRefetchGapfills = false;
+        let shouldRefetchModel = false;
+
+        for (const job of trackedJobsForModel) {
+            const currentStatus = trackedStatusById.get(job.id);
+            const previousStatus = lastTrackedStatusesRef.current.get(job.id);
+            const becameTerminal = Boolean(
+                currentStatus
+                && isTerminalJobStatus(currentStatus)
+                && !isTerminalJobStatus(previousStatus),
+            );
+
+            if (becameTerminal) {
+                terminalJobIds.push(job.id);
+                shouldRefetchModel = true;
+                if (currentStatus === 'completed') {
+                    if (job.kind === 'fba') shouldRefetchFba = true;
+                    if (job.kind === 'gapfill') shouldRefetchGapfills = true;
+                }
+            }
+
+            nextStatuses.set(job.id, currentStatus);
+        }
+
+        lastTrackedStatusesRef.current = nextStatuses;
+
+        if (shouldRefetchFba) {
+            void refetchModelFba();
+            void refetchWorkspaceFbaRefs();
+        }
+        if (shouldRefetchGapfills) {
+            void refetchModelGapfills();
+            void refetchWorkspaceGapfillRefs();
+        }
+        if (shouldRefetchModel) {
+            void refetchModelData();
+        }
+
+        if (terminalJobIds.length > 0) {
+            for (const jobId of terminalJobIds) {
+                removeTrackedJob(jobId);
+            }
+            setTrackedJobs(listTrackedJobs());
+        }
+    }, [
+        trackedJobsForModel,
+        trackedStatusById,
+        refetchModelData,
+        refetchModelFba,
+        refetchModelGapfills,
+        refetchWorkspaceFbaRefs,
+        refetchWorkspaceGapfillRefs,
+    ]);
 
     // Enhanced edit handlers — MUST be before early returns to satisfy Rules of Hooks
     const handleAddReactions = useCallback((reactions: { id: string; name: string; equation?: string }[]) => {
@@ -1005,30 +1544,17 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const modelName = String(modelObject.id ?? modelSegments[modelSegments.length - 1] ?? 'Unknown Model');
     const modelSpecies = String(modelObject.name ?? '');
     const tableConfig = buildTableConfig(modelObject);
-    const fbaRows = extractFbaRows(modelFba);
-    const gapfillRows = extractGapfillRows(modelGapfills);
+    const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries);
+    const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries);
     const expressionRows = extractExpressionRows(modelObject);
+    if (tableConfig.fba) {
+        tableConfig.fba.rows = fbaRows;
+    }
     const defaultMedia = workspacePath.includes('/plantseed/')
         ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
         : 'Complete';
     const isPlantModel = workspacePath.includes('/plantseed/')
         || String(modelObject.type ?? '').toLowerCase().includes('plant');
-
-    const pathname = usePathname();
-    const isUserDataModel = useMemo(() => {
-        return true;
-    }, []);
-
-    const userDataTabs = [
-        { label: 'My Models', href: '/my-models' },
-        { label: 'My Media', href: '/myMedia' },
-        { label: 'My Jobs', href: '/my-jobs' },
-    ];
-
-    const activeUserTab = useMemo(() => {
-        const idx = userDataTabs.findIndex((t) => pathname.startsWith(t.href));
-        return idx >= 0 ? idx : 0;
-    }, [pathname]);
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
@@ -1151,6 +1677,64 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
     ];
 
+    const fbaColumns: GridColDef<Record<string, unknown>>[] = [
+        {
+            field: 'id',
+            headerName: 'ID',
+            width: 180,
+            renderCell: (params) => {
+                const fbaId = params.value;
+                const fbaHref = `/fba${workspacePath}/fba/${fbaId}`;
+                return (
+                    <Link href={fbaHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                        {String(params.value ?? '')}
+                    </Link>
+                );
+            },
+        },
+        { field: 'objective', headerName: 'Objective', width: 140 },
+        { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
+        { field: 'media', headerName: 'Media', width: 180 },
+        { field: 'timestamp', headerName: 'Time', width: 180 },
+    ];
+
+    const gapfillColumns: GridColDef<Record<string, unknown>>[] = [
+        {
+            field: 'id',
+            headerName: 'ID',
+            width: 180,
+            renderCell: (params) => {
+                const gapfillId = params.value;
+                const gapfillHref = `/gapfill${workspacePath}/gapfill/${gapfillId}`;
+                return (
+                    <Link href={gapfillHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                        {String(params.value ?? '')}
+                    </Link>
+                );
+            },
+        },
+        { field: 'media', headerName: 'Media', width: 200 },
+        { field: 'integrated', headerName: 'Integrated', width: 120 },
+        { field: 'rundate', headerName: 'Date', width: 180 },
+    ];
+
+    const pathwayColumns: GridColDef<Record<string, unknown>>[] = [
+        { field: 'id', headerName: 'ID', width: 180 },
+        { field: 'name', headerName: 'Name', width: 300 },
+        {
+            field: 'reactions',
+            headerName: 'Rxns',
+            width: 120,
+            type: 'number',
+        },
+        {
+            field: 'compounds',
+            headerName: 'Cpds',
+            width: 120,
+            type: 'number',
+        },
+    ];
+
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
         const tab = MODEL_TABS[nextIndex];
         if (!tab) return;
@@ -1173,6 +1757,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     })
                     : await submitGapfillJobFromApi({
                         model: workspaceCandidates[0],
+                        template_type: 'gn',
                         media: selectedMedia,
                     });
 
@@ -1186,10 +1771,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     relatedRef: workspacePath,
                     submittedAt: new Date().toISOString(),
                 });
+                setTrackedJobs(listTrackedJobs());
             }
             setActionMessage(
                 jobId
-                    ? `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted. Job ID: ${jobId}`
+                    ? `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted. Job ID: ${jobId}. Results will appear automatically when ready.`
                     : `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted.`,
             );
         } catch (err) {
@@ -1587,7 +2173,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                         ? reactionColumns
                                         : tab.key === 'compounds'
                                             ? compoundColumns
-                                            : tableConfig[tab.key].columns
+                                            : tab.key === 'fba'
+                                                ? fbaColumns
+                                                : tab.key === 'pathways'
+                                                    ? pathwayColumns
+                                                    : tableConfig[tab.key].columns
                                 }
                                 pageSizeOptions={[10, 25, 50, 100]}
                                 paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
