@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3] - 2026-03-27
+
+Overview: ModelSEED-UI enhancements and bug fixes.
+
+### Fixed
+
+- Pop-up maintenance dialog on Plant Build page now displays without unnecessary title lines.
+- Model landing page biomass tab now correctly displays data when available.
+- User Data navigation tabs (My Models/My Media/My Jobs) now persist when navigating to model detail pages from user data section.
+
 ## [0.1.3] - 2026-03-25
 
 Overview: Improved Build Model clarity and fixed reconstruction submission errors.

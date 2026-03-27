@@ -16,7 +16,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel } from '@mui/x-data-grid';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -192,6 +192,8 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
         model.modelbiomasses ?? 
         model.biomass_reactions ?? 
         model.model_biomasses ??
+        model.biomass_reaction ?? 
+        model.modelbiomassreaction ?? 
         []
     );
     if (biomasses.length === 0) {
@@ -1012,6 +1014,22 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const isPlantModel = workspacePath.includes('/plantseed/')
         || String(modelObject.type ?? '').toLowerCase().includes('plant');
 
+    const pathname = usePathname();
+    const isUserDataModel = useMemo(() => {
+        return true;
+    }, []);
+
+    const userDataTabs = [
+        { label: 'My Models', href: '/my-models' },
+        { label: 'My Media', href: '/myMedia' },
+        { label: 'My Jobs', href: '/my-jobs' },
+    ];
+
+    const activeUserTab = useMemo(() => {
+        const idx = userDataTabs.findIndex((t) => pathname.startsWith(t.href));
+        return idx >= 0 ? idx : 0;
+    }, [pathname]);
+
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
     const genomeRef = String(modelObject.genome_ref ?? '');
@@ -1306,6 +1324,52 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     ))}
                 </Tabs>
             </Box>
+
+            {isUserDataModel && (
+                <Box
+                    sx={{
+                        backgroundColor: '#2D224E',
+                        borderBottom: '1px solid #ccc',
+                        px: 1.5,
+                        mt: 2,
+                    }}
+                >
+                    <Tabs
+                        value={activeUserTab}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        TabIndicatorProps={{ sx: { display: 'none' } }}
+                        sx={{
+                            minHeight: 48,
+                            '& .MuiTab-root': {
+                                color: 'rgba(255,255,255,0.7)',
+                                fontSize: '1rem',
+                                fontWeight: 400,
+                                textTransform: 'none',
+                                minHeight: 48,
+                                borderRight: '1px solid #bbb',
+                                px: 2.5,
+                                '&.Mui-selected': {
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                },
+                                '&:hover': {
+                                    color: '#fff',
+                                },
+                            },
+                        }}
+                    >
+                        {userDataTabs.map((tab) => (
+                            <Tab
+                                key={tab.label}
+                                label={tab.label}
+                                component={Link}
+                                href={tab.href}
+                            />
+                        ))}
+                    </Tabs>
+                </Box>
+            )}
 
             {MODEL_TABS.map((tab, index) => (
                 <TabPanel key={tab.key} value={tabIndex} index={index}>

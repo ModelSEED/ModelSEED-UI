@@ -15,8 +15,6 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -263,7 +261,7 @@ export default function BuildModelPlantPage() {
                                 <Tooltip
                                     title={
                                         PLANTSEED_MAINTENANCE
-                                            ? 'PlantSEED v2.0\nPlantSEED v3.0\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
+                                            ? 'PlantSEED v2.0\nPlantSEED v3.0\n\nUpdate In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.'
                                             : ''
                                     }
                                     slotProps={{
@@ -449,16 +447,6 @@ export default function BuildModelPlantPage() {
                     maxWidth="sm"
                     fullWidth
                 >
-                    <DialogTitle sx={{ fontWeight: 600 }}>
-                        PlantSEED v2.0
-                        <br />
-                        PlantSEED v3.0
-                    </DialogTitle>
-                    <DialogContent>
-                        <Typography sx={{ mt: 1 }}>
-                            Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.
-                        </Typography>
-                    </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setPlantseedDialogOpen(false)}>
                             Close
