@@ -95,8 +95,10 @@ npx playwright test -g "public"
 3. **Environment variables** in `.env.local`:
    ```bash
    NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
-   PATRIC_TOKEN=your_token  # Optional - tests skip if not set
+   PATRIC_TOKEN=your_patric_token   # For PATRIC workspace tests
+   RAST_TOKEN=your_rast_token       # For RAST workspace tests
    ```
+   Note: At least one token is required for authenticated tests.
 
 ---
 
@@ -109,9 +111,10 @@ The API test script (`scripts/api-test.mjs`) directly tests all backend endpoint
 | Suite | Tests |
 |-------|-------|
 | Configuration | API URL, Proxy settings, Reachability |
-| Authentication | PATRIC login |
+| Authentication | PATRIC/RAST token login |
 | Workspace | ls, get, create, delete |
 | ModelSEED API | List models, media, jobs |
+| Model Analysis | Get FBA results, Get gapfill results |
 | Public Data | List media, get model, export SBML |
 | Biochemistry | List/search reactions & compounds |
 
@@ -134,9 +137,24 @@ npm run test:api
 2. **Environment variables** in `.env.local`:
    ```bash
    NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
-   PATRIC_USERNAME=your_username
-   PATRIC_PASSWORD=your_password
+   
+   # PATRIC credentials (for /seaver@patricbrc.org/... paths)
+   PATRIC_TOKEN=un=seaver@patricbrc.org|...
+   
+   # OR RAST credentials (for /seaver/... paths)
+   RAST_TOKEN=un=seaver|...
    ```
+
+### What API Tests Verify
+
+- ✅ Authentication works (PATRIC and RAST tokens)
+- ✅ List user models
+- ✅ List workspace contents
+- ✅ Get model data
+- ✅ Get FBA results for models
+- ✅ Get gapfill results for models
+- ✅ Submit FBA jobs (via API, not tested here)
+- ✅ Public data access
 
 ---
 
@@ -162,7 +180,9 @@ The CI workflow (`.github/workflows/ci.yml`) runs on:
 
 1. Go to GitHub repository **Settings**
 2. Navigate to **Secrets and Variables > Actions**
-3. Add `PATRIC_TOKEN` with your PATRIC auth token
+3. Add secrets:
+   - `PATRIC_TOKEN` - PATRIC auth token
+   - `RAST_TOKEN` - RAST auth token (optional, for full coverage)
 
 ---
 
@@ -172,12 +192,46 @@ The CI workflow (`.github/workflows/ci.yml`) runs on:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PATRIC_TOKEN` | For E2E/API | PATRIC auth token |
-| `PATRIC_USERNAME` | For API | PATRIC username |
-| `PATRIC_PASSWORD` | For API | PATRIC password |
+| `PATRIC_TOKEN` | For API testing | PATRIC auth token (for PATRIC workspace) |
+| `PATRIC_USERNAME` | For API login | PATRIC username |
+| `PATRIC_PASSWORD` | For API login | PATRIC password |
+| `RAST_TOKEN` | For API testing | RAST auth token (for RAST workspace) |
+| `RAST_USERNAME` | For API login | RAST username |
+| `RAST_PASSWORD` | For API login | RAST password |
 | `NEXT_PUBLIC_USE_MODELSEED_API` | No | Enable ModelSEED API (default: true) |
 | `NEXT_PUBLIC_MODELSEED_API_URL` | No | API base URL |
 | `NEXT_PUBLIC_USE_NEW_PROXY` | No | Use new proxy (default: true) |
+
+### PATRIC vs RAST Tokens
+
+The API supports two authentication systems:
+- **PATRIC**: Use for `/seaver@patricbrc.org/modelseed/...` workspace paths
+- **RAST**: Use for `/seaver/modelseed/...` workspace paths
+
+API tests automatically use whichever token is available. For testing both systems, set both tokens:
+
+```bash
+# .env.local
+PATRIC_TOKEN=un=seaver@patricbrc.org|...
+RAST_TOKEN=un=seaver|...
+```
+
+### Example .env.local
+
+```bash
+NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+NEXT_PUBLIC_USE_MODELSEED_API=true
+
+# PATRIC credentials
+PATRIC_TOKEN=un=seaver@patricbrc.org|tokenid=...|expiry=...
+PATRIC_USERNAME=samseaver@gmail.com
+PATRIC_PASSWORD=your_password
+
+# RAST credentials  
+RAST_TOKEN=un=seaver|tokenid=...|expiry=...
+RAST_USERNAME=seaver
+RAST_PASSWORD=your_password
+```
 
 ---
 
@@ -192,11 +246,12 @@ The CI workflow (`.github/workflows/ci.yml`) runs on:
 ### Example (Correct)
 
 ```typescript
-const TOKEN = process.env.PATRIC_TOKEN;
+const PATRIC_TOKEN = process.env.PATRIC_TOKEN;
+const RAST_TOKEN = process.env.RAST_TOKEN;
 
 test.beforeEach(async ({ page }) => {
-  if (!TOKEN) {
-    test.skip(true, 'PATRIC_TOKEN not set');
+  if (!PATRIC_TOKEN && !RAST_TOKEN) {
+    test.skip(true, 'No auth tokens set');
     return;
   }
   // ...

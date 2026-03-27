@@ -4,11 +4,23 @@ ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the Model
 
 **Status (March 2026):** Core workflows and job execution are fully tested and stable against the Poplar `modelseed-api` layer. The UI is ready for production user testing, with specific backend limitations managed gracefully. Legacy endpoints are documented in `issues.md` and `docs/WORKSPACE.md`.
 
-> **⚠️ Known Limitations:**
-> - Models and media lists differ between RAST and PATRIC accounts for the same user (separate data stores)
-> - RAST MS FBA (Flux Balance Analysis) is not functional
-> - Model creation only works with PATRIC accounts
-> - Workspace write operations (save edits, delete) are limited
+### What's Working ✅
+
+- FBA job submission and results retrieval (both PATRIC and RAST)
+- Gapfill job submission
+- Model reconstruction (genome → model)
+- My Models, My Media, My Jobs pages
+- Model detail tabs (Reactions, Compounds, Genes, Compartments, Biomass, Pathways, FBA)
+- Biochemical reference data (reactions, compounds via Solr)
+
+### Known Limitations (Backend)
+
+- Organism/Taxonomy not saved during model reconstruction (backend fix needed)
+- Reaction equations not returned in model data (API limitation)
+- Gene functions not returned in model data (API limitation)
+- RAST gapfill jobs may fail (backend issue)
+
+> **⚠️ Note:** PATRIC and RAST are separate systems with different workspaces. A PATRIC user cannot access RAST workspace data and vice versa.
 
 ## Stack Overview
 
