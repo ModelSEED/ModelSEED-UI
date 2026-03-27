@@ -17,7 +17,7 @@ import { listPublicMediaFromApi, ModelseedMediaSummary } from '@/lib/api/modelse
 interface MediaSelectionDialogProps {
     open: boolean;
     onClose: () => void;
-    onConfirm: (mediaId: string, mediaName: string) => void;
+    onConfirm: (mediaId: string, mediaName: string, mediaRef?: string) => void;
     title?: string;
 }
 
@@ -55,7 +55,7 @@ export default function MediaSelectionDialog({
     const handleConfirm = () => {
         if (selectedMedia) {
             const media = mediaList.find(m => m.id === selectedMedia);
-            onConfirm(selectedMedia, media?.name || selectedMedia);
+            onConfirm(selectedMedia, media?.name || selectedMedia, media?.ref);
         }
     };
 
