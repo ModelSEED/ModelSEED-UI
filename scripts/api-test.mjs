@@ -18,7 +18,9 @@
  *   PATRIC_PASSWORD=your_password
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 const API_URL = process.env.NEXT_PUBLIC_MODELSEED_API_URL || 'http://localhost:8000';
 const USE_NEW_PROXY = process.env.NEXT_PUBLIC_USE_NEW_PROXY !== 'false';
@@ -33,7 +35,7 @@ const SOLR_BASE = process.env.NEXT_PUBLIC_USE_NEW_BIOCHEM === 'true'
 
 let testsPassed = 0;
 let testsFailed = 0;
-let authToken = null;
+let authToken = process.env.PATRIC_TOKEN || process.env.RAST_TOKEN || null;
 let authUser = null;
 let apiReachable = true;
 
@@ -181,21 +183,30 @@ async function testAuthentication() {
 
   const username = process.env.PATRIC_USERNAME;
   const password = process.env.PATRIC_PASSWORD;
+  const existingToken = process.env.PATRIC_TOKEN;
 
-  if (!username || !password) {
-    skip('PATRIC login', 'PATRIC_USERNAME/PASSWORD not set in .env.local');
+  if (existingToken) {
+    authToken = existingToken;
+    const tokenUserMatch = existingToken.match(/un=([^|]+)/);
+    authUser = tokenUserMatch ? tokenUserMatch[1] : 'unknown';
+    log(`  Using existing PATRIC_TOKEN for: ${authUser}`, 'success');
+    test('Token auth works', async () => {
+      assert(authToken, 'No token available');
+      log(`  Token auth OK`, 'success');
+    });
+  } else if (username && password) {
+    test('PATRIC login succeeds', async () => {
+      const result = await loginPatricApi(username, password);
+      assert(result, 'Login returned null');
+      authToken = result.token || result.access_token;
+      authUser = result.user_id || result.username;
+      assert(authToken, 'Login did not return token');
+      log(`  Logged in as: ${authUser}`, 'success');
+    });
+  } else {
+    skip('PATRIC login', 'PATRIC_TOKEN or PATRIC_USERNAME/PASSWORD not set in .env.local');
     skip('Authenticated API tests', 'No credentials');
-    return;
   }
-
-  test('PATRIC login succeeds', async () => {
-    const result = await loginPatricApi(username, password);
-    assert(result, 'Login returned null');
-    authToken = result.token || result.access_token;
-    authUser = result.user_id || result.username;
-    assert(authToken, 'Login did not return token');
-    log(`  Logged in as: ${authUser}`, 'success');
-  });
 }
 
 /* ============================================================================
@@ -268,6 +279,9 @@ async function testModelseedApi() {
     });
     assert(Array.isArray(result), 'Did not return array');
     log(`  Found ${result.length} user models`, 'info');
+    if (result.length > 0) {
+      log(`  First model: ${JSON.stringify(result[0]).substring(0, 100)}`, 'info');
+    }
   });
 
   test('List user media', async () => {
@@ -292,6 +306,24 @@ async function testModelseedApi() {
     });
     assert(result, 'Get model returned null');
     log(`  Got model detail`, 'success');
+  });
+
+  test('Get model gapfills', async () => {
+    const testModelRef = encodeURIComponent('/seaver@patricbrc.org/modelseed/Test');
+    const result = await request(`${API_URL}/api/models/gapfills?ref=${testModelRef}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    assert(result !== null && result !== undefined, 'Gapfills returned null/undefined');
+    log(`  Got gapfills: OK`, 'success');
+  });
+
+  test('Get model FBA results', async () => {
+    const testModelRef = encodeURIComponent('/seaver@patricbrc.org/modelseed/Test');
+    const result = await request(`${API_URL}/api/models/fba?ref=${testModelRef}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    assert(result !== null && result !== undefined, 'FBA results returned null/undefined');
+    log(`  Got FBA results: OK`, 'success');
   });
 }
 

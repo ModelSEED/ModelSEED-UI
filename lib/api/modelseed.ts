@@ -189,7 +189,7 @@ export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> 
 
 export async function getModelDataFromApi(ref: string): Promise<Record<string, unknown>> {
     return modelseedFetch<Record<string, unknown>>(
-        `/api/models/data${buildQueryString({ ref })}`,
+        `/api/models/data${buildQueryString({ ref: safeDecodePath(ref) })}`,
     );
 }
 
@@ -205,7 +205,7 @@ export async function copyModelFromApi(
 
 export async function listModelGapfillsFromApi(ref: string): Promise<Record<string, unknown>[]> {
     return modelseedFetch<Record<string, unknown>[]>(
-        `/api/models/gapfills${buildQueryString({ ref })}`,
+        `/api/models/gapfills${buildQueryString({ ref: safeDecodePath(ref) })}`,
     );
 }
 
@@ -223,7 +223,7 @@ export async function manageModelGapfillsFromApi(
 
 export async function getModelFbaFromApi(ref: string): Promise<Record<string, unknown>> {
     return modelseedFetch<Record<string, unknown>>(
-        `/api/models/fba${buildQueryString({ ref })}`,
+        `/api/models/fba${buildQueryString({ ref: safeDecodePath(ref) })}`,
     );
 }
 
@@ -247,7 +247,7 @@ export async function getModelDetailBundleFromApi(ref: string): Promise<ModelDet
  */
 export async function exportModelFromApi(ref: string, format: string): Promise<Blob> {
     const response = await fetch(
-        `${MODELSEED_API_URL}/api/models/export?ref=${encodeURIComponent(ref)}&format=${format}`,
+        `${MODELSEED_API_URL}/api/models/export?ref=${encodeURIComponent(safeDecodePath(ref))}&format=${format}`,
         {
             headers: {
                 ...withRawTokenAuth({}, true),
@@ -267,7 +267,7 @@ export async function exportModelFromApi(ref: string, format: string): Promise<B
  */
 export async function deleteModelFromApi(ref: string): Promise<void> {
     const response = await fetch(
-        `${MODELSEED_API_URL}/api/models?ref=${encodeURIComponent(ref)}`,
+        `${MODELSEED_API_URL}/api/models?ref=${encodeURIComponent(safeDecodePath(ref))}`,
         {
             method: 'DELETE',
             headers: withRawTokenAuth({}, true),
@@ -558,7 +558,7 @@ export async function exportMediaFromApi(ref: string): Promise<Record<string, un
 
 export async function listModelEditsFromApi(ref: string): Promise<Record<string, unknown>[]> {
     return modelseedFetch<Record<string, unknown>[]>(
-        `/api/models/edits${buildQueryString({ ref })}`,
+        `/api/models/edits${buildQueryString({ ref: safeDecodePath(ref) })}`,
     );
 }
 
