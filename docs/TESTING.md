@@ -3,8 +3,9 @@
 > **Quick Reference**
 > - Tests Location: `tests/` directory
 > - Unit Tests: `tests/unit/` (Vitest)
-> - E2E Tests: `tests/e2e/` (Playwright)
-> - CI/CD: `.github/workflows/test.yml`
+> - E2E Tests: `tests/e2e/` (Playwright) - 59 comprehensive tests
+> - API Tests: `scripts/api-test.mjs` - Direct endpoint testing
+> - CI/CD: `.github/workflows/ci.yml`
 
 This document covers the testing infrastructure that enables safe JavaScript framework updates and catches regressions before they reach users.
 
@@ -15,8 +16,8 @@ This document covers the testing infrastructure that enables safe JavaScript fra
 | Layer | Tool | Speed | Coverage |
 |-------|------|-------|---------|
 | **Unit Tests** | Vitest | < 1s | Utility functions, API clients |
-| **Integration Tests** | Vitest | 1-5s | Real API validation |
-| **E2E Tests** | Playwright | 30-60s | Critical user workflows |
+| **API Tests** | Node.js | 5-10s | Direct endpoint validation |
+| **E2E Tests** | Playwright | 30-60s | Critical user workflows (59 tests) |
 
 ### Why This Stack?
 

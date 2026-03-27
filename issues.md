@@ -33,6 +33,38 @@
 
 ---
 
+### 🟡 ACTIVE: My Models/Media Not Consistent Across RAST and PATRIC
+
+**Severity:** High  
+**Affected:** `/my-models`, `/myMedia` pages  
+**Description:** Models and media lists are NOT the same when logging in with RAST vs PATRIC credentials for the same user. This is because:
+- PATRIC and RAST maintain separate user workspaces
+- Each authentication system has its own independent data storage
+- Users may have created models/media in one system but not the other
+
+**Impact:** 
+- Users who use both RAST and PATRIC accounts see different data in each
+- Switching from RAST to PATRIC (or vice versa) shows different models/media
+- No unified view of user's complete data across authentication systems
+
+**Action Item:** Document this limitation clearly in UI or consider implementing data migration/sync between systems.
+
+---
+
+### 🟡 ACTIVE: RAST MS FBA Not Working
+
+**Severity:** High  
+**Affected:** `/fba/*` pages, FBA analysis  
+**Description:** Flux Balance Analysis (FBA) jobs submitted through RAST accounts fail to complete or return errors. This affects:
+- Running FBA on models owned by RAST users
+- Viewing FBA results for RAST-owned models
+
+**Impact:** RAST users cannot perform metabolic modeling analysis through the UI.
+
+**Action Item:** Backend investigation required - RAST MS FBA service may be unavailable or require different authentication.
+
+---
+
 ### 🟡 ACTIVE: My Models Data Depends on Account Type
 
 **Severity:** Medium  
@@ -93,6 +125,8 @@ This is expected behavior based on how each system stores user data, but the UX 
 | Issue | Severity | Status | Account Affected |
 |-------|----------|--------|-------------------|
 | Model submission (PATRIC only) | High | 🔴 Active | RAST |
+| Model/Media list inconsistency (RAST vs PATRIC) | High | 🟡 Active | Both |
+| RAST MS FBA not working | High | 🔴 Active | RAST |
 | Model editing | Medium | 🟡 Active | All |
 | My Models account differences | Medium | 🟡 Active | RAST |
 | Workspace writes | High | 🟡 Active | All |

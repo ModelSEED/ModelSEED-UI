@@ -2,7 +2,13 @@
 
 ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the ModelSEED platform. It provides biochemistry reference tables, public genomes/media, and authenticated user workflows (Build Model, My Models, My Media, My Jobs) interacting with the new `modelseed-api` backend while preserving legacy URL parity.
 
-**Status (March 2026):** Core workflows and job execution are fully tested and stable against the popar `modelseed-api` layer. The UI is ready for production user testing, with specific backend limitations managed gracefully. Legacy endpoints are documented in `issues.md` and `docs/WORKSPACE.md`.
+**Status (March 2026):** Core workflows and job execution are fully tested and stable against the Poplar `modelseed-api` layer. The UI is ready for production user testing, with specific backend limitations managed gracefully. Legacy endpoints are documented in `issues.md` and `docs/WORKSPACE.md`.
+
+> **⚠️ Known Limitations:**
+> - Models and media lists differ between RAST and PATRIC accounts for the same user (separate data stores)
+> - RAST MS FBA (Flux Balance Analysis) is not functional
+> - Model creation only works with PATRIC accounts
+> - Workspace write operations (save edits, delete) are limited
 
 ## Stack Overview
 
@@ -107,6 +113,42 @@ For a deeper architectural view, see:
 
 ### Note for AI Agents
 When initializing a debugging or feature session, start by reading `INDEX.md` for the context protocol, then review `issues.md` to ensure you are not debugging a known backend limitation (such as 501 Not Implemented endpoints).
+
+## Running Tests
+
+### Prerequisites
+
+1. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+2. **Start SSH tunnel to Poplar API (for authenticated tests):**
+   ```bash
+   ssh -L 8000:localhost:8000 user@poplar.cels.anl.gov
+   ```
+
+3. **Configure `.env.local`:**
+   ```bash
+   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   PATRIC_USERNAME=your_username
+   PATRIC_PASSWORD=your_password
+   ```
+
+### Test Commands
+
+```bash
+# Unit tests
+npm run test:run
+
+# E2E tests (requires dev server + SSH tunnel)
+npm run test:e2e
+
+# API endpoint tests (requires SSH tunnel)
+npm run test:api
+```
+
+See [`tests/README.md`](tests/README.md) for full documentation.
 
 ## Timestamp Log
 

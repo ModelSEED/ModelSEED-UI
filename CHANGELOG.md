@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - TBD
+
+### Known Issues (Documented in issues.md)
+
+- **Models/Media inconsistency**: Models and media lists differ between RAST and PATRIC accounts for the same user
+- **RAST MS FBA not working**: FBA analysis fails for RAST-owned models
+- **PATRIC-only model submission**: Model creation only works with PATRIC accounts
+- **Workspace write operations limited**: Cannot save edits back to workspace
+
+### Testing
+
+- Added comprehensive E2E test suite (59 tests) covering all major workflows
+- Added API test script for endpoint validation
+- CI/CD pipeline with lint, typecheck, security audit, and tests
+
+---
+
 ## [3] - 2026-03-27
 
 Overview: ModelSEED-UI enhancements and bug fixes.
