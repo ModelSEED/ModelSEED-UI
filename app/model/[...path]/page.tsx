@@ -1323,18 +1323,29 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         staleTime: 30_000,
     });
 
+    const modelFbaRef = useMemo(() => {
+        // Only fetch FBA if we're on a specific model, not a folder
+        // A model path should have at least 3 segments and NOT end with /modelseed
+        const segments = workspacePath.split('/').filter(Boolean);
+        if (segments.length >= 3 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
+            const modelPath = workspacePath.endsWith('/model') ? workspacePath : `${workspacePath}/model`;
+            return modelPath;
+        }
+        return null;
+    }, [workspacePath]);
+
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
-        queryKey: ['modelFba', USE_MODELSEED_API, workspaceCandidates[0]],
-        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
-        queryFn: async () => getModelFbaFromApi(workspaceCandidates[0]),
+        queryKey: ['modelFba', USE_MODELSEED_API, modelFbaRef],
+        enabled: USE_MODELSEED_API && modelFbaRef !== null,
+        queryFn: async () => getModelFbaFromApi(modelFbaRef!),
         retry: 0,
         staleTime: 0,
     });
 
     const { data: modelGapfills, error: modelGapfillsError, refetch: refetchModelGapfills } = useQuery({
-        queryKey: ['modelGapfills', USE_MODELSEED_API, workspaceCandidates[0]],
-        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
-        queryFn: async () => listModelGapfillsFromApi(workspaceCandidates[0]),
+        queryKey: ['modelGapfills', USE_MODELSEED_API, modelFbaRef],
+        enabled: USE_MODELSEED_API && modelFbaRef !== null,
+        queryFn: async () => listModelGapfillsFromApi(modelFbaRef!),
         retry: 0,
         staleTime: 0,
     });

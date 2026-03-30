@@ -204,9 +204,17 @@ export async function copyModelFromApi(
 }
 
 export async function listModelGapfillsFromApi(ref: string): Promise<Record<string, unknown>[]> {
-    return modelseedFetch<Record<string, unknown>[]>(
-        `/api/models/gapfills${buildQueryString({ ref: safeDecodePath(ref) })}`,
-    );
+    try {
+        return await modelseedFetch<Record<string, unknown>[]>(
+            `/api/models/gapfills${buildQueryString({ ref: safeDecodePath(ref) })}`,
+        );
+    } catch (err) {
+        // 404 means no gapfill data exists yet - this is expected for models without gapfill runs
+        if (err instanceof Error && err.message.includes('(404)')) {
+            return [];
+        }
+        throw err;
+    }
 }
 
 export async function manageModelGapfillsFromApi(
@@ -221,10 +229,18 @@ export async function manageModelGapfillsFromApi(
     });
 }
 
-export async function getModelFbaFromApi(ref: string): Promise<Record<string, unknown>> {
-    return modelseedFetch<Record<string, unknown>>(
-        `/api/models/fba${buildQueryString({ ref: safeDecodePath(ref) })}`,
-    );
+export async function getModelFbaFromApi(ref: string): Promise<Record<string, unknown> | null> {
+    try {
+        return await modelseedFetch<Record<string, unknown>>(
+            `/api/models/fba${buildQueryString({ ref: safeDecodePath(ref) })}`,
+        );
+    } catch (err) {
+        // 404 means no FBA data exists yet - this is expected for models without FBA runs
+        if (err instanceof Error && err.message.includes('(404)')) {
+            return null;
+        }
+        throw err;
+    }
 }
 
 export async function getModelDetailBundleFromApi(ref: string): Promise<ModelDetailBundle> {
@@ -557,9 +573,17 @@ export async function exportMediaFromApi(ref: string): Promise<Record<string, un
 }
 
 export async function listModelEditsFromApi(ref: string): Promise<Record<string, unknown>[]> {
-    return modelseedFetch<Record<string, unknown>[]>(
-        `/api/models/edits${buildQueryString({ ref: safeDecodePath(ref) })}`,
-    );
+    try {
+        return await modelseedFetch<Record<string, unknown>[]>(
+            `/api/models/edits${buildQueryString({ ref: safeDecodePath(ref) })}`,
+        );
+    } catch (err) {
+        // 404 means no edits exist yet - this is expected for models without edits
+        if (err instanceof Error && err.message.includes('(404)')) {
+            return [];
+        }
+        throw err;
+    }
 }
 
 export async function editModelFromApi(

@@ -79,9 +79,10 @@ function statusColor(status: string, isStuck?: boolean): 'error' | 'success' | '
     return 'default';
 }
 
-function normalizeStatus(status: string): 'queued' | 'running' | 'completed' {
+function normalizeStatus(status: string): 'queued' | 'running' | 'completed' | 'failed' {
     const s = status.toLowerCase();
-    if (['completed', 'failed', 'error', 'cancelled', 'canceled', 'terminated'].includes(s)) return 'completed';
+    if (['failed', 'error', 'cancelled', 'canceled', 'terminated'].includes(s)) return 'failed';
+    if (['completed'].includes(s)) return 'completed';
     if (['running', 'in-progress', 'executing'].includes(s)) return 'running';
     return 'queued';
 }
@@ -211,11 +212,7 @@ function MyJobsContent() {
         const result = { queued: 0, running: 0, completed: 0, failed: 0 };
         for (const job of jobRows) {
             const status = normalizeStatus(job.status);
-            if (status in result) {
-                result[status as keyof typeof result]++;
-            } else if (job.status.toLowerCase() === 'failed') {
-                result.failed++;
-            }
+            result[status as keyof typeof result]++;
         }
         return result;
     }, [jobRows]);
