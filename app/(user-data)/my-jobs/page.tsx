@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import QueueIcon from '@mui/icons-material/HourglassEmpty';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -208,9 +209,14 @@ function MyJobsContent() {
     }, [refetch]);
 
     const counts = useMemo(() => {
-        const result = { queued: 0, running: 0, completed: 0 };
+        const result = { queued: 0, running: 0, completed: 0, failed: 0 };
         for (const job of jobRows) {
-            result[normalizeStatus(job.status)]++;
+            const status = normalizeStatus(job.status);
+            if (status in result) {
+                result[status as keyof typeof result]++;
+            } else if (job.status.toLowerCase() === 'failed') {
+                result.failed++;
+            }
         }
         return result;
     }, [jobRows]);
@@ -339,6 +345,13 @@ function MyJobsContent() {
                     <Box>
                         <Typography variant="h4" fontWeight={600}>{isLoading ? '…' : counts.completed}</Typography>
                         <Typography variant="body2" color="text.secondary">Completed</Typography>
+                    </Box>
+                </Paper>
+                <Paper elevation={0} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 2, border: '1px solid #e0e0e0', minWidth: 160 }}>
+                    <ErrorOutlineIcon sx={{ fontSize: 40, color: '#f44336' }} />
+                    <Box>
+                        <Typography variant="h4" fontWeight={600}>{isLoading ? '…' : counts.failed}</Typography>
+                        <Typography variant="body2" color="text.secondary">Failed</Typography>
                     </Box>
                 </Paper>
             </Box>

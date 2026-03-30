@@ -58,6 +58,7 @@ type TabKey =
     | 'biomass'
     | 'pathways'
     | 'fba'
+    | 'gapfill'
     | 'edits';
 
 interface TabConfig {
@@ -80,6 +81,7 @@ const MODEL_TABS: TabConfig[] = [
     { key: 'biomass', label: 'Biomass', searchPlaceholder: 'Search biomass...' },
     { key: 'pathways', label: 'Pathways', searchPlaceholder: 'Search pathways...' },
     { key: 'fba', label: 'FBA', searchPlaceholder: 'Search FBA results...' },
+    { key: 'gapfill', label: 'Gapfill', searchPlaceholder: 'Search gapfill results...' },
     { key: 'edits', label: 'Edit Model', searchPlaceholder: 'Search edits...' },
 ];
 
@@ -440,6 +442,15 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
                 { field: 'media', headerName: 'Media', width: 180 },
                 { field: 'timestamp', headerName: 'Time', width: 180 },
+            ],
+        },
+        gapfill: {
+            rows: [],
+            columns: [
+                { field: 'id', headerName: 'ID', width: 180 },
+                { field: 'media', headerName: 'Media', width: 200 },
+                { field: 'integrated', headerName: 'Integrated', width: 120 },
+                { field: 'rundate', headerName: 'Date', width: 180 },
             ],
         },
     };
@@ -1549,6 +1560,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const expressionRows = extractExpressionRows(modelObject);
     if (tableConfig.fba) {
         tableConfig.fba.rows = fbaRows;
+    }
+    if (tableConfig.gapfill) {
+        tableConfig.gapfill.rows = gapfillRows;
     }
     const defaultMedia = workspacePath.includes('/plantseed/')
         ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
