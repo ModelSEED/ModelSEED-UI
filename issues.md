@@ -110,6 +110,20 @@ This is expected behavior based on how each system stores user data, but the UX 
 
 ---
 
+### 🟡 ACTIVE: Public Media List Empty
+
+**Severity:** Low  
+**Affected:** `/list-media` page  
+**Description:** The public media table renders but shows 0 rows. The API endpoint `/api/media/public` returns an empty array.
+
+**Impact:** Users cannot browse available public media formulations.
+
+**Location:** `app/(reference-data)/list-media/page.tsx`, `lib/api/modelseed.ts:listPublicMediaFromApi`
+
+**Backend Required:** Yes - Populate the `/api/media/public` endpoint with media data
+
+---
+
 ### 🟢 COMPLETED: Job Status Sync with Model Table
 
 **Severity:** Low  
@@ -130,6 +144,8 @@ This is expected behavior based on how each system stores user data, but the UX 
 | Model editing | Medium | 🟡 Active | All |
 | My Models account differences | Medium | 🟡 Active | RAST |
 | Workspace writes | High | 🟡 Active | All |
+| Public media list empty | Low | 🟡 Active | All |
+| Invalid model path timeout | Low | ✅ Fixed | All |
 | Media consistency | Low | ✅ Complete | - |
 | Job status sync | Low | ✅ Complete | - |
 

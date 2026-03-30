@@ -1239,6 +1239,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const router = useRouter();
     const { method: authMethod } = useAuth();
     const resolvedParams = use(params);
+    const [loadingTooLong, setLoadingTooLong] = useState(false);
     const urlSegments = useMemo(
         () => resolvedParams.path ?? [],
         [resolvedParams.path],
@@ -1294,7 +1295,18 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             throw new Error(`Failed to load model object. Tried refs: ${failures.join(' | ')}`);
         },
         retry: 1,
+        staleTime: 60_000, // Cache for 1 minute
     });
+
+    // Track loading timeout - show error message after 15 seconds
+    useEffect(() => {
+        if (!isLoading) {
+            setLoadingTooLong(false);
+            return;
+        }
+        const timeout = setTimeout(() => setLoadingTooLong(true), 15_000);
+        return () => clearTimeout(timeout);
+    }, [isLoading]);
 
     const {
         data: modelEdits = [],
@@ -1544,8 +1556,19 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     if (isLoading) {
         return (
-            <Box sx={{ p: 10, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ p: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                 <CircularProgress />
+                {loadingTooLong && (
+                    <Box sx={{ textAlign: 'center', maxWidth: 500 }}>
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                            <AlertTitle>Loading is taking longer than expected</AlertTitle>
+                            The model at <strong>{workspacePath}</strong> may not exist or the API may be unavailable.
+                        </Alert>
+                        <Button variant="outlined" onClick={() => router.push('/my-models')}>
+                            Return to My Models
+                        </Button>
+                    </Box>
+                )}
             </Box>
         );
     }
