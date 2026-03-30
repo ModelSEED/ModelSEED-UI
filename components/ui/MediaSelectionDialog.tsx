@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,7 +12,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import { listPublicMediaFromApi, ModelseedMediaSummary } from '@/lib/api/modelseed';
+import { useQuery } from '@tanstack/react-query';
+import { listPublicMediaFromApi } from '@/lib/api/modelseed';
 
 interface MediaSelectionDialogProps {
     open: boolean;
@@ -27,30 +28,24 @@ export default function MediaSelectionDialog({
     onConfirm,
     title = 'Select Media for Simulation',
 }: MediaSelectionDialogProps) {
-    const [mediaList, setMediaList] = useState<ModelseedMediaSummary[]>([]);
-    const [selectedMedia, setSelectedMedia] = useState<string>('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [userSelectedMedia, setUserSelectedMedia] = useState<string>('');
 
-    useEffect(() => {
-        if (open) {
-            setLoading(true);
-            setError(null);
-            listPublicMediaFromApi()
-                .then((media) => {
-                    setMediaList(media);
-                    if (media.length > 0) {
-                        const defaultMedia = media.find(m => m.name.toLowerCase().includes('complete')) || media[0];
-                        setSelectedMedia(defaultMedia.id);
-                    }
-                })
-                .catch((err) => {
-                    console.error('Failed to load media:', err);
-                    setError('Failed to load media list');
-                })
-                .finally(() => setLoading(false));
+    const { data: mediaList = [], isLoading, error } = useQuery({
+        queryKey: ['public-media-list'],
+        queryFn: listPublicMediaFromApi,
+        enabled: open,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Derive the effective selection: user choice or default from loaded list
+    const selectedMedia = useMemo(() => {
+        if (userSelectedMedia) return userSelectedMedia;
+        if (mediaList.length > 0) {
+            const defaultMedia = mediaList.find(m => m.name.toLowerCase().includes('complete')) || mediaList[0];
+            return defaultMedia.id;
         }
-    }, [open]);
+        return '';
+    }, [userSelectedMedia, mediaList]);
 
     const handleConfirm = () => {
         if (selectedMedia) {
@@ -63,20 +58,20 @@ export default function MediaSelectionDialog({
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ fontWeight: 600 }}>{title}</DialogTitle>
             <DialogContent>
-                {loading && (
+                {isLoading && (
                     <CircularProgress sx={{ display: 'block', mx: 'auto', my: 2 }} />
                 )}
                 {error && (
-                    <Typography sx={{ color: 'error.main' }}>{error}</Typography>
+                    <Typography sx={{ color: 'error.main' }}>Failed to load media list</Typography>
                 )}
-                {!loading && !error && (
+                {!isLoading && !error && (
                     <FormControl fullWidth sx={{ mt: 1 }}>
                         <InputLabel id="media-select-label">Media</InputLabel>
                         <Select
                             labelId="media-select-label"
                             value={selectedMedia}
                             label="Media"
-                            onChange={(e) => setSelectedMedia(e.target.value)}
+                            onChange={(e) => setUserSelectedMedia(e.target.value)}
                         >
                             {mediaList.map((media) => (
                                 <MenuItem key={media.id} value={media.id}>
@@ -92,7 +87,7 @@ export default function MediaSelectionDialog({
                 <Button
                     onClick={handleConfirm}
                     variant="contained"
-                    disabled={!selectedMedia || loading}
+                    disabled={!selectedMedia || isLoading}
                 >
                     Run
                 </Button>

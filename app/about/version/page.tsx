@@ -13,7 +13,7 @@ async function getChangelog() {
     try {
         const filePath = path.join(process.cwd(), 'CHANGELOG.md');
         return fs.readFileSync(filePath, 'utf8');
-    } catch (error) {
+    } catch {
         return 'Changelog not found or could not be loaded.';
     }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { PUBLICATIONS, type Publication } from '@/lib/data/publications';
+import { PUBLICATIONS } from '@/lib/data/publications';
 import styles from './publications.module.css';
 
 /** Highlight matching text in a string, returning JSX fragments. */

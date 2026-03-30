@@ -19,7 +19,6 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelect
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 import { useAuth } from '@/components/auth/AuthProvider';
 import { parseWorkspaceGetObject, workspaceGet, workspaceLs } from '@/lib/api/workspace';
@@ -261,7 +260,7 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
         // Handle array of arrays format: [[cpd_id, coefficient, ""], ...]
         const rawCompounds = biomass.compounds;
         if (Array.isArray(rawCompounds) && rawCompounds.length > 0 && Array.isArray(rawCompounds[0])) {
-            compounds = rawCompounds.map((c: unknown[], idx: number) => ({
+            compounds = rawCompounds.map((c: unknown[]) => ({
                 compound_id: Array.isArray(c) ? c[0] : '',
                 coefficient: Array.isArray(c) ? c[1] : 0,
                 compartment: Array.isArray(c) ? c[2] : '',
@@ -1391,7 +1390,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [addReactionsOpen, setAddReactionsOpen] = useState(false);
     const [reactionsToAdd, setReactionsToAdd] = useState<{ id: string; name: string; equation?: string; direction?: string }[]>([]);
     const [selectedReactionsToRemove, setSelectedReactionsToRemove] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
-    const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const lastTrackedStatusesRef = useRef(new Map<string, string | undefined>());
 
@@ -1405,6 +1403,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const activeUserTab = useMemo(() => {
         const idx = userDataTabs.findIndex((t) => pathname.startsWith(t.href));
         return idx >= 0 ? idx : 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- userDataTabs is stable
     }, [pathname]);
     const isUserDataModel = useMemo(() => {
         return true;
@@ -1712,26 +1711,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         { field: 'timestamp', headerName: 'Time', width: 180 },
     ];
 
-    const gapfillColumns: GridColDef<Record<string, unknown>>[] = [
-        {
-            field: 'id',
-            headerName: 'ID',
-            width: 180,
-            renderCell: (params) => {
-                const gapfillId = params.value;
-                const gapfillHref = `/gapfill${workspacePath}/gapfill/${gapfillId}`;
-                return (
-                    <Link href={gapfillHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
-                        {String(params.value ?? '')}
-                    </Link>
-                );
-            },
-        },
-        { field: 'media', headerName: 'Media', width: 200 },
-        { field: 'integrated', headerName: 'Integrated', width: 120 },
-        { field: 'rundate', headerName: 'Date', width: 180 },
-    ];
-
     const pathwayColumns: GridColDef<Record<string, unknown>>[] = [
         { field: 'id', headerName: 'ID', width: 180 },
         { field: 'name', headerName: 'Name', width: 300 },
@@ -1887,8 +1866,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 modelName={modelName}
                 visualizeOption={visualizeOption}
                 onVisualizeChange={setVisualizeOption}
-                onRunFba={(mediaId?: string, mediaName?: string) => void submitModelJob('fba', mediaId)}
-                onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaId)}
+                onRunFba={() => void submitModelJob('fba')}
+                onRunGapfill={() => void submitModelJob('gapfill')}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
             />

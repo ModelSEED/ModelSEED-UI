@@ -42,8 +42,9 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
             setUsername('');
             setPassword('');
             onClose();
-        } catch (err: any) {
-            setError(err?.message ?? 'Authentication failed. Please check your credentials.');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Authentication failed. Please check your credentials.';
+            setError(message);
         } finally {
             setLoading(false);
         }

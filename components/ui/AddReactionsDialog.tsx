@@ -62,12 +62,13 @@ export default function AddReactionsDialog({ open, onClose, onAdd, excludeIds = 
         enabled: open && debouncedQuery.length >= 2,
     });
 
-    // Filter out excluded IDs
+    // Filter out excluded IDs - use data.docs directly in deps to match React Compiler expectations
+    const docs = data?.docs;
     const filteredDocs = useMemo(() => {
-        if (!data?.docs) return [];
+        if (!docs) return [];
         const excludeSet = new Set(excludeIds);
-        return data.docs.filter((r) => !excludeSet.has(r.id));
-    }, [data?.docs, excludeIds]);
+        return docs.filter((r) => !excludeSet.has(r.id));
+    }, [docs, excludeIds]);
 
     const handleAdd = () => {
         const selectedIds = selectionModel.type === 'include' 

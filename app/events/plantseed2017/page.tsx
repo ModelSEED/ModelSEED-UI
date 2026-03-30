@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Typography, Box, Link as MuiLink } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import Image from 'next/image';
 
 export default function PlantSEED2017Page() {

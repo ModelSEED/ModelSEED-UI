@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -78,7 +78,7 @@ const FEATURES_ROW_2 = [
     },
 ];
 
-export default function HomePage() {
+function HomePageContent() {
     const [method, setMethod] = useState<AuthMethod>('rast');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -406,5 +406,13 @@ export default function HomePage() {
                 </Container>
             </Box>
         </>
+    );
+}
+
+export default function HomePage() {
+    return (
+        <Suspense fallback={<div />}>
+            <HomePageContent />
+        </Suspense>
     );
 }

@@ -26,6 +26,8 @@ import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import {
+    deleteModelFromApi,
+    exportModelFromApi,
     getJobsFromApi,
     listUserModelsFromApi,
     manageJobFromApi,
@@ -99,6 +101,8 @@ export default function MyModelsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'modDate', sort: 'desc' }]);
     const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
+    const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
     const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
     const [mergeModelName, setMergeModelName] = useState('merged_model');
     const [mergeOutputPath, setMergeOutputPath] = useState('');
@@ -168,6 +172,46 @@ export default function MyModelsPage() {
     const handleModelDeleted = useCallback(() => {
         void refetch();
     }, [refetch]);
+
+    const handleBulkDelete = useCallback(async () => {
+        setIsBulkDeleting(true);
+        try {
+            for (const modelId of selectedModelIds) {
+                const model = rows.find((r) => r.id === modelId);
+                if (model) {
+                    await deleteModelFromApi(model.path);
+                }
+            }
+            setSelectedModelIds([]);
+            setBulkDeleteDialogOpen(false);
+            void refetch();
+        } catch (err) {
+            console.error('Bulk delete failed:', err);
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    }, [selectedModelIds, rows, refetch]);
+
+    const handleBulkExport = useCallback(async () => {
+        for (const modelId of selectedModelIds) {
+            const model = rows.find((r) => r.id === modelId);
+            if (model) {
+                try {
+                    const blob = await exportModelFromApi(model.path, 'json');
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${model.id}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error(`Export failed for ${model.id}:`, err);
+                }
+            }
+        }
+    }, [selectedModelIds, rows]);
 
     const trackedJobStatusMap = useMemo(() => {
         const list = Array.isArray(trackedJobStatuses) ? trackedJobStatuses : [];
@@ -244,12 +288,16 @@ export default function MyModelsPage() {
     }, [refetch]);
 
     useEffect(() => {
+        // Capture ref values for cleanup
+        const timerMap = modelSyncTimerRef.current;
+        const attemptMap = modelSyncAttemptRef.current;
+        
         return () => {
-            for (const timeoutId of modelSyncTimerRef.current.values()) {
+            for (const timeoutId of timerMap.values()) {
                 window.clearTimeout(timeoutId);
             }
-            modelSyncTimerRef.current.clear();
-            modelSyncAttemptRef.current.clear();
+            timerMap.clear();
+            attemptMap.clear();
         };
     }, []);
 
@@ -519,6 +567,26 @@ export default function MyModelsPage() {
                                 Merge Models ({selectedModelIds.length})
                             </Button>
                         )}
+                        {selectedModelIds.length >= 1 && (
+                            <>
+                                <Button
+                                    variant="outlined"
+                                    color="info"
+                                    onClick={handleBulkExport}
+                                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                                >
+                                    Export ({selectedModelIds.length})
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    onClick={() => setBulkDeleteDialogOpen(true)}
+                                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                                >
+                                    Delete ({selectedModelIds.length})
+                                </Button>
+                            </>
+                        )}
                     </Stack>
                 </Box>
 
@@ -706,6 +774,38 @@ export default function MyModelsPage() {
                             disabled={isSubmittingMerge || selectedModels.length < 2}
                         >
                             {isSubmittingMerge ? 'Submitting...' : 'Submit Merge'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog
+                    open={bulkDeleteDialogOpen}
+                    onClose={() => setBulkDeleteDialogOpen(false)}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle>Delete Models</DialogTitle>
+                    <DialogContent>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                            Are you sure you want to delete the following {selectedModelIds.length} model(s)? This action cannot be undone.
+                        </Typography>
+                        <Stack spacing={1}>
+                            {selectedModels.map((model) => (
+                                <Typography key={model.id} variant="body2">
+                                    {model.id} <Box component="span" sx={{ color: 'text.secondary' }}>({model.path})</Box>
+                                </Typography>
+                            ))}
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setBulkDeleteDialogOpen(false)} disabled={isBulkDeleting}>Cancel</Button>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => void handleBulkDelete()}
+                            disabled={isBulkDeleting}
+                        >
+                            {isBulkDeleting ? 'Deleting...' : 'Delete Models'}
                         </Button>
                     </DialogActions>
                 </Dialog>

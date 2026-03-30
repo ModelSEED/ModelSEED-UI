@@ -32,15 +32,13 @@ export default function ModelDetailHeader({
 }: ModelDetailHeaderProps) {
     const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
     const [mediaDialogType, setMediaDialogType] = useState<'fba' | 'gapfill' | null>(null);
-    const [selectedMedia, setSelectedMedia] = useState<{ id: string; name: string; ref?: string } | null>(null);
 
     const handleOpenMediaDialog = (type: 'fba' | 'gapfill') => {
         setMediaDialogType(type);
         setMediaDialogOpen(true);
     };
 
-    const handleMediaConfirm = (mediaId: string, mediaName: string, mediaRef?: string) => {
-        setSelectedMedia({ id: mediaId, name: mediaName, ref: mediaRef });
+    const handleMediaConfirm = (mediaId: string, mediaName: string) => {
         setMediaDialogOpen(false);
         
         // Use media name for both FBA and gapfill (not the UUID or path)

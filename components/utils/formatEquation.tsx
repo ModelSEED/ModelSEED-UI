@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import { formatFormula } from './formatFormula';
 
 /**
  * Formats a reaction equation/definition string.
@@ -12,7 +11,7 @@ export function formatEquation(equation: string | undefined | null): React.React
     if (!equation) return 'N/A';
 
     // Basic cleanup of ModelSEED equation syntax for display
-    let cleaned = equation
+    const cleaned = equation
         // Remove compartment tags like [0]
         .replace(/\[\d+\]/g, '')
         // Clean stoichiometry parentheses like (1) or (1.0). Keep the numbers but strip parens, 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -166,7 +166,7 @@ function ModelComparisonContent() {
     }, [modelData]);
 
     // Dynamic columns based on number of models
-    const buildComparisonColumns = (type: 'reactions' | 'compounds' | 'genes'): GridColDef[] => {
+    const buildComparisonColumns = (): GridColDef[] => {
         const baseColumns: GridColDef[] = [
             { field: 'id', headerName: 'ID', width: 140 },
             { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
@@ -257,7 +257,7 @@ function ModelComparisonContent() {
                         <TabPanel value={activeTab} index={0}>
                             <DataGrid
                                 rows={reactionComparison}
-                                columns={buildComparisonColumns('reactions')}
+                                columns={buildComparisonColumns()}
                                 pageSizeOptions={[25, 50, 100]}
                                 initialState={{
                                     pagination: { paginationModel: { pageSize: 25 } },
@@ -271,7 +271,7 @@ function ModelComparisonContent() {
                         <TabPanel value={activeTab} index={1}>
                             <DataGrid
                                 rows={compoundComparison}
-                                columns={buildComparisonColumns('compounds')}
+                                columns={buildComparisonColumns()}
                                 pageSizeOptions={[25, 50, 100]}
                                 initialState={{
                                     pagination: { paginationModel: { pageSize: 25 } },
@@ -285,7 +285,7 @@ function ModelComparisonContent() {
                         <TabPanel value={activeTab} index={2}>
                             <DataGrid
                                 rows={geneComparison}
-                                columns={buildComparisonColumns('genes')}
+                                columns={buildComparisonColumns()}
                                 pageSizeOptions={[25, 50, 100]}
                                 initialState={{
                                     pagination: { paginationModel: { pageSize: 25 } },

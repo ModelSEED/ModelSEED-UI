@@ -20,7 +20,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 
 import { getJobsFromApi } from '@/lib/api/modelseed';
-import { listTrackedJobs, isTerminalJobStatus, isActiveJobStatus, TrackedJob } from '@/lib/api/jobTracker';
+import { listTrackedJobs, TrackedJob } from '@/lib/api/jobTracker';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
 import DataControlHeader from '@/components/layout/DataControlHeader';
@@ -49,7 +49,6 @@ interface JobStatusHistory {
 
 /* ---------- constants ---------- */
 
-const STDERR_BASE = 'https://p3c.theseed.org/services/app_service/task_info';
 const STUCK_THRESHOLD_POLLS = 3; // Consider job stuck after 3 same-status polls (~30s)
 
 /* ---------- helpers ---------- */

@@ -102,8 +102,6 @@ export default function ReactionDetailPage() {
     const ecDisplay = (rxn.ec_numbers ?? []).join('; ').replace(/"/g, '');
     const pathwaysDisplay = (rxn.pathways ?? []).join('; ').replace(/"/g, '');
 
-    const backUrl = '/biochem/reactions';
-
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
             <Card variant="outlined">

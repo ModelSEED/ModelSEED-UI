@@ -13,7 +13,7 @@ function formatSubscripts(text: string): React.ReactNode[] {
     let lastTokenWasLetter = false;
 
     while ((match = segmentRegex.exec(text)) !== null) {
-        const [full, letters, digits, other] = match;
+        const [, letters, digits, other] = match;
 
         if (letters) {
             parts.push(<span key={match.index}>{letters}</span>);
