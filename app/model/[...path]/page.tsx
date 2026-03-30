@@ -1257,7 +1257,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         ? workspacePath.slice(0, -('/model'.length))
         : workspacePath;
     const modelRootCandidates = useMemo(
-        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, authMethod)]),
+        () => dedupeRefs([expandOwnerRef(modelRootPath, authMethod), modelRootPath, ownerAliasRef(modelRootPath, authMethod)]),
         [modelRootPath, authMethod],
     );
 
@@ -1324,15 +1324,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     });
 
     const modelFbaRef = useMemo(() => {
-        // Only fetch FBA if we're on a specific model, not a folder
-        // A model path should have at least 3 segments and NOT end with /modelseed
-        const segments = workspacePath.split('/').filter(Boolean);
-        if (segments.length >= 3 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
-            const modelPath = workspacePath.endsWith('/model') ? workspacePath : `${workspacePath}/model`;
-            return modelPath;
+        // The new modelseed-api /fba and /gapfills endpoints expect the model container path,
+        // as they append '/model' internally. We use the first valid root candidate.
+        if (modelRootCandidates.length > 0 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
+            return modelRootCandidates[0];
         }
         return null;
-    }, [workspacePath]);
+    }, [modelRootCandidates, workspacePath]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, modelFbaRef],
