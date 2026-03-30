@@ -13,7 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
-import { listPublicMediaFromApi } from '@/lib/api/modelseed';
+import { listPublicMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
 
 interface MediaSelectionDialogProps {
     open: boolean;
@@ -31,8 +31,21 @@ export default function MediaSelectionDialog({
     const [userSelectedMedia, setUserSelectedMedia] = useState<string>('');
 
     const { data: mediaList = [], isLoading, error } = useQuery({
-        queryKey: ['public-media-list'],
-        queryFn: listPublicMediaFromApi,
+        queryKey: ['all-media-list'],
+        queryFn: async () => {
+            const [publicMedia, myMedia] = await Promise.all([
+                listPublicMediaFromApi(),
+                listMyMediaFromApi(),
+            ]);
+            // Deduplicate by ID
+            const seen = new Set<string>();
+            const combined = [...publicMedia, ...myMedia];
+            return combined.filter(m => {
+                if (seen.has(m.id)) return false;
+                seen.add(m.id);
+                return true;
+            });
+        },
         enabled: open,
         staleTime: 5 * 60 * 1000,
     });

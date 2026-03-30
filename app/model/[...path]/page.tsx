@@ -726,7 +726,7 @@ function extractExpressionRows(model: Record<string, unknown>): Array<{ id: stri
 }
 
 function extractFbaRows(
-    fbaData: Record<string, unknown> | null | undefined,
+    fbaData: Record<string, unknown>[] | Record<string, unknown> | null | undefined,
     modelObject?: Record<string, unknown>,
     fallbackEntries: WorkspaceListingEntry[] = [],
 ): Record<string, unknown>[] {
@@ -1900,8 +1900,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 modelName={modelName}
                 visualizeOption={visualizeOption}
                 onVisualizeChange={setVisualizeOption}
-                onRunFba={() => void submitModelJob('fba')}
-                onRunGapfill={() => void submitModelJob('gapfill')}
+                onRunFba={(mediaId?: string, mediaName?: string) => void submitModelJob('fba', mediaName)}
+                onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaName)}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
             />

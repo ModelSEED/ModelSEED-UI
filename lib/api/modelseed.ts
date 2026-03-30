@@ -229,9 +229,9 @@ export async function manageModelGapfillsFromApi(
     });
 }
 
-export async function getModelFbaFromApi(ref: string): Promise<Record<string, unknown> | null> {
+export async function getModelFbaFromApi(ref: string): Promise<Record<string, unknown>[] | null> {
     try {
-        return await modelseedFetch<Record<string, unknown>>(
+        return await modelseedFetch<Record<string, unknown>[]>(
             `/api/models/fba${buildQueryString({ ref: safeDecodePath(ref) })}`,
         );
     } catch (err) {
