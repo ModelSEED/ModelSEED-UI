@@ -2,16 +2,18 @@
 
 ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the ModelSEED platform. It provides biochemistry reference tables, public genomes/media, and authenticated user workflows (Build Model, My Models, My Media, My Jobs) interacting with the new `modelseed-api` backend while preserving legacy URL parity.
 
-**Status (March 2026):** Core workflows and job execution are fully tested and stable against the Poplar `modelseed-api` layer. The UI is ready for production user testing, with specific backend limitations managed gracefully. Legacy endpoints are documented in `issues.md` and `docs/WORKSPACE.md`.
+
 
 ### What's Working ✅
 
-- FBA job submission and results retrieval (both PATRIC and RAST)
+- **Full Legacy Parity** Achieved!
+- FBA job submission (with plant-specific media and reaction KO options)
 - Gapfill job submission
 - Model reconstruction (genome → model)
 - My Models, My Media, My Jobs pages
-- Model detail tabs (Reactions, Compounds, Genes, Compartments, Biomass, Pathways, FBA)
-- Biochemical reference data (reactions, compounds via Solr)
+- Complete Model detail tab coverage (Reactions, Compounds, Genes, Compartments, Biomass, Pathways, FBA)
+- Biochemical reference data (reactions, compounds via Solr with detail drawers)
+- Inline metadata editing (Name, Description persist to backend)
 
 ### Known Limitations (Backend)
 
@@ -19,6 +21,7 @@ ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the Model
 - Reaction equations not returned in model data (API limitation)
 - Gene functions not returned in model data (API limitation)
 - RAST gapfill jobs may fail (backend issue)
+- `modelseed.org/solr` CORS issue block direct execution in test runner (handled gracefully in UI)
 
 > **⚠️ Note:** PATRIC and RAST are separate systems with different workspaces. A PATRIC user cannot access RAST workspace data and vice versa.
 

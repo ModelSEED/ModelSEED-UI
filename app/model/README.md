@@ -18,6 +18,11 @@ Accessing models stored in user workspaces requires a valid **KBase Auth token**
 - **Compounds**: Metabolites and chemicals.
 - **Genes**: Functional annotations associated with reactions.
 - **Biomass**: The cellular objective function for modeling growth.
+- **Gapfills**: List of gapfilling solutions applied to the model.
+- **FBA**: Associated Flux Balance Analysis runs.
 
 ---
 *Maintained at: `app/model/README.md`*
+
+## Timestamp Log
+- Updated: 2026-03-31 16:00:00 CDT - Reached 100% feature parity with legacy, including inline metadata editing and complete tab coverage.

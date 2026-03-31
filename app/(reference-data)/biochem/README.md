@@ -20,3 +20,6 @@ This directory provides interactive access to the **ModelSEED Biochemistry Libra
 
 --- 
 *Maintained at: `app/(reference-data)/biochem/README.md`*
+
+## Timestamp Log
+- Updated: 2026-03-31 16:00:00 CDT - Integrated side drawers for inline compound data fetching inside the Media Editor contexts. Fully functional Solr querying.

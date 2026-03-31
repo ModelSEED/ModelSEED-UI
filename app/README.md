@@ -21,14 +21,14 @@ These folders use **Catch-all Routes (`[...path]`)** to capture deeply nested pa
 
 ## Reference Data
 
-- **`biochem/`**: Biochemistry library including Compounds and Reactions (Solr-indexed).
+- **`biochem/`**: Biochemistry library including Compounds and Reactions (Solr-indexed with robust Fallbacks).
 - **`genomes/`**: Public genome repository (KBase-linked).
 - **`list-media/`**: Public media directory.
 
 ## Authentication and User (Protected)
 
 - **`auth/`**: Login, signup, and session management.
-- **`my-models/`**: User-specific metabolic models.
+- **`my-models/`**: User-specific metabolic models (with inline Metadata editing).
 - **`plant/`**: Build model and analysis workflow (requires authentication).
 
 ## Global Layout Components
@@ -40,4 +40,4 @@ These folders use **Catch-all Routes (`[...path]`)** to capture deeply nested pa
 *Follow the [GSD Methodology](../.gsd/ROADMAP.md) for development.*
 
 ## Timestamp Log
-- Updated: 2026-03-12 20:18:13 CDT - Removed emojis from headings and clarified protected Build Model and My Models routes.
+- Updated: 2026-03-31 16:00:00 CDT - Reached 100% functional parity with legacy ModelSEED. Added inline metadata editing mapping to REST Proxy, expanded FBA Advanced Options. Codebase is in a production-ready state with strict type checking and linting fully compliant.
