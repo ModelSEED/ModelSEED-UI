@@ -55,3 +55,14 @@ export function getStoredAuthUsername(): string | null {
         return null;
     }
 }
+export function getStoredAuthMethod(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw) as { method?: string };
+        return parsed?.method ?? null;
+    } catch {
+        return null;
+    }
+}

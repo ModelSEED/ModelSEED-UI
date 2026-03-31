@@ -200,6 +200,11 @@ export default function DataBrowserPage({ params }: { params: Promise<{ path: st
             field: 'modDate',
             headerName: 'Modified',
             width: 160,
+            sortComparator: (_v1, _v2, cell1, cell2) => {
+                const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
+                const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
+                return d1 - d2;
+            },
         },
         {
             field: 'owner',

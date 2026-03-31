@@ -88,8 +88,14 @@ function extractModelRef(fbaPath: string): string {
     const fbaIdx = normalized.toLowerCase().lastIndexOf('/fba/');
     if (fbaIdx > 0) return normalized.substring(0, fbaIdx);
 
-    // Fallback: strip last two segments (object id + container)
+    // Smarter fallback: if '/modelseed/' exists, the model is the segment immediately following it.
     const segments = fbaPath.split('/').filter(Boolean);
+    const msIdx = segments.findIndex(s => s.toLowerCase() === 'modelseed');
+    if (msIdx >= 0 && segments.length > msIdx + 1) {
+        return '/' + segments.slice(0, msIdx + 2).join('/');
+    }
+
+    // Fallback: strip last two segments (object id + container)
     if (segments.length >= 3) return '/' + segments.slice(0, -2).join('/');
     return normalized;
 }
@@ -150,7 +156,9 @@ function isFbaObjectData(value: unknown): boolean {
     const data = value as Record<string, unknown>;
     return (
         Array.isArray(data.FBAReactionVariables)
+        || Array.isArray(data.fba_reaction_variables)
         || Array.isArray(data.FBACompoundVariables)
+        || Array.isArray(data.fba_compound_variables)
         || 'objective' in data
         || 'objective_value' in data
         || 'status' in data
@@ -408,10 +416,10 @@ function toImageSrc(data: string | null): string | null {
 }
 
 function parseReactionFluxes(data: Record<string, unknown>): FbaReactionFlux[] {
-    const vars = data.FBAReactionVariables as Record<string, unknown>[] | undefined;
+    const vars = (data.FBAReactionVariables ?? data.fba_reaction_variables) as Record<string, unknown>[] | undefined;
     if (!Array.isArray(vars)) return [];
     return vars.map((v, idx) => {
-        const rxnRef = String(v.modelreaction_ref ?? v.reaction_ref ?? '');
+        const rxnRef = String(v.modelreaction_ref ?? v.reaction_ref ?? v.ref ?? '');
         const rxnId = rxnRef.split('/').pop() ?? `rxn-${idx}`;
         return {
             id: rxnId + '-' + idx,
@@ -427,10 +435,10 @@ function parseReactionFluxes(data: Record<string, unknown>): FbaReactionFlux[] {
 }
 
 function parseExchangeFluxes(data: Record<string, unknown>): FbaExchangeFlux[] {
-    const vars = data.FBACompoundVariables as Record<string, unknown>[] | undefined;
+    const vars = (data.FBACompoundVariables ?? data.fba_compound_variables) as Record<string, unknown>[] | undefined;
     if (!Array.isArray(vars)) return [];
     return vars.map((v, idx) => {
-        const cpdRef = String(v.modelcompound_ref ?? v.compound_ref ?? '');
+        const cpdRef = String(v.modelcompound_ref ?? v.compound_ref ?? v.ref ?? '');
         const cpdId = cpdRef.split('/').pop() ?? `cpd-${idx}`;
         return {
             id: cpdId + '-' + idx,
@@ -463,17 +471,38 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
     const [mapSort, setMapSort] = useState<GridSortModel>([]);
     const [mapTabs, setMapTabs] = useState<FbaMapTabState[]>([]);
 
+    const { apiCandidates, workspaceCandidates } = useMemo(() => {
+        const base = workspacePath.endsWith('/') ? workspacePath.slice(0, -1) : workspacePath;
+        const modelBase = modelRef.endsWith('/') ? modelRef.slice(0, -1) : modelRef;
+        
+        const expandedWs = expandOwnerRef(base, authMethod);
+        const wsBases = [expandedWs];
+        if (expandedWs !== base) wsBases.push(base);
+
+        const expandedModel = expandOwnerRef(modelBase, authMethod);
+        const modelBases = [expandedModel];
+        if (expandedModel !== modelBase) modelBases.push(modelBase);
+
+        const wsCandidates: string[] = [];
+        for (const b of wsBases) {
+            wsCandidates.push(b);
+            if (!b.endsWith('/model')) wsCandidates.push(`${b}/model`);
+        }
+
+        return {
+            apiCandidates: dedupeRefs(modelBases),
+            workspaceCandidates: dedupeRefs(wsCandidates),
+        };
+    }, [workspacePath, modelRef, authMethod]);
+
     const { data: fbaData, isLoading, error } = useQuery({
         queryKey: ['fbaDetail', workspacePath, modelRef],
         queryFn: async () => {
-            const modelRefCandidates = dedupeRefs([modelRef, ownerAliasRef(modelRef, authMethod), expandOwnerRef(modelRef, authMethod)]);
-            const workspaceCandidates = dedupeRefs([workspacePath, ownerAliasRef(workspacePath, authMethod), expandOwnerRef(workspacePath, authMethod)]);
-
-            // Try model-level FBA from API first
+            // Try model-level FBA from API first using base paths
             if (USE_MODELSEED_API) {
-                for (const refCandidate of modelRefCandidates) {
+                for (const candidate of apiCandidates) {
                     try {
-                        const result = await getModelFbaFromApi(refCandidate);
+                        const result = await getModelFbaFromApi(candidate);
                         const selected = pickFbaObject(result, workspacePath, fbaName);
                         if (selected && typeof selected === 'object' && isFbaObjectData(selected)) return selected;
                     } catch {
@@ -482,16 +511,15 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
                 }
             }
 
-            // Fallback: fetch FBA object directly from workspace
-            const directObjectRefs: string[] = [];
+            // Fallback: fetch FBA object directly from workspace with variations
+            const directObjectRefs: string[] = [...workspaceCandidates];
             for (const candidate of workspaceCandidates) {
-                directObjectRefs.push(candidate);
                 if (isFbaContainerRef(candidate)) {
                     try {
                         const lsPayload = await workspaceLs([candidate]);
                         directObjectRefs.push(...extractFbaObjectRefsFromLs(lsPayload));
                     } catch {
-                        // Ignore ls failure and try direct fetch candidates.
+                        // Ignore ls failure.
                     }
                 }
             }

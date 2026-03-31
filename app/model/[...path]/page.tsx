@@ -25,7 +25,7 @@ import { parseWorkspaceGetObject, workspaceGet, workspaceLs } from '@/lib/api/wo
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import {
     editModelFromApi,
-    getModelDetailBundleFromApi,
+    getModelDataFromApi,
     getModelFbaFromApi,
     getJobsFromApi,
     listModelEditsFromApi,
@@ -33,6 +33,7 @@ import {
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
+import { getStoredAuthMethod } from '@/lib/api/requestAuth';
 import {
     extractTrackedJobId,
     isTerminalJobStatus,
@@ -214,13 +215,13 @@ function buildCompartmentRows(model: Record<string, unknown>): Record<string, un
 function buildBiomassRows(model: Record<string, unknown>): Record<string, unknown>[] {
     const rows: Record<string, unknown>[] = [];
     const biomasses = asArray<Record<string, unknown>>(
-        model.biomasses ?? 
-        model.biomass ?? 
-        model.modelbiomasses ?? 
-        model.biomass_reactions ?? 
+        model.biomasses ??
+        model.biomass ??
+        model.modelbiomasses ??
+        model.biomass_reactions ??
         model.model_biomasses ??
-        model.biomass_reaction ?? 
-        model.modelbiomassreaction ?? 
+        model.biomass_reaction ??
+        model.modelbiomassreaction ??
         []
     );
     if (biomasses.length === 0) {
@@ -231,7 +232,7 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
             const name = String(rxn.name ?? '').toLowerCase();
             return id.includes('biomass') || name.includes('biomass');
         });
-        
+
         if (autoBiomasses.length > 0) {
             autoBiomasses.forEach((rxn) => {
                 rows.push({
@@ -249,14 +250,14 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
     biomasses.forEach((biomass, biomassIndex) => {
         const biomassId = String(biomass.id ?? biomass.label ?? biomass.name ?? `bio-${biomassIndex}`);
         let compounds = asArray<Record<string, unknown>>(
-            biomass.biomasscompounds ?? 
-            biomass.modelbiomasscompounds ?? 
-            biomass.biomass_compounds ?? 
+            biomass.biomasscompounds ??
+            biomass.modelbiomasscompounds ??
+            biomass.biomass_compounds ??
             biomass.modelbiomass_compounds ??
             biomass.model_biomass_compounds ??
             []
         );
-        
+
         // Handle array of arrays format: [[cpd_id, coefficient, ""], ...]
         const rawCompounds = biomass.compounds;
         if (Array.isArray(rawCompounds) && rawCompounds.length > 0 && Array.isArray(rawCompounds[0])) {
@@ -266,7 +267,7 @@ function buildBiomassRows(model: Record<string, unknown>): Record<string, unknow
                 compartment: Array.isArray(c) ? c[2] : '',
             }));
         }
-        
+
         if (compounds.length === 0) {
             rows.push({
                 id: `${biomassId}-empty`,
@@ -440,7 +441,16 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { field: 'objective', headerName: 'Objective', width: 140 },
                 { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
                 { field: 'media', headerName: 'Media', width: 180 },
-                { field: 'timestamp', headerName: 'Time', width: 180 },
+                { 
+                    field: 'timestamp', 
+                    headerName: 'Time', 
+                    width: 180, 
+                    sortComparator: (_v1, _v2, cell1, cell2) => {
+                        const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
+                        const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
+                        return d1 - d2;
+                    },
+                },
             ],
         },
         gapfill: {
@@ -449,7 +459,16 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { field: 'id', headerName: 'ID', width: 180 },
                 { field: 'media', headerName: 'Media', width: 200 },
                 { field: 'integrated', headerName: 'Integrated', width: 120 },
-                { field: 'rundate', headerName: 'Date', width: 180 },
+                { 
+                    field: 'rundate', 
+                    headerName: 'Date', 
+                    width: 180, 
+                    sortComparator: (_v1, _v2, cell1, cell2) => {
+                        const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
+                        const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
+                        return d1 - d2;
+                    },
+                },
             ],
         },
     };
@@ -954,7 +973,7 @@ function extractExternalLinks(model: Record<string, unknown>): ExternalLinkItem[
                 return { name, url };
             })
             .filter((entry): entry is ExternalLinkItem => Boolean(entry));
-        
+
         // Use candidate links if we don't have better ones yet
         if (candidateLinks.length > 0) {
             links.push(...candidateLinks);
@@ -989,7 +1008,7 @@ function OrganismLinksCard({
             <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
                 Organism & Taxonomy
             </Typography>
-            
+
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                 {imageUrl && (
                     <Box
@@ -999,28 +1018,22 @@ function OrganismLinksCard({
                         sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1, border: '1px solid #eee' }}
                     />
                 )}
-                <Box sx={{ flex: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5 }}>
-                        {organismName || 'Organism metadata unavailable'}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="body1" fontWeight={600}>
+                        {organismName || 'Unknown Organism'}
                     </Typography>
+                    {taxonomy && (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', maxWidth: 450 }}>
+                            {taxonomy}
+                        </Typography>
+                    )}
                     {genomeId && (
-                        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontWeight: 500 }}>
-                            Genome ID: {genomeId}
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
+                            ID: {genomeId}
                         </Typography>
                     )}
                 </Box>
             </Box>
-
-            {taxonomy && (
-                <Box sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-                        Taxonomy
-                    </Typography>
-                    <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
-                        {taxonomy}
-                    </Typography>
-                </Box>
-            )}
 
             <Divider sx={{ my: 1.5, opacity: 0.6 }} />
 
@@ -1237,7 +1250,7 @@ function VisualizeDataPanel({
 
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
-    const { method: authMethod } = useAuth();
+    const authMethod = getStoredAuthMethod();
     const resolvedParams = use(params);
     const [loadingTooLong, setLoadingTooLong] = useState(false);
     const urlSegments = useMemo(
@@ -1257,46 +1270,61 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         ? workspacePath.slice(0, -('/model'.length))
         : workspacePath;
     const modelRootCandidates = useMemo(
-        () => dedupeRefs([expandOwnerRef(modelRootPath, authMethod), modelRootPath, ownerAliasRef(modelRootPath, authMethod)]),
+        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, authMethod)]),
         [modelRootPath, authMethod],
     );
 
-    const workspaceCandidates = useMemo(() => {
-        if (!workspacePath || workspacePath === '/') return [workspacePath];
+    const { apiCandidates, workspaceCandidates } = useMemo(() => {
         const base = workspacePath.endsWith('/') ? workspacePath.slice(0, -1) : workspacePath;
-        return base.endsWith('/model') ? [base] : [base, `${base}/model`];
-    }, [workspacePath]);
+        const expanded = expandOwnerRef(base, authMethod);
+        const bases = [expanded];
+        if (expanded !== base) bases.push(base);
 
-    const { data: modelData, isLoading, error, refetch: refetchModelData } = useQuery({
-        queryKey: ['modelDetail', USE_MODELSEED_API, USE_NEW_PROXY, ...workspaceCandidates],
+        const wsCandidates: string[] = [];
+        for (const b of bases) {
+            wsCandidates.push(b);
+            if (!b.endsWith('/model')) wsCandidates.push(`${b}/model`);
+        }
+
+        return {
+            apiCandidates: dedupeRefs(bases),
+            workspaceCandidates: dedupeRefs(wsCandidates),
+        };
+    }, [workspacePath, authMethod]);
+
+    const { data: apiModel, isLoading: apiLoading } = useQuery({
+        queryKey: ['apiModel', workspacePath],
         queryFn: async () => {
-            const failures: string[] = [];
-            if (USE_MODELSEED_API) {
-                for (const candidate of workspaceCandidates) {
-                    try {
-                        const detail = await getModelDetailBundleFromApi(candidate);
-                        return detail.data;
-                    } catch (err) {
-                        const reason = err instanceof Error ? err.message : 'Unknown model endpoint error';
-                        failures.push(`model-api ${candidate}: ${reason}`);
-                    }
+            if (!USE_MODELSEED_API) return null;
+            for (const candidate of apiCandidates) {
+                try {
+                    const model = await getModelDataFromApi(candidate);
+                    if (model && (model.id || model.name)) return model;
+                } catch {
+                    // Try next.
                 }
             }
+            return null;
+        },
+        retry: false,
+    });
+
+    const { data: wsObject, isLoading: wsLoading } = useQuery({
+        queryKey: ['wsObject', workspacePath],
+        queryFn: async () => {
+            const errors: any[] = [];
             for (const candidate of workspaceCandidates) {
                 try {
-                    const result = await workspaceGet([candidate]);
-                    const object = parseWorkspaceGetObject<Record<string, unknown>>(result);
-                    if (object) return object;
-                } catch (err) {
-                    const reason = err instanceof Error ? err.message : 'Unknown workspace error';
-                    failures.push(`workspace ${candidate}: ${reason}`);
+                    return await workspaceGet([candidate]);
+                } catch (e) {
+                    errors.push(e);
                 }
             }
-            throw new Error(`Failed to load model object. Tried refs: ${failures.join(' | ')}`);
+            throw errors[0] || new Error('Failed to load workspace object');
         },
-        retry: 1,
-        staleTime: 60_000, // Cache for 1 minute
     });
+
+    const isLoading = apiLoading || wsLoading;
 
     // Track loading timeout - show error message after 15 seconds
     useEffect(() => {
@@ -1324,13 +1352,15 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     });
 
     const modelFbaRef = useMemo(() => {
-        // The new modelseed-api /fba and /gapfills endpoints expect the model container path,
-        // as they append '/model' internally. We use the first valid root candidate.
-        if (modelRootCandidates.length > 0 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
-            return modelRootCandidates[0];
+        // Only fetch FBA if we're on a specific model, not a folder
+        // A model path should have at least 3 segments and NOT end with /modelseed
+        const segments = workspacePath.split('/').filter(Boolean);
+        if (segments.length >= 3 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
+            const modelPath = workspacePath.endsWith('/model') ? workspacePath : `${workspacePath}/model`;
+            return modelPath;
         }
         return null;
-    }, [modelRootCandidates, workspacePath]);
+    }, [workspacePath]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, modelFbaRef],
@@ -1424,7 +1454,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const activeUserTab = useMemo(() => {
         const idx = userDataTabs.findIndex((t) => pathname.startsWith(t.href));
         return idx >= 0 ? idx : 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- userDataTabs is stable
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- userDataTabs is stable
     }, [pathname]);
     const isUserDataModel = useMemo(() => {
         return true;
@@ -1511,7 +1541,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             void refetchWorkspaceGapfillRefs();
         }
         if (shouldRefetchModel) {
-            void refetchModelData();
+            // void refetchModelData();
         }
 
         if (terminalJobIds.length > 0) {
@@ -1523,7 +1553,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     }, [
         trackedJobsForModel,
         trackedStatusById,
-        refetchModelData,
         refetchModelFba,
         refetchModelGapfills,
         refetchWorkspaceFbaRefs,
@@ -1546,13 +1575,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     // Must be above early returns to satisfy Rules of Hooks
     const existingReactionIds = useMemo(() => {
-        if (!modelData) return [];
-        const obj = parseWorkspaceGetObject<Record<string, unknown>>(modelData) ?? {};
+        if (!wsObject) return [];
+        const obj = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
         const config = buildTableConfig(obj);
         return config.reactions.rows.map((r) => String(r.id ?? '').replace(/_[a-z]\d+$/, ''));
-    }, [modelData]);
+    }, [wsObject]);
 
-    if (error) {
+    if (!isLoading && !apiModel && !wsObject) {
         return (
             <Box sx={{ p: 4, maxWidth: '1400px', mx: 'auto' }}>
                 <Typography color="error" variant="h6">
@@ -1582,51 +1611,71 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         );
     }
 
-    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(modelData) ?? {};
-    const modelName = String(modelObject.id ?? modelSegments[modelSegments.length - 1] ?? 'Unknown Model');
-    const modelSpecies = String(modelObject.name ?? '');
+    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
     const tableConfig = buildTableConfig(modelObject);
     const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries);
     const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries);
     const expressionRows = extractExpressionRows(modelObject);
+
     if (tableConfig.fba) {
         tableConfig.fba.rows = fbaRows;
     }
     if (tableConfig.gapfill) {
         tableConfig.gapfill.rows = gapfillRows;
     }
+
     const defaultMedia = workspacePath.includes('/plantseed/')
         ? '/chenry/public/modelsupport/media/PlantHeterotrophicMedia'
         : 'Complete';
-    const isPlantModel = workspacePath.includes('/plantseed/')
-        || String(modelObject.type ?? '').toLowerCase().includes('plant');
+    const isPlantModel =
+        workspacePath.includes('/plantseed/') ||
+        String(modelObject.type ?? '').toLowerCase().includes('plant');
+
+    const modelName = String(
+        apiModel?.name ??
+        modelObject.name ??
+        modelObject.id ??
+        workspacePath.split('/').filter(Boolean).pop() ??
+        'Unknown Model',
+    );
+
+    const speciesName = String(
+        apiModel?.organism ??
+        modelObject.scientific_name ??
+        modelObject.organism ??
+        modelObject.species ??
+        modelName,
+    );
+
+    const genomeRef = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
 
     const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
 
-    const genomeRef = String(modelObject.genome_ref ?? '');
-    const modelMetadata: Array<{ label: string; value: ReactNode }> = [
-        { label: 'Model ID', value: String(modelObject.id ?? modelName) },
-        { label: 'Species', value: modelSpecies || '-' },
-        { label: 'Source', value: String(modelObject.source ?? '-') },
+    const modelMetadata = [
+        { label: 'Model ID', value: modelName },
+        { label: 'Species', value: speciesName },
+        {
+            label: 'Source',
+            value: String(modelObject.source ?? (workspacePath.includes('/modelseed/') ? 'ModelSEED' : '-')),
+        },
         {
             label: 'Genome Ref',
-            value: genomeRef
-                ? (
-                    <Link
-                        href={toEncodedCatchallHref('/genome', genomeRef)}
-                        style={{ color: '#00acc1', textDecoration: 'none' }}
-                    >
-                        {genomeRef}
-                    </Link>
-                )
-                : '-',
+            value: genomeRef !== '-' ? (
+                <Link
+                    href={`https://www.bv-brc.org/view/Genome/${genomeRef}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#00acc1', textDecoration: 'none' }}
+                >
+                    {genomeRef}
+                </Link>
+            ) : '-',
         },
         { label: 'Type', value: String(modelObject.type ?? '-') },
         {
             label: 'Edits',
             value: modelEditsError
-                ? (modelEditsError instanceof Error
-                    && modelEditsError.message.includes('501')
+                ? (modelEditsError instanceof Error && modelEditsError.message.includes('501')
                     ? 'Not supported by backend yet'
                     : 'Unavailable')
                 : String(modelEdits.length),
@@ -1847,11 +1896,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     const handleSubmitBatchEdit = async () => {
         // GridRowSelectionModel is now { type: 'include', ids: Set<string> }
-        const removeIds = selectedReactionsToRemove.type === 'include' 
+        const removeIds = selectedReactionsToRemove.type === 'include'
             ? Array.from(selectedReactionsToRemove.ids).map(String).filter(Boolean)
             : [];
         const addIds = reactionsToAdd.map((r) => r.id);
-        
+
         if (removeIds.length === 0 && addIds.length === 0) {
             setEditMessage('No reactions selected to add or remove.');
             return;
@@ -1886,8 +1935,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     };
 
     // Number of selected reactions to remove
-    const numSelectedToRemove = selectedReactionsToRemove.type === 'include' 
-        ? selectedReactionsToRemove.ids.size 
+    const numSelectedToRemove = selectedReactionsToRemove.type === 'include'
+        ? selectedReactionsToRemove.ids.size
         : 0;
 
     // existingReactionIds moved above early returns
@@ -2014,10 +2063,10 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                         Add Reactions
                                     </Button>
                                     {reactionsToAdd.length > 0 && (
-                                        <Chip 
-                                            label={`${reactionsToAdd.length} pending`} 
-                                            color="primary" 
-                                            size="small" 
+                                        <Chip
+                                            label={`${reactionsToAdd.length} pending`}
+                                            color="primary"
+                                            size="small"
                                         />
                                     )}
                                 </Stack>
@@ -2089,7 +2138,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                     sx={{ mb: 2 }}
                                 />
                                 {editMessage && (
-                                    <Alert 
+                                    <Alert
                                         severity={editMessage.includes('submitted') || editMessage.includes('Edit submitted') ? 'success' : 'error'}
                                         sx={{ mb: 2 }}
                                     >
@@ -2262,12 +2311,12 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     <Box sx={{ flex: 1, overflow: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                         {(detailDrawer ? extractDetailEntries(detailDrawer.row) : []).map((entry) => (
                             <Box key={entry.key} sx={{ borderBottom: '1px solid #f0f0f0', pb: 1.5, '&:last-child': { borderBottom: 0 } }}>
-                                <Typography 
-                                    variant="caption" 
-                                    color="primary" 
-                                    fontWeight={800} 
-                                    sx={{ 
-                                        mb: 0.75, 
+                                <Typography
+                                    variant="caption"
+                                    color="primary"
+                                    fontWeight={800}
+                                    sx={{
+                                        mb: 0.75,
                                         display: 'block',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.08em',
@@ -2276,12 +2325,12 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                 >
                                     {entry.key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                 </Typography>
-                                <Typography 
-                                    variant="body2" 
-                                    sx={{ 
-                                        wordBreak: 'break-word', 
-                                        whiteSpace: 'pre-wrap', 
-                                        color: 'text.primary', 
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        wordBreak: 'break-word',
+                                        whiteSpace: 'pre-wrap',
+                                        color: 'text.primary',
                                         lineHeight: 1.6,
                                         backgroundColor: entry.value.startsWith('{') || entry.value.startsWith('[') ? '#fcfcfc' : 'transparent',
                                         fontFamily: entry.value.startsWith('{') || entry.value.startsWith('[') ? 'monospace' : 'inherit',

@@ -249,12 +249,22 @@ function MyJobsContent() {
             field: 'submitted',
             headerName: 'Submitted',
             width: 140,
+            sortComparator: (_v1, v2, cell1, cell2) => {
+                const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
+                const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
+                return d1 - d2;
+            },
             renderCell: (p) => relativeTime(p.row.submitted),
         },
         {
             field: 'started',
             headerName: 'Started',
             width: 140,
+            sortComparator: (_v1, v2, cell1, cell2) => {
+                const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
+                const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
+                return d1 - d2;
+            },
             renderCell: (p) => relativeTime(p.row.started),
         },
         {
