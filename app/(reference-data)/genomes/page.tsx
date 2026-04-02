@@ -62,11 +62,9 @@ const columns: GridColDef<PlantModelItem>[] = [
         field: 'modDate',
         headerName: 'Modification Date',
         width: 200,
-        sortComparator: (_v1, _v2, cell1, cell2) => {
-            const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
-            const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
-            return d1 - d2;
-        },
+        type: 'dateTime',
+        valueGetter: (_value, row) => (row.modDate ? new Date(row.modDate) : null),
+        valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
     },
 ];
 

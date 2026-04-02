@@ -34,7 +34,9 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
                 headerName: 'Modified',
                 minWidth: 180,
                 flex: 1,
-                valueGetter: (_value, row) => (row.mod_time ? new Date(row.mod_time).toLocaleString() : '-'),
+                type: 'dateTime',
+                valueGetter: (_value, row) => (row.mod_time ? new Date(row.mod_time) : null),
+                valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
             },
             {
                 field: 'build',
