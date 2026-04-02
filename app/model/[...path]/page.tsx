@@ -444,12 +444,10 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { 
                     field: 'timestamp', 
                     headerName: 'Time', 
-                    width: 180, 
-                    sortComparator: (_v1, _v2, cell1, cell2) => {
-                        const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
-                        const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
-                        return d1 - d2;
-                    },
+                    width: 180,
+                    type: 'dateTime',
+                    valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+                    valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
                 },
             ],
         },
@@ -462,12 +460,10 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                 { 
                     field: 'rundate', 
                     headerName: 'Date', 
-                    width: 180, 
-                    sortComparator: (_v1, _v2, cell1, cell2) => {
-                        const d1 = cell1 ? new Date(String(cell1)).getTime() : 0;
-                        const d2 = cell2 ? new Date(String(cell2)).getTime() : 0;
-                        return d1 - d2;
-                    },
+                    width: 180,
+                    type: 'dateTime',
+                    valueGetter: (_value, row) => (row.rundate ? new Date(String(row.rundate)) : null),
+                    valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
                 },
             ],
         },
@@ -1710,7 +1706,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             field: 'timestamp',
             headerName: 'Timestamp',
             width: 220,
-            valueGetter: (value) => (value ? new Date(String(value)).toLocaleString() : '-'),
+            type: 'dateTime',
+            valueGetter: (value) => (value ? new Date(String(value)) : null),
+            valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
         { field: 'user', headerName: 'User', width: 220 },
         { field: 'operation', headerName: 'Operation', width: 180 },
@@ -1789,7 +1787,14 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         { field: 'objective', headerName: 'Objective', width: 140 },
         { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
         { field: 'media', headerName: 'Media', width: 180 },
-        { field: 'timestamp', headerName: 'Time', width: 180 },
+        { 
+            field: 'timestamp', 
+            headerName: 'Time', 
+            width: 180,
+            type: 'dateTime',
+            valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+            valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
+        },
     ];
 
     const pathwayColumns: GridColDef<Record<string, unknown>>[] = [
