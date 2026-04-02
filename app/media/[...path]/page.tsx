@@ -254,6 +254,8 @@ export default function MediaPathPage({ params }: { params: Promise<{ path: stri
         router.push('/myMedia');
     };
 
+    const isCompleteMedia = mediaName.toLowerCase() === 'complete';
+
     const content = (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Breadcrumbs separator=">" sx={{ mt: 1 }}>
@@ -274,12 +276,21 @@ export default function MediaPathPage({ params }: { params: Promise<{ path: stri
                         Build a new media formulation by adding compounds, then save it with <strong>Save as...</strong>.
                     </Typography>
                 )}
-                {!canEditMedia && (
+                {!canEditMedia && !isCompleteMedia && (
                     <Typography variant="body2" color="text.secondary">
                         Read-only view. Copy this media into your workspace to edit.
                     </Typography>
                 )}
             </Box>
+
+            {isCompleteMedia && (
+                <Alert severity="info" variant="outlined" sx={{ mb: 1 }}>
+                    Modeling growth in <strong>complete media</strong> means the model is allowed to
+                    consume any nutrient for which a transport reaction is available. For this reason,
+                    the content of complete media can change depending on which transport reactions
+                    are present in the model.
+                </Alert>
+            )}
 
             {statusMessage && (
                 <Alert severity="success" variant="outlined">

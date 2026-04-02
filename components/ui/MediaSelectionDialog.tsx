@@ -12,14 +12,34 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Box from '@mui/material/Box';
 import { useQuery } from '@tanstack/react-query';
 import { listPublicMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
+
+/** Advanced FBA options matching the legacy fba-plant.html configuration */
+export interface FbaAdvancedOptions {
+    reactionKnockouts: string;
+}
 
 interface MediaSelectionDialogProps {
     open: boolean;
     onClose: () => void;
-    onConfirm: (mediaId: string, mediaName: string, mediaRef?: string) => void;
+    onConfirm: (
+        mediaId: string,
+        mediaName: string,
+        mediaRef?: string,
+        advancedOptions?: FbaAdvancedOptions,
+    ) => void;
     title?: string;
+    /** Whether to show advanced FBA options (reaction knockouts, etc.) */
+    showAdvancedOptions?: boolean;
+    /** Whether the model is a plant model — adjusts default messages */
+    isPlantModel?: boolean;
 }
 
 export default function MediaSelectionDialog({
@@ -27,8 +47,11 @@ export default function MediaSelectionDialog({
     onClose,
     onConfirm,
     title = 'Select Media for Simulation',
+    showAdvancedOptions = false,
+    isPlantModel = false,
 }: MediaSelectionDialogProps) {
     const [userSelectedMedia, setUserSelectedMedia] = useState<string>('');
+    const [reactionKnockouts, setReactionKnockouts] = useState('');
 
     const { data: mediaList = [], isLoading, error } = useQuery({
         queryKey: ['all-media-list'],
@@ -37,7 +60,6 @@ export default function MediaSelectionDialog({
                 listPublicMediaFromApi(),
                 listMyMediaFromApi(),
             ]);
-            // Deduplicate by ID
             const seen = new Set<string>();
             const combined = [...publicMedia, ...myMedia];
             return combined.filter(m => {
@@ -50,7 +72,6 @@ export default function MediaSelectionDialog({
         staleTime: 5 * 60 * 1000,
     });
 
-    // Derive the effective selection: user choice or default from loaded list
     const selectedMedia = useMemo(() => {
         if (userSelectedMedia) return userSelectedMedia;
         if (mediaList.length > 0) {
@@ -63,14 +84,30 @@ export default function MediaSelectionDialog({
     const handleConfirm = () => {
         if (selectedMedia) {
             const media = mediaList.find(m => m.id === selectedMedia);
-            onConfirm(selectedMedia, media?.name || selectedMedia, media?.ref);
+            const advanced: FbaAdvancedOptions | undefined = showAdvancedOptions
+                ? { reactionKnockouts: reactionKnockouts.trim() }
+                : undefined;
+            onConfirm(selectedMedia, media?.name || selectedMedia, media?.ref, advanced);
         }
     };
 
+    const handleClose = () => {
+        setReactionKnockouts('');
+        onClose();
+    };
+
+    const defaultMediaNote = isPlantModel
+        ? 'Plant Heterotrophic Media is used by default.'
+        : 'Complete media is used by default.';
+
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ fontWeight: 600 }}>{title}</DialogTitle>
             <DialogContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {defaultMediaNote}
+                </Typography>
+
                 {isLoading && (
                     <CircularProgress sx={{ display: 'block', mx: 'auto', my: 2 }} />
                 )}
@@ -94,9 +131,39 @@ export default function MediaSelectionDialog({
                         </Select>
                     </FormControl>
                 )}
+
+                {showAdvancedOptions && (
+                    <Accordion
+                        disableGutters
+                        elevation={0}
+                        sx={{
+                            mt: 2,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            '&::before': { display: 'none' },
+                        }}
+                    >
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography variant="subtitle2">Advanced Options</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <TextField
+                                    label="Reaction Knockouts"
+                                    value={reactionKnockouts}
+                                    onChange={(e) => setReactionKnockouts(e.target.value)}
+                                    placeholder="rxn00001;rxn00002 (semicolon-separated)"
+                                    helperText="Specify reaction IDs to knock out during simulation, separated by semicolons."
+                                    fullWidth
+                                    size="small"
+                                />
+                            </Box>
+                        </AccordionDetails>
+                    </Accordion>
+                )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={handleClose}>Cancel</Button>
                 <Button
                     onClick={handleConfirm}
                     variant="contained"

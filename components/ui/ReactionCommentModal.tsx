@@ -25,8 +25,8 @@ export default function ReactionCommentModal({ open, onClose, reactionId }: Reac
     const [email, setEmail] = useState('');
 
     const handleSubmit = () => {
-        // Mock submission
-        console.log('Submitted comment for', reactionId, {
+        // Mock submission — backend endpoint not yet available
+        console.info('Reaction comment submitted for', reactionId, {
             isAlias,
             wrongStoichiometry,
             comments,

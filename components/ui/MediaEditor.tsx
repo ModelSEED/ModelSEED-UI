@@ -14,12 +14,15 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import Drawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
 import Link from '@mui/material/Link';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import UndoIcon from '@mui/icons-material/Undo';
+import CloseIcon from '@mui/icons-material/Close';
 import AddCompoundsDialog from './AddCompoundsDialog';
 import { formatFormula } from '@/components/utils/formatFormula';
 
@@ -88,6 +91,31 @@ function EditNumericCell(props: GridRenderEditCellParams<MediaCompound, number>)
     );
 }
 
+/** Detail row component for the compound drawer */
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <Box sx={{ borderBottom: '1px solid #f0f0f0', pb: 1.5, '&:last-child': { borderBottom: 0 } }}>
+            <Typography
+                variant="caption"
+                color="primary"
+                fontWeight={800}
+                sx={{
+                    mb: 0.5,
+                    display: 'block',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    fontSize: '0.65rem',
+                }}
+            >
+                {label}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6 }}>
+                {children}
+            </Typography>
+        </Box>
+    );
+}
+
 export default function MediaEditor({
     initialMedia,
     onSave,
@@ -105,6 +133,7 @@ export default function MediaEditor({
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [detailCompound, setDetailCompound] = useState<MediaCompound | null>(null);
 
     // Track unsaved changes
     useEffect(() => {
@@ -373,13 +402,105 @@ export default function MediaEditor({
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25 } },
                     }}
+                    onRowClick={({ row }) => setDetailCompound(row)}
                     sx={{
                         '& .MuiDataGrid-cell:focus': {
                             outline: 'none',
                         },
+                        '& .MuiDataGrid-row:hover': {
+                            cursor: 'pointer',
+                        },
                     }}
                 />
             </Box>
+
+            {/* Compound Detail Drawer (side panel) */}
+            <Drawer
+                anchor="right"
+                open={detailCompound !== null}
+                onClose={() => setDetailCompound(null)}
+            >
+                <Box sx={{ width: { xs: 320, md: 400 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Box
+                        sx={{
+                            p: 2,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            bgcolor: '#f5f5f5',
+                        }}
+                    >
+                        <Typography variant="h6" fontWeight={600} noWrap sx={{ flex: 1 }}>
+                            {detailCompound?.name ?? 'Compound'}
+                        </Typography>
+                        <IconButton size="small" onClick={() => setDetailCompound(null)}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+
+                    {detailCompound && (
+                        <Box sx={{ flex: 1, overflow: 'auto', p: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <DetailRow label="Compound ID">
+                                <Link
+                                    component={NextLink}
+                                    href={`/biochem/compounds/${detailCompound.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{ color: '#00acc1' }}
+                                >
+                                    {detailCompound.id}
+                                </Link>
+                            </DetailRow>
+
+                            <DetailRow label="Name">
+                                {detailCompound.name}
+                            </DetailRow>
+
+                            {detailCompound.formula && (
+                                <DetailRow label="Formula">
+                                    {formatFormula(detailCompound.formula)}
+                                </DetailRow>
+                            )}
+
+                            {detailCompound.charge !== undefined && (
+                                <DetailRow label="Charge">
+                                    {detailCompound.charge}
+                                </DetailRow>
+                            )}
+
+                            <Divider />
+
+                            <DetailRow label="Concentration (mM)">
+                                {detailCompound.concentration}
+                            </DetailRow>
+
+                            <DetailRow label="Min Flux">
+                                {detailCompound.minFlux}
+                            </DetailRow>
+
+                            <DetailRow label="Max Flux">
+                                {detailCompound.maxFlux}
+                            </DetailRow>
+
+                            <Divider />
+
+                            <Button
+                                component={NextLink}
+                                href={`/biochem/compounds/${detailCompound.id}`}
+                                target="_blank"
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                sx={{ mt: 1 }}
+                            >
+                                View Full Compound Details →
+                            </Button>
+                        </Box>
+                    )}
+                </Box>
+            </Drawer>
 
             {/* Add Compounds Dialog */}
             <AddCompoundsDialog

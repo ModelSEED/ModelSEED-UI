@@ -9,16 +9,18 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Alert from '@mui/material/Alert';
-import MediaSelectionDialog from './MediaSelectionDialog';
+import MediaSelectionDialog, { type FbaAdvancedOptions } from './MediaSelectionDialog';
 
 interface ModelDetailHeaderProps {
     modelName: string;
     visualizeOption: string;
     onVisualizeChange: (value: string) => void;
-    onRunFba?: (mediaId?: string, mediaName?: string) => void;
+    onRunFba?: (mediaId?: string, mediaName?: string, advancedOptions?: FbaAdvancedOptions) => void;
     onRunGapfill?: (mediaId?: string, mediaName?: string) => void;
     actionLoading?: 'fba' | 'gapfill' | null;
     actionMessage?: string | null;
+    /** Whether this is a plant model — affects default media note in dialog */
+    isPlantModel?: boolean;
 }
 
 export default function ModelDetailHeader({
@@ -29,6 +31,7 @@ export default function ModelDetailHeader({
     onRunGapfill,
     actionLoading,
     actionMessage,
+    isPlantModel = false,
 }: ModelDetailHeaderProps) {
     const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
     const [mediaDialogType, setMediaDialogType] = useState<'fba' | 'gapfill' | null>(null);
@@ -38,14 +41,18 @@ export default function ModelDetailHeader({
         setMediaDialogOpen(true);
     };
 
-    const handleMediaConfirm = (mediaId: string, mediaName: string) => {
+    const handleMediaConfirm = (
+        mediaId: string,
+        mediaName: string,
+        _mediaRef?: string,
+        advancedOptions?: FbaAdvancedOptions,
+    ) => {
         setMediaDialogOpen(false);
-        
-        // Use media name for both FBA and gapfill (not the UUID or path)
+
         const mediaValue = mediaName;
-        
+
         if (mediaDialogType === 'fba' && onRunFba) {
-            onRunFba(mediaValue, mediaName);
+            onRunFba(mediaValue, mediaName, advancedOptions);
         } else if (mediaDialogType === 'gapfill' && onRunGapfill) {
             onRunGapfill(mediaValue, mediaName);
         }
@@ -134,6 +141,8 @@ export default function ModelDetailHeader({
                 onClose={() => setMediaDialogOpen(false)}
                 onConfirm={handleMediaConfirm}
                 title={mediaDialogType === 'fba' ? 'Select Media for FBA' : 'Select Media for Gapfilling'}
+                showAdvancedOptions={mediaDialogType === 'fba'}
+                isPlantModel={isPlantModel}
             />
         </>
     );

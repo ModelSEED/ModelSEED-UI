@@ -102,6 +102,7 @@ export function parseWorkspaceGetObject<T = unknown>(payload: unknown, index = 0
  * Routes through the endpoint defined in config.ts.
  * Automatically attaches the user's auth token when available.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Legacy JSON-RPC fallback, retained for USE_NEW_PROXY=false mode
 async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T> {
     const request: WorkspaceRpcRequest = {
         version: '1.1',
@@ -289,6 +290,22 @@ export async function workspaceCopy(body: Record<string, unknown>): Promise<Reco
 export async function workspaceMetadata(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspaceMetadata');
     return callWorkspaceRestApi<Record<string, unknown>>('metadata', body);
+}
+
+/**
+ * Update user-editable metadata fields on a workspace object.
+ * Uses the Workspace `update_metadata` RPC method via REST proxy.
+ * @param path Workspace path of the object (e.g. '/user/modelseed/MyModel')
+ * @param updates Key-value pairs to update (e.g. { name: 'New Name', description: 'desc' })
+ */
+export async function workspaceUpdateMetadata(
+    path: string,
+    updates: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+    ensureProxyMode('workspaceUpdateMetadata');
+    return callWorkspaceRestApi<Record<string, unknown>>('update-metadata', {
+        objects: [[path, updates]],
+    });
 }
 
 export async function workspacePermissions(body: Record<string, unknown>): Promise<Record<string, unknown>> {
