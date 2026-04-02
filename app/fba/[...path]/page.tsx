@@ -116,15 +116,6 @@ function normalizeWorkspaceRef(value: string): string {
     return value.startsWith('/') ? value : `/${value}`;
 }
 
-function ownerAliasRef(ref: string, authMethod?: string | null): string {
-    if (authMethod === 'PATRIC') return ref;
-    const normalized = normalizeWorkspaceRef(ref);
-    if (!normalized) return '';
-    const match = normalized.match(/^\/([^/@]+)@[^/]+\/(.*)$/);
-    if (!match) return normalized;
-    return `/${match[1]}/${match[2]}`;
-}
-
 function expandOwnerRef(ref: string, authMethod?: string | null): string {
     if (authMethod !== 'PATRIC') return ref;
     const normalized = normalizeWorkspaceRef(ref);

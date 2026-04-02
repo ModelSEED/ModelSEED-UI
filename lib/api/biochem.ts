@@ -61,14 +61,14 @@ export interface Compound {
 export interface GridFilterItem {
     id?: number | string;
     field: string;
-    value?: any;
+    value?: string | number | boolean | string[];
     operator: string;
 }
 
 export interface GridFilterModel {
     items: GridFilterItem[];
     logicOperator?: 'and' | 'or';
-    quickFilterValues?: any[];
+    quickFilterValues?: string[];
     quickFilterLogicOperator?: 'and' | 'or';
 }
 
