@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { use, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -20,9 +20,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 
-import { useAuth } from '@/components/auth/AuthProvider';
 import { parseWorkspaceGetObject, workspaceGet, workspaceLs } from '@/lib/api/workspace';
-import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
+import { USE_MODELSEED_API } from '@/lib/api/config';
 import {
     editModelFromApi,
     getModelDataFromApi,
@@ -43,6 +42,7 @@ import {
     type TrackedJob,
 } from '@/lib/api/jobTracker';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
+import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
@@ -1312,7 +1312,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const { data: wsObject, isLoading: wsLoading } = useQuery({
         queryKey: ['wsObject', workspacePath],
         queryFn: async () => {
-            const errors: any[] = [];
+            const errors: unknown[] = [];
             for (const candidate of workspaceCandidates) {
                 try {
                     return await workspaceGet([candidate]);
@@ -1817,18 +1817,27 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         router.push(nextPath);
     };
 
-    const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string) => {
+    const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string, advancedOptions?: FbaAdvancedOptions) => {
         setActionLoading(kind);
         setActionMessage(null);
         const selectedMedia = media || defaultMedia;
         try {
+            // Build FBA payload with optional advanced options (reaction knockouts)
+            const fbaPayload: Record<string, unknown> = {
+                model: workspaceCandidates[0],
+                media: selectedMedia,
+                media_supplement: [],
+            };
+            if (advancedOptions?.reactionKnockouts) {
+                fbaPayload.reaction_ko_list = advancedOptions.reactionKnockouts
+                    .split(/[;,\s]+/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+            }
+
             const payload =
                 kind === 'fba'
-                    ? await submitFbaJobFromApi({
-                        model: workspaceCandidates[0],
-                        media: selectedMedia,
-                        media_supplement: [],
-                    })
+                    ? await submitFbaJobFromApi(fbaPayload)
                     : await submitGapfillJobFromApi({
                         model: workspaceCandidates[0],
                         template_type: 'gn',
@@ -1947,10 +1956,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 modelName={modelName}
                 visualizeOption={visualizeOption}
                 onVisualizeChange={setVisualizeOption}
-                onRunFba={(mediaId?: string, mediaName?: string) => void submitModelJob('fba', mediaName)}
+                onRunFba={(mediaId?: string, mediaName?: string, advancedOptions?: FbaAdvancedOptions) => void submitModelJob('fba', mediaName, advancedOptions)}
                 onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaName)}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
+                isPlantModel={isPlantModel}
             />
 
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
