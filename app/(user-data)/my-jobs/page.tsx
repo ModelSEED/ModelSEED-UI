@@ -377,6 +377,11 @@ function MyJobsContent() {
                 onPaginationModelChange={setPagination}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: 'submitted', sort: 'desc' }],
+                    },
+                }}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 slotProps={{ toolbar: { showQuickFilter: true } }}

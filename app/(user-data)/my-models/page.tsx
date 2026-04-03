@@ -694,6 +694,11 @@ export default function MyModelsPage() {
                         onPaginationModelChange={setPaginationModel}
                         sortModel={sortModel}
                         onSortModelChange={setSortModel}
+                        initialState={{
+                            sorting: {
+                                sortModel: [{ field: 'modDate', sort: 'desc' }],
+                            },
+                        }}
                         showToolbar
                         slots={{ toolbar: DataControlHeader }}
                         slotProps={{
