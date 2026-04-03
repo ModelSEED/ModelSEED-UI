@@ -295,6 +295,24 @@ async function testModelDetail() {
     assert(detail.reactions?.length > 0, 'No reactions in detail');
     log(`  ${model.id}: ${detail.reactions.length} reactions`, 'success');
   });
+
+  test('Model detail counts match model list metadata', async () => {
+    // Get first model with reactions
+    const model = models.find(m => m.num_reactions > 0);
+    assert(model, 'No model with reactions found');
+    
+    const detail = await request(`${API_URL}/api/models/data?ref=${encodeURIComponent(model.ref)}`);
+    
+    // Verify the detail has data (not empty/404)
+    assert(detail && !detail.detail, 'Model detail returned error: ' + JSON.stringify(detail?.detail));
+    
+    // Verify counts match between list and detail
+    const listReactions = model.num_reactions || 0;
+    const detailReactions = detail.reactions?.length || 0;
+    assert(listReactions === detailReactions, `Reaction count mismatch: list=${listReactions}, detail=${detailReactions}`);
+    
+    log(`  ${model.id}: list reactions=${listReactions}, detail reactions=${detailReactions}`, 'success');
+  });
   
   test('Get model detail with compounds', async () => {
     const model = models.find(m => m.num_compounds > 0);
@@ -605,26 +623,24 @@ async function testReconstruction() {
         const contents = folderCheck[modelseedPath + '/' + recentFolders[0][0]] || [];
         const hasModel = contents.some(x => x[1] === 'model');
         
-        if (hasModel) {
-          const ref = modelseedPath + '/' + recentFolders[0][0];
-          const detail = await request(`${API_URL}/api/models/data?ref=${encodeURIComponent(ref)}`);
-          
-          assert(detail.organism_name, 'New model missing organism_name');
-          assert(detail.taxonomy, 'New model missing taxonomy');
-          assert(detail.domain, 'New model missing domain');
-          
-          log(`  ${recentFolders[0][0]}:`, 'success');
-          log(`    organism_name: ${detail.organism_name}`, 'success');
-          log(`    taxonomy: ${detail.taxonomy?.substring(0, 40)}...`, 'success');
-          log(`    domain: ${detail.domain}`, 'success');
-        } else {
-          skip('No model file created yet', 'Reconstruction may still be running');
-        }
+        assert(hasModel, 'Model folder has no model file inside (empty folder!)');
+        
+        const ref = modelseedPath + '/' + recentFolders[0][0];
+        const detail = await request(`${API_URL}/api/models/data?ref=${encodeURIComponent(ref)}`);
+        
+        assert(detail.organism_name, 'New model missing organism_name');
+        assert(detail.taxonomy, 'New model missing taxonomy');
+        assert(detail.domain, 'New model missing domain');
+        
+        log(`  ${recentFolders[0][0]}:`, 'success');
+        log(`    organism_name: ${detail.organism_name}`, 'success');
+        log(`    taxonomy: ${detail.taxonomy?.substring(0, 40)}...`, 'success');
+        log(`    domain: ${detail.domain}`, 'success');
       } else {
         skip('No recent model folder', 'No model created in this session');
       }
     } catch (err) {
-      // Handle cross-token permission errors (e.g., PATRIC token trying to access RAST workspace)
+      // Handle cross-token permission errors
       if (err.message?.includes('403')) {
         log('  Workspace permission denied (cross-token test)', 'info');
       } else {
@@ -1090,6 +1106,23 @@ async function testWorkspaceOperations() {
         })
       });
       log(`  Copied model to: ${copyPath}`, 'success');
+      
+      // Verify the model file was actually copied
+      const folderLs = await request(`${API_URL}/api/workspace/ls`, {
+        method: 'POST',
+        body: JSON.stringify({ paths: [copyPath] })
+      });
+      const folderContents = folderLs[copyPath] || [];
+      const hasModelFile = folderContents.some(x => x[1] === 'model');
+      
+      assert(hasModelFile, 'Copied model folder is empty - no model file inside!');
+      log(`  Copied folder has model file: YES`, 'success');
+      
+      // Verify we can get model detail
+      const detail = await request(`${API_URL}/api/models/data?ref=${encodeURIComponent(copyPath)}`);
+      assert(detail && !detail.detail, 'Cannot get model detail from copied model');
+      assert(detail.reactions?.length > 0, 'Copied model has no reactions');
+      log(`  Model detail accessible: ${detail.reactions.length} reactions`, 'success');
       
       // Clean up - delete the copy
       try {

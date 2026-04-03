@@ -775,7 +775,7 @@ function extractFbaRows(
                 ref,
                 objective: String(fba.objective ?? '-'),
                 objectiveFunction: String(fba.objective_function ?? 'N/A'),
-                media: summarizeMediaRef(fba.media),
+                media: summarizeMediaRef(fba.media_ref ?? fba.media),
                 timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
             });
         }
@@ -846,7 +846,7 @@ function extractGapfillRows(
             id,
             ref,
             integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
-            media: summarizeMediaRef(gapfill.media),
+            media: summarizeMediaRef(gapfill.media_ref ?? gapfill.media),
             timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
         });
     }
@@ -1249,6 +1249,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const authMethod = getStoredAuthMethod();
     const resolvedParams = use(params);
     const [loadingTooLong, setLoadingTooLong] = useState(false);
+    const [activeTabOverride, setActiveTabOverride] = useState<TabKey | null>(null);
     const urlSegments = useMemo(
         () => resolvedParams.path ?? [],
         [resolvedParams.path],
@@ -1259,7 +1260,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     );
 
     const lastSegment = decodedSegments[decodedSegments.length - 1]?.toLowerCase();
-    const activeTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
+    const urlTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
+    const activeTab: TabKey = activeTabOverride ?? urlTab;
     const modelSegments = isTabKey(lastSegment) ? decodedSegments.slice(0, -1) : decodedSegments;
     const workspacePath = `/${modelSegments.join('/')}`;
     const modelRootPath = workspacePath.endsWith('/model')
@@ -1607,7 +1609,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         );
     }
 
-    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
+    // Prefer apiModel for table data (full model from API), fallback to wsObject (workspace)
+    const modelObject = (apiModel as Record<string, unknown> | null) ?? 
+                        parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
     const tableConfig = buildTableConfig(modelObject);
     const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries);
     const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries);
@@ -1797,6 +1801,33 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
     ];
 
+    const gapfillColumns: GridColDef<Record<string, unknown>>[] = [
+        {
+            field: 'id',
+            headerName: 'ID',
+            width: 180,
+            renderCell: (params) => {
+                const gapfillId = params.value;
+                const gapfillHref = `/gapfill${workspacePath}/gapfill/${gapfillId}`;
+                return (
+                    <Link href={gapfillHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                        {String(params.value ?? '')}
+                    </Link>
+                );
+            },
+        },
+        { field: 'media', headerName: 'Media', width: 200 },
+        { field: 'integrated', headerName: 'Integrated', width: 120 },
+        { 
+            field: 'timestamp', 
+            headerName: 'Date', 
+            width: 180,
+            type: 'dateTime',
+            valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+            valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
+        },
+    ];
+
     const pathwayColumns: GridColDef<Record<string, unknown>>[] = [
         { field: 'id', headerName: 'ID', width: 180 },
         { field: 'name', headerName: 'Name', width: 300 },
@@ -1817,9 +1848,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
         const tab = MODEL_TABS[nextIndex];
         if (!tab) return;
-        const basePath = `/model${workspacePath}`;
-        const nextPath = tab.key === 'overview' ? basePath : `${basePath}/${tab.key}`;
-        router.push(nextPath);
+        setActiveTabOverride(tab.key);
     };
 
     const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string, advancedOptions?: FbaAdvancedOptions) => {
@@ -2264,9 +2293,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                             ? compoundColumns
                                             : tab.key === 'fba'
                                                 ? fbaColumns
-                                                : tab.key === 'pathways'
-                                                    ? pathwayColumns
-                                                    : tableConfig[tab.key].columns
+                                                : tab.key === 'gapfill'
+                                                    ? gapfillColumns
+                                                    : tab.key === 'pathways'
+                                                        ? pathwayColumns
+                                                        : tableConfig[tab.key].columns
                                 }
                                 pageSizeOptions={[10, 25, 50, 100]}
                                 paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
