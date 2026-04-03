@@ -11,6 +11,13 @@ import FormControl from '@mui/material/FormControl';
 import Alert from '@mui/material/Alert';
 import MediaSelectionDialog, { type FbaAdvancedOptions } from './MediaSelectionDialog';
 
+interface ModelReaction {
+    id: string;
+    name: string;
+    direction?: string;
+    equation?: string;
+}
+
 interface ModelDetailHeaderProps {
     modelName: string;
     visualizeOption: string;
@@ -21,6 +28,8 @@ interface ModelDetailHeaderProps {
     actionMessage?: string | null;
     /** Whether this is a plant model — affects default media note in dialog */
     isPlantModel?: boolean;
+    /** Model reactions for knockout selection */
+    modelReactions?: ModelReaction[];
 }
 
 export default function ModelDetailHeader({
@@ -32,6 +41,7 @@ export default function ModelDetailHeader({
     actionLoading,
     actionMessage,
     isPlantModel = false,
+    modelReactions = [],
 }: ModelDetailHeaderProps) {
     const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
     const [mediaDialogType, setMediaDialogType] = useState<'fba' | 'gapfill' | null>(null);
@@ -143,6 +153,7 @@ export default function ModelDetailHeader({
                 title={mediaDialogType === 'fba' ? 'Select Media for FBA' : 'Select Media for Gapfilling'}
                 showAdvancedOptions={mediaDialogType === 'fba'}
                 isPlantModel={isPlantModel}
+                modelReactions={modelReactions}
             />
         </>
     );

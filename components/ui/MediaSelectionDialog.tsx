@@ -12,18 +12,28 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
+import Chip from '@mui/material/Chip';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Box from '@mui/material/Box';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { listPublicMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
+import ReactionKnockoutsDialog from '@/components/ui/ReactionKnockoutsDialog';
 
 /** Advanced FBA options matching the legacy fba-plant.html configuration */
 export interface FbaAdvancedOptions {
     reactionKnockouts: string;
+}
+
+interface ModelReaction {
+    id: string;
+    name: string;
+    direction?: string;
+    equation?: string;
 }
 
 interface MediaSelectionDialogProps {
@@ -40,6 +50,8 @@ interface MediaSelectionDialogProps {
     showAdvancedOptions?: boolean;
     /** Whether the model is a plant model — adjusts default messages */
     isPlantModel?: boolean;
+    /** Model reactions for knockout selection dialog */
+    modelReactions?: ModelReaction[];
 }
 
 export default function MediaSelectionDialog({
@@ -49,9 +61,11 @@ export default function MediaSelectionDialog({
     title = 'Select Media for Simulation',
     showAdvancedOptions = false,
     isPlantModel = false,
+    modelReactions = [],
 }: MediaSelectionDialogProps) {
     const [userSelectedMedia, setUserSelectedMedia] = useState<string>('');
-    const [reactionKnockouts, setReactionKnockouts] = useState('');
+    const [reactionKnockouts, setReactionKnockouts] = useState<string[]>([]);
+    const [knockoutsDialogOpen, setKnockoutsDialogOpen] = useState(false);
 
     const { data: mediaList = [], isLoading, error } = useQuery({
         queryKey: ['all-media-list'],
@@ -85,15 +99,23 @@ export default function MediaSelectionDialog({
         if (selectedMedia) {
             const media = mediaList.find(m => m.id === selectedMedia);
             const advanced: FbaAdvancedOptions | undefined = showAdvancedOptions
-                ? { reactionKnockouts: reactionKnockouts.trim() }
+                ? { reactionKnockouts: reactionKnockouts.join(';') }
                 : undefined;
             onConfirm(selectedMedia, media?.name || selectedMedia, media?.ref, advanced);
         }
     };
 
     const handleClose = () => {
-        setReactionKnockouts('');
+        setReactionKnockouts([]);
         onClose();
+    };
+
+    const handleSaveKnockouts = (selectedIds: string[]) => {
+        setReactionKnockouts(selectedIds);
+    };
+
+    const handleRemoveKnockout = (id: string) => {
+        setReactionKnockouts(prev => prev.filter(rxnId => rxnId !== id));
     };
 
     const defaultMediaNote = isPlantModel
@@ -148,15 +170,64 @@ export default function MediaSelectionDialog({
                         </AccordionSummary>
                         <AccordionDetails>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                <TextField
-                                    label="Reaction Knockouts"
-                                    value={reactionKnockouts}
-                                    onChange={(e) => setReactionKnockouts(e.target.value)}
-                                    placeholder="rxn00001;rxn00002 (semicolon-separated)"
-                                    helperText="Specify reaction IDs to knock out during simulation, separated by semicolons."
-                                    fullWidth
-                                    size="small"
-                                />
+                                <Box>
+                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                        Reaction Knockouts
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={() => setKnockoutsDialogOpen(true)}
+                                        sx={{ mb: 1 }}
+                                    >
+                                        {reactionKnockouts.length > 0
+                                            ? `Edit Knockouts (${reactionKnockouts.length} selected)`
+                                            : 'Select Reactions to Knock Out'}
+                                    </Button>
+                                    {reactionKnockouts.length > 0 && (
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                            {reactionKnockouts.map((rxnId) => {
+                                                const reaction = modelReactions.find(r => r.id === rxnId);
+                                                return (
+                                                    <Chip
+                                                        key={rxnId}
+                                                        label={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                <Link
+                                                                    href={`/biochem/reactions/${rxnId}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    style={{
+                                                                        color: 'inherit',
+                                                                        textDecoration: 'none',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 4,
+                                                                    }}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    {rxnId}
+                                                                    <OpenInNewIcon sx={{ fontSize: 12 }} />
+                                                                </Link>
+                                                                {reaction?.name && (
+                                                                    <span style={{ opacity: 0.7, fontSize: '0.875em', marginLeft: 4 }}>
+                                                                        {reaction.name.substring(0, 20)}
+                                                                        {reaction.name.length > 20 ? '...' : ''}
+                                                                    </span>
+                                                                )}
+                                                            </Box>
+                                                        }
+                                                        onDelete={() => handleRemoveKnockout(rxnId)}
+                                                        size="small"
+                                                    />
+                                                );
+                                            })}
+                                        </Box>
+                                    )}
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                                        Specify reactions to knock out during simulation
+                                    </Typography>
+                                </Box>
                             </Box>
                         </AccordionDetails>
                     </Accordion>
@@ -172,6 +243,14 @@ export default function MediaSelectionDialog({
                     Run
                 </Button>
             </DialogActions>
+
+            <ReactionKnockoutsDialog
+                open={knockoutsDialogOpen}
+                onClose={() => setKnockoutsDialogOpen(false)}
+                onSave={handleSaveKnockouts}
+                reactions={modelReactions}
+                initialSelectedIds={reactionKnockouts}
+            />
         </Dialog>
     );
 }

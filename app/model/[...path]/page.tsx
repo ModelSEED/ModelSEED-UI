@@ -1995,6 +1995,12 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
                 isPlantModel={isPlantModel}
+                modelReactions={tableConfig.reactions.rows.map((r: Record<string, unknown>) => ({
+                    id: String(r.id ?? ''),
+                    name: String(r.name ?? ''),
+                    direction: String(r.direction ?? ''),
+                    equation: String(r.equation ?? ''),
+                }))}
             />
 
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
