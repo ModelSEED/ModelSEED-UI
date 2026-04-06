@@ -28,6 +28,50 @@ interface GapfillReaction {
 
 /* ---------- helpers ---------- */
 
+/**
+ * Validates if the gapfill path has the correct structure
+ * 
+ * A valid gapfill path must have:
+ * - At least 5 segments: /gapfill/{user}/modelseed/{model}/{gapfill-id}
+ * - The path must contain /modelseed/
+ * - The path must have a valid gapfill identifier (gf.x or ends with /gapfilling/ or contains /gapfilling/)
+ * 
+ * @param path - The gapfill workspace path to validate
+ * @returns true if the path structure is valid, false otherwise
+ * 
+ * @example
+ * isValidGapfillPath('/gapfill/seaver/modelseed/MyModel/gf.0') // true
+ * isValidGapfillPath('/gapfill/seaver/modelseed') // false (incomplete)
+ */
+function isValidGapfillPath(path: string): boolean {
+    if (!path) return false;
+
+    const segments = path.split('/').filter(Boolean);
+    
+    // Must have at least 5 segments: gapfill, user, modelseed, model, gapfill-id
+    if (segments.length < 5) return false;
+
+    // Must contain 'modelseed' segment
+    if (!path.toLowerCase().includes('/modelseed/')) return false;
+
+    // Must have a valid gapfill identifier
+    const lastSegment = segments[segments.length - 1].toLowerCase();
+    const pathLower = path.toLowerCase();
+    
+    // Valid patterns:
+    // 1. Last segment starts with 'gf.' (e.g., gf.0, gf.1)
+    // 2. Path contains /gapfilling/ (e.g., /model/gapfilling/gf.0)
+    // 3. Path ends with /gapfilling or /gapfill
+    const hasGapfillId = lastSegment.startsWith('gf.') || 
+                         pathLower.includes('/gapfilling/') ||
+                         pathLower.endsWith('/gapfilling') ||
+                         pathLower.endsWith('/gapfill');
+    
+    if (!hasGapfillId) return false;
+
+    return true;
+}
+
 function extractModelRef(gfPath: string): string {
     const normalized = normalizeWorkspaceRef(gfPath);
 
@@ -223,6 +267,12 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
     const { data: gfReactions, isLoading, error } = useQuery({
         queryKey: ['gapfillDetail', workspacePath, modelRef],
         queryFn: async () => {
+            // Validate the gapfill path before making any API calls
+            // Invalid URLs will show friendly "No gapfill reactions found" message instead of 404 error
+            if (!isValidGapfillPath(workspacePath)) {
+                return [];
+            }
+
             // Try API gapfills list first
             if (USE_MODELSEED_API) {
                 try {
