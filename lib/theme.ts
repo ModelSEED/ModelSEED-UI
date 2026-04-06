@@ -1,7 +1,43 @@
 'use client';
 
+/**
+ * Material-UI theme configuration for ModelSEED UI.
+ * 
+ * This theme maintains visual consistency with the legacy AngularJS application
+ * by mapping color values and styling from the original core.css file. All color
+ * codes and design decisions are documented with their CSS source references.
+ * 
+ * @see core.css - Original styling source
+ */
+
 import { createTheme } from '@mui/material/styles';
 
+/**
+ * ModelSEED application theme with brand colors and typography.
+ * 
+ * Color palette derived from legacy core.css to maintain visual consistency:
+ * - Primary (#30BCCF): ModelSEED brand teal
+ * - Secondary (rgba(95,98,168,0.91)): Accent purple
+ * - Error (#DA265D): Danger/error state red
+ * - Success (#38BD5C): Success/complete state green
+ * 
+ * Typography uses Montserrat font family with 500 weight for all headings.
+ * Buttons have 0px border-radius and 'none' text-transform per legacy design.
+ * 
+ * @example
+ * ```tsx
+ * import { ThemeProvider } from '@mui/material/styles';
+ * import theme from '@/lib/theme';
+ * 
+ * export default function App() {
+ *   return (
+ *     <ThemeProvider theme={theme}>
+ *       <YourComponents />
+ *     </ThemeProvider>
+ *   );
+ * }
+ * ```
+ */
 const theme = createTheme({
     palette: {
         primary: {

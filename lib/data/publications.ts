@@ -1,13 +1,58 @@
+/**
+ * ModelSEED publications database.
+ * 
+ * Curated list of scientific publications related to ModelSEED, PlantSEED,
+ * and associated metabolic modeling research. Used for displaying citations
+ * on the About page and in documentation.
+ * 
+ * Data is extracted from the legacy AngularJS application and maintained as a
+ * static dataset. Publications are ordered roughly by relevance/importance.
+ */
+
+/**
+ * Publication metadata structure.
+ * 
+ * Note: Some property names preserve legacy spelling ('volumn' instead of 'volume')
+ * to maintain compatibility with existing data import scripts.
+ */
 export interface Publication {
+    /** Full publication title */
     title: string;
+    /** List of authors in citation format (LastName, FirstName Middle) */
     authors: string[];
+    /** Journal or publication venue name, or null if not in a journal */
     publication: string | null;
+    /** Volume number (legacy spelling preserved) */
     volumn?: string;
+    /** Issue number */
     number?: string;
+    /** Page range (e.g., "1487-1499") */
     pages?: string;
+    /** Publication year */
     year?: number;
 }
 
+/**
+ * Complete list of ModelSEED-related publications.
+ * 
+ * @example
+ * ```tsx
+ * import { PUBLICATIONS } from '@/lib/data/publications';
+ * 
+ * export function PublicationsList() {
+ *   return (
+ *     <ul>
+ *       {PUBLICATIONS.map((pub, i) => (
+ *         <li key={i}>
+ *           {pub.authors.join(', ')} ({pub.year}). {pub.title}.
+ *           {pub.publication && ` ${pub.publication}`}
+ *         </li>
+ *       ))}
+ *     </ul>
+ *   );
+ * }
+ * ```
+ */
 export const PUBLICATIONS: Publication[] =
     [
         {

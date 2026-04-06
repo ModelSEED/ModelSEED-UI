@@ -1,29 +1,88 @@
 /**
- * Team member data extracted from legacy app/views/docs/team.html.
- * Structured for iteration to maintain visual fidelity with the original layout.
+ * Team member data for the ModelSEED About page.
+ * 
+ * Extracted from legacy app/views/docs/team.html and structured for programmatic
+ * iteration. The data structure preserves the original visual layout with
+ * hierarchical categories (PI, Scientists, Developers, etc.).
+ * 
+ * Team member images are located in /public/img/team/ directory.
+ * 
+ * @see /app/about/team/page.tsx - Rendering component
  */
 
+/**
+ * Individual team member information.
+ */
 export interface TeamMember {
+    /** Full name */
     name: string;
+    /** Personal or professional website URL */
     url?: string;
+    /** Job title or role */
     role?: string;
+    /** Institution or organization name */
     affiliation: string;
+    /** Institution website URL */
     affiliationUrl?: string;
+    /** Path to team member image (relative to /public) */
     imageSrc: string;
+    /** Image width in pixels (for consistent layout) */
     imageWidth?: number;
+    /** Image height in pixels (for consistent layout) */
     imageHeight?: number;
 }
 
+/**
+ * Team category grouping (e.g., "Principal Investigators", "Developers").
+ */
 export interface TeamCategory {
+    /** Category heading text */
     title: string;
-    /** Use 'h3' for top-level sections, 'h4' for sub-sections */
+    /** Heading level for semantic HTML (h3 for main categories, h4 for subcategories) */
     level: 'h3' | 'h4';
+    /** Array of team members in this category */
     members: TeamMember[];
 }
 
+/**
+ * Introductory text for the team page.
+ */
 export const TEAM_INTRO =
     'The ModelSEED is a collaboration between Henry Lab at Argonne National Laboratory and Nick Chia\'s team at Mayo Clinic.';
 
+/**
+ * Complete team member roster organized by category.
+ * 
+ * Categories are ordered hierarchically:
+ * - Principal Investigators
+ * - Partner Principal Investigators
+ * - Scientists
+ * - Developers
+ * - Contributors
+ * - Alumni
+ * 
+ * @example
+ * ```tsx
+ * import { TEAM_DATA } from '@/lib/data/team';
+ * 
+ * export function TeamPage() {
+ *   return (
+ *     <>
+ *       {TEAM_DATA.map((category) => (
+ *         <section key={category.title}>
+ *           <category.level>{category.title}</category.level>
+ *           <div className="team-grid">
+ *             {category.members.map((member) => (
+ *               <TeamMemberCard key={member.name} member={member} />
+ *             ))}
+ *           </div>
+ *         </section>
+ *       ))}
+ *     </>
+ *   );
+ * }
+ * ```
+ */
 export const TEAM_DATA: TeamCategory[] = [
     {
         title: 'Principal Investigators',
