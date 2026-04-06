@@ -95,6 +95,24 @@ function parseReactionRecords(raw: unknown): Record<string, unknown>[] {
 }
 
 function parseGapfillSolutions(gfData: Record<string, unknown>): Record<string, unknown>[] {
+    // Try stringified solutiondata field first (used in workspace objects)
+    if (typeof gfData.solutiondata === 'string') {
+        try {
+            const parsed = JSON.parse(gfData.solutiondata) as unknown;
+            if (Array.isArray(parsed)) {
+                return parsed.map((sol) => {
+                    if (Array.isArray(sol)) {
+                        // solutiondata is array of arrays of reactions
+                        return { solution_reactions: sol };
+                    }
+                    return asRecord(sol);
+                });
+            }
+        } catch {
+            // Fall through to other fields
+        }
+    }
+
     return asArray<Record<string, unknown>>(
         gfData.gapfillingSolutions
         ?? gfData.gapfilling_solutions
@@ -232,24 +250,47 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
 
                             const nestedRef = normalizeWorkspaceRef(String(matchRecord.ref ?? matchRecord.path ?? ''));
                             if (nestedRef) {
-                                try {
-                                    const nestedPayload = await workspaceGet([nestedRef]);
-                                    const nestedObject = parseWorkspaceGetObject<unknown>(nestedPayload);
-                                    if (nestedObject && typeof nestedObject === 'object') {
-                                        const nestedReactions = parseGapfillReactions(nestedObject as Record<string, unknown>);
-                                        if (nestedReactions.length > 0) {
-                                            return nestedReactions;
-                                        }
-                                    }
-                                } catch {
-                                    // Fall through to workspace direct fetch.
+                                // Try the ref from API first
+                                const refsToTry = [nestedRef];
+                                
+                                // If API returned wrong ref format (e.g., /gapfill.gf.0 instead of /gapfilling/gf.0)
+                                // Try alternative paths
+                                if (nestedRef.includes('/gapfill.')) {
+                                    const altRef = nestedRef.replace('/gapfill.', '/gapfilling/');
+                                    refsToTry.push(altRef);
+                                }
+                                if (!nestedRef.includes('/gapfilling/') && nestedRef.includes('/gf.')) {
+                                    const parts = nestedRef.split('/');
+                                    const gfId = parts.pop();
+                                    const altRef = parts.join('/') + '/gapfilling/' + gfId;
+                                    refsToTry.push(altRef);
                                 }
 
-                                const downloaded = await downloadWorkspaceObjectJson(nestedRef);
-                                if (downloaded) {
-                                    const nestedReactions = parseGapfillReactions(downloaded);
-                                    if (nestedReactions.length > 0) {
-                                        return nestedReactions;
+                                // Try each potential ref
+                                for (const ref of refsToTry) {
+                                    try {
+                                        const nestedPayload = await workspaceGet([ref]);
+                                        const nestedObject = parseWorkspaceGetObject<unknown>(nestedPayload);
+                                        if (nestedObject && typeof nestedObject === 'object') {
+                                            const nestedReactions = parseGapfillReactions(nestedObject as Record<string, unknown>);
+                                            if (nestedReactions.length > 0) {
+                                                return nestedReactions;
+                                            }
+                                        }
+                                    } catch {
+                                        // Try next ref
+                                    }
+
+                                    try {
+                                        const downloaded = await downloadWorkspaceObjectJson(ref);
+                                        if (downloaded) {
+                                            const nestedReactions = parseGapfillReactions(downloaded);
+                                            if (nestedReactions.length > 0) {
+                                                return nestedReactions;
+                                            }
+                                        }
+                                    } catch {
+                                        // Try next ref
                                     }
                                 }
                             }
@@ -266,18 +307,37 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
                     }
                 } catch { /* fall through */ }
             }
-            // Fallback: workspace get
-            try {
-                const wsData = await workspaceGet([workspacePath]);
-                const parsed = parseWorkspaceGetObject<unknown>(wsData);
-                if (parsed && typeof parsed === 'object') {
-                    return parseGapfillReactions(parsed as Record<string, unknown>);
-                }
-            } catch { /* handled below */ }
+            // Fallback: workspace get - try multiple path variations
+            const pathsToTry = [
+                workspacePath,
+                // If path has /gapfill/, try /gapfilling/
+                workspacePath.replace('/gapfill/', '/gapfilling/'),
+            ];
 
-            const downloaded = await downloadWorkspaceObjectJson(workspacePath);
-            if (downloaded) {
-                return parseGapfillReactions(downloaded);
+            // Add unique paths only
+            const uniquePaths = [...new Set(pathsToTry)];
+
+            for (const path of uniquePaths) {
+                try {
+                    const wsData = await workspaceGet([path]);
+                    const parsed = parseWorkspaceGetObject<unknown>(wsData);
+                    if (parsed && typeof parsed === 'object') {
+                        const reactions = parseGapfillReactions(parsed as Record<string, unknown>);
+                        if (reactions.length > 0) {
+                            return reactions;
+                        }
+                    }
+                } catch { /* try next path */ }
+
+                try {
+                    const downloaded = await downloadWorkspaceObjectJson(path);
+                    if (downloaded) {
+                        const reactions = parseGapfillReactions(downloaded);
+                        if (reactions.length > 0) {
+                            return reactions;
+                        }
+                    }
+                } catch { /* try next path */ }
             }
 
             return [];

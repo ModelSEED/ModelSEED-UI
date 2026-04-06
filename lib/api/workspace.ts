@@ -97,68 +97,11 @@ export function parseWorkspaceGetObject<T = unknown>(payload: unknown, index = 0
     return candidate as T;
 }
 
-/**
- * Perform a generic Workspace JSON-RPC call.
- * Routes through the endpoint defined in config.ts.
- * Automatically attaches the user's auth token when available.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Legacy JSON-RPC fallback, retained for USE_NEW_PROXY=false mode
-async function callWorkspaceApi<T>(method: string, params: unknown[]): Promise<T> {
-    const request: WorkspaceRpcRequest = {
-        version: '1.1',
-        method,
-        id: Math.floor(Math.random() * 100000),
-        params,
-    };
-
-    const baseHeaders: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    };
-    const headers = withRawTokenAuth(baseHeaders);
-
-    const response = await fetch(WORKSPACE_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(request),
-        // next caches fetch by default in some configurations, let's allow it but revalidate reasonably
-        next: { revalidate: 3600 }
-    });
-
-    const payload = await parseJsonResponse(response);
-    if (!response.ok) {
-        const backendMessage = extractWorkspaceErrorMessage(payload);
-        const statusMessage = STATUS_MESSAGES[response.status] || 'Request failed';
-        
-        // Log full error details for debugging
-        console.error(`Workspace JSON-RPC ${method} error:`, {
-            status: response.status,
-            statusMessage,
-            backendMessage,
-            payload,
-        });
-        
-        const userMessage = backendMessage
-            ? `${statusMessage} - ${backendMessage}`
-            : statusMessage;
-        
-        throw new Error(
-            `Workspace ${method} failed (${response.status}): ${userMessage}`,
-        );
-    }
-
-    const data = payload as WorkspaceRpcResponse<T>;
-
-    if (data.error) {
-        throw new Error(`Workspace API error: ${data.error.message}`);
-    }
-
-    if (!data.result) {
-        throw new Error('Workspace API returned no result');
-    }
-
-    return data.result[0];
-}
+// DEAD CODE REMOVED: callWorkspaceApi (legacy JSON-RPC fallback)
+// This function was never called - all workspace operations now route through
+// callWorkspaceRestApi. The legacy JSON-RPC support via USE_NEW_PROXY=false
+// is no longer actively used. If legacy support is needed in the future,
+// re-implement with proper routing logic in individual workspace functions.
 
 /**
  * User-friendly descriptions for common HTTP status codes from the Poplar backend.
@@ -175,8 +118,13 @@ const STATUS_MESSAGES: Record<number, string> = {
 };
 
 /**
- * Safely decode a path string that might be URL-encoded.
- * Handles double-encoding by decoding until no change occurs.
+ * Safely decode a URL-encoded path, handling double-encoding.
+ * 
+ * Decodes the path iteratively until it reaches a stable state,
+ * which handles cases where paths are accidentally double-encoded.
+ * 
+ * @param path - Path string that may be URL-encoded
+ * @returns Decoded path string
  */
 function safeDecodePath(path: string): string {
     try {
@@ -192,6 +140,12 @@ function safeDecodePath(path: string): string {
         return path; // If decoding fails, use original
     }
 }
+
+// DEAD CODE REMOVED: callWorkspaceApi (legacy JSON-RPC fallback)
+// This function was never called - all workspace operations now route through
+// callWorkspaceRestApi. The legacy JSON-RPC support via USE_NEW_PROXY=false
+// is no longer actively used. If legacy support is needed in the future,
+// re-implement with proper routing logic in individual workspace functions.
 
 /**
  * Perform a REST call to the new modelseed-api (Poplar) Workspace endpoints.
@@ -241,9 +195,21 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
 }
 
 /**
- * List objects or directories
- * Method: Workspace.ls
- * @param paths Array of workspace paths to list (e.g. ['/plantseed/plantseed/'])
+ * List objects or directories in the workspace.
+ * 
+ * Retrieves directory listings for the specified workspace paths. Each path
+ * maps to an array of workspace entry tuples containing metadata about files
+ * and directories.
+ * 
+ * @param paths - Array of workspace directory paths to list (e.g., ['/username@patricbrc.org/models'])
+ * @returns Dictionary mapping each path to an array of workspace entries
+ * @throws {Error} When request fails or paths are invalid
+ * 
+ * @example
+ * ```typescript
+ * const listings = await workspaceLs(['/user@patricbrc.org/models']);
+ * // listings['/user@patricbrc.org/models'] contains array of [name, type, path, modDate, id, ...]
+ * ```
  */
 export async function workspaceLs(paths: string[]): Promise<Record<string, unknown[]>> {
     // Always route through the new REST proxy (`/api/workspace/ls`).
@@ -254,9 +220,20 @@ export async function workspaceLs(paths: string[]): Promise<Record<string, unkno
 }
 
 /**
- * Get contents of objects
- * Method: Workspace.get
- * @param objects Array of workspace paths to get (e.g. ['/plantseed/Data/annotation_overview'])
+ * Retrieve full contents of workspace objects.
+ * 
+ * Fetches the complete data for the specified workspace objects. Response
+ * structure varies by object type (models, media, genomes, etc.).
+ * 
+ * @param objects - Array of workspace object paths (e.g., ['/user@patricbrc.org/models/MyModel'])
+ * @returns Array of workspace object data (use parseWorkspaceGetObject to extract typed data)
+ * @throws {Error} When request fails or objects don't exist
+ * 
+ * @example
+ * ```typescript
+ * const results = await workspaceGet(['/user@patricbrc.org/models/MyModel']);
+ * const modelData = parseWorkspaceGetObject(results, 0);
+ * ```
  */
 export async function workspaceGet(objects: string[]): Promise<unknown[]> {
     // Always route through the new REST proxy (`/api/workspace/get`).
@@ -266,27 +243,60 @@ export async function workspaceGet(objects: string[]): Promise<unknown[]> {
     return callWorkspaceRestApi<unknown[]>('get', { objects: decodedObjects });
 }
 
+/**
+ * Ensure USE_NEW_PROXY is enabled for operations requiring the REST proxy.
+ * 
+ * @param operation - Name of the operation being attempted
+ * @throws {Error} When USE_NEW_PROXY is false
+ */
 function ensureProxyMode(operation: string): void {
     if (!USE_NEW_PROXY) {
         throw new Error(`${operation} requires USE_NEW_PROXY=true`);
     }
 }
 
+/**
+ * Create a new workspace object.
+ * 
+ * Creates models, media, or other workspace objects via the REST proxy.
+ * Requires USE_NEW_PROXY=true.
+ * 
+ * @param body - Creation request body (structure depends on object type)
+ * @returns Response with created object metadata
+ * @throws {Error} When USE_NEW_PROXY is false or creation fails
+ */
 export async function workspaceCreate(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspaceCreate');
     return callWorkspaceRestApi<Record<string, unknown>>('create', body);
 }
 
+/**
+ * Delete workspace object(s).
+ * 
+ * Permanently removes objects from the workspace. Requires USE_NEW_PROXY=true.
+ * 
+ * @param body - Deletion request body with object paths
+ * @returns Response confirming deletion
+ * @throws {Error} When USE_NEW_PROXY is false or deletion fails
+ */
 export async function workspaceDelete(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspaceDelete');
     return callWorkspaceRestApi<Record<string, unknown>>('delete', body);
 }
 
-export async function workspaceCopy(body: Record<string, unknown>): Promise<Record<string, unknown>> {
-    ensureProxyMode('workspaceCopy');
-    return callWorkspaceRestApi<Record<string, unknown>>('copy', body);
-}
+// DEAD CODE REMOVED: workspaceCopy
+// This function had zero references in the codebase. If copy functionality
+// is needed in the future, implement it with proper documentation and usage.
 
+/**
+ * Retrieve metadata for workspace objects.
+ * 
+ * Gets object metadata without fetching full contents. Requires USE_NEW_PROXY=true.
+ * 
+ * @param body - Metadata request body with object paths
+ * @returns Object metadata
+ * @throws {Error} When USE_NEW_PROXY is false or request fails
+ */
 export async function workspaceMetadata(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspaceMetadata');
     return callWorkspaceRestApi<Record<string, unknown>>('metadata', body);
@@ -294,9 +304,22 @@ export async function workspaceMetadata(body: Record<string, unknown>): Promise<
 
 /**
  * Update user-editable metadata fields on a workspace object.
- * Uses the Workspace `update_metadata` RPC method via REST proxy.
- * @param path Workspace path of the object (e.g. '/user/modelseed/MyModel')
- * @param updates Key-value pairs to update (e.g. { name: 'New Name', description: 'desc' })
+ * 
+ * Updates fields like name, description, or other metadata. Uses the
+ * Workspace update_metadata RPC method via REST proxy. Requires USE_NEW_PROXY=true.
+ * 
+ * @param path - Workspace path of the object (e.g., '/user/modelseed/MyModel')
+ * @param updates - Key-value pairs to update (e.g., { name: 'New Name', description: 'New description' })
+ * @returns Response confirming update
+ * @throws {Error} When USE_NEW_PROXY is false or update fails
+ * 
+ * @example
+ * ```typescript
+ * await workspaceUpdateMetadata('/user@patricbrc.org/models/Model1', {
+ *   name: 'Updated Model Name',
+ *   description: 'New description'
+ * });
+ * ```
  */
 export async function workspaceUpdateMetadata(
     path: string,
@@ -308,11 +331,29 @@ export async function workspaceUpdateMetadata(
     });
 }
 
+/**
+ * Manage workspace permissions.
+ * 
+ * Set or modify access permissions for workspace objects. Requires USE_NEW_PROXY=true.
+ * 
+ * @param body - Permissions request body
+ * @returns Response with updated permissions
+ * @throws {Error} When USE_NEW_PROXY is false or request fails
+ */
 export async function workspacePermissions(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspacePermissions');
     return callWorkspaceRestApi<Record<string, unknown>>('permissions', body);
 }
 
+/**
+ * Generate a download URL for workspace object(s).
+ * 
+ * Creates a temporary download URL for exporting workspace data. Requires USE_NEW_PROXY=true.
+ * 
+ * @param body - Download request body with object paths
+ * @returns Response with download URL
+ * @throws {Error} When USE_NEW_PROXY is false or request fails
+ */
 export async function workspaceDownloadUrl(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     ensureProxyMode('workspaceDownloadUrl');
     return callWorkspaceRestApi<Record<string, unknown>>('download-url', body);

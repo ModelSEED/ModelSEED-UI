@@ -258,7 +258,15 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     return url;
 }
 
-/** Sanitize user input for Solr query (mirrors legacy logic). */
+/**
+ * Sanitize user input for Solr query syntax.
+ * 
+ * Removes special characters and handles whitespace for safe Solr queries.
+ * Mirrors legacy sanitization logic for backward compatibility.
+ * 
+ * @param query - Raw user input string
+ * @returns Sanitized query string safe for Solr
+ */
 function sanitizeQuery(query: string): string {
     let q = query.trim();
     q = q.replace(/'/g, "'");
@@ -317,7 +325,13 @@ async function fetchModelseedApiBiochem<T>(
     };
 }
 
-/* ─── Public API ─────────────────────────────────────────────── */
+/* ─── Constants ──────────────────────────────────────────────── */
+
+/** Field name mapping: UI uses 'synonyms' but Solr uses 'aliases'. */
+const SYNONYM_FIELD_ALIAS = 'aliases';
+
+/** Minimum query length for wildcard search (shorter queries use prefix match). */
+const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
 const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ecs', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
@@ -338,6 +352,33 @@ const CPD_VISIBLE = [
     'charge', 'aliases', 'ontology',
 ];
 
+/* ─── Public API ─────────────────────────────────────────────── */
+
+/**
+ * Search and retrieve biochemical reactions.
+ * 
+ * Queries the ModelSEED biochemistry database for reactions with support for
+ * advanced filtering, pagination, and sorting. Routes to either legacy Solr
+ * or new REST API based on configuration.
+ * 
+ * @param opts - Query options (query, limit, offset, sort, filterModel)
+ * @returns Promise resolving to paginated reaction results
+ * 
+ * @example
+ * ```typescript
+ * // Simple search
+ * const results = await getReactions({ query: 'ATP', limit: 25 });
+ * 
+ * // Advanced filtering
+ * const filtered = await getReactions({
+ *   filterModel: {
+ *     items: [{ field: 'status', operator: 'equals', value: 'OK' }],
+ *     logicOperator: 'and'
+ *   },
+ *   sort: { field: 'name' }
+ * });
+ * ```
+ */
 export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrResponse<Reaction>> {
     const mergedOpts: SolrQueryOpts = {
         limit: 25,
@@ -371,6 +412,23 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
     return res;
 }
 
+/**
+ * Search and retrieve biochemical compounds.
+ * 
+ * Queries the ModelSEED biochemistry database for compounds (metabolites)
+ * with pagination, filtering, and sorting support.
+ * 
+ * @param opts - Query options (query, limit, offset, sort, filterModel)
+ * @returns Promise resolving to paginated compound results
+ * 
+ * @example
+ * ```typescript
+ * const results = await getCompounds({ query: 'glucose', limit: 10 });
+ * results.docs.forEach(cpd => {
+ *   console.log(`${cpd.id}: ${cpd.name} - ${cpd.formula}`);
+ * });
+ * ```
+ */
 export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrResponse<Compound>> {
     const mergedOpts: SolrQueryOpts = {
         limit: 25,
@@ -389,12 +447,38 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
     return fetchSolr<Compound>(url);
 }
 
+/**
+ * Fetch a specific reaction by its ModelSEED ID.
+ * 
+ * @param id - Reaction ID (e.g., 'rxn00001')
+ * @returns Promise resolving to Reaction object
+ * @throws {Error} When reaction is not found or request fails
+ * 
+ * @example
+ * ```typescript
+ * const reaction = await getReactionById('rxn00001');
+ * console.log(reaction.name, reaction.definition);
+ * ```
+ */
 export async function getReactionById(id: string): Promise<Reaction> {
     const url = `${SOLR_BASE}reactions_staging/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Reaction>(url);
     return res.docs[0];
 }
 
+/**
+ * Fetch a specific compound by its ModelSEED ID.
+ * 
+ * @param id - Compound ID (e.g., 'cpd00001')
+ * @returns Promise resolving to Compound object
+ * @throws {Error} When compound is not found or request fails
+ * 
+ * @example
+ * ```typescript
+ * const compound = await getCompoundById('cpd00001');
+ * console.log(compound.name, compound.formula, compound.charge);
+ * ```
+ */
 export async function getCompoundById(id: string): Promise<Compound> {
     const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Compound>(url);
@@ -403,7 +487,19 @@ export async function getCompoundById(id: string): Promise<Compound> {
 
 /**
  * Fetch multiple compounds by their IDs in a single query.
- * Returns a map of id -> Compound for easy lookup.
+ * 
+ * Optimized batch fetch that retrieves multiple compounds at once.
+ * Returns a map for easy lookup by compound ID.
+ * 
+ * @param ids - Array of compound IDs
+ * @returns Promise resolving to Map of compound ID to Compound object
+ * 
+ * @example
+ * ```typescript
+ * const compounds = await getCompoundsByIds(['cpd00001', 'cpd00002', 'cpd00003']);
+ * const atp = compounds.get('cpd00002');
+ * if (atp) console.log(atp.name); // 'ATP'
+ * ```
  */
 export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Compound>> {
     if (ids.length === 0) return new Map();
@@ -422,7 +518,19 @@ export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Comp
 
 /**
  * Find reactions containing a given compound.
- * Mirrors legacy `findReactions_solr`.
+ * 
+ * Searches for reactions where the specified compound appears as a reactant
+ * or product. Useful for exploring compound participation in metabolism.
+ * 
+ * @param cpdId - Compound ID to search for
+ * @param opts - Query options (limit, offset, sort)
+ * @returns Promise resolving to paginated reaction results
+ * 
+ * @example
+ * ```typescript
+ * const reactions = await findReactionsForCompound('cpd00002'); // Find reactions using ATP
+ * console.log(`ATP participates in ${reactions.numFound} reactions`);
+ * ```
  */
 export async function findReactionsForCompound(
     cpdId: string,
@@ -443,7 +551,21 @@ export async function findReactionsForCompound(
     return fetchSolr<Reaction>(url);
 }
 
-/** Get compound image path (mirrors legacy `getImagePath`). */
+/**
+ * Get compound structure image URL.
+ * 
+ * Returns the URL for a pre-rendered PNG image of the compound structure.
+ * Note: Not all compounds have images (will return 404 if missing).
+ * 
+ * @param id - Compound ID
+ * @returns URL string for compound image
+ * 
+ * @example
+ * ```typescript
+ * const imageUrl = getCompoundImageUrl('cpd00001');
+ * // Use with error handling: <img src={imageUrl} onError={handleMissingImage} />
+ * ```
+ */
 export function getCompoundImageUrl(id: string): string {
     return `${CPD_IMG_BASE}${id}.png`;
 }

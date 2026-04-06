@@ -147,7 +147,13 @@ function safeParseNumber(val: unknown): number | undefined {
 }
 
 /**
- * Process model summary data with defensive number parsing to handle edge cases.
+ * Process model summary data with defensive number parsing.
+ * 
+ * Handles edge cases like "N/A" values or invalid numbers in metadata
+ * to prevent crashes from malformed backend data.
+ * 
+ * @param raw - Raw model data from API
+ * @returns Typed ModelseedModelSummary with safe defaults
  */
 function processModelSummary(raw: Record<string, unknown>): ModelseedModelSummary {
     return {
@@ -168,6 +174,23 @@ function processModelSummary(raw: Record<string, unknown>): ModelseedModelSummar
     };
 }
 
+/**
+ * List all models owned by the authenticated user.
+ * 
+ * Fetches model summaries from the modelseed-api backend with defensive
+ * parsing to handle malformed metadata gracefully.
+ * 
+ * @returns Promise resolving to array of model summaries
+ * @throws {Error} When not authenticated or request fails
+ * 
+ * @example
+ * ```typescript
+ * const models = await listUserModelsFromApi();
+ * models.forEach(model => {
+ *   console.log(`${model.name}: ${model.num_reactions} reactions, ${model.num_genes} genes`);
+ * });
+ * ```
+ */
 export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> {
     const rawModels = await modelseedFetch<Record<string, unknown>[]>('/api/models');
     
@@ -187,6 +210,19 @@ export async function listUserModelsFromApi(): Promise<ModelseedModelSummary[]> 
     });
 }
 
+/**
+ * Fetch full model data by workspace reference.
+ * 
+ * @param ref - Workspace reference path (e.g., '/user@patricbrc.org/models/MyModel')
+ * @returns Promise resolving to model data object
+ * @throws {Error} When model not found or request fails
+ * 
+ * @example
+ * ```typescript
+ * const modelData = await getModelDataFromApi('/user@patricbrc.org/models/EcoliModel');
+ * console.log('Model has', modelData.modelreactions.length, 'reactions');
+ * ```
+ */
 export async function getModelDataFromApi(ref: string): Promise<Record<string, unknown>> {
     return modelseedFetch<Record<string, unknown>>(
         `/api/models/data${buildQueryString({ ref: safeDecodePath(ref) })}`,
@@ -310,6 +346,28 @@ export async function getJobsFromApi(ids: string[]): Promise<ModelseedJobSummary
     return [];
 }
 
+/**
+ * Submit a model reconstruction job.
+ * 
+ * Submits a genome-to-model reconstruction job to the backend queue.
+ * Job completion can take minutes to hours depending on genome size.
+ * 
+ * @param payload - Reconstruction parameters (genome, model_name, template, gapfill, etc.)
+ * @returns Promise resolving to job submission response (contains job ID)
+ * @throws {Error} When not authenticated or submission fails
+ * 
+ * @example
+ * ```typescript
+ * const response = await submitReconstructJobFromApi({
+ *   genome: '511145.12',
+ *   model_name: 'EcoliModel',
+ *   template: 'GramNegative',
+ *   gapfill: true
+ * });
+ * const jobId = extractTrackedJobId(response);
+ * trackJob({ id: jobId, kind: 'reconstruct', label: 'E. coli reconstruction', ... });
+ * ```
+ */
 export async function submitReconstructJobFromApi(
     payload: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
@@ -383,6 +441,25 @@ type RawRastJob = {
     type?: unknown;
 };
 
+/**
+ * List RAST genome annotation jobs for the authenticated user.
+ * 
+ * Queries the modelseed_support backend for RAST genome jobs. Includes complex
+ * fallback logic to handle different backend RPC method names and deployment
+ * configurations. Returns empty array if backend is misconfigured rather than
+ * crashing the UI.
+ * 
+ * @returns Promise resolving to array of RAST genome jobs
+ * @throws {Error} When authentication fails or all RPC methods fail
+ * 
+ * @example
+ * ```typescript
+ * const genomes = await listRastGenomes();
+ * genomes.forEach(genome => {
+ *   console.log(`${genome.genome_name} (${genome.genome_id}) - ${genome.contig_count} contigs`);
+ * });
+ * ```
+ */
 export async function listRastGenomes(): Promise<RastGenomeJob[]> {
     const callRastList = async (method: string, params: Record<string, unknown>) => {
         const response = await fetch(MODELSEED_SUPPORT_URL, {
@@ -516,10 +593,37 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
         .filter((job) => job.genome_id.length > 0 || job.id.length > 0);
 }
 
+/**
+ * List public media formulations.
+ * 
+ * Retrieves the list of pre-defined public media available for FBA and gapfilling.
+ * 
+ * @returns Promise resolving to array of public media summaries
+ * 
+ * @example
+ * ```typescript
+ * const media = await listPublicMediaFromApi();
+ * const complete = media.find(m => m.id === 'Complete');
+ * ```
+ */
 export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     return listMediaGeneric('/api/media/public');
 }
 
+/**
+ * List user's custom media formulations.
+ * 
+ * Retrieves media created by the authenticated user. Includes fallback logic
+ * to search common workspace paths if primary endpoint returns empty results.
+ * 
+ * @returns Promise resolving to array of user media summaries
+ * 
+ * @example
+ * ```typescript
+ * const myMedia = await listMyMediaFromApi();
+ * console.log(`You have ${myMedia.length} custom media formulations`);
+ * ```
+ */
 export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
     const primary = await listMediaGeneric('/api/media/mine');
     if (primary.length > 0) return primary;

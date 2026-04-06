@@ -1,5 +1,12 @@
 import { withRawTokenAuth } from './requestAuth';
 
+/**
+ * BV-BRC / PATRIC genome search API client.
+ * 
+ * Provides search capabilities for the BV-BRC genome database with built-in
+ * error handling and retry logic for backend compatibility issues.
+ */
+
 const PATRIC_GENOME_API_URL = 'https://www.patricbrc.org/api/genome/';
 
 export interface PatricGenome {
@@ -30,6 +37,15 @@ interface RawPatricResponse {
     docs?: Record<string, unknown>[];
 }
 
+/**
+ * Build RQL search clause from user query string.
+ * 
+ * Converts user search terms into BV-BRC RQL format. Single terms search by
+ * genome_name prefix or exact genome_id. Multiple terms use AND logic.
+ * 
+ * @param query - User search string
+ * @returns RQL search clause or null if query is empty
+ */
 function buildSearchClause(query: string): string | null {
     const terms = query
         .trim()
@@ -48,6 +64,12 @@ function buildSearchClause(query: string): string | null {
     return `and(${allNameMatches})`;
 }
 
+/**
+ * Map raw BV-BRC API response document to typed PatricGenome.
+ * 
+ * @param doc - Raw document from BV-BRC API
+ * @returns Typed PatricGenome object
+ */
 function mapPatricGenome(doc: Record<string, unknown>): PatricGenome {
     const genomeId = String(doc.genome_id ?? '');
     const genomeName = String(doc.genome_name ?? '');
@@ -60,6 +82,30 @@ function mapPatricGenome(doc: Record<string, unknown>): PatricGenome {
     };
 }
 
+/**
+ * Search the BV-BRC genome database.
+ * 
+ * Queries the BV-BRC genome API with pagination and sorting support. Includes
+ * automatic retry logic for known backend configuration issues (signingSubjectURL error).
+ * 
+ * @param params - Search parameters (query, limit, offset, sort)
+ * @returns Promise resolving to search results with rows and total count
+ * @throws {Error} When search fails after retry attempts
+ * 
+ * @example
+ * ```typescript
+ * const results = await searchPatricGenomes({
+ *   query: 'Escherichia coli',
+ *   limit: 25,
+ *   offset: 0,
+ *   sort: '+genome_name'
+ * });
+ * console.log(`Found ${results.total} genomes`);
+ * results.rows.forEach(genome => {
+ *   console.log(`${genome.genome_name} (${genome.genome_id})`);
+ * });
+ * ```
+ */
 export async function searchPatricGenomes(
     params: SearchPatricGenomesParams = {},
 ): Promise<PatricGenomeSearchResult> {
