@@ -139,13 +139,26 @@ When initializing a debugging or feature session, start by reading `INDEX.md` fo
    ```
 
 2. **Start SSH tunnel to Poplar API (for authenticated tests):**
+   
+   The ModelSEED API backend runs on Poplar and requires an SSH tunnel for local development:
+   
    ```bash
    ssh -L 8000:localhost:8000 user@poplar.cels.anl.gov
    ```
+   
+   **Important**: Keep this terminal session open while developing. The tunnel forwards `localhost:8000` to the Poplar API server.
+   
+   Without the SSH tunnel:
+   - Version page will show endpoints as "error"
+   - Media tab (`/list-media`) will be empty due to timeout
+   - All authenticated API features will be unavailable
 
 3. **Configure `.env.local`:**
    ```bash
+   # When using SSH tunnel
    NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   
+   # For authenticated tests
    PATRIC_USERNAME=your_username
    PATRIC_PASSWORD=your_password
    ```
@@ -164,6 +177,70 @@ npm run test:api
 ```
 
 See [`tests/README.md`](tests/README.md) for full documentation.
+
+## Troubleshooting
+
+### Issue: Version page shows endpoints as "error"
+
+**Cause**: SSH tunnel to Poplar API is not active.
+
+**Solution**:
+1. Start the SSH tunnel: `ssh -L 8000:localhost:8000 user@poplar.cels.anl.gov`
+2. Keep the terminal session open while developing
+3. Verify connection: `curl http://localhost:8000/health` (should return 200)
+
+### Issue: Media tab (`/list-media`) is empty
+
+**Cause**: Backend API not responding (SSH tunnel not active).
+
+**Solution**:
+1. Check SSH tunnel is running (see above)
+2. Verify environment variable in `.env.local`:
+   ```bash
+   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   ```
+3. Restart the development server after changing `.env.local`
+4. Test API connection: `curl http://localhost:8000/api/media/public`
+
+### Issue: Different models/media between RAST and PATRIC accounts
+
+**This is expected behavior, not a bug.**
+
+RAST and PATRIC are separate systems with different workspace folders. A PATRIC user cannot access RAST workspace data and vice versa. The same username on both systems will have different data because they point to different underlying workspace directories.
+
+### Issue: Authentication fails or times out
+
+**Cause**: Network connectivity to PATRIC/RAST authentication servers or SSH tunnel issue.
+
+**Solution**:
+1. Check internet connectivity to `p3.theseed.org` and `rast.nmpdr.org`
+2. Verify SSH tunnel is active for API calls
+3. Try the developer bypass (local testing only):
+   - Username: `developer`
+   - Password: `developer`
+   - Returns a fixed token without hitting remote auth services
+
+### Issue: Build or type errors after updates
+
+**Solution**:
+```bash
+# Clean build artifacts
+rm -rf .next
+rm -rf node_modules
+npm install
+
+# Run type check
+npx tsc --noEmit
+
+# Run linter
+npm run lint
+```
+
+For more detailed troubleshooting and architecture documentation, see:
+- [`docs/README.md`](docs/README.md) - Developer manual
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture
+- [`docs/WORKSPACE.md`](docs/WORKSPACE.md) - Workspace API details
+- [`issues.md`](issues.md) - Known backend limitations
 
 ## Review Status (March 2026)
 

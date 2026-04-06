@@ -1,0 +1,11 @@
+I've checked the API at port 8000 and confirmed that both issues are in fact real problems with the backend.
+
+1. **Wrong gapfill ref (Confirmed)**:
+When calling the \`/api/models/gapfills\` endpoint for a model, the API returns objects where the \`ref\` field is incorrectly constructed using the pattern \`[model_path]/gapfill.[id]\` (e.g., \`/seaver@patricbrc.org/modelseed/Test/gapfill.gf.0\`). However, querying the workspace file tree directly (\`/api/workspace/ls\`) confirms that the gapfill iterations are actually stored inside a \`gapfilling\` subfolder (\`/seaver@patricbrc.org/modelseed/Test/gapfilling/gf.0\`). This causes immediate 404 Object Not Found errors when the UI or any script tries to fetch the object by its broken \`ref\`.
+
+2. **solution_reactions not populated (Confirmed)**:
+The gapfilling and FBA workspace objects store the bulk of their reaction data in a \`solutiondata\` field. Because this field is typically a stringified JSON payload (or deeply nested dictionary depending on the PATRIC workspace iteration), the backend API fails to properly parse and extract it for models like \`Test_Microbe\`. As a result, the backend just returns \`solution_reactions: []\` (an empty array) instead of parsing the \`solutiondata\` string and mapping it to the \`solution_reactions\` list.
+
+You can confidently report these bugs to the API team. Ask them to:
+- Update the path builder in the models service to look inside the \`/gapfilling/\` directory instead of appending \`gapfill.\`.
+- Add a parsing step in the endpoint to check for and un-stringify \`solutiondata\`, mapping the contents to \`solution_reactions\` when returning the JSON to the UI.

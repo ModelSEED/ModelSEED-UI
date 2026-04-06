@@ -9,8 +9,120 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Link from 'next/link';
-import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { getReactionById, getCompoundImageUrl, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
+
+/* ─── Helpers ───────────────────────────────────────────────── */
+
+/**
+ * Extract unique compound IDs from a reaction equation
+ * 
+ * Parses compound IDs in the format cpd##### (e.g., cpd00001, cpd12345)
+ * from a reaction equation string, removing duplicates and compartment
+ * annotations.
+ * 
+ * @param equation - Reaction equation (e.g., "cpd00001[c] + cpd00002[c] => cpd00003[c]")
+ * @returns Array of unique compound IDs without compartments
+ * 
+ * @example
+ * extractCompoundIds("cpd00001[c] + cpd00002[c] => cpd00003[c]")
+ * // Returns: ["cpd00001", "cpd00002", "cpd00003"]
+ */
+function extractCompoundIds(equation: string): string[] {
+    if (!equation) return [];
+    
+    // Match pattern: cpd followed by 5 digits
+    const matches = equation.match(/cpd\d{5}/g);
+    if (!matches) return [];
+    
+    // Remove duplicates and return
+    return Array.from(new Set(matches));
+}
+
+/* ─── Compound Structure Gallery Component ──────────────────── */
+
+interface CompoundStructureGalleryProps {
+    compoundIds: string[];
+}
+
+/**
+ * Displays a gallery of compound structure images with links to detail pages
+ * 
+ * Shows structure images for all compounds in a reaction equation. Images are
+ * displayed in a responsive flex grid. Missing images are hidden gracefully.
+ * Each image links to the corresponding compound detail page.
+ */
+function CompoundStructureGallery({ compoundIds }: CompoundStructureGalleryProps) {
+    if (!compoundIds || compoundIds.length === 0) return null;
+    
+    return (
+        <Box sx={{ mt: 2, mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary' }}>
+                Compound Structures
+            </Typography>
+            <Box sx={{ 
+                display: 'flex', 
+                gap: 2, 
+                flexWrap: 'wrap',
+                alignItems: 'flex-start'
+            }}>
+                {compoundIds.map(id => (
+                    <Box 
+                        key={id} 
+                        sx={{ 
+                            textAlign: 'center',
+                            '&:hover img': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                transform: 'translateY(-2px)',
+                                transition: 'all 0.2s ease'
+                            }
+                        }}
+                    >
+                        <Link href={`/biochem/compounds/${id}`} style={{ textDecoration: 'none' }}>
+                            <img
+                                src={getCompoundImageUrl(id)}
+                                alt={`Structure of ${id}`}
+                                style={{
+                                    maxWidth: '150px',
+                                    maxHeight: '150px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '4px',
+                                    padding: '8px',
+                                    background: '#fff',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onError={(e) => {
+                                    // Hide images that fail to load (compound has no structure image)
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement?.parentElement;
+                                    if (parent) parent.style.display = 'none';
+                                }}
+                            />
+                        </Link>
+                        <Typography 
+                            variant="caption" 
+                            display="block" 
+                            sx={{ mt: 0.5 }}
+                        >
+                            <Link 
+                                href={`/biochem/compounds/${id}`}
+                                style={{ 
+                                    color: '#00acc1', 
+                                    textDecoration: 'none',
+                                    fontWeight: 500
+                                }}
+                            >
+                                {id}
+                            </Link>
+                        </Typography>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+    );
+}
 
 /* ─── Alias helper ───────────────────────────────────────────── */
 
@@ -102,6 +214,9 @@ export default function ReactionDetailPage() {
     const ecDisplay = (rxn.ec_numbers ?? []).join('; ').replace(/"/g, '');
     const pathwaysDisplay = (rxn.pathways ?? []).join('; ').replace(/"/g, '');
 
+    // Extract compound IDs for structure display
+    const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
+
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
             <Card variant="outlined">
@@ -116,6 +231,14 @@ export default function ReactionDetailPage() {
                     <DetailRow label="Equation">
                         <ChemicalEquation equation={rxn.definition} />
                     </DetailRow>
+                    
+                    {/* Compound Structure Images */}
+                    {compoundIds.length > 0 && (
+                        <Box sx={{ pl: '20%', minWidth: 180 }}>
+                            <CompoundStructureGallery compoundIds={compoundIds} />
+                        </Box>
+                    )}
+                    
                     <Divider />
 
                     <DetailRow label="Abbreviation">

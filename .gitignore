@@ -2,6 +2,11 @@
 /legacy/
 scripts/local
 .api-temp/
+lib/api/IMPLEMENTATION_SUMMARY.md
+lib/IMPLEMENTATION_COMPLETE.md
+lib/api/PRODUCTION_REVIEW.md
+lib/REVIEW_SUMMARY.md
+
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 

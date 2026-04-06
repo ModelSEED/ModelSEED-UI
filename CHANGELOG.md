@@ -5,14 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-04-06
+
+### Added
+- **Compound Structure Images on Reaction Pages**: Reaction detail pages now display structure images for all compounds in the equation below the equation text. Images are clickable and link to compound detail pages. Missing images are gracefully hidden.
+- **Comprehensive Troubleshooting Documentation**: Added `docs/TROUBLESHOOTING.md` with detailed solutions for common issues including SSH tunnel setup, backend connectivity, authentication, and data display problems.
+- **Enhanced README Documentation**: Added SSH tunnel setup instructions, environment variable documentation, and common troubleshooting scenarios to main README.
+
+### Changed
+- **Version Bump**: Updated version from 0.1.0 to 3.0.0 per production requirements.
+- **Version Display**: Updated About/Version page to display v3.0.0 instead of hardcoded v0.1.3.
+
+### Fixed
+- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/seaver/modelseed`) by returning empty results instead of 404 errors.
+
+### Documentation
+- **SSH Tunnel Requirement**: Clearly documented that SSH tunnel to Poplar API server is required for local development and testing. The tunnel forwards `localhost:8000` to the backend API.
+- **Environment Variables**: Documented all `NEXT_PUBLIC_*` environment variables with examples and usage.
+- **Backend Connection Issues**: Added comprehensive troubleshooting for common connectivity issues (version page errors, empty media tab, authentication failures).
+- **Account Separation Clarification**: Documented that different models/media lists between RAST and PATRIC accounts is **expected behavior**, not a bug. The two systems use separate workspace folders by design.
+
+### Technical Details
+- Added `extractCompoundIds()` utility function to parse compound IDs from reaction equations.
+- Created `CompoundStructureGallery` component with hover effects, error handling, and responsive layout.
+- Compound images served from: `https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/{cpdID}.png`
+- Added `isValidGapfillPath()` helper with comprehensive validation logic.
+
+### Security
+- ✅ No vulnerabilities found: `npm audit --omit=dev` confirms 0 vulnerabilities.
+
+### Notes
+- Media tab (`/list-media`) requires active SSH tunnel to populate. Code implementation is correct.
+- RAST and PATRIC workspace separation is intentional system design.
+
+---
+
 ## [Unreleased] - TBD
 
 ### Known Issues (Documented in issues.md)
 
-- **Models/Media inconsistency**: Models and media lists differ between RAST and PATRIC accounts for the same user
 - **RAST MS FBA not working**: FBA analysis fails for RAST-owned models
 - **PATRIC-only model submission**: Model creation only works with PATRIC accounts
 - **Workspace write operations limited**: Cannot save edits back to workspace
+
+### Expected Behaviors (Not Bugs)
+
+- **Models/Media differ between RAST and PATRIC**: This is **intentional system design**. RAST and PATRIC are separate systems with different workspace folders. A user with the same username on both systems will see different data because they point to different underlying directories. This is not a bug or limitation.
 
 ### Testing
 
