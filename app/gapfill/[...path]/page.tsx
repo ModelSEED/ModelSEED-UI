@@ -28,50 +28,6 @@ interface GapfillReaction {
 
 /* ---------- helpers ---------- */
 
-/**
- * Validates if the gapfill path has the correct structure
- * 
- * A valid gapfill path must have:
- * - At least 5 segments: /gapfill/{user}/modelseed/{model}/{gapfill-id}
- * - The path must contain /modelseed/
- * - The path must have a valid gapfill identifier (gf.x or ends with /gapfilling/ or contains /gapfilling/)
- * 
- * @param path - The gapfill workspace path to validate
- * @returns true if the path structure is valid, false otherwise
- * 
- * @example
- * isValidGapfillPath('/gapfill/seaver/modelseed/MyModel/gf.0') // true
- * isValidGapfillPath('/gapfill/seaver/modelseed') // false (incomplete)
- */
-function isValidGapfillPath(path: string): boolean {
-    if (!path) return false;
-
-    const segments = path.split('/').filter(Boolean);
-    
-    // Must have at least 5 segments: gapfill, user, modelseed, model, gapfill-id
-    if (segments.length < 5) return false;
-
-    // Must contain 'modelseed' segment
-    if (!path.toLowerCase().includes('/modelseed/')) return false;
-
-    // Must have a valid gapfill identifier
-    const lastSegment = segments[segments.length - 1].toLowerCase();
-    const pathLower = path.toLowerCase();
-    
-    // Valid patterns:
-    // 1. Last segment starts with 'gf.' (e.g., gf.0, gf.1)
-    // 2. Path contains /gapfilling/ (e.g., /model/gapfilling/gf.0)
-    // 3. Path ends with /gapfilling or /gapfill
-    const hasGapfillId = lastSegment.startsWith('gf.') || 
-                         pathLower.includes('/gapfilling/') ||
-                         pathLower.endsWith('/gapfilling') ||
-                         pathLower.endsWith('/gapfill');
-    
-    if (!hasGapfillId) return false;
-
-    return true;
-}
-
 function extractModelRef(gfPath: string): string {
     const normalized = normalizeWorkspaceRef(gfPath);
 
@@ -139,24 +95,6 @@ function parseReactionRecords(raw: unknown): Record<string, unknown>[] {
 }
 
 function parseGapfillSolutions(gfData: Record<string, unknown>): Record<string, unknown>[] {
-    // Try stringified solutiondata field first (used in workspace objects)
-    if (typeof gfData.solutiondata === 'string') {
-        try {
-            const parsed = JSON.parse(gfData.solutiondata) as unknown;
-            if (Array.isArray(parsed)) {
-                return parsed.map((sol) => {
-                    if (Array.isArray(sol)) {
-                        // solutiondata is array of arrays of reactions
-                        return { solution_reactions: sol };
-                    }
-                    return asRecord(sol);
-                });
-            }
-        } catch {
-            // Fall through to other fields
-        }
-    }
-
     return asArray<Record<string, unknown>>(
         gfData.gapfillingSolutions
         ?? gfData.gapfilling_solutions
@@ -267,12 +205,6 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
     const { data: gfReactions, isLoading, error } = useQuery({
         queryKey: ['gapfillDetail', workspacePath, modelRef],
         queryFn: async () => {
-            // Validate the gapfill path before making any API calls
-            // Invalid URLs will show friendly "No gapfill reactions found" message instead of 404 error
-            if (!isValidGapfillPath(workspacePath)) {
-                return [];
-            }
-
             // Try API gapfills list first
             if (USE_MODELSEED_API) {
                 try {
@@ -300,47 +232,24 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
 
                             const nestedRef = normalizeWorkspaceRef(String(matchRecord.ref ?? matchRecord.path ?? ''));
                             if (nestedRef) {
-                                // Try the ref from API first
-                                const refsToTry = [nestedRef];
-                                
-                                // If API returned wrong ref format (e.g., /gapfill.gf.0 instead of /gapfilling/gf.0)
-                                // Try alternative paths
-                                if (nestedRef.includes('/gapfill.')) {
-                                    const altRef = nestedRef.replace('/gapfill.', '/gapfilling/');
-                                    refsToTry.push(altRef);
-                                }
-                                if (!nestedRef.includes('/gapfilling/') && nestedRef.includes('/gf.')) {
-                                    const parts = nestedRef.split('/');
-                                    const gfId = parts.pop();
-                                    const altRef = parts.join('/') + '/gapfilling/' + gfId;
-                                    refsToTry.push(altRef);
-                                }
-
-                                // Try each potential ref
-                                for (const ref of refsToTry) {
-                                    try {
-                                        const nestedPayload = await workspaceGet([ref]);
-                                        const nestedObject = parseWorkspaceGetObject<unknown>(nestedPayload);
-                                        if (nestedObject && typeof nestedObject === 'object') {
-                                            const nestedReactions = parseGapfillReactions(nestedObject as Record<string, unknown>);
-                                            if (nestedReactions.length > 0) {
-                                                return nestedReactions;
-                                            }
+                                try {
+                                    const nestedPayload = await workspaceGet([nestedRef]);
+                                    const nestedObject = parseWorkspaceGetObject<unknown>(nestedPayload);
+                                    if (nestedObject && typeof nestedObject === 'object') {
+                                        const nestedReactions = parseGapfillReactions(nestedObject as Record<string, unknown>);
+                                        if (nestedReactions.length > 0) {
+                                            return nestedReactions;
                                         }
-                                    } catch {
-                                        // Try next ref
                                     }
+                                } catch {
+                                    // Fall through to workspace direct fetch.
+                                }
 
-                                    try {
-                                        const downloaded = await downloadWorkspaceObjectJson(ref);
-                                        if (downloaded) {
-                                            const nestedReactions = parseGapfillReactions(downloaded);
-                                            if (nestedReactions.length > 0) {
-                                                return nestedReactions;
-                                            }
-                                        }
-                                    } catch {
-                                        // Try next ref
+                                const downloaded = await downloadWorkspaceObjectJson(nestedRef);
+                                if (downloaded) {
+                                    const nestedReactions = parseGapfillReactions(downloaded);
+                                    if (nestedReactions.length > 0) {
+                                        return nestedReactions;
                                     }
                                 }
                             }
@@ -357,37 +266,18 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
                     }
                 } catch { /* fall through */ }
             }
-            // Fallback: workspace get - try multiple path variations
-            const pathsToTry = [
-                workspacePath,
-                // If path has /gapfill/, try /gapfilling/
-                workspacePath.replace('/gapfill/', '/gapfilling/'),
-            ];
+            // Fallback: workspace get
+            try {
+                const wsData = await workspaceGet([workspacePath]);
+                const parsed = parseWorkspaceGetObject<unknown>(wsData);
+                if (parsed && typeof parsed === 'object') {
+                    return parseGapfillReactions(parsed as Record<string, unknown>);
+                }
+            } catch { /* handled below */ }
 
-            // Add unique paths only
-            const uniquePaths = [...new Set(pathsToTry)];
-
-            for (const path of uniquePaths) {
-                try {
-                    const wsData = await workspaceGet([path]);
-                    const parsed = parseWorkspaceGetObject<unknown>(wsData);
-                    if (parsed && typeof parsed === 'object') {
-                        const reactions = parseGapfillReactions(parsed as Record<string, unknown>);
-                        if (reactions.length > 0) {
-                            return reactions;
-                        }
-                    }
-                } catch { /* try next path */ }
-
-                try {
-                    const downloaded = await downloadWorkspaceObjectJson(path);
-                    if (downloaded) {
-                        const reactions = parseGapfillReactions(downloaded);
-                        if (reactions.length > 0) {
-                            return reactions;
-                        }
-                    }
-                } catch { /* try next path */ }
+            const downloaded = await downloadWorkspaceObjectJson(workspacePath);
+            if (downloaded) {
+                return parseGapfillReactions(downloaded);
             }
 
             return [];

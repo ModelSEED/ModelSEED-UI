@@ -437,57 +437,10 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
         fba: {
             rows: [],
             columns: [
-                { 
-                    field: 'id', 
-                    headerName: 'ID', 
-                    width: 180,
-                    renderCell: (params) => {
-                        const row = params.row as Record<string, unknown>;
-                        const ref = String(row.ref ?? '');
-                        const id = String(params.value ?? '');
-                        const isTracked = Boolean(row.isTracked);
-                        
-                        if (ref && ref.includes('/fba/')) {
-                            return (
-                                <Link 
-                                    href={`/fba${ref}`} 
-                                    style={{ color: '#00acc1', textDecoration: 'none' }}
-                                >
-                                    {id}
-                                </Link>
-                            );
-                        }
-                        return <span style={{ opacity: isTracked ? 0.7 : 1 }}>{id}</span>;
-                    },
-                },
+                { field: 'id', headerName: 'ID', width: 180 },
                 { field: 'objective', headerName: 'Objective', width: 140 },
                 { field: 'objectiveFunction', headerName: 'Objective Function', width: 200 },
                 { field: 'media', headerName: 'Media', width: 180 },
-                { 
-                    field: 'status', 
-                    headerName: 'Status', 
-                    width: 140,
-                    renderCell: (params) => {
-                        const status = String(params.value ?? 'completed');
-                        const isTracked = Boolean(params.row.isTracked);
-                        let color = 'success.main';
-                        if (status.toLowerCase().includes('progress') || status.toLowerCase().includes('running')) {
-                            color = 'warning.main';
-                        } else if (status.toLowerCase().includes('fail') || status.toLowerCase().includes('error')) {
-                            color = 'error.main';
-                        } else if (status.toLowerCase() === 'queued' || status.toLowerCase() === 'submitted') {
-                            color = 'info.main';
-                        }
-                        return isTracked ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color }}>
-                                <CircularProgress size={14} sx={{ color }} />
-                                <span style={{ textTransform: 'capitalize' }}>{status}</span>
-                            </Box>
-                        ) : (
-                            <span>{status}</span>
-                        );
-                    },
-                },
                 { 
                     field: 'timestamp', 
                     headerName: 'Time', 
@@ -501,62 +454,15 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
         gapfill: {
             rows: [],
             columns: [
-                { 
-                    field: 'id', 
-                    headerName: 'ID', 
-                    width: 180,
-                    renderCell: (params) => {
-                        const row = params.row as Record<string, unknown>;
-                        const ref = String(row.ref ?? '');
-                        const id = String(params.value ?? '');
-                        const isTracked = Boolean(row.isTracked);
-                        
-                        if (ref && ref.includes('/gapfill/')) {
-                            return (
-                                <Link 
-                                    href={`/gapfill${ref}`} 
-                                    style={{ color: '#00acc1', textDecoration: 'none' }}
-                                >
-                                    {id}
-                                </Link>
-                            );
-                        }
-                        return <span style={{ opacity: isTracked ? 0.7 : 1 }}>{id}</span>;
-                    },
-                },
+                { field: 'id', headerName: 'ID', width: 180 },
                 { field: 'media', headerName: 'Media', width: 200 },
                 { field: 'integrated', headerName: 'Integrated', width: 120 },
                 { 
-                    field: 'status', 
-                    headerName: 'Status', 
-                    width: 140,
-                    renderCell: (params) => {
-                        const status = String(params.value ?? 'completed');
-                        const isTracked = Boolean(params.row.isTracked);
-                        let color = 'success.main';
-                        if (status.toLowerCase().includes('progress') || status.toLowerCase().includes('running')) {
-                            color = 'warning.main';
-                        } else if (status.toLowerCase().includes('fail') || status.toLowerCase().includes('error')) {
-                            color = 'error.main';
-                        } else if (status.toLowerCase() === 'queued' || status.toLowerCase() === 'submitted') {
-                            color = 'info.main';
-                        }
-                        return isTracked ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color }}>
-                                <CircularProgress size={14} sx={{ color }} />
-                                <span style={{ textTransform: 'capitalize' }}>{status}</span>
-                            </Box>
-                        ) : (
-                            <span>{status}</span>
-                        );
-                    },
-                },
-                { 
-                    field: 'timestamp', 
+                    field: 'rundate', 
                     headerName: 'Date', 
                     width: 180,
                     type: 'dateTime',
-                    valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+                    valueGetter: (_value, row) => (row.rundate ? new Date(String(row.rundate)) : null),
                     valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
                 },
             ],
@@ -838,12 +744,9 @@ function extractFbaRows(
     fbaData: Record<string, unknown>[] | Record<string, unknown> | null | undefined,
     modelObject?: Record<string, unknown>,
     fallbackEntries: WorkspaceListingEntry[] = [],
-    trackedJobs: TrackedJob[] = [],
-    trackedStatuses: Map<string, string | undefined> = new Map(),
 ): Record<string, unknown>[] {
     const rows: Record<string, unknown>[] = [];
     const seenRefs = new Set<string>();
-    const seenJobIds = new Set<string>();
 
     if (fbaData) {
         let rawRows: Record<string, unknown>[] = [];
@@ -866,39 +769,14 @@ function extractFbaRows(
             const id = String(fba.id ?? extractRefId(ref) ?? `fba-${index}`);
             if (!ref && id.toLowerCase() === 'fba') continue;
             if (ref) seenRefs.add(ref);
-            seenJobIds.add(id);
 
             rows.push({
                 id,
                 ref,
                 objective: String(fba.objective ?? '-'),
                 objectiveFunction: String(fba.objective_function ?? 'N/A'),
-                media: summarizeMediaRef(fba.media_ref ?? fba.media),
+                media: summarizeMediaRef(fba.media),
                 timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
-                status: 'completed',
-            });
-        }
-    }
-
-    // Add tracked (in-progress or recently completed) FBA jobs
-    for (const job of trackedJobs) {
-        if (job.kind !== 'fba') continue;
-        if (seenJobIds.has(job.id)) continue; // Already in results
-        
-        const status = trackedStatuses.get(job.id) ?? 'in-progress';
-        const isTerminal = ['completed', 'failed', 'error', 'cancelled'].includes(status.toLowerCase());
-        
-        // Only show if still active or recently completed (will be cleaned up on next refetch)
-        if (!isTerminal || true) {  // Show all for now, terminal jobs will be removed by cleanup
-            rows.push({
-                id: job.id,
-                ref: null,
-                objective: '-',
-                objectiveFunction: 'N/A',
-                media: '-',
-                timestamp: formatRelativeTimestamp(job.submittedAt),
-                status: status,
-                isTracked: true,
             });
         }
     }
@@ -953,12 +831,9 @@ function extractGapfillRows(
     gapfills: Record<string, unknown>[] | undefined,
     modelObject?: Record<string, unknown>,
     fallbackEntries: WorkspaceListingEntry[] = [],
-    trackedJobs: TrackedJob[] = [],
-    trackedStatuses: Map<string, string | undefined> = new Map(),
 ): Record<string, unknown>[] {
     const rows: Record<string, unknown>[] = [];
     const seenRefs = new Set<string>();
-    const seenJobIds = new Set<string>();
 
     for (const [index, gapfill] of asArray<Record<string, unknown>>(gapfills).entries()) {
         const ref = normalizeWorkspaceRef(gapfill.ref ?? gapfill.path ?? gapfill.workspace_ref);
@@ -966,38 +841,14 @@ function extractGapfillRows(
         const id = String(gapfill.id ?? extractRefId(ref) ?? `gapfill-${index}`);
         if (!ref && (id.toLowerCase() === 'gapfill' || id.toLowerCase() === 'gapfilling')) continue;
         if (ref) seenRefs.add(ref);
-        seenJobIds.add(id);
 
         rows.push({
             id,
             ref,
             integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
-            media: summarizeMediaRef(gapfill.media_ref ?? gapfill.media),
+            media: summarizeMediaRef(gapfill.media),
             timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
-            status: 'completed',
         });
-    }
-
-    // Add tracked (in-progress or recently completed) Gapfill jobs
-    for (const job of trackedJobs) {
-        if (job.kind !== 'gapfill') continue;
-        if (seenJobIds.has(job.id)) continue; // Already in results
-        
-        const status = trackedStatuses.get(job.id) ?? 'in-progress';
-        const isTerminal = ['completed', 'failed', 'error', 'cancelled'].includes(status.toLowerCase());
-        
-        // Show all tracked jobs (terminal jobs will be cleaned up on next refetch)
-        if (!isTerminal || true) {
-            rows.push({
-                id: job.id,
-                ref: null,
-                integrated: '-',
-                media: '-',
-                timestamp: formatRelativeTimestamp(job.submittedAt),
-                status: status,
-                isTracked: true,
-            });
-        }
     }
 
     const modelRefs = modelObject
@@ -1398,7 +1249,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const authMethod = getStoredAuthMethod();
     const resolvedParams = use(params);
     const [loadingTooLong, setLoadingTooLong] = useState(false);
-    const [activeTabOverride, setActiveTabOverride] = useState<TabKey | null>(null);
     const urlSegments = useMemo(
         () => resolvedParams.path ?? [],
         [resolvedParams.path],
@@ -1409,8 +1259,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     );
 
     const lastSegment = decodedSegments[decodedSegments.length - 1]?.toLowerCase();
-    const urlTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
-    const activeTab: TabKey = activeTabOverride ?? urlTab;
+    const activeTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
     const modelSegments = isTabKey(lastSegment) ? decodedSegments.slice(0, -1) : decodedSegments;
     const workspacePath = `/${modelSegments.join('/')}`;
     const modelRootPath = workspacePath.endsWith('/model')
@@ -1758,12 +1607,10 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         );
     }
 
-    // Prefer apiModel for table data (full model from API), fallback to wsObject (workspace)
-    const modelObject = (apiModel as Record<string, unknown> | null) ?? 
-                        parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
+    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
     const tableConfig = buildTableConfig(modelObject);
-    const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries, trackedJobsForModel, trackedStatusById);
-    const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries, trackedJobsForModel, trackedStatusById);
+    const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries);
+    const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries);
     const expressionRows = extractExpressionRows(modelObject);
 
     if (tableConfig.fba) {
@@ -1950,33 +1797,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
     ];
 
-    const gapfillColumns: GridColDef<Record<string, unknown>>[] = [
-        {
-            field: 'id',
-            headerName: 'ID',
-            width: 180,
-            renderCell: (params) => {
-                const gapfillId = params.value;
-                const gapfillHref = `/gapfill${workspacePath}/gapfill/${gapfillId}`;
-                return (
-                    <Link href={gapfillHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
-                        {String(params.value ?? '')}
-                    </Link>
-                );
-            },
-        },
-        { field: 'media', headerName: 'Media', width: 200 },
-        { field: 'integrated', headerName: 'Integrated', width: 120 },
-        { 
-            field: 'timestamp', 
-            headerName: 'Date', 
-            width: 180,
-            type: 'dateTime',
-            valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
-            valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
-        },
-    ];
-
     const pathwayColumns: GridColDef<Record<string, unknown>>[] = [
         { field: 'id', headerName: 'ID', width: 180 },
         { field: 'name', headerName: 'Name', width: 300 },
@@ -1997,7 +1817,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
         const tab = MODEL_TABS[nextIndex];
         if (!tab) return;
-        setActiveTabOverride(tab.key);
+        const basePath = `/model${workspacePath}`;
+        const nextPath = tab.key === 'overview' ? basePath : `${basePath}/${tab.key}`;
+        router.push(nextPath);
     };
 
     const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string, advancedOptions?: FbaAdvancedOptions) => {
@@ -2144,12 +1966,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
                 isPlantModel={isPlantModel}
-                modelReactions={tableConfig.reactions.rows.map((r: Record<string, unknown>) => ({
-                    id: String(r.id ?? ''),
-                    name: String(r.name ?? ''),
-                    direction: String(r.direction ?? ''),
-                    equation: String(r.equation ?? ''),
-                }))}
             />
 
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
@@ -2448,11 +2264,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                             ? compoundColumns
                                             : tab.key === 'fba'
                                                 ? fbaColumns
-                                                : tab.key === 'gapfill'
-                                                    ? gapfillColumns
-                                                    : tab.key === 'pathways'
-                                                        ? pathwayColumns
-                                                        : tableConfig[tab.key].columns
+                                                : tab.key === 'pathways'
+                                                    ? pathwayColumns
+                                                    : tableConfig[tab.key].columns
                                 }
                                 pageSizeOptions={[10, 25, 50, 100]}
                                 paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
