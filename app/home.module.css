@@ -1,0 +1,158 @@
+/* ─── Hero / Header Section ─── */
+.hero {
+    background: #fdfdfd;
+    padding: 100px 0;
+}
+
+@media (max-width: 767px) {
+    .hero {
+        padding: 40px 0;
+    }
+}
+
+.introText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.logoSubText {
+    font-size: 16px;
+    font-weight: 300;
+    color: #999;
+    margin-top: 8px;
+}
+
+.biochemButton {
+    height: 128px !important;
+    width: 280px !important;
+    font-size: 28px !important;
+    text-align: center;
+    margin: 46px 0 0 0;
+    padding: 26px !important;
+    border-radius: 10px !important;
+    border: 2px solid #000 !important;
+}
+
+/* ─── Login Section ─── */
+.login {
+    padding: 0 20px;
+}
+
+.altLoginContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.altLogin {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.15s;
+}
+
+.altLogin:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── About / Features Section ─── */
+.about {
+    color: #333;
+    background-color: #F1F1F1;
+    text-align: center;
+    border-top: 2px solid #e2e2e2;
+    padding: 100px 0;
+}
+
+.about h2 {
+    color: #04A0B5;
+    margin: 0;
+    font-size: 3em;
+}
+
+.aboutItem {
+    width: 200px;
+    margin: 0 50px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+}
+
+.aboutItem h4 {
+    margin: 12px 0 8px;
+}
+
+.aboutItem small {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.plantImg {
+    position: relative;
+    bottom: 20px;
+    width: 120px;
+}
+
+.microbeImg {
+    position: relative;
+    top: 30px;
+    right: 20px;
+    width: 70px;
+}
+
+@media (max-width: 767px) {
+    .about {
+        padding: 50px 0;
+    }
+
+    .aboutItem {
+        width: 160px;
+        margin: 10px 20px;
+    }
+}
+
+
+
+/* ─── More Info Section ─── */
+.moreInfo {
+    color: #333;
+    background: #fff;
+    border-bottom: 4px solid #bbb;
+    padding: 100px 0;
+}
+
+@media (max-width: 767px) {
+    .moreInfo {
+        padding: 50px 0;
+    }
+}
+
+.moreInfo h2 {
+    margin: 0 0 24px;
+    font-size: 2.5em;
+}
+
+.moreInfo h4 {
+    margin: 20px 0 8px;
+    font-weight: 600;
+}
+
+.moreInfo p,
+.moreInfo span {
+    line-height: 1.7;
+}
+
+.moreInfo a {
+    color: #30BCCF;
+    text-decoration: none;
+}
+
+.moreInfo a:hover {
+    color: #006C86;
+}

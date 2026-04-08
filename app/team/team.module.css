@@ -1,0 +1,60 @@
+.container {
+    padding: 5px 20px;
+    max-width: 1170px;
+    margin: 0 auto;
+}
+
+.noMargin {
+    margin: 0;
+}
+
+.teamMember {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.teamMember img {
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.teamMember h4 {
+    margin: 0 0 2px 0;
+}
+
+.teamMember h4 a {
+    color: #1a0dab;
+    text-decoration: none;
+}
+
+.teamMember h4 a:hover {
+    text-decoration: underline;
+}
+
+.teamMember i {
+    display: block;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.affiliationLink {
+    color: #1a0dab;
+    text-decoration: none;
+}
+
+.affiliationLink:hover {
+    text-decoration: underline;
+}
+
+.sectionTitle {
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+.subSectionTitle {
+    margin-top: 20px;
+    margin-bottom: 8px;
+}

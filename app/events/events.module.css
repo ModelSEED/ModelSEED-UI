@@ -1,0 +1,44 @@
+.container {
+    padding: 5px 20px;
+    max-width: 1170px;
+    margin: 0 auto;
+}
+
+.noMargin {
+    margin: 0;
+}
+
+.eventBlock {
+    margin: 0 16px;
+    padding: 8px 16px;
+}
+
+.eventBlock h4 {
+    margin: 0 0 2px 0;
+}
+
+.eventBlock h4 a {
+    color: #1a0dab;
+    text-decoration: none;
+}
+
+.eventBlock h4 a:hover {
+    text-decoration: underline;
+}
+
+.dateMuted {
+    color: #999;
+    font-size: 0.8em;
+}
+
+.toggleLink {
+    color: #1a0dab;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    margin-left: 16px;
+}
+
+.toggleLink:hover {
+    text-decoration: underline;
+}

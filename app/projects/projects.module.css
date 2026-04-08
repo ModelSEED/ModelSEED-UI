@@ -1,0 +1,55 @@
+.container {
+    padding: 5px 20px;
+    max-width: 1170px;
+    margin: 0 auto;
+}
+
+.noMargin {
+    margin: 0;
+}
+
+.intro {
+    margin-bottom: 16px;
+}
+
+.projectRow {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    margin: 0 16px 24px 16px;
+    padding: 8px 0;
+}
+
+.projectRow>div {
+    flex: 1;
+}
+
+.projectRow h4 {
+    margin: 0 0 4px 0;
+}
+
+.projectRow h4 a {
+    color: #1a0dab;
+    text-decoration: none;
+}
+
+.projectRow h4 a:hover {
+    text-decoration: underline;
+}
+
+.newIcon {
+    color: #30BCCF;
+    font-size: 0.85em;
+    margin-right: 4px;
+}
+
+.projectWithImage {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.projectWithImage img {
+    flex-shrink: 0;
+}
