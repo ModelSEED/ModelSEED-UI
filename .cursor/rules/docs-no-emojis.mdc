@@ -1,0 +1,11 @@
+---
+description: Never use emojis in project documentation
+alwaysApply: true
+---
+
+# Documentation Emoji Policy
+
+- Do not use emojis in any project documentation files (for example, files under `docs/`, `INDEX.md`, or additional Markdown guides).
+- When editing or adding documentation, remove existing emojis and use plain text headings and emphasis instead.
+- This rule does not affect application UI copy; it only applies to repository documentation content.
+

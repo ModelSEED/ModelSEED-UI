@@ -1,0 +1,59 @@
+# Local
+/legacy/
+scripts/local
+.api-temp/
+lib/api/IMPLEMENTATION_SUMMARY.md
+lib/IMPLEMENTATION_COMPLETE.md
+lib/api/PRODUCTION_REVIEW.md
+lib/REVIEW_SUMMARY.md
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+package-lock.json
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+.vscode/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local token smoke helpers
+scripts/local/*.local.mjs
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+test-results/
+playwright-report/

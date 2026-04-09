@@ -1,0 +1,97 @@
+.container {
+    padding: 5px 20px;
+    max-width: 1170px;
+    margin: 0 auto;
+}
+
+.noMargin {
+    margin: 0;
+}
+
+.searchRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: #30BCCF;
+}
+
+.yearToggle {
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+
+.yearToggle:hover {
+    color: #30BCCF;
+}
+
+.pubTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.publication td {
+    padding: 10px 8px;
+    border-top: 1px solid #eee;
+    vertical-align: top;
+}
+
+.title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.author {
+    color: #555;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+.source {
+    color: #777;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.year {
+    font-weight: 700;
+    white-space: nowrap;
+    text-align: right;
+    min-width: 50px;
+}
+
+.highlight {
+    color: #000;
+    background-color: rgba(48, 175, 198, 0.125);
+    border-radius: 5px;
+    padding: 3px;
+    margin: -3px;
+    font-weight: 800;
+}
+
+.noResults {
+    margin-left: 40px;
+    color: #777;
+}
+
+.searchIcon {
+    color: #999;
+    font-size: 20px;
+}
