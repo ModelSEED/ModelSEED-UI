@@ -1,3 +1,14 @@
+/**
+ * Team listing page displaying ModelSEED collaborators.
+ * 
+ * Renders team members grouped by category (Principal Investigators,
+ * Scientists, Developers, etc.) with links to personal/professional
+ * websites and institution pages.
+ * 
+ * @page /team - Main team roster page
+ * @see lib/data/team.ts for data source and type definitions
+ */
+
 import type { Metadata } from 'next';
 import { TEAM_DATA, TEAM_INTRO } from '@/lib/data/team';
 import styles from './team.module.css';
@@ -7,6 +18,11 @@ export const metadata: Metadata = {
     description: 'Meet the ModelSEED team — a collaboration between Argonne National Laboratory and Mayo Clinic.',
 };
 
+/**
+ * Renders the team page with categorized member listings.
+ * 
+ * @returns JSX containing team intro text and categorized member cards
+ */
 export default function TeamPage() {
     return (
         <div className={styles.container}>
