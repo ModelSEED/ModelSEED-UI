@@ -1,3 +1,14 @@
+/**
+ * Genome detail view displaying annotation features and roles.
+ * 
+ * Fetches genome data from Workspace and displays features in a searchable,
+ * sortable DataGrid with pagination. Shows both raw features and derived
+ * annotations (roles/subsystems).
+ * 
+ * @route /genome/[...path] - Dynamic genome workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo, useState } from 'react';
@@ -14,7 +25,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import { workspaceGet, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
-/* ---------- types ---------- */
+/* ─── Types ─── */
 
 interface GenomeFeature {
     id: string;
@@ -32,13 +43,25 @@ interface GenomeAnnotation {
     subsystem: string;
 }
 
-/* ---------- helpers ---------- */
+/* ─── Helpers ─── */
 
+/**
+ * Extracts the genome name from a workspace path.
+ * 
+ * @param genomePath - Full workspace path to genome object
+ * @returns Last path segment as genome name, or 'Genome' if empty
+ */
 function extractGenomeName(genomePath: string): string {
     const parts = genomePath.split('/').filter(Boolean);
     return parts[parts.length - 1] || 'Genome';
 }
 
+/**
+ * Parses genome features from raw workspace data.
+ * 
+ * @param data - Raw genome object from workspace
+ * @returns Array of parsed GenomeFeature objects
+ */
 function parseFeatures(data: Record<string, unknown>): GenomeFeature[] {
     const features = data.features as Record<string, unknown>[] | undefined;
     if (!Array.isArray(features)) return [];
@@ -70,6 +93,12 @@ function parseFeatures(data: Record<string, unknown>): GenomeFeature[] {
     });
 }
 
+/**
+ * Parses genome annotations (roles/subsystems) from raw workspace data.
+ * 
+ * @param data - Raw genome object from workspace
+ * @returns Array of parsed GenomeAnnotation objects
+ */
 function parseAnnotations(data: Record<string, unknown>): GenomeAnnotation[] {
     const features = data.features as Record<string, unknown>[] | undefined;
     if (!Array.isArray(features)) return [];
@@ -103,8 +132,14 @@ function parseAnnotations(data: Record<string, unknown>): GenomeAnnotation[] {
     return annotations;
 }
 
-/* ---------- component ---------- */
+/* ─── Component ─── */
 
+/**
+ * Genome detail page component.
+ * 
+ * @param params - Promise resolving to workspace path segments
+ * @returns JSX containing genome header, tabs, and DataGrid tables
+ */
 export default function GenomePage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
     const workspacePath = `/${resolvedParams.path.join('/')}`;

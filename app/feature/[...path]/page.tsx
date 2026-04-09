@@ -1,3 +1,14 @@
+/**
+ * Feature (gene) detail view displaying individual gene information.
+ * 
+ * Shows detailed feature metadata including aliases, functional description,
+ * location, and linked PubMed/COG annotations. Provides navigation to
+ * parent genome.
+ * 
+ * @route /feature/[...path] - Dynamic feature workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo } from 'react';

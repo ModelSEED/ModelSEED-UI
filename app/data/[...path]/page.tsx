@@ -1,3 +1,14 @@
+/**
+ * Data Browser / Workspace Manager for navigating user and public data.
+ * 
+ * Provides a file-browser-like interface for the KBase Workspace service,
+ * allowing users to browse, upload, download, and manage metabolic models,
+ * genomes, media, and other workspace objects.
+ * 
+ * @route /data/[...path] - Dynamic workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useState, useMemo } from 'react';
@@ -69,6 +80,12 @@ function formatSize(bytes: number): string {
     return `${size.toFixed(i > 0 ? 1 : 0)} ${units[i]}`;
 }
 
+/**
+ * Data browser page component for workspace navigation.
+ * 
+ * @param params - Promise resolving to workspace path segments
+ * @returns JSX containing file browser with DataGrid and breadcrumbs
+ */
 export default function DataBrowserPage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
     const router = useRouter();

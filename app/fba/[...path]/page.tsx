@@ -1,3 +1,14 @@
+/**
+ * FBA (Flux Balance Analysis) results detail view.
+ * 
+ * Displays FBA simulation results including reaction fluxes, knockout
+ * predictions, and visualization options. Shows objective value and
+ * solution status.
+ * 
+ * @route /fba/[...path] - Dynamic FBA workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo, useState, useCallback } from 'react';
@@ -443,8 +454,14 @@ function parseExchangeFluxes(data: Record<string, unknown>): FbaExchangeFlux[] {
     });
 }
 
-/* ---------- component ---------- */
+/* ─── Component ─── */
 
+/**
+ * FBA detail page component with reaction flux visualization.
+ * 
+ * @param params - Promise resolving to workspace path segments
+ * @returns JSX containing FBA results with reaction flux table
+ */
 export default function FbaPage({ params }: { params: Promise<{ path: string[] }> }) {
     const { method: authMethod } = useAuth();
     const resolvedParams = use(params);

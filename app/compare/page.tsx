@@ -1,3 +1,13 @@
+/**
+ * Model Comparison page for side-by-side analysis of metabolic models.
+ * 
+ * Compares reactions, compounds, and genes across 2-3 selected models from
+ * the user's workspace. Supports sorting, filtering, and overlap statistics.
+ * 
+ * @page /compare - Model comparison tool
+ * @param {string} models - Comma-separated model workspace paths (max 3)
+ */
+
 'use client';
 
 import { Suspense, useState, useMemo } from 'react';
@@ -22,12 +32,22 @@ interface ComparisonRow {
     [key: string]: string | number | boolean | undefined;
 }
 
+/* ─── Types ─── */
+
 interface TabPanelProps {
     children?: React.ReactNode;
     index: number;
     value: number;
 }
 
+/**
+ * Tab panel component for switching between comparison views.
+ * 
+ * @param children - Panel content to render
+ * @param value - Current active tab index
+ * @param index - This panel's index
+ * @returns JSX with panel visibility controlled by parent tabs
+ */
 function TabPanel({ children, value, index }: TabPanelProps) {
     return (
         <div role="tabpanel" hidden={value !== index}>
@@ -364,6 +384,11 @@ function ModelComparisonContent() {
     );
 }
 
+/**
+ * Main model comparison page wrapper with Suspense boundary.
+ * 
+ * @returns JSX containing comparison content with loading fallback
+ */
 export default function ModelComparisonPage() {
     return (
         <Suspense fallback={<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>}>

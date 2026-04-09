@@ -1,3 +1,14 @@
+/**
+ * Media (growth medium) detail and editor view.
+ * 
+ * Displays media composition with compound names and concentrations.
+ * Supports editing, saving, and exporting media definitions. Requires
+ * authentication for write operations.
+ * 
+ * @route /media/[...path] - Dynamic media workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo, useState } from 'react';
@@ -18,6 +29,8 @@ import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi } from '@/lib/api/modelseed';
 import { parseWorkspaceGetObject, workspaceCreate, workspaceGet } from '@/lib/api/workspace';
 import { getCompoundsByIds } from '@/lib/api/biochem';
+
+/* ─── Helpers ─── */
 
 function toNumber(value: unknown, fallback: number): number {
     const parsed = Number(value);
@@ -82,6 +95,12 @@ function buildMediaTable(media: MediaData): string {
     return `${header}\n${rows.join('\n')}\n`;
 }
 
+/**
+ * Media detail page component with editing capabilities.
+ * 
+ * @param params - Promise resolving to workspace path segments
+ * @returns JSX containing media editor with compound table
+ */
 export default function MediaPathPage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
     const router = useRouter();

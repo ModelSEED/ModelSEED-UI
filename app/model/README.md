@@ -1,28 +1,99 @@
-# Metabolism Model View (`/model`)
+# Metabolism Model (`app/model`)
 
-This directory contains the **Metabolic Model Detail View**. It allows users to browse the metabolic network of an organism.
+> Comprehensive metabolic model detail view with tabbed navigation.
 
-## 🔗 Legacy Path Mapping
-- **AngularJS Origin**: `/model`
-- **Next.js Implementation**: `app/model/[...path]/page.tsx`
-- **Pattern**: `[...path]` (Catch-all)
+## Quick Navigation
 
-## 📁 Content breakdown
-- `page.tsx`: A functional detail view that fetches model data (Reactions, Compounds, Genes) from the Workspace via `workspaceGet`.
+| Need | File | Description |
+|------|------|-------------|
+| **Model detail** | `[...path]/page.tsx` | Tabbed view of reactions, compounds, genes, FBA, gapfill |
+| **README** | `README.md` | This file |
 
-### 🛡️ Access (WIP)
-Accessing models stored in user workspaces requires a valid **KBase Auth token**. If not logged in, the view will only display public models.
+## Architecture
 
-## 🧪 Scientific data
-- **Reactions**: All metabolic transformations in the model.
-- **Compounds**: Metabolites and chemicals.
-- **Genes**: Functional annotations associated with reactions.
-- **Biomass**: The cellular objective function for modeling growth.
-- **Gapfills**: List of gapfilling solutions applied to the model.
-- **FBA**: Associated Flux Balance Analysis runs.
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Application Layer                     │
+│              (Next.js App Router pages)                 │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│                   app/model (This Layer)                 │
+│  ┌─────────────────────────────────────────────────────┐│
+│  │ [...path]/page.tsx - Tabbed model viewer with       ││
+│  │ 10 tabs: Overview, Reactions, Compounds, Genes,    ││
+│  │ Compartments, Biomass, Pathways, FBA, Gapfill,     ││
+│  │ Edit Model                                          ││
+│  └─────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│                      API Layer                            │
+│  lib/api/workspace.ts (workspaceGet, workspaceLs)       │
+│  lib/api/modelseed.ts (getModelDataFromApi, jobs, etc) │
+│  lib/api/biochem.ts (reaction/compound details)        │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Data Flow
+
+1. **Workspace Fetch**: Model object loaded via `workspaceGet` or `getModelDataFromApi`
+2. **Data Building**: Raw model parsed into row arrays for each tab (reactions, compounds, etc.)
+3. **Tab Rendering**: DataGrid displays each data type with custom columns
+4. **Job Operations**: FBA/gapfill submitted via `submitFbaJobFromApi` / `submitGapfillJobFromApi`
+5. **Edit Mode**: Changes tracked locally, applied via `editModelFromApi`
+
+## File Reference
+
+### [...path]/page.tsx
+
+**Purpose**: Comprehensive metabolic model detail view.
+
+**Route Parameter**:
+| Param | Type | Description |
+|-------|------|-------------|
+| `path` | `string[]` | Workspace path to model object |
+
+**Tabs:**
+| Tab | Description | Key Functions |
+|-----|-------------|---------------|
+| Overview | Model metadata, organism, external links | `OrganismLinksCard` |
+| Reactions | Metabolic reactions with equations | `ChemicalEquation` |
+| Compounds | Metabolites with formula/charge | `formatFormula` |
+| Genes | Gene-reaction associations | - |
+| Compartments | Model compartments with pH/potential | - |
+| Biomass | Biomass reaction compounds | - |
+| Pathways | Pathway maps with reaction counts | - |
+| FBA | Flux Balance Analysis results | `submitFbaJobFromApi` |
+| Gapfill | Gapfilling solutions | `submitGapfillJobFromApi` |
+| Edit Model | Inline reaction compound edits | `editModelFromApi` |
+
+**Data Sources:**
+- Model reactions: `modelreactions` or `reactions`
+- Model compounds: `modelcompounds` or `compounds`
+- Genes: `modelgenes` or `genes`
+- FBA results: `fba_refs`, inline data, or workspace listing
+- Gapfills: `gapfill_refs`, inline data, or workspace listing
+
+**Helper Functions:**
+- `buildReactionRows()`, `buildCompoundRows()`, `buildGeneRows()`
+- `extractFbaRows()`, `extractGapfillRows()`
+- `normalizeBiochemReactionId()`, `normalizeBiochemCompoundId()`
 
 ---
-*Maintained at: `app/model/README.md`*
 
-## Timestamp Log
-- Updated: 2026-03-31 16:00:00 CDT - Reached 100% feature parity with legacy, including inline metadata editing and complete tab coverage.
+**Related:**
+- Model comparison: [`app/compare/`](../compare/)
+- FBA detail: [`app/fba/`](../fba/)
+- Gapfill detail: [`app/gapfill/`](../gapfill/)
+- Genome view: [`app/genome/`](../genome/)
+- Main app README: [`../README.md`](../README.md)
+
+## Scientific Context
+
+Metabolic models represent the complete set of metabolic reactions in an organism. Key elements:
+- **Reactions**: Catalyzed transformations with stoichiometry and directionality
+- **Compounds**: Metabolites with chemical formulas and charges
+- **Genes**: Protein-coding sequences associated with reactions (GPR)
+- **Biomass**: Pseudo-reaction representing cellular growth requirements
+- **Compartments**: Spatial organization (cytoplasm, periplasm, etc.)
