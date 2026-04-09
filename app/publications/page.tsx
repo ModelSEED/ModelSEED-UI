@@ -1,10 +1,32 @@
+/**
+ * Publications listing page with search and filtering.
+ * 
+ * Displays ModelSEED-related scientific publications in a searchable,
+ * sortable table with text highlighting for matched terms.
+ * 
+ * @page /publications - Publications listing page
+ * @see lib/data/publications.ts for data source and type definitions
+ */
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import { PUBLICATIONS } from '@/lib/data/publications';
 import styles from './publications.module.css';
 
-/** Highlight matching text in a string, returning JSX fragments. */
+/**
+ * Highlights matching text in a string by wrapping matches in a span.
+ * 
+ * @param text - The text to search within
+ * @param query - The search query to highlight
+ * @returns React nodes with matched terms wrapped in highlight spans
+ * 
+ * @example
+ * ```tsx
+ * highlightText('ModelSEED is great', 'Model')
+ * // Returns: [<span>Model</span>, 'SEED is great']
+ * ```
+ */
 function highlightText(text: string, query: string): React.ReactNode {
     if (!query || !text) return text;
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -18,6 +40,11 @@ function highlightText(text: string, query: string): React.ReactNode {
     );
 }
 
+/**
+ * Publications page component with search and sorting.
+ * 
+ * @returns JSX containing search input, year toggle, and filtered publication table
+ */
 export default function PublicationsPage() {
     const [query, setQuery] = useState('');
     const [reversed, setReversed] = useState(false);

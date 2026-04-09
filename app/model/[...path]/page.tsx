@@ -1,3 +1,14 @@
+/**
+ * Metabolic model detail view with comprehensive tabbed interface.
+ * 
+ * Displays model data including reactions, compounds, genes, compartments,
+ * biomass, pathways, FBA results, and gapfill solutions. Supports inline
+ * editing and job submission for FBA/gapfill operations.
+ * 
+ * @route /model/[...path] - Dynamic model workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo, useState, useCallback, useEffect, useRef } from 'react';

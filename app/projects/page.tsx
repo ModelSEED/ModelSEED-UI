@@ -1,3 +1,12 @@
+/**
+ * Projects hub page showcasing ModelSEED-related research and prototypes.
+ * 
+ * Links to external projects (KOMODO, MINE, Core Models) and internal
+ * sub-projects (Regulons, Fusions) for metabolic pathway analysis.
+ * 
+ * @page /projects - Projects hub page
+ */
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from './projects.module.css';
@@ -7,6 +16,11 @@ export const metadata: Metadata = {
     description: 'ModelSEED Projects — a place to share research and results related to the ModelSEED resource.',
 };
 
+/**
+ * Projects hub component displaying research project cards.
+ * 
+ * @returns JSX containing project listings with links
+ */
 export default function ProjectsPage() {
     return (
         <div className={styles.container}>

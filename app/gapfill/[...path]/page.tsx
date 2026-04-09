@@ -1,3 +1,14 @@
+/**
+ * Gapfill solution detail view.
+ * 
+ * Displays gapfilling results that identify missing metabolic reactions
+ * needed for model completeness. Shows proposed reactions, compounds,
+ * and integration status.
+ * 
+ * @route /gapfill/[...path] - Dynamic gapfill workspace path
+ * @param {Promise<{ path: string[] }>} params - Workspace path segments
+ */
+
 'use client';
 
 import { use, useMemo, useState } from 'react';
@@ -190,8 +201,14 @@ function parseGapfillReactions(gfData: Record<string, unknown>): GapfillReaction
     return reactions;
 }
 
-/* ---------- component ---------- */
+/* ─── Component ─── */
 
+/**
+ * Gapfill detail page component with solution reactions.
+ * 
+ * @param params - Promise resolving to workspace path segments
+ * @returns JSX containing gapfill solution with reaction table
+ */
 export default function GapfillPage({ params }: { params: Promise<{ path: string[] }> }) {
     const resolvedParams = use(params);
     const workspacePath = `/${resolvedParams.path.join('/')}`;

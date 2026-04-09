@@ -1,3 +1,11 @@
+/**
+ * Events listing page displaying ModelSEED workshops and related events.
+ * 
+ * Shows PlantSEED workshops from 2015-2018 with expand/collapse for older events.
+ * 
+ * @page /events - Events listing page
+ */
+
 'use client';
 
 import { useState } from 'react';
