@@ -1,3 +1,12 @@
+/**
+ * Data Sources page listing external databases and resources used by ModelSEED.
+ * 
+ * Displays table of data categories (biochemistry, genome annotations, plant
+ * genomes) with links to source databases like KEGG, MetaCyc, PlantCyc, Rhea, etc.
+ * 
+ * @page /about/data-sources - Data sources information page
+ */
+
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -10,6 +19,11 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Link from '@mui/material/Link';
 
+/* ─── Configuration ─── */
+
+/**
+ * Data source categories with associated external databases.
+ */
 const DATA_SOURCES = [
     {
         data: 'Biochemical data (<a href="https://fairsharing.org/FAIRsharing.Ql6K87" target="_blank" rel="noreferrer">DOI</a>) and metabolic maps',
@@ -42,6 +56,11 @@ const DATA_SOURCES = [
     }
 ];
 
+/**
+ * Data sources page component displaying external database references.
+ * 
+ * @returns JSX containing data sources table with category/source rows
+ */
 export default function DataSourcesPage() {
     return (
         <>

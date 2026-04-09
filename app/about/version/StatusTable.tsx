@@ -1,3 +1,12 @@
+/**
+ * Service status table component displaying connectivity to backend services.
+ * 
+ * Pings various ModelSEED and BV-BRC services to verify availability.
+ * Shows authentication requirements and links to API specifications.
+ * 
+ * @component StatusTable - Checks RAST, PATRIC, Shock, SOLR, API, ProbModelSEED, Workspace
+ */
+
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -20,16 +29,33 @@ import {
     WORKSPACE_URL,
 } from '@/lib/api/config';
 
+/* ─── Types ─── */
+
+/**
+ * Configuration for a service to be checked.
+ */
 interface ServiceConfig {
+    /** Unique identifier for the service */
     id: string;
+    /** Display name of the service */
     service: string;
+    /** Primary endpoint URL */
     endpoint: string;
+    /** URL to ping for status (null if no ping endpoint) */
     pingUrl: string | null;
+    /** Whether the service requires authentication */
     authReq: boolean;
+    /** Optional link to service documentation */
     link?: string;
+    /** Optional array of API reference links */
     api?: { label: string; url: string }[];
 }
 
+/* ─── Configuration ─── */
+
+/**
+ * List of backend services to check for status.
+ */
 const SERVICES: ServiceConfig[] = [
     { id: 'auth', service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', pingUrl: null, authReq: false },
     { id: 'patric', service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', pingUrl: null, authReq: false },
@@ -64,6 +90,13 @@ const SERVICES: ServiceConfig[] = [
     { id: 'app', service: 'App Service', endpoint: 'https://p3.theseed.org/services/app_service', pingUrl: 'https://p3.theseed.org/services/app_service/ping', authReq: true }
 ];
 
+/* ─── Component ─── */
+
+/**
+ * Status table component that checks connectivity to backend services.
+ * 
+ * @returns JSX containing service status table with check/error icons
+ */
 export default function StatusTable() {
     const [status, setStatus] = useState<Record<string, 'loading' | 'success' | 'error' | 'unauth' | 'skip'>>({});
     const { isAuthenticated, token } = useAuth();

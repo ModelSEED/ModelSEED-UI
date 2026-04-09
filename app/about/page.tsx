@@ -1,7 +1,18 @@
+/**
+ * About ModelSEED landing page displaying project information and funding sources.
+ * 
+ * @page /about - Main about page
+ */
+
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 
+/**
+ * Main about page component displaying project description and funding info.
+ * 
+ * @returns JSX containing about content and funding sources
+ */
 export default function AboutPage() {
     return (
         <>

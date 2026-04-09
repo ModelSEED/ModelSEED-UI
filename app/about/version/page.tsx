@@ -1,3 +1,12 @@
+/**
+ * Version information page displaying ModelSEED version, changelog, and service status.
+ * 
+ * Loads CHANGELOG.md from project root, displays version badge, and renders
+ * StatusTable showing connectivity to backend services.
+ * 
+ * @page /about/version - Version and status page
+ */
+
 import React from 'react';
 import fs from 'fs';
 import path from 'path';
@@ -8,8 +17,13 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import StatusTable from '@/app/about/version/StatusTable';
 
-// Server side data loading
-async function getChangelog() {
+/**
+ * Reads CHANGELOG.md file from project root.
+ * 
+ * @returns Raw markdown content or fallback error message
+ * @throws {Error} File read errors return fallback message
+ */
+async function getChangelog(): Promise<string> {
     try {
         const filePath = path.join(process.cwd(), 'CHANGELOG.md');
         return fs.readFileSync(filePath, 'utf8');
@@ -18,6 +32,11 @@ async function getChangelog() {
     }
 }
 
+/**
+ * Version page component with changelog and service status.
+ * 
+ * @returns JSX containing version badge, changelog, and StatusTable
+ */
 export default async function VersionPage() {
     const rawChangelog = await getChangelog();
 

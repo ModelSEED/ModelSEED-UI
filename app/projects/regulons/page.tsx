@@ -1,3 +1,12 @@
+/**
+ * Regulons project detail page showing Bacillus subtilis regulatory network.
+ * 
+ * Displays data from the paper "Reconstruction of the Regulatory Network
+ * for Bacillus Subtilis and Reconciliation with Gene Expression Data".
+ * 
+ * @page /projects/regulons - Regulatory network visualization
+ */
+
 'use client';
 
 import { Box, Typography, Alert, Button } from '@mui/material';

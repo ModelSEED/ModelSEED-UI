@@ -1,3 +1,12 @@
+/**
+ * PlantSEED 2015 Workshop page.
+ * 
+ * Displays workshop details, agenda, and downloadable materials for
+ * the 2015 PlantSEED Metabolic Modeling Workshop held August 13-14, 2015.
+ * 
+ * @page /events/plantseed2015 - 2015 workshop details
+ */
+
 import React from 'react';
 import { Container, Typography, Box } from '@mui/material';
 import Image from 'next/image';

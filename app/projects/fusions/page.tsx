@@ -1,3 +1,13 @@
+/**
+ * Gene Fusions project detail page analyzing frequent fusion events.
+ * 
+ * Displays results from the paper "Systematic Identification and Analysis
+ * of Frequent Fusion Events in Metabolic Pathways" showing metabolic
+ * pathway fusion analysis.
+ * 
+ * @page /projects/fusions - Fusion events analysis
+ */
+
 'use client';
 
 import { Box, Typography, Alert, Button, Card, CardContent } from '@mui/material';
