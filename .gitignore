@@ -1,5 +1,6 @@
 # Local
 /legacy/
+PRODUCTION_POLISH_PLAN.md
 scripts/local
 .api-temp/
 lib/api/IMPLEMENTATION_SUMMARY.md
