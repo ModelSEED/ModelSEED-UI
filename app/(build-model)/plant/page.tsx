@@ -176,7 +176,7 @@ export default function BuildModelPlantPage() {
             {
                 genome: modelName,
                 output_path: outputPath,
-                template_type: uploadForm.template === 'auto' ? 'gn' : uploadForm.template,
+                template_type: uploadForm.template,
                 media: uploadForm.media || undefined,
                 filename: uploadForm.file.name,
                 fasta: fastaText,
