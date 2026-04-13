@@ -108,7 +108,92 @@ interface CompoundTooltipProps {
     synonyms?: string[];
 }
 
+const SUBSCRIPT_MAP: Record<string, string> = {
+    '0': '₀',
+    '1': '₁',
+    '2': '₂',
+    '3': '₃',
+    '4': '₄',
+    '5': '₅',
+    '6': '₆',
+    '7': '₇',
+    '8': '₈',
+    '9': '₉',
+    '+': '₊',
+    '-': '₋',
+    '(': '₍',
+    ')': '₎',
+};
+
+const SUPERSCRIPT_MAP: Record<string, string> = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+    '+': '⁺',
+    '-': '⁻',
+    '(': '⁽',
+    ')': '⁾',
+};
+
+function toMappedScript(value: string, map: Record<string, string>): string {
+    return value
+        .split('')
+        .map((ch) => map[ch] ?? ch)
+        .join('');
+}
+
+function formatChemicalText(value: string): string {
+    if (!value) return value;
+
+    let text = value.trim();
+
+    // Normalize any HTML sub/sup tags from legacy synonym strings.
+    text = text
+        .replace(/<\s*sub\s*>(.*?)<\s*\/\s*sub\s*>/gi, (_, inner: string) => toMappedScript(inner, SUBSCRIPT_MAP))
+        .replace(/<\s*sup\s*>(.*?)<\s*\/\s*sup\s*>/gi, (_, inner: string) => toMappedScript(inner, SUPERSCRIPT_MAP))
+        .replace(/<[^>]+>/g, '');
+
+    // Convert element-number patterns (H2O, PO4, O3) to Unicode subscripts.
+    text = text.replace(/([A-Za-z\)\]])(\d+)/g, (_, prev: string, digits: string) => `${prev}${toMappedScript(digits, SUBSCRIPT_MAP)}`);
+
+    // Convert trailing charge notation e.g. "(2-)" -> "²⁻" and "( - )"/"(+)".
+    text = text.replace(/\((\d*[+-]|[+-]\d*)\)\s*$/g, (_, charge: string) => toMappedScript(charge, SUPERSCRIPT_MAP));
+
+    // Convert non-parenthesized trailing charges e.g. H2PO4- or PO43-.
+    text = text.replace(/([A-Za-z₀-₉\]\)])(\d*[+-]|[+-]\d*)$/g, (_, stem: string, charge: string) => `${stem}${toMappedScript(charge, SUPERSCRIPT_MAP)}`);
+
+    return text.replace(/\s+/g, ' ').trim();
+}
+
+function normalizeSynonyms(rawSynonyms: string[] | undefined): string[] {
+    if (!rawSynonyms || rawSynonyms.length === 0) return [];
+
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    for (const raw of rawSynonyms) {
+        const formatted = formatChemicalText(raw);
+        if (!formatted) continue;
+        const dedupeKey = formatted.toLowerCase();
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        result.push(formatted);
+    }
+
+    return result;
+}
+
 function CompoundTooltipContent({ compoundId, name, formula, synonyms }: CompoundTooltipProps) {
+    const formattedFormula = formula ? formatChemicalText(formula) : undefined;
+    const formattedSynonyms = normalizeSynonyms(synonyms);
+
     return (
         <Box sx={{ p: 0.5, maxWidth: 280 }}>
             <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.25 }}>
@@ -117,15 +202,22 @@ function CompoundTooltipContent({ compoundId, name, formula, synonyms }: Compoun
             <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
                 ID: {compoundId}
             </Typography>
-            {formula && (
+            {formattedFormula && (
                 <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
-                    Formula: {formula}
+                    Formula: {formattedFormula}
                 </Typography>
             )}
-            {synonyms && synonyms.length > 0 && (
-                <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
-                    Synonyms: {synonyms.slice(0, 5).join(', ')}
-                </Typography>
+            {formattedSynonyms.length > 0 && (
+                <Box sx={{ mt: 0.5 }}>
+                    <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
+                        Synonyms:
+                    </Typography>
+                    {formattedSynonyms.slice(0, 8).map((syn) => (
+                        <Typography key={syn} variant="caption" display="block" sx={{ color: 'text.secondary', lineHeight: 1.35 }}>
+                            • {syn}
+                        </Typography>
+                    ))}
+                </Box>
             )}
         </Box>
     );
