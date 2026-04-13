@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-function formatSubscripts(text: string): React.ReactNode[] {
+function formatSubscripts(text: string, baseOffset = 0, scope = 'txt'): React.ReactNode[] {
     const parts: React.ReactNode[] = [];
 
     // Split into segments but keep track of context
@@ -14,21 +14,22 @@ function formatSubscripts(text: string): React.ReactNode[] {
 
     while ((match = segmentRegex.exec(text)) !== null) {
         const [, letters, digits, other] = match;
+        const keyBase = `${scope}-${baseOffset + match.index}-${segmentRegex.lastIndex}`;
 
         if (letters) {
-            parts.push(<span key={match.index}>{letters}</span>);
+            parts.push(<span key={`${keyBase}-letters`}>{letters}</span>);
             lastTokenWasLetter = true;
         } else if (digits) {
             // ONLY subscript if it follows a letter directly (no spaces/parens in between)
             // This correctly identifies H2O vs (2) Phosphate or 2.5 H2O
             if (lastTokenWasLetter) {
-                parts.push(<sub key={match.index}>{digits}</sub>);
+                parts.push(<sub key={`${keyBase}-sub`}>{digits}</sub>);
             } else {
-                parts.push(<span key={match.index}>{digits}</span>);
+                parts.push(<span key={`${keyBase}-digits`}>{digits}</span>);
             }
             lastTokenWasLetter = false;
         } else {
-            parts.push(<span key={match.index}>{other}</span>);
+            parts.push(<span key={`${keyBase}-other`}>{other}</span>);
             // If we hit a space or punctuation, the next digit is not a subscript
             if (other.trim().length > 0 || /\s/.test(other)) {
                 lastTokenWasLetter = false;
@@ -49,12 +50,12 @@ function formatChemicalText(text: string): React.ReactNode[] {
     while ((match = compoundRegex.exec(text)) !== null) {
         if (match.index > lastIndex) {
             const before = text.slice(lastIndex, match.index);
-            result.push(...formatSubscripts(before));
+            result.push(...formatSubscripts(before, lastIndex, 'before'));
         }
 
         result.push(
             <Link
-                key={match.index}
+                key={`cpd-${match.index}-${match[1]}`}
                 href={`/biochem/compounds/${match[1]}`}
                 style={{ color: '#1976d2', textDecoration: 'none' }}
             >
@@ -67,7 +68,7 @@ function formatChemicalText(text: string): React.ReactNode[] {
 
     if (lastIndex < text.length) {
         const after = text.slice(lastIndex);
-        result.push(...formatSubscripts(after));
+        result.push(...formatSubscripts(after, lastIndex, 'after'));
     }
 
     return result;
