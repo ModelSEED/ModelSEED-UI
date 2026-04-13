@@ -2,18 +2,14 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useMemo, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
 import Skeleton from '@mui/material/Skeleton';
 import { getCompoundsForReaction } from '@/lib/api/biochem';
 import type { AtomColors } from './MoleculeRenderer';
 
-/**
- * MoleculeRenderer is WASM-based. Wrap with ssr:false so Next.js never
- * attempts to render it on the server.
- */
 const MoleculeRenderer = dynamic(() => import('./MoleculeRenderer'), {
     ssr: false,
     loading: () => <Skeleton variant="rectangular" width={150} height={150} sx={{ borderRadius: 1 }} />,
@@ -195,25 +191,25 @@ function CompoundTooltipContent({ compoundId, name, formula, synonyms }: Compoun
     const formattedSynonyms = normalizeSynonyms(synonyms);
 
     return (
-        <Box sx={{ p: 0.5, maxWidth: 280 }}>
-            <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.25 }}>
+        <Box sx={{ p: 0.75, maxWidth: 360 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.35 }}>
                 {name ?? compoundId}
             </Typography>
-            <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
+            <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.3 }}>
                 ID: {compoundId}
             </Typography>
             {formattedFormula && (
-                <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
+                <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.3 }}>
                     Formula: {formattedFormula}
                 </Typography>
             )}
             {formattedSynonyms.length > 0 && (
-                <Box sx={{ mt: 0.5 }}>
-                    <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.25 }}>
+                <Box sx={{ mt: 0.6 }}>
+                    <Typography variant="caption" display="block" sx={{ color: 'text.secondary', mb: 0.35, fontWeight: 700 }}>
                         Synonyms:
                     </Typography>
                     {formattedSynonyms.slice(0, 8).map((syn) => (
-                        <Typography key={syn} variant="caption" display="block" sx={{ color: 'text.secondary', lineHeight: 1.35 }}>
+                        <Typography key={syn} variant="caption" display="block" sx={{ color: 'text.secondary', lineHeight: 1.45 }}>
                             • {syn}
                         </Typography>
                     ))}
@@ -234,80 +230,119 @@ interface CompoundCardProps {
     atomColors?: AtomColors;
 }
 
-function CompoundCard({ token, smiles, name, formula, synonyms, atomColors }: CompoundCardProps) {
+const CompoundCard = memo(function CompoundCard({ token, smiles, name, formula, synonyms, atomColors }: CompoundCardProps) {
     return (
-        <Tooltip
-            title={
+        <Box
+            sx={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 0.75,
+                cursor: 'pointer',
+                '&:hover > .cpd-tooltip': {
+                    opacity: 1,
+                    visibility: 'visible',
+                },
+                '&:hover .mol-wrapper': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    transform: 'translateY(-2px)',
+                },
+            }}
+        >
+            {token.stoich && (
+                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                    ({token.stoich})
+                </Typography>
+            )}
+
+            <Link href={`/biochem/compounds/${token.id}`} style={{ textDecoration: 'none' }}>
+                <Box
+                    className="mol-wrapper"
+                    sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        p: 1,
+                        background: '#fff',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 150,
+                        height: 150,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <MoleculeRenderer
+                        smiles={smiles}
+                        compoundId={token.id}
+                        atomColors={atomColors}
+                        width={134}
+                        height={134}
+                    />
+                </Box>
+            </Link>
+
+            <Link
+                href={`/biochem/compounds/${token.id}`}
+                style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
+            >
+                <Typography variant="caption">{token.id}</Typography>
+            </Link>
+
+            {/* Below image + ID — avoids clipping under the equation row above */}
+            <Box
+                className="cpd-tooltip"
+                sx={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '50%',
+                    mt: 1,
+                    transform: 'translateX(-50%)',
+                    opacity: 0,
+                    visibility: 'hidden',
+                    transition: 'opacity 0.18s ease-in-out, visibility 0.18s ease-in-out',
+                    zIndex: 1500,
+                    pointerEvents: 'none',
+                    bgcolor: '#ffffff',
+                    color: '#1f2937',
+                    border: '1px solid #d1d5db',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+                    borderRadius: '8px',
+                    minWidth: 200,
+                    maxWidth: 380,
+                    maxHeight: 'min(60vh, 320px)',
+                    overflowY: 'auto',
+                    '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        border: '7px solid transparent',
+                        borderBottomColor: '#d1d5db',
+                    },
+                    '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        transform: 'translate(-50%, 1px)',
+                        border: '6px solid transparent',
+                        borderBottomColor: '#ffffff',
+                    },
+                }}
+            >
                 <CompoundTooltipContent
                     compoundId={token.id}
                     name={name}
                     formula={formula}
                     synonyms={synonyms}
                 />
-            }
-            arrow
-            placement="top"
-        >
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 0.75,
-                    cursor: 'pointer',
-                    '&:hover .mol-wrapper': {
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                        transform: 'translateY(-2px)',
-                        transition: 'all 0.2s ease',
-                    },
-                }}
-            >
-                {/* Stoichiometry prefix */}
-                {token.stoich && (
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                        ({token.stoich})
-                    </Typography>
-                )}
-
-                {/* Structure image */}
-                <Link href={`/biochem/compounds/${token.id}`} style={{ textDecoration: 'none' }}>
-                    <Box
-                        className="mol-wrapper"
-                        sx={{
-                            border: '1px solid #e0e0e0',
-                            borderRadius: 1,
-                            p: 1,
-                            background: '#fff',
-                            transition: 'all 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 150,
-                            height: 150,
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <MoleculeRenderer
-                            smiles={smiles}
-                            compoundId={token.id}
-                            atomColors={atomColors}
-                            width={134}
-                            height={134}
-                        />
-                    </Box>
-                </Link>
-
-                {/* Compound ID link */}
-                <Link
-                    href={`/biochem/compounds/${token.id}`}
-                    style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
-                >
-                    <Typography variant="caption">{token.id}</Typography>
-                </Link>
             </Box>
-        </Tooltip>
+        </Box>
     );
-}
+});
 
 /* ─── Side (reactants or products) ──────────────────────────── */
 
@@ -348,53 +383,67 @@ function EquationSide({
 
 /* ─── Main Component ─────────────────────────────────────────── */
 
+type DisplayData = { name?: string; smiles?: string; formula?: string; synonyms?: string[] };
+const EMPTY_PARSED: ParsedEquation = { reactants: [], products: [], arrow: '⇒' };
+const EMPTY_MAP = new Map<string, DisplayData>();
+
 export default function ReactionStructureEquation({
     equation,
     reversibility,
     atomMapping,
 }: ReactionStructureEquationProps) {
-    if (!equation) return null;
+    // All hooks must be called unconditionally before any early return.
+    // Previously the early return was before the hooks, which violated
+    // Rules of Hooks and caused unpredictable render-loop behavior.
+    const parsed = useMemo(
+        () => (equation ? parseEquation(equation) : EMPTY_PARSED),
+        [equation]
+    );
 
-    const parsed = parseEquation(equation);
+    const arrow = useMemo(() => {
+        let a = parsed.arrow;
+        if (reversibility === '=' || reversibility === '<=>') a = '⇌';
+        else if (reversibility === '>') a = '⇒';
+        else if (reversibility === '<') a = '⇐';
+        return a;
+    }, [parsed.arrow, reversibility]);
 
-    // Determine arrow — prefer explicit reversibility field if available
-    let arrow = parsed.arrow;
-    if (reversibility) {
-        if (reversibility === '=' || reversibility === '<=>') arrow = '⇌';
-        else if (reversibility === '>') arrow = '⇒';
-        else if (reversibility === '<') arrow = '⇐';
-    }
-
-    const allIds = [
-        ...parsed.reactants.map((t) => t.id),
-        ...parsed.products.map((t) => t.id),
-    ];
+    const allIds = useMemo(
+        () => [...parsed.reactants.map((t) => t.id), ...parsed.products.map((t) => t.id)],
+        [parsed]
+    );
+    const compoundIdsKey = useMemo(() => [...allIds].sort().join(','), [allIds]);
 
     const { data: compoundMap, isLoading } = useQuery({
-        queryKey: ['reaction-structure-compounds', allIds.sort().join(',')],
+        queryKey: ['reaction-structure-compounds', compoundIdsKey],
         queryFn: () => getCompoundsForReaction(allIds),
         enabled: allIds.length > 0,
         staleTime: 5 * 60 * 1000,
     });
 
-    // Build a display-ready map with synonym extraction
-    type DisplayData = { name?: string; smiles?: string; formula?: string; synonyms?: string[] };
-    const displayMap = new Map<string, DisplayData>();
-
-    if (compoundMap) {
+    // Memoize the display map — creating a new Map() on every render passes
+    // new object references into CompoundCard props, triggering continuous
+    // re-renders even when the underlying data has not changed.
+    const displayMap = useMemo<Map<string, DisplayData>>(() => {
+        if (!compoundMap) return EMPTY_MAP;
+        const map = new Map<string, DisplayData>();
         for (const [id, cpd] of compoundMap.entries()) {
             const synonymEntry = cpd.aliases?.find((a) => a.startsWith('Name:'));
             const synonyms = synonymEntry
                 ? synonymEntry.replace('Name:', '').replace(/"/g, '').split(';').map((s) => s.trim()).filter(Boolean)
                 : [];
-            displayMap.set(id, {
+            map.set(id, {
                 name: cpd.name,
                 smiles: cpd.smiles,
                 formula: cpd.formula,
                 synonyms,
             });
         }
-    }
+        return map;
+    }, [compoundMap]);
+
+    // Safe to early-return after all hooks have been called.
+    if (!equation) return null;
 
     if (isLoading) {
         return (
@@ -414,7 +463,6 @@ export default function ReactionStructureEquation({
                 gap: 2,
                 flexWrap: 'wrap',
                 py: 1,
-                overflowX: 'auto',
             }}
         >
             {/* Reactants */}

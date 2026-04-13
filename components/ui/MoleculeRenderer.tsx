@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
@@ -35,6 +35,7 @@ export default function MoleculeRenderer({
 }: MoleculeRendererProps) {
     const [state, setState] = useState<RenderState>('loading');
     const [svgString, setSvgString] = useState<string>('');
+    const atomColorsKey = useMemo(() => JSON.stringify(atomColors ?? {}), [atomColors]);
 
     useEffect(() => {
         let cancelled = false;
@@ -99,7 +100,7 @@ export default function MoleculeRenderer({
         return () => {
             cancelled = true;
         };
-    }, [smiles, atomColors, width, height]);
+    }, [smiles, atomColorsKey, width, height]);
 
     if (state === 'loading') {
         return (
