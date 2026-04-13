@@ -517,6 +517,28 @@ export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Comp
 }
 
 /**
+ * Fetch compound data for reaction structure display.
+ *
+ * Retrieves the full set of fields needed to render compound structures
+ * and tooltips in the ReactionStructureEquation component, including
+ * smiles (for RDKit.js rendering), aliases (for tooltip synonyms), and
+ * inchikey.
+ */
+export async function getCompoundsForReaction(ids: string[]): Promise<Map<string, Compound>> {
+    if (ids.length === 0) return new Map();
+
+    const idQuery = ids.map(id => `id:${id}`).join(' OR ');
+    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,name,formula,charge,smiles,inchikey,aliases`;
+
+    const res = await fetchSolr<Compound>(url);
+    const map = new Map<string, Compound>();
+    for (const doc of res.docs) {
+        map.set(doc.id, doc);
+    }
+    return map;
+}
+
+/**
  * Find reactions containing a given compound.
  * 
  * Searches for reactions where the specified compound appears as a reactant

@@ -11,6 +11,7 @@ import CardContent from '@mui/material/CardContent';
 import Link from 'next/link';
 import { getReactionById, getCompoundImageUrl, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
+import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 
 /* ─── Helpers ───────────────────────────────────────────────── */
 
@@ -231,11 +232,14 @@ export default function ReactionDetailPage() {
                     <DetailRow label="Equation">
                         <ChemicalEquation equation={rxn.definition} />
                     </DetailRow>
-                    
-                    {/* Compound Structure Images */}
+
+                    {/* Integrated structure diagram — structures inline with reaction arrow */}
                     {compoundIds.length > 0 && (
-                        <Box sx={{ pl: '20%', minWidth: 180 }}>
-                            <CompoundStructureGallery compoundIds={compoundIds} />
+                        <Box sx={{ pl: '20%', mt: 1, mb: 1 }}>
+                            <ReactionStructureEquation
+                                equation={rxn.equation ?? rxn.definition}
+                                reversibility={rxn.reversibility}
+                            />
                         </Box>
                     )}
                     
