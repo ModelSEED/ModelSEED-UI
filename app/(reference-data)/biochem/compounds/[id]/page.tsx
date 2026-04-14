@@ -7,8 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Link from 'next/link';
 import {
@@ -25,15 +24,15 @@ import { formatEquation } from '@/components/utils/formatEquation';
 /* ─── Helpers ────────────────────────────────────────────────── */
 
 function AliasDisplay({ aliases, type }: { aliases?: string[]; type: 'cpd' | 'rxn' }) {
-    if (!aliases || aliases.length === 0) return <span>N/A</span>;
+    if (!aliases || aliases.length === 0) return <Typography variant="body2" sx={{ color: 'text.disabled' }}>N/A</Typography>;
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.9 }}>
             {aliases.map((entry, i) => {
                 const colonIdx = entry.indexOf(':');
                 if (colonIdx === -1) {
                     return (
-                        <Typography key={i} variant="caption" sx={{ color: 'text.secondary' }}>
+                        <Typography key={i} variant="body2" sx={{ color: 'text.secondary' }}>
                             {entry}
                         </Typography>
                     );
@@ -51,37 +50,35 @@ function AliasDisplay({ aliases, type }: { aliases?: string[]; type: 'cpd' | 'rx
                     baseUrl = type === 'cpd' ? EXTERNAL_DBS.MetaCyc_c : EXTERNAL_DBS.MetaCyc_r;
 
                 return (
-                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, flexWrap: 'wrap' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 62 }}>
-                            {prefix}:
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                        <Typography
+                            variant="caption"
+                            sx={{ fontWeight: 700, color: 'text.secondary', minWidth: 72, pt: 0.5, flexShrink: 0 }}
+                        >
+                            {prefix}
                         </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Box sx={{ borderLeft: '2px solid #e2e8f0', pl: 1.2, display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
                             {values.map((v, j) => (
-                                <Box
-                                    key={`${prefix}-${j}-${v}`}
-                                    sx={{
-                                        px: 0.75,
-                                        py: 0.2,
-                                        borderRadius: 1,
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        bgcolor: 'background.default',
-                                        lineHeight: 1.1,
-                                    }}
-                                >
-                                    {baseUrl ? (
-                                        <a
-                                            href={`${baseUrl}${v}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ textDecoration: 'none', color: '#1976d2', fontSize: '0.75rem' }}
-                                        >
-                                            {v}
-                                        </a>
-                                    ) : (
-                                        <Typography variant="caption">{v}</Typography>
-                                    )}
-                                </Box>
+                                baseUrl ? (
+                                    <Chip
+                                        key={`${prefix}-${j}-${v}`}
+                                        label={v}
+                                        component="a"
+                                        href={`${baseUrl}${v}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        clickable
+                                        size="small"
+                                        sx={{ color: '#0e7490', bgcolor: '#ecfeff', border: '1px solid #bae6fd', fontSize: '0.73rem' }}
+                                    />
+                                ) : (
+                                    <Chip
+                                        key={`${prefix}-${j}-${v}`}
+                                        label={v}
+                                        size="small"
+                                        sx={{ bgcolor: '#f1f5f9', border: '1px solid #e2e8f0', color: '#334155', fontSize: '0.73rem' }}
+                                    />
+                                )
                             ))}
                         </Box>
                     </Box>
@@ -93,11 +90,22 @@ function AliasDisplay({ aliases, type }: { aliases?: string[]; type: 'cpd' | 'rx
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <Box sx={{ display: 'flex', py: 0.5 }}>
-            <Box sx={{ width: '20%', minWidth: 160, flexShrink: 0 }}>
-                <strong>{label}</strong>
+        <Box
+            sx={{
+                display: 'flex',
+                py: 0.95,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                gap: 1.2,
+                alignItems: 'flex-start',
+            }}
+        >
+            <Box sx={{ width: '22%', minWidth: 180, flexShrink: 0, pt: 0.15 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {label}
+                </Typography>
             </Box>
-            <Box sx={{ flex: 1 }}>{children}</Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
         </Box>
     );
 }
@@ -155,23 +163,20 @@ function SynonymsDisplay({ synonyms }: { synonyms: string[] }) {
     if (synonyms.length === 0) return <span>N/A</span>;
 
     return (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
             {synonyms.map((syn) => (
-                <Box
+                <Chip
                     key={syn}
+                    label={syn}
+                    size="small"
                     sx={{
-                        px: 0.75,
-                        py: 0.25,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        borderRadius: 1,
-                        bgcolor: 'background.default',
+                        bgcolor: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        color: '#1e293b',
+                        fontWeight: 500,
+                        fontSize: '0.74rem',
                     }}
-                >
-                    <Typography variant="caption" sx={{ lineHeight: 1.3 }}>
-                        {syn}
-                    </Typography>
-                </Box>
+                />
             ))}
         </Box>
     );
@@ -187,16 +192,13 @@ function PKaDisplay({ value }: { value: string | null }) {
         .map((segment) => {
             const [idx1, idx2, pka] = segment.split(':').map((s) => s.trim());
             if (!idx1 || !idx2 || !pka) return null;
-            return {
-                key: `${idx1}:${idx2}`,
-                pka,
-            };
+            return { key: `${idx1}:${idx2}`, pka };
         })
         .filter((entry): entry is { key: string; pka: string } => entry !== null);
 
     if (entries.length === 0) {
         return (
-            <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
                 {value}
             </Typography>
         );
@@ -205,21 +207,18 @@ function PKaDisplay({ value }: { value: string | null }) {
     return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
             {entries.map((entry) => (
-                <Box
+                <Chip
                     key={entry.key}
+                    label={`${entry.key} = ${entry.pka}`}
+                    size="small"
                     sx={{
-                        px: 0.75,
-                        py: 0.25,
-                        borderRadius: 1,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        bgcolor: 'background.default',
+                        fontFamily: 'monospace',
+                        bgcolor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        color: '#334155',
+                        fontSize: '0.74rem',
                     }}
-                >
-                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                        {entry.key} = {entry.pka}
-                    </Typography>
-                </Box>
+                />
             ))}
         </Box>
     );
@@ -227,44 +226,46 @@ function PKaDisplay({ value }: { value: string | null }) {
 
 function ChargeDisplay({ charge }: { charge: number }) {
     const value = Number(charge);
-    if (Number.isNaN(value)) return <span>{String(charge)}</span>;
+    if (Number.isNaN(value)) return <Typography variant="body2">{String(charge)}</Typography>;
     const sign = value > 0 ? '+' : '';
+    const label = `${sign}${value}`;
+    const color =
+        value > 0
+            ? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+            : value < 0
+              ? { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' }
+              : { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
     return (
-        <Box
+        <Chip
+            size="small"
+            label={label}
+            sx={{ fontFamily: 'monospace', fontWeight: 700, bgcolor: color.bg, color: color.text, border: `1px solid ${color.border}` }}
+        />
+    );
+}
+
+function YesNoChip({ value }: { value: boolean }) {
+    return (
+        <Chip
+            size="small"
+            label={value ? 'Yes' : 'No'}
             sx={{
-                display: 'inline-flex',
-                px: 0.8,
-                py: 0.2,
-                borderRadius: 1,
-                bgcolor: 'action.hover',
+                fontWeight: 700,
+                bgcolor: value ? '#ecfdf3' : '#f9fafb',
+                color: value ? '#166534' : '#374151',
                 border: '1px solid',
-                borderColor: 'divider',
+                borderColor: value ? '#bbf7d0' : '#e5e7eb',
             }}
-        >
-            <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700 }}>
-                {sign}{value}
-            </Typography>
-        </Box>
+        />
     );
 }
 
 function MonospaceValue({ value }: { value?: string | null }) {
-    if (!value) return <span>N/A</span>;
+    if (!value) return <Typography variant="body2" sx={{ color: 'text.disabled' }}>N/A</Typography>;
     return (
         <Typography
-            variant="caption"
-            sx={{
-                fontFamily: 'monospace',
-                wordBreak: 'break-all',
-                lineHeight: 1.4,
-                px: 0.75,
-                py: 0.35,
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.default',
-                display: 'inline-block',
-            }}
+            variant="body2"
+            sx={{ fontFamily: 'monospace', wordBreak: 'break-all', color: 'text.secondary', lineHeight: 1.5 }}
         >
             {value}
         </Typography>
@@ -372,8 +373,11 @@ export default function CompoundDetailPage() {
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
             {/* ── Title ── */}
-            <Typography variant="h6" sx={{ mb: 1 }}>
-                <strong>Compound:</strong>&nbsp;{cpd.id}&nbsp;({cpd.name},&nbsp;{formatFormula(cpd.formula)})
+            <Typography variant="h6" sx={{ mb: 0.6 }}>
+                <strong>Compound:</strong>&nbsp;{cpd.id}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                {cpd.name} ({formatFormula(cpd.formula)})
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
@@ -392,52 +396,53 @@ export default function CompoundDetailPage() {
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    <Card variant="outlined">
-                        <CardContent sx={{ py: 1 }}>
-                            <DetailRow label="ΔG:">
-                                <Typography variant="body2">
-                                    {deltaGDisplay}
-                                    {deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol
-                                </Typography>
-                            </DetailRow>
-                            {pkaDisplay && (
-                                <DetailRow label="pKa:">
-                                    <PKaDisplay value={pkaDisplay} />
-                                </DetailRow>
-                            )}
-                            {pkbDisplay && (
-                                <DetailRow label="pKb:">
-                                    <PKaDisplay value={pkbDisplay} />
-                                </DetailRow>
-                            )}
-                            <DetailRow label="Weight:">
-                                <Typography variant="body2">{cpd.mass} Da</Typography>
-                            </DetailRow>
-                            <DetailRow label="Charge:">
-                                <ChargeDisplay charge={cpd.charge} />
-                            </DetailRow>
-                            {cpd.structure && <DetailRow label="Structure:">{cpd.structure}</DetailRow>}
-                            <DetailRow label="InChIKey:">
-                                <MonospaceValue value={cpd.inchikey} />
-                            </DetailRow>
-                            <DetailRow label="SMILES:">
-                                <MonospaceValue value={cpd.smiles} />
-                            </DetailRow>
-                            <DetailRow label="Is co-factor?:">{cpd.is_cofactor ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Is core?:">{cpd.is_core ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Is obsolete?:">{cpd.is_obsolete === '1' ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Aliases:">
-                                <AliasDisplay aliases={aliasesWithoutName} type="cpd" />
-                            </DetailRow>
-                            <DetailRow label="Synonyms:">
-                                <SynonymsDisplay synonyms={synonyms} />
-                            </DetailRow>
-                            {cpd.ontology && cpd.ontology !== 'class:null|context:null' && (
-                                <DetailRow label="Ontology:">{cpd.ontology}</DetailRow>
-                            )}
-                            <DetailRow label="Source:">{cpd.source ?? 'N/A'}</DetailRow>
-                        </CardContent>
-                    </Card>
+                    <DetailRow label="ΔG">
+                        <Typography variant="body2">
+                            {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
+                        </Typography>
+                    </DetailRow>
+                    {pkaDisplay && (
+                        <DetailRow label="pKa">
+                            <PKaDisplay value={pkaDisplay} />
+                        </DetailRow>
+                    )}
+                    {pkbDisplay && (
+                        <DetailRow label="pKb">
+                            <PKaDisplay value={pkbDisplay} />
+                        </DetailRow>
+                    )}
+                    <DetailRow label="Weight">
+                        <Typography variant="body2">{cpd.mass} Da</Typography>
+                    </DetailRow>
+                    <DetailRow label="Charge">
+                        <ChargeDisplay charge={cpd.charge} />
+                    </DetailRow>
+                    {cpd.structure && <DetailRow label="Structure"><Typography variant="body2">{cpd.structure}</Typography></DetailRow>}
+                    <DetailRow label="InChIKey">
+                        <MonospaceValue value={cpd.inchikey} />
+                    </DetailRow>
+                    <DetailRow label="SMILES">
+                        <MonospaceValue value={cpd.smiles} />
+                    </DetailRow>
+                    <DetailRow label="Is co-factor?">
+                        <YesNoChip value={Boolean(cpd.is_cofactor)} />
+                    </DetailRow>
+                    <DetailRow label="Is core?">
+                        <YesNoChip value={Boolean(cpd.is_core)} />
+                    </DetailRow>
+                    <DetailRow label="Is obsolete?">
+                        <YesNoChip value={cpd.is_obsolete === '1'} />
+                    </DetailRow>
+                    <DetailRow label="Aliases">
+                        <AliasDisplay aliases={aliasesWithoutName} type="cpd" />
+                    </DetailRow>
+                    <DetailRow label="Synonyms">
+                        <SynonymsDisplay synonyms={synonyms} />
+                    </DetailRow>
+                    {cpd.ontology && cpd.ontology !== 'class:null|context:null' && (
+                        <DetailRow label="Ontology"><Typography variant="body2">{cpd.ontology}</Typography></DetailRow>
+                    )}
+                    <DetailRow label="Source"><Typography variant="body2">{cpd.source ?? 'N/A'}</Typography></DetailRow>
                 </Box>
             </Box>
 
