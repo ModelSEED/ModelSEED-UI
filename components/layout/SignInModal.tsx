@@ -182,9 +182,7 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
                             )}
                         </Box>
 
-                        <Typography variant="caption" sx={{ mt: 2, color: '#888' }}>
-                            Dev testing: use <strong>developer / developer</strong>
-                        </Typography>
+                        
                     </Box>
 
                 </Box>
