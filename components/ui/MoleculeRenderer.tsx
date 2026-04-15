@@ -114,8 +114,11 @@ export default function MoleculeRenderer({
     }
 
     if (state === 'svg') {
+        const svgLabel = alt ?? `Structure of ${compoundId}`;
         return (
             <div
+                role="img"
+                aria-label={svgLabel}
                 dangerouslySetInnerHTML={{ __html: svgString }}
                 style={{
                     width,

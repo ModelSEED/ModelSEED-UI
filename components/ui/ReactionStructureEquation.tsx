@@ -303,7 +303,7 @@ const CompoundCard = memo(function CompoundCard({ token, smiles, name, formula, 
                     visibility: 'hidden',
                     transition: 'opacity 0.18s ease-in-out, visibility 0.18s ease-in-out',
                     zIndex: 1500,
-                    pointerEvents: 'none',
+                    pointerEvents: 'auto',
                     bgcolor: '#ffffff',
                     color: '#1f2937',
                     border: '1px solid #d1d5db',
@@ -412,12 +412,13 @@ export default function ReactionStructureEquation({
         () => [...parsed.reactants.map((t) => t.id), ...parsed.products.map((t) => t.id)],
         [parsed]
     );
-    const compoundIdsKey = useMemo(() => [...allIds].sort().join(','), [allIds]);
+    const uniqueCompoundIds = useMemo(() => Array.from(new Set(allIds)), [allIds]);
+    const compoundIdsKey = useMemo(() => [...uniqueCompoundIds].sort().join(','), [uniqueCompoundIds]);
 
     const { data: compoundMap, isLoading } = useQuery({
         queryKey: ['reaction-structure-compounds', compoundIdsKey],
-        queryFn: () => getCompoundsForReaction(allIds),
-        enabled: allIds.length > 0,
+        queryFn: () => getCompoundsForReaction(uniqueCompoundIds),
+        enabled: uniqueCompoundIds.length > 0,
         staleTime: 5 * 60 * 1000,
     });
 

@@ -182,7 +182,6 @@ export default function SignInModal({ open, onClose }: SignInModalProps) {
                             )}
                         </Box>
 
-                        
                     </Box>
 
                 </Box>
