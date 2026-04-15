@@ -23,12 +23,15 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Chip from '@mui/material/Chip';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
+import SearchIcon from '@mui/icons-material/Search';
 import NextLink from 'next/link';
 import { workspaceLs, workspaceDownloadUrl } from '@/lib/api/workspace';
 import ShowMetadataDialog from '@/components/ui/ShowMetadataDialog';
@@ -93,6 +96,7 @@ export default function DataBrowserPage({ params }: { params: Promise<{ path: st
 
     const [metadataDialogOpen, setMetadataDialogOpen] = useState(false);
     const [selectedItemMeta, setSelectedItemMeta] = useState<WorkspaceItem | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch directory listing
     const { data, isLoading, error } = useQuery({
@@ -124,6 +128,18 @@ export default function DataBrowserPage({ params }: { params: Promise<{ path: st
                 return a.name.localeCompare(b.name);
             });
     }, [data, workspacePath]);
+
+    const filteredItems = useMemo<WorkspaceItem[]>(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return items;
+
+        return items.filter((item) =>
+            item.name.toLowerCase().includes(query) ||
+            item.type.toLowerCase().includes(query) ||
+            item.owner.toLowerCase().includes(query) ||
+            item.path.toLowerCase().includes(query)
+        );
+    }, [items, searchQuery]);
 
     // Build breadcrumb segments
     const breadcrumbs = useMemo(() => {
@@ -323,32 +339,73 @@ export default function DataBrowserPage({ params }: { params: Promise<{ path: st
 
             {/* Data grid */}
             {!isLoading && !error && (
-                <DataGrid
-                    rows={items}
-                    columns={columns}
-                    pageSizeOptions={[25, 50, 100]}
-                    initialState={{
-                        pagination: { paginationModel: { pageSize: 25 } },
-                    }}
-                    onRowClick={(params) => handleRowClick(params.row)}
-                    autoHeight
-                    disableRowSelectionOnClick
-                    sx={{
-                        cursor: 'pointer',
-                        '& .MuiDataGrid-row:hover': {
-                            backgroundColor: 'action.hover',
-                        },
-                    }}
-                    slots={{
-                        noRowsOverlay: () => (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                                <Typography color="text.secondary">
-                                    This directory is empty
-                                </Typography>
-                            </Box>
-                        ),
-                    }}
-                />
+                <Box>
+                    <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Quick filter by name, type, owner, or path"
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon fontSize="small" />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <DataGrid
+                        rows={filteredItems}
+                        columns={columns}
+                        showToolbar
+                        pageSizeOptions={[25, 50, 100]}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25 } },
+                        }}
+                        onRowClick={(params) => handleRowClick(params.row)}
+                        disableRowSelectionOnClick
+                        sx={{
+                            height: '70vh',
+                            maxHeight: 720,
+                            cursor: 'pointer',
+                            '& .MuiDataGrid-columnHeaders': {
+                                position: 'sticky',
+                                top: 0,
+                                zIndex: 2,
+                                backgroundColor: 'background.paper',
+                            },
+                            '& .MuiDataGrid-row:hover': {
+                                backgroundColor: 'action.hover',
+                            },
+                        }}
+                        slots={{
+                            noRowsOverlay: () => (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        height: '100%',
+                                        textAlign: 'center',
+                                        px: 2,
+                                    }}
+                                >
+                                    <Box>
+                                        <Typography variant="subtitle1" color="text.primary" fontWeight={600}>
+                                            {searchQuery.trim() ? 'No matching entries found' : 'This folder is empty'}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {searchQuery.trim()
+                                                ? 'Try a different search term or clear the filter to see all items.'
+                                                : 'No files or subfolders are available in this location yet.'}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            ),
+                        }}
+                    />
+                </Box>
             )}
 
             {/* Metadata Dialog */}

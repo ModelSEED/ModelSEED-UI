@@ -7,8 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Link from 'next/link';
 import {
@@ -25,13 +24,19 @@ import { formatEquation } from '@/components/utils/formatEquation';
 /* ─── Helpers ────────────────────────────────────────────────── */
 
 function AliasDisplay({ aliases, type }: { aliases?: string[]; type: 'cpd' | 'rxn' }) {
-    if (!aliases || aliases.length === 0) return <span>N/A</span>;
+    if (!aliases || aliases.length === 0) return <Typography variant="body2" sx={{ color: 'text.disabled' }}>N/A</Typography>;
 
     return (
-        <span>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.9 }}>
             {aliases.map((entry, i) => {
                 const colonIdx = entry.indexOf(':');
-                if (colonIdx === -1) return <span key={i}>{entry}; </span>;
+                if (colonIdx === -1) {
+                    return (
+                        <Typography key={i} variant="body2" sx={{ color: 'text.secondary' }}>
+                            {entry}
+                        </Typography>
+                    );
+                }
 
                 const prefix = entry.substring(0, colonIdx).trim();
                 const values = entry.substring(colonIdx + 1).split(';').map((v) => v.trim()).filter(Boolean);
@@ -45,32 +50,225 @@ function AliasDisplay({ aliases, type }: { aliases?: string[]; type: 'cpd' | 'rx
                     baseUrl = type === 'cpd' ? EXTERNAL_DBS.MetaCyc_c : EXTERNAL_DBS.MetaCyc_r;
 
                 return (
-                    <span key={i}>
-                        <strong>{prefix}:</strong>{' '}
-                        {values.map((v, j) => (
-                            <span key={j}>
-                                {baseUrl ? (
-                                    <a href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer">{v}</a>
-                                ) : v}
-                                {j < values.length - 1 ? '; ' : ''}
-                            </span>
-                        ))}
-                        {'; '}
-                    </span>
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                        <Typography
+                            variant="caption"
+                            sx={{ fontWeight: 700, color: 'text.secondary', minWidth: 72, pt: 0.5, flexShrink: 0 }}
+                        >
+                            {prefix}
+                        </Typography>
+                        <Box sx={{ borderLeft: '2px solid #e2e8f0', pl: 1.2, display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
+                            {values.map((v, j) => (
+                                baseUrl ? (
+                                    <Chip
+                                        key={`${prefix}-${j}-${v}`}
+                                        label={v}
+                                        component="a"
+                                        href={`${baseUrl}${v}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        clickable
+                                        size="small"
+                                        sx={{ color: '#0e7490', bgcolor: '#ecfeff', border: '1px solid #bae6fd', fontSize: '0.73rem' }}
+                                    />
+                                ) : (
+                                    <Chip
+                                        key={`${prefix}-${j}-${v}`}
+                                        label={v}
+                                        size="small"
+                                        sx={{ bgcolor: '#f1f5f9', border: '1px solid #e2e8f0', color: '#334155', fontSize: '0.73rem' }}
+                                    />
+                                )
+                            ))}
+                        </Box>
+                    </Box>
                 );
             })}
-        </span>
+        </Box>
     );
 }
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <Box sx={{ display: 'flex', py: 0.5 }}>
-            <Box sx={{ width: '20%', minWidth: 160, flexShrink: 0 }}>
-                <strong>{label}</strong>
+        <Box
+            sx={{
+                display: 'flex',
+                py: 0.95,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                gap: 1.2,
+                alignItems: 'flex-start',
+            }}
+        >
+            <Box sx={{ width: '22%', minWidth: 180, flexShrink: 0, pt: 0.15 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {label}
+                </Typography>
             </Box>
-            <Box sx={{ flex: 1 }}>{children}</Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
         </Box>
+    );
+}
+
+const SUBSCRIPT_MAP: Record<string, string> = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+    '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '(': '₍', ')': '₎',
+};
+
+const SUPERSCRIPT_MAP: Record<string, string> = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '(': '⁽', ')': '⁾',
+};
+
+function toMappedScript(value: string, map: Record<string, string>): string {
+    return value.split('').map((ch) => map[ch] ?? ch).join('');
+}
+
+function formatChemicalText(value: string): string {
+    if (!value) return value;
+
+    let text = value.trim();
+
+    text = text
+        .replace(/<\s*sub\s*>(.*?)<\s*\/\s*sub\s*>/gi, (_, inner: string) => toMappedScript(inner, SUBSCRIPT_MAP))
+        .replace(/<\s*sup\s*>(.*?)<\s*\/\s*sup\s*>/gi, (_, inner: string) => toMappedScript(inner, SUPERSCRIPT_MAP))
+        .replace(/<[^>]+>/g, '');
+
+    text = text.replace(/([A-Za-z\)\]])(\d+)/g, (_, prev: string, digits: string) => `${prev}${toMappedScript(digits, SUBSCRIPT_MAP)}`);
+    text = text.replace(/\((\d*[+-]|[+-]\d*)\)\s*$/g, (_, charge: string) => toMappedScript(charge, SUPERSCRIPT_MAP));
+    text = text.replace(/([A-Za-z₀-₉\]\)])(\d*[+-]|[+-]\d*)$/g, (_, stem: string, charge: string) => `${stem}${toMappedScript(charge, SUPERSCRIPT_MAP)}`);
+
+    return text.replace(/\s+/g, ' ').trim();
+}
+
+function normalizeSynonyms(rawSynonyms: string[]): string[] {
+    const seen = new Set<string>();
+    const formatted: string[] = [];
+
+    for (const value of rawSynonyms) {
+        const clean = formatChemicalText(value);
+        if (!clean) continue;
+        const key = clean.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        formatted.push(clean);
+    }
+
+    return formatted;
+}
+
+function SynonymsDisplay({ synonyms }: { synonyms: string[] }) {
+    if (synonyms.length === 0) return <span>N/A</span>;
+
+    return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
+            {synonyms.map((syn) => (
+                <Chip
+                    key={syn}
+                    label={syn}
+                    size="small"
+                    sx={{
+                        bgcolor: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        color: '#1e293b',
+                        fontWeight: 500,
+                        fontSize: '0.74rem',
+                    }}
+                />
+            ))}
+        </Box>
+    );
+}
+
+function PKaDisplay({ value }: { value: string | null }) {
+    if (!value) return <span>N/A</span>;
+
+    const entries = value
+        .split(';')
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+        .map((segment) => {
+            const [idx1, idx2, pka] = segment.split(':').map((s) => s.trim());
+            if (!idx1 || !idx2 || !pka) return null;
+            return { key: `${idx1}:${idx2}`, pka };
+        })
+        .filter((entry): entry is { key: string; pka: string } => entry !== null);
+
+    if (entries.length === 0) {
+        return (
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                {value}
+            </Typography>
+        );
+    }
+
+    return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6 }}>
+            {entries.map((entry) => (
+                <Chip
+                    key={entry.key}
+                    label={`${entry.key} = ${entry.pka}`}
+                    size="small"
+                    sx={{
+                        fontFamily: 'monospace',
+                        bgcolor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        color: '#334155',
+                        fontSize: '0.74rem',
+                    }}
+                />
+            ))}
+        </Box>
+    );
+}
+
+function ChargeDisplay({ charge }: { charge: number }) {
+    const value = Number(charge);
+    if (Number.isNaN(value)) return <Typography variant="body2">{String(charge)}</Typography>;
+    const sign = value > 0 ? '+' : '';
+    const label = `${sign}${value}`;
+    const color =
+        value > 0
+            ? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+            : value < 0
+              ? { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' }
+              : { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
+    return (
+        <Chip
+            size="small"
+            label={label}
+            sx={{ fontFamily: 'monospace', fontWeight: 700, bgcolor: color.bg, color: color.text, border: `1px solid ${color.border}` }}
+        />
+    );
+}
+
+function YesNoChip({ value }: { value: boolean }) {
+    return (
+        <Chip
+            size="small"
+            label={value ? 'Yes' : 'No'}
+            sx={{
+                fontWeight: 700,
+                bgcolor: value ? '#ecfdf3' : '#f9fafb',
+                color: value ? '#166534' : '#374151',
+                border: '1px solid',
+                borderColor: value ? '#bbf7d0' : '#e5e7eb',
+            }}
+        />
+    );
+}
+
+function MonospaceValue({ value }: { value?: string | null }) {
+    if (!value) return <Typography variant="body2" sx={{ color: 'text.disabled' }}>N/A</Typography>;
+    return (
+        <Typography
+            variant="body2"
+            sx={{ fontFamily: 'monospace', wordBreak: 'break-all', color: 'text.secondary', lineHeight: 1.5 }}
+        >
+            {value}
+        </Typography>
     );
 }
 
@@ -154,7 +352,16 @@ export default function CompoundDetailPage() {
 
     // ── Derived display values (matching legacy Compound controller)
     const synonymEntry = cpd.aliases?.find((a) => a.startsWith('Name:'));
-    const synonyms = synonymEntry ? synonymEntry.replace('Name:', '').replace(/"/g, '') : 'N/A';
+    const synonyms = synonymEntry
+        ? normalizeSynonyms(
+            synonymEntry
+                .replace('Name:', '')
+                .replace(/"/g, '')
+                .split(';')
+                .map((s) => s.trim())
+                .filter(Boolean)
+        )
+        : [];
     const aliasesWithoutName = cpd.aliases?.filter((a) => !a.startsWith('Name:')) ?? [];
 
     const pkaDisplay = cpd.pka?.[0]?.replace(/"/g, '') ?? null;
@@ -166,8 +373,11 @@ export default function CompoundDetailPage() {
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
             {/* ── Title ── */}
-            <Typography variant="h6" sx={{ mb: 1 }}>
-                <strong>Compound:</strong>&nbsp;{cpd.id}&nbsp;({cpd.name},&nbsp;{formatFormula(cpd.formula)})
+            <Typography variant="h6" sx={{ mb: 0.6 }}>
+                <strong>Compound:</strong>&nbsp;{cpd.id}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                {cpd.name} ({formatFormula(cpd.formula)})
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
@@ -186,31 +396,53 @@ export default function CompoundDetailPage() {
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    <Card variant="outlined">
-                        <CardContent sx={{ py: 1 }}>
-                            <DetailRow label="ΔG:">
-                                {deltaGDisplay}±{deltaGerrDisplay}&nbsp;(kcal/mol)
-                            </DetailRow>
-                            {pkaDisplay && <DetailRow label="pKa:">{pkaDisplay}</DetailRow>}
-                            {pkbDisplay && <DetailRow label="pKb:">{pkbDisplay}</DetailRow>}
-                            <DetailRow label="Weight:">{cpd.mass}</DetailRow>
-                            <DetailRow label="Charge:">{cpd.charge}</DetailRow>
-                            {cpd.structure && <DetailRow label="Structure:">{cpd.structure}</DetailRow>}
-                            <DetailRow label="InChIKey:">{cpd.inchikey ?? 'N/A'}</DetailRow>
-                            <DetailRow label="SMILES:">{cpd.smiles ?? 'N/A'}</DetailRow>
-                            <DetailRow label="Is co-factor?:">{cpd.is_cofactor ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Is core?:">{cpd.is_core ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Is obsolete?:">{cpd.is_obsolete === '1' ? 'Yes' : 'No'}</DetailRow>
-                            <DetailRow label="Aliases:">
-                                <AliasDisplay aliases={aliasesWithoutName} type="cpd" />
-                            </DetailRow>
-                            <DetailRow label="Synonyms:">{synonyms}</DetailRow>
-                            {cpd.ontology && cpd.ontology !== 'class:null|context:null' && (
-                                <DetailRow label="Ontology:">{cpd.ontology}</DetailRow>
-                            )}
-                            <DetailRow label="Source:">{cpd.source ?? 'N/A'}</DetailRow>
-                        </CardContent>
-                    </Card>
+                    <DetailRow label="ΔG">
+                        <Typography variant="body2">
+                            {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
+                        </Typography>
+                    </DetailRow>
+                    {pkaDisplay && (
+                        <DetailRow label="pKa">
+                            <PKaDisplay value={pkaDisplay} />
+                        </DetailRow>
+                    )}
+                    {pkbDisplay && (
+                        <DetailRow label="pKb">
+                            <PKaDisplay value={pkbDisplay} />
+                        </DetailRow>
+                    )}
+                    <DetailRow label="Weight">
+                        <Typography variant="body2">{cpd.mass} Da</Typography>
+                    </DetailRow>
+                    <DetailRow label="Charge">
+                        <ChargeDisplay charge={cpd.charge} />
+                    </DetailRow>
+                    {cpd.structure && <DetailRow label="Structure"><Typography variant="body2">{cpd.structure}</Typography></DetailRow>}
+                    <DetailRow label="InChIKey">
+                        <MonospaceValue value={cpd.inchikey} />
+                    </DetailRow>
+                    <DetailRow label="SMILES">
+                        <MonospaceValue value={cpd.smiles} />
+                    </DetailRow>
+                    <DetailRow label="Is co-factor?">
+                        <YesNoChip value={Boolean(cpd.is_cofactor)} />
+                    </DetailRow>
+                    <DetailRow label="Is core?">
+                        <YesNoChip value={Boolean(cpd.is_core)} />
+                    </DetailRow>
+                    <DetailRow label="Is obsolete?">
+                        <YesNoChip value={cpd.is_obsolete === '1'} />
+                    </DetailRow>
+                    <DetailRow label="Aliases">
+                        <AliasDisplay aliases={aliasesWithoutName} type="cpd" />
+                    </DetailRow>
+                    <DetailRow label="Synonyms">
+                        <SynonymsDisplay synonyms={synonyms} />
+                    </DetailRow>
+                    {cpd.ontology && cpd.ontology !== 'class:null|context:null' && (
+                        <DetailRow label="Ontology"><Typography variant="body2">{cpd.ontology}</Typography></DetailRow>
+                    )}
+                    <DetailRow label="Source"><Typography variant="body2">{cpd.source ?? 'N/A'}</Typography></DetailRow>
                 </Box>
             </Box>
 
