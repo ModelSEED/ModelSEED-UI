@@ -25,7 +25,7 @@
     "@mui/material": "^7.3.8",
     "@mui/material-nextjs": "^7.3.8",
     "@mui/x-data-grid": "^8.27.3",
-    "@rdkit/rdkit": "^2025.3.4-1.0.0",
+    "@rdkit/rdkit": "2025.3.4-1.0.0",
     "@tanstack/react-query": "^5.90.21",
     "next": "16.2.1",
     "react": "19.2.3",

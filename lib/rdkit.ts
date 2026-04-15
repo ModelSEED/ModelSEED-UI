@@ -18,7 +18,12 @@ declare global {
 }
 
 const RDKIT_VERSION = '2025.3.4-1.0.0';
-const RDKIT_BASE = `https://unpkg.com/@rdkit/rdkit@${RDKIT_VERSION}/dist`;
+// Prefer self-hosted assets (e.g. /public/rdkit) when NEXT_PUBLIC_RDKIT_BASE_URL is set.
+// Falls back to the pinned unpkg URL for development convenience.
+const RDKIT_BASE = (
+    process.env.NEXT_PUBLIC_RDKIT_BASE_URL?.replace(/\/$/, '')
+    ?? `https://unpkg.com/@rdkit/rdkit@${RDKIT_VERSION}/dist`
+);
 const RDKIT_JS_URL = `${RDKIT_BASE}/RDKit_minimal.js`;
 const RDKIT_WASM_URL = `${RDKIT_BASE}/RDKit_minimal.wasm`;
 
@@ -36,16 +41,38 @@ function loadRDKitScript(): Promise<void> {
     scriptPromise = new Promise<void>((resolve, reject) => {
         const existing = document.querySelector<HTMLScriptElement>(`script[src="${RDKIT_JS_URL}"]`);
         if (existing) {
+            if (window.initRDKitModule || existing.dataset.rdkitStatus === 'loaded') {
+                resolve();
+                return;
+            }
+            if (existing.dataset.rdkitStatus === 'error') {
+                reject(new Error('Failed to load RDKit script.'));
+                return;
+            }
             existing.addEventListener('load', () => resolve(), { once: true });
             existing.addEventListener('error', () => reject(new Error('Failed to load RDKit script.')), { once: true });
+            queueMicrotask(() => {
+                if (window.initRDKitModule || existing.dataset.rdkitStatus === 'loaded') {
+                    resolve();
+                } else if (existing.dataset.rdkitStatus === 'error') {
+                    reject(new Error('Failed to load RDKit script.'));
+                }
+            });
             return;
         }
 
         const script = document.createElement('script');
         script.src = RDKIT_JS_URL;
         script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load RDKit script.'));
+        script.dataset.rdkitStatus = 'loading';
+        script.onload = () => {
+            script.dataset.rdkitStatus = 'loaded';
+            resolve();
+        };
+        script.onerror = () => {
+            script.dataset.rdkitStatus = 'error';
+            reject(new Error('Failed to load RDKit script.'));
+        };
         document.head.appendChild(script);
     });
 
