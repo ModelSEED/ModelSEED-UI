@@ -30,4 +30,18 @@ describe('Biochem API Integration Tests', () => {
     expect(result).toBeDefined();
     expect(result.id).toBe('rxn00001');
   });
+
+  it('should fetch compounds for reaction rendering with structure fields', async () => {
+    if (!isApiAvailable) return;
+
+    const result = await biochemApi.getCompoundsForReaction(['cpd00001', 'cpd00002', 'cpd00008']);
+    expect(result).toBeInstanceOf(Map);
+    expect(result.size).toBeGreaterThan(0);
+
+    const atp = result.get('cpd00002');
+    if (atp) {
+      expect(atp.name).toBeDefined();
+      expect('smiles' in atp).toBe(true);
+    }
+  });
 });

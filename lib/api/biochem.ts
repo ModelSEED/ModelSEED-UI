@@ -502,18 +502,7 @@ export async function getCompoundById(id: string): Promise<Compound> {
  * ```
  */
 export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Compound>> {
-    if (ids.length === 0) return new Map();
-    
-    // Build OR query for all IDs
-    const idQuery = ids.map(id => `id:${id}`).join(' OR ');
-    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,name,formula,charge,mass`;
-    
-    const res = await fetchSolr<Compound>(url);
-    const map = new Map<string, Compound>();
-    for (const doc of res.docs) {
-        map.set(doc.id, doc);
-    }
-    return map;
+    return getCompoundsByIdsWithFields(ids, ['id', 'name', 'formula', 'charge', 'mass']);
 }
 
 /**
@@ -525,17 +514,24 @@ export async function getCompoundsByIds(ids: string[]): Promise<Map<string, Comp
  * inchikey.
  */
 export async function getCompoundsForReaction(ids: string[]): Promise<Map<string, Compound>> {
-    if (ids.length === 0) return new Map();
+    return getCompoundsByIdsWithFields(ids, ['id', 'name', 'formula', 'charge', 'smiles', 'inchikey', 'aliases']);
+}
 
-    const idQuery = ids.map(id => `id:${id}`).join(' OR ');
-    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,name,formula,charge,smiles,inchikey,aliases`;
+function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<Map<string, Compound>> {
+    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    if (uniqueIds.length === 0) return Promise.resolve(new Map());
 
-    const res = await fetchSolr<Compound>(url);
-    const map = new Map<string, Compound>();
-    for (const doc of res.docs) {
-        map.set(doc.id, doc);
-    }
-    return map;
+    const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
+    const fl = fields.join(',');
+    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+
+    return fetchSolr<Compound>(url).then((res) => {
+        const map = new Map<string, Compound>();
+        for (const doc of res.docs) {
+            map.set(doc.id, doc);
+        }
+        return map;
+    });
 }
 
 /**
