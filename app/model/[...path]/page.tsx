@@ -527,6 +527,33 @@ function summarizeMediaRef(value: unknown): string {
     return pieces[pieces.length - 1] || value;
 }
 
+function applyGridSortModel(
+    rows: Record<string, unknown>[],
+    sortModel: GridSortModel,
+): Record<string, unknown>[] {
+    if (!sortModel.length) return rows;
+    const [sortRule] = sortModel;
+    if (!sortRule || !sortRule.field || !sortRule.sort) return rows;
+
+    const direction = sortRule.sort === 'asc' ? 1 : -1;
+    const field = sortRule.field;
+
+    return [...rows].sort((a, b) => {
+        const aValue = a[field];
+        const bValue = b[field];
+
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1 * direction;
+        if (bValue == null) return -1 * direction;
+
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return (aValue - bValue) * direction;
+        }
+
+        return String(aValue).localeCompare(String(bValue), undefined, { numeric: true }) * direction;
+    });
+}
+
 function normalizeWorkspaceRef(value: unknown): string {
     if (typeof value !== 'string') return '';
     const trimmed = value.trim();
@@ -1273,6 +1300,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const activeTab: TabKey = isTabKey(lastSegment) ? lastSegment : 'overview';
     const modelSegments = isTabKey(lastSegment) ? decodedSegments.slice(0, -1) : decodedSegments;
     const workspacePath = `/${modelSegments.join('/')}`;
+    const dataBrowserParentPath = useMemo(() => {
+        const segments = workspacePath.split('/').filter(Boolean);
+        if (segments.length <= 1) return '/data/home';
+        return `/data/${segments.slice(0, -1).join('/')}`;
+    }, [workspacePath]);
     const modelRootPath = workspacePath.endsWith('/model')
         ? workspacePath.slice(0, -('/model'.length))
         : workspacePath;
@@ -1289,8 +1321,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
         const wsCandidates: string[] = [];
         for (const b of bases) {
-            wsCandidates.push(b);
+            // Try the /model sub-object first (has actual JSON data), then the folder
             if (!b.endsWith('/model')) wsCandidates.push(`${b}/model`);
+            wsCandidates.push(b);
         }
 
         return {
@@ -1582,11 +1615,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     // Must be above early returns to satisfy Rules of Hooks
     const existingReactionIds = useMemo(() => {
-        if (!wsObject) return [];
-        const obj = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
+        const obj: Record<string, unknown> =
+            (apiModel as Record<string, unknown> | null | undefined) ??
+            parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ??
+            {};
         const config = buildTableConfig(obj);
         return config.reactions.rows.map((r) => String(r.id ?? '').replace(/_[a-z]\d+$/, ''));
-    }, [wsObject]);
+    }, [apiModel, wsObject]);
 
     if (!isLoading && !apiModel && !wsObject) {
         return (
@@ -1598,6 +1633,21 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             </Box>
         );
     }
+
+    // Both API and workspace returned but the data payload is empty — stub/incomplete model
+    const wsObjectData = parseWorkspaceGetObject<Record<string, unknown>>(wsObject);
+    const hasModelData = Boolean(
+        (apiModel && (Array.isArray((apiModel as Record<string, unknown>).reactions)
+            ? ((apiModel as Record<string, unknown>).reactions as unknown[]).length > 0
+            : false)) ||
+        (wsObjectData && (
+            Array.isArray((wsObjectData as Record<string, unknown>).modelreactions)
+                ? ((wsObjectData as Record<string, unknown>).modelreactions as unknown[]).length > 0
+                : Array.isArray((wsObjectData as Record<string, unknown>).reactions)
+                    ? ((wsObjectData as Record<string, unknown>).reactions as unknown[]).length > 0
+                    : false
+        ))
+    );
 
     if (isLoading) {
         return (
@@ -1618,7 +1668,12 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         );
     }
 
-    const modelObject = parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ?? {};
+    // Prefer the REST API model data (full reactions/compounds/etc.) when available.
+    // Fall back to parsing the legacy workspace object for older deployments.
+    const modelObject: Record<string, unknown> =
+        (apiModel as Record<string, unknown> | null | undefined) ??
+        parseWorkspaceGetObject<Record<string, unknown>>(wsObject) ??
+        {};
     const tableConfig = buildTableConfig(modelObject);
     const fbaRows = extractFbaRows(modelFba, modelObject, workspaceFbaEntries);
     const gapfillRows = extractGapfillRows(modelGapfills, modelObject, workspaceGapfillEntries);
@@ -1687,6 +1742,12 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     : 'Unavailable')
                 : String(modelEdits.length),
         },
+    ];
+    const overviewHighlights = [
+        { label: 'Reactions', value: String(tableConfig.reactions.rows.length) },
+        { label: 'Compounds', value: String(tableConfig.compounds.rows.length) },
+        { label: 'Genes', value: String(tableConfig.genes.rows.length) },
+        { label: 'Pathways', value: String(tableConfig.pathways.rows.length) },
     ];
 
     const editHistoryRows = modelEdits.map((edit, index) => {
@@ -1968,6 +2029,25 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     return (
         <Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 4 } }}>
+            <Box sx={{ mb: 1.5 }}>
+                <Typography
+                    component={Link}
+                    href={dataBrowserParentPath}
+                    sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        color: 'primary.main',
+                        textDecoration: 'none',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                        '&:hover': { textDecoration: 'underline' },
+                    }}
+                >
+                    <span aria-hidden>←</span>
+                    Back to Data Browser
+                </Typography>
+            </Box>
             <ModelDetailHeader
                 modelName={modelName}
                 visualizeOption={visualizeOption}
@@ -2004,7 +2084,23 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             <LegacySurfaceStatus isPlantModel={isPlantModel} />
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={tabIndex} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+                <Tabs
+                    value={tabIndex}
+                    onChange={handleTabChange}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    allowScrollButtonsMobile
+                    sx={{
+                        '& .MuiTab-root': {
+                            minWidth: 'auto',
+                            px: { xs: 1.25, sm: 2 },
+                            whiteSpace: 'nowrap',
+                        },
+                        '& .MuiTabs-scrollButtons': {
+                            display: 'flex',
+                        },
+                    }}
+                >
                     {MODEL_TABS.map((tab, index) => (
                         <Tab key={tab.key} label={tab.label} {...a11yProps(index)} />
                     ))}
@@ -2060,17 +2156,77 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             {MODEL_TABS.map((tab, index) => (
                 <TabPanel key={tab.key} value={tabIndex} index={index}>
                     {tab.key === 'overview' ? (
-                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '220px 1fr' }, rowGap: 1.5, columnGap: 2 }}>
-                            {modelMetadata.map((row) => (
-                                <Box key={row.label} sx={{ display: 'contents' }}>
-                                    <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                                        {row.label}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {row.value}
-                                    </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            {!hasModelData && !isLoading && (
+                                <Alert severity="warning">
+                                    <AlertTitle>Model data unavailable</AlertTitle>
+                                    The model file for <strong>{modelName}</strong> exists in the workspace but
+                                    its reaction and compound data could not be loaded. This can happen when a
+                                    copy or build job did not complete successfully. Try rebuilding the model or
+                                    contact your workspace administrator.
+                                </Alert>
+                            )}
+                            <Box>
+                                <Typography variant="h6" gutterBottom>
+                                    Model Overview
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Key summary metrics and metadata for this model.
+                                </Typography>
+                            </Box>
+
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
+                                    gap: 1.5,
+                                }}
+                            >
+                                {overviewHighlights.map((item) => (
+                                    <Box
+                                        key={item.label}
+                                        sx={{
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 1.5,
+                                            p: 2,
+                                            backgroundColor: 'background.paper',
+                                        }}
+                                    >
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            {item.label}
+                                        </Typography>
+                                        <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
+                                            {item.value}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+
+                            <Box
+                                sx={{
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                    borderRadius: 1.5,
+                                    p: { xs: 2, md: 2.5 },
+                                }}
+                            >
+                                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                                    Metadata
+                                </Typography>
+                                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '220px 1fr' }, rowGap: 1.5, columnGap: 2 }}>
+                                    {modelMetadata.map((row) => (
+                                        <Box key={row.label} sx={{ display: 'contents' }}>
+                                            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                                                {row.label}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                {row.value}
+                                            </Typography>
+                                        </Box>
+                                    ))}
                                 </Box>
-                            ))}
+                            </Box>
                         </Box>
                     ) : tab.key === 'edits' ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -2266,8 +2422,23 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         </Box>
                     ) : (
                         <>
+                            {(() => {
+                                const isLazyLargeTab = tab.key === 'reactions' || tab.key === 'compounds';
+                                const activePagination = paginationByTab[tab.key] ?? { page: 0, pageSize: 25 };
+                                const activeSortModel = sortByTab[tab.key] ?? [];
+                                const allRows = tableConfig[tab.key].rows;
+                                const preparedRows = isLazyLargeTab
+                                    ? applyGridSortModel(allRows, activeSortModel)
+                                    : allRows;
+                                const pageStart = activePagination.page * activePagination.pageSize;
+                                const pageEnd = pageStart + activePagination.pageSize;
+                                const displayedRows = isLazyLargeTab
+                                    ? preparedRows.slice(pageStart, pageEnd)
+                                    : preparedRows;
+
+                                return (
                             <DataGrid<Record<string, unknown>>
-                                rows={tableConfig[tab.key].rows}
+                                rows={displayedRows}
                                 columns={
                                     tab.key === 'reactions'
                                         ? reactionColumns
@@ -2280,13 +2451,19 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                                     : tableConfig[tab.key].columns
                                 }
                                 pageSizeOptions={[10, 25, 50, 100]}
-                                paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
+                                paginationMode={isLazyLargeTab ? 'server' : 'client'}
+                                sortingMode={isLazyLargeTab ? 'server' : 'client'}
+                                rowCount={isLazyLargeTab ? preparedRows.length : undefined}
+                                paginationModel={activePagination}
                                 onPaginationModelChange={(model) =>
                                     setPaginationByTab((prev) => ({ ...prev, [tab.key]: model }))
                                 }
-                                sortModel={sortByTab[tab.key] ?? []}
+                                sortModel={activeSortModel}
                                 onSortModelChange={(model) =>
-                                    setSortByTab((prev) => ({ ...prev, [tab.key]: model }))
+                                    setSortByTab((prev) => ({
+                                        ...prev,
+                                        [tab.key]: model,
+                                    }))
                                 }
                                 showToolbar
                                 slots={{ toolbar: DataControlHeader }}
@@ -2317,6 +2494,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                     },
                                 }}
                             />
+                                );
+                            })()}
                         </>
                     )}
                 </TabPanel>
