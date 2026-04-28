@@ -10,6 +10,7 @@
 import React from 'react';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
@@ -32,6 +33,54 @@ async function getChangelog(): Promise<string> {
     }
 }
 
+type BuildMetadata = {
+    version: string;
+    commit: string;
+    deployed: string;
+};
+
+function getPackageVersion(): string {
+    try {
+        const packagePath = path.join(process.cwd(), 'package.json');
+        const pkgRaw = fs.readFileSync(packagePath, 'utf8');
+        const pkg = JSON.parse(pkgRaw) as { version?: string };
+        return pkg.version ?? 'unknown';
+    } catch {
+        return 'unknown';
+    }
+}
+
+function getCommitSha(): string {
+    const envCommit =
+        process.env.NEXT_PUBLIC_GIT_COMMIT
+        ?? process.env.GIT_COMMIT
+        ?? process.env.VERCEL_GIT_COMMIT_SHA
+        ?? process.env.GITHUB_SHA;
+    if (envCommit) return envCommit.slice(0, 7);
+
+    try {
+        return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    } catch {
+        return 'unknown';
+    }
+}
+
+function getDeployedTimestamp(): string {
+    const raw = process.env.NEXT_PUBLIC_BUILD_DATE ?? process.env.BUILD_DATE;
+    if (!raw) return 'unknown';
+
+    const parsed = new Date(raw);
+    return Number.isNaN(parsed.getTime()) ? raw : parsed.toISOString();
+}
+
+function getBuildMetadata(): BuildMetadata {
+    return {
+        version: getPackageVersion(),
+        commit: getCommitSha(),
+        deployed: getDeployedTimestamp(),
+    };
+}
+
 /**
  * Version page component with changelog and service status.
  * 
@@ -39,6 +88,7 @@ async function getChangelog(): Promise<string> {
  */
 export default async function VersionPage() {
     const rawChangelog = await getChangelog();
+    const metadata = getBuildMetadata();
 
     // Fix: legacy changelog missing spaces after hashes (e.g., ####v2.6.1)
     const changelog = rawChangelog.replace(/^(#+)(?![\s#])/gm, '$1 ');
@@ -50,10 +100,12 @@ export default async function VersionPage() {
                     <Image src="/img/ModelSEED-logo-vertical-small.png" alt="ModelSEED" width={125} height={125} style={{ objectFit: 'contain' }} />
                 </Box>
                 <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>v3.0.0</Typography>
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>
+                        v{metadata.version}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Deployed: N/A<br />
-                        Commit: dev
+                        Deployed: {metadata.deployed}<br />
+                        Commit: {metadata.commit}
                     </Typography>
                 </Box>
                 <Box>

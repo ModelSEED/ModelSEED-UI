@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Version Display**: Updated About/Version page to display v3.0.0 instead of hardcoded v0.1.3.
 
 ### Fixed
-- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/seaver/modelseed`) by returning empty results instead of 404 errors.
+- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/user/modelseed`) by returning empty results instead of 404 errors.
 
 ### Documentation
 - **SSH Tunnel Requirement**: Clearly documented that SSH tunnel to Poplar API server is required for local development and testing. The tunnel forwards `localhost:8000` to the backend API.
