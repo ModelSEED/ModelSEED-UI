@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as modelseedApi from '@/lib/api/modelseed';
 
+const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : String(error);
+
 const token = process.env.PATRIC_TOKEN;
 
 const setupAuth = () => {
@@ -25,8 +28,8 @@ describe('ModelSEED API Integration Tests', () => {
 
         try {
             await modelseedApi.listUserModelsFromApi();
-        } catch (e: any) {
-            console.warn('ModelSEED API is unavailable, skipping tests:', e?.message || e);
+        } catch (e: unknown) {
+            console.warn('ModelSEED API is unavailable, skipping tests:', getErrorMessage(e));
             isApiAvailable = false;
         }
     });

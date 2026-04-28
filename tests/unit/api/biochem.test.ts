@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import * as biochemApi from '@/lib/api/biochem';
 
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 describe('Biochem API Integration Tests', () => {
   let isApiAvailable = true;
 
@@ -8,8 +11,8 @@ describe('Biochem API Integration Tests', () => {
     try {
       const res = await biochemApi.getReactions({ limit: 1 });
       expect(res.docs).toBeDefined();
-    } catch (e: any) {
-      console.warn('Biochem API is unavailable, skipping tests:', e?.message || e);
+    } catch (e: unknown) {
+      console.warn('Biochem API is unavailable, skipping tests:', getErrorMessage(e));
       isApiAvailable = false;
     }
   });

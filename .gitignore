@@ -13,7 +13,6 @@ lib/REVIEW_SUMMARY.md
 
 # dependencies
 /node_modules
-package-lock.json
 /.pnp
 .pnp.*
 .yarn/*
@@ -58,3 +57,15 @@ scripts/local/*.local.mjs
 next-env.d.ts
 test-results/
 playwright-report/
+
+# AI assistant/tooling metadata (keep local, do not track)
+.agent/
+.cursor/
+.gemini/
+.cursorrules
+AGENTS.md
+PROJECT_RULES.md
+CLAUDE.md
+CLAUDE.local.md
+.opencode/
+.gsd/.opencode/

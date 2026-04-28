@@ -26,12 +26,12 @@ export function getTestUser(): TestUser | null {
 }
 
 export const test = base.extend<{ authenticatedPage: Page }>({
-    authenticatedPage: async ({ page }, use) => {
+    authenticatedPage: async ({ page }, runFixture) => {
         const user = getTestUser();
 
         if (!user) {
             console.warn('⚠️ No PATRIC credentials available - authenticated tests will be skipped');
-            await use(page);
+            await runFixture(page);
             return;
         }
 
@@ -54,7 +54,7 @@ export const test = base.extend<{ authenticatedPage: Page }>({
 
         if (!token) {
             console.warn('⚠️ No PATRIC authentication available - authenticated tests will be skipped');
-            await use(page);
+            await runFixture(page);
             return;
         }
         
@@ -71,6 +71,6 @@ export const test = base.extend<{ authenticatedPage: Page }>({
             }));
         }, { token, username });
         
-        await use(page);
+        await runFixture(page);
     }
 });
