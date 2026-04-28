@@ -1,0 +1,247 @@
+'use client';
+
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import DownloadIcon from '@mui/icons-material/Download';
+import Link from 'next/link';
+import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { formatFormula } from '@/components/utils/formatFormula';
+import { GridHighlightText } from '@/components/GridHighlightText';
+import DataControlHeader from '@/components/layout/DataControlHeader';
+import { exportToCsv } from '@/lib/utils/exportCsv';
+
+/* ─── Alias / formatting helpers ─────────────────────────────── */
+
+function parseAliases(aliases?: string[]): React.ReactNode {
+    if (!aliases || aliases.length === 0) return 'N/A';
+
+    // First item is the "Name:" (synonyms) entry in compounds — exclude from aliases display
+    const aliasEntries = aliases.slice(1);
+    if (aliasEntries.length === 0) return 'N/A';
+
+    return (
+        <span style={{ display: 'inline-block', maxWidth: 300 }}>
+            {aliasEntries.map((entry, i) => {
+                const colonIdx = entry.indexOf(':');
+                if (colonIdx === -1) return <span key={i}>{entry}<br /></span>;
+
+                const prefix = entry.substring(0, colonIdx).trim();
+                const values = entry.substring(colonIdx + 1).split(';').map((v) => v.trim()).filter(Boolean);
+
+                let baseUrl = '';
+                if (prefix.includes('BiGG')) baseUrl = EXTERNAL_DBS.BiGG_c;
+                else if (prefix.includes('KEGG')) baseUrl = EXTERNAL_DBS.KEGG;
+                else if (prefix.includes('MetaCyc')) baseUrl = EXTERNAL_DBS.MetaCyc_c;
+
+                return (
+                    <span key={i}>
+                        <strong>{prefix}:</strong>{' '}
+                        {values.map((v, j) => (
+                            <span key={j}>
+                                {baseUrl ? (
+                                    <a href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer">{v}</a>
+                                ) : (
+                                    v
+                                )}
+                                {j < values.length - 1 ? '; ' : ''}
+                            </span>
+                        ))}
+                        <br />
+                    </span>
+                );
+            })}
+        </span>
+    );
+}
+
+function parseSynonyms(aliases?: string[]): string {
+    if (!aliases || aliases.length === 0) return 'N/A';
+    // For compounds, the Name entry is the FIRST alias
+    const first = aliases[0];
+    return first.replace('Name:', '').replace(/"/g, '');
+}
+
+/* ─── Columns ────────────────────────────────────────────────── */
+
+const columns: GridColDef<Compound>[] = [
+    {
+        field: 'id',
+        headerName: 'ID',
+        width: 120,
+        renderCell: (params) => (
+            <Link href={`/biochem/compounds/${params.value}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                <GridHighlightText text={params.value as string} />
+            </Link>
+        ),
+    },
+    {
+        field: 'name',
+        headerName: 'Name',
+        width: 220,
+        renderCell: (params) => <GridHighlightText text={params.value as string} />
+    },
+    {
+        field: 'formula',
+        headerName: 'Formula',
+        width: 140,
+        renderCell: (params) => formatFormula(params.value)
+    },
+    { field: 'mass', headerName: 'Mass', width: 100, type: 'number' },
+    { field: 'charge', headerName: 'Charge', width: 80, type: 'number' },
+    {
+        field: 'synonyms',
+        headerName: 'Synonyms',
+        width: 300,
+        sortable: false,
+        renderCell: (params) => <GridHighlightText text={parseSynonyms(params.row.aliases)} />,
+    },
+    {
+        field: 'aliases',
+        headerName: 'Aliases',
+        width: 320,
+        sortable: false,
+        renderCell: (params) => parseAliases(params.row.aliases),
+    },
+    {
+        field: 'ontology',
+        headerName: 'Ontology',
+        width: 200,
+        valueGetter: (_value, row) => {
+            if (!row.ontology || row.ontology === 'class:null|context:null') return 'N/A';
+            return row.ontology;
+        },
+    },
+];
+
+/* ─── Page Component ─────────────────────────────────────────── */
+
+export default function CompoundsPage() {
+    const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+        page: 0,
+        pageSize: 25,
+    });
+    const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
+    const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
+    const [search, setSearch] = useState('');
+
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
+        setSearch(newModel.quickFilterValues?.[0] ?? '');
+        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+    }, []);
+
+    const queryOpts = useMemo<SolrQueryOpts>(() => ({
+        limit: paginationModel.pageSize,
+        offset: paginationModel.page * paginationModel.pageSize,
+        sort: sortModel[0]
+            ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
+            : { field: 'id' },
+        filterModel,
+    }), [paginationModel, sortModel, filterModel]);
+
+    const { data, isFetching } = useQuery({
+        queryKey: ['compounds', queryOpts],
+        queryFn: () => getCompounds(queryOpts),
+        placeholderData: keepPreviousData,
+    });
+
+    const filteredDocs = useMemo(() => {
+        if (!search || !data?.docs) return data?.docs ?? [];
+        const q = search.toLowerCase();
+        return data.docs.filter((doc) =>
+            doc.id?.toLowerCase().includes(q) ||
+            doc.name?.toLowerCase().includes(q) ||
+            doc.formula?.toLowerCase().includes(q) ||
+            doc.aliases?.some((a) => a.toLowerCase().includes(q))
+        );
+    }, [data, search]);
+
+    const handleExportCsv = useCallback(() => {
+        const docs = search ? filteredDocs : (data?.docs ?? []);
+        if (docs.length === 0) return;
+
+        exportToCsv(docs.map((d) => ({
+            id: d.id,
+            name: d.name,
+            formula: d.formula,
+            mass: d.mass,
+            charge: d.charge,
+            deltag: d.deltag,
+            synonyms: parseSynonyms(d.aliases),
+            aliases: d.aliases?.slice(1).join('; ') || '',
+        })), {
+            filename: 'modelseed_compounds.csv',
+            columns: ['id', 'name', 'formula', 'mass', 'charge', 'deltag', 'synonyms', 'aliases'],
+            columnLabels: {
+                id: 'ID',
+                name: 'Name',
+                formula: 'Formula',
+                mass: 'Mass',
+                charge: 'Charge',
+                deltag: 'ΔG',
+                synonyms: 'Synonyms',
+                aliases: 'Aliases',
+            },
+        });
+    }, [data, search, filteredDocs]);
+
+    return (
+        <>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
+                <Typography variant="h5" fontWeight={600}>
+                    Compounds
+                </Typography>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleExportCsv}
+                    disabled={!data?.docs?.length}
+                >
+                    Export CSV
+                </Button>
+            </Box>
+
+            <DataGrid<Compound>
+                rows={search ? filteredDocs : (data?.docs ?? [])}
+                columns={columns}
+                rowCount={search ? filteredDocs.length : (data?.numFound ?? 0)}
+                loading={isFetching}
+                pageSizeOptions={[10, 25, 50, 100]}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                paginationMode={search ? 'client' : 'server'}
+                sortingMode={search ? 'client' : 'server'}
+                sortModel={sortModel}
+                onSortModelChange={setSortModel}
+                filterMode={search ? undefined : 'server'}
+                filterModel={{
+                    ...(search ? { items: [] } : filterModel),
+                    quickFilterValues: search ? [search] : [],
+                }}
+                onFilterModelChange={handleFilterModelChange}
+                showToolbar
+                slots={{ toolbar: DataControlHeader }}
+                slotProps={{
+                    toolbar: { showQuickFilter: true },
+                }}
+                getRowId={(row) => row.id}
+                getRowHeight={() => 'auto'}
+                disableRowSelectionOnClick
+                hideFooter
+                disableColumnMenu
+                sx={{
+                    border: '1px solid #e0e0e0',
+                    '& .MuiDataGrid-cell': {
+                        py: 1,
+                        alignItems: 'flex-start',
+                    },
+                }}
+                autoHeight
+            />
+        </>
+    );
+}
