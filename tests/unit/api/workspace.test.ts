@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as workspaceApi from '@/lib/api/workspace';
 
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 const token = process.env.PATRIC_TOKEN;
 
 const setupAuth = () => {
@@ -25,8 +28,8 @@ describe('Workspace API Integration Tests', () => {
 
     try {
       await workspaceApi.workspaceLs(['/seaver/']);
-    } catch (e: any) {
-      console.warn('Workspace API is unavailable, skipping tests:', e?.message || e);
+    } catch (e: unknown) {
+      console.warn('Workspace API is unavailable, skipping tests:', getErrorMessage(e));
       isApiAvailable = false;
     }
   });

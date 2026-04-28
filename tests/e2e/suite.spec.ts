@@ -11,7 +11,7 @@
  * - API server must be running (via SSH tunnel on port 8000)
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /* ============================================================================
  * TEST CONFIGURATION & UTILITIES
@@ -27,7 +27,7 @@ const PATRIC_TOKEN = process.env.PATRIC_TOKEN;
  * @param page - Playwright page object
  * @param token - PATRIC authentication token
  */
-async function authenticatePage(page: any, token: string): Promise<void> {
+async function authenticatePage(page: Page, token: string): Promise<void> {
   await page.addInitScript((t: string) => {
     window.localStorage.setItem('auth', JSON.stringify({
       user_id: 'seaver',
@@ -40,9 +40,6 @@ async function authenticatePage(page: any, token: string): Promise<void> {
 /**
  * Check if tests should run with authentication
  */
-const isAuthenticated = !!PATRIC_TOKEN;
-
-
 /* ============================================================================
  * SUITE 1: PUBLIC PAGES
  * Tests for pages that don't require authentication

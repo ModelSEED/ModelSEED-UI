@@ -2,11 +2,11 @@
  * Model path verification tests.
  * Tests that model data loads correctly via the API, and stub models show the warning.
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const TOKEN = process.env.PATRIC_TOKEN ?? "un=seaver|tokenid=D2E5BC0A-38FA-11F1-9F38-A4663B4BF60A|expiry=1807814535|client_id=seaver|token_type=Bearer|SigningSubject=https://rast.nmpdr.org/goauth/keys/E087E220-F8B1-11E3-9175-BD9D42A49C03|this_is_globus=globus_style_token|sig=12a496bfdf4bc9a32d1e22cd6f5ec785faef46e56945da687878e700dd5b7d0b655f92228f5307b554b65ea42f81698510a6a40f1f682834cb9d348312f923d1069b18570ad65c7cc31458222c1380cafa35fb9552b2b6bd357f29e81829919eea1706d9b1f5ec834542e442730799769f7de2c9a69beee86655e4be8281bd12";
 
-async function authenticate(page: any) {
+async function authenticate(page: Page) {
   await page.addInitScript((t: string) => {
     window.localStorage.setItem('auth', JSON.stringify({
       user_id: 'seaver', token: t, method: 'PATRIC',
