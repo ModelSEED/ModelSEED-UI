@@ -39,6 +39,17 @@ type BuildMetadata = {
     deployed: string;
 };
 
+function getBuildMetadataFromFile(): Partial<BuildMetadata> {
+    try {
+        const metadataPath = path.join(process.cwd(), '.build-metadata.json');
+        const raw = fs.readFileSync(metadataPath, 'utf8');
+        const parsed = JSON.parse(raw) as Partial<BuildMetadata>;
+        return parsed;
+    } catch {
+        return {};
+    }
+}
+
 function getPackageVersion(): string {
     try {
         const packagePath = path.join(process.cwd(), 'package.json');
@@ -74,10 +85,11 @@ function getDeployedTimestamp(): string {
 }
 
 function getBuildMetadata(): BuildMetadata {
+    const fromFile = getBuildMetadataFromFile();
     return {
-        version: getPackageVersion(),
-        commit: getCommitSha(),
-        deployed: getDeployedTimestamp(),
+        version: fromFile.version ?? getPackageVersion(),
+        commit: fromFile.commit ?? getCommitSha(),
+        deployed: fromFile.deployed ?? getDeployedTimestamp(),
     };
 }
 

@@ -11,6 +11,13 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Generate build metadata so commit/deploy values are available
+# without manual env setup after `docker build`.
+RUN COMMIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" && \
+    BUILD_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)" && \
+    APP_VERSION="$(node -p \"require('./package.json').version\" 2>/dev/null || echo unknown)" && \
+    printf '{\"version\":\"%s\",\"commit\":\"%s\",\"deployed\":\"%s\"}\n' "$APP_VERSION" "$COMMIT_SHA" "$BUILD_TS" > .build-metadata.json
+
 # Build the application
 RUN npm run build
 
@@ -30,11 +37,17 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.build-metadata.json ./.build-metadata.json
 
-# Create .env.local with basic config
-RUN echo 'NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000' > .env.local && \
-    echo 'NEXT_PUBLIC_USE_MODELSEED_API=true' >> .env.local && \
-    echo 'NEXT_PUBLIC_USE_NEW_PROXY=true' >> .env.local
+# Build arguments with defaults for local development
+ARG NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+ARG NEXT_PUBLIC_USE_MODELSEED_API=true
+ARG NEXT_PUBLIC_USE_NEW_PROXY=true
+
+# Create .env.local from build args (can be overridden at runtime)
+ENV NEXT_PUBLIC_MODELSEED_API_URL=${NEXT_PUBLIC_MODELSEED_API_URL}
+ENV NEXT_PUBLIC_USE_MODELSEED_API=${NEXT_PUBLIC_USE_MODELSEED_API}
+ENV NEXT_PUBLIC_USE_NEW_PROXY=${NEXT_PUBLIC_USE_NEW_PROXY}
 
 # Expose port
 EXPOSE 3000
