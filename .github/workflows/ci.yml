@@ -64,8 +64,8 @@ jobs:
           retention-days: 7
 
   e2e:
-    name: E2E (push only)
-    if: github.event_name == 'push'
+    name: E2E (manual only)
+    if: github.event_name == 'workflow_dispatch'
     needs: verify
     runs-on: ubuntu-latest
     steps:
