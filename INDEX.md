@@ -1,92 +1,39 @@
-# ModelSEED-UI Project Documentation Index
+# ModelSEED-UI Directory Index
 
-> **AI AGENT & DEVELOPER START HERE**
-> This file serves as the primary reference and context map. Read this *before* exploring the codebase. For AI agents: utilize the defined directories and files to narrow your search space rather than exhaustively traversing the repository.
+This file is the primary map of the repository. Use this to quickly locate relevant folders and configurations.
 
----
+## Root Configuration Files
 
-## AI Agent Context Protocol
+| File | Purpose |
+| :--- | :--- |
+| [README.md](./README.md) | Project overview, setup instructions, and primary context. |
+| [issues.md](./issues.md) | Current known bugs and backend limitations. |
+| [AGENTS.md](./AGENTS.md) | Active agent configurations and methodologies. |
+| [PROJECT_RULES.md](./PROJECT_RULES.md) | Project-specific rules and guidelines. |
+| [CHANGELOG.md](./CHANGELOG.md) | Record of version changes and feature additions. |
 
-When starting a new task, follow this exact sequence:
-1. **Understand Current State**: Read `.gsd/STATE.md` to know what was just completed and what is currently active.
-2. **Understand the Big Picture**: Read `.gsd/ROADMAP.md` (specifically the current and next phases).
-3. **Understand the Rules**: Read `PROJECT_RULES.md` and `.gemini/GEMINI.md`.
-4. **Locate Target Files**: Use the **One-Stop Search Map** below to find the files relevant to your task.
-5. **Read Subsystem Docs**: If working on a specific subsystem (Auth, Routing, Workspace), read its exact file in the `docs/` folder first.
-6. **Check Known Issues**: See [`issues.md`](./issues.md) for a curated list of known bugs, API limitations, and developer action items.
+## Subsystem Directories
 
----
+Each directory contains a specific domain of the application and has its own `README.md` file detailing its contents and architecture.
 
-## One-Stop Search Map (Quick-Find Table)
-
-| Target Domain | ...Start Here | Why? |
+| Directory | Purpose | Documentation |
 | :--- | :--- | :--- |
-| **System State / Next Tasks** | `.gsd/STATE.md` & `.gsd/ROADMAP.md` | Single source of truth for task progress and handoffs. |
-| **Known Issues & Bugs** | `issues.md` | Curated list of UI bugs, API limitations, and developer action items. |
-| **Testing Platform** | `tests/README.md` | Vitest, Playwright, and CI/CD configuration for automated testing. |
-| **Header / Main Navigation** | `components/layout/Header.tsx` | Global top navigation for home and docs. |
-| **Biochem / Tools Header** | `components/layout/AppHeader.tsx` | Secondary sub-header for all biological tool pages. |
-| **Model Data & Detail UI** | `app/model/[...path]/page.tsx` | Primary entry point for viewing metabolic models. |
-| **Chemical Formulas** | `components/ui/ChemicalEquation.tsx` | Core component formatting (e.g., `H2O` -> H₂O). |
-| **Colors/Theme/Styles** | `lib/theme.ts` | Complete MUI v7 design system (do not use raw CSS). |
-| **API Calls (Ref Data)** | `lib/api/biochem.ts` | Solr queries for public biochemical reference data. |
-| **API Calls (User Data)** | `lib/api/modelseed.ts` | `modelseed-api` client (Models, Jobs, Media). |
-| **Workspace API** | `lib/api/workspace.ts` | JSON-RPC & proxy requests for workspace resources. |
-| **Auth Logic & State** | `components/auth/AuthProvider.tsx` | Context/zustand logic handling tokens and sessions. |
+| `app/` | Next.js App Router UI, pages, and route logic. | [app/README.md](./app/README.md) |
+| `components/` | Reusable UI components (MUI v7), layouts, and auth wrappers. | [components/README.md](./components/README.md) |
+| `lib/` | API clients, configurations, theme definitions, and utility scripts. | [lib/README.md](./lib/README.md) |
+| `docs/` | Deep-dive technical manuals, architecture guidelines, and logic specs. | [docs/README.md](./docs/README.md) |
+| `types/` | Global TypeScript type declarations and interfaces. | [types/README.md](./types/README.md) |
+| `scripts/` | Standalone scripts for maintenance, cleanup, or data fetching. | [scripts/README.md](./scripts/README.md) |
+| `public/` | Static media, icons, and assets. | [public/README.md](./public/README.md) |
+| `tests/` | Playwright E2E and Vitest unit testing configurations and suites. | [tests/README.md](./tests/README.md) |
+| `test-data/` | Mock JSON responses and static structure definitions for tests. | [test-data/README.md](./test-data/README.md) |
+| `legacy/` | Externa or outdated dependencies, previous implementation phases, and legacy codebase artifacts. | [legacy/README.md](./legacy/README.md) |
 
----
+## State and Planning
 
-## Codebase Geography (Folder Matrix)
+| Directory | Purpose |
+| :--- | :--- |
+| `.gsd/` | Project roadmap, current state, and specific agent tasks. |
+| `.agent/` | Skills, workflows, and rules for AI agents. |
 
-### Core Logic (`lib/`) — [README](./lib/README.md)
-The "Brain". All external API communication and core app configuration lives here. Always encapsulate network calls in `lib/api/` instead of putting `fetch()` inside UI components.
-
-### UI & Routing (`app/`) — [README](./app/README.md)
-The Next.js 16 App Router. Everything here maps directly to a URL.
-- `(reference-data)/` — Public biological data (Biochem, Genomes).
-- `(user-data)/` — Protected views requiring Auth (My Models, My Jobs, My Media).
-- `model/[...path]/`, `fba/[...path]/`, `feature/[...path]/` — Catch-all URLs designed to perfectly match legacy system routes for backward compatibility.
-
-### Reusable UI (`components/`) — [README](./components/README.md)
-Stateless or purely presentational UI elements.
-- `auth/` — Login/Signup forms and guards.
-- `layout/` — Headers, Footers, and shell wrappers.
-- `ui/` — Generic components (e.g., Data Grids, Dialogs, Editors).
-
-### deep-dive documentation (`docs/`) — [README](./docs/README.md)
-Detailed subsystem manuals. 
-- See `docs/ARCHITECTURE.md` for tech stack details.
-- See `docs/ROUTING.md` for legacy vs modern URL parity algorithms.
-- See [`issues.md`](./issues.md) for known bugs and API limitations.
-
----
-
-## Legacy vs. Modern Parity Matrix
-
-**CRITICAL GSD RULE**: We maintain **100% URL parity** with the legacy AngularJS app. Existing bookmarks and publication citations *must not break*.
-
-| Feature | Legacy System (AngularJS) | Modern System (Next.js 16) |
-| :--- | :--- | :--- |
-| **Routing** | Client-side `ui-router` | Server-based App Router with `[...path]` |
-| **Auth** | KBase Session Cookie | Zustand `useAuth()` + LocalStorage Token |
-| **State** | `$scope` & `$rootScope` | React Query + Zustand |
-| **Network** | Manual `$http` wrappers | `lib/api/` + `@tanstack/react-query` |
-
-*For full transition rules, see [LEGACY_TRANSITION.md](./docs/LEGACY_TRANSITION.md).*
-
----
-
-## Developer & Agent Quick-Action Checklist
-
-> **When adding a new feature or migrating a legacy route:**
-> 1. **Identify Legacy URL**: Find the exact URL path used in the AngularJS app.
-> 2. **Create Catch-all**: Add a folder in `app/` using `[...path]` to handle arbitrary trailing paths (due to workspace encodings).
-> 3. **Use React Query**: Define your fetch logic in `lib/api/` and use `useQuery` inside your new `page.tsx`.
-> 4. **Style with MUI**: Import components from `@mui/material`. Check `lib/theme.ts` before adding custom hex colors.
-> 5. **Update Roadmap**: Check off your progress in `.gsd/STATE.md` and `.gsd/ROADMAP.md` before committing.
-> 6. **Document Issues**: If you encounter new bugs or API limitations, add them to `issues.md`.
-
-## Repository Information
-- **URL**: [https://github.com/VibhavSetlur/ModelSEED-UI](https://github.com/VibhavSetlur/ModelSEED-UI)
-- **Production Branch**: `master`
-- **Development Branch**: `develop`
+Please navigate to individual folder `README.md` files for deeper domain information.

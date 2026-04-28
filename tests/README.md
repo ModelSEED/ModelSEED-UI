@@ -147,14 +147,14 @@ npm run test:api
 
 ### What API Tests Verify
 
-- ✅ Authentication works (PATRIC and RAST tokens)
-- ✅ List user models
-- ✅ List workspace contents
-- ✅ Get model data
-- ✅ Get FBA results for models
-- ✅ Get gapfill results for models
-- ✅ Submit FBA jobs (via API, not tested here)
-- ✅ Public data access
+- Authentication works (PATRIC and RAST tokens)
+- List user models
+- List workspace contents
+- Get model data
+- Get FBA results for models
+- Get gapfill results for models
+- Submit FBA jobs (via API, not tested here)
+- Public data access
 
 ---
 

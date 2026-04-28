@@ -1,10 +1,8 @@
 # App Directory (Routing & Pages)
 
-This directory follows the **Next.js 16 App Router** convention. Folders with `page.tsx` represent routes.
+This directory follows the Next.js 16 App Router conventions. All application routes and pages are defined here.
 
-## Core Data Views (Legacy URL Parity)
-
-These folders use **Catch-all Routes (`[...path]`)** to capture deeply nested paths and prevent broken legacy links:
+## Route Map
 
 | Route Path | Data Type | Component |
 |------------|-----------|-----------|
@@ -16,28 +14,21 @@ These folders use **Catch-all Routes (`[...path]`)** to capture deeply nested pa
 | `/data` | Workspace File Browser | `app/data/[...path]/page.tsx` |
 | `/media` | Media Editor / Viewer | `app/media/[...path]/page.tsx` |
 
-> [!IMPORTANT]
-> **Parameter Naming**: For a folder named `[...path]`, the `params` prop in the page component MUST be accessed as `params.path`. Using any other name (like `slug`) will result in `undefined` errors.
+**Parameter Naming**: For a folder named `[...path]`, the `params` prop in the page component MUST be accessed as `params.path`.
 
-## Reference Data
+## Reference Data Routes
 
-- **`biochem/`**: Biochemistry library including Compounds and Reactions (Solr-indexed with robust Fallbacks).
-- **`genomes/`**: Public genome repository (KBase-linked).
+- **`biochem/`**: Biochemistry libraries (Compounds and Reactions).
+- **`genomes/`**: Public genome repository.
 - **`list-media/`**: Public media directory.
 
-## Authentication and User (Protected)
+## Authenticated User Routes
 
 - **`auth/`**: Login, signup, and session management.
-- **`my-models/`**: User-specific metabolic models (with inline Metadata editing).
-- **`plant/`**: Build model and analysis workflow (requires authentication).
+- **`my-models/`**: User-specific metabolic models.
+- **`plant/`**: Build model workflow.
 
-## Global Layout Components
+## Global Layouts
 
-- **`layout.tsx`**: Root layout (includes Headers, AuthProvider, and QueryClient).
-- **`page.tsx`**: The main landing page.
-
----
-*Follow the [GSD Methodology](../.gsd/ROADMAP.md) for development.*
-
-## Timestamp Log
-- Updated: 2026-03-31 16:00:00 CDT - Reached 100% functional parity with legacy ModelSEED. Added inline metadata editing mapping to REST Proxy, expanded FBA Advanced Options. Codebase is in a production-ready state with strict type checking and linting fully compliant.
+- **`layout.tsx`**: Root layout including Headers, AuthProvider, and QueryClient.
+- **`page.tsx`**: Main landing page.

@@ -1,8 +1,9 @@
 # Types Directory (`/types`)
 
-Shared TypeScript type definitions and interfaces.
+This directory contains shared TypeScript definitions and interfaces used across the ModelSEED-UI project.
 
-## Planned
-- API response types for ModelSEED backend
-- Domain models (compounds, reactions, models, media, etc.)
-- Component prop interfaces shared across multiple components
+## Directory Scope
+
+- **API Models:** Response types for backend requests and Data Object formats.
+- **Domain Interfaces:** Structures for biological components such as compounds, reactions, and models.
+- **Component Props:** Shared prop definitions for UI components across the application.

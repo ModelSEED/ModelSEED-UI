@@ -1,25 +1,17 @@
 # Scripts Directory (`/scripts`)
 
-This directory contains utility scripts for the ModelSEED-UI project. These scripts are typically used for local development, testing API connectivity, or performing maintenance tasks outside of the core application runtime.
+This directory contains standalone utility scripts for local development and backend testing.
 
-## Directory Structure
+## Overview
 
-| Folder/File | Description |
-|-----------|-------------|
-| `local/` | Directory for untracked, developer-specific local scripts. This directory is included in `.gitignore` to prevent committing experimental or temporary code to the repository. |
-| `test-poplar-api.mjs` | A Node.js script used to verify connectivity and endpoint functionality against the new `modelseed-api` backend (Poplar server). Used for integration smoke testing. |
+| Item | Description |
+|------|-------------|
+| `local/` | Developer-specific scripts (untracked). Useful for setup or experimental integration tasks. |
+| `test-poplar-api.mjs` | Node.js script ensuring connectivity and basic REST responses from the `modelseed-api` (Poplar). |
 
 ## Usage Guidelines
 
-1. **Local Development**: Any scripts created for temporary debugging, data parsing, or personal environment setup should be placed inside the `local/` subdirectory.
-2. **ESM Modules**: Scripts in this directory are typically written as ES Modules (using the `.mjs` extension) to support modern JavaScript imports natively in Node.js.
-3. **Execution**: Run scripts directly using Node.js from the repository root:
-   ```bash
-   node scripts/test-poplar-api.mjs
-   ```
-
-## Best Practices
-
-- Do not place production build scripts or core application logic in this directory.
-- Ensure that any script intended for shared use (e.g., database seeding, broad API testing) is committed to version control and documented here.
-- Remove obsolete or broken scripts to maintain a clean repository.
+- Execute scripts with `node scripts/<script-name>.mjs` from the repository root.
+- Keep core application logic outside of this directory.
+- Use the `.mjs` extension for ES Module support.
+- Commit shared maintenance scripts; isolate transient scripts to `local/`.

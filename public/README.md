@@ -1,25 +1,25 @@
 # Public Assets Directory (`/public`)
 
-This directory contains **Static Assets** that are served by the application.
+This directory stores static assets necessary for the ModelSEED-UI application.
 
-## 📁 Content Breakdown
+## Directory Structure
 
-| Folder/File | Description |
+| Location | Description |
 |-----------|-------------|
-| `img/` | **Imagery**: Logos, scientific diagrams, and UI icons. |
-| `data/` | **Static JSON**: Small, static reference files (e.g., icons, fonts). |
-| `favicon.ico` | **UI Detail**: The ModelSEED bookmark and browser tab icon. |
+| `img/` | Images, application logos, and scientific diagrams. |
+| `data/` | Static reference JSON files. |
+| `favicon.ico` | Application browser tab icon. |
 
-## 🧬 Scientific Imagery
-- **`ModelSEED-logo.png`**: The main purple/white project identity.
-- **`KBase-logo.png`**: The identity of the KBase platform that powers the backend.
-- **`about-biochem.png`**: Scientific visualization of metabolic networks for the About page.
+## Notable Assets
 
-## 🖼️ Usage in Code
-Assets in this folder are accessible via the root path `/` in your components. For example:
+- `ModelSEED-logo.png`: Primary platform identity.
+- `KBase-logo.png`: Backend provider identity.
+- `about-biochem.png`: Educational diagram for the About page.
+
+## Asset Resolution
+
+Files residing here are hosted at the URL root `/`. When referencing inside Next.js components, format paths relative to root:
+
 ```tsx
-<Image src="/img/ModelSEED-logo.png" alt="Logo" width={174} height={44} />
+<Image src="/img/ModelSEED-logo.png" alt="ModelSEED Logo" width={174} height={44} />
 ```
-
---- 
-*Last Updated: 2026-03-11*
