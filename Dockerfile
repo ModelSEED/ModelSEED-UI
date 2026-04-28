@@ -18,6 +18,11 @@ RUN COMMIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" && \
     APP_VERSION="$(node -p \"require('./package.json').version\" 2>/dev/null || echo unknown)" && \
     printf '{\"version\":\"%s\",\"commit\":\"%s\",\"deployed\":\"%s\"}\n' "$APP_VERSION" "$COMMIT_SHA" "$BUILD_TS" > .build-metadata.json
 
+# Tell Docker to expect these variables during the build
+ARG NEXT_PUBLIC_MODELSEED_API_URL
+ARG NEXT_PUBLIC_USE_MODELSEED_API
+ARG NEXT_PUBLIC_USE_NEW_PROXY
+
 # Build the application
 RUN npm run build
 
@@ -38,16 +43,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/.build-metadata.json ./.build-metadata.json
-
-# Build arguments with defaults for local development
-ARG NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
-ARG NEXT_PUBLIC_USE_MODELSEED_API=true
-ARG NEXT_PUBLIC_USE_NEW_PROXY=true
-
-# Create .env.local from build args (can be overridden at runtime)
-ENV NEXT_PUBLIC_MODELSEED_API_URL=${NEXT_PUBLIC_MODELSEED_API_URL}
-ENV NEXT_PUBLIC_USE_MODELSEED_API=${NEXT_PUBLIC_USE_MODELSEED_API}
-ENV NEXT_PUBLIC_USE_NEW_PROXY=${NEXT_PUBLIC_USE_NEW_PROXY}
 
 # Expose port
 EXPOSE 3000
