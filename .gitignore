@@ -67,3 +67,5 @@ AGENTS.md
 PROJECT_RULES.md
 CLAUDE.md
 CLAUDE.local.md
+.opencode/
+.gsd/.opencode/
