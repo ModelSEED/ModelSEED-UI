@@ -62,18 +62,19 @@ function getPackageVersion(): string {
 }
 
 function getCommitSha(): string {
+    try {
+        return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    } catch {
+        // Fall back to environment variables when git metadata is unavailable.
+    }
+
     const envCommit =
         process.env.NEXT_PUBLIC_GIT_COMMIT
         ?? process.env.GIT_COMMIT
         ?? process.env.VERCEL_GIT_COMMIT_SHA
         ?? process.env.GITHUB_SHA;
     if (envCommit) return envCommit.slice(0, 7);
-
-    try {
-        return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    } catch {
-        return 'unknown';
-    }
+    return 'unknown';
 }
 
 function getDeployedTimestamp(): string {

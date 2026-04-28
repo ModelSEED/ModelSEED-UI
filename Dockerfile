@@ -11,10 +11,17 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Optional manual overrides. Auto-detected git metadata takes precedence when available.
+ARG BUILD_COMMIT=unknown
+ARG BUILD_DATE=unknown
+
 # Generate build metadata so commit/deploy values are available
 # without manual env setup after `docker build`.
-RUN COMMIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" && \
-    BUILD_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)" && \
+RUN COMMIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || true)" && \
+    if [ -z "$COMMIT_SHA" ]; then COMMIT_SHA="$BUILD_COMMIT"; fi && \
+    if [ -z "$COMMIT_SHA" ]; then COMMIT_SHA="unknown"; fi && \
+    BUILD_TS="$BUILD_DATE" && \
+    if [ -z "$BUILD_TS" ] || [ "$BUILD_TS" = "unknown" ]; then BUILD_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"; fi && \
     APP_VERSION="$(node -p \"require('./package.json').version\" 2>/dev/null || echo unknown)" && \
     printf '{\"version\":\"%s\",\"commit\":\"%s\",\"deployed\":\"%s\"}\n' "$APP_VERSION" "$COMMIT_SHA" "$BUILD_TS" > .build-metadata.json
 
