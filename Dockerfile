@@ -11,6 +11,11 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Tell Docker to expect these variables during the build
+ARG NEXT_PUBLIC_MODELSEED_API_URL
+ARG NEXT_PUBLIC_USE_MODELSEED_API
+ARG NEXT_PUBLIC_USE_NEW_PROXY
+
 # Build the application
 RUN npm run build
 
@@ -30,11 +35,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-# Create .env.local with basic config
-RUN echo 'NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000' > .env.local && \
-    echo 'NEXT_PUBLIC_USE_MODELSEED_API=true' >> .env.local && \
-    echo 'NEXT_PUBLIC_USE_NEW_PROXY=true' >> .env.local
 
 # Expose port
 EXPOSE 3000
