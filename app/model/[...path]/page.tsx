@@ -59,6 +59,7 @@ import DataControlHeader from '@/components/layout/DataControlHeader';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import { formatFormula } from '@/components/utils/formatFormula';
 import AddReactionsDialog from '@/components/ui/AddReactionsDialog';
+import CopyModelModal from '@/components/ui/CopyModelModal';
 
 type TabKey =
     | 'overview'
@@ -1482,6 +1483,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [reactionsToAdd, setReactionsToAdd] = useState<{ id: string; name: string; equation?: string; direction?: string }[]>([]);
     const [selectedReactionsToRemove, setSelectedReactionsToRemove] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set<string>() });
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
+    const [copyModalOpen, setCopyModalOpen] = useState(false);
     const lastTrackedStatusesRef = useRef(new Map<string, string | undefined>());
 
     // Hooks that must be before early returns
@@ -2061,13 +2063,23 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
                 <OrganismLinksCard model={modelObject} />
-                <Box sx={{ mt: 1 }}>
+                <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
                     <DownloadModelMenu
                         modelRef={workspaceCandidates[0]}
                         modelId={modelName}
                         buttonLabel="Download options"
                         helperText="Export this model as SBML, JSON, or TSV."
                     />
+                    {isPlantModel && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => setCopyModalOpen(true)}
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Copy to My Models
+                        </Button>
+                    )}
                 </Box>
             </Box>
 
@@ -2101,7 +2113,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         },
                     }}
                 >
-                    {MODEL_TABS.map((tab, index) => (
+                    {MODEL_TABS.filter(tab => !(isPlantModel && tab.key === 'edits')).map((tab, index) => (
                         <Tab key={tab.key} label={tab.label} {...a11yProps(index)} />
                     ))}
                 </Tabs>
@@ -2153,7 +2165,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 </Box>
             )}
 
-            {MODEL_TABS.map((tab, index) => (
+            {MODEL_TABS.filter(tab => !(isPlantModel && tab.key === 'edits')).map((tab, index) => (
                 <TabPanel key={tab.key} value={tabIndex} index={index}>
                     {tab.key === 'overview' ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -2551,6 +2563,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     </Box>
                 </Box>
             </Drawer>
+
+            <CopyModelModal
+                open={copyModalOpen}
+                onClose={() => setCopyModalOpen(false)}
+                sourcePath={workspaceCandidates[0]}
+                modelName={modelName}
+            />
         </Box>
     );
 }

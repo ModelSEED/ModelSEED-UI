@@ -37,6 +37,7 @@ import {
 import { useAuth } from '@/components/auth/AuthProvider';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DeleteModelModal from '@/components/ui/DeleteModelModal';
+import CopyModelModal from '@/components/ui/CopyModelModal';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import {
     isActiveJobStatus,
@@ -110,6 +111,8 @@ export default function MyModelsPage() {
     const [mergeMessage, setMergeMessage] = useState<string | null>(null);
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const [jobActionError, setJobActionError] = useState<string | null>(null);
+    const [copyModalOpen, setCopyModalOpen] = useState(false);
+    const [modelToCopy, setModelToCopy] = useState<{ path: string; name: string } | null>(null);
     const [jobSyncNotice, setJobSyncNotice] = useState<string | null>(null);
     const lastTrackedJobStatusesRef = useRef(new Map<string, string | undefined>());
     const modelSyncAttemptRef = useRef(new Map<string, number>());
@@ -444,14 +447,19 @@ export default function MyModelsPage() {
         {
             field: 'id',
             headerName: 'Model ID',
-            width: 250,
+            width: 280,
             renderCell: (params) => (
-                <Link
-                    href={`/model${params.row.path}`}
-                    style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
-                >
-                    {params.value}
-                </Link>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Link
+                        href={`/model${params.row.path}`}
+                        style={{ color: '#00acc1', textDecoration: 'none', fontWeight: 500 }}
+                    >
+                        {params.value}
+                    </Link>
+                    {params.row.path.includes('/plantseed/') && (
+                        <Chip size="small" label="PlantSEED" sx={{ fontSize: '0.7rem', height: 20 }} color="success" variant="outlined" />
+                    )}
+                </Box>
             )
         },
         {
@@ -516,18 +524,33 @@ export default function MyModelsPage() {
         {
             field: 'commands',
             headerName: 'Commands',
-            width: 170,
+            width: 220,
             sortable: false,
             filterable: false,
             disableColumnMenu: true,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <DownloadModelMenu modelRef={params.row.path} modelId={params.row.id} />
-                    <DeleteModelModal
-                        modelRef={params.row.path}
-                        modelId={params.row.id}
-                        onDeleted={handleModelDeleted}
-                    />
+                    {params.row.path.includes('/plantseed/') ? (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => {
+                                setModelToCopy({ path: params.row.path, name: params.row.id });
+                                setCopyModalOpen(true);
+                            }}
+                            sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                        >
+                            Copy
+                        </Button>
+                    ) : (
+                        <DeleteModelModal
+                            modelRef={params.row.path}
+                            modelId={params.row.id}
+                            onDeleted={handleModelDeleted}
+                        />
+                    )}
                 </Box>
             ),
         },
@@ -817,6 +840,16 @@ export default function MyModelsPage() {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                <CopyModelModal
+                    open={copyModalOpen}
+                    onClose={() => {
+                        setCopyModalOpen(false);
+                        setModelToCopy(null);
+                    }}
+                    sourcePath={modelToCopy?.path ?? ''}
+                    modelName={modelToCopy?.name ?? ''}
+                />
             </Box>
         </AuthGuard>
     );
