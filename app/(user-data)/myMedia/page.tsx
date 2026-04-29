@@ -19,6 +19,7 @@ import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
 import { workspaceDelete } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import ExportModal from '@/components/ui/ExportModal';
 
 interface MyMediaItem {
     id: string;
@@ -52,6 +53,7 @@ export default function MyMediaPage() {
     const [deleteTarget, setDeleteTarget] = useState<MyMediaItem | null>(null);
     const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
     const [isDeletingMedia, setIsDeletingMedia] = useState(false);
+    const [exportModalOpen, setExportModalOpen] = useState(false);
     const { isAuthenticated, user } = useAuth();
 
     const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -194,10 +196,19 @@ export default function MyMediaPage() {
         },
     ], [exportingMediaId, isDeletingMedia, goToMediaPath]);
 
+    const exportColumns = useMemo(() => [
+        { field: 'id', headerName: 'Media ID', defaultSelected: true },
+        { field: 'name', headerName: 'Name', defaultSelected: true },
+        { field: 'type', headerName: 'Type', defaultSelected: true },
+        { field: 'isMinimal', headerName: 'Minimal?', defaultSelected: false },
+        { field: 'isDefined', headerName: 'Defined?', defaultSelected: false },
+        { field: 'modDate', headerName: 'Modification Date', defaultSelected: true },
+    ], []);
+
     return (
         <AuthGuard>
             <Box sx={{ maxWidth: '1400px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Button
                         variant="contained"
                         color="primary"
@@ -208,6 +219,14 @@ export default function MyMediaPage() {
                         sx={{ textTransform: 'none', fontWeight: 600 }}
                     >
                         Create New Media
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setExportModalOpen(true)}
+                        disabled={!rows || rows.length === 0}
+                    >
+                        Export CSV
                     </Button>
                 </Box>
 
@@ -298,6 +317,23 @@ export default function MyMediaPage() {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                <ExportModal
+                    open={exportModalOpen}
+                    onClose={() => setExportModalOpen(false)}
+                    columns={exportColumns}
+                    currentData={rows}
+                    totalRows={rows.length}
+                    filename="modelseed_my_media.csv"
+                    columnLabels={{
+                        id: 'Media ID',
+                        name: 'Name',
+                        type: 'Type',
+                        isMinimal: 'Minimal?',
+                        isDefined: 'Defined?',
+                        modDate: 'Modification Date',
+                    }}
+                />
             </Box>
         </AuthGuard>
     );

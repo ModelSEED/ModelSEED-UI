@@ -8,6 +8,7 @@ import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -24,6 +25,7 @@ import { listTrackedJobs, TrackedJob } from '@/lib/api/jobTracker';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import ExportModal from '@/components/ui/ExportModal';
 
 /* ---------- types ---------- */
 
@@ -179,6 +181,8 @@ function MyJobsContent() {
     // Track job status history for stuck detection
     const statusHistoryRef = useRef<Map<string, JobStatusHistory>>(new Map());
 
+    const [exportModalOpen, setExportModalOpen] = useState(false);
+
     const { data: jobRows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myJobs'],
         queryFn: async () => {
@@ -318,11 +322,31 @@ function MyJobsContent() {
         },
     ], [handleRefreshJob]);
 
+    const exportColumns = useMemo(() => [
+        { field: 'id', headerName: 'Job ID', defaultSelected: true },
+        { field: 'task', headerName: 'Task', defaultSelected: true },
+        { field: 'params', headerName: 'Parameters', defaultSelected: false },
+        { field: 'submitted', headerName: 'Submitted', defaultSelected: true },
+        { field: 'started', headerName: 'Started', defaultSelected: false },
+        { field: 'status', headerName: 'Status', defaultSelected: true },
+        { field: 'app', headerName: 'App', defaultSelected: false },
+    ], []);
+
     return (
         <>
-            <Typography variant="h5" fontWeight={600} gutterBottom>
-                Job Status
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5" fontWeight={600}>
+                    Job Status
+                </Typography>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setExportModalOpen(true)}
+                    disabled={!jobRows || jobRows.length === 0}
+                >
+                    Export CSV
+                </Button>
+            </Box>
 
             {/* Status count cards */}
             <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
@@ -401,6 +425,24 @@ function MyJobsContent() {
                     No jobs found. Submit an FBA, Gapfill, or Reconstruction job to see it here.
                 </Typography>
             )}
+
+            <ExportModal
+                open={exportModalOpen}
+                onClose={() => setExportModalOpen(false)}
+                columns={exportColumns}
+                currentData={jobRows}
+                totalRows={jobRows.length}
+                filename="modelseed_jobs.csv"
+                columnLabels={{
+                    id: 'Job ID',
+                    task: 'Task',
+                    params: 'Parameters',
+                    submitted: 'Submitted',
+                    started: 'Started',
+                    status: 'Status',
+                    app: 'App',
+                }}
+            />
         </>
     );
 }

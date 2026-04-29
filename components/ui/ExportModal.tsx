@@ -29,8 +29,8 @@ interface ExportModalProps {
     open: boolean;
     onClose: () => void;
     columns: ExportColumnConfig[];
-    currentData: Record<string, unknown>[];
-    allDataFetcher?: () => Promise<Record<string, unknown>[]>;
+    currentData: unknown[];
+    allDataFetcher?: () => Promise<unknown[]>;
     totalRows: number;
     filename: string;
     columnLabels?: Record<string, string>;
@@ -87,10 +87,11 @@ export default function ExportModal({
         setError(null);
 
         try {
-            let dataToExport = currentData;
+            let dataToExport: Record<string, unknown>[] = (currentData as Record<string, unknown>[]);
 
             if (exportScope === 'all' && allDataFetcher) {
-                dataToExport = await allDataFetcher();
+                const fetched = await allDataFetcher();
+                dataToExport = fetched as Record<string, unknown>[];
             }
 
             if (dataToExport.length === 0) {
