@@ -57,7 +57,7 @@ function formatChemicalText(text: string): React.ReactNode[] {
             <Link
                 key={`cpd-${match.index}-${match[1]}`}
                 href={`/biochem/compounds/${match[1]}`}
-                style={{ color: '#1976d2', textDecoration: 'none' }}
+                style={{ color: '#00acc1', textDecoration: 'none' }}
             >
                 {match[1]}
             </Link>
