@@ -19,9 +19,14 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium-staging',
-      use: { ...devices['Desktop Chrome'], baseURL: 'https://staging.modelseed.org', headless: true },
+      name: 'chromium-local',
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000', headless: true },
     },
   ],
-  webServer: undefined,
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 120000,
+  },
 });

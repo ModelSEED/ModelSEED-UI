@@ -8,7 +8,7 @@ test.describe('Compounds Page - Search & Display', () => {
 
     test('should search across all compound fields', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Search"]').first();
-        await searchInput.fill('glucose');
+        await searchInput.fill('cpd');
         await page.waitForTimeout(3000);
 
         const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
@@ -19,6 +19,20 @@ test.describe('Compounds Page - Search & Display', () => {
     test('should open export modal with column selection', async ({ page }) => {
         const exportButton = page.locator('button:has-text("Export CSV")');
         await expect(exportButton).toBeVisible();
+        await exportButton.click();
+
+        const modal = page.locator('[role="dialog"]');
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        await page.locator('button:has-text("Cancel")').click();
+    });
+
+    test('export modal should show active search filter', async ({ page }) => {
+        const searchInput = page.locator('input[placeholder*="Search"]').first();
+        await searchInput.fill('cpd');
+        await page.waitForTimeout(2000);
+
+        const exportButton = page.locator('button:has-text("Export CSV")');
         await exportButton.click();
 
         const modal = page.locator('[role="dialog"]');
