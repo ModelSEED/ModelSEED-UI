@@ -8,6 +8,7 @@ import {
     gridPageSelector,
     gridPageSizeSelector,
     gridRowCountSelector,
+    gridFilterModelSelector,
     type GridColDef,
     type GridFilterItem,
     type GridFilterModel,
@@ -141,6 +142,8 @@ function ToolbarFilterEditor() {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [rows, setRows] = useState<ToolbarFilterRow[]>([makeEmptyFilterRow()]);
     const [allColumns, setAllColumns] = useState<GridColDef[]>([]);
+    const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
+    const quickFilterValue = filterModel?.quickFilterValues?.join(' ') ?? '';
 
     const open = Boolean(anchorEl);
 
@@ -241,10 +244,14 @@ function ToolbarFilterEditor() {
         applyRowsToGrid(normalized);
     };
 
+    const filterButtonLabel = quickFilterValue
+        ? `Filters (all) '${quickFilterValue}'`
+        : 'Filters';
+
     return (
         <>
             <Button variant="text" size="small" onClick={openEditor}>
-                Filters
+                {filterButtonLabel}
             </Button>
             <Popover
                 open={open}
