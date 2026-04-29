@@ -18,6 +18,7 @@ import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import { exportToCsv } from '@/lib/utils/exportCsv';
 import ExportModal from '@/components/ui/ExportModal';
+import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -234,7 +235,11 @@ export default function ReactionsPage() {
             headerName: 'Equation',
             width: 350,
             sortable: false,
-            renderCell: (params) => <ChemicalEquation equation={params.value} />,
+            renderCell: (params) => (
+                <TruncatedWithTooltip text={params.value} maxWidth={330}>
+                    <ChemicalEquation equation={params.value} />
+                </TruncatedWithTooltip>
+            ),
         },
         {
             field: 'is_transport',
@@ -289,7 +294,11 @@ export default function ReactionsPage() {
             headerName: 'Synonyms',
             width: 280,
             sortable: false,
-            renderCell: (params) => <SynonymsCell synonyms={parseSynonyms(params.row.aliases)} />,
+            renderCell: (params) => (
+                <TruncatedWithTooltip text={parseSynonyms(params.row.aliases).join('; ')}>
+                    <SynonymsCell synonyms={parseSynonyms(params.row.aliases)} />
+                </TruncatedWithTooltip>
+            ),
         },
         {
             field: 'aliases',
