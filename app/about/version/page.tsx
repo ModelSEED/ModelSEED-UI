@@ -74,7 +74,10 @@ export default async function VersionPage() {
     const metadata = getBuildMetadata();
 
     // Fix: legacy changelog missing spaces after hashes (e.g., ####v2.6.1)
-    const changelog = rawChangelog.replace(/^(#+)(?![\s#])/gm, '$1 ');
+    // and inject env-driven current version token.
+    const changelog = rawChangelog
+        .replace(/^(#+)(?![\s#])/gm, '$1 ')
+        .replace(/\{\{VERSION\}\}/g, metadata.version);
 
     return (
         <Box>
