@@ -10,7 +10,6 @@
 import React from 'react';
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
@@ -39,17 +38,6 @@ type BuildMetadata = {
     deployed: string;
 };
 
-function getBuildMetadataFromFile(): Partial<BuildMetadata> {
-    try {
-        const metadataPath = path.join(process.cwd(), '.build-metadata.json');
-        const raw = fs.readFileSync(metadataPath, 'utf8');
-        const parsed = JSON.parse(raw) as Partial<BuildMetadata>;
-        return parsed;
-    } catch {
-        return {};
-    }
-}
-
 function getPackageVersion(): string {
     try {
         const packagePath = path.join(process.cwd(), 'package.json');
@@ -62,12 +50,6 @@ function getPackageVersion(): string {
 }
 
 function getCommitSha(): string {
-    try {
-        return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    } catch {
-        // Fall back to environment variables when git metadata is unavailable.
-    }
-
     const envCommit =
         process.env.NEXT_PUBLIC_GIT_COMMIT
         ?? process.env.GIT_COMMIT
@@ -86,11 +68,10 @@ function getDeployedTimestamp(): string {
 }
 
 function getBuildMetadata(): BuildMetadata {
-    const fromFile = getBuildMetadataFromFile();
     return {
-        version: fromFile.version ?? getPackageVersion(),
-        commit: fromFile.commit ?? getCommitSha(),
-        deployed: fromFile.deployed ?? getDeployedTimestamp(),
+        version: getPackageVersion(),
+        commit: getCommitSha(),
+        deployed: getDeployedTimestamp(),
     };
 }
 
