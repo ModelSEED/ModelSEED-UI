@@ -16,7 +16,6 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
-import { exportToCsv } from '@/lib/utils/exportCsv';
 import ExportModal from '@/components/ui/ExportModal';
 import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
@@ -147,11 +146,15 @@ export default function ReactionsPage() {
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
-    const [search, setSearch] = useState('');
 
     const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
-        setSearch(newModel.quickFilterValues?.[0] ?? '');
-        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        setFilterModel({
+            items: newModel.items ?? [],
+            logicOperator: newModel.logicOperator,
+            quickFilterValues: newModel.quickFilterValues ?? [],
+            quickFilterLogicOperator: newModel.quickFilterLogicOperator,
+        });
     }, []);
 
     // Modal state
@@ -340,16 +343,6 @@ export default function ReactionsPage() {
         placeholderData: keepPreviousData,
     });
 
-    const filteredDocs = useMemo(() => {
-        if (!search || !data?.docs) return data?.docs ?? [];
-        const q = search.toLowerCase();
-        return data.docs.filter((doc) => {
-            // Search all string/number fields in the row
-            const searchable = JSON.stringify(doc).toLowerCase();
-            return searchable.includes(q);
-        });
-    }, [data, search]);
-
     return (
         <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
@@ -368,28 +361,22 @@ export default function ReactionsPage() {
             </Box>
 
             <DataGrid<Reaction>
-                rows={search ? filteredDocs : (data?.docs ?? [])}
+                rows={data?.docs ?? []}
                 columns={columns}
-                rowCount={!search ? (data?.numFound ?? 0) : undefined}
+                rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                paginationMode={search ? 'client' : 'server'}
-                sortingMode={search ? 'client' : 'server'}
+                paginationMode="server"
+                sortingMode="server"
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
-                filterMode={search ? undefined : 'server'}
-                filterModel={{
-                    ...(search ? { items: [] } : filterModel),
-                    quickFilterValues: search ? [search] : [],
-                }}
+                filterMode="server"
+                filterModel={filterModel}
                 onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
-                slotProps={{
-                    toolbar: { showQuickFilter: true },
-                }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
@@ -415,8 +402,8 @@ export default function ReactionsPage() {
                 open={exportModalOpen}
                 onClose={() => setExportModalOpen(false)}
                 columns={exportColumns}
-                currentData={search ? filteredDocs as unknown as Record<string, unknown>[] : (data?.docs as unknown as Record<string, unknown>[] ?? [])}
-                allDataFetcher={!search ? fetchAllRows : undefined}
+                currentData={data?.docs as unknown as Record<string, unknown>[] ?? []}
+                allDataFetcher={fetchAllRows}
                 totalRows={data?.numFound ?? 0}
                 filename="modelseed_reactions.csv"
                 columnLabels={{
@@ -430,7 +417,7 @@ export default function ReactionsPage() {
                     pathways: 'Pathways',
                     is_transport: 'Transport',
                 }}
-                activeSearch={search || undefined}
+                activeSearch={filterModel.quickFilterValues?.join(' ') || undefined}
                 activeFilter={filterModel.items.length > 0 ? `${filterModel.items.length} column filter(s)` : undefined}
             />
         </>
