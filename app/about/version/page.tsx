@@ -36,18 +36,10 @@ type BuildMetadata = {
     version: string;
     commit: string;
     branch: string;
-    deployed: string | null;
 };
 
-function getPackageVersion(): string {
-    try {
-        const packagePath = path.join(process.cwd(), 'package.json');
-        const pkgRaw = fs.readFileSync(packagePath, 'utf8');
-        const pkg = JSON.parse(pkgRaw) as { version?: string };
-        return pkg.version ?? 'unknown';
-    } catch {
-        return 'unknown';
-    }
+function getVersion(): string {
+    return process.env.NEXT_PUBLIC_GIT_VERSION ?? 'unknown';
 }
 
 function getCommitSha(): string {
@@ -64,24 +56,11 @@ function getBranchName(): string {
     return process.env.NEXT_PUBLIC_GIT_BRANCH ?? process.env.GIT_BRANCH ?? 'unknown';
 }
 
-function getDeployedTimestamp(): string {
-    const raw =
-        process.env.NEXT_PUBLIC_GIT_DEPLOYED
-        ?? process.env.NEXT_PUBLIC_BUILD_DATE
-        ?? process.env.BUILD_DATE;
-    if (!raw) return '';
-
-    const parsed = new Date(raw);
-    return Number.isNaN(parsed.getTime()) ? raw : parsed.toISOString();
-}
-
 function getBuildMetadata(): BuildMetadata {
-    const deployed = getDeployedTimestamp();
     return {
-        version: getPackageVersion(),
+        version: getVersion(),
         branch: getBranchName(),
         commit: getCommitSha(),
-        deployed: deployed || null,
     };
 }
 
@@ -112,8 +91,7 @@ export default async function VersionPage() {
                             https://github.com/ModelSEED/ModelSEED-UI
                         </Link><br />
                         Branch: {metadata.branch}<br />
-                        Commit: {metadata.commit}<br />
-                        {metadata.deployed ? <>Deployed: {metadata.deployed}</> : null}
+                        Commit: {metadata.commit}
                     </Typography>
                 </Box>
                 <Box>
