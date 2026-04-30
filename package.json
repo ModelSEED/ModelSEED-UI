@@ -3,8 +3,11 @@
   "version": "3.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/sync-version-from-env.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-version-from-env.mjs",
     "build": "next build",
+    "prestart": "node scripts/sync-version-from-env.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
