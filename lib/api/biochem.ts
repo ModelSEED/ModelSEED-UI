@@ -101,6 +101,172 @@ export const EXTERNAL_DBS = {
 
 /* ─── Query Builder ──────────────────────────────────────────── */
 
+/** Operators that do not require a filter value payload. */
+const NO_VALUE_OPERATORS = new Set(['isEmpty', 'isNotEmpty']);
+
+/** Numeric literal matcher used to keep number filters/ranges unquoted. */
+const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
+
+/**
+ * Escape user terms for Solr/Lucene query syntax while preserving text,
+ * punctuation, and biochemical identifiers.
+ */
+function escapeSolrTerm(value: string): string {
+    let escaped = value.trim().replace(/\\/g, '\\\\');
+    escaped = escaped.replace(/&&/g, '\\&&').replace(/\|\|/g, '\\||');
+    escaped = escaped.replace(/([+\-!(){}\[\]^"~*?:/|])/g, '\\$1');
+    return escaped;
+}
+
+/** Escape string values for quoted Solr phrases. */
+function escapeSolrPhrase(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/** Maps UI field aliases to Solr field names. */
+function toSolrField(field: string): string {
+    return field === 'synonyms' ? SYNONYM_FIELD_ALIAS : field;
+}
+
+/** Convert any scalar filter value to string safely. */
+function normalizeFilterValue(value: unknown): string {
+    if (value instanceof Date) return value.toISOString();
+    if (typeof value === 'boolean') return value ? 'true' : 'false';
+    return String(value ?? '').trim();
+}
+
+/** Build a wildcard-safe search token. */
+function toWildcardToken(value: string): string {
+    return escapeSolrTerm(value.replace(/%20/g, ' ').trim()).replace(/\s+/g, '*');
+}
+
+/** Build a Solr exact literal (quoted or native for booleans/numbers). */
+function toSolrLiteral(value: string): string {
+    if (NUMERIC_LITERAL_RE.test(value)) return value;
+    if (/^(true|false)$/i.test(value)) return value.toLowerCase();
+    return `"${escapeSolrPhrase(value)}"`;
+}
+
+/** Build a Solr range boundary for numeric/date/text comparisons. */
+function toRangeBoundary(value: string): string {
+    if (NUMERIC_LITERAL_RE.test(value)) return value;
+
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) {
+        return `"${date.toISOString()}"`;
+    }
+
+    return `"${escapeSolrPhrase(value)}"`;
+}
+
+/** Build a single Solr clause from one DataGrid filter item. */
+function buildFilterClause(item: GridFilterItem): string | null {
+    const field = toSolrField(item.field);
+    const operator = String(item.operator ?? '').trim();
+    const rawValue = item.value;
+    const needsValue = !NO_VALUE_OPERATORS.has(operator);
+
+    if (!field || !operator) return null;
+    if (needsValue) {
+        if (rawValue == null) return null;
+        if (Array.isArray(rawValue) && rawValue.length === 0) return null;
+        if (!Array.isArray(rawValue) && normalizeFilterValue(rawValue).length === 0) return null;
+    }
+
+    const value = normalizeFilterValue(rawValue);
+    const wildcardValue = toWildcardToken(value);
+    const literalValue = toSolrLiteral(value);
+    const rangeBoundary = toRangeBoundary(value);
+
+    switch (operator) {
+        case '>':
+        case 'after':
+            return `${field}:{${rangeBoundary} TO *]`;
+        case '>=':
+        case 'onOrAfter':
+            return `${field}:[${rangeBoundary} TO *]`;
+        case '<':
+        case 'before':
+            return `${field}:[* TO ${rangeBoundary}}`;
+        case '<=':
+        case 'onOrBefore':
+            return `${field}:[* TO ${rangeBoundary}]`;
+        case 'isEmpty':
+            return `-${field}:[* TO *]`;
+        case 'isNotEmpty':
+            return `${field}:[* TO *]`;
+        case '=':
+        case 'equals':
+        case 'is':
+            return `${field}:${literalValue}`;
+        case '!=':
+        case 'not':
+        case 'doesNotEqual':
+            return `-${field}:${literalValue}`;
+        case 'startsWith':
+            return wildcardValue ? `${field}:${wildcardValue}*` : null;
+        case 'endsWith':
+            return wildcardValue ? `${field}:*${wildcardValue}` : null;
+        case 'doesNotContain':
+            return wildcardValue ? `-${field}:*${wildcardValue}*` : null;
+        case 'isAnyOf': {
+            const values = Array.isArray(rawValue)
+                ? rawValue.map((entry) => normalizeFilterValue(entry)).filter(Boolean)
+                : value
+                    .split(',')
+                    .map((entry) => entry.trim())
+                    .filter(Boolean);
+            if (values.length === 0) return null;
+            return `(${values.map((entry) => `${field}:${toSolrLiteral(entry)}`).join(' OR ')})`;
+        }
+        case 'contains':
+        default:
+            return wildcardValue ? `${field}:*${wildcardValue}*` : null;
+    }
+}
+
+/** Build the Solr clause for quick/global search terms. */
+function buildQuickSearchClause(
+    query: string | undefined,
+    searchFields: string[] | undefined,
+    quickFilterValues: string[],
+    quickFilterLogicOperator: 'and' | 'or',
+): string {
+    if (query === '*' || query === '*:*') return '*';
+
+    const candidateTerms = query ? [query] : quickFilterValues;
+    const terms = candidateTerms
+        .map((value) => normalizeFilterValue(value))
+        .filter(Boolean);
+    if (terms.length === 0) return '';
+
+    const termClauses = terms
+        .map((term) => {
+            const token = toWildcardToken(term);
+            if (!token) return '';
+            const usePrefixOnly = token.length < MIN_WILDCARD_QUERY_LENGTH;
+
+            if (searchFields && searchFields.length > 0) {
+                const fieldClauses = searchFields.map((field) => {
+                    const solrField = toSolrField(field);
+                    return usePrefixOnly
+                        ? `${solrField}:${token}*`
+                        : `${solrField}:*${token}*`;
+                });
+                return `(${fieldClauses.join(' OR ')})`;
+            }
+
+            return usePrefixOnly ? `${token}*` : `*${token}*`;
+        })
+        .filter(Boolean);
+
+    if (termClauses.length === 0) return '';
+    if (termClauses.length === 1) return termClauses[0];
+
+    const logic = quickFilterLogicOperator === 'or' ? 'OR' : 'AND';
+    return `(${termClauses.join(` ${logic} `)})`;
+}
+
 /**
  * Builds a Solr query URL from options, mirroring legacy `get_solr`.
  */
@@ -123,127 +289,46 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         url += `&fl=${visible.join(',')}`;
     }
 
-    // Query construction (ported from legacy + updated for DataGrid FilterModel)
-    const filters: string[] = [];
+    const filterClauses = (filterModel?.items ?? [])
+        .map((item) => buildFilterClause(item))
+        .filter((clause): clause is string => Boolean(clause));
+    const filterLogic = filterModel?.logicOperator === 'or' ? 'OR' : 'AND';
+    const combinedFilterClause =
+        filterClauses.length > 1
+            ? `(${filterClauses.join(` ${filterLogic} `)})`
+            : (filterClauses[0] ?? '');
 
-    // Parse DataGrid advanced filter model
-    if (filterModel && filterModel.items.length > 0) {
-        for (const item of filterModel.items) {
-            if ((item.value == null || item.value === '') && item.operator !== 'isEmpty' && item.operator !== 'isNotEmpty') {
-                continue;
-            }
+    const queryColumnClauses = queryColumn
+        ? Object.entries(queryColumn)
+            .map(([field, rawValue]) => {
+                const value = normalizeFilterValue(rawValue);
+                const token = toWildcardToken(value);
+                if (!token) return '';
+                return `${toSolrField(field)}:*${token}*`;
+            })
+            .filter(Boolean)
+        : [];
+    const combinedQueryColumnClause =
+        queryColumnClauses.length > 1
+            ? `(${queryColumnClauses.join(' AND ')})`
+            : (queryColumnClauses[0] ?? '');
 
-            const field = item.field === 'synonyms' ? 'aliases' : item.field;
-            let val = '';
-            if (item.value != null) {
-                val = String(item.value).replace(/'/g, "'").replace(/[;,:"'+.\-]/g, '');
-            }
+    const mainQueryStr = buildQuickSearchClause(
+        query,
+        searchFields,
+        filterModel?.quickFilterValues ?? [],
+        filterModel?.quickFilterLogicOperator ?? 'and',
+    );
 
-            switch (item.operator) {
-                case '>':
-                    filters.push(`${field}:{${val} TO *]`);
-                    break;
-                case '>=':
-                    filters.push(`${field}:[${val} TO *]`);
-                    break;
-                case '<':
-                    filters.push(`${field}:[* TO ${val}}`);
-                    break;
-                case '<=':
-                    filters.push(`${field}:[* TO ${val}]`);
-                    break;
-                case 'isEmpty':
-                    filters.push(`-${field}:[* TO *]`);
-                    break;
-                case 'isNotEmpty':
-                    filters.push(`${field}:[* TO *]`);
-                    break;
-                case '=':
-                case 'equals':
-                case 'is':
-                    filters.push(`${field}:"${val}"`);
-                    break;
-                case '!=':
-                case 'not':
-                    filters.push(`-${field}:"${val}"`);
-                    break;
-                case 'startsWith':
-                    filters.push(`${field}:(${val}*)`);
-                    break;
-                case 'endsWith':
-                    filters.push(`${field}:(*${val})`);
-                    break;
-                case 'isAnyOf':
-                    if (Array.isArray(item.value)) {
-                        const anyOf = item.value.map(v => `${field}:"${String(v).replace(/"/g, '')}"`);
-                        if (anyOf.length > 0) {
-                            filters.push(`(${anyOf.join(' OR ')})`);
-                        }
-                    }
-                    break;
-                default:
-                    // default contains
-                    filters.push(`${field}:(*${val}*)`);
-            }
-        }
+    const finalClauses: string[] = [];
+    if (mainQueryStr && mainQueryStr !== '*') finalClauses.push(mainQueryStr);
+    if (combinedFilterClause) finalClauses.push(combinedFilterClause);
+    if (combinedQueryColumnClause) finalClauses.push(combinedQueryColumnClause);
+    if (mainQueryStr === '*' && finalClauses.length === 0) {
+        finalClauses.push('*');
     }
 
-    if (queryColumn) {
-        for (const field in queryColumn) {
-            let val = queryColumn[field];
-            val = val.replace(/'/g, "'");
-            val = val.replace(/[;,:"'+.\-]/g, '');
-            const solrField = field === 'synonyms' ? 'aliases' : field;
-            filters.push(`${solrField}:(*${val}*)`);
-        }
-    }
-
-    let mainQueryStr = '';
-    const activeQuery = query || (filterModel && filterModel.quickFilterValues && filterModel.quickFilterValues.length > 0 ? filterModel.quickFilterValues.join(' ') : null);
-
-    // Handle special "match all" case - don't wrap with wildcards
-    if (activeQuery === '*' || activeQuery === '*:*') {
-        mainQueryStr = '*';
-    } else if (activeQuery && searchFields && searchFields.length > 0) {
-        const cleanQuery = sanitizeQuery(activeQuery);
-        // Skip if query is empty after sanitization
-        if (cleanQuery.length === 0) {
-            mainQueryStr = '*';
-        } else if (cleanQuery.length < 3) {
-            // For short queries, do exact prefix match without wildcards
-            const searchFilters = searchFields.map((f) => {
-                const solrField = f === 'synonyms' ? 'aliases' : f;
-                return `${solrField}:${cleanQuery}*`;
-            });
-            mainQueryStr = `(${searchFilters.join(' OR ')})`;
-        } else {
-            const searchFilters = searchFields.map((f) => {
-                const solrField = f === 'synonyms' ? 'aliases' : f;
-                return `${solrField}:*${cleanQuery}*`;
-            });
-            mainQueryStr = `(${searchFilters.join(' OR ')})`;
-        }
-    } else if (activeQuery) {
-        const cleanQuery = sanitizeQuery(activeQuery);
-        // Skip if query is empty after sanitization
-        if (cleanQuery.length === 0) {
-            mainQueryStr = '*';
-        } else if (cleanQuery.length < 3) {
-            mainQueryStr = `${cleanQuery}*`;
-        } else {
-            mainQueryStr = `*${cleanQuery}*`;
-        }
-    }
-
-    if (filters.length > 0 && mainQueryStr) {
-        url += `&q=(${mainQueryStr}) AND ${filters.join(' AND ')}`;
-    } else if (filters.length > 0) {
-        url += `&q=${filters.join(' AND ')}`;
-    } else if (mainQueryStr !== '') {
-        url += `&q=${mainQueryStr}`;
-    } else {
-        url += `&q=*`;
-    }
+    url += `&q=${finalClauses.length > 0 ? finalClauses.join(' AND ') : '*'}`;
 
     // Pagination
     if (limit) url += `&rows=${limit}`;
@@ -256,25 +341,6 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     }
 
     return url;
-}
-
-/**
- * Sanitize user input for Solr query syntax.
- * 
- * Removes special characters and handles whitespace for safe Solr queries.
- * Mirrors legacy sanitization logic for backward compatibility.
- * 
- * @param query - Raw user input string
- * @returns Sanitized query string safe for Solr
- */
-function sanitizeQuery(query: string): string {
-    let q = query.trim();
-    q = q.replace(/'/g, "'");
-    q = q.replace(/[;,:"'+.\-]/g, '');
-    if (q.includes(' ') || q.includes('%20')) {
-        q = q.replace(/%20/g, '*').replace(/\s/g, '*');
-    }
-    return q;
 }
 
 /* ─── Fetcher ────────────────────────────────────────────────── */
@@ -300,8 +366,11 @@ async function fetchModelseedApiBiochem<T>(
     // Map SolrQueryOpts to REST params
     // Note: Poplar currently only supports simple 'query' and 'limit'
     let activeQuery = query;
-    if (!activeQuery && filterModel?.quickFilterValues?.[0]) {
-        activeQuery = String(filterModel.quickFilterValues[0]);
+    if (!activeQuery && filterModel?.quickFilterValues && filterModel.quickFilterValues.length > 0) {
+        activeQuery = filterModel.quickFilterValues
+            .map((value) => normalizeFilterValue(value))
+            .filter(Boolean)
+            .join(' ');
     }
 
     let url = `${baseUrl}?limit=${limit}`;
