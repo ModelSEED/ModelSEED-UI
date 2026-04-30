@@ -131,8 +131,8 @@ function ToolbarSearchField() {
         if (pathname.includes('/biochem/compounds')) return 'Search compounds...';
         if (pathname.includes('/reference-data/genomes')) return 'Search plant models...';
         if (pathname.includes('/reference-data/list-media')) return 'Search media...';
-        if (pathname.includes('/user-data/my-models')) return 'Search my models...';
-        if (pathname.includes('/user-data/myMedia')) return 'Search my media...';
+        if (pathname.includes('/my-models')) return 'Search my models...';
+        if (pathname.includes('/myMedia')) return 'Search my media...';
         if (pathname.includes('/model/')) {
             if (pathname.endsWith('/reactions')) return 'Search reactions...';
             if (pathname.endsWith('/compounds')) return 'Search compounds...';
@@ -212,7 +212,6 @@ function ToolbarFilterEditor() {
     const [draftRows, setDraftRows] = useState<ToolbarFilterRow[]>([makeEmptyFilterRow()]);
     const [draftLogicOperator, setDraftLogicOperator] = useState<ToolbarLogicOperator>(GridLogicOperator.And);
     const [draftColumnVisibilityModel, setDraftColumnVisibilityModel] = useState<Record<string, boolean>>({});
-    const [draftQuickFilterValues, setDraftQuickFilterValues] = useState<string[]>([]);
     const [appliedHiddenColumnCount, setAppliedHiddenColumnCount] = useState(0);
 
     const open = Boolean(anchorEl);
@@ -294,7 +293,6 @@ function ToolbarFilterEditor() {
         }
 
         setDraftLogicOperator((filterModel?.logicOperator as ToolbarLogicOperator | undefined) ?? GridLogicOperator.And);
-        setDraftQuickFilterValues(filterModel?.quickFilterValues ?? []);
         setAnchorEl(event.currentTarget);
     };
 
@@ -342,7 +340,6 @@ function ToolbarFilterEditor() {
         setDraftColumnVisibilityModel(visible);
         setDraftRows([makeEmptyFilterRow()]);
         setDraftLogicOperator(GridLogicOperator.And);
-        setDraftQuickFilterValues([]);
     };
 
     const saveChanges = () => {
@@ -358,7 +355,7 @@ function ToolbarFilterEditor() {
         apiRef.current.setFilterModel({
             items,
             logicOperator: draftLogicOperator,
-            quickFilterValues: draftQuickFilterValues,
+            quickFilterValues: filterModel?.quickFilterValues ?? [],
             quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
         });
 

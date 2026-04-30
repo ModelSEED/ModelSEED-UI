@@ -168,7 +168,9 @@ export default function ExportModal({
 
                 {!hasActiveFilters && (
                     <Alert severity="info" sx={{ mb: 2 }}>
-                        No active filters. Exporting all data.
+                        {exportScope === 'all'
+                            ? 'No active filters. Exporting all data.'
+                            : 'No active filters. Exporting current page only.'}
                     </Alert>
                 )}
 

@@ -79,7 +79,7 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
             if (jobId && user) {
                 trackJob({
                     id: jobId,
-                    kind: 'reconstruct',
+                    kind: 'copy',
                     label: `Copy ${modelName} to ${newName}`,
                     modelId: trimmedName,
                     relatedRef: destinationPath,

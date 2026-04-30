@@ -37,9 +37,9 @@ test.describe('My Models Page - PlantSEED Copy', () => {
         await page.locator('button:has-text("Cancel")').click();
     });
 
-    test('should NOT show Edit Model tab for PlantSEED models', async () => {
+    test.skip('should NOT show Edit Model tab for PlantSEED models', async () => {
         // This would need to navigate to a PlantSEED model detail page
-        // and verify the Edit Model tab is not present
-        // Skipping for now as it requires specific model ID
+        // and verify the Edit Model tab is not present.
+        // Skipped for now because it requires a specific model ID.
     });
 });

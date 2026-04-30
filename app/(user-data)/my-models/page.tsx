@@ -237,7 +237,7 @@ export default function MyModelsPage() {
     }, [trackedJobs, trackedJobStatusMap]);
 
     const startModelAppearanceSync = useCallback((job: TrackedJobWithStatus) => {
-        if (job.kind !== 'reconstruct' && job.kind !== 'merge') {
+        if (job.kind !== 'reconstruct' && job.kind !== 'copy' && job.kind !== 'merge') {
             void refetch();
             return;
         }

@@ -1714,7 +1714,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const genomeRef = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
 
     const visibleTabs = MODEL_TABS.filter((tab) => !(isPlantModel && tab.key === 'edits'));
-    const tabIndex = Math.max(0, visibleTabs.findIndex((tab) => tab.key === activeTab));
+    const activeTabVisible = visibleTabs.some((tab) => tab.key === activeTab);
+    const normalizedActiveTab = activeTabVisible ? activeTab : 'overview';
+    const tabIndex = Math.max(0, visibleTabs.findIndex((tab) => tab.key === normalizedActiveTab));
 
     const modelMetadata = [
         { label: 'Model ID', value: modelName },

@@ -113,7 +113,7 @@ const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
  */
 function escapeSolrTerm(value: string): string {
     let escaped = value.trim().replace(/\\/g, '\\\\');
-    escaped = escaped.replace(/&&/g, '\\&&').replace(/\|\|/g, '\\||');
+    escaped = escaped.replace(/&&/g, '\\&&');
     escaped = escaped.replace(/([+\-!(){}\[\]^"~*?:/|])/g, '\\$1');
     return escaped;
 }

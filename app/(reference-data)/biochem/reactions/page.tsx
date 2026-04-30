@@ -297,11 +297,14 @@ export default function ReactionsPage() {
             headerName: 'Synonyms',
             width: 280,
             sortable: false,
-            renderCell: (params) => (
-                <TruncatedWithTooltip text={parseSynonyms(params.row.aliases).join('; ')}>
-                    <SynonymsCell synonyms={parseSynonyms(params.row.aliases)} />
-                </TruncatedWithTooltip>
-            ),
+            renderCell: (params) => {
+                const synonyms = parseSynonyms(params.row.aliases);
+                return (
+                    <TruncatedWithTooltip text={synonyms.join('; ')}>
+                        <SynonymsCell synonyms={synonyms} />
+                    </TruncatedWithTooltip>
+                );
+            },
         },
         {
             field: 'aliases',
