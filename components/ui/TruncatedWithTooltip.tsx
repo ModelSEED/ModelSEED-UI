@@ -21,19 +21,27 @@ export default function TruncatedWithTooltip({ text, maxWidth = 300, sx, childre
 
     const fullText = text || (typeof children === 'string' ? children : undefined);
 
+    const truncatedContent = (
+        <Box
+            sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth,
+                ...sx,
+            }}
+        >
+            {content}
+        </Box>
+    );
+
+    if (!fullText || fullText.trim().length === 0) {
+        return truncatedContent;
+    }
+
     return (
-        <Tooltip title={fullText || ''} placement="top-start" arrow>
-            <Box
-                sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth,
-                    ...sx,
-                }}
-            >
-                {content}
-            </Box>
+        <Tooltip title={fullText} placement="top-start" arrow>
+            {truncatedContent}
         </Tooltip>
     );
 }

@@ -841,15 +841,17 @@ export default function MyModelsPage() {
                     </DialogActions>
                 </Dialog>
 
-                <CopyModelModal
-                    open={copyModalOpen}
-                    onClose={() => {
-                        setCopyModalOpen(false);
-                        setModelToCopy(null);
-                    }}
-                    sourcePath={modelToCopy?.path ?? ''}
-                    modelName={modelToCopy?.name ?? ''}
-                />
+                {modelToCopy && (
+                    <CopyModelModal
+                        open={copyModalOpen}
+                        onClose={() => {
+                            setCopyModalOpen(false);
+                            setModelToCopy(null);
+                        }}
+                        sourcePath={modelToCopy.path}
+                        modelName={modelToCopy.name}
+                    />
+                )}
             </Box>
         </AuthGuard>
     );

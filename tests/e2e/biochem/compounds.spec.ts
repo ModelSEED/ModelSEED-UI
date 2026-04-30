@@ -2,14 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Compounds Page - Search & Display', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('https://staging.modelseed.org/biochem/compounds');
+        await page.goto('/biochem/compounds');
         await page.waitForLoadState('networkidle');
     });
 
     test('should search across all compound fields', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Search"]').first();
         await searchInput.fill('cpd');
-        await page.waitForTimeout(3000);
+        await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
         const count = await rows.count();
@@ -30,7 +30,7 @@ test.describe('Compounds Page - Search & Display', () => {
     test('export modal should show active search filter', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Search"]').first();
         await searchInput.fill('cpd');
-        await page.waitForTimeout(2000);
+        await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const exportButton = page.locator('button:has-text("Export CSV")');
         await exportButton.click();

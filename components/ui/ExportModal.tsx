@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -50,12 +50,24 @@ export default function ExportModal({
     activeSearch,
     activeFilter,
 }: ExportModalProps) {
+    const defaultSelectedColumns = useCallback(
+        () => new Set(columns.filter((c) => c.defaultSelected !== false).map((c) => c.field)),
+        [columns],
+    );
+
     const [selectedColumns, setSelectedColumns] = useState<Set<string>>(
-        () => new Set(columns.filter(c => c.defaultSelected !== false).map(c => c.field))
+        () => defaultSelectedColumns(),
     );
     const [exportScope, setExportScope] = useState<'current' | 'all'>('current');
     const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        setSelectedColumns(defaultSelectedColumns());
+        setExportScope('current');
+        setError(null);
+    }, [open, defaultSelectedColumns]);
 
     const handleToggleColumn = useCallback((field: string) => {
         setSelectedColumns(prev => {

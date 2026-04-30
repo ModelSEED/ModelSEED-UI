@@ -1713,7 +1713,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
 
     const genomeRef = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
 
-    const tabIndex = MODEL_TABS.findIndex((tab) => tab.key === activeTab);
+    const visibleTabs = MODEL_TABS.filter((tab) => !(isPlantModel && tab.key === 'edits'));
+    const tabIndex = Math.max(0, visibleTabs.findIndex((tab) => tab.key === activeTab));
 
     const modelMetadata = [
         { label: 'Model ID', value: modelName },
@@ -1889,7 +1890,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     ];
 
     const handleTabChange = (_event: React.SyntheticEvent, nextIndex: number) => {
-        const tab = MODEL_TABS[nextIndex];
+        const tab = visibleTabs[nextIndex];
         if (!tab) return;
         const basePath = `/model${workspacePath}`;
         const nextPath = tab.key === 'overview' ? basePath : `${basePath}/${tab.key}`;
@@ -2113,7 +2114,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         },
                     }}
                 >
-                    {MODEL_TABS.filter(tab => !(isPlantModel && tab.key === 'edits')).map((tab, index) => (
+                    {visibleTabs.map((tab, index) => (
                         <Tab key={tab.key} label={tab.label} {...a11yProps(index)} />
                     ))}
                 </Tabs>
@@ -2165,7 +2166,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 </Box>
             )}
 
-            {MODEL_TABS.filter(tab => !(isPlantModel && tab.key === 'edits')).map((tab, index) => (
+            {visibleTabs.map((tab, index) => (
                 <TabPanel key={tab.key} value={tabIndex} index={index}>
                     {tab.key === 'overview' ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

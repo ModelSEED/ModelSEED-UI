@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -27,11 +27,39 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    const outputPath = user ? `/${user}/modelseed` : '/workspace';
+    const outputPath = user ? `/${user}/modelseed` : null;
+    const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (open) {
+            setNewName(`Copy_of_${modelName}`);
+            setError(null);
+            setSuccess(false);
+        }
+    }, [open, modelName]);
+
+    useEffect(() => {
+        return () => {
+            if (closeTimeoutRef.current) {
+                clearTimeout(closeTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleCopy = useCallback(async () => {
+        if (!user || !outputPath) {
+            setError('You must be logged in to copy a model');
+            return;
+        }
+
         if (!newName.trim()) {
             setError('Model name is required');
+            return;
+        }
+
+        const trimmedName = newName.trim();
+        if (!/^[A-Za-z0-9_.-]+$/.test(trimmedName)) {
+            setError('Model name can only include letters, numbers, dot, underscore, and hyphen');
             return;
         }
 
@@ -40,7 +68,7 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
         setSuccess(false);
 
         try {
-            const destinationPath = `${outputPath}/${newName.trim()}`;
+            const destinationPath = `${outputPath}/${trimmedName}`;
             const payload = {
                 objects: [[sourcePath, destinationPath]],
             };
@@ -53,18 +81,19 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
                     id: jobId,
                     kind: 'reconstruct',
                     label: `Copy ${modelName} to ${newName}`,
-                    modelId: newName.trim(),
+                    modelId: trimmedName,
                     relatedRef: destinationPath,
                     submittedAt: new Date().toISOString(),
                 });
             }
 
             setSuccess(true);
-            setTimeout(() => {
+            closeTimeoutRef.current = setTimeout(() => {
                 onClose();
                 // Reset state after closing
                 setNewName(`Copy_of_${modelName}`);
                 setSuccess(false);
+                closeTimeoutRef.current = null;
             }, 1500);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to copy model');
@@ -75,6 +104,10 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
 
     const handleClose = useCallback(() => {
         if (isCopying) return;
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
         onClose();
         setError(null);
         setSuccess(false);
@@ -111,7 +144,7 @@ export default function CopyModelModal({ open, onClose, sourcePath, modelName }:
                 />
 
                 <Typography variant="caption" color="text.secondary">
-                    Destination: {outputPath}/{newName || '[model name]'}
+                    Destination: {(outputPath ?? '[login required]')}/{newName || '[model name]'}
                 </Typography>
             </DialogContent>
             <DialogActions>
