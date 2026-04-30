@@ -36,6 +36,7 @@ type BuildMetadata = {
     version: string;
     commit: string;
     branch: string;
+    date: string;
 };
 
 function getVersion(): string {
@@ -56,11 +57,25 @@ function getBranchName(): string {
     return process.env.NEXT_PUBLIC_GIT_BRANCH ?? process.env.GIT_BRANCH ?? 'unknown';
 }
 
+function getBuildDate(): string {
+    const envDate = process.env.NEXT_PUBLIC_GIT_DATE;
+    if (envDate) return envDate;
+
+    try {
+        const filePath = path.join(process.cwd(), '.build-date');
+        const value = fs.readFileSync(filePath, 'utf8').trim();
+        return value || 'unknown';
+    } catch {
+        return 'unknown';
+    }
+}
+
 function getBuildMetadata(): BuildMetadata {
     return {
         version: getVersion(),
         branch: getBranchName(),
         commit: getCommitSha(),
+        date: getBuildDate(),
     };
 }
 
@@ -94,7 +109,8 @@ export default async function VersionPage() {
                             https://github.com/ModelSEED/ModelSEED-UI
                         </Link><br />
                         Branch: {metadata.branch}<br />
-                        Commit: {metadata.commit}
+                        Commit: {metadata.commit}<br />
+                        Date: {metadata.date}
                     </Typography>
                 </Box>
                 <Box>

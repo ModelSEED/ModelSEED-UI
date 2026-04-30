@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node scripts/sync-version-from-env.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/sync-version-from-env.mjs",
+    "prebuild": "node scripts/sync-version-from-env.mjs && node scripts/write-build-date.mjs",
     "build": "next build",
     "prestart": "node scripts/sync-version-from-env.mjs",
     "start": "next start",
