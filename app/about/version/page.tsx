@@ -58,7 +58,7 @@ function getBranchName(): string {
 }
 
 function getBuildDate(): string {
-    const envDate = process.env.NEXT_PUBLIC_GIT_DATE;
+    const envDate = process.env.NEXT_PUBLIC_DEPLOY_DATE;
     if (envDate) return envDate;
 
     try {
