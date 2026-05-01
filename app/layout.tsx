@@ -8,6 +8,7 @@ import Providers from '@/components/Providers';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/styles/icomoon/style.css";
 
 export const metadata: Metadata = {
     title: "ModelSEED",
@@ -23,7 +24,6 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <head>
                 <link rel="shortcut icon" href="/img/ModelSEED-favicon.png" />
-                <link rel="stylesheet" href="/icomoon/style.css" />
                 <link
                     href="https://fonts.googleapis.com/icon?family=Material+Icons"
                     rel="stylesheet"
