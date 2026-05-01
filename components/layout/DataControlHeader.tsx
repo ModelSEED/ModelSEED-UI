@@ -30,8 +30,10 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback, type MouseEvent } from 'react';
 
 const NO_VALUE_OPERATORS = new Set(['isEmpty', 'isNotEmpty']);
 
@@ -121,67 +123,209 @@ function CustomPagination() {
 function ToolbarSearchField() {
     const apiRef = useGridApiContext();
     const pathname = usePathname();
-    const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
-    const value = filterModel?.quickFilterValues?.join(' ') ?? '';
+    const [searchTerm, setSearchTerm] = useState('');
+    const [matchIndex, setMatchIndex] = useState(0);
+    const [totalMatches, setTotalMatches] = useState(0);
+    const allMatchesRef = useRef<HTMLElement[]>([]);
+    const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const placeholder = useMemo(() => {
-        if (!pathname) return 'Search...';
-        if (pathname.includes('/genomes/Annotations')) return 'Search subsystems...';
-        if (pathname.includes('/biochem/reactions')) return 'Search reactions...';
-        if (pathname.includes('/biochem/compounds')) return 'Search compounds...';
-        if (pathname.includes('/reference-data/genomes')) return 'Search plant models...';
-        if (pathname.includes('/reference-data/list-media')) return 'Search media...';
-        if (pathname.includes('/my-models')) return 'Search my models...';
-        if (pathname.includes('/myMedia')) return 'Search my media...';
+        if (!pathname) return 'Find in page...';
+        if (pathname.includes('/biochem/reactions')) return 'Find in reactions...';
+        if (pathname.includes('/biochem/compounds')) return 'Find in compounds...';
+        if (pathname.includes('/genomes/Annotations')) return 'Find in subsystems...';
+        if (pathname.includes('/reference-data/genomes')) return 'Find in plant models...';
+        if (pathname.includes('/reference-data/list-media')) return 'Find in media...';
+        if (pathname.includes('/my-models')) return 'Find in my models...';
+        if (pathname.includes('/myMedia')) return 'Find in my media...';
         if (pathname.includes('/model/')) {
-            if (pathname.endsWith('/reactions')) return 'Search reactions...';
-            if (pathname.endsWith('/compounds')) return 'Search compounds...';
-            if (pathname.endsWith('/genes')) return 'Search genes...';
-            if (pathname.endsWith('/compartments')) return 'Search compartments...';
-            if (pathname.endsWith('/biomass')) return 'Search biomass...';
-            if (pathname.endsWith('/pathways')) return 'Search pathways...';
-            return 'Search model...';
+            if (pathname.endsWith('/reactions')) return 'Find in reactions...';
+            if (pathname.endsWith('/compounds')) return 'Find in compounds...';
+            if (pathname.endsWith('/genes')) return 'Find in genes...';
+            if (pathname.endsWith('/compartments')) return 'Find in compartments...';
+            if (pathname.endsWith('/biomass')) return 'Find in biomass...';
+            if (pathname.endsWith('/pathways')) return 'Find in pathways...';
+            return 'Find in model...';
         }
-        return 'Search...';
+        return 'Find in page...';
     }, [pathname]);
 
-    const handleChange = (next: string) => {
-        apiRef.current.setFilterModel({
-            items: filterModel?.items ?? [],
-            logicOperator: filterModel?.logicOperator ?? GridLogicOperator.And,
-            quickFilterValues: next ? [next] : [],
-            quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
+    const clearHighlights = useCallback(() => {
+        document.querySelectorAll('.search-highlight').forEach((el) => {
+            const parent = el.parentNode;
+            if (parent) {
+                parent.replaceChild(document.createTextNode(el.textContent ?? ''), el);
+                parent.normalize();
+            }
         });
+        allMatchesRef.current = [];
+    }, []);
+
+    const highlightText = useCallback((term: string) => {
+        clearHighlights();
+        if (!term || term.trim().length === 0) {
+            setTotalMatches(0);
+            setMatchIndex(0);
+            return;
+        }
+
+        const grid = document.querySelector('[role="grid"]');
+        if (!grid) {
+            setTotalMatches(0);
+            setMatchIndex(0);
+            return;
+        }
+
+        const matches: HTMLElement[] = [];
+        const caseSensitive = term === term.toLowerCase() ? false : term !== term.toLowerCase();
+        const searchLower = caseSensitive ? term : term.toLowerCase();
+
+        // Get all text nodes in grid cells
+        const walker = document.createTreeWalker(grid, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        while (walker.nextNode()) {
+            const node = walker.currentNode as Text;
+            const parent = node.parentElement;
+            if (parent && parent.closest('[role="gridcell"]')) {
+                textNodes.push(node);
+            }
+        }
+
+        textNodes.forEach((textNode) => {
+            const text = textNode.textContent ?? '';
+            const textCompare = caseSensitive ? text : text.toLowerCase();
+            let idx = 0;
+
+            while ((idx = textCompare.indexOf(searchLower, idx)) !== -1) {
+                const range = document.createRange();
+                range.setStart(textNode, idx);
+                range.setEnd(textNode, idx + term.length);
+
+                const mark = document.createElement('mark');
+                mark.className = 'search-highlight';
+                mark.style.backgroundColor = '#ffeb3b';
+                mark.style.color = '#000';
+                mark.style.padding = '0 2px';
+                mark.style.borderRadius = '2px';
+                range.surroundContents(mark);
+                matches.push(mark);
+
+                idx += term.length;
+            }
+        });
+
+        allMatchesRef.current = matches;
+        setTotalMatches(matches.length);
+        setMatchIndex(matches.length > 0 ? 0 : 0);
+
+        if (matches.length > 0) {
+            matches[0].style.backgroundColor = '#ff9800';
+            matches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [clearHighlights]);
+
+    const navigateToMatch = useCallback((index: number) => {
+        if (totalMatches === 0) return;
+        const clampedIndex = ((index % totalMatches) + totalMatches) % totalMatches;
+        setMatchIndex(clampedIndex);
+
+        // Reset all highlights to default color
+        allMatchesRef.current.forEach((el, i) => {
+            el.style.backgroundColor = i === clampedIndex ? '#ff9800' : '#ffeb3b';
+        });
+
+        const target = allMatchesRef.current[clampedIndex];
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [totalMatches]);
+
+    useEffect(() => {
+        if (highlightTimeoutRef.current) {
+            clearTimeout(highlightTimeoutRef.current);
+        }
+
+        highlightTimeoutRef.current = setTimeout(() => {
+            highlightText(searchTerm);
+        }, 300);
+
+        return () => {
+            if (highlightTimeoutRef.current) {
+                clearTimeout(highlightTimeoutRef.current);
+            }
+        };
+    }, [searchTerm, highlightText]);
+
+    useEffect(() => {
+        return () => {
+            clearHighlights();
+        };
+    }, [clearHighlights]);
+
+    const handleClear = () => {
+        setSearchTerm('');
+        clearHighlights();
+        setTotalMatches(0);
+        setMatchIndex(0);
     };
 
     return (
-        <TextField
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            size="small"
-            fullWidth
-            placeholder={placeholder}
-            InputProps={{
-                startAdornment: (
-                    <InputAdornment position="start">
-                        <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                    </InputAdornment>
-                ),
-                endAdornment: value ? (
-                    <InputAdornment position="end">
-                        <IconButton
-                            size="small"
-                            aria-label="Clear search"
-                            onClick={() => handleChange('')}
-                            edge="end"
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </InputAdornment>
-                ) : undefined,
-            }}
-            sx={{ '& .MuiInputBase-input': { cursor: 'text' } }}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, width: '100%' }}>
+            <TextField
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        if (e.shiftKey) navigateToMatch(matchIndex - 1);
+                        else navigateToMatch(matchIndex + 1);
+                    }
+                }}
+                size="small"
+                fullWidth
+                placeholder={placeholder}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                    ),
+                    endAdornment: searchTerm ? (
+                        <InputAdornment position="end">
+                            <IconButton
+                                size="small"
+                                aria-label="Clear search"
+                                onClick={handleClear}
+                                edge="end"
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </InputAdornment>
+                    ) : undefined,
+                }}
+                sx={{ '& .MuiInputBase-input': { cursor: 'text' } }}
+            />
+            {searchTerm && totalMatches > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap', ml: 0.5 }}>
+                    <IconButton
+                        size="small"
+                        aria-label="Previous match"
+                        onClick={() => navigateToMatch(matchIndex - 1)}
+                    >
+                        <ArrowUpwardIcon fontSize="small" />
+                    </IconButton>
+                    <Typography variant="caption" sx={{ minWidth: '60px', textAlign: 'center' }}>
+                        {matchIndex + 1} of {totalMatches}
+                    </Typography>
+                    <IconButton
+                        size="small"
+                        aria-label="Next match"
+                        onClick={() => navigateToMatch(matchIndex + 1)}
+                    >
+                        <ArrowDownwardIcon fontSize="small" />
+                    </IconButton>
+                </Box>
+            )}
+        </Box>
     );
 }
 

@@ -292,10 +292,10 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     const filterClauses = (filterModel?.items ?? [])
         .map((item) => buildFilterClause(item))
         .filter((clause): clause is string => Boolean(clause));
-    const filterLogic = filterModel?.logicOperator === 'or' ? 'OR' : 'AND';
+    const filterLogic = filterModel?.logicOperator === 'or' ? ' OR ' : ' AND ';
     const combinedFilterClause =
         filterClauses.length > 1
-            ? `(${filterClauses.join(` ${filterLogic} `)})`
+            ? `(${filterClauses.join(filterLogic)})`
             : (filterClauses[0] ?? '');
 
     const queryColumnClauses = queryColumn
@@ -328,7 +328,8 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         finalClauses.push('*');
     }
 
-    url += `&q=${finalClauses.length > 0 ? finalClauses.join(' AND ') : '*'}`;
+    const qValue = finalClauses.length > 0 ? finalClauses.join(' AND ') : '*';
+    url += `&q=${encodeURIComponent(qValue)}`;
 
     // Pagination
     if (limit) url += `&rows=${limit}`;
@@ -403,7 +404,7 @@ const SYNONYM_FIELD_ALIAS = 'aliases';
 const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
-const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ecs', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
 
 /** Reaction visible fields matching legacy `rxnOpts.visible`. */
 const RXN_VISIBLE = [
