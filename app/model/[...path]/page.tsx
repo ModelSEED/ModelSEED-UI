@@ -1711,7 +1711,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         modelName,
     );
 
-    const genomeRef = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
+    const genomeRefRaw = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
+    const genomeRef = genomeRefRaw.replace(/\|\|+$/, '').trim() || '-';
 
     const visibleTabs = MODEL_TABS.filter((tab) => !(isPlantModel && tab.key === 'edits'));
     const activeTabVisible = visibleTabs.some((tab) => tab.key === activeTab);
@@ -1727,16 +1728,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
         {
             label: 'Genome Ref',
-            value: genomeRef !== '-' ? (
-                <Link
-                    href={`https://www.bv-brc.org/view/Genome/${genomeRef}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ color: '#00acc1', textDecoration: 'none' }}
-                >
-                    {genomeRef}
-                </Link>
-            ) : '-',
+            value: genomeRef,
         },
         { label: 'Type', value: String(modelObject.type ?? '-') },
         {

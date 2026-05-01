@@ -25,13 +25,10 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
 import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
+
 import CloseIcon from '@mui/icons-material/Close';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState, useRef, useCallback, type MouseEvent } from 'react';
 
@@ -44,9 +41,18 @@ const STRING_OPERATORS = [
     { value: 'doesNotEqual', label: 'does not equal' },
     { value: 'startsWith', label: 'starts with' },
     { value: 'endsWith', label: 'ends with' },
+    { value: 'isAnyOf', label: 'is any of' },
     { value: 'isEmpty', label: 'is empty' },
     { value: 'isNotEmpty', label: 'is not empty' },
 ];
+
+/** Operators whose value field should be treated as a comma-separated list. */
+const ARRAY_VALUE_OPERATORS = new Set(['isAnyOf']);
+
+/** Hint shown below the value input when an array operator is selected. */
+const ARRAY_OPERATOR_HINT: Record<string, string> = {
+    isAnyOf: 'Comma-separated values, e.g. cpd00001, cpd00002',
+};
 
 const NUMBER_OPERATORS = [
     { value: '=', label: '=' },
@@ -123,11 +129,8 @@ function CustomPagination() {
 function ToolbarSearchField() {
     const apiRef = useGridApiContext();
     const pathname = usePathname();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [matchIndex, setMatchIndex] = useState(0);
-    const [totalMatches, setTotalMatches] = useState(0);
-    const allMatchesRef = useRef<HTMLElement[]>([]);
-    const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [value, setValue] = useState('');
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const placeholder = useMemo(() => {
         if (!pathname) return 'Find in page...';
@@ -150,135 +153,141 @@ function ToolbarSearchField() {
         return 'Find in page...';
     }, [pathname]);
 
-    const clearHighlights = useCallback(() => {
-        document.querySelectorAll('.search-highlight').forEach((el) => {
-            const parent = el.parentNode;
-            if (parent) {
-                parent.replaceChild(document.createTextNode(el.textContent ?? ''), el);
-                parent.normalize();
-            }
-        });
-        allMatchesRef.current = [];
-    }, []);
+    /** Push search term into the DataGrid filter model as a quickFilter.
+     *  This triggers onFilterModelChange on the page → server re-fetch → only
+     *  matching rows are returned.  GridHighlightText reads quickFilterValues
+     *  and highlights the matched text in each cell automatically. */
+    const applySearch = useCallback(
+        (term: string) => {
+            const current = apiRef.current.state.filter?.filterModel ?? { items: [] };
+            apiRef.current.setFilterModel({
+                items: (current.items ?? []) as import('@mui/x-data-grid').GridFilterItem[],
+                logicOperator:
+                    (current.logicOperator as GridLogicOperator | undefined) ??
+                    GridLogicOperator.And,
+                quickFilterValues: term.trim() ? [term.trim()] : [],
+                quickFilterLogicOperator: GridLogicOperator.And,
+            });
+        },
+        [apiRef],
+    );
 
-    const highlightText = useCallback((term: string) => {
-        clearHighlights();
-        if (!term || term.trim().length === 0) {
-            setTotalMatches(0);
-            setMatchIndex(0);
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const term = e.target.value;
+            setValue(term);
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = setTimeout(() => applySearch(term), 300);
+        },
+        [applySearch],
+    );
+
+    const handleClear = useCallback(() => {
+        setValue('');
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        applySearch('');
+    }, [applySearch]);
+
+    // Clear quickFilter on unmount so navigating away doesn't leave a stale filter
+    useEffect(() => {
+        const api = apiRef.current;
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            try {
+                const current = api.state.filter?.filterModel ?? { items: [] };
+                api.setFilterModel({
+                    items: (current.items ?? []) as import('@mui/x-data-grid').GridFilterItem[],
+                    logicOperator:
+                        (current.logicOperator as GridLogicOperator | undefined) ??
+                        GridLogicOperator.And,
+                    quickFilterValues: [],
+                });
+            } catch {
+                // api may be stale on unmount — safe to ignore
+            }
+        };
+    }, [apiRef]);
+
+    // Apply CSS Custom Highlight API to highlight matches in the grid
+    useEffect(() => {
+        const term = value.trim();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!term || typeof CSS === 'undefined' || !('highlights' in (CSS as any))) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (typeof CSS !== 'undefined' && 'highlights' in (CSS as any)) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ((CSS as any).highlights as any).clear();
+            }
             return;
         }
 
-        const grid = document.querySelector('[role="grid"]');
-        if (!grid) {
-            setTotalMatches(0);
-            setMatchIndex(0);
-            return;
-        }
+        const root = apiRef.current.rootElementRef?.current;
+        if (!root) return;
 
-        const matches: HTMLElement[] = [];
-        const caseSensitive = term === term.toLowerCase() ? false : term !== term.toLowerCase();
-        const searchLower = caseSensitive ? term : term.toLowerCase();
+        const updateHighlights = () => {
+            if (!('Highlight' in window)) return;
+            const treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+            const ranges: Range[] = [];
+            const lowerTerm = term.toLowerCase();
 
-        // Get all text nodes in grid cells
-        const walker = document.createTreeWalker(grid, NodeFilter.SHOW_TEXT);
-        const textNodes: Text[] = [];
-        while (walker.nextNode()) {
-            const node = walker.currentNode as Text;
-            const parent = node.parentElement;
-            if (parent && parent.closest('[role="gridcell"]')) {
-                textNodes.push(node);
+            let node = treeWalker.nextNode();
+            while (node) {
+                const text = node.textContent?.toLowerCase() || '';
+                let startIndex = 0;
+                let index;
+                while ((index = text.indexOf(lowerTerm, startIndex)) !== -1) {
+                    const range = new Range();
+                    range.setStart(node, index);
+                    range.setEnd(node, index + lowerTerm.length);
+                    ranges.push(range);
+                    startIndex = index + lowerTerm.length;
+                }
+                node = treeWalker.nextNode();
             }
-        }
 
-        textNodes.forEach((textNode) => {
-            const text = textNode.textContent ?? '';
-            const textCompare = caseSensitive ? text : text.toLowerCase();
-            let idx = 0;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const HighlightClass = (window as any).Highlight;
+            const highlight = new HighlightClass(...ranges);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ((CSS as any).highlights as any).set('search-results', highlight);
+        };
 
-            while ((idx = textCompare.indexOf(searchLower, idx)) !== -1) {
-                const range = document.createRange();
-                range.setStart(textNode, idx);
-                range.setEnd(textNode, idx + term.length);
+        // Delay slightly to allow DataGrid to render the new filtered rows
+        const timeout = setTimeout(() => {
+            updateHighlights();
+        }, 100);
 
-                const mark = document.createElement('mark');
-                mark.className = 'search-highlight';
-                mark.style.backgroundColor = '#ffeb3b';
-                mark.style.color = '#000';
-                mark.style.padding = '0 2px';
-                mark.style.borderRadius = '2px';
-                range.surroundContents(mark);
-                matches.push(mark);
-
-                idx += term.length;
-            }
+        const observer = new MutationObserver(() => {
+            updateHighlights();
         });
 
-        allMatchesRef.current = matches;
-        setTotalMatches(matches.length);
-        setMatchIndex(matches.length > 0 ? 0 : 0);
-
-        if (matches.length > 0) {
-            matches[0].style.backgroundColor = '#ff9800';
-            matches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, [clearHighlights]);
-
-    const navigateToMatch = useCallback((index: number) => {
-        if (totalMatches === 0) return;
-        const clampedIndex = ((index % totalMatches) + totalMatches) % totalMatches;
-        setMatchIndex(clampedIndex);
-
-        // Reset all highlights to default color
-        allMatchesRef.current.forEach((el, i) => {
-            el.style.backgroundColor = i === clampedIndex ? '#ff9800' : '#ffeb3b';
-        });
-
-        const target = allMatchesRef.current[clampedIndex];
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, [totalMatches]);
-
-    useEffect(() => {
-        if (highlightTimeoutRef.current) {
-            clearTimeout(highlightTimeoutRef.current);
-        }
-
-        highlightTimeoutRef.current = setTimeout(() => {
-            highlightText(searchTerm);
-        }, 300);
+        observer.observe(root, { childList: true, subtree: true, characterData: true });
 
         return () => {
-            if (highlightTimeoutRef.current) {
-                clearTimeout(highlightTimeoutRef.current);
+            clearTimeout(timeout);
+            observer.disconnect();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (typeof CSS !== 'undefined' && 'highlights' in (CSS as any)) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ((CSS as any).highlights as any).clear();
             }
         };
-    }, [searchTerm, highlightText]);
-
-    useEffect(() => {
-        return () => {
-            clearHighlights();
-        };
-    }, [clearHighlights]);
-
-    const handleClear = () => {
-        setSearchTerm('');
-        clearHighlights();
-        setTotalMatches(0);
-        setMatchIndex(0);
-    };
+    }, [value, apiRef]);
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, width: '100%' }}>
+        <>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                ::highlight(search-results) {
+                    background-color: #fff3cd;
+                    color: #856404;
+                }
+            `}} />
             <TextField
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={value}
+                onChange={handleChange}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        if (e.shiftKey) navigateToMatch(matchIndex - 1);
-                        else navigateToMatch(matchIndex + 1);
-                    }
+                    if (e.key === 'Escape') handleClear();
                 }}
                 size="small"
                 fullWidth
@@ -289,7 +298,7 @@ function ToolbarSearchField() {
                             <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
                         </InputAdornment>
                     ),
-                    endAdornment: searchTerm ? (
+                    endAdornment: value ? (
                         <InputAdornment position="end">
                             <IconButton
                                 size="small"
@@ -304,28 +313,7 @@ function ToolbarSearchField() {
                 }}
                 sx={{ '& .MuiInputBase-input': { cursor: 'text' } }}
             />
-            {searchTerm && totalMatches > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap', ml: 0.5 }}>
-                    <IconButton
-                        size="small"
-                        aria-label="Previous match"
-                        onClick={() => navigateToMatch(matchIndex - 1)}
-                    >
-                        <ArrowUpwardIcon fontSize="small" />
-                    </IconButton>
-                    <Typography variant="caption" sx={{ minWidth: '60px', textAlign: 'center' }}>
-                        {matchIndex + 1} of {totalMatches}
-                    </Typography>
-                    <IconButton
-                        size="small"
-                        aria-label="Next match"
-                        onClick={() => navigateToMatch(matchIndex + 1)}
-                    >
-                        <ArrowDownwardIcon fontSize="small" />
-                    </IconButton>
-                </Box>
-            )}
-        </Box>
+        </>
     );
 }
 
@@ -336,7 +324,6 @@ type ToolbarFilterRow = {
     value: string;
 };
 
-type ToolbarLogicOperator = GridLogicOperator.And | GridLogicOperator.Or;
 
 function makeEmptyFilterRow(): ToolbarFilterRow {
     return {
@@ -353,8 +340,8 @@ function ToolbarFilterEditor() {
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [allColumns, setAllColumns] = useState<GridColDef[]>([]);
-    const [draftRows, setDraftRows] = useState<ToolbarFilterRow[]>([makeEmptyFilterRow()]);
-    const [draftLogicOperator, setDraftLogicOperator] = useState<ToolbarLogicOperator>(GridLogicOperator.And);
+    // Community DataGrid supports only 1 filter item; we store exactly one draft row.
+    const [draftRow, setDraftRow] = useState<ToolbarFilterRow>(makeEmptyFilterRow());
     const [draftColumnVisibilityModel, setDraftColumnVisibilityModel] = useState<Record<string, boolean>>({});
     const [appliedHiddenColumnCount, setAppliedHiddenColumnCount] = useState(0);
 
@@ -386,7 +373,12 @@ function ToolbarFilterEditor() {
         Boolean(
             row.field &&
             row.operator &&
-            (isNoValueOperator(row.operator) || row.value.trim().length > 0),
+            (
+                isNoValueOperator(row.operator) ||
+                (ARRAY_VALUE_OPERATORS.has(row.operator)
+                    ? row.value.trim().split(',').some((v) => v.trim().length > 0)
+                    : row.value.trim().length > 0)
+            ),
         );
 
     const toFilterValue = (row: ToolbarFilterRow): GridFilterItem['value'] => {
@@ -394,6 +386,15 @@ function ToolbarFilterEditor() {
 
         const raw = row.value.trim();
         const type = getColumnType(row.field);
+
+        // isAnyOf needs an array
+        if (ARRAY_VALUE_OPERATORS.has(row.operator)) {
+            return raw
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean);
+        }
+
         if (type === 'number') {
             const parsed = Number(raw);
             return Number.isFinite(parsed) ? parsed : raw;
@@ -423,48 +424,27 @@ function ToolbarFilterEditor() {
             Object.values(visibilityModel).filter((visible) => visible === false).length,
         );
 
-        const existingItems = (filterModel?.items ?? []) as GridFilterItem[];
-        if (existingItems.length > 0) {
-            const mapped = existingItems.map((item) => ({
-                id: String(item.id ?? `filter-${Math.random().toString(16).slice(2)}`),
-                field: String(item.field ?? ''),
-                operator: String(item.operator ?? ''),
-                value: Array.isArray(item.value) ? item.value.map(String).join(', ') : String(item.value ?? ''),
-            }));
-            setDraftRows([...mapped, makeEmptyFilterRow()]);
+        // Load existing filter item (first only — Community DataGrid allows 1)
+        const existingItem = ((filterModel?.items ?? []) as GridFilterItem[])[0];
+        if (existingItem?.field) {
+            setDraftRow({
+                id: String(existingItem.id ?? `filter-${Math.random().toString(16).slice(2)}`),
+                field: String(existingItem.field ?? ''),
+                operator: String(existingItem.operator ?? ''),
+                value: Array.isArray(existingItem.value)
+                    ? existingItem.value.map(String).join(', ')
+                    : String(existingItem.value ?? ''),
+            });
         } else {
-            setDraftRows([makeEmptyFilterRow()]);
+            setDraftRow(makeEmptyFilterRow());
         }
 
-        setDraftLogicOperator((filterModel?.logicOperator as ToolbarLogicOperator | undefined) ?? GridLogicOperator.And);
         setAnchorEl(event.currentTarget);
     };
 
     const closeEditor = () => setAnchorEl(null);
 
-    const updateRow = (idx: number, patch: Partial<ToolbarFilterRow>) => {
-        setDraftRows((prev) => prev.map((row, i) => (i === idx ? { ...row, ...patch } : row)));
-    };
-
-    const addRow = () => {
-        const last = draftRows[draftRows.length - 1];
-        if (!last || !isFilled(last)) return;
-        setDraftRows((prev) => [...prev, makeEmptyFilterRow()]);
-    };
-
-    const removeRow = (idx: number) => {
-        if (draftRows.length === 1) {
-            setDraftRows([makeEmptyFilterRow()]);
-            return;
-        }
-        const remaining = draftRows.filter((_, i) => i !== idx);
-        setDraftRows(remaining.length > 0 ? remaining : [makeEmptyFilterRow()]);
-    };
-
-    const clearFiltersDraft = () => {
-        setDraftRows([makeEmptyFilterRow()]);
-        setDraftLogicOperator(GridLogicOperator.And);
-    };
+    const clearFiltersDraft = () => setDraftRow(makeEmptyFilterRow());
 
     const setAllColumnsVisibleDraft = (visible: boolean) => {
         setDraftColumnVisibilityModel((prev) => {
@@ -482,23 +462,17 @@ function ToolbarFilterEditor() {
             visible[column.field] = true;
         });
         setDraftColumnVisibilityModel(visible);
-        setDraftRows([makeEmptyFilterRow()]);
-        setDraftLogicOperator(GridLogicOperator.And);
+        setDraftRow(makeEmptyFilterRow());
     };
 
     const saveChanges = () => {
-        const items: GridFilterItem[] = draftRows
-            .filter(isFilled)
-            .map((row) => ({
-                id: row.id,
-                field: row.field,
-                operator: row.operator,
-                value: toFilterValue(row),
-            }));
+        const items: GridFilterItem[] = isFilled(draftRow)
+            ? [{ id: draftRow.id, field: draftRow.field, operator: draftRow.operator, value: toFilterValue(draftRow) }]
+            : [];
 
         apiRef.current.setFilterModel({
             items,
-            logicOperator: draftLogicOperator,
+            logicOperator: GridLogicOperator.And,
             quickFilterValues: filterModel?.quickFilterValues ?? [],
             quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
         });
@@ -536,54 +510,39 @@ function ToolbarFilterEditor() {
                         }}
                     >
                         <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                                 <Typography variant="subtitle2" fontWeight={600}>
-                                    Column Filters
+                                    Column Filter
                                 </Typography>
                                 <Button variant="text" size="small" onClick={clearFiltersDraft}>
-                                    Clear filters
+                                    Clear
                                 </Button>
                             </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Match rows:
-                                </Typography>
-                                <ToggleButtonGroup
-                                    exclusive
-                                    size="small"
-                                    value={draftLogicOperator}
-                                    onChange={(_event, value: ToolbarLogicOperator | null) => {
-                                        if (value) setDraftLogicOperator(value);
-                                    }}
-                                >
-                                    <ToggleButton value={GridLogicOperator.And}>All filters (AND)</ToggleButton>
-                                    <ToggleButton value={GridLogicOperator.Or}>Any filter (OR)</ToggleButton>
-                                </ToggleButtonGroup>
-                            </Box>
-                            <Stack spacing={1.5}>
-                                {draftRows.map((row, idx) => {
-                                    const operators = operatorOptionsForField(row.field);
-                                    const type = getColumnType(row.field);
-                                    const noValueOperator = isNoValueOperator(row.operator);
-                                    const isBoolean = type === 'boolean';
-                                    const inputType =
-                                        type === 'number'
-                                            ? 'number'
-                                            : type === 'dateTime'
-                                                ? 'datetime-local'
-                                                : type === 'date'
-                                                    ? 'date'
-                                                    : 'text';
-                                    const isDateInput = inputType === 'date' || inputType === 'datetime-local';
+                            {(() => {
+                                const row = draftRow;
+                                const operators = operatorOptionsForField(row.field);
+                                const type = getColumnType(row.field);
+                                const noValueOp = isNoValueOperator(row.operator);
+                                const isArrayOp = ARRAY_VALUE_OPERATORS.has(row.operator);
+                                const isBoolean = type === 'boolean';
+                                const inputType =
+                                    type === 'number'
+                                        ? 'number'
+                                        : type === 'dateTime'
+                                            ? 'datetime-local'
+                                            : type === 'date'
+                                                ? 'date'
+                                                : 'text';
+                                const isDateInput = inputType === 'date' || inputType === 'datetime-local';
+                                const hint = isArrayOp ? ARRAY_OPERATOR_HINT[row.operator] : undefined;
 
-                                    return (
+                                return (
+                                    <Stack spacing={1.5}>
                                         <Box
-                                            key={row.id}
                                             sx={{
                                                 display: 'grid',
-                                                gridTemplateColumns: '2fr 1.55fr 2fr auto auto',
+                                                gridTemplateColumns: '1fr 1fr',
                                                 gap: 1,
-                                                alignItems: 'center',
                                             }}
                                         >
                                             <TextField
@@ -592,11 +551,12 @@ function ToolbarFilterEditor() {
                                                 label="Column"
                                                 value={row.field}
                                                 onChange={(e) =>
-                                                    updateRow(idx, {
+                                                    setDraftRow((prev) => ({
+                                                        ...prev,
                                                         field: e.target.value,
                                                         operator: '',
                                                         value: '',
-                                                    })
+                                                    }))
                                                 }
                                             >
                                                 <MenuItem value="">Select column</MenuItem>
@@ -613,66 +573,53 @@ function ToolbarFilterEditor() {
                                                 label="Operator"
                                                 value={row.operator}
                                                 onChange={(e) => {
-                                                    const nextOperator = e.target.value;
-                                                    updateRow(idx, {
-                                                        operator: nextOperator,
-                                                        value: isNoValueOperator(nextOperator) ? '' : row.value,
-                                                    });
+                                                    const next = e.target.value;
+                                                    setDraftRow((prev) => ({
+                                                        ...prev,
+                                                        operator: next,
+                                                        value: isNoValueOperator(next) ? '' : prev.value,
+                                                    }));
                                                 }}
                                                 disabled={!row.field}
                                             >
                                                 <MenuItem value="">Select</MenuItem>
-                                                {operators.map((operator) => (
-                                                    <MenuItem key={operator.value} value={operator.value}>
-                                                        {operator.label}
+                                                {operators.map((op) => (
+                                                    <MenuItem key={op.value} value={op.value}>
+                                                        {op.label}
                                                     </MenuItem>
                                                 ))}
                                             </TextField>
-
-                                            {isBoolean ? (
-                                                <TextField
-                                                    select
-                                                    size="small"
-                                                    label="Value"
-                                                    value={row.value}
-                                                    onChange={(e) => updateRow(idx, { value: e.target.value })}
-                                                    disabled={!row.field || !row.operator || noValueOperator}
-                                                >
-                                                    <MenuItem value="">Select</MenuItem>
-                                                    <MenuItem value="true">true</MenuItem>
-                                                    <MenuItem value="false">false</MenuItem>
-                                                </TextField>
-                                            ) : (
-                                                <TextField
-                                                    size="small"
-                                                    label="Value"
-                                                    value={row.value}
-                                                    onChange={(e) => updateRow(idx, { value: e.target.value })}
-                                                    disabled={!row.field || !row.operator || noValueOperator}
-                                                    type={inputType}
-                                                    InputLabelProps={isDateInput ? { shrink: true } : undefined}
-                                                />
-                                            )}
-
-                                            <IconButton
-                                                size="small"
-                                                aria-label="Add filter row"
-                                                onClick={addRow}
-                                                disabled={idx !== draftRows.length - 1}
-                                            >
-                                                <AddIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                aria-label="Remove filter row"
-                                                onClick={() => removeRow(idx)}
-                                            >
-                                                <CloseIcon fontSize="small" />
-                                            </IconButton>
                                         </Box>
-                                    );
-                                })}
-                            </Stack>
+
+                                        {isBoolean ? (
+                                            <TextField
+                                                select
+                                                size="small"
+                                                label="Value"
+                                                value={row.value}
+                                                onChange={(e) => setDraftRow((prev) => ({ ...prev, value: e.target.value }))}
+                                                disabled={!row.field || !row.operator || noValueOp}
+                                            >
+                                                <MenuItem value="">Select</MenuItem>
+                                                <MenuItem value="true">true</MenuItem>
+                                                <MenuItem value="false">false</MenuItem>
+                                            </TextField>
+                                        ) : (
+                                            <TextField
+                                                size="small"
+                                                label="Value"
+                                                value={row.value}
+                                                onChange={(e) => setDraftRow((prev) => ({ ...prev, value: e.target.value }))}
+                                                disabled={!row.field || !row.operator || noValueOp}
+                                                type={inputType}
+                                                InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                                helperText={hint}
+                                                placeholder={isArrayOp ? 'value1, value2, ...' : undefined}
+                                            />
+                                        )}
+                                    </Stack>
+                                );
+                            })()}
                         </Box>
 
                         <Box>

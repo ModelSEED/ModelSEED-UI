@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Non-product/generated/archived areas:
+    "legacy/**",
+    "gsd-opencode/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 
