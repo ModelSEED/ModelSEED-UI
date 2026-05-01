@@ -12,7 +12,8 @@ import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@
 import { formatFormula } from '@/components/utils/formatFormula';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
-import { exportToCsv } from '@/lib/utils/exportCsv';
+import ExportModal from '@/components/ui/ExportModal';
+import Chip from '@mui/material/Chip';
 
 /* ─── Alias / formatting helpers ─────────────────────────────── */
 
@@ -58,11 +59,34 @@ function parseAliases(aliases?: string[]): React.ReactNode {
     );
 }
 
-function parseSynonyms(aliases?: string[]): string {
-    if (!aliases || aliases.length === 0) return 'N/A';
+function parseSynonyms(aliases?: string[]): string[] {
+    if (!aliases || aliases.length === 0) return [];
     // For compounds, the Name entry is the FIRST alias
     const first = aliases[0];
-    return first.replace('Name:', '').replace(/"/g, '');
+    const nameEntry = first.replace('Name:', '').replace(/"/g, '');
+    return nameEntry.split(';').map((s) => s.trim()).filter(Boolean);
+}
+
+function SynonymsCell({ synonyms }: { synonyms: string[] }) {
+    if (synonyms.length === 0) return <span style={{ color: '#999' }}>N/A</span>;
+    return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5 }}>
+            {synonyms.map((syn) => (
+                <Chip
+                    key={syn}
+                    label={syn}
+                    size="small"
+                    sx={{
+                        bgcolor: '#f1f5f9',
+                        border: '1px solid #e2e8f0',
+                        color: '#334155',
+                        fontSize: '0.72rem',
+                        height: 22,
+                    }}
+                />
+            ))}
+        </Box>
+    );
 }
 
 /* ─── Columns ────────────────────────────────────────────────── */
@@ -95,9 +119,9 @@ const columns: GridColDef<Compound>[] = [
     {
         field: 'synonyms',
         headerName: 'Synonyms',
-        width: 300,
+        width: 280,
         sortable: false,
-        renderCell: (params) => <GridHighlightText text={parseSynonyms(params.row.aliases)} />,
+        renderCell: (params) => <SynonymsCell synonyms={parseSynonyms(params.row.aliases)} />,
     },
     {
         field: 'aliases',
@@ -126,11 +150,16 @@ export default function CompoundsPage() {
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
-    const [search, setSearch] = useState('');
+    const [exportModalOpen, setExportModalOpen] = useState(false);
 
     const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
-        setSearch(newModel.quickFilterValues?.[0] ?? '');
-        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        setFilterModel({
+            items: newModel.items ?? [],
+            logicOperator: newModel.logicOperator,
+            quickFilterValues: newModel.quickFilterValues ?? [],
+            quickFilterLogicOperator: newModel.quickFilterLogicOperator,
+        });
     }, []);
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
@@ -148,45 +177,35 @@ export default function CompoundsPage() {
         placeholderData: keepPreviousData,
     });
 
-    const filteredDocs = useMemo(() => {
-        if (!search || !data?.docs) return data?.docs ?? [];
-        const q = search.toLowerCase();
-        return data.docs.filter((doc) =>
-            doc.id?.toLowerCase().includes(q) ||
-            doc.name?.toLowerCase().includes(q) ||
-            doc.formula?.toLowerCase().includes(q) ||
-            doc.aliases?.some((a) => a.toLowerCase().includes(q))
-        );
-    }, [data, search]);
+    const exportColumns = useMemo(() => [
+        { field: 'id', headerName: 'ID', defaultSelected: true },
+        { field: 'name', headerName: 'Name', defaultSelected: true },
+        { field: 'formula', headerName: 'Formula', defaultSelected: true },
+        { field: 'mass', headerName: 'Mass', defaultSelected: true },
+        { field: 'charge', headerName: 'Charge', defaultSelected: false },
+        { field: 'deltag', headerName: 'ΔG', defaultSelected: false },
+        { field: 'synonyms', headerName: 'Synonyms', defaultSelected: false },
+        { field: 'aliases', headerName: 'Aliases', defaultSelected: false },
+    ], []);
 
-    const handleExportCsv = useCallback(() => {
-        const docs = search ? filteredDocs : (data?.docs ?? []);
-        if (docs.length === 0) return;
-
-        exportToCsv(docs.map((d) => ({
-            id: d.id,
-            name: d.name,
-            formula: d.formula,
-            mass: d.mass,
-            charge: d.charge,
-            deltag: d.deltag,
-            synonyms: parseSynonyms(d.aliases),
-            aliases: d.aliases?.slice(1).join('; ') || '',
-        })), {
-            filename: 'modelseed_compounds.csv',
-            columns: ['id', 'name', 'formula', 'mass', 'charge', 'deltag', 'synonyms', 'aliases'],
-            columnLabels: {
-                id: 'ID',
-                name: 'Name',
-                formula: 'Formula',
-                mass: 'Mass',
-                charge: 'Charge',
-                deltag: 'ΔG',
-                synonyms: 'Synonyms',
-                aliases: 'Aliases',
-            },
+    const fetchAllRows = useCallback(async (): Promise<Record<string, unknown>[]> => {
+        const res = await getCompounds({
+            limit: 100000,
+            offset: 0,
+            sort: { field: 'id' },
+            filterModel,
         });
-    }, [data, search, filteredDocs]);
+        return res.docs.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            formula: doc.formula,
+            mass: doc.mass,
+            charge: doc.charge,
+            deltag: doc.deltag,
+            synonyms: parseSynonyms(doc.aliases).join('; '),
+            aliases: doc.aliases?.slice(1).join('; ') || '',
+        }));
+    }, [filterModel]);
 
     return (
         <>
@@ -198,7 +217,7 @@ export default function CompoundsPage() {
                     variant="outlined"
                     size="small"
                     startIcon={<DownloadIcon />}
-                    onClick={handleExportCsv}
+                    onClick={() => setExportModalOpen(true)}
                     disabled={!data?.docs?.length}
                 >
                     Export CSV
@@ -206,28 +225,22 @@ export default function CompoundsPage() {
             </Box>
 
             <DataGrid<Compound>
-                rows={search ? filteredDocs : (data?.docs ?? [])}
+                rows={data?.docs ?? []}
                 columns={columns}
-                rowCount={search ? filteredDocs.length : (data?.numFound ?? 0)}
+                rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                paginationMode={search ? 'client' : 'server'}
-                sortingMode={search ? 'client' : 'server'}
+                paginationMode="server"
+                sortingMode="server"
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
-                filterMode={search ? undefined : 'server'}
-                filterModel={{
-                    ...(search ? { items: [] } : filterModel),
-                    quickFilterValues: search ? [search] : [],
-                }}
+                filterMode="server"
+                filterModel={filterModel}
                 onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
-                slotProps={{
-                    toolbar: { showQuickFilter: true },
-                }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
@@ -241,6 +254,28 @@ export default function CompoundsPage() {
                     },
                 }}
                 autoHeight
+            />
+
+            <ExportModal
+                open={exportModalOpen}
+                onClose={() => setExportModalOpen(false)}
+                columns={exportColumns}
+                currentData={data?.docs as unknown as Record<string, unknown>[] ?? []}
+                allDataFetcher={fetchAllRows}
+                totalRows={data?.numFound ?? 0}
+                filename="modelseed_compounds.csv"
+                columnLabels={{
+                    id: 'ID',
+                    name: 'Name',
+                    formula: 'Formula',
+                    mass: 'Mass',
+                    charge: 'Charge',
+                    deltag: 'ΔG',
+                    synonyms: 'Synonyms',
+                    aliases: 'Aliases',
+                }}
+                activeSearch={filterModel.quickFilterValues?.join(' ') || undefined}
+                activeFilter={filterModel.items.length > 0 ? `${filterModel.items.length} column filter(s)` : undefined}
             />
         </>
     );

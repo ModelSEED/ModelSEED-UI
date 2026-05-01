@@ -10,7 +10,7 @@
 
 export interface TrackedJob {
     id: string;
-    kind: 'reconstruct' | 'gapfill' | 'fba' | 'merge';
+    kind: 'reconstruct' | 'copy' | 'gapfill' | 'fba' | 'merge';
     label: string;
     modelId?: string;
     relatedRef?: string;

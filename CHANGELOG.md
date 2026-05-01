@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2026-04-06
+## [{{VERSION}}] - 2026-04-06
 
 ### Added
 - **Compound Structure Images on Reaction Pages**: Reaction detail pages now display structure images for all compounds in the equation below the equation text. Images are clickable and link to compound detail pages. Missing images are gracefully hidden.
@@ -13,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced README Documentation**: Added SSH tunnel setup instructions, environment variable documentation, and common troubleshooting scenarios to main README.
 
 ### Changed
-- **Version Bump**: Updated version from 0.1.0 to 3.0.0 per production requirements.
-- **Version Display**: Updated About/Version page to display v3.0.0 instead of hardcoded v0.1.3.
+- **Version Bump**: Updated version from 0.1.0 to {{VERSION}} per production requirements.
+- **Version Display**: Updated About/Version page to display v{{VERSION}} instead of hardcoded v0.1.3.
 
 ### Fixed
-- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/seaver/modelseed`) by returning empty results instead of 404 errors.
+- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/user/modelseed`) by returning empty results instead of 404 errors.
 
 ### Documentation
 - **SSH Tunnel Requirement**: Clearly documented that SSH tunnel to Poplar API server is required for local development and testing. The tunnel forwards `localhost:8000` to the backend API.

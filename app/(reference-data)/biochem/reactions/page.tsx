@@ -6,6 +6,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterMod
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
 import DownloadIcon from '@mui/icons-material/Download';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
@@ -15,7 +16,8 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
-import { exportToCsv } from '@/lib/utils/exportCsv';
+import ExportModal from '@/components/ui/ExportModal';
+import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
@@ -41,16 +43,16 @@ function parseAliases(aliases?: string[]): React.ReactNode {
                 else if (prefix.includes('MetaCyc')) baseUrl = EXTERNAL_DBS.MetaCyc_r;
 
                 return (
-                    <span key={i}>
+                    <span key={i} style={{ display: 'block', marginBottom: 2 }}>
                         <strong>{prefix}:</strong>{' '}
                         {values.map((v, j) => (
                             <span key={j}>
                                 {baseUrl ? (
-                                    <a href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer">{v}</a>
+                                    <a href={`${baseUrl}${v}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00acc1' }}>{v}</a>
                                 ) : (
-                                    v
+                                    <span style={{ color: '#334155' }}>{v}</span>
                                 )}
-                                {j < values.length - 1 ? '; ' : ''}
+                                {j < values.length - 1 ? <span style={{ color: '#94a3b8', margin: '0 4px' }}>•</span> : ''}
                             </span>
                         ))}
                         <br />
@@ -61,24 +63,77 @@ function parseAliases(aliases?: string[]): React.ReactNode {
     );
 }
 
-function parseSynonyms(aliases?: string[]): string {
-    if (!aliases || aliases.length === 0) return 'N/A';
+function parseSynonyms(aliases?: string[]): string[] {
+    if (!aliases || aliases.length === 0) return [];
     const last = aliases[aliases.length - 1];
-    return last.replace('Name:', '').replace(/"/g, '');
+    const nameEntry = last.replace('Name:', '').replace(/"/g, '');
+    return nameEntry.split(';').map((s) => s.trim()).filter(Boolean);
+}
+
+function SynonymsCell({ synonyms }: { synonyms: string[] }) {
+    if (synonyms.length === 0) return <span style={{ color: '#999' }}>N/A</span>;
+    return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5 }}>
+            {synonyms.map((syn) => (
+                <Chip
+                    key={syn}
+                    label={syn}
+                    size="small"
+                    sx={{
+                        bgcolor: '#f1f5f9',
+                        border: '1px solid #e2e8f0',
+                        color: '#334155',
+                        fontSize: '0.72rem',
+                        height: 22,
+                    }}
+                />
+            ))}
+        </Box>
+    );
 }
 
 function parsePathways(pathways?: string[]): React.ReactNode {
     if (!pathways || pathways.length === 0) return 'N/A';
+    
+    const allPathways: { prefix: string; items: string[] }[] = [];
+    pathways.forEach((p) => {
+        const colonIdx = p.indexOf(':');
+        if (colonIdx === -1) {
+            allPathways.push({ prefix: '', items: [p] });
+            return;
+        }
+        const prefix = p.substring(0, colonIdx).trim();
+        const rest = p.substring(colonIdx + 1).replace(/"/g, '').replace(/\|/g, ';');
+        const items = rest.split(';').map((s) => s.trim()).filter(Boolean);
+        allPathways.push({ prefix, items });
+    });
+
     return (
-        <span style={{ display: 'inline-block', maxWidth: 300 }}>
-            {pathways.map((p, i) => {
-                const colonIdx = p.indexOf(':');
-                if (colonIdx === -1) return <span key={i}>{p}<br /></span>;
-                const prefix = p.substring(0, colonIdx).trim();
-                const rest = p.substring(colonIdx + 1).replace(/"/g, '').replace(/\|/g, '; ');
-                return <span key={i}><strong>{prefix}:</strong> {rest}<br /></span>;
-            })}
-        </span>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 0.5 }}>
+            {allPathways.map((group, i) => (
+                <Box key={i} sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                    {group.prefix && (
+                        <Box component="span" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', mr: 0.5 }}>
+                            {group.prefix}:
+                        </Box>
+                    )}
+                    {group.items.map((item) => (
+                        <Chip
+                            key={item}
+                            label={item}
+                            size="small"
+                            sx={{
+                                bgcolor: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                color: '#475569',
+                                fontSize: '0.72rem',
+                                height: 22,
+                            }}
+                        />
+                    ))}
+                </Box>
+            ))}
+        </Box>
     );
 }
 
@@ -91,16 +146,53 @@ export default function ReactionsPage() {
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
-    const [search, setSearch] = useState('');
 
     const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
-        setSearch(newModel.quickFilterValues?.[0] ?? '');
-        setFilterModel((prev) => ({ ...prev, items: newModel.items ?? [] }));
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        setFilterModel({
+            items: newModel.items ?? [],
+            logicOperator: newModel.logicOperator,
+            quickFilterValues: newModel.quickFilterValues ?? [],
+            quickFilterLogicOperator: newModel.quickFilterLogicOperator,
+        });
     }, []);
 
     // Modal state
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [commentReactionId, setCommentReactionId] = useState<string | null>(null);
+    const [exportModalOpen, setExportModalOpen] = useState(false);
+
+    const exportColumns = useMemo(() => [
+        { field: 'id', headerName: 'ID', defaultSelected: true },
+        { field: 'name', headerName: 'Name', defaultSelected: true },
+        { field: 'definition', headerName: 'Equation', defaultSelected: true },
+        { field: 'deltag', headerName: 'ΔG', defaultSelected: true },
+        { field: 'reversibility', headerName: 'Reversibility', defaultSelected: false },
+        { field: 'status', headerName: 'Status', defaultSelected: true },
+        { field: 'ec_numbers', headerName: 'EC Numbers', defaultSelected: false },
+        { field: 'pathways', headerName: 'Pathways', defaultSelected: false },
+        { field: 'is_transport', headerName: 'Transport', defaultSelected: false },
+    ], []);
+
+    const fetchAllRows = useCallback(async (): Promise<Record<string, unknown>[]> => {
+        const res = await getReactions({
+            limit: 100000,
+            offset: 0,
+            sort: { field: 'id' },
+            filterModel,
+        });
+        return res.docs.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            definition: doc.definition,
+            deltag: doc.deltag,
+            reversibility: doc.reversibility,
+            status: doc.status,
+            ec_numbers: doc.ec_numbers?.join('; ') || '',
+            pathways: doc.pathways?.join('; ') || '',
+            is_transport: doc.is_transport ? 'Yes' : 'No',
+        }));
+    }, [filterModel]);
 
     const handleOpenComment = useCallback((id: string) => {
         setCommentReactionId(id);
@@ -146,7 +238,11 @@ export default function ReactionsPage() {
             headerName: 'Equation',
             width: 350,
             sortable: false,
-            renderCell: (params) => <ChemicalEquation equation={params.value} />,
+            renderCell: (params) => (
+                <TruncatedWithTooltip text={params.value} maxWidth={330}>
+                    <ChemicalEquation equation={params.value} />
+                </TruncatedWithTooltip>
+            ),
         },
         {
             field: 'is_transport',
@@ -164,9 +260,30 @@ export default function ReactionsPage() {
         {
             field: 'ec_numbers',
             headerName: 'EC Numbers',
-            width: 130,
+            width: 160,
             sortable: false,
-            renderCell: (params) => <GridHighlightText text={(params.row.ec_numbers ?? []).join('; ')} />,
+            renderCell: (params) => {
+                const ecNumbers = params.row.ec_numbers ?? [];
+                if (ecNumbers.length === 0) return 'N/A';
+                return (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5 }}>
+                        {ecNumbers.map((ec: string) => (
+                            <Chip
+                                key={ec}
+                                label={ec}
+                                size="small"
+                                sx={{
+                                    bgcolor: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    color: '#475569',
+                                    fontSize: '0.72rem',
+                                    height: 22,
+                                }}
+                            />
+                        ))}
+                    </Box>
+                );
+            },
         },
         {
             field: 'notes',
@@ -178,9 +295,16 @@ export default function ReactionsPage() {
         {
             field: 'synonyms',
             headerName: 'Synonyms',
-            width: 260,
+            width: 280,
             sortable: false,
-            renderCell: (params) => <GridHighlightText text={parseSynonyms(params.row.aliases)} />,
+            renderCell: (params) => {
+                const synonyms = parseSynonyms(params.row.aliases);
+                return (
+                    <TruncatedWithTooltip text={synonyms.join('; ')}>
+                        <SynonymsCell synonyms={synonyms} />
+                    </TruncatedWithTooltip>
+                );
+            },
         },
         {
             field: 'aliases',
@@ -192,7 +316,7 @@ export default function ReactionsPage() {
         {
             field: 'pathways',
             headerName: 'Pathways',
-            width: 300,
+            width: 280,
             sortable: false,
             renderCell: (params) => parsePathways(params.row.pathways),
         },
@@ -222,49 +346,6 @@ export default function ReactionsPage() {
         placeholderData: keepPreviousData,
     });
 
-    const filteredDocs = useMemo(() => {
-        if (!search || !data?.docs) return data?.docs ?? [];
-        const q = search.toLowerCase();
-        return data.docs.filter((doc) =>
-            doc.id?.toLowerCase().includes(q) ||
-            doc.name?.toLowerCase().includes(q) ||
-            doc.definition?.toLowerCase().includes(q) ||
-            doc.aliases?.some((a) => a.toLowerCase().includes(q)) ||
-            doc.pathways?.some((p) => p.toLowerCase().includes(q))
-        );
-    }, [data, search]);
-
-    const handleExportCsv = useCallback(() => {
-        const docs = search ? filteredDocs : (data?.docs ?? []);
-        if (docs.length === 0) return;
-
-        exportToCsv(docs.map((d) => ({
-            id: d.id,
-            name: d.name,
-            definition: d.definition,
-            deltag: d.deltag,
-            reversibility: d.reversibility,
-            status: d.status,
-            ec_numbers: d.ec_numbers?.join('; ') || '',
-            pathways: d.pathways?.join('; ') || '',
-            is_transport: d.is_transport ? 'Yes' : 'No',
-        })), {
-            filename: 'modelseed_reactions.csv',
-            columns: ['id', 'name', 'definition', 'deltag', 'reversibility', 'status', 'ec_numbers', 'pathways', 'is_transport'],
-            columnLabels: {
-                id: 'ID',
-                name: 'Name',
-                definition: 'Equation',
-                deltag: 'ΔG',
-                reversibility: 'Reversibility',
-                status: 'Status',
-                ec_numbers: 'EC Numbers',
-                pathways: 'Pathways',
-                is_transport: 'Transport',
-            },
-        });
-    }, [data, search, filteredDocs]);
-
     return (
         <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
@@ -275,7 +356,7 @@ export default function ReactionsPage() {
                     variant="outlined"
                     size="small"
                     startIcon={<DownloadIcon />}
-                    onClick={handleExportCsv}
+                    onClick={() => setExportModalOpen(true)}
                     disabled={!data?.docs?.length}
                 >
                     Export CSV
@@ -283,28 +364,22 @@ export default function ReactionsPage() {
             </Box>
 
             <DataGrid<Reaction>
-                rows={search ? filteredDocs : (data?.docs ?? [])}
+                rows={data?.docs ?? []}
                 columns={columns}
-                rowCount={!search ? (data?.numFound ?? 0) : undefined}
+                rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                paginationMode={search ? 'client' : 'server'}
-                sortingMode={search ? 'client' : 'server'}
+                paginationMode="server"
+                sortingMode="server"
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
-                filterMode={search ? undefined : 'server'}
-                filterModel={{
-                    ...(search ? { items: [] } : filterModel),
-                    quickFilterValues: search ? [search] : [],
-                }}
+                filterMode="server"
+                filterModel={filterModel}
                 onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
-                slotProps={{
-                    toolbar: { showQuickFilter: true },
-                }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
@@ -324,6 +399,29 @@ export default function ReactionsPage() {
                 open={commentModalOpen}
                 onClose={() => setCommentModalOpen(false)}
                 reactionId={commentReactionId}
+            />
+
+            <ExportModal
+                open={exportModalOpen}
+                onClose={() => setExportModalOpen(false)}
+                columns={exportColumns}
+                currentData={data?.docs as unknown as Record<string, unknown>[] ?? []}
+                allDataFetcher={fetchAllRows}
+                totalRows={data?.numFound ?? 0}
+                filename="modelseed_reactions.csv"
+                columnLabels={{
+                    id: 'ID',
+                    name: 'Name',
+                    definition: 'Equation',
+                    deltag: 'ΔG',
+                    reversibility: 'Reversibility',
+                    status: 'Status',
+                    ec_numbers: 'EC Numbers',
+                    pathways: 'Pathways',
+                    is_transport: 'Transport',
+                }}
+                activeSearch={filterModel.quickFilterValues?.join(' ') || undefined}
+                activeFilter={filterModel.items.length > 0 ? `${filterModel.items.length} column filter(s)` : undefined}
             />
         </>
     );
