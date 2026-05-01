@@ -42,9 +42,11 @@ export default function PlantSEED2015Page() {
 
             <Box textAlign="center" mb={4}>
                 <a href="http://press3.mcs.anl.gov/plantseed2015/files/2015/09/2015-Wkshp_participants.jpeg" target="_blank" rel="noopener noreferrer">
-                    <img
+                    <Image
                         src="http://press3.mcs.anl.gov/plantseed2015/files/2015/09/2015-Wkshp_participants.jpeg"
                         alt="2015 Workshop Group Photo"
+                        width={800}
+                        height={600}
                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
                     />
                 </a>
