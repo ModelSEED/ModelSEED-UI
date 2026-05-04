@@ -7,6 +7,7 @@ import {
     gridPageSelector,
     gridPageSizeSelector,
     gridRowCountSelector,
+    gridFilteredRowCountSelector,
     gridFilterModelSelector,
     type GridColDef,
     type GridFilterItem,
@@ -87,11 +88,15 @@ function CustomPagination() {
     const apiRef = useGridApiContext();
     const page = useGridSelector(apiRef, gridPageSelector);
     const pageSize = useGridSelector(apiRef, gridPageSizeSelector);
+    // Use filtered row count so pagination shows correct total after client-side filtering
+    const filteredCount = useGridSelector(apiRef, gridFilteredRowCountSelector);
     const rowCount = useGridSelector(apiRef, gridRowCountSelector);
+    // Prefer filtered count (client-side filtering), fall back to total rowCount
+    const displayCount = filteredCount ?? rowCount;
+    const rowCountValue = displayCount ?? 0;
     const ready = page !== undefined && pageSize !== undefined && rowCount !== undefined;
     const pageValue = page ?? 0;
     const pageSizeValue = pageSize ?? 25;
-    const rowCountValue = rowCount ?? 0;
     const lastPage = Math.max(0, Math.ceil(rowCountValue / pageSizeValue) - 1);
     const safePage = Math.min(pageValue, lastPage);
 
