@@ -625,27 +625,7 @@ export async function listPublicMediaFromApi(): Promise<ModelseedMediaSummary[]>
  * ```
  */
 export async function listMyMediaFromApi(): Promise<ModelseedMediaSummary[]> {
-    const primary = await listMediaGeneric('/api/media/mine');
-    if (primary.length > 0) return primary;
-
-    if (!USE_NEW_PROXY) return primary;
-    const username = getStoredAuthUsername();
-    if (!username) return primary;
-
-    try {
-        const fallbackPaths = [
-            `/${username}/media`,
-            `/${username}/modelseed/media`,
-        ];
-        for (const path of fallbackPaths) {
-            const viaWorkspace = await listMediaViaWorkspaceLs(path);
-            if (viaWorkspace.length > 0) return viaWorkspace;
-        }
-        return primary;
-    } catch (err) {
-        console.warn('modelseed-api: fallback /api/workspace/ls media lookup failed:', err);
-        return primary;
-    }
+    return listMediaGeneric('/api/media/mine');
 }
 
 /**

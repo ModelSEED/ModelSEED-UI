@@ -48,6 +48,7 @@ import {
     trackJob,
     TrackedJob,
 } from '@/lib/api/jobTracker';
+import { parseWorkspaceDate } from '@/lib/utils/date';
 
 interface MyModelItem {
     id: string; // Model name / filename
@@ -518,7 +519,7 @@ export default function MyModelsPage() {
             headerName: 'Modification Date',
             width: 220,
             type: 'dateTime',
-            valueGetter: (_value, row) => (row.modDate ? new Date(row.modDate) : null),
+            valueGetter: (_value, row) => (row.modDate ? (parseWorkspaceDate(row.modDate) ?? new Date(row.modDate)) : null),
             valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
         {

@@ -52,6 +52,7 @@ import {
     trackJob,
     type TrackedJob,
 } from '@/lib/api/jobTracker';
+import { parseWorkspaceDate } from '@/lib/utils/date';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
@@ -503,7 +504,7 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                     headerName: 'Time', 
                     width: 180,
                     type: 'dateTime',
-                    valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+                    valueGetter: (_value, row) => (row.timestamp ? (parseWorkspaceDate(String(row.timestamp)) ?? new Date(String(row.timestamp))) : null),
                     valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
                 },
             ],
@@ -519,7 +520,7 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
                     headerName: 'Date', 
                     width: 180,
                     type: 'dateTime',
-                    valueGetter: (_value, row) => (row.rundate ? new Date(String(row.rundate)) : null),
+                    valueGetter: (_value, row) => (row.rundate ? (parseWorkspaceDate(String(row.rundate)) ?? new Date(String(row.rundate))) : null),
                     valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
                 },
             ],
@@ -562,7 +563,7 @@ function a11yProps(index: number) {
 
 function formatRelativeTimestamp(value: unknown): string {
     if (typeof value !== 'string' && typeof value !== 'number') return '-';
-    const date = new Date(value);
+    const date = parseWorkspaceDate(String(value)) ?? new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
     return date.toLocaleString();
 }
@@ -859,7 +860,7 @@ function extractFbaRows(
                 ref,
                 objective: String(fba.objective ?? '-'),
                 objectiveFunction: String(fba.objective_function ?? 'N/A'),
-                media: summarizeMediaRef(fba.media),
+                media: summarizeMediaRef(fba.media_ref ?? fba.media),
                 timestamp: formatRelativeTimestamp(fba.timestamp ?? fba.rundate),
             });
         }
@@ -930,7 +931,7 @@ function extractGapfillRows(
             id,
             ref,
             integrated: (gapfill.integrated ?? gapfill.integrated_solution) ? 'Yes' : 'No',
-            media: summarizeMediaRef(gapfill.media),
+            media: summarizeMediaRef(gapfill.media_ref ?? gapfill.media),
             timestamp: formatRelativeTimestamp(gapfill.rundate ?? gapfill.timestamp),
         });
     }
@@ -1427,10 +1428,10 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         error: modelEditsError,
         refetch: refetchModelEdits,
     } = useQuery({
-        queryKey: ['modelEdits', USE_MODELSEED_API, workspaceCandidates[0]],
-        enabled: USE_MODELSEED_API && workspaceCandidates.length > 0,
+        queryKey: ['modelEdits', USE_MODELSEED_API, apiCandidates[0]],
+        enabled: USE_MODELSEED_API && apiCandidates.length > 0,
         queryFn: async () => {
-            const edits = await listModelEditsFromApi(workspaceCandidates[0]);
+            const edits = await listModelEditsFromApi(apiCandidates[0]);
             return Array.isArray(edits) ? edits : [];
         },
         retry: 0,
@@ -1821,7 +1822,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             headerName: 'Timestamp',
             width: 220,
             type: 'dateTime',
-            valueGetter: (value) => (value ? new Date(String(value)) : null),
+            valueGetter: (value) => (value ? (parseWorkspaceDate(String(value)) ?? new Date(String(value))) : null),
             valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
         { field: 'user', headerName: 'User', width: 220 },
@@ -1889,10 +1890,11 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             headerName: 'ID',
             width: 180,
             renderCell: (params) => {
-                const fbaId = params.value;
-                const fbaHref = `/fba${workspacePath}/fba/${fbaId}`;
+                const ref = typeof params.row.ref === 'string' && params.row.ref
+                    ? params.row.ref
+                    : `${workspacePath}/fba/${String(params.value ?? '')}`;
                 return (
-                    <Link href={fbaHref} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                    <Link href={toEncodedCatchallHref('/fba', ref)} style={{ color: '#00acc1', textDecoration: 'none' }}>
                         {String(params.value ?? '')}
                     </Link>
                 );
@@ -1906,7 +1908,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             headerName: 'Time', 
             width: 180,
             type: 'dateTime',
-            valueGetter: (_value, row) => (row.timestamp ? new Date(String(row.timestamp)) : null),
+            valueGetter: (_value, row) => (row.timestamp ? (parseWorkspaceDate(String(row.timestamp)) ?? new Date(String(row.timestamp))) : null),
             valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
     ];
