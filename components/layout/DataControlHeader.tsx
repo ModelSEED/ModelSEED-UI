@@ -140,7 +140,9 @@ function ToolbarSearchField() {
         if (pathname.includes('/reference-data/genomes')) return 'Find in plant models...';
         if (pathname.includes('/reference-data/list-media')) return 'Find in media...';
         if (pathname.includes('/my-models')) return 'Find in my models...';
+        if (pathname.includes('/my-jobs')) return 'Find in my jobs...';
         if (pathname.includes('/myMedia')) return 'Find in my media...';
+        if (pathname.includes('/my-media')) return 'Find in my media...';
         if (pathname.includes('/model/')) {
             if (pathname.endsWith('/reactions')) return 'Find in reactions...';
             if (pathname.endsWith('/compounds')) return 'Find in compounds...';
@@ -166,7 +168,9 @@ function ToolbarSearchField() {
                     (current.logicOperator as GridLogicOperator | undefined) ??
                     GridLogicOperator.And,
                 quickFilterValues: term.trim() ? [term.trim()] : [],
-                quickFilterLogicOperator: GridLogicOperator.And,
+                quickFilterLogicOperator:
+                    (current.quickFilterLogicOperator as GridLogicOperator | undefined) ??
+                    GridLogicOperator.And,
             });
         },
         [apiRef],
@@ -201,6 +205,9 @@ function ToolbarSearchField() {
                         (current.logicOperator as GridLogicOperator | undefined) ??
                         GridLogicOperator.And,
                     quickFilterValues: [],
+                    quickFilterLogicOperator:
+                        (current.quickFilterLogicOperator as GridLogicOperator | undefined) ??
+                        GridLogicOperator.And,
                 });
             } catch {
                 // api may be stale on unmount — safe to ignore

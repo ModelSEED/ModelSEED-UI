@@ -9,7 +9,7 @@
  * the unified proxy when available.
  */
 
-import { SOLR_BASE, SOLR_BASE_LEGACY, CPD_IMG_BASE, MODELSEED_API_URL, USE_NEW_BIOCHEM } from './config';
+import { SOLR_BASE, SOLR_BASE_LEGACY, CPD_IMG_BASE, MODELSEED_API_URL } from './config';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -354,8 +354,9 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
 }
 
 /**
- * Fetcher for the new modelseed-api (Poplar) REST biochemistry endpoints.
- * Currently limited to simple query-based search.
+ * Explicit REST fetcher for modelseed-api biochemistry endpoints.
+ * Note: reaction/compound pages are pinned to legacy Solr; this is for
+ * other consumers that intentionally target modelseed-api.
  */
 async function fetchModelseedApiBiochem<T>(
     endpoint: string,
@@ -363,7 +364,6 @@ async function fetchModelseedApiBiochem<T>(
 ): Promise<SolrResponse<T>> {
     const { query, limit = 25, offset = 0, filterModel, sort } = opts;
 
-    // Extract search term from options or filter model
     let activeSearch = query;
     if (!activeSearch && filterModel?.quickFilterValues && filterModel.quickFilterValues.length > 0) {
         activeSearch = filterModel.quickFilterValues
@@ -374,28 +374,20 @@ async function fetchModelseedApiBiochem<T>(
 
     const hasColumnFilters = (filterModel?.items?.length ?? 0) > 0;
     const needsLocalTransforms = hasColumnFilters || Boolean(sort);
-
-    // modelseed-api search currently supports query/limit/offset but not full DataGrid filter operators.
-    // When advanced filters/sorts are present, fetch a wider window and apply them client-side for parity.
     const fetchLimit = needsLocalTransforms ? Math.max(limit + offset, 1000) : limit;
 
-    // Build URL for the modern Python-based REST API.
-    // Some deployments reject `offset`, and some reject empty search query.
     const primaryUrl = activeSearch
         ? `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeSearch)}&limit=${fetchLimit}&type=${endpoint}`
         : `${MODELSEED_API_URL}/api/biochem/${endpoint}?limit=${fetchLimit}`;
 
     let res = await fetch(primaryUrl);
     if (!res.ok && !activeSearch) {
-        // Fallback for deployments that require /search even for browse requests.
         const fallbackUrl = `${MODELSEED_API_URL}/api/biochem/search?query=*&limit=${fetchLimit}&type=${endpoint}`;
         res = await fetch(fallbackUrl);
     }
     if (!res.ok) throw new Error(`modelseed-api request failed: ${res.status}`);
     const data = await res.json();
 
-    // Map REST response to SolrResponse format.
-    // Handles both new paginated dict format and fallback array format.
     const rawDocs: T[] = Array.isArray(data)
         ? (data as T[])
         : ((data.docs || []) as T[]);
@@ -573,16 +565,7 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
         ...opts,
     };
 
-    if (USE_NEW_BIOCHEM) {
-        const res = await fetchModelseedApiBiochem<Reaction>('reactions', mergedOpts);
-        res.docs.forEach((doc) => {
-            if (doc.is_obsolete === '1') {
-                doc.status += ' (and is obsolete)';
-            }
-        });
-        return res;
-    }
-
+    // Reactions page is intentionally pinned to legacy Solr.
     const url = buildSolrUrl('reactions', mergedOpts);
     const res = await fetchSolr<Reaction>(url);
 
@@ -623,12 +606,35 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
         ...opts,
     };
 
-    if (USE_NEW_BIOCHEM) {
-        return fetchModelseedApiBiochem<Compound>('compounds', mergedOpts);
-    }
-
+    // Compounds page is intentionally pinned to legacy Solr.
     const url = buildSolrUrl('compounds', mergedOpts);
     return fetchSolr<Compound>(url);
+}
+
+/**
+ * Explicit modelseed-api reactions query path.
+ * Use this only when intentionally targeting the REST backend.
+ */
+export async function getReactionsFromModelseedApi(
+    opts: SolrQueryOpts = {}
+): Promise<SolrResponse<Reaction>> {
+    const res = await fetchModelseedApiBiochem<Reaction>('reactions', opts);
+    res.docs.forEach((doc) => {
+        if (doc.is_obsolete === '1') {
+            doc.status += ' (and is obsolete)';
+        }
+    });
+    return res;
+}
+
+/**
+ * Explicit modelseed-api compounds query path.
+ * Use this only when intentionally targeting the REST backend.
+ */
+export async function getCompoundsFromModelseedApi(
+    opts: SolrQueryOpts = {}
+): Promise<SolrResponse<Compound>> {
+    return fetchModelseedApiBiochem<Compound>('compounds', opts);
 }
 
 /**

@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 describe('biochem REST path local filter/sort/pagination', () => {
   beforeEach(() => {
     vi.resetModules();
-    process.env.NEXT_PUBLIC_USE_NEW_BIOCHEM = 'true';
     process.env.NEXT_PUBLIC_MODELSEED_API_URL = 'http://localhost:8000';
   });
 
@@ -19,7 +18,7 @@ describe('biochem REST path local filter/sort/pagination', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const biochem = await import('@/lib/api/biochem');
-    const res = await biochem.getReactions({
+    const res = await biochem.getReactionsFromModelseedApi({
       limit: 25,
       filterModel: {
         items: [{ field: 'status', operator: 'equals', value: 'OK' }],
@@ -45,7 +44,7 @@ describe('biochem REST path local filter/sort/pagination', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const biochem = await import('@/lib/api/biochem');
-    const res = await biochem.getReactions({
+    const res = await biochem.getReactionsFromModelseedApi({
       limit: 1,
       offset: 1,
       sort: { field: 'id', desc: false },
