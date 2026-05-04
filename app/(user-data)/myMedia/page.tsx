@@ -20,6 +20,7 @@ import { workspaceDelete } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
+import { parseWorkspaceDate } from '@/lib/utils/date';
 
 interface MyMediaItem {
     id: string;
@@ -143,7 +144,7 @@ export default function MyMediaPage() {
             headerName: 'Modification Date',
             width: 250,
             type: 'dateTime',
-            valueGetter: (_value, row) => (row.modDate ? new Date(row.modDate) : null),
+            valueGetter: (_value, row) => (row.modDate ? (parseWorkspaceDate(row.modDate) ?? new Date(row.modDate)) : null),
             valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
         {

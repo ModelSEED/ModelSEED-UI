@@ -34,6 +34,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from '@mui/icons-material/Search';
 import NextLink from 'next/link';
 import { workspaceLs, workspaceDownloadUrl } from '@/lib/api/workspace';
+import { parseWorkspaceDate } from '@/lib/utils/date';
 import ShowMetadataDialog from '@/components/ui/ShowMetadataDialog';
 
 interface WorkspaceItem {
@@ -53,7 +54,8 @@ function parseWorkspaceLsEntry(entry: unknown[], parentPath: string): WorkspaceI
     const name = String(entry[0] || '');
     const type = String(entry[1] || 'unknown');
     const path = String(entry[2] || `${parentPath}/${name}`);
-    const timestamp = entry[3] ? new Date(String(entry[3])).toLocaleString() : '';
+    const rawTs = String(entry[3] || '');
+    const timestamp = rawTs;
     const size = Number(entry[6]) || 0;
     const owner = String(entry[5] || '');
     const isFolder = type === 'folder' || type === 'modelfolder';
@@ -234,7 +236,7 @@ export default function DataBrowserPage({ params }: { params: Promise<{ path: st
             headerName: 'Modified',
             width: 160,
             type: 'dateTime',
-            valueGetter: (_value, row) => (row.modDate ? new Date(row.modDate) : null),
+            valueGetter: (_value, row) => (row.modDate ? (parseWorkspaceDate(row.modDate) ?? new Date(row.modDate)) : null),
             valueFormatter: (value: Date | null) => (value ? value.toLocaleString() : '-'),
         },
         {

@@ -9,6 +9,7 @@ import {
     gridRowCountSelector,
     gridFilteredRowCountSelector,
     gridFilterModelSelector,
+    gridRowsLoadingSelector,
     type GridColDef,
     type GridFilterItem,
     type GridFilterModel,
@@ -91,6 +92,8 @@ function CustomPagination() {
     // Use filtered row count so pagination shows correct total after client-side filtering
     const filteredCount = useGridSelector(apiRef, gridFilteredRowCountSelector);
     const rowCount = useGridSelector(apiRef, gridRowCountSelector);
+    // Hide pagination while data is loading to prevent "0-0 of 0" flash
+    const isLoading = useGridSelector(apiRef, gridRowsLoadingSelector);
     // Prefer filtered count (client-side filtering), fall back to total rowCount
     const displayCount = filteredCount ?? rowCount;
     const rowCountValue = displayCount ?? 0;
@@ -107,7 +110,7 @@ function CustomPagination() {
         }
     }, [apiRef, ready, pageValue, pageSizeValue, lastPage]);
 
-    if (!ready) {
+    if (!ready || isLoading) {
         return null;
     }
 

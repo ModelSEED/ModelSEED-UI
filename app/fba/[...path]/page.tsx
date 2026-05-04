@@ -192,8 +192,10 @@ function extractFbaObjectRefsFromLs(payload: Record<string, unknown[]>): string[
             if (type !== 'fba') continue;
             const ref = resolveWorkspaceLsRef(entry);
             if (!ref || isFbaContainerRef(ref)) continue;
-            const ts = Number.isFinite(new Date(String(entry[3] ?? '')).getTime())
-                ? new Date(String(entry[3] ?? '')).getTime()
+            const rawTs = String(entry[3] ?? '');
+            const normalizedTs = rawTs.replace(/^(\d{4}-\d{2}-\d{2})-(\d{2}:\d{2}:\d{2})$/, '$1T$2');
+            const ts = Number.isFinite(new Date(normalizedTs).getTime())
+                ? new Date(normalizedTs).getTime()
                 : 0;
             refs.push({ ref, ts });
         }
