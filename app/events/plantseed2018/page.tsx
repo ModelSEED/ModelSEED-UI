@@ -54,9 +54,11 @@ export default function PlantSEED2018Page() {
 
             <Box textAlign="center" mb={4}>
                 <a href="http://bioseed.mcs.anl.gov/~seaver/Files/PlantSEED_Workshop_2018/PlantSEED_Workshop_2018_Participants.png" target="_blank" rel="noopener noreferrer">
-                    <img
+                    <Image
                         src="http://bioseed.mcs.anl.gov/~seaver/Files/PlantSEED_Workshop_2018/PlantSEED_Workshop_2018_Participants.png"
                         alt="2018 Workshop Group Photo"
+                        width={800}
+                        height={600}
                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
                     />
                 </a>

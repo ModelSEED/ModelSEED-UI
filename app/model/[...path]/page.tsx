@@ -157,6 +157,20 @@ function toSearchableString(value: unknown): string {
     return '';
 }
 
+function extractReactionIds(value: unknown): string[] {
+    const raw = toSearchableString(value);
+    if (!raw.trim()) return [];
+    const matches = raw.match(/rxn\d{5}/g) ?? [];
+    const seen = new Set<string>();
+    const ordered: string[] = [];
+    for (const match of matches) {
+        if (seen.has(match)) continue;
+        seen.add(match);
+        ordered.push(match);
+    }
+    return ordered;
+}
+
 function buildReactionRows(model: Record<string, unknown>): Record<string, unknown>[] {
     return asArray<Record<string, unknown>>(model.modelreactions ?? model.reactions).map((reaction, index) => ({
         id: String((reaction.id ?? extractRefId(reaction.reaction_ref)) || `rxn-${index}`),
@@ -185,6 +199,7 @@ function buildGeneRows(model: Record<string, unknown>): Record<string, unknown>[
         return explicitGenes.map((gene, index) => ({
             id: String((gene.id ?? extractRefId(gene.feature_ref)) || `gene-${index}`),
             reactions: toSearchableString(gene.reactions ?? []),
+            reactionIds: extractReactionIds(gene.reactions ?? []),
             functions: gene.functions ? toSearchableString(gene.functions) : 'N/A',
         }));
     }
@@ -211,6 +226,7 @@ function buildGeneRows(model: Record<string, unknown>): Record<string, unknown>[
     return Array.from(geneToReactions.entries()).map(([gene, reactions]) => ({
         id: gene,
         reactions: Array.from(reactions).join(', '),
+        reactionIds: Array.from(reactions),
         functions: 'View details',
     }));
 }
@@ -400,7 +416,36 @@ function buildTableConfig(model: Record<string, unknown>): Record<Exclude<TabKey
             rows: buildGeneRows(model),
             columns: [
                 { field: 'id', headerName: 'Gene', width: 230 },
-                { field: 'reactions', headerName: 'Reactions', flex: 1, minWidth: 260 },
+                {
+                    field: 'reactions',
+                    headerName: 'Reactions',
+                    flex: 1,
+                    minWidth: 320,
+                    renderCell: (params) => {
+                        const row = params.row as Record<string, unknown>;
+                        const reactionIds = Array.isArray(row.reactionIds)
+                            ? (row.reactionIds as string[])
+                            : extractReactionIds(params.value);
+                        if (reactionIds.length === 0) {
+                            return <Typography variant="body2" color="text.secondary">N/A</Typography>;
+                        }
+                        return (
+                            <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" sx={{ py: 0.5 }}>
+                                {reactionIds.map((rxnId) => (
+                                    <Chip
+                                        key={`${String(row.id ?? 'gene')}-${rxnId}`}
+                                        label={rxnId}
+                                        size="small"
+                                        component={Link}
+                                        clickable
+                                        href={`/biochem/reactions/${rxnId}`}
+                                        sx={{ color: '#00acc1' }}
+                                    />
+                                ))}
+                            </Stack>
+                        );
+                    },
+                },
                 { field: 'functions', headerName: 'Functions', flex: 1, minWidth: 260 },
             ],
         },
@@ -1711,7 +1756,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         modelName,
     );
 
-    const genomeRef = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
+    const genomeRefRaw = String(modelObject.genome_ref ?? modelObject.genome_id ?? '-');
+    const genomeRef = genomeRefRaw.replace(/\|\|+$/, '').trim() || '-';
 
     const visibleTabs = MODEL_TABS.filter((tab) => !(isPlantModel && tab.key === 'edits'));
     const activeTabVisible = visibleTabs.some((tab) => tab.key === activeTab);
@@ -1727,16 +1773,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         },
         {
             label: 'Genome Ref',
-            value: genomeRef !== '-' ? (
-                <Link
-                    href={`https://www.bv-brc.org/view/Genome/${genomeRef}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ color: '#00acc1', textDecoration: 'none' }}
-                >
-                    {genomeRef}
-                </Link>
-            ) : '-',
+            value: genomeRef,
         },
         { label: 'Type', value: String(modelObject.type ?? '-') },
         {

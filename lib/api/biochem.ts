@@ -9,7 +9,7 @@
  * the unified proxy when available.
  */
 
-import { SOLR_BASE, CPD_IMG_BASE, MODELSEED_API_URL } from './config';
+import { SOLR_BASE, SOLR_BASE_LEGACY, CPD_IMG_BASE, MODELSEED_API_URL } from './config';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -135,8 +135,8 @@ function normalizeFilterValue(value: unknown): string {
     return String(value ?? '').trim();
 }
 
-/** Build a wildcard-safe search token. */
-function toWildcardToken(value: string): string {
+/** Build a wildcard-safe search token for legacy Solr. */
+function toSolrWildcardToken(value: string): string {
     return escapeSolrTerm(value.replace(/%20/g, ' ').trim()).replace(/\s+/g, '*');
 }
 
@@ -174,7 +174,7 @@ function buildFilterClause(item: GridFilterItem): string | null {
     }
 
     const value = normalizeFilterValue(rawValue);
-    const wildcardValue = toWildcardToken(value);
+    const wildcardValue = toSolrWildcardToken(value);
     const literalValue = toSolrLiteral(value);
     const rangeBoundary = toRangeBoundary(value);
 
@@ -242,7 +242,7 @@ function buildQuickSearchClause(
 
     const termClauses = terms
         .map((term) => {
-            const token = toWildcardToken(term);
+            const token = toSolrWildcardToken(term);
             if (!token) return '';
             const usePrefixOnly = token.length < MIN_WILDCARD_QUERY_LENGTH;
 
@@ -292,17 +292,17 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     const filterClauses = (filterModel?.items ?? [])
         .map((item) => buildFilterClause(item))
         .filter((clause): clause is string => Boolean(clause));
-    const filterLogic = filterModel?.logicOperator === 'or' ? 'OR' : 'AND';
+    const filterLogic = filterModel?.logicOperator === 'or' ? ' OR ' : ' AND ';
     const combinedFilterClause =
         filterClauses.length > 1
-            ? `(${filterClauses.join(` ${filterLogic} `)})`
+            ? `(${filterClauses.join(filterLogic)})`
             : (filterClauses[0] ?? '');
 
     const queryColumnClauses = queryColumn
         ? Object.entries(queryColumn)
             .map(([field, rawValue]) => {
                 const value = normalizeFilterValue(rawValue);
-                const token = toWildcardToken(value);
+                const token = toSolrWildcardToken(value);
                 if (!token) return '';
                 return `${toSolrField(field)}:*${token}*`;
             })
@@ -328,7 +328,8 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         finalClauses.push('*');
     }
 
-    url += `&q=${finalClauses.length > 0 ? finalClauses.join(' AND ') : '*'}`;
+    const qValue = finalClauses.length > 0 ? finalClauses.join(' AND ') : '*';
+    url += `&q=${encodeURIComponent(qValue)}`;
 
     // Pagination
     if (limit) url += `&rows=${limit}`;
@@ -353,45 +354,155 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
 }
 
 /**
- * Fetcher for the new modelseed-api (Poplar) REST biochemistry endpoints.
- * Currently limited to simple query-based search.
+ * Explicit REST fetcher for modelseed-api biochemistry endpoints.
+ * Note: reaction/compound pages are pinned to legacy Solr; this is for
+ * other consumers that intentionally target modelseed-api.
  */
 async function fetchModelseedApiBiochem<T>(
     endpoint: string,
     opts: SolrQueryOpts = {}
 ): Promise<SolrResponse<T>> {
-    const { query, limit = 25, offset = 0, filterModel } = opts;
-    const baseUrl = `${MODELSEED_API_URL}/api/biochem/${endpoint}`;
+    const { query, limit = 25, offset = 0, filterModel, sort } = opts;
 
-    // Map SolrQueryOpts to REST params
-    // Note: Poplar currently only supports simple 'query' and 'limit'
-    let activeQuery = query;
-    if (!activeQuery && filterModel?.quickFilterValues && filterModel.quickFilterValues.length > 0) {
-        activeQuery = filterModel.quickFilterValues
-            .map((value) => normalizeFilterValue(value))
+    let activeSearch = query;
+    if (!activeSearch && filterModel?.quickFilterValues && filterModel.quickFilterValues.length > 0) {
+        activeSearch = filterModel.quickFilterValues
+            .map((v) => String(v).trim())
             .filter(Boolean)
             .join(' ');
     }
 
-    let url = `${baseUrl}?limit=${limit}`;
-    if (activeQuery) {
-        url = `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeQuery)}&limit=${limit}&type=${endpoint}`;
-    } else {
-        // Poplar doesn't have a broad "list all" without IDs yet, 
-        // fallback to search with empty or universal query if possible, or just return empty
-        url = `${baseUrl}?limit=${limit}`; 
-    }
+    const hasColumnFilters = (filterModel?.items?.length ?? 0) > 0;
+    const needsLocalTransforms = hasColumnFilters || Boolean(sort);
+    // Guardrail to avoid excessive payload sizes when offset is large.
+    const MAX_REST_FETCH_LIMIT = 5000;
+    const fetchLimit = needsLocalTransforms
+        ? Math.min(Math.max(limit + offset, 1000), MAX_REST_FETCH_LIMIT)
+        : Math.min(limit, MAX_REST_FETCH_LIMIT);
 
-    const res = await fetch(url);
+    const primaryUrl = activeSearch
+        ? `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeSearch)}&limit=${fetchLimit}&type=${endpoint}`
+        : `${MODELSEED_API_URL}/api/biochem/${endpoint}?limit=${fetchLimit}`;
+
+    let res = await fetch(primaryUrl);
+    if (!res.ok && !activeSearch) {
+        const fallbackUrl = `${MODELSEED_API_URL}/api/biochem/search?query=*&limit=${fetchLimit}&type=${endpoint}`;
+        res = await fetch(fallbackUrl);
+    }
     if (!res.ok) throw new Error(`modelseed-api request failed: ${res.status}`);
     const data = await res.json();
 
-    // Map REST array response to SolrResponse format for compatibility
+    const rawDocs: T[] = Array.isArray(data)
+        ? (data as T[])
+        : ((data.docs || []) as T[]);
+
+    const filteredDocs = hasColumnFilters
+        ? rawDocs.filter((doc) => matchesFilterModel(doc as Record<string, unknown>, filterModel?.items ?? []))
+        : rawDocs;
+    const sortedDocs = sort ? sortDocs(filteredDocs, sort) : filteredDocs;
+    const pagedDocs = sortedDocs.slice(offset, offset + limit);
+
     return {
-        numFound: data.length, // REST API doesn't return total count yet
+        numFound: sortedDocs.length,
         start: offset,
-        docs: data as T[],
+        docs: pagedDocs,
     };
+}
+
+function normalizeFieldValue(value: unknown): string {
+    if (Array.isArray(value)) return value.map((v) => String(v ?? '')).join(' ');
+    if (value == null) return '';
+    return String(value);
+}
+
+function compareStringByOperator(fieldValue: string, operator: string, filterValue: string): boolean {
+    const fieldNorm = fieldValue.toLowerCase();
+    const valueNorm = filterValue.toLowerCase();
+    switch (operator) {
+        case 'contains':
+            return fieldNorm.includes(valueNorm);
+        case 'doesNotContain':
+            return !fieldNorm.includes(valueNorm);
+        case 'equals':
+        case 'is':
+            return fieldNorm === valueNorm;
+        case 'doesNotEqual':
+        case 'not':
+            return fieldNorm !== valueNorm;
+        case 'startsWith':
+            return fieldNorm.startsWith(valueNorm);
+        case 'endsWith':
+            return fieldNorm.endsWith(valueNorm);
+        default:
+            return fieldNorm.includes(valueNorm);
+    }
+}
+
+function matchesFilterItem(doc: Record<string, unknown>, item: GridFilterItem): boolean {
+    const operator = String(item.operator ?? '');
+    const field = toSolrField(String(item.field ?? ''));
+    if (!field || !operator) return true;
+
+    const rawField = doc[field];
+    const fieldValue = normalizeFieldValue(rawField);
+    const value = normalizeFilterValue(item.value);
+
+    if (operator === 'isEmpty') return fieldValue.trim().length === 0;
+    if (operator === 'isNotEmpty') return fieldValue.trim().length > 0;
+    if (operator === 'isAnyOf') {
+        const values = Array.isArray(item.value)
+            ? item.value.map((v) => normalizeFilterValue(v)).filter(Boolean)
+            : value.split(',').map((v) => v.trim()).filter(Boolean);
+        if (values.length === 0) return true;
+        return values.some((v) => compareStringByOperator(fieldValue, 'equals', v));
+    }
+
+    const fieldNum = Number(fieldValue);
+    const valueNum = Number(value);
+    const bothNumeric = Number.isFinite(fieldNum) && Number.isFinite(valueNum);
+    if (bothNumeric) {
+        switch (operator) {
+            case '>':
+            case 'after':
+                return fieldNum > valueNum;
+            case '>=':
+            case 'onOrAfter':
+                return fieldNum >= valueNum;
+            case '<':
+            case 'before':
+                return fieldNum < valueNum;
+            case '<=':
+            case 'onOrBefore':
+                return fieldNum <= valueNum;
+            case '=':
+                return fieldNum === valueNum;
+            case '!=':
+                return fieldNum !== valueNum;
+        }
+    }
+
+    return compareStringByOperator(fieldValue, operator, value);
+}
+
+function matchesFilterModel(doc: Record<string, unknown>, items: GridFilterItem[]): boolean {
+    const activeItems = items.filter((item) => item.field && item.operator);
+    if (activeItems.length === 0) return true;
+    return activeItems.every((item) => matchesFilterItem(doc, item));
+}
+
+function sortDocs<T>(docs: T[], sort: { field: string; desc?: boolean }): T[] {
+    const { field, desc } = sort;
+    const direction = desc ? -1 : 1;
+    return [...docs].sort((a, b) => {
+        const av = (a as Record<string, unknown>)[field];
+        const bv = (b as Record<string, unknown>)[field];
+        const aNum = Number(av);
+        const bNum = Number(bv);
+        if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+            return direction * (aNum - bNum);
+        }
+        return direction * normalizeFieldValue(av).localeCompare(normalizeFieldValue(bv));
+    });
 }
 
 /* ─── Constants ──────────────────────────────────────────────── */
@@ -403,7 +514,7 @@ const SYNONYM_FIELD_ALIAS = 'aliases';
 const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
-const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ecs', 'synonyms', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
 
 /** Reaction visible fields matching legacy `rxnOpts.visible`. */
 const RXN_VISIBLE = [
@@ -458,16 +569,7 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
         ...opts,
     };
 
-    if (SOLR_BASE.includes('/api/')) {
-        const res = await fetchModelseedApiBiochem<Reaction>('reactions', mergedOpts);
-        res.docs.forEach((doc) => {
-            if (doc.is_obsolete === '1') {
-                doc.status += ' (and is obsolete)';
-            }
-        });
-        return res;
-    }
-
+    // Reactions page is intentionally pinned to legacy Solr.
     const url = buildSolrUrl('reactions', mergedOpts);
     const res = await fetchSolr<Reaction>(url);
 
@@ -508,12 +610,35 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
         ...opts,
     };
 
-    if (SOLR_BASE.includes('/api/')) {
-        return fetchModelseedApiBiochem<Compound>('compounds', mergedOpts);
-    }
-
+    // Compounds page is intentionally pinned to legacy Solr.
     const url = buildSolrUrl('compounds', mergedOpts);
     return fetchSolr<Compound>(url);
+}
+
+/**
+ * Explicit modelseed-api reactions query path.
+ * Use this only when intentionally targeting the REST backend.
+ */
+export async function getReactionsFromModelseedApi(
+    opts: SolrQueryOpts = {}
+): Promise<SolrResponse<Reaction>> {
+    const res = await fetchModelseedApiBiochem<Reaction>('reactions', opts);
+    res.docs.forEach((doc) => {
+        if (doc.is_obsolete === '1') {
+            doc.status += ' (and is obsolete)';
+        }
+    });
+    return res;
+}
+
+/**
+ * Explicit modelseed-api compounds query path.
+ * Use this only when intentionally targeting the REST backend.
+ */
+export async function getCompoundsFromModelseedApi(
+    opts: SolrQueryOpts = {}
+): Promise<SolrResponse<Compound>> {
+    return fetchModelseedApiBiochem<Compound>('compounds', opts);
 }
 
 /**
@@ -530,7 +655,8 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
  * ```
  */
 export async function getReactionById(id: string): Promise<Reaction> {
-    const url = `${SOLR_BASE}reactions_staging/select?wt=json&q=id:${id}`;
+    // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
+    const url = `${SOLR_BASE_LEGACY}reactions_staging/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Reaction>(url);
     return res.docs[0];
 }
@@ -549,7 +675,8 @@ export async function getReactionById(id: string): Promise<Reaction> {
  * ```
  */
 export async function getCompoundById(id: string): Promise<Compound> {
-    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=id:${id}`;
+    // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
+    const url = `${SOLR_BASE_LEGACY}compounds_staging/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Compound>(url);
     return res.docs[0];
 }
@@ -592,7 +719,8 @@ function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<M
 
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
-    const url = `${SOLR_BASE}compounds_staging/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    // Batch ID fetch is currently Solr-backed for both modes.
+    const url = `${SOLR_BASE_LEGACY}compounds_staging/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
 
     return fetchSolr<Compound>(url).then((res) => {
         const map = new Map<string, Compound>();
@@ -627,7 +755,8 @@ export async function findReactionsForCompound(
     const offset = opts.offset ?? 0;
     const sort = opts.sort;
 
-    let url = `${SOLR_BASE}reactions_staging/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    // Reverse compound lookup remains Solr-backed for now.
+    let url = `${SOLR_BASE_LEGACY}reactions_staging/select?wt=json&q=equation:*${cpdId}*&fl=*`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {

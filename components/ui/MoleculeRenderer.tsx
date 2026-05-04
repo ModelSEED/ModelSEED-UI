@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Skeleton from '@mui/material/Skeleton';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
@@ -100,7 +101,7 @@ export default function MoleculeRenderer({
         return () => {
             cancelled = true;
         };
-    }, [smiles, atomColorsKey, width, height]);
+    }, [smiles, atomColorsKey, atomColors, width, height]);
 
     if (state === 'loading') {
         return (
@@ -134,12 +135,12 @@ export default function MoleculeRenderer({
 
     if (state === 'png') {
         return (
-            <img
+            <Image
                 src={getCompoundImageUrl(compoundId)}
                 alt={alt ?? `Structure of ${compoundId}`}
+                width={width}
+                height={height}
                 style={{
-                    width,
-                    height,
                     objectFit: 'contain',
                     border: '1px solid #e0e0e0',
                     borderRadius: 4,

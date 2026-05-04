@@ -16,7 +16,7 @@ export default function GenomeDetailPage(props: GenomeDetailProps) {
     const genomeRef = decodeURIComponent(params.ref);
 
     // Query for genome data - this would need to be implemented in the API
-    const { data: genomeData, isLoading, error } = useQuery({
+    const { isLoading, error } = useQuery({
         queryKey: ['genome', genomeRef],
         queryFn: async () => {
             // Placeholder - would need actual API endpoint
