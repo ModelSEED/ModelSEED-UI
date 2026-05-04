@@ -86,6 +86,22 @@ function FeatureLinks({ ids }: { ids: string[] }) {
     );
 }
 
+function ReactionLinks({ ids }: { ids: string[] }) {
+    if (!ids || ids.length === 0) return <>-</>;
+    return (
+        <span style={{ display: 'inline-block', maxWidth: 260 }}>
+            {ids.map((id, idx) => (
+                <span key={`${id}-${idx}`}>
+                    <Link href={`/biochem/reactions/${id}`} style={{ color: '#00acc1', textDecoration: 'none' }}>
+                        {id}
+                    </Link>
+                    {idx < ids.length - 1 && <br />}
+                </span>
+            ))}
+        </span>
+    );
+}
+
 export default function SubsystemsPage() {
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'role', sort: 'asc' }]);
@@ -154,7 +170,7 @@ export default function SubsystemsPage() {
                 field: 'reactions',
                 headerName: 'Reactions',
                 width: 200,
-                renderCell: (params) => <MultiLineList items={params.row.reactions} />,
+                renderCell: (params) => <ReactionLinks ids={params.row.reactions} />,
                 sortable: false,
             },
             {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
 
@@ -42,7 +43,8 @@ export default function MoleculeRenderer({
         let cancelled = false;
 
         if (!smiles) {
-            setState('png');
+            // No structural string from API; avoid rendering empty/transparent fallback images.
+            setState('hidden');
             return;
         }
 
@@ -153,5 +155,28 @@ export default function MoleculeRenderer({
     }
 
     // state === 'hidden': no structure available at all
-    return null;
+    return (
+        <div
+            aria-label={`Compound image unavailable for ${compoundId}`}
+            style={{
+                width,
+                height,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px dashed #cbd5e1',
+                borderRadius: 4,
+                background: '#f8fafc',
+                padding: 8,
+                boxSizing: 'border-box',
+            }}
+        >
+            <Typography
+                variant="caption"
+                sx={{ color: 'text.secondary', textAlign: 'center', lineHeight: 1.3 }}
+            >
+                Compound image unavailable
+            </Typography>
+        </div>
+    );
 }
