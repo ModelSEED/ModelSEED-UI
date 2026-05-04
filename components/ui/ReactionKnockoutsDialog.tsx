@@ -165,6 +165,7 @@ export default function ReactionKnockoutsDialog({
                     showToolbar
                     slots={{ toolbar: DataControlHeader }}
                     slotProps={{ toolbar: { showQuickFilter: true } }}
+                    hideFooter
                     autoHeight
                     disableRowSelectionOnClick={false}
                     sx={{

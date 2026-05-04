@@ -49,6 +49,21 @@ describe('Biochem API Integration Tests', () => {
   });
 });
 
+describe('filterDocsByGridModel (shared local column filters)', () => {
+  it('filters rows using MUI string operators', async () => {
+    const { filterDocsByGridModel } = await import('@/lib/api/biochem');
+    const docs = [
+      { id: '1', name: 'Alpha' },
+      { id: '2', name: 'Beta' },
+    ] as Record<string, unknown>[];
+    const out = filterDocsByGridModel(docs, [
+      { field: 'name', operator: 'contains', value: 'lph' },
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]?.id).toBe('1');
+  });
+});
+
 describe('getCompounds Solr query shape', () => {
   afterEach(() => {
     vi.restoreAllMocks();

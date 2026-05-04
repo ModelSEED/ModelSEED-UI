@@ -514,6 +514,7 @@ async function fetchModelseedApiBiochem<T>(
 function normalizeFieldValue(value: unknown): string {
     if (Array.isArray(value)) return value.map((v) => String(v ?? '')).join(' ');
     if (value == null) return '';
+    if (value instanceof Date) return value.toISOString();
     return String(value);
 }
 
@@ -621,6 +622,28 @@ function sortDocs<T>(
         }
         return direction * normalizeFieldValue(av).localeCompare(normalizeFieldValue(bv));
     });
+}
+
+/**
+ * Apply MUI column filter items to row objects locally (for APIs that cannot express filters server-side).
+ * Uses the same operator semantics as Solr-backed biochem when used with `get*FromModelseedApi`.
+ */
+export function filterDocsByGridModel<T extends Record<string, unknown>>(
+    docs: T[],
+    items: GridFilterItem[],
+    endpoint?: string,
+): T[] {
+    if (!items.length) return docs;
+    return docs.filter((doc) => matchesFilterModel(doc, items, endpoint));
+}
+
+/** Client-side sort helper for grids that batch-fetch then paginate (e.g. PATRIC with column filters). */
+export function sortGridDocsLocally<T>(
+    docs: T[],
+    sort: { field: string; desc?: boolean },
+    resolveField?: (field: string) => string,
+): T[] {
+    return sortDocs(docs, sort, resolveField);
 }
 
 /* ─── Constants ──────────────────────────────────────────────── */

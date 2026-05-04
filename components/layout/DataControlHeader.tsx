@@ -129,7 +129,11 @@ function CustomPagination() {
 function ToolbarSearchField() {
     const apiRef = useGridApiContext();
     const pathname = usePathname();
-    const [value, setValue] = useState('');
+    const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
+    const committedQuick = (gridFilterModel?.quickFilterValues ?? []).join(' ').trim();
+    /** When non-null, the user is editing; otherwise show the grid's committed quick filter. */
+    const [draftQuick, setDraftQuick] = useState<string | null>(null);
+    const displayValue = draftQuick ?? committedQuick;
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const placeholder = useMemo(() => {
@@ -137,12 +141,15 @@ function ToolbarSearchField() {
         if (pathname.includes('/biochem/reactions')) return 'Find in reactions...';
         if (pathname.includes('/biochem/compounds')) return 'Find in compounds...';
         if (pathname.includes('/genomes/Annotations')) return 'Find in subsystems...';
-        if (pathname.includes('/reference-data/genomes')) return 'Find in plant models...';
-        if (pathname.includes('/reference-data/list-media')) return 'Find in media...';
+        if (pathname === '/genomes') return 'Find in plant models...';
+        if (pathname === '/list-media') return 'Find in media...';
         if (pathname.includes('/my-models')) return 'Find in my models...';
         if (pathname.includes('/my-jobs')) return 'Find in my jobs...';
         if (pathname.includes('/myMedia')) return 'Find in my media...';
         if (pathname.includes('/my-media')) return 'Find in my media...';
+        if (pathname.startsWith('/genome/')) return 'Find in genome...';
+        if (pathname.includes('/gapfill/')) return 'Find in gapfill reactions...';
+        if (pathname.includes('/fba/')) return 'Find in FBA results...';
         if (pathname.includes('/model/')) {
             if (pathname.endsWith('/reactions')) return 'Find in reactions...';
             if (pathname.endsWith('/compounds')) return 'Find in compounds...';
@@ -179,16 +186,21 @@ function ToolbarSearchField() {
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const term = e.target.value;
-            setValue(term);
+            setDraftQuick(term);
             if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => applySearch(term), 300);
+            debounceRef.current = setTimeout(() => {
+                applySearch(term);
+                debounceRef.current = null;
+                setDraftQuick(null);
+            }, 300);
         },
         [applySearch],
     );
 
     const handleClear = useCallback(() => {
-        setValue('');
+        setDraftQuick(null);
         if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = null;
         applySearch('');
     }, [applySearch]);
 
@@ -197,6 +209,7 @@ function ToolbarSearchField() {
         const api = apiRef.current;
         return () => {
             if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = null;
             try {
                 const current = api.state.filter?.filterModel ?? { items: [] };
                 api.setFilterModel({
@@ -217,7 +230,7 @@ function ToolbarSearchField() {
 
     // Apply CSS Custom Highlight API to highlight matches in the grid
     useEffect(() => {
-        const term = value.trim();
+        const term = displayValue.trim();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!term || typeof CSS === 'undefined' || !('highlights' in (CSS as any))) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -279,7 +292,7 @@ function ToolbarSearchField() {
                 ((CSS as any).highlights as any).delete('search-results');
             }
         };
-    }, [value, apiRef]);
+    }, [displayValue, apiRef]);
 
     return (
         <>
@@ -291,7 +304,7 @@ function ToolbarSearchField() {
                 }
             `}} />
             <TextField
-                value={value}
+                value={displayValue}
                 onChange={handleChange}
                 onKeyDown={(e) => {
                     if (e.key === 'Escape') handleClear();
@@ -305,7 +318,7 @@ function ToolbarSearchField() {
                             <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
                         </InputAdornment>
                     ),
-                    endAdornment: value ? (
+                    endAdornment: displayValue ? (
                         <InputAdornment position="end">
                             <IconButton
                                 size="small"

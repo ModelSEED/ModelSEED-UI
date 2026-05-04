@@ -409,6 +409,7 @@ function MyJobsContent() {
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 slotProps={{ toolbar: { showQuickFilter: true } }}
+                hideFooter
                 disableRowSelectionOnClick
                 getRowId={(row) => row.id}
                 autoHeight
