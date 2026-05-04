@@ -360,8 +360,8 @@ function ToolbarFilterEditor() {
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [allColumns, setAllColumns] = useState<GridColDef[]>([]);
-    // Community DataGrid supports only 1 filter item; we store exactly one draft row.
-    const [draftRow, setDraftRow] = useState<ToolbarFilterRow>(makeEmptyFilterRow());
+    const [draftRows, setDraftRows] = useState<ToolbarFilterRow[]>([]);
+    const [draftLogicOperator, setDraftLogicOperator] = useState<GridLogicOperator>(GridLogicOperator.And);
     const [draftColumnVisibilityModel, setDraftColumnVisibilityModel] = useState<Record<string, boolean>>({});
     const [appliedHiddenColumnCount, setAppliedHiddenColumnCount] = useState(0);
 
@@ -426,6 +426,20 @@ function ToolbarFilterEditor() {
         return raw;
     };
 
+    const addFilterRow = () => {
+        setDraftRows((prev) => [...prev, makeEmptyFilterRow()]);
+    };
+
+    const removeFilterRow = (id: string) => {
+        setDraftRows((prev) => prev.filter((row) => row.id !== id));
+    };
+
+    const updateFilterRow = (id: string, updates: Partial<ToolbarFilterRow>) => {
+        setDraftRows((prev) =>
+            prev.map((row) => (row.id === id ? { ...row, ...updates } : row)),
+        );
+    };
+
     const openEditor = (event: MouseEvent<HTMLButtonElement>) => {
         const columns = apiRef.current
             .getAllColumns()
@@ -444,27 +458,34 @@ function ToolbarFilterEditor() {
             Object.values(visibilityModel).filter((visible) => visible === false).length,
         );
 
-        // Load existing filter item (first only — Community DataGrid allows 1)
-        const existingItem = ((filterModel?.items ?? []) as GridFilterItem[])[0];
-        if (existingItem?.field) {
-            setDraftRow({
-                id: String(existingItem.id ?? `filter-${Math.random().toString(16).slice(2)}`),
-                field: String(existingItem.field ?? ''),
-                operator: String(existingItem.operator ?? ''),
-                value: Array.isArray(existingItem.value)
-                    ? existingItem.value.map(String).join(', ')
-                    : String(existingItem.value ?? ''),
-            });
+        // Load existing filter items
+        const existingItems = (filterModel?.items ?? []) as GridFilterItem[];
+        if (existingItems.length > 0 && existingItems[0]?.field) {
+            setDraftRows(
+                existingItems.map((item) => ({
+                    id: String(item.id ?? `filter-${Math.random().toString(16).slice(2)}`),
+                    field: String(item.field ?? ''),
+                    operator: String(item.operator ?? ''),
+                    value: Array.isArray(item.value)
+                        ? item.value.map(String).join(', ')
+                        : String(item.value ?? ''),
+                })),
+            );
         } else {
-            setDraftRow(makeEmptyFilterRow());
+            setDraftRows([makeEmptyFilterRow()]);
         }
+        setDraftLogicOperator(
+            filterModel?.logicOperator === GridLogicOperator.Or
+                ? GridLogicOperator.Or
+                : GridLogicOperator.And,
+        );
 
         setAnchorEl(event.currentTarget);
     };
 
     const closeEditor = () => setAnchorEl(null);
 
-    const clearFiltersDraft = () => setDraftRow(makeEmptyFilterRow());
+    const clearFiltersDraft = () => setDraftRows([makeEmptyFilterRow()]);
 
     const setAllColumnsVisibleDraft = (visible: boolean) => {
         setDraftColumnVisibilityModel((prev) => {
@@ -482,17 +503,23 @@ function ToolbarFilterEditor() {
             visible[column.field] = true;
         });
         setDraftColumnVisibilityModel(visible);
-        setDraftRow(makeEmptyFilterRow());
+        setDraftRows([makeEmptyFilterRow()]);
+        setDraftLogicOperator(GridLogicOperator.And);
     };
 
     const saveChanges = () => {
-        const items: GridFilterItem[] = isFilled(draftRow)
-            ? [{ id: draftRow.id, field: draftRow.field, operator: draftRow.operator, value: toFilterValue(draftRow) }]
-            : [];
+        const items: GridFilterItem[] = draftRows
+            .filter(isFilled)
+            .map((row) => ({
+                id: row.id,
+                field: row.field,
+                operator: row.operator,
+                value: toFilterValue(row),
+            }));
 
         apiRef.current.setFilterModel({
             items,
-            logicOperator: GridLogicOperator.And,
+            logicOperator: draftLogicOperator,
             quickFilterValues: filterModel?.quickFilterValues ?? [],
             quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
         });
@@ -534,35 +561,51 @@ function ToolbarFilterEditor() {
                                 <Typography variant="subtitle2" fontWeight={600}>
                                     Column Filter
                                 </Typography>
-                                <Button variant="text" size="small" onClick={clearFiltersDraft}>
-                                    Clear
-                                </Button>
+                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                    <TextField
+                                        select
+                                        size="small"
+                                        label="Logic"
+                                        value={draftLogicOperator}
+                                        onChange={(e) =>
+                                            setDraftLogicOperator(e.target.value as GridLogicOperator)
+                                        }
+                                        sx={{ minWidth: 110 }}
+                                    >
+                                        <MenuItem value={GridLogicOperator.And}>AND</MenuItem>
+                                        <MenuItem value={GridLogicOperator.Or}>OR</MenuItem>
+                                    </TextField>
+                                    <Button variant="text" size="small" onClick={clearFiltersDraft}>
+                                        Clear All
+                                    </Button>
+                                </Box>
                             </Box>
-                            {(() => {
-                                const row = draftRow;
-                                const operators = operatorOptionsForField(row.field);
-                                const type = getColumnType(row.field);
-                                const noValueOp = isNoValueOperator(row.operator);
-                                const isArrayOp = ARRAY_VALUE_OPERATORS.has(row.operator);
-                                const isBoolean = type === 'boolean';
-                                const inputType =
-                                    type === 'number'
-                                        ? 'number'
-                                        : type === 'dateTime'
-                                            ? 'datetime-local'
-                                            : type === 'date'
-                                                ? 'date'
-                                                : 'text';
-                                const isDateInput = inputType === 'date' || inputType === 'datetime-local';
-                                const hint = isArrayOp ? ARRAY_OPERATOR_HINT[row.operator] : undefined;
+                            <Stack spacing={1.5}>
+                                {draftRows.map((row) => {
+                                    const operators = operatorOptionsForField(row.field);
+                                    const type = getColumnType(row.field);
+                                    const noValueOp = isNoValueOperator(row.operator);
+                                    const isArrayOp = ARRAY_VALUE_OPERATORS.has(row.operator);
+                                    const isBoolean = type === 'boolean';
+                                    const inputType =
+                                        type === 'number'
+                                            ? 'number'
+                                            : type === 'dateTime'
+                                                ? 'datetime-local'
+                                                : type === 'date'
+                                                    ? 'date'
+                                                    : 'text';
+                                    const isDateInput = inputType === 'date' || inputType === 'datetime-local';
+                                    const hint = isArrayOp ? ARRAY_OPERATOR_HINT[row.operator] : undefined;
 
-                                return (
-                                    <Stack spacing={1.5}>
+                                    return (
                                         <Box
+                                            key={row.id}
                                             sx={{
                                                 display: 'grid',
-                                                gridTemplateColumns: '1fr 1fr',
+                                                gridTemplateColumns: '1fr 1fr 1fr auto',
                                                 gap: 1,
+                                                alignItems: 'center',
                                             }}
                                         >
                                             <TextField
@@ -571,12 +614,11 @@ function ToolbarFilterEditor() {
                                                 label="Column"
                                                 value={row.field}
                                                 onChange={(e) =>
-                                                    setDraftRow((prev) => ({
-                                                        ...prev,
+                                                    updateFilterRow(row.id, {
                                                         field: e.target.value,
                                                         operator: '',
                                                         value: '',
-                                                    }))
+                                                    })
                                                 }
                                             >
                                                 <MenuItem value="">Select column</MenuItem>
@@ -594,11 +636,10 @@ function ToolbarFilterEditor() {
                                                 value={row.operator}
                                                 onChange={(e) => {
                                                     const next = e.target.value;
-                                                    setDraftRow((prev) => ({
-                                                        ...prev,
+                                                    updateFilterRow(row.id, {
                                                         operator: next,
-                                                        value: isNoValueOperator(next) ? '' : prev.value,
-                                                    }));
+                                                        value: isNoValueOperator(next) ? '' : row.value,
+                                                    });
                                                 }}
                                                 disabled={!row.field}
                                             >
@@ -609,37 +650,54 @@ function ToolbarFilterEditor() {
                                                     </MenuItem>
                                                 ))}
                                             </TextField>
-                                        </Box>
 
-                                        {isBoolean ? (
-                                            <TextField
-                                                select
+                                            {isBoolean ? (
+                                                <TextField
+                                                    select
+                                                    size="small"
+                                                    label="Value"
+                                                    value={row.value}
+                                                    onChange={(e) => updateFilterRow(row.id, { value: e.target.value })}
+                                                    disabled={!row.field || !row.operator || noValueOp}
+                                                >
+                                                    <MenuItem value="">Select</MenuItem>
+                                                    <MenuItem value="true">true</MenuItem>
+                                                    <MenuItem value="false">false</MenuItem>
+                                                </TextField>
+                                            ) : (
+                                                <TextField
+                                                    size="small"
+                                                    label="Value"
+                                                    value={row.value}
+                                                    onChange={(e) => updateFilterRow(row.id, { value: e.target.value })}
+                                                    disabled={!row.field || !row.operator || noValueOp}
+                                                    type={inputType}
+                                                    InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                                    helperText={hint}
+                                                    placeholder={isArrayOp ? 'value1, value2, ...' : undefined}
+                                                />
+                                            )}
+
+                                            <IconButton
                                                 size="small"
-                                                label="Value"
-                                                value={row.value}
-                                                onChange={(e) => setDraftRow((prev) => ({ ...prev, value: e.target.value }))}
-                                                disabled={!row.field || !row.operator || noValueOp}
+                                                onClick={() => removeFilterRow(row.id)}
+                                                disabled={draftRows.length <= 1}
+                                                aria-label="Remove filter"
                                             >
-                                                <MenuItem value="">Select</MenuItem>
-                                                <MenuItem value="true">true</MenuItem>
-                                                <MenuItem value="false">false</MenuItem>
-                                            </TextField>
-                                        ) : (
-                                            <TextField
-                                                size="small"
-                                                label="Value"
-                                                value={row.value}
-                                                onChange={(e) => setDraftRow((prev) => ({ ...prev, value: e.target.value }))}
-                                                disabled={!row.field || !row.operator || noValueOp}
-                                                type={inputType}
-                                                InputLabelProps={isDateInput ? { shrink: true } : undefined}
-                                                helperText={hint}
-                                                placeholder={isArrayOp ? 'value1, value2, ...' : undefined}
-                                            />
-                                        )}
-                                    </Stack>
-                                );
-                            })()}
+                                                <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    );
+                                })}
+                            </Stack>
+                            <Button
+                                size="small"
+                                onClick={addFilterRow}
+                                sx={{ mt: 1 }}
+                                startIcon={<span style={{ fontSize: '1.2em', lineHeight: 1 }}>+</span>}
+                            >
+                                Add Filter
+                            </Button>
                         </Box>
 
                         <Box>
