@@ -348,7 +348,17 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
 
 async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Solr request failed: ${res.status}`);
+    if (!res.ok) {
+        let detail = '';
+        try {
+            const text = await res.text();
+            const parsed = JSON.parse(text) as { error?: { msg?: string } };
+            detail = parsed?.error?.msg ? `: ${parsed.error.msg}` : (text?.slice(0, 240) ?? '');
+        } catch {
+            // ignore JSON parse failures
+        }
+        throw new Error(`Solr request failed: ${res.status}${detail}`);
+    }
     const json = await res.json();
     return json.response as SolrResponse<T>;
 }
@@ -523,13 +533,17 @@ const RXN_VISIBLE = [
     'is_transport', 'ontology', 'pathways', 'notes',
 ];
 
-/** Compound search fields matching legacy `cpd_sFields`. */
-const CPD_SEARCH_FIELDS = ['id', 'name', 'formula', 'synonyms', 'aliases', 'ontology'];
+/**
+ * Compound quick-search fields — must exist on Solr `compounds_staging`.
+ * Note: Solr does not expose an `ontology` field on compounds; querying it yields 400
+ * ("undefined field ontology") and breaks the whole quick-search clause.
+ */
+const CPD_SEARCH_FIELDS = ['id', 'name', 'formula', 'synonyms', 'aliases'];
 
-/** Compound visible fields matching legacy `cpdOpts.visible`. */
+/** Compound visible fields matching Solr `compounds_staging` stored fields (see fl=). */
 const CPD_VISIBLE = [
     'name', 'id', 'formula', 'mass', 'abbreviation', 'deltag', 'deltagerr',
-    'charge', 'aliases', 'ontology',
+    'charge', 'aliases',
 ];
 
 /* ─── Public API ─────────────────────────────────────────────── */
