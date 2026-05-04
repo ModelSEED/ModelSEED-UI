@@ -61,10 +61,11 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
             'patric-genomes',
             query,
             columnFiltersActive,
-            paginationModel.page,
-            paginationModel.pageSize,
+            // Only include pagination in query key for server mode (client-mode paginates in memory)
+            ...(columnFiltersActive ? [] : [paginationModel.page, paginationModel.pageSize]),
             sortToken,
-            filterModel.items,
+            // Stable string key for filter items (avoids new-reference re-fetches)
+            JSON.stringify(filterModel.items ?? []),
         ],
         queryFn: async () => {
             if (columnFiltersActive) {
@@ -75,9 +76,9 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                     sort: sortToken,
                 });
                 const filtered = filterDocsByGridModel(
-                    raw.rows as Record<string, unknown>[],
-                    (filterModel.items ?? []) as GridFilterItem[],
-                );
+                    raw.rows as unknown as Record<string, unknown>[],
+                    filterModel.items ?? [],
+                ) as unknown as PatricGenome[];
                 const sm = sortModel[0];
                 const sorted = sm?.field
                     ? sortGridDocsLocally(filtered, { field: sm.field, desc: sm.sort === 'desc' })

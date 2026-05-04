@@ -290,7 +290,13 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         url += `&fl=${visible.join(',')}`;
     }
 
-    const filterClauses = (filterModel?.items ?? [])
+    // Filter out ontology field for compounds (Solr compounds_staging has no ontology field)
+    const filterItems = (filterModel?.items ?? []).filter(item => {
+        const field = toSolrField(String(item.field ?? ''));
+        return !(collection === 'compounds' && field === 'ontology');
+    });
+
+    const filterClauses = filterItems
         .map((item) => buildFilterClause(item))
         .filter((clause): clause is string => Boolean(clause));
     const filterLogic = filterModel?.logicOperator === 'or' ? ' OR ' : ' AND ';
@@ -588,6 +594,25 @@ function matchesFilterItem(
                 return fieldNum === valueNum;
             case '!=':
                 return fieldNum !== valueNum;
+        }
+    }
+
+    // Handle date operators for non-numeric fields (e.g., date strings)
+    const dateOperators = ['after', 'before', 'onOrAfter', 'onOrBefore'];
+    if (dateOperators.includes(operator)) {
+        const fieldDate = new Date(fieldValue);
+        const valueDate = new Date(value);
+        if (!Number.isNaN(fieldDate.getTime()) && !Number.isNaN(valueDate.getTime())) {
+            switch (operator) {
+                case 'after':
+                    return fieldDate > valueDate;
+                case 'before':
+                    return fieldDate < valueDate;
+                case 'onOrAfter':
+                    return fieldDate >= valueDate;
+                case 'onOrBefore':
+                    return fieldDate <= valueDate;
+            }
         }
     }
 
