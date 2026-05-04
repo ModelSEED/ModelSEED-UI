@@ -83,6 +83,7 @@ export interface SolrQueryOpts {
     limit?: number;
     offset?: number;
     sort?: { field: string; desc?: boolean };
+    /** Solr field list for quick search OR for modelseed-api local quick-refine (see get*FromModelseedApi). */
     searchFields?: string[];
     queryColumn?: Record<string, string>;
     visible?: string[];
@@ -368,11 +369,78 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
  * Note: reaction/compound pages are pinned to legacy Solr; this is for
  * other consumers that intentionally target modelseed-api.
  */
+/**
+ * Resolved JSON field used for sorting (UI column `synonyms` → Solr/REST `aliases`).
+ */
+function resolveDocFieldKey(field: string): string {
+    return toSolrField(field);
+}
+
+/** Terms taken from toolbar quick search when no explicit Solr `query` is set. */
+function quickTermsFromOpts(
+    explicitQuery: string | undefined,
+    filterModel?: GridFilterModel,
+): string[] {
+    if (explicitQuery != null && String(explicitQuery).trim().length > 0) {
+        return [normalizeFilterValue(explicitQuery)];
+    }
+    return (filterModel?.quickFilterValues ?? [])
+        .map((v) => normalizeFilterValue(v))
+        .filter(Boolean);
+}
+
+/**
+ * Approximate Solr quick-search behavior on the REST payload: AND/OR of terms where
+ * each term matches if ANY search field matches (substring, case-insensitive).
+ * Short tokens mirror Solr prefix behavior (MIN_WILDCARD_QUERY_LENGTH).
+ */
+function docsPassRestQuickSearch(
+    docs: Record<string, unknown>[],
+    terms: string[],
+    searchFields: string[],
+    logicOperator: 'and' | 'or',
+): Record<string, unknown>[] {
+    if (terms.length === 0 || searchFields.length === 0) return docs;
+
+    return docs.filter((doc) =>
+        docsPassRestQuickSearchRow(doc, terms, searchFields, logicOperator));
+}
+
+function docsPassRestQuickSearchRow(
+    doc: Record<string, unknown>,
+    terms: string[],
+    searchFields: string[],
+    logicOperator: 'and' | 'or',
+): boolean {
+    const joiner = logicOperator === 'or' ? 'some' : 'every';
+    return terms[joiner]((rawTerm) => {
+        const term = normalizeFilterValue(rawTerm);
+        const tnorm = term.toLowerCase();
+        const usePrefixOnly = toSolrWildcardToken(term).length < MIN_WILDCARD_QUERY_LENGTH;
+        return searchFields.some((sf) => {
+            const fv = normalizeFieldValue(doc[resolveDocFieldKey(sf)]).toLowerCase();
+            return usePrefixOnly ? fv.startsWith(tnorm) : fv.includes(tnorm);
+        });
+    });
+}
+
 async function fetchModelseedApiBiochem<T>(
     endpoint: string,
     opts: SolrQueryOpts = {}
 ): Promise<SolrResponse<T>> {
-    const { query, limit = 25, offset = 0, filterModel, sort } = opts;
+    const {
+        query,
+        limit = 25,
+        offset = 0,
+        filterModel,
+        sort,
+        searchFields:
+            incomingSearchFields,
+    } = opts;
+
+    const searchFields = (incomingSearchFields && incomingSearchFields.length > 0)
+        ? incomingSearchFields
+        : (endpoint === 'compounds' ? CPD_SEARCH_FIELDS : RXN_SEARCH_FIELDS);
 
     let activeSearch = query;
     if (!activeSearch && filterModel?.quickFilterValues && filterModel.quickFilterValues.length > 0) {
@@ -383,12 +451,27 @@ async function fetchModelseedApiBiochem<T>(
     }
 
     const hasColumnFilters = (filterModel?.items?.length ?? 0) > 0;
-    const needsLocalTransforms = hasColumnFilters || Boolean(sort);
-    // Guardrail to avoid excessive payload sizes when offset is large.
-    const MAX_REST_FETCH_LIMIT = 5000;
-    const fetchLimit = needsLocalTransforms
-        ? Math.min(Math.max(limit + offset, 1000), MAX_REST_FETCH_LIMIT)
-        : Math.min(limit, MAX_REST_FETCH_LIMIT);
+    const quickTerms = quickTermsFromOpts(query, filterModel);
+    /** REST endpoints do not pass Solr `start`/`offset`; we must fetch enough rows to slice. */
+    const minRowsForPaging = Math.max(limit + offset, 1);
+
+    /*
+     * modelseed-api list/search does not pass Solr offsets: we slice client-side after fetch.
+     * When quick search narrows logically across multiple columns (Solr-style OR), widen the REST
+     * pull then refine locally. Column filters/sort also operate on client batches.
+     */
+    const MAX_CAP = 5000;
+    const quickRefine = quickTerms.length > 0;
+    const wantsWideHeap = Boolean(sort) || hasColumnFilters || quickRefine;
+
+    let fetchLimit: number;
+    if (!wantsWideHeap) {
+        fetchLimit = Math.min(MAX_CAP, minRowsForPaging);
+    } else if (quickRefine) {
+        fetchLimit = MAX_CAP;
+    } else {
+        fetchLimit = Math.min(MAX_CAP, Math.max(minRowsForPaging, 1000));
+    }
 
     const primaryUrl = activeSearch
         ? `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeSearch)}&limit=${fetchLimit}&type=${endpoint}`
@@ -406,16 +489,25 @@ async function fetchModelseedApiBiochem<T>(
         ? (data as T[])
         : ((data.docs || []) as T[]);
 
+    let working = rawDocs as unknown as Record<string, unknown>[];
+    working = docsPassRestQuickSearch(
+        working,
+        quickTerms,
+        searchFields,
+        filterModel?.quickFilterLogicOperator === 'or' ? 'or' : 'and',
+    );
+
     const filteredDocs = hasColumnFilters
-        ? rawDocs.filter((doc) => matchesFilterModel(doc as Record<string, unknown>, filterModel?.items ?? []))
-        : rawDocs;
-    const sortedDocs = sort ? sortDocs(filteredDocs, sort) : filteredDocs;
+        ? working.filter((doc) =>
+            matchesFilterModel(doc as Record<string, unknown>, filterModel?.items ?? [], endpoint))
+        : working;
+    const sortedDocs = sort ? sortDocs(filteredDocs, sort, resolveDocFieldKey) : filteredDocs;
     const pagedDocs = sortedDocs.slice(offset, offset + limit);
 
     return {
         numFound: sortedDocs.length,
         start: offset,
-        docs: pagedDocs,
+        docs: pagedDocs as unknown as T[],
     };
 }
 
@@ -448,10 +540,17 @@ function compareStringByOperator(fieldValue: string, operator: string, filterVal
     }
 }
 
-function matchesFilterItem(doc: Record<string, unknown>, item: GridFilterItem): boolean {
+function matchesFilterItem(
+    doc: Record<string, unknown>,
+    item: GridFilterItem,
+    endpoint?: string,
+): boolean {
     const operator = String(item.operator ?? '');
     const field = toSolrField(String(item.field ?? ''));
     if (!field || !operator) return true;
+
+    /* Solr compounds_staging has no ontology query field — REST payloads typically omit it too. */
+    if (endpoint === 'compounds' && field === 'ontology') return true;
 
     const rawField = doc[field];
     const fieldValue = normalizeFieldValue(rawField);
@@ -494,18 +593,27 @@ function matchesFilterItem(doc: Record<string, unknown>, item: GridFilterItem): 
     return compareStringByOperator(fieldValue, operator, value);
 }
 
-function matchesFilterModel(doc: Record<string, unknown>, items: GridFilterItem[]): boolean {
+function matchesFilterModel(
+    doc: Record<string, unknown>,
+    items: GridFilterItem[],
+    endpoint?: string,
+): boolean {
     const activeItems = items.filter((item) => item.field && item.operator);
     if (activeItems.length === 0) return true;
-    return activeItems.every((item) => matchesFilterItem(doc, item));
+    return activeItems.every((item) => matchesFilterItem(doc, item, endpoint));
 }
 
-function sortDocs<T>(docs: T[], sort: { field: string; desc?: boolean }): T[] {
+function sortDocs<T>(
+    docs: T[],
+    sort: { field: string; desc?: boolean },
+    resolveSortKey?: (field: string) => string,
+): T[] {
     const { field, desc } = sort;
     const direction = desc ? -1 : 1;
+    const key = resolveSortKey ? resolveSortKey(field) : field;
     return [...docs].sort((a, b) => {
-        const av = (a as Record<string, unknown>)[field];
-        const bv = (b as Record<string, unknown>)[field];
+        const av = (a as Record<string, unknown>)[key];
+        const bv = (b as Record<string, unknown>)[key];
         const aNum = Number(av);
         const bNum = Number(bv);
         if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
@@ -636,7 +744,13 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
 export async function getReactionsFromModelseedApi(
     opts: SolrQueryOpts = {}
 ): Promise<SolrResponse<Reaction>> {
-    const res = await fetchModelseedApiBiochem<Reaction>('reactions', opts);
+    const res = await fetchModelseedApiBiochem<Reaction>('reactions', {
+        limit: 25,
+        offset: 0,
+        sort: { field: 'id' },
+        searchFields: RXN_SEARCH_FIELDS,
+        ...opts,
+    });
     res.docs.forEach((doc) => {
         if (doc.is_obsolete === '1') {
             doc.status += ' (and is obsolete)';
@@ -652,7 +766,13 @@ export async function getReactionsFromModelseedApi(
 export async function getCompoundsFromModelseedApi(
     opts: SolrQueryOpts = {}
 ): Promise<SolrResponse<Compound>> {
-    return fetchModelseedApiBiochem<Compound>('compounds', opts);
+    return fetchModelseedApiBiochem<Compound>('compounds', {
+        limit: 25,
+        offset: 0,
+        sort: { field: 'id' },
+        searchFields: CPD_SEARCH_FIELDS,
+        ...opts,
+    });
 }
 
 /**
