@@ -16,6 +16,24 @@ test.describe('Compounds Page - Search & Display', () => {
         expect(count).toBeGreaterThan(0);
     });
 
+    test('should resolve a specific compound ID (cpd05323)', async ({ page }) => {
+        const searchInput = page.locator('input[placeholder*="Find in"]').first();
+        await searchInput.fill('cpd05323');
+        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
+            timeout: 20000,
+        });
+    });
+
+    test('should match compound name case-insensitively (glucoiberin → Glucoiberin)', async ({
+        page,
+    }) => {
+        const searchInput = page.locator('input[placeholder*="Find in"]').first();
+        await searchInput.fill('glucoiberin');
+        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
+            timeout: 20000,
+        });
+    });
+
     test('should open export modal with column selection', async ({ page }) => {
         const exportButton = page.locator('button:has-text("Export CSV")');
         await expect(exportButton).toBeVisible();

@@ -145,4 +145,23 @@ test.describe('DataControlHeader - cross-page smoke', () => {
     await searchWithHeader(page, 'plant');
     await expect(page.locator('input[placeholder*="Find in"]').first()).toHaveValue('plant');
   });
+
+  test('genomes Annotations page shows subsystem search placeholder and filter dialog', async ({
+    page,
+  }) => {
+    await page.goto('/genomes/Annotations');
+    await waitForGridData(page, false);
+    await expect(page.locator('input[placeholder*="Find in subsystems"]')).toBeVisible({
+      timeout: 15000,
+    });
+    await openFilterDialog(page);
+    await page.locator('button:has-text("Cancel")').first().click();
+  });
+
+  test('my-jobs grid uses toolbar pagination only (no duplicate footer)', async ({ page }) => {
+    await page.goto('/my-jobs');
+    await waitForGridData(page, false);
+    const footers = page.locator('.MuiTablePagination-root');
+    await expect(footers).toHaveCount(1);
+  });
 });

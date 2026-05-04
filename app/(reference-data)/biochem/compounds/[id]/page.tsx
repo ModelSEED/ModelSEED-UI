@@ -307,6 +307,7 @@ const rxnColumns: GridColDef<Reaction>[] = [
 
 export default function CompoundDetailPage() {
     const { id } = useParams<{ id: string }>();
+    const [imageUnavailable, setImageUnavailable] = useState(false);
 
     // ── Compound data
     const { data: cpd, isLoading: loadingCpd, error } = useQuery({
@@ -385,13 +386,35 @@ export default function CompoundDetailPage() {
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
                 {/* Image */}
                 <Box sx={{ width: 220, flexShrink: 0 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={getCompoundImageUrl(cpd.id)}
-                        alt={`Structure of ${cpd.id}`}
-                        style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
+                    {(!cpd.smiles || imageUnavailable) ? (
+                        <Box
+                            aria-label={`Compound image unavailable for ${cpd.id}`}
+                            sx={{
+                                width: '100%',
+                                minHeight: 220,
+                                border: '1px dashed #cbd5e1',
+                                borderRadius: 1,
+                                bgcolor: '#f8fafc',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center',
+                                px: 2,
+                            }}
+                        >
+                            <Typography variant="body2" color="text.secondary">
+                                Compound image unavailable
+                            </Typography>
+                        </Box>
+                    ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={getCompoundImageUrl(cpd.id)}
+                            alt={`Structure of ${cpd.id}`}
+                            style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+                            onError={() => setImageUnavailable(true)}
+                        />
+                    )}
                 </Box>
 
                 {/* Properties */}

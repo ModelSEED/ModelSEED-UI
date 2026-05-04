@@ -228,6 +228,7 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
                             slotProps={{ toolbar: { showQuickFilter: true } }}
+                            hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
                             sx={{ border: '1px solid #e0e0e0', backgroundColor: '#fff', minHeight: 400 }}
@@ -246,6 +247,7 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
                             slotProps={{ toolbar: { showQuickFilter: true } }}
+                            hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
                             sx={{ border: '1px solid #e0e0e0', backgroundColor: '#fff', minHeight: 400 }}

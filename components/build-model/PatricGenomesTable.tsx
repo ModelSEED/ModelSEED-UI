@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
     DataGrid,
     GridColDef,
+    type GridFilterItem,
     GridFilterModel,
     GridPaginationModel,
     GridSortModel,
@@ -13,7 +14,21 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { filterDocsByGridModel, sortGridDocsLocally } from '@/lib/api/biochem';
 import { PatricGenome, searchPatricGenomes } from '@/lib/api/patric';
+
+/** Max rows to pull when column filters need client-side evaluation (PATRIC RQL cannot express MUI operators). */
+const PATRIC_LOCAL_FILTER_BATCH = 5000;
+
+function hasActiveColumnFilters(items: GridFilterItem[] | undefined): boolean {
+    return (items ?? []).some((item) => {
+        if (!item.field || !item.operator) return false;
+        const op = String(item.operator);
+        if (op === 'isEmpty' || op === 'isNotEmpty') return true;
+        if (Array.isArray(item.value)) return item.value.length > 0;
+        return String(item.value ?? '').trim().length > 0;
+    });
+}
 
 interface PatricGenomesTableProps {
     onSelectGenome: (genome: PatricGenome) => void;
@@ -39,22 +54,47 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
 
     const query = extractQuickFilterQuery(filterModel);
     const sortToken = toSortToken(sortModel);
+    const columnFiltersActive = hasActiveColumnFilters(filterModel.items as GridFilterItem[]);
 
     const { data, isLoading, error } = useQuery({
         queryKey: [
             'patric-genomes',
             query,
-            paginationModel.page,
-            paginationModel.pageSize,
+            columnFiltersActive,
+            // Only include pagination in query key for server mode (client-mode paginates in memory)
+            ...(columnFiltersActive ? [] : [paginationModel.page, paginationModel.pageSize]),
             sortToken,
+            // Stable string key for filter items (avoids new-reference re-fetches)
+            JSON.stringify(filterModel.items ?? []),
         ],
-        queryFn: () =>
-            searchPatricGenomes({
+        queryFn: async () => {
+            if (columnFiltersActive) {
+                const raw = await searchPatricGenomes({
+                    query,
+                    limit: PATRIC_LOCAL_FILTER_BATCH,
+                    offset: 0,
+                    sort: sortToken,
+                });
+                const filtered = filterDocsByGridModel(
+                    raw.rows as unknown as Record<string, unknown>[],
+                    filterModel.items ?? [],
+                ) as unknown as PatricGenome[];
+                const sm = sortModel[0];
+                const sorted = sm?.field
+                    ? sortGridDocsLocally(filtered, { field: sm.field, desc: sm.sort === 'desc' })
+                    : filtered;
+                const total = sorted.length;
+                const start = paginationModel.page * paginationModel.pageSize;
+                const rows = sorted.slice(start, start + paginationModel.pageSize) as PatricGenome[];
+                return { rows, total };
+            }
+            return searchPatricGenomes({
                 query,
                 limit: paginationModel.pageSize,
                 offset: paginationModel.page * paginationModel.pageSize,
                 sort: sortToken,
-            }),
+            });
+        },
         staleTime: 30_000,
     });
 

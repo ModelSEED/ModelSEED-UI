@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import * as biochemApi from '@/lib/api/biochem';
 
 const getErrorMessage = (error: unknown): string =>
@@ -46,5 +46,82 @@ describe('Biochem API Integration Tests', () => {
       expect(atp.name).toBeDefined();
       expect('smiles' in atp).toBe(true);
     }
+  });
+});
+
+describe('filterDocsByGridModel (shared local column filters)', () => {
+  it('filters rows using MUI string operators', async () => {
+    const { filterDocsByGridModel } = await import('@/lib/api/biochem');
+    const docs = [
+      { id: '1', name: 'Alpha' },
+      { id: '2', name: 'Beta' },
+    ] as Record<string, unknown>[];
+    const out = filterDocsByGridModel(docs, [
+      { field: 'name', operator: 'contains', value: 'lph' },
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]?.id).toBe('1');
+  });
+});
+
+describe('getCompounds Solr query shape', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('quick search must not reference ontology (undefined field on compounds_staging)', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    await biochemApi.getCompounds({
+      limit: 25,
+      offset: 0,
+      filterModel: { items: [], quickFilterValues: ['cpd05323'] },
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    const u = new URL(calledUrl);
+    const qRaw = u.searchParams.get('q');
+    expect(qRaw).toBeTruthy();
+    const q = decodeURIComponent(qRaw ?? '');
+    expect(q).not.toMatch(/\bontology\b/i);
+    expect(q).toContain('cpd05323');
+    expect(q).toMatch(/formula|aliases|name|id/);
+  });
+});
+
+describe('getReactions Solr case-variant filters', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('expands lowercase equals filters with case variants', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    await biochemApi.getReactions({
+      limit: 25,
+      offset: 0,
+      filterModel: {
+        items: [{ field: 'status', operator: 'equals', value: 'ok' }],
+        logicOperator: 'and',
+        quickFilterValues: [],
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    const q = decodeURIComponent(new URL(calledUrl).searchParams.get('q') ?? '');
+    expect(q).toContain('status:"ok"');
+    expect(q).toContain('status:"OK"');
   });
 });
