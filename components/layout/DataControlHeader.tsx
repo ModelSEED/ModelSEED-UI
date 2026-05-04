@@ -10,6 +10,7 @@ import {
     gridFilterModelSelector,
     type GridColDef,
     type GridFilterItem,
+    type GridFilterModel,
     GridLogicOperator,
 } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
@@ -344,7 +345,6 @@ type ToolbarFilterRow = {
     value: string;
 };
 
-
 function makeEmptyFilterRow(): ToolbarFilterRow {
     return {
         id: `filter-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -517,12 +517,14 @@ function ToolbarFilterEditor() {
                 value: toFilterValue(row),
             }));
 
-        apiRef.current.setFilterModel({
+        const newModel: GridFilterModel = {
             items,
             logicOperator: draftLogicOperator,
             quickFilterValues: filterModel?.quickFilterValues ?? [],
             quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
-        });
+        };
+
+        apiRef.current.setFilterModel(newModel);
 
         allColumns.forEach((column) => {
             const visible = draftColumnVisibilityModel[column.field] !== false;

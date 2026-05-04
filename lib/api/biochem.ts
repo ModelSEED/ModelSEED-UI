@@ -160,6 +160,69 @@ function toRangeBoundary(value: string): string {
     return `"${escapeSolrPhrase(value)}"`;
 }
 
+/** True when the value has ASCII letters and may need case-variant matching. */
+function hasAsciiLetters(value: string): boolean {
+    return /[A-Za-z]/.test(value);
+}
+
+/** Title-case words for mixed-case fallback variants. */
+function toTitleCaseWords(value: string): string {
+    return value.replace(/[A-Za-z]+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+}
+
+/** Build case variants for legacy Solr fields that are case-sensitive. */
+function buildCaseVariants(value: string): string[] {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    if (!hasAsciiLetters(trimmed)) return [trimmed];
+
+    return Array.from(
+        new Set([
+            trimmed,
+            trimmed.toLowerCase(),
+            trimmed.toUpperCase(),
+            toTitleCaseWords(trimmed),
+        ]),
+    );
+}
+
+function joinOrClauses(clauses: string[]): string | null {
+    if (clauses.length === 0) return null;
+    if (clauses.length === 1) return clauses[0];
+    return `(${clauses.join(' OR ')})`;
+}
+
+function buildEqualsVariantClause(field: string, value: string): string | null {
+    const clauses = Array.from(
+        new Set(buildCaseVariants(value).map((entry) => `${field}:${toSolrLiteral(entry)}`)),
+    );
+    return joinOrClauses(clauses);
+}
+
+function buildWildcardVariantClause(
+    field: string,
+    value: string,
+    mode: 'contains' | 'startsWith' | 'endsWith',
+): string | null {
+    const clauses = buildCaseVariants(value)
+        .map((entry) => {
+            const token = toSolrWildcardToken(entry);
+            if (!token) return '';
+            switch (mode) {
+                case 'startsWith':
+                    return `${field}:${token}*`;
+                case 'endsWith':
+                    return `${field}:*${token}`;
+                case 'contains':
+                default:
+                    return `${field}:*${token}*`;
+            }
+        })
+        .filter((clause): clause is string => Boolean(clause));
+
+    return joinOrClauses(Array.from(new Set(clauses)));
+}
+
 /** Build a single Solr clause from one DataGrid filter item. */
 function buildFilterClause(item: GridFilterItem): string | null {
     const field = toSolrField(item.field);
@@ -175,8 +238,6 @@ function buildFilterClause(item: GridFilterItem): string | null {
     }
 
     const value = normalizeFilterValue(rawValue);
-    const wildcardValue = toSolrWildcardToken(value);
-    const literalValue = toSolrLiteral(value);
     const rangeBoundary = toRangeBoundary(value);
 
     switch (operator) {
@@ -199,17 +260,23 @@ function buildFilterClause(item: GridFilterItem): string | null {
         case '=':
         case 'equals':
         case 'is':
-            return `${field}:${literalValue}`;
+            return buildEqualsVariantClause(field, value);
         case '!=':
         case 'not':
         case 'doesNotEqual':
-            return `-${field}:${literalValue}`;
+            return (() => {
+                const equalsClause = buildEqualsVariantClause(field, value);
+                return equalsClause ? `-${equalsClause}` : null;
+            })();
         case 'startsWith':
-            return wildcardValue ? `${field}:${wildcardValue}*` : null;
+            return buildWildcardVariantClause(field, value, 'startsWith');
         case 'endsWith':
-            return wildcardValue ? `${field}:*${wildcardValue}` : null;
+            return buildWildcardVariantClause(field, value, 'endsWith');
         case 'doesNotContain':
-            return wildcardValue ? `-${field}:*${wildcardValue}*` : null;
+            return (() => {
+                const containsClause = buildWildcardVariantClause(field, value, 'contains');
+                return containsClause ? `-${containsClause}` : null;
+            })();
         case 'isAnyOf': {
             const values = Array.isArray(rawValue)
                 ? rawValue.map((entry) => normalizeFilterValue(entry)).filter(Boolean)
@@ -218,11 +285,14 @@ function buildFilterClause(item: GridFilterItem): string | null {
                     .map((entry) => entry.trim())
                     .filter(Boolean);
             if (values.length === 0) return null;
-            return `(${values.map((entry) => `${field}:${toSolrLiteral(entry)}`).join(' OR ')})`;
+            const valueClauses = values
+                .map((entry) => buildEqualsVariantClause(field, entry))
+                .filter((clause): clause is string => Boolean(clause));
+            return joinOrClauses(valueClauses);
         }
         case 'contains':
         default:
-            return wildcardValue ? `${field}:*${wildcardValue}*` : null;
+            return buildWildcardVariantClause(field, value, 'contains');
     }
 }
 

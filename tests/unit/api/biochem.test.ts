@@ -94,3 +94,34 @@ describe('getCompounds Solr query shape', () => {
     expect(q).toMatch(/formula|aliases|name|id/);
   });
 });
+
+describe('getReactions Solr case-variant filters', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('expands lowercase equals filters with case variants', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    await biochemApi.getReactions({
+      limit: 25,
+      offset: 0,
+      filterModel: {
+        items: [{ field: 'status', operator: 'equals', value: 'ok' }],
+        logicOperator: 'and',
+        quickFilterValues: [],
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    const q = decodeURIComponent(new URL(calledUrl).searchParams.get('q') ?? '');
+    expect(q).toContain('status:"ok"');
+    expect(q).toContain('status:"OK"');
+  });
+});
