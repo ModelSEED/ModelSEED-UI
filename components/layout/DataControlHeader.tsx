@@ -223,7 +223,7 @@ function ToolbarSearchField() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (typeof CSS !== 'undefined' && 'highlights' in (CSS as any)) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ((CSS as any).highlights as any).clear();
+                ((CSS as any).highlights as any).delete('search-results');
             }
             return;
         }
@@ -276,7 +276,7 @@ function ToolbarSearchField() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (typeof CSS !== 'undefined' && 'highlights' in (CSS as any)) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ((CSS as any).highlights as any).clear();
+                ((CSS as any).highlights as any).delete('search-results');
             }
         };
     }, [value, apiRef]);

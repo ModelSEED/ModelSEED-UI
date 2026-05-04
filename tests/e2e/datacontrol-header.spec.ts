@@ -85,12 +85,13 @@ test.describe('DataControlHeader - biochem operator matrix', () => {
     expect(await dataRows(page).count()).toBeGreaterThan(0);
 
     await applyFilter(page, { column: 'ID', operator: 'contains', value: reactionContainsToken });
-    expect(await dataRows(page).count()).toBeGreaterThan(0);
+    const containsCount = await dataRows(page).count();
+    expect(containsCount).toBeGreaterThan(0);
 
-    // Equality can legitimately return 0 when source data is denormalized across aliases/casing.
-    // This still validates the operator wiring end-to-end.
     await applyFilter(page, { column: 'ID', operator: 'equals', value: reactionId });
-    expect(await dataRows(page).count()).toBeGreaterThanOrEqual(0);
+    const equalsCount = await dataRows(page).count();
+    expect(equalsCount).toBeLessThanOrEqual(containsCount);
+    await expect(page.locator('button:has-text("Filter & Columns (")').first()).toBeVisible();
 
     await applyFilter(page, { column: 'ID', operator: 'does not contain', value: 'rxn' });
     expect(await dataRows(page).count()).toBe(0);
@@ -109,12 +110,13 @@ test.describe('DataControlHeader - biochem operator matrix', () => {
     expect(await dataRows(page).count()).toBeGreaterThan(0);
 
     await applyFilter(page, { column: 'ID', operator: 'contains', value: compoundContainsToken });
-    expect(await dataRows(page).count()).toBeGreaterThan(0);
+    const containsCount = await dataRows(page).count();
+    expect(containsCount).toBeGreaterThan(0);
 
-    // Equality can legitimately return 0 when source data is denormalized across aliases/casing.
-    // This still validates the operator wiring end-to-end.
     await applyFilter(page, { column: 'ID', operator: 'equals', value: compoundId });
-    expect(await dataRows(page).count()).toBeGreaterThanOrEqual(0);
+    const equalsCount = await dataRows(page).count();
+    expect(equalsCount).toBeLessThanOrEqual(containsCount);
+    await expect(page.locator('button:has-text("Filter & Columns (")').first()).toBeVisible();
 
     await applyFilter(page, { column: 'ID', operator: 'does not contain', value: 'cpd' });
     expect(await dataRows(page).count()).toBe(0);
@@ -141,6 +143,6 @@ test.describe('DataControlHeader - cross-page smoke', () => {
     await page.locator('button:has-text("Show all")').first().click();
     await page.locator('button:has-text("Save")').first().click();
     await searchWithHeader(page, 'plant');
-    expect(await dataRows(page).count()).toBeGreaterThanOrEqual(0);
+    await expect(page.locator('input[placeholder*="Find in"]').first()).toHaveValue('plant');
   });
 });

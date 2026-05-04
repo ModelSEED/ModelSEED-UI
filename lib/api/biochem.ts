@@ -374,7 +374,11 @@ async function fetchModelseedApiBiochem<T>(
 
     const hasColumnFilters = (filterModel?.items?.length ?? 0) > 0;
     const needsLocalTransforms = hasColumnFilters || Boolean(sort);
-    const fetchLimit = needsLocalTransforms ? Math.max(limit + offset, 1000) : limit;
+    // Guardrail to avoid excessive payload sizes when offset is large.
+    const MAX_REST_FETCH_LIMIT = 5000;
+    const fetchLimit = needsLocalTransforms
+        ? Math.min(Math.max(limit + offset, 1000), MAX_REST_FETCH_LIMIT)
+        : Math.min(limit, MAX_REST_FETCH_LIMIT);
 
     const primaryUrl = activeSearch
         ? `${MODELSEED_API_URL}/api/biochem/search?query=${encodeURIComponent(activeSearch)}&limit=${fetchLimit}&type=${endpoint}`
