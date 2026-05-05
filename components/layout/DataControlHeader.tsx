@@ -159,18 +159,8 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
     const committedQuick = (gridFilterModel?.quickFilterValues ?? []).join(' ').trim();
     /** When non-null, the user is editing; otherwise show the grid's committed quick filter. */
     const [draftQuick, setDraftQuick] = useState<string | null>(null);
-    /** Track the last submitted search term to know when grid state has caught up. */
-    const pendingTermRef = useRef<string | null>(null);
     const displayValue = draftQuick ?? committedQuick;
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Clear draft state only when committed value matches what we sent (grid has updated)
-    useEffect(() => {
-        if (pendingTermRef.current !== null && committedQuick === pendingTermRef.current.trim()) {
-            pendingTermRef.current = null;
-            setDraftQuick(null);
-        }
-    }, [committedQuick]);
 
     const placeholder = useMemo(() => {
         if (!pathname) return 'Find in page...';
@@ -227,7 +217,7 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
                 apiRef.current.setFilterModel(newModel);
             }
         },
-        [apiRef],
+        [apiRef, onApplyFilterModel],
     );
 
     const handleChange = useCallback(
@@ -236,22 +226,19 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
             setDraftQuick(term);
             if (debounceRef.current) clearTimeout(debounceRef.current);
             debounceRef.current = setTimeout(() => {
-                pendingTermRef.current = term;
                 applySearch(term);
                 debounceRef.current = null;
-                // Don't clear draftQuick here - let useEffect do it when committedQuick catches up
+                setDraftQuick(null);
             }, 300);
         },
         [applySearch],
     );
 
     const handleClear = useCallback(() => {
-        setDraftQuick('');
-        pendingTermRef.current = '';
+        setDraftQuick(null);
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = null;
         applySearch('');
-        // useEffect will clear draftQuick once committedQuick catches up to empty
     }, [applySearch]);
 
     // Cleanup pending debounce only. Avoid grid state updates during unmount.

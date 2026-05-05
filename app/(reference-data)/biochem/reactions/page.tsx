@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel, GridLogicOperator } from '@mui/x-data-grid';
-import type { GridCallbackDetails } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -149,13 +148,12 @@ export default function ReactionsPage() {
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
     // Tracks the authoritative multi-filter items set by our toolbar (bypasses grid truncation).
     const committedFilterItemsRef = useRef<GridFilterModel['items']>([]);
-    const committedLogicOperatorRef = useRef<GridFilterModel['logicOperator']>(undefined);
 
     // When true, the next handleFilterModelChange call came from our toolbar Save
     // (not from a grid-internal Community Edition truncation), so the guard is skipped.
     const toolbarSaveRef = useRef(false);
 
-    const handleFilterModelChange = useCallback((newModel: GridFilterModel, _details?: GridCallbackDetails<'filter'>) => {
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
         const incoming = newModel.items ?? [];
         const committed = committedFilterItemsRef.current;
         const fromToolbar = toolbarSaveRef.current;
@@ -174,7 +172,6 @@ export default function ReactionsPage() {
             quickFilterLogicOperator: newModel.quickFilterLogicOperator,
         });
         committedFilterItemsRef.current = incoming;
-        committedLogicOperatorRef.current = newModel.logicOperator;
     }, []);
 
     // Wrapper passed via slotProps.toolbar — marks the next call as authoritative.
@@ -357,17 +354,14 @@ export default function ReactionsPage() {
         },
     ], [handleOpenComment]);
 
-    const queryOpts = useMemo<SolrQueryOpts>(() => {
-        console.debug('[Reactions] queryOpts recomputed. filterModel items:', filterModel.items?.length, JSON.stringify(filterModel));
-        return {
-            limit: paginationModel.pageSize,
-            offset: paginationModel.page * paginationModel.pageSize,
-            sort: sortModel[0]
-                ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
-                : { field: 'id' },
-            filterModel,
-        };
-    }, [paginationModel, sortModel, filterModel]);
+    const queryOpts = useMemo<SolrQueryOpts>(() => ({
+        limit: paginationModel.pageSize,
+        offset: paginationModel.page * paginationModel.pageSize,
+        sort: sortModel[0]
+            ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
+            : { field: 'id' },
+        filterModel,
+    }), [paginationModel, sortModel, filterModel]);
 
     const { data, isFetching } = useQuery({
         queryKey: ['reactions', queryOpts],

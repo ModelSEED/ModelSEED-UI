@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
-import type { GridCallbackDetails } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -156,14 +155,13 @@ export default function CompoundsPage() {
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
     // Tracks the authoritative multi-filter items set by our toolbar (bypasses grid truncation).
     const committedFilterItemsRef = useRef<GridFilterModel['items']>([]);
-    const committedLogicOperatorRef = useRef<GridFilterModel['logicOperator']>(undefined);
     const [exportModalOpen, setExportModalOpen] = useState(false);
 
     // When true, the next handleFilterModelChange call came from our toolbar Save
     // (not from a grid-internal Community Edition truncation), so the guard is skipped.
     const toolbarSaveRef = useRef(false);
 
-    const handleFilterModelChange = useCallback((newModel: GridFilterModel, _details?: GridCallbackDetails<'filter'>) => {
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
         const incoming = newModel.items ?? [];
         const committed = committedFilterItemsRef.current;
         const fromToolbar = toolbarSaveRef.current;
@@ -182,7 +180,6 @@ export default function CompoundsPage() {
             quickFilterLogicOperator: newModel.quickFilterLogicOperator,
         });
         committedFilterItemsRef.current = incoming;
-        committedLogicOperatorRef.current = newModel.logicOperator;
     }, []);
 
     // Wrapper passed via slotProps.toolbar — marks the next call as authoritative.
