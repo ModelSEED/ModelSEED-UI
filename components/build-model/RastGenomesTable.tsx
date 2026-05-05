@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import { listRastGenomes, RastGenomeJob } from '@/lib/api/modelseed';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface RastGenomesTableProps {
     onSelectGenome: (job: RastGenomeJob) => void;
@@ -60,6 +61,15 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
         [disabled, onSelectGenome],
     );
 
+    const {
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<RastGenomeJob>({
+        rows,
+        onFilterApplied: () => setPaginationModel((prev) => ({ ...prev, page: 0 })),
+    });
+
     return (
         <Box>
             {error && (
@@ -69,7 +79,7 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
             )}
             <DataGrid<RastGenomeJob>
                 autoHeight
-                rows={rows}
+                rows={filteredRows}
                 columns={columns}
                 loading={isLoading}
                 getRowId={(row) => row.id || row.genome_id}
@@ -78,8 +88,11 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
+                slotProps={{ toolbar: { onApplyFilterModel: handleToolbarApplyFilterModel } }}
                 hideFooter
                 disableRowSelectionOnClick
                 disableColumnMenu

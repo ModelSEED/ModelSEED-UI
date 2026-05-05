@@ -8,6 +8,7 @@ import Alert from '@mui/material/Alert';
 import { workspaceLs } from '@/lib/api/workspace';
 import { USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface PlantModelItem {
     id: string;
@@ -102,6 +103,15 @@ export default function PlantsPage() {
         staleTime: 5 * 60 * 1000,
     });
 
+    const {
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<PlantModelItem>({
+        rows,
+        onFilterApplied: () => setPaginationModel((prev) => ({ ...prev, page: 0 })),
+    });
+
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -111,7 +121,7 @@ export default function PlantsPage() {
                 PlantSEED v2.0<br />Update In Progress: Annotation and reconstruction services are temporarily offline for updates and will be restored shortly.
             </Alert>
             <DataGrid<PlantModelItem>
-                rows={rows}
+                rows={filteredRows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -119,10 +129,15 @@ export default function PlantsPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 slotProps={{
-                    toolbar: { showQuickFilter: true },
+                    toolbar: {
+                        showQuickFilter: true,
+                        onApplyFilterModel: handleToolbarApplyFilterModel,
+                    },
                 }}
                 hideFooter
                 disableColumnMenu

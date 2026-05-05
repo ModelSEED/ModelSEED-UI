@@ -575,7 +575,12 @@ async function fetchModelseedApiBiochem<T>(
 
     const filteredDocs = hasColumnFilters
         ? working.filter((doc) =>
-            matchesFilterModel(doc as Record<string, unknown>, filterModel?.items ?? [], endpoint))
+            matchesFilterModel(
+                doc as Record<string, unknown>,
+                filterModel?.items ?? [],
+                filterModel?.logicOperator === 'or' ? 'or' : 'and',
+                endpoint,
+            ))
         : working;
     const sortedDocs = sort ? sortDocs(filteredDocs, sort, resolveDocFieldKey) : filteredDocs;
     const pagedDocs = sortedDocs.slice(offset, offset + limit);
@@ -692,10 +697,14 @@ function matchesFilterItem(
 function matchesFilterModel(
     doc: Record<string, unknown>,
     items: GridFilterItem[],
+    logicOperator: 'and' | 'or' = 'and',
     endpoint?: string,
 ): boolean {
     const activeItems = items.filter((item) => item.field && item.operator);
     if (activeItems.length === 0) return true;
+    if (logicOperator === 'or') {
+        return activeItems.some((item) => matchesFilterItem(doc, item, endpoint));
+    }
     return activeItems.every((item) => matchesFilterItem(doc, item, endpoint));
 }
 
@@ -727,9 +736,10 @@ export function filterDocsByGridModel<T extends Record<string, unknown>>(
     docs: T[],
     items: GridFilterItem[],
     endpoint?: string,
+    logicOperator: 'and' | 'or' = 'and',
 ): T[] {
     if (!items.length) return docs;
-    return docs.filter((doc) => matchesFilterModel(doc, items, endpoint));
+    return docs.filter((doc) => matchesFilterModel(doc, items, logicOperator, endpoint));
 }
 
 /** Client-side sort helper for grids that batch-fetch then paginate (e.g. PATRIC with column filters). */

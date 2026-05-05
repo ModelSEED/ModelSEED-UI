@@ -21,6 +21,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import { parseWorkspaceDate } from '@/lib/utils/date';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface MyMediaItem {
     id: string;
@@ -197,6 +198,20 @@ export default function MyMediaPage() {
         },
     ], [exportingMediaId, isDeletingMedia, goToMediaPath]);
 
+    const handleFiltersApplied = useCallback(() => {
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    }, []);
+
+    const {
+        filterModel,
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<MyMediaItem>({
+        rows,
+        onFilterApplied: handleFiltersApplied,
+    });
+
     const exportColumns = useMemo(() => [
         { field: 'id', headerName: 'Media ID', defaultSelected: true },
         { field: 'name', headerName: 'Name', defaultSelected: true },
@@ -252,7 +267,7 @@ export default function MyMediaPage() {
                     </Typography>
                 ) : (
                     <DataGrid<MyMediaItem>
-                        rows={rows}
+                        rows={filteredRows}
                         columns={columns}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
@@ -260,10 +275,16 @@ export default function MyMediaPage() {
                         onPaginationModelChange={setPaginationModel}
                         sortModel={sortModel}
                         onSortModelChange={setSortModel}
+                        filterModel={filterModel}
+                        filterMode="server"
+                        onFilterModelChange={handleFilterModelChange}
                         showToolbar
                         slots={{ toolbar: DataControlHeader }}
                         slotProps={{
-                            toolbar: { showQuickFilter: true },
+                            toolbar: {
+                                showQuickFilter: true,
+                                onApplyFilterModel: handleToolbarApplyFilterModel,
+                            },
                         }}
                         hideFooter
                         disableColumnMenu
