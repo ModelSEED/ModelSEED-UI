@@ -279,6 +279,26 @@ export async function getModelFbaFromApi(ref: string): Promise<Record<string, un
     }
 }
 
+export async function getModelFbaDataFromApi(
+    ref: string,
+    fbaId: string,
+): Promise<Record<string, unknown> | null> {
+    try {
+        return await modelseedFetch<Record<string, unknown>>(
+            `/api/models/fba/data${buildQueryString({
+                ref: safeDecodePath(ref),
+                fba_id: safeDecodePath(fbaId),
+            })}`,
+        );
+    } catch (err) {
+        // 404 means no detail data exists yet for this FBA run
+        if (err instanceof Error && err.message.includes('(404)')) {
+            return null;
+        }
+        throw err;
+    }
+}
+
 export async function getModelDetailBundleFromApi(ref: string): Promise<ModelDetailBundle> {
     const [data, gapfills, fba] = await Promise.all([
         getModelDataFromApi(ref),
