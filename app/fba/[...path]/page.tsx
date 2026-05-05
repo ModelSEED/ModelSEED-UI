@@ -26,7 +26,7 @@ import Link from 'next/link';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { getModelFbaFromApi } from '@/lib/api/modelseed';
+import { getModelFbaDataFromApi, getModelFbaFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { workspaceGet, workspaceLs, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
@@ -511,6 +511,13 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
             // Try model-level FBA from API first using base paths
             if (USE_MODELSEED_API) {
                 for (const candidate of apiCandidates) {
+                    try {
+                        const detail = await getModelFbaDataFromApi(candidate, fbaName);
+                        if (detail && isFbaObjectData(detail)) return detail;
+                    } catch {
+                        // Fall through to list endpoint.
+                    }
+
                     try {
                         const result = await getModelFbaFromApi(candidate);
                         const selected = pickFbaObject(result, workspacePath, fbaName);
