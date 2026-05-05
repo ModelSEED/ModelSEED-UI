@@ -10,6 +10,7 @@ import { workspaceLs } from '@/lib/api/workspace';
 import { listPublicMediaFromApi } from '@/lib/api/modelseed';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface MediaItem {
     id: string;
@@ -95,13 +96,22 @@ export default function MediaPage() {
         { field: 'type', headerName: 'Type', width: 180 },
     ], []);
 
+    const {
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<MediaItem>({
+        rows,
+        onFilterApplied: () => setPaginationModel((prev) => ({ ...prev, page: 0 })),
+    });
+
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
                 Media Formulations
             </Typography>
             <DataGrid<MediaItem>
-                rows={rows}
+                rows={filteredRows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -109,10 +119,15 @@ export default function MediaPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 slotProps={{
-                    toolbar: { showQuickFilter: true },
+                    toolbar: {
+                        showQuickFilter: true,
+                        onApplyFilterModel: handleToolbarApplyFilterModel,
+                    },
                 }}
                 hideFooter
                 disableColumnMenu

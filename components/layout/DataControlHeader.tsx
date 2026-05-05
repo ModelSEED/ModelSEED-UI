@@ -211,10 +211,22 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
             // For server-side pages: call the page's handler directly so the server
             // re-fetches with both column filters and the new quick search.
             if (typeof onApplyFilterModel === 'function') {
-                onApplyFilterModel(newModel, {});
+                onApplyFilterModel(newModel, { source: 'toolbar' });
+                // Update the grid's internal model so the input retains the committed value.
+                apiRef.current.setFilterModel({
+                    items: items.slice(0, 1),
+                    logicOperator,
+                    quickFilterValues: newModel.quickFilterValues,
+                    quickFilterLogicOperator: newModel.quickFilterLogicOperator,
+                });
             } else {
-                // Client-side: use setFilterModel normally (grid handles filtering in-memory).
-                apiRef.current.setFilterModel(newModel);
+                // Client-side: use setFilterModel normally, but truncate to 1 item to avoid CE limits.
+                apiRef.current.setFilterModel({
+                    items: items.slice(0, 1),
+                    logicOperator,
+                    quickFilterValues: newModel.quickFilterValues,
+                    quickFilterLogicOperator: newModel.quickFilterLogicOperator,
+                });
             }
         },
         [apiRef, onApplyFilterModel],

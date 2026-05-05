@@ -26,6 +26,7 @@ import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 /* ---------- types ---------- */
 
@@ -322,6 +323,19 @@ function MyJobsContent() {
         },
     ], [handleRefreshJob]);
 
+    const handleFiltersApplied = useCallback(() => {
+        setPagination((prev) => ({ ...prev, page: 0 }));
+    }, []);
+
+    const {
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<JobRow>({
+        rows: jobRows,
+        onFilterApplied: handleFiltersApplied,
+    });
+
     const exportColumns = useMemo(() => [
         { field: 'id', headerName: 'Job ID', defaultSelected: true },
         { field: 'task', headerName: 'Task', defaultSelected: true },
@@ -394,7 +408,7 @@ function MyJobsContent() {
             )}
 
             <DataGrid<JobRow>
-                rows={jobRows}
+                rows={filteredRows}
                 columns={columns}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={pagination}
@@ -406,9 +420,16 @@ function MyJobsContent() {
                         sortModel: [{ field: 'submitted', sort: 'desc' }],
                     },
                 }}
+                filterMode="server"
+                onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
-                slotProps={{ toolbar: { showQuickFilter: true } }}
+                slotProps={{
+                    toolbar: {
+                        showQuickFilter: true,
+                        onApplyFilterModel: handleToolbarApplyFilterModel,
+                    },
+                }}
                 hideFooter
                 disableRowSelectionOnClick
                 getRowId={(row) => row.id}

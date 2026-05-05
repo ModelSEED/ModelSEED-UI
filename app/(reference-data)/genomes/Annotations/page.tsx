@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_NEW_PROXY } from '@/lib/api/config';
 import DataControlHeader from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface SubsystemItem {
     id: string; // role
@@ -184,13 +185,22 @@ export default function SubsystemsPage() {
         [],
     );
 
+    const {
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<SubsystemItem>({
+        rows,
+        onFilterApplied: () => setPaginationModel((prev) => ({ ...prev, page: 0 })),
+    });
+
     return (
         <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
                 Subsystems
             </Typography>
             <DataGrid<SubsystemItem>
-                rows={rows}
+                rows={filteredRows}
                 columns={columns}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -198,10 +208,15 @@ export default function SubsystemsPage() {
                 onPaginationModelChange={setPaginationModel}
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
+                filterMode="server"
+                onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 slotProps={{
-                    toolbar: { showQuickFilter: true },
+                    toolbar: {
+                        showQuickFilter: true,
+                        onApplyFilterModel: handleToolbarApplyFilterModel,
+                    },
                 }}
                 hideFooter
                 disableColumnMenu
