@@ -1444,8 +1444,16 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         if (segments.length < 3 || workspacePath.toLowerCase().endsWith('/modelseed')) {
             return null;
         }
-        return apiCandidates[0] ?? null;
-    }, [workspacePath, apiCandidates]);
+        // modelseed-api expects the canonical model ref (without trailing /model).
+        const canonical = modelRootPath;
+        const expandedCanonical = expandOwnerRef(canonical, authMethod);
+        const canonicalCandidates = dedupeRefs([
+            expandedCanonical,
+            canonical,
+            ownerAliasRef(canonical, authMethod),
+        ]);
+        return canonicalCandidates[0] ?? null;
+    }, [workspacePath, modelRootPath, authMethod]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, modelApiRef],

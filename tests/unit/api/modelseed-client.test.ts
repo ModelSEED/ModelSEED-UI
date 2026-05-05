@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function setAuthToken(): void {
     localStorage.setItem('auth', JSON.stringify({
@@ -12,10 +12,14 @@ describe('modelseed API client wrappers', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
         vi.resetModules();
-        process.env.NEXT_PUBLIC_USE_MODELSEED_API = 'true';
-        process.env.NEXT_PUBLIC_MODELSEED_API_URL = 'http://localhost:8000';
+        vi.stubEnv('NEXT_PUBLIC_USE_MODELSEED_API', 'true');
+        vi.stubEnv('NEXT_PUBLIC_MODELSEED_API_URL', 'http://localhost:8000');
         localStorage.clear();
         setAuthToken();
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('calls fba detail endpoint with ref and fba_id', async () => {
