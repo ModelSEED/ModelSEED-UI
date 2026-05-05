@@ -173,13 +173,19 @@ async function callWorkspaceRestApi<T>(method: string, body: Record<string, unkn
         const backendMessage = extractWorkspaceErrorMessage(payload);
         const statusMessage = STATUS_MESSAGES[response.status] || 'Request failed';
         
-        // Log full error details for debugging
-        console.error(`Workspace ${endpoint} error:`, {
+        const errorDetails = {
             status: response.status,
             statusMessage,
             backendMessage,
             payload,
-        });
+        };
+
+        // 401 unauthenticated responses are expected for signed-out sessions.
+        if (response.status === 401) {
+            console.info(`Workspace ${endpoint} unauthenticated:`, errorDetails);
+        } else {
+            console.error(`Workspace ${endpoint} error:`, errorDetails);
+        }
         
         // Construct user-friendly error message
         const userMessage = backendMessage
