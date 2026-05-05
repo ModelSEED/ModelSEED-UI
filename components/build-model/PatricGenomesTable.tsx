@@ -81,6 +81,8 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                 const filtered = filterDocsByGridModel(
                     raw.rows as unknown as Record<string, unknown>[],
                     filterModel.items ?? [],
+                    undefined,
+                    String(filterModel.logicOperator ?? '').toLowerCase() === 'or' ? 'or' : 'and',
                 ) as unknown as PatricGenome[];
                 const sm = sortModel[0];
                 const sorted = sm?.field
