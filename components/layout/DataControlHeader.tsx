@@ -7,7 +7,6 @@ import {
     gridPageSelector,
     gridPageSizeSelector,
     gridRowCountSelector,
-    gridFilteredRowCountSelector,
     gridFilterModelSelector,
     gridRowsLoadingSelector,
     type GridColDef,
@@ -15,6 +14,14 @@ import {
     type GridFilterModel,
     GridLogicOperator,
 } from '@mui/x-data-grid';
+
+// Extend MUI's toolbar props so our custom callback is recognized by TypeScript
+// when passed via slotProps.toolbar.
+declare module '@mui/x-data-grid' {
+    interface ToolbarPropsOverrides {
+        onApplyFilterModel?: (model: GridFilterModel, details: { source?: 'toolbar' }) => void;
+    }
+}
 import Box from '@mui/material/Box';
 import TablePagination from '@mui/material/TablePagination';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -34,6 +41,18 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState, useRef, useCallback, type MouseEvent } from 'react';
+
+/**
+ * Module-level registry that maps DataGrid apiRef instances to the toolbar's
+ * committed filter items + logic operator.  This lets ToolbarSearchField (a
+ * sibling component with no prop access to ToolbarFilterEditor's refs) read
+ * the current multi-filter state when building quick-filter updates — ensuring
+ * that a search never accidentally wipes committed column filters.
+ */
+const committedFilterRegistry = new WeakMap<
+    object,
+    { items: GridFilterItem[]; logicOperator: GridLogicOperator }
+>();
 
 const NO_VALUE_OPERATORS = new Set(['isEmpty', 'isNotEmpty']);
 
@@ -89,14 +108,12 @@ function CustomPagination() {
     const apiRef = useGridApiContext();
     const page = useGridSelector(apiRef, gridPageSelector);
     const pageSize = useGridSelector(apiRef, gridPageSizeSelector);
-    // Use filtered row count so pagination shows correct total after client-side filtering
-    const filteredCount = useGridSelector(apiRef, gridFilteredRowCountSelector);
+    // In server-mode rowCount = the value from the rowCount prop (e.g. numFound from Solr).
+    // gridFilteredRowCountSelector only counts rows in the current page — wrong for server-mode.
     const rowCount = useGridSelector(apiRef, gridRowCountSelector);
     // Hide pagination while data is loading to prevent "0-0 of 0" flash
     const isLoading = useGridSelector(apiRef, gridRowsLoadingSelector);
-    // Prefer filtered count (client-side filtering), fall back to total rowCount
-    const displayCount = filteredCount ?? rowCount;
-    const rowCountValue = displayCount ?? 0;
+    const rowCountValue = rowCount ?? 0;
     const ready = page !== undefined && pageSize !== undefined && rowCount !== undefined;
     const pageValue = page ?? 0;
     const pageSizeValue = pageSize ?? 25;
@@ -135,15 +152,25 @@ function CustomPagination() {
     );
 }
 
-function ToolbarSearchField() {
+function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (model: GridFilterModel, details: object) => void }) {
     const apiRef = useGridApiContext();
     const pathname = usePathname();
     const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
     const committedQuick = (gridFilterModel?.quickFilterValues ?? []).join(' ').trim();
     /** When non-null, the user is editing; otherwise show the grid's committed quick filter. */
     const [draftQuick, setDraftQuick] = useState<string | null>(null);
+    /** Track the last submitted search term to know when grid state has caught up. */
+    const pendingTermRef = useRef<string | null>(null);
     const displayValue = draftQuick ?? committedQuick;
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Clear draft state only when committed value matches what we sent (grid has updated)
+    useEffect(() => {
+        if (pendingTermRef.current !== null && committedQuick === pendingTermRef.current.trim()) {
+            pendingTermRef.current = null;
+            setDraftQuick(null);
+        }
+    }, [committedQuick]);
 
     const placeholder = useMemo(() => {
         if (!pathname) return 'Find in page...';
@@ -172,22 +199,33 @@ function ToolbarSearchField() {
     }, [pathname]);
 
     /** Push search term into the DataGrid filter model as a quickFilter.
-     *  This triggers onFilterModelChange on the page → server re-fetch → only
-     *  matching rows are returned.  GridHighlightText reads quickFilterValues
-     *  and highlights the matched text in each cell automatically. */
+     *  Reads committed column filters from the registry (set by ToolbarFilterEditor.saveChanges)
+     *  so a search never accidentally wipes multi-column filters.  Calls the page's
+     *  onFilterModelChange directly (via the same rootProps path used by saveChanges) when
+     *  available, so server-side pages re-fetch with both the column filters AND the new search. */
     const applySearch = useCallback(
         (term: string) => {
-            const current = apiRef.current.state.filter?.filterModel ?? { items: [] };
-            apiRef.current.setFilterModel({
-                items: (current.items ?? []) as import('@mui/x-data-grid').GridFilterItem[],
-                logicOperator:
-                    (current.logicOperator as GridLogicOperator | undefined) ??
-                    GridLogicOperator.And,
+            // Prefer registry items (the toolbar's committed multi-filter) over the grid's
+            // internal state which is truncated to 1 item in community edition.
+            const registry = committedFilterRegistry.get(apiRef.current);
+            const items: GridFilterItem[] = registry?.items ?? [];
+            const logicOperator = registry?.logicOperator ?? GridLogicOperator.And;
+
+            const newModel: GridFilterModel = {
+                items,
+                logicOperator,
                 quickFilterValues: term.trim() ? [term.trim()] : [],
-                quickFilterLogicOperator:
-                    (current.quickFilterLogicOperator as GridLogicOperator | undefined) ??
-                    GridLogicOperator.And,
-            });
+                quickFilterLogicOperator: GridLogicOperator.And,
+            };
+
+            // For server-side pages: call the page's handler directly so the server
+            // re-fetches with both column filters and the new quick search.
+            if (typeof onApplyFilterModel === 'function') {
+                onApplyFilterModel(newModel, {});
+            } else {
+                // Client-side: use setFilterModel normally (grid handles filtering in-memory).
+                apiRef.current.setFilterModel(newModel);
+            }
         },
         [apiRef],
     );
@@ -198,44 +236,31 @@ function ToolbarSearchField() {
             setDraftQuick(term);
             if (debounceRef.current) clearTimeout(debounceRef.current);
             debounceRef.current = setTimeout(() => {
+                pendingTermRef.current = term;
                 applySearch(term);
                 debounceRef.current = null;
-                setDraftQuick(null);
+                // Don't clear draftQuick here - let useEffect do it when committedQuick catches up
             }, 300);
         },
         [applySearch],
     );
 
     const handleClear = useCallback(() => {
-        setDraftQuick(null);
+        setDraftQuick('');
+        pendingTermRef.current = '';
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = null;
         applySearch('');
+        // useEffect will clear draftQuick once committedQuick catches up to empty
     }, [applySearch]);
 
-    // Clear quickFilter on unmount so navigating away doesn't leave a stale filter
+    // Cleanup pending debounce only. Avoid grid state updates during unmount.
     useEffect(() => {
-        const api = apiRef.current;
         return () => {
             if (debounceRef.current) clearTimeout(debounceRef.current);
             debounceRef.current = null;
-            try {
-                const current = api.state.filter?.filterModel ?? { items: [] };
-                api.setFilterModel({
-                    items: (current.items ?? []) as import('@mui/x-data-grid').GridFilterItem[],
-                    logicOperator:
-                        (current.logicOperator as GridLogicOperator | undefined) ??
-                        GridLogicOperator.And,
-                    quickFilterValues: [],
-                    quickFilterLogicOperator:
-                        (current.quickFilterLogicOperator as GridLogicOperator | undefined) ??
-                        GridLogicOperator.And,
-                });
-            } catch {
-                // api may be stale on unmount — safe to ignore
-            }
         };
-    }, [apiRef]);
+    }, []);
 
     // Apply CSS Custom Highlight API to highlight matches in the grid
     useEffect(() => {
@@ -362,7 +387,7 @@ function makeEmptyFilterRow(): ToolbarFilterRow {
     };
 }
 
-function ToolbarFilterEditor() {
+function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (model: GridFilterModel, details: object) => void }) {
     const apiRef = useGridApiContext();
     const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
 
@@ -373,9 +398,39 @@ function ToolbarFilterEditor() {
     const [draftColumnVisibilityModel, setDraftColumnVisibilityModel] = useState<Record<string, boolean>>({});
     const [appliedHiddenColumnCount, setAppliedHiddenColumnCount] = useState(0);
 
+    /**
+     * The community DataGrid hard-forces disableMultipleColumnsFiltering=true and silently
+     * truncates filterModel.items to a single entry via sanitizeFilterModel.  We work around
+     * this by keeping our own committed filter list in a ref that lives entirely outside the
+     * grid's state — it is the single source of truth for the button label and reopen state.
+     */
+    const committedItemsRef = useRef<GridFilterItem[]>([]);
+    const committedLogicOperatorRef = useRef<GridLogicOperator>(GridLogicOperator.And);
+    // Force re-render after saving so the button label updates immediately.
+    const [, forceUpdate] = useState(0);
+
+    // Bootstrap the ref from a controlled filterModel on the first render.
+    // This handles externally-supplied initial filters (e.g. from URL params / page state).
+    // We only do this when our own ref is still empty to avoid overwriting user edits.
+    useEffect(() => {
+        if (committedItemsRef.current.length === 0 && (filterModel?.items ?? []).length > 0) {
+            const items = (filterModel.items as GridFilterItem[]).filter(
+                (item) => item.field && item.operator,
+            );
+            if (items.length > 0) {
+                committedItemsRef.current = items;
+                committedLogicOperatorRef.current =
+                    filterModel.logicOperator ?? GridLogicOperator.And;
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // intentionally runs once on mount only
+
     const open = Boolean(anchorEl);
     const filterableColumns = allColumns.filter((column) => column.filterable !== false);
-    const activeAppliedFilterCount = (filterModel?.items ?? []).filter((item) => {
+
+    // Count from our ref (not gridFilterModelSelector which only ever has ≤1 item).
+    const activeAppliedFilterCount = committedItemsRef.current.filter((item) => {
         if (!item.field || !item.operator) return false;
         if (NO_VALUE_OPERATORS.has(String(item.operator))) return true;
         if (Array.isArray(item.value)) return item.value.length > 0;
@@ -438,8 +493,22 @@ function ToolbarFilterEditor() {
         setDraftRows((prev) => [...prev, makeEmptyFilterRow()]);
     };
 
-    const removeFilterRow = (id: string) => {
-        setDraftRows((prev) => prev.filter((row) => row.id !== id));
+
+    /**
+     * X button handler for a filter row.
+     * Always only mutates draft state — effects are applied when Save is clicked.
+     * - Multiple rows: removes the row from the draft.
+     * - Last row: resets that row's values to empty (UI always keeps ≥1 row),
+     *   so the user sees a blank row and Save will apply zero active filters.
+     */
+    const removeOrClearFilterRow = (id: string) => {
+        setDraftRows((prev) => {
+            if (prev.length <= 1) {
+                // Keep one empty row so the UI never collapses entirely.
+                return [makeEmptyFilterRow()];
+            }
+            return prev.filter((row) => row.id !== id);
+        });
     };
 
     const updateFilterRow = (id: string, updates: Partial<ToolbarFilterRow>) => {
@@ -466,11 +535,12 @@ function ToolbarFilterEditor() {
             Object.values(visibilityModel).filter((visible) => visible === false).length,
         );
 
-        // Load existing filter items
-        const existingItems = (filterModel?.items ?? []) as GridFilterItem[];
-        if (existingItems.length > 0 && existingItems[0]?.field) {
+        // Restore from our ref — this is the only reliable source for multi-filter rows
+        // because the grid's internal state only retains the first item (community edition).
+        const committed = committedItemsRef.current;
+        if (committed.length > 0 && committed[0]?.field) {
             setDraftRows(
-                existingItems.map((item) => ({
+                committed.map((item) => ({
                     id: String(item.id ?? `filter-${Math.random().toString(16).slice(2)}`),
                     field: String(item.field ?? ''),
                     operator: String(item.operator ?? ''),
@@ -482,11 +552,7 @@ function ToolbarFilterEditor() {
         } else {
             setDraftRows([makeEmptyFilterRow()]);
         }
-        setDraftLogicOperator(
-            filterModel?.logicOperator === GridLogicOperator.Or
-                ? GridLogicOperator.Or
-                : GridLogicOperator.And,
-        );
+        setDraftLogicOperator(committedLogicOperatorRef.current);
 
         setAnchorEl(event.currentTarget);
     };
@@ -513,10 +579,27 @@ function ToolbarFilterEditor() {
         setDraftColumnVisibilityModel(visible);
         setDraftRows([makeEmptyFilterRow()]);
         setDraftLogicOperator(GridLogicOperator.And);
+        // Clear the committed state so searches don't carry stale filters after a Reset All.
+        committedItemsRef.current = [];
+        committedLogicOperatorRef.current = GridLogicOperator.And;
+        committedFilterRegistry.set(apiRef.current, { items: [], logicOperator: GridLogicOperator.And });
+        // Notify the page of the cleared state.
+        const quickFilterValues = filterModel?.quickFilterValues ?? [];
+        if (typeof onApplyFilterModel === 'function') {
+            onApplyFilterModel({ items: [], logicOperator: GridLogicOperator.And, quickFilterValues }, { source: 'toolbar' });
+        } else {
+            apiRef.current.setFilterModel({ items: [], logicOperator: GridLogicOperator.And, quickFilterValues });
+        }
+        allColumns.forEach((column) => {
+            apiRef.current.setColumnVisibility(column.field, true);
+        });
+        setAppliedHiddenColumnCount(0);
+        forceUpdate((n) => n + 1);
+        closeEditor();
     };
 
     const saveChanges = () => {
-        const items: GridFilterItem[] = draftRows
+        const filledItems: GridFilterItem[] = draftRows
             .filter(isFilled)
             .map((row) => ({
                 id: row.id,
@@ -525,14 +608,41 @@ function ToolbarFilterEditor() {
                 value: toFilterValue(row),
             }));
 
-        const newModel: GridFilterModel = {
-            items,
+        // Persist all filled items in our refs AND the shared registry.
+        committedItemsRef.current = filledItems;
+        committedLogicOperatorRef.current = draftLogicOperator;
+        committedFilterRegistry.set(apiRef.current, { items: filledItems, logicOperator: draftLogicOperator });
+
+        // Preserve the current quick-filter search term from the grid's internal model.
+        const quickFilterValues = filterModel?.quickFilterValues ?? [];
+        const quickFilterLogicOperator = filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And;
+
+        // Build the full model we want the application to see (all items + logic + quick search).
+        const fullModel: GridFilterModel = {
+            items: filledItems,
             logicOperator: draftLogicOperator,
-            quickFilterValues: filterModel?.quickFilterValues ?? [],
-            quickFilterLogicOperator: filterModel?.quickFilterLogicOperator ?? GridLogicOperator.And,
+            quickFilterValues,
+            quickFilterLogicOperator,
         };
 
-        apiRef.current.setFilterModel(newModel);
+        // For server-side pages: call the page's handler directly with all items so the
+        // server query receives the complete multi-filter.  The grid's setFilterModel
+        // silently truncates to 1 item (Community Edition), so we bypass it entirely.
+        if (typeof onApplyFilterModel === 'function') {
+            // Pass source:'toolbar' so handlers know this is an explicit user action,
+            // not a Community Edition truncation event from the grid itself.
+            onApplyFilterModel(fullModel, { source: 'toolbar' });
+        } else {
+            // Client-side page: let the grid apply item[0] for native row filtering.
+            // Rows 2+ won't be applied by the grid, but they are stored in committedItemsRef.
+            const gridModel: GridFilterModel = {
+                items: filledItems.slice(0, 1),
+                logicOperator: draftLogicOperator,
+                quickFilterValues,
+                quickFilterLogicOperator,
+            };
+            apiRef.current.setFilterModel(gridModel);
+        }
 
         allColumns.forEach((column) => {
             const visible = draftColumnVisibilityModel[column.field] !== false;
@@ -542,6 +652,8 @@ function ToolbarFilterEditor() {
             Object.values(draftColumnVisibilityModel).filter((visible) => visible === false).length,
         );
 
+        // Trigger a re-render so the button label picks up the new count from the ref.
+        forceUpdate((n) => n + 1);
         closeEditor();
     };
 
@@ -581,6 +693,7 @@ function ToolbarFilterEditor() {
                                             setDraftLogicOperator(e.target.value as GridLogicOperator)
                                         }
                                         sx={{ minWidth: 110 }}
+                                        SelectProps={{ MenuProps: { disablePortal: true } }}
                                     >
                                         <MenuItem value={GridLogicOperator.And}>AND</MenuItem>
                                         <MenuItem value={GridLogicOperator.Or}>OR</MenuItem>
@@ -630,6 +743,7 @@ function ToolbarFilterEditor() {
                                                         value: '',
                                                     })
                                                 }
+                                                SelectProps={{ MenuProps: { disablePortal: true } }}
                                             >
                                                 <MenuItem value="">Select column</MenuItem>
                                                 {filterableColumns.map((column) => (
@@ -652,6 +766,7 @@ function ToolbarFilterEditor() {
                                                     });
                                                 }}
                                                 disabled={!row.field}
+                                                SelectProps={{ MenuProps: { disablePortal: true } }}
                                             >
                                                 <MenuItem value="">Select</MenuItem>
                                                 {operators.map((op) => (
@@ -669,6 +784,7 @@ function ToolbarFilterEditor() {
                                                     value={row.value}
                                                     onChange={(e) => updateFilterRow(row.id, { value: e.target.value })}
                                                     disabled={!row.field || !row.operator || noValueOp}
+                                                    SelectProps={{ MenuProps: { disablePortal: true } }}
                                                 >
                                                     <MenuItem value="">Select</MenuItem>
                                                     <MenuItem value="true">true</MenuItem>
@@ -690,8 +806,7 @@ function ToolbarFilterEditor() {
 
                                             <IconButton
                                                 size="small"
-                                                onClick={() => removeFilterRow(row.id)}
-                                                disabled={draftRows.length <= 1}
+                                                onClick={() => removeOrClearFilterRow(row.id)}
                                                 aria-label="Remove filter"
                                             >
                                                 <CloseIcon fontSize="small" />
@@ -779,7 +894,11 @@ function ToolbarFilterEditor() {
  * Single data control bar for tables: white search box (with icon),
  * merged Filters + Columns panel, and pagination.
  */
-export default function DataControlHeader() {
+export default function DataControlHeader(props: {
+    /** Direct callback for server-side pages. Passed via slotProps.toolbar. */
+    onApplyFilterModel?: (model: GridFilterModel, details: object) => void;
+}) {
+    const { onApplyFilterModel } = props;
     return (
         <GridToolbarContainer
             sx={{
@@ -814,9 +933,9 @@ export default function DataControlHeader() {
                         '& .MuiInputBase-input': { width: '100%', minWidth: 0 },
                     }}
                 >
-                    <ToolbarSearchField />
+                    <ToolbarSearchField onApplyFilterModel={onApplyFilterModel} />
                 </Box>
-                <ToolbarFilterEditor />
+                <ToolbarFilterEditor onApplyFilterModel={onApplyFilterModel} />
             </Box>
             <CustomPagination />
         </GridToolbarContainer>

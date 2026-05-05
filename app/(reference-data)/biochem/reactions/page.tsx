@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel, GridLogicOperator } from '@mui/x-data-grid';
+import type { GridCallbackDetails } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -146,16 +147,41 @@ export default function ReactionsPage() {
     });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
+    // Tracks the authoritative multi-filter items set by our toolbar (bypasses grid truncation).
+    const committedFilterItemsRef = useRef<GridFilterModel['items']>([]);
+    const committedLogicOperatorRef = useRef<GridFilterModel['logicOperator']>(undefined);
 
-    const handleFilterModelChange = useCallback((newModel: GridFilterModel) => {
+    // When true, the next handleFilterModelChange call came from our toolbar Save
+    // (not from a grid-internal Community Edition truncation), so the guard is skipped.
+    const toolbarSaveRef = useRef(false);
+
+    const handleFilterModelChange = useCallback((newModel: GridFilterModel, _details?: GridCallbackDetails<'filter'>) => {
+        const incoming = newModel.items ?? [];
+        const committed = committedFilterItemsRef.current;
+        const fromToolbar = toolbarSaveRef.current;
+        toolbarSaveRef.current = false;
+        // Guard: if the grid fires this with fewer items than our committed state,
+        // it's a Community Edition truncation — ignore it (unless clearing to 0).
+        // Skip the guard when the toolbar explicitly triggered this (user intentionally removed a filter).
+        if (!fromToolbar && incoming.length > 0 && incoming.length < committed.length) {
+            return;
+        }
         setPaginationModel((prev) => ({ ...prev, page: 0 }));
         setFilterModel({
-            items: newModel.items ?? [],
+            items: incoming,
             logicOperator: newModel.logicOperator,
             quickFilterValues: newModel.quickFilterValues ?? [],
             quickFilterLogicOperator: newModel.quickFilterLogicOperator,
         });
+        committedFilterItemsRef.current = incoming;
+        committedLogicOperatorRef.current = newModel.logicOperator;
     }, []);
+
+    // Wrapper passed via slotProps.toolbar — marks the next call as authoritative.
+    const handleToolbarApplyFilterModel = useCallback((model: GridFilterModel) => {
+        toolbarSaveRef.current = true;
+        handleFilterModelChange(model);
+    }, [handleFilterModelChange]);
 
     // Modal state
     const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -331,14 +357,17 @@ export default function ReactionsPage() {
         },
     ], [handleOpenComment]);
 
-    const queryOpts = useMemo<SolrQueryOpts>(() => ({
-        limit: paginationModel.pageSize,
-        offset: paginationModel.page * paginationModel.pageSize,
-        sort: sortModel[0]
-            ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
-            : { field: 'id' },
-        filterModel,
-    }), [paginationModel, sortModel, filterModel]);
+    const queryOpts = useMemo<SolrQueryOpts>(() => {
+        console.debug('[Reactions] queryOpts recomputed. filterModel items:', filterModel.items?.length, JSON.stringify(filterModel));
+        return {
+            limit: paginationModel.pageSize,
+            offset: paginationModel.page * paginationModel.pageSize,
+            sort: sortModel[0]
+                ? { field: sortModel[0].field, desc: sortModel[0].sort === 'desc' }
+                : { field: 'id' },
+            filterModel,
+        };
+    }, [paginationModel, sortModel, filterModel]);
 
     const { data, isFetching } = useQuery({
         queryKey: ['reactions', queryOpts],
@@ -376,10 +405,10 @@ export default function ReactionsPage() {
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 filterMode="server"
-                filterModel={filterModel}
                 onFilterModelChange={handleFilterModelChange}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
+                slotProps={{ toolbar: { onApplyFilterModel: handleToolbarApplyFilterModel } }}
                 getRowId={(row) => row.id}
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick

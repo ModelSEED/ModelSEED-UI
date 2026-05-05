@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
     DataGrid,
@@ -51,6 +51,9 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'genome_name', sort: 'asc' }]);
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [], quickFilterValues: [] });
+    // Tracks authoritative multi-filter items from the toolbar (bypasses grid truncation).
+    const committedFilterItemsRef = useRef<GridFilterItem[]>([]);
+    const committedLogicOperatorRef = useRef<GridFilterModel['logicOperator']>(undefined);
 
     const query = extractQuickFilterQuery(filterModel);
     const sortToken = toSortToken(sortModel);
@@ -147,12 +150,29 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                 sortModel={sortModel}
                 onSortModelChange={setSortModel}
                 sortingMode="server"
-                filterModel={filterModel}
+                filterMode="server"
                 onFilterModelChange={(next) => {
-                    setFilterModel(next);
+                    setFilterModel((prev) => {
+                        const committed = committedFilterItemsRef.current;
+                        const incomingItems = (next.items ?? []) as GridFilterItem[];
+                        const shouldKeepCommitted =
+                            committed.length > 0 && incomingItems.length < committed.length;
+                        return {
+                            items: shouldKeepCommitted ? committed : incomingItems,
+                            logicOperator: shouldKeepCommitted
+                                ? committedLogicOperatorRef.current
+                                : next.logicOperator,
+                            quickFilterValues: next.quickFilterValues ?? prev.quickFilterValues ?? [],
+                            quickFilterLogicOperator: next.quickFilterLogicOperator ?? prev.quickFilterLogicOperator,
+                        };
+                    });
+                    const incomingItems = (next.items ?? []) as GridFilterItem[];
+                    if (incomingItems.length >= committedFilterItemsRef.current.length) {
+                        committedFilterItemsRef.current = incomingItems;
+                        committedLogicOperatorRef.current = next.logicOperator;
+                    }
                     setPaginationModel((prev) => ({ ...prev, page: 0 }));
                 }}
-                filterMode="server"
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
                 hideFooter
