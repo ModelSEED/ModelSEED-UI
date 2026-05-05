@@ -1438,29 +1438,27 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         staleTime: 30_000,
     });
 
-    const modelFbaRef = useMemo(() => {
-        // Only fetch FBA if we're on a specific model, not a folder
-        // A model path should have at least 3 segments and NOT end with /modelseed
+    const modelApiRef = useMemo(() => {
+        // Only fetch model-linked data if we're on a specific model, not a folder.
         const segments = workspacePath.split('/').filter(Boolean);
-        if (segments.length >= 3 && !workspacePath.toLowerCase().endsWith('/modelseed')) {
-            const modelPath = workspacePath.endsWith('/model') ? workspacePath : `${workspacePath}/model`;
-            return modelPath;
+        if (segments.length < 3 || workspacePath.toLowerCase().endsWith('/modelseed')) {
+            return null;
         }
-        return null;
-    }, [workspacePath]);
+        return apiCandidates[0] ?? null;
+    }, [workspacePath, apiCandidates]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
-        queryKey: ['modelFba', USE_MODELSEED_API, modelFbaRef],
-        enabled: USE_MODELSEED_API && modelFbaRef !== null,
-        queryFn: async () => getModelFbaFromApi(modelFbaRef!),
+        queryKey: ['modelFba', USE_MODELSEED_API, modelApiRef],
+        enabled: USE_MODELSEED_API && modelApiRef !== null,
+        queryFn: async () => getModelFbaFromApi(modelApiRef!),
         retry: 0,
         staleTime: 0,
     });
 
     const { data: modelGapfills, error: modelGapfillsError, refetch: refetchModelGapfills } = useQuery({
-        queryKey: ['modelGapfills', USE_MODELSEED_API, modelFbaRef],
-        enabled: USE_MODELSEED_API && modelFbaRef !== null,
-        queryFn: async () => listModelGapfillsFromApi(modelFbaRef!),
+        queryKey: ['modelGapfills', USE_MODELSEED_API, modelApiRef],
+        enabled: USE_MODELSEED_API && modelApiRef !== null,
+        queryFn: async () => listModelGapfillsFromApi(modelApiRef!),
         retry: 0,
         staleTime: 0,
     });
