@@ -619,6 +619,16 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
             // Pass source:'toolbar' so handlers know this is an explicit user action,
             // not a Community Edition truncation event from the grid itself.
             onApplyFilterModel(fullModel, { source: 'toolbar' });
+
+            // Also update the grid's internal model so features like GridHighlightText
+            // and the filter button badge reflect the current search state.
+            // We pass a truncated model to avoid Community Edition limits.
+            apiRef.current.setFilterModel({
+                items: filledItems.slice(0, 1),
+                logicOperator: draftLogicOperator,
+                quickFilterValues,
+                quickFilterLogicOperator,
+            });
         } else {
             // Client-side page: let the grid apply item[0] for native row filtering.
             // Rows 2+ won't be applied by the grid, but they are stored in committedItemsRef.

@@ -129,6 +129,21 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
         [disabled, onSelectGenome],
     );
 
+    const handleToolbarApplyFilterModel = (model: GridFilterModel) => {
+        // Store the full multi-filter from the toolbar (bypasses grid truncation)
+        committedFilterItemsRef.current = model.items as GridFilterItem[];
+        committedLogicOperatorRef.current = model.logicOperator;
+
+        // Also update the local filterModel so the UI stays in sync
+        setFilterModel({
+            items: model.items,
+            logicOperator: model.logicOperator,
+            quickFilterValues: model.quickFilterValues ?? [],
+            quickFilterLogicOperator: model.quickFilterLogicOperator,
+        });
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    };
+
     return (
         <Box>
             {error && (
@@ -155,8 +170,14 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                     setFilterModel((prev) => {
                         const committed = committedFilterItemsRef.current;
                         const incomingItems = (next.items ?? []) as GridFilterItem[];
+                        // Only keep committed filters when:
+                        // 1. We have committed items
+                        // 2. Incoming count is LESS than committed (truncation)
+                        // 3. Incoming count is > 0 (not an intentional clear)
                         const shouldKeepCommitted =
-                            committed.length > 0 && incomingItems.length < committed.length;
+                            committed.length > 0 &&
+                            incomingItems.length < committed.length &&
+                            incomingItems.length > 0;
                         return {
                             items: shouldKeepCommitted ? committed : incomingItems,
                             logicOperator: shouldKeepCommitted
@@ -167,7 +188,8 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                         };
                     });
                     const incomingItems = (next.items ?? []) as GridFilterItem[];
-                    if (incomingItems.length >= committedFilterItemsRef.current.length) {
+                    // Only update committed refs if we're not clearing (incoming has items or was truncation)
+                    if (incomingItems.length > 0 || incomingItems.length >= committedFilterItemsRef.current.length) {
                         committedFilterItemsRef.current = incomingItems;
                         committedLogicOperatorRef.current = next.logicOperator;
                     }
@@ -175,6 +197,7 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                 }}
                 showToolbar
                 slots={{ toolbar: DataControlHeader }}
+                slotProps={{ toolbar: { onApplyFilterModel: handleToolbarApplyFilterModel } }}
                 hideFooter
                 disableRowSelectionOnClick
                 disableColumnMenu
