@@ -35,7 +35,7 @@ services:
         - NEXT_PUBLIC_USE_NEW_PROXY=true
     container_name: modelseed_ui_production
     ports:
-      - "3001:3001"
+      - "3000:3001"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
