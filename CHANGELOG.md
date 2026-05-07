@@ -8,135 +8,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [{{VERSION}}] - 2026-04-06
 
 ### Added
-- **Compound Structure Images on Reaction Pages**: Reaction detail pages now display structure images for all compounds in the equation below the equation text. Images are clickable and link to compound detail pages. Missing images are gracefully hidden.
-- **Comprehensive Troubleshooting Documentation**: Added `docs/TROUBLESHOOTING.md` with detailed solutions for common issues including SSH tunnel setup, backend connectivity, authentication, and data display problems.
-- **Enhanced README Documentation**: Added SSH tunnel setup instructions, environment variable documentation, and common troubleshooting scenarios to main README.
+- Compound structure images on reaction pages with click-through to compound detail pages
+- Comprehensive troubleshooting documentation and enhanced README with SSH tunnel setup instructions
 
 ### Changed
-- **Version Bump**: Updated version from 0.1.0 to {{VERSION}} per production requirements.
-- **Version Display**: Updated About/Version page to display v{{VERSION}} instead of hardcoded v0.1.3.
+- Version display updated to show v{{VERSION}} from environment
 
 ### Fixed
-- **Invalid Gapfill URL Handling**: Added URL validation in gapfill page to gracefully handle incomplete URLs (e.g., `/gapfill/user/modelseed`) by returning empty results instead of 404 errors.
+- Invalid gapfill URL handling to gracefully return empty results instead of 404 errors
+- Improved Reaction/Compound detail drawer with better typography and monospace formatting
 
 ### Documentation
-- **SSH Tunnel Requirement**: Clearly documented that SSH tunnel to Poplar API server is required for local development and testing. The tunnel forwards `localhost:8000` to the backend API.
-- **Environment Variables**: Documented all `NEXT_PUBLIC_*` environment variables with examples and usage.
-- **Backend Connection Issues**: Added comprehensive troubleshooting for common connectivity issues (version page errors, empty media tab, authentication failures).
-- **Account Separation Clarification**: Documented that different models/media lists between RAST and PATRIC accounts is **expected behavior**, not a bug. The two systems use separate workspace folders by design.
-
-### Technical Details
-- Added `extractCompoundIds()` utility function to parse compound IDs from reaction equations.
-- Created `CompoundStructureGallery` component with hover effects, error handling, and responsive layout.
-- Compound images served from: `https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/{cpdID}.png`
-- Added `isValidGapfillPath()` helper with comprehensive validation logic.
-
-### Security
-- ✅ No vulnerabilities found: `npm audit --omit=dev` confirms 0 vulnerabilities.
-
-### Notes
-- Media tab (`/list-media`) requires active SSH tunnel to populate. Code implementation is correct.
-- RAST and PATRIC workspace separation is intentional system design.
+- SSH tunnel requirements, environment variables, and account separation expectations
 
 ---
 
 ## [Unreleased] - TBD
 
-### Known Issues (Documented in issues.md)
+### Known Issues
+- RAST MS FBA not working
+- PATRIC-only model submission
+- Workspace write operations limited
 
-- **RAST MS FBA not working**: FBA analysis fails for RAST-owned models
-- **PATRIC-only model submission**: Model creation only works with PATRIC accounts
-- **Workspace write operations limited**: Cannot save edits back to workspace
-
-### Expected Behaviors (Not Bugs)
-
-- **Models/Media differ between RAST and PATRIC**: This is **intentional system design**. RAST and PATRIC are separate systems with different workspace folders. A user with the same username on both systems will see different data because they point to different underlying directories. This is not a bug or limitation.
-
-### Testing
-
-- Added comprehensive E2E test suite (59 tests) covering all major workflows
-- Added API test script for endpoint validation
-- CI/CD pipeline with lint, typecheck, security audit, and tests
+### Expected Behaviors
+- Models/Media differ between RAST and PATRIC (intentional system design)
 
 ---
 
 ## [3] - 2026-03-27
 
-Overview: ModelSEED-UI enhancements and bug fixes.
-
 ### Fixed
-
-- Pop-up maintenance dialog on Plant Build page now displays without unnecessary title lines.
-- Model landing page biomass tab now correctly displays data when available.
-- User Data navigation tabs (My Models/My Media/My Jobs) now persist when navigating to model detail pages from user data section.
+- Plant build maintenance dialog display
+- Model landing page biomass tab display
+- User data navigation tab persistence
 
 ## [0.1.3] - 2026-03-25
 
-Overview: Improved Build Model clarity and fixed reconstruction submission errors.
-
 ### Added
-
-- Professional 2-sentence description to the "Build Model" page.
+- Build Model page description
 
 ### Changed
-
-- PlantSEED banner now correctly shows "v2.0 / v3.0" with requested double linebreak for clarity.
-- Improved Reaction/Compound detail drawer with improved typography and monospace formatting for data values.
-- Re-aligned Download Options menu to better match descriptive text on Model Landing page.
-- Enhanced Biomass tab with auto-discovery fallback for models with missing biomass metadata.
+- PlantSEED banner formatting and clarity
+- Biomass tab with auto-discovery fallback
 
 ### Fixed
-
-- Version page now correctly displays v0.1.3 and loads changelog from project root.
-- Removed prefixing from genome IDs in reconstruction jobs which was causing backend API failures.
+- Genome ID prefixing in reconstruction jobs
 
 ## [0.1.2] - 2026-03-25
 
-Overview: Final UI polish and parity fixes.
-
 ### Added
-
-- Interactive pop-up for PlantSEED v2/v3 maintenance banner on Build Model page
-- Expanded fallback discovery for biomass data in model objects
+- PlantSEED v2/v3 maintenance banner
 
 ### Changed
-
-- PlantSEED banner now correctly shows "v2.0 / v3.0" with requested linebreak
-- Improved Reaction/Compound detail drawer with pretty-printed JSON and better array formatting
-- Re-aligned Download Options menu to better match descriptive text
+- Reaction/Compound detail drawer formatting
 
 ## [0.1.1] - 2026-03-24
 
 ### Changed
-
-- PlantSEED banner now shows linebreak after "PlantSEED v2.0" text
-- Download options link alignment fixed on model landing page
-- Reaction details drawer now properly formatted with improved typography and scrolling
-- Biomass data extraction improved to support multiple API response formats
+- PlantSEED banner and download options link alignment
 
 ### Fixed
-
-- Version page now loads changelog from project root instead of legacy external directory
+- Version page changelog loading from project root
 
 ## [0.1.0] - 2026-03-24
 
-Overview: Initial release of the ModelSEED-UI refactor. This version includes the new React/Next.js based user interface with key features for model building, viewing, and analysis.
-
 ### Added
-
-- New Build Model pages with tabs for UPLOAD Plants FASTA, UPLOAD Microbes FASTA, PATRIC Microbes, and RAST Microbes
-- Model detail pages with tabs for Reactions, Compounds, Genes, Compartments, Biomass, and Pathways
-- FBA and Gapfilling job submission functionality
-- Download options for models (SBML, JSON, TSV formats)
-- Reference data pages for Biochemistry (Compounds, Reactions, Media)
-- Version page with changelog
-- Authentication and authorization guards
+- Build Model pages with FASTA upload, PATRIC, and RAST options
+- Model detail pages (Reactions, Compounds, Genes, Compartments, Biomass, Pathways)
+- FBA and Gapfilling job submission
+- Model download options (SBML, JSON, TSV)
+- Biochemistry reference pages (Compounds, Reactions, Media)
+- Authentication and authorization
 
 ### Changed
-
-- Migrated from legacy Angular/Flask application to Next.js 14 with Material-UI
-- Implemented new API layer for ModelSEED backend communication
-- Restructured project layout with app router and route groups
+- Migrated from Angular/Flask to Next.js 14 with Material-UI
 
 ## Legacy Changelog
 
