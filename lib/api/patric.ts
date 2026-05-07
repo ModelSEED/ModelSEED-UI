@@ -131,9 +131,10 @@ export async function searchPatricGenomes(
         rqlParts.push('keyword(*)');
     }
 
-    const queryString = `http_accept=${encodeURIComponent('application/solr+json')}&${rqlParts
-        .map((part) => encodeURIComponent(part))
-        .join('&')}`;
+    // BV-BRC's RQL parser expects structural characters (commas, parentheses)
+    // to be unencoded. RQL parts only contain safe characters (alphanumerics,
+    // parens, commas, +, *, _, .) so they can be passed directly.
+    const queryString = `http_accept=${encodeURIComponent('application/solr+json')}&${rqlParts.join('&')}`;
     const url = `${PATRIC_GENOME_API_URL}?${queryString}`;
 
     const doFetch = async (useAuth: boolean): Promise<Response> => {
