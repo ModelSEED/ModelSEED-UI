@@ -1,0 +1,32 @@
+{
+    "skills": {
+        "path": [
+            ".opencode/skills"
+        ]
+    },
+    "commands": {
+        "path": [
+            ".opencode/commands"
+        ]
+    },
+    "rules": {
+        "path": [
+            ".opencode/rules"
+        ]
+    },
+    "agents": {
+        "Plan": {
+            "skills": [
+                "planner",
+                "codebase-mapper"
+            ]
+        },
+        "Build": {
+            "skills": [
+                "executor",
+                "debugger",
+                "verifier"
+            ]
+        }
+    }
+}

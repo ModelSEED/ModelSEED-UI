@@ -1,0 +1,172 @@
+# ROADMAP
+
+## Milestone 1: v1-alpha — Base Application Migration [COMPLETE]
+
+## Milestone 2: v1-beta — Data Analysis & Interactive Tools [IN PROGRESS]
+
+### Phase 13: Deployment Readiness (URL Parity & Equation Formatting)
+**Status**: ✅ Complete
+- Audit and align all local routes and `<Link>` tags to exactly match the legacy UI's URL structures.
+- Ensure placeholder dynamic routes exist for legacy links (e.g., `/data/...`, `/fba/...`).
+- Implement custom React formatting utility (Option A) to parse Reaction equations for proper chemical formula subscripting.
+
+### Phase 14: FBA & Simulation Results / Service Status Auth Fix
+**Status**: ✅ Complete
+- Fix service status authentication (useAuth integration, mock token support)
+- Display FBA results in interactive tables and charts.
+- Implement simulation status tracking for queued jobs.
+
+### Phase 16: UI/UX Refinement & Data Consistency
+**Status**: ✅ Complete
+- Standardize data table headers with search, filters, manage columns, and pagination.
+- Apply consistent headers across all dynamic reference data subtabs.
+- Fix UI/UX issues: tooltips on disabled elements, passive model indicators, and home page login logic.
+
+### Phase 17: Authenticated User Data & Workspace/API Integration
+**Status**: ⚪ Not Started
+- Fix authentication and permissions so signed-in users can reliably access **My Models** and **My Media**.
+- Resolve Workspace permission errors by integrating with the appropriate backend (P3 Workspace or the new `modelseed-api` workspace proxy).
+- Ensure Build Model UX defaults to the active "UPLOAD Microbes FASTA" tab while keeping the Plant tab disabled with tooltip.
+- Exercise and validate user flows against the new `modelseed-api` backend using test RAST/PATRIC accounts.
+
+- Regression checks and readiness assessment for promoting the new stack as the primary ModelSEED UI.
+
+### Phase 19: UI Reliability and Functional Parity
+**Status**: ✅ Complete
+- Fixed console errors in the Build Model flow and add maintenance banners where features are in-progress.
+- Implemented the "Commands" column in My Models for downloading (SBML, JSON, TSV) and deleting models with confirmation.
+- Reconstructed the Model Detail page with full tabbed data tables (Reactions, Compounds, etc.) matching legacy visuals.
+- Integrated the standard `DataControlHeader` into all user data tables for consistent filtering and column management.
+
+### Phase 19.4: DataControlHeader Integration & Search Fix
+**Status**: ✅ Complete
+- Fixed DataControlHeader search functionality to be clickable and searchable.
+- Integrated DataControlHeader into My Models and My Media pages.
+- Added DataControlHeader to biochem reference data tabs (compounds, reactions).
+
+### Phase 20: New API Consolidation (Models, Jobs, Workspace Proxy)
+**Status**: 🔄 In Progress
+- **Target:** Use the new API (Poplar: `MODELSEED_API_URL` = http://poplar.cels.anl.gov:8000) for all backend operations **except** biochemistry reference table serving (keep Solr for biochem search/tables per backend team).
+- **Auth:** PATRIC token in `Authorization` header (direct, no Bearer). Set `USE_MODELSEED_API=true` and `USE_NEW_PROXY=true`.
+- **Models:** GET/POST/DELETE `/api/models`, `/api/models/data`, `/api/models/export`, `/api/models/copy`, `/api/models/gapfills`, `/api/models/gapfills/manage`, `/api/models/fba`.
+- **Jobs:** GET `/api/jobs`, POST `/api/jobs/reconstruct`, `/api/jobs/gapfill`, `/api/jobs/fba`, `/api/jobs/manage`.
+- **Media:** GET `/api/media/public`, `/api/media/mine`.
+- **Workspace:** Transition to new API only — POST `/api/workspace/ls`, `/get`, `/create`, `/delete`, `/copy`, `/metadata`, `/permissions`, `/download-url` (request/response format matches PATRIC workspace JSON-RPC, REST transport).
+- **Biochemistry:** Do not switch reference data tables to new API; keep using Solr for biochem search and table serving.
+- Implement Build Model end-to-end flows (submit, poll jobs, manage outputs) against the new API.
+
+### Phase 21: PATRIC & RAST Genome Selection Fix
+**Status**: 🔄 In Progress
+- Replace basic text inputs for PATRIC/RAST genomes in the "Build Model" page with functional, searchable data grids.
+- Implement PATRIC Data API (RQL) for genome searching.
+- Implement RAST job listing API via modelseed_support service.
+- Use `DataControlHeader` for consistent search and pagination in PATRIC/RAST tabs.
+- Ensure the "Build Model" action from the table correctly initiates reconstruction.
+
+### Phase 22: Poplar API Endpoint Parity and Model Flow Reliability
+**Status**: ✅ Complete
+- Align frontend API usage with Poplar `/demo`-validated endpoint behavior for models/jobs/media/workspace (excluding biochem table serving).
+- Remove model detail's hard dependency on workspace `/get` by preferring `/api/models/data`, `/api/models/gapfills`, and `/api/models/fba`.
+- Add repeatable smoke verification for authenticated endpoint coverage against Poplar.
+- Ensure My Models click-through and downstream model detail rendering are stable with real user refs and raw PATRIC token auth.
+- Finalize `/myMedia` endpoint-backed behavior and remove broken banner once stable.
+- Finalize `/plant` build model and jobs workflows end-to-end using authenticated API calls.
+
+### Phase 23: Full Non-Biochem Endpoint Coverage and Localhost Demo Validation
+**Status**: ✅ Complete
+- Add frontend API client coverage for all modelseed-api non-biochem endpoints used by `/demo` and documented in `modelseed-api` README.
+- Keep Solr as the source for biochemistry reactions and compounds tables.
+- Extend token-auth smoke validation against `http://localhost:8000` tunnel to cover non-destructive checks for models/jobs/media/workspace endpoints.
+- Verify primary user pages (`/my-models`, `/myMedia`, `/plant`, `/model/...`) remain functional and visually aligned with legacy layout expectations.
+- Exclude destructive delete-model testing from automated verification.
+
+### Phase 24: Page-Level API Adoption and Browser Final Verification
+**Status**: 🔄 In Progress
+- Apply newly added non-biochem API endpoints in the relevant UI pages, using legacy pages only for parity reference.
+- Complete page-level API wiring for authenticated user flows (`/my-models`, `/myMedia`, `/plant`, `/model/...`) while preserving current delete restrictions in tests.
+- Execute real browser validation on localhost with token-authenticated session and verify route behavior end-to-end.
+- Document remaining unbuilt or intentionally deferred legacy-equivalent pages/features.
+
+### Phase 25: Missing Workflow UIs (Merge, Edit, History, Media CRUD, Delete)
+**Status**: 🔄 In Progress
+- Design and implement dedicated merge-model workflow UI for `POST /api/jobs/merge`.
+- Design and implement dedicated model editing workflow UI for `POST /api/models/edit`.
+- Build a richer model edit-history interface (beyond counts) using `/api/models/edits`.
+- Implement full my-media CRUD parity (create/delete media) with safe delete UX.
+- Implement delete-model UI behavior wired to existing delete API, with tests constrained to non-supervisor/test models.
+
+### Phase 26: Model Detail Legacy Parity and Validation Readiness
+**Status**: 🔄 In Progress
+- Translate legacy model-detail "Visualize Data" behavior into functional modern UI (FBA, Gapfill, Expression states) without requiring new Run FBA/Run Gapfill button behavior.
+- Implement remaining model-detail parity features identified during validation review (download/detail surfaces, translated tabs/panels, and unsupported-feature UX where backend capability is missing).
+- Produce a complete translated-vs-not-translated inventory for the model detail flow and close high-priority parity gaps needed for full validation sign-off.
+- Execute browser/API validation against localhost token-auth session for `/model/...` to confirm functional parity on non-destructive flows.
+
+### Phase 27: Formatting, Cross-Links, and Legacy Surface Completion
+**Status**: ✅ Complete
+- Align model-detail reaction/compound/biomass/pathway tables with legacy chemical formatting and cross-links (IDs → biochem detail, genome refs → genome detail).
+- Implement or explicitly mark deferred the remaining legacy model-detail surfaces (Predictions, dynamic pathway tabs, organism image/links block) with clear modern UX.
+- Close remaining formatting/link inconsistencies across user models vs reference data and produce an updated audit ready for final v1-beta validation.
+
+### Phase 28: Legacy Feature Parity — Detail Pages, Jobs Page, and Dead Link Closure
+**Status**: ✅ Complete
+- Implement functional FBA detail page (`/fba/[...path]`) with Reaction Fluxes, Exchange Fluxes, and Pathways tabs using existing `getModelFbaFromApi`.
+- Implement functional Gapfill detail page (`/gapfill/[...path]`) showing gapfill reactions table using existing `listModelGapfillsFromApi`.
+- Implement functional Genome detail page (`/genome/[...path]`) with Features and Annotations tabs reading workspace genome objects.
+- Add dedicated My Jobs page (`/my-jobs`) under user-data layout with status counts, full jobs table with polling, and stderr/stdout links — matching legacy URL `/my-jobs`.
+- Add "My Jobs" tab to user-data layout navigation.
+- Ensure all URLs match legacy patterns exactly (`/fba/<ref>`, `/gapfill/<ref>`, `/genome/<ref>`, `/my-jobs`).
+
+### Phase 29: User Testing Readiness — Feature Page, Header Fix, Cleanup
+**Status**: ✅ Complete
+- Implement functional Feature detail page (`/feature/[...path]`) with function, subsystems, aliases, and protein sequence — replacing "under construction" placeholder.
+- Fix AppHeader `isUserDataActive` detection to include `/my-jobs` for correct tab highlighting.
+- Remove stale READMEs in `/fba` and `/gapfill` that incorrectly describe pages as "under construction."
+### Phase 30: Analytical Tools — Model Comparison & Workspace Browser
+**Status**: ⚪ Not Started
+- Implement functional Model Comparison route (`/compare`) allowing users to selection 2-3 models for side-by-side comparison of reactions, biomass, and gapfills.
+- Upgrade the generic `/data/[...path]` from a placeholder to a functional raw workspace browser (listing files/metadata and providing download links).
+- Ensure parity with legacy "Comparison" and "Workspace" views.
+
+### Phase 31: UI Transition Completion for User Testing
+**Status**: ✅ Complete
+**Objective**: Complete all UI-side logic to achieve parity with legacy AngularJS UI, ready for user testing once backend API issues resolved.
+- **Data Browser** (`/data/[...path]`): ✅ Full workspace file browser with directory listing, breadcrumbs, metadata, and download links
+- **Model Comparison** (`/compare`): ✅ Side-by-side model comparison with reaction diffs and heatmap visualization
+- **Media Editor**: ✅ Compound-level editing integrated into My Media with Add/Remove compounds and inline editing
+- **Model Editor Enhancement**: ✅ Add/Remove reactions in Edit tab with dialog integration
+- **Missing Dialogs**: ✅ SaveAs, SelectMedia, AddCompounds, AddReactions, ShowMetadata dialogs created
+- **Bulk Download**: ✅ CSV export on compounds and reactions pages
+- **API Fallbacks**: ✅ Graceful "API unavailable" messages throughout
+- **Note**: Workspace API write operations (create/delete/copy/metadata/permissions) and `editModelFromApi` require backend fixes
+
+## Timestamp Log
+- Updated: 2026-03-11 10:50:00 -05:00 - Reset roadmap for Milestone 2.
+- Updated: 2026-03-11 11:12:00 -05:00 - Phase 13 complete (URL parity and equation formatting).
+- Updated: 2026-03-11 11:18:00 -05:00 - Fixed parameter naming in catch-all stubs and refined equation formatting logic.
+- Updated: 2026-03-11 11:30:00 -05:00 - Phase 14 complete (service status auth fix).
+- Updated: 2026-03-11 19:36:00 -06:00 - Phase 16 complete (UI/UX refinement and data consistency).
+- Updated: 2026-03-11 20:05:00 -06:00 - Re-scoped Phase 17 for authenticated user data and Workspace/modelseed-api integration.
+- Updated: 2026-03-12 15:30:00 -05:00 - Re-scoped Phase 18 for modelseed-api verification and end-to-end testing.
+- Updated: 2026-03-12 17:15:00 -05:00 - Added Phase 19 for UI Reliability and functional parity.
+- Updated: 2026-03-12 17:30:33 -05:00 - Executed Phase 19 plans and produced summaries/verification; pending manual browser checks.
+- Updated: 2026-03-12 17:40:00 -05:00 - Added Phase 19.4 plan for DataControlHeader integration.
+- Updated: 2026-03-12 17:45:00 -05:00 - Phase 19.4 complete: DataControlHeader integrated into all user data and biochem pages.
+- Updated: 2026-03-12 19:26:13 -05:00 - Added Phase 20 scope for models/jobs/workspace proxy and Build Model end-to-end integration.
+- Updated: 2026-03-12 19:50:00 -05:00 - Phase 20: workspace transition to POST /api/workspace/*; new API for all except Solr biochem tables; Poplar URL and PATRIC auth.
+- Updated: 2026-03-12 19:55:16 CDT - Phase 20 implementation committed; final authenticated Poplar verification still pending.
+- Updated: 2026-03-13 09:30:00 -05:00 - Added Phase 21 for PATRIC/RAST Genome Selection Fix in Build Model page.
+- Updated: 2026-03-13 09:57:09 CDT - Executed Phase 21 plans; implementation complete with build verification, awaiting authenticated browser validation.
+- Updated: 2026-03-13 10:56:00 CDT - Added Phase 22 for Poplar endpoint parity and model flow reliability hardening.
+- Updated: 2026-03-13 11:01:38 CDT - Re-scoped Phase 22 with explicit `/myMedia`, `/plant`, and target `/model/...` outcomes aligned to demo behavior.
+- Updated: 2026-03-13 11:12:24 CDT - Phase 22 executed and verified (PASS) with authenticated localhost demo smoke checks.
+- Updated: 2026-03-16 09:36:04 CDT - Added Phase 23 for full non-biochem endpoint coverage and localhost tunnel validation.
+- Updated: 2026-03-16 09:46:46 CDT - Added Phase 24 for page-level API adoption and browser final verification.
+- Updated: 2026-03-16 10:17:02 CDT - Added Phase 25 scope for remaining workflow UIs (merge, edit, history, media CRUD, delete model).
+- Updated: 2026-03-16 10:36:09 CDT - Executed Phase 25 implementation work; code/build verification passed and live authenticated destructive-flow checks remain pending.
+- Updated: 2026-03-16 11:07:14 CDT - Added Phase 26 scope for model detail legacy parity completion and validation readiness.
+- Updated: 2026-03-16 11:24:49 CDT - Executed Phase 26 implementation work; live model-detail validation is partially blocked by backend Workspace 500 responses.
+- Updated: 2026-03-16 11:39:55 CDT - Added Phase 27 for formatting/link parity and remaining legacy surface completion on model-detail and related flows.
+- Updated: 2026-03-16 11:46:54 CDT - Executed and verified Phase 27 formatting/link parity and legacy-surface UX closure.
+- Updated: 2026-03-19 10:15:00 CDT - Phase 23 complete: full non-biochem API client coverage and poplar smoke validation.
+- Updated: 2026-03-23 13:30:00 CDT - Added Phase 31 for UI transition completion and user testing readiness (gap analysis complete).

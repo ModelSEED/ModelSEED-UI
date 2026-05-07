@@ -1,0 +1,52 @@
+/* Core legacy fonts setup */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&display=swap');
+
+
+
+html,
+body {
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Base override for layout adjustments that don't fit perfectly in MUI Theme */
+#content {
+    padding: 5px 20px;
+}
+
+/* Text utils */
+.text-highlight {
+    color: #000;
+    background-color: rgba(48, 175, 198, 0.125);
+    border-radius: 5px;
+    padding: 3px;
+    margin: -3px;
+    font-weight: 800;
+}
+
+.text-light {
+    color: #888;
+}
+
+.important-note {
+    padding: 15px;
+    color: #6B1414;
+    background-color: #FFBFBF;
+    border: 2px solid #CE6363;
+}
+
+/* Animations */
+.animate-show {
+    transition: all linear 0.1s !important;
+}
+
+.animate-show.ng-hide {
+    opacity: 0 !important;
+}
+
+/* Fix file upload styling cursor */
+label.md-button {
+    cursor: pointer;
+}
