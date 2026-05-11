@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { GridFilterModel } from '@mui/x-data-grid';
-import { filterDocsByGridModel } from '@/lib/api/biochem';
 import { filterRowsWithGridModel } from '@/lib/hooks/useToolbarGridFiltering';
 
 describe('grid filtering helpers', () => {
-    it('supports OR logic for column filters', () => {
+    it('supports OR logic for column filters', async () => {
+        process.env.NEXT_PUBLIC_DEPLOYMENT_MODE = 'staging';
+        const { filterDocsByGridModel } = await import('@/lib/api/biochem');
         const rows = [
             { id: 'm1', status: 'queued', type: 'model' },
             { id: 'm2', status: 'completed', type: 'media' },
