@@ -78,7 +78,7 @@ export default function MyMediaPage() {
             }
 
             throw new Error(
-                'My Media requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_MODELSEED_API_URL at a running modelseed-api instance.',
+                'My Media requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_API_BASE_URL at a running modelseed-api instance.',
             );
         },
         staleTime: 5 * 60 * 1000,

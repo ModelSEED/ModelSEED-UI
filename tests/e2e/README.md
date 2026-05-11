@@ -24,7 +24,7 @@ Create a `.env.local` file with your PATRIC credentials:
 
 ```bash
 # .env.local
-NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 NEXT_PUBLIC_USE_MODELSEED_API=true
 PATRIC_TOKEN=your_patric_token_here
 PATRIC_USERNAME=your_username

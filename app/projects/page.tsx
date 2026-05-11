@@ -91,7 +91,7 @@ export default function ProjectsPage() {
                 <div className={styles.projectWithImage}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="http://minedatabase.mcs.anl.gov/img/Gold-Miner-Icon.png"
+                        src="https://minedatabase.mcs.anl.gov/img/Gold-Miner-Icon.png"
                         alt="MINE Database"
                         width={100}
                         height={100}

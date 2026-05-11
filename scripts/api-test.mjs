@@ -13,7 +13,7 @@
  *   - SSH tunnel to API server: ssh -L 8000:localhost:8000 user@poplar.cels.anl.gov
  * 
  * Environment Variables (.env.local):
- *   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+ *   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
  *   PATRIC_USERNAME=your_username
  *   PATRIC_PASSWORD=your_password
  */
@@ -22,12 +22,57 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 dotenv.config({ path: '.env' });
 
-const API_URL = process.env.NEXT_PUBLIC_MODELSEED_API_URL || 'http://localhost:8000';
 const USE_NEW_PROXY = process.env.NEXT_PUBLIC_USE_NEW_PROXY !== 'false';
+const DEPLOYMENT_MODE = (process.env.NEXT_PUBLIC_DEPLOYMENT_MODE || '').toLowerCase();
+const IS_MANUAL = DEPLOYMENT_MODE !== 'staging' && DEPLOYMENT_MODE !== 'production';
+
+const SITE_BASE = process.env.NEXT_PUBLIC_SITE_BASE_URL
+  || (
+    DEPLOYMENT_MODE === 'production'
+      ? (process.env.NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION || 'https://modelseed.org')
+      : DEPLOYMENT_MODE === 'staging'
+        ? (process.env.NEXT_PUBLIC_SITE_BASE_URL_STAGING || 'https://staging.modelseed.org')
+        : ''
+  );
+
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+  || (
+    DEPLOYMENT_MODE === 'production'
+      ? (process.env.NEXT_PUBLIC_API_BASE_URL_PRODUCTION || `${SITE_BASE}/PMS`)
+      : DEPLOYMENT_MODE === 'staging'
+        ? (process.env.NEXT_PUBLIC_API_BASE_URL_STAGING || `${SITE_BASE}/PMS`)
+        : ''
+  );
+
 const WORKSPACE_URL = USE_NEW_PROXY ? `${API_URL}/api/workspace` : 'https://p3.theseed.org/services/Workspace';
-const SOLR_BASE = process.env.NEXT_PUBLIC_USE_NEW_BIOCHEM === 'true' 
-  ? `${API_URL}/api/solr/` 
-  : 'https://modelseed.org/solr/';
+
+const SOLR_BASE = process.env.NEXT_PUBLIC_SOLR_BASE_URL
+  || (
+    DEPLOYMENT_MODE === 'production'
+      ? (process.env.NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION || `${SITE_BASE}/solr/`)
+      : DEPLOYMENT_MODE === 'staging'
+        ? (process.env.NEXT_PUBLIC_SOLR_BASE_URL_STAGING || `${SITE_BASE}/solr/`)
+        : ''
+  );
+const SOLR_BASE_NORMALIZED = SOLR_BASE.endsWith('/') ? SOLR_BASE : `${SOLR_BASE}/`;
+
+const REACTIONS_COLLECTION = process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION
+  || (
+    DEPLOYMENT_MODE === 'production'
+      ? (process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION || 'reactions')
+      : DEPLOYMENT_MODE === 'staging'
+        ? (process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING || 'reactions_staging')
+        : ''
+  );
+
+const COMPOUNDS_COLLECTION = process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION
+  || (
+    DEPLOYMENT_MODE === 'production'
+      ? (process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION || 'compounds')
+      : DEPLOYMENT_MODE === 'staging'
+        ? (process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING || 'compounds_staging')
+        : ''
+  );
 
 /* ============================================================================
  * TEST UTILITIES
@@ -157,7 +202,19 @@ async function testConfiguration() {
 
   test('Solr base URL is configured', async () => {
     assert(SOLR_BASE, 'SOLR_BASE not set');
-    log(`  Solr URL: ${SOLR_BASE}`, 'info');
+    log(`  Solr URL: ${SOLR_BASE_NORMALIZED}`, 'info');
+  });
+
+  test('Solr collection names are set', async () => {
+    assert(REACTIONS_COLLECTION, 'Set NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION (e.g. reactions_staging or reactions)');
+    assert(COMPOUNDS_COLLECTION, 'Set NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION (e.g. compounds_staging or compounds)');
+  });
+
+  test('Manual mode has explicit endpoint overrides', async () => {
+    if (!IS_MANUAL) return;
+    assert(SITE_BASE, 'manual mode requires NEXT_PUBLIC_SITE_BASE_URL');
+    assert(API_URL, 'manual mode requires NEXT_PUBLIC_API_BASE_URL');
+    assert(SOLR_BASE, 'manual mode requires NEXT_PUBLIC_SOLR_BASE_URL');
   });
 
   test('API server is reachable', async () => {
@@ -362,28 +419,28 @@ async function testBiochemApi() {
   logSection('Biochemistry API');
 
   test('List reactions', async () => {
-    const result = await request(`${SOLR_BASE}reactions_staging/select?q=*:*&rows=10&wt=json`);
+    const result = await request(`${SOLR_BASE_NORMALIZED}${REACTIONS_COLLECTION}/select?q=*:*&rows=10&wt=json`);
     assert(result.response, 'No response in result');
     assert(Array.isArray(result.response.docs), 'No docs in response');
     log(`  Found ${result.response.docs.length} reactions`, 'info');
   });
 
   test('List compounds', async () => {
-    const result = await request(`${SOLR_BASE}compounds_staging/select?q=*:*&rows=10&wt=json`);
+    const result = await request(`${SOLR_BASE_NORMALIZED}${COMPOUNDS_COLLECTION}/select?q=*:*&rows=10&wt=json`);
     assert(result.response, 'No response in result');
     assert(Array.isArray(result.response.docs), 'No docs in response');
     log(`  Found ${result.response.docs.length} compounds`, 'info');
   });
 
   test('Get reaction by ID', async () => {
-    const result = await request(`${SOLR_BASE}reactions_staging/select?q=id:rxn00001&wt=json`);
+    const result = await request(`${SOLR_BASE_NORMALIZED}${REACTIONS_COLLECTION}/select?q=id:rxn00001&wt=json`);
     assert(result.response, 'No response');
     assert(result.response.docs.length > 0, 'No reaction found');
     log(`  Got reaction: rxn00001`, 'success');
   });
 
   test('Get compound by ID', async () => {
-    const result = await request(`${SOLR_BASE}compounds_staging/select?q=id:cpd00001&wt=json`);
+    const result = await request(`${SOLR_BASE_NORMALIZED}${COMPOUNDS_COLLECTION}/select?q=id:cpd00001&wt=json`);
     assert(result.response, 'No response');
     assert(result.response.docs.length > 0, 'No compound found');
     log(`  Got compound: cpd00001`, 'success');

@@ -8,7 +8,7 @@ function fixToken(token) {
 }
 
 const token = fixToken(process.env.RAST_TOKEN);
-const API_URL = process.env.NEXT_PUBLIC_MODELSEED_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const jobs = {
   'e60bb1ce-9cfa-4ee3-b1df-4da671e655a4': 'Protein FASTA',

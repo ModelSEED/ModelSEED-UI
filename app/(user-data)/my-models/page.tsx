@@ -155,7 +155,7 @@ export default function MyModelsPage() {
             // for the legacy paths. Instead, surface a clear configuration
             // error so the environment can be fixed explicitly.
             throw new Error(
-                'My Models requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_MODELSEED_API_URL at a running modelseed-api instance.',
+                'My Models requires modelseed-api. Set NEXT_PUBLIC_USE_MODELSEED_API=true and point NEXT_PUBLIC_API_BASE_URL at a running modelseed-api instance.',
             );
         },
         staleTime: 30 * 1000,
