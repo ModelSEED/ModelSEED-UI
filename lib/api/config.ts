@@ -78,7 +78,8 @@ function resolveDeploymentMode(raw: string | undefined): DeploymentMode {
         return normalized;
     }
     if (!normalized) {
-        return 'manual';
+        // Default to staging for build convenience when unset
+        return 'staging';
     }
     throw new Error(
         `Invalid ${DEPLOYMENT_MODE_VAR} value "${raw}". Use staging, production, or manual.`,

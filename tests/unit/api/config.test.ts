@@ -44,11 +44,12 @@ describe('api config deployment resolution', () => {
         expect(config.SOLR_BASE).toBe('https://custom.modelseed.org/solr/');
     });
 
-    it('requires explicit vars when NEXT_PUBLIC_DEPLOYMENT_MODE is unset (manual mode)', async () => {
+    it('defaults to staging mode when NEXT_PUBLIC_DEPLOYMENT_MODE is unset', async () => {
         clearEndpointOverrides();
-        vi.stubEnv('NEXT_PUBLIC_SITE_BASE_URL', '');
-        vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', '');
-        await expect(loadConfig()).rejects.toThrow('NEXT_PUBLIC_SITE_BASE_URL');
+        const config = await loadConfig();
+        expect(config.DEPLOYMENT_MODE).toBe('staging');
+        expect(config.MODELSEED_SITE_BASE_URL).toBe('https://staging.modelseed.org');
+        expect(config.SOLR_REACTIONS_COLLECTION).toBe('reactions_staging');
     });
 
     it('uses production defaults when NEXT_PUBLIC_DEPLOYMENT_MODE=production', async () => {
