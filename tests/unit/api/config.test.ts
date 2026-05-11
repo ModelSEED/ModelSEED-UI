@@ -24,11 +24,13 @@ describe('api config deployment resolution', () => {
 
     it('throws in manual mode when required override vars are missing', async () => {
         clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'manual');
         await expect(loadConfig()).rejects.toThrow(/NEXT_PUBLIC_SITE_BASE_URL/);
     });
 
     it('supports manual mode when explicit overrides are provided', async () => {
         clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'manual');
         vi.stubEnv('NEXT_PUBLIC_SITE_BASE_URL', 'https://custom.modelseed.org');
         vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'https://custom.modelseed.org/PMS');
         vi.stubEnv('NEXT_PUBLIC_REST_BASE_URL', 'https://custom.modelseed.org/api/v0');
@@ -37,9 +39,17 @@ describe('api config deployment resolution', () => {
         vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions_custom');
         vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds_custom');
         const config = await loadConfig();
-        expect(config.DEPLOYMENT_MODE).toBe('');
+        expect(config.DEPLOYMENT_MODE).toBe('manual');
         expect(config.MODELSEED_API_URL).toBe('https://custom.modelseed.org/PMS');
         expect(config.SOLR_BASE).toBe('https://custom.modelseed.org/solr/');
+    });
+
+    it('defaults to staging mode when NEXT_PUBLIC_DEPLOYMENT_MODE is unset', async () => {
+        clearEndpointOverrides();
+        const config = await loadConfig();
+        expect(config.DEPLOYMENT_MODE).toBe('staging');
+        expect(config.MODELSEED_SITE_BASE_URL).toBe('https://staging.modelseed.org');
+        expect(config.SOLR_REACTIONS_COLLECTION).toBe('reactions_staging');
     });
 
     it('uses production defaults when NEXT_PUBLIC_DEPLOYMENT_MODE=production', async () => {

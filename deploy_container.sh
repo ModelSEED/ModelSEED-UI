@@ -1,36 +1,70 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_MODE="${1:-${NEXT_PUBLIC_DEPLOYMENT_MODE:-}}"
+AUTO_YES="${AUTO_YES:-false}"
+
+if [[ "${TARGET_MODE}" == "--yes" ]]; then
+    TARGET_MODE=""
+    AUTO_YES="true"
+fi
+if [[ "${2:-}" == "--yes" ]]; then
+    AUTO_YES="true"
+fi
 
 # 1. Grab the manually set version from VERSION.md
-# (Checks if the file exists, reads it, and strips any accidental whitespace/newlines)
 if [ -f "VERSION.md" ]; then
-    export NEXT_PUBLIC_GIT_VERSION=$(cat VERSION.md | xargs)
+    export NEXT_PUBLIC_GIT_VERSION
+    NEXT_PUBLIC_GIT_VERSION=$(xargs < VERSION.md)
 else
     echo "Warning: VERSION.md not found. Defaulting to 'unknown'."
     export NEXT_PUBLIC_GIT_VERSION="unknown"
 fi
 
 # 2. Get strictly the first 6 characters of the current commit hash
-export NEXT_PUBLIC_GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null | cut -c 1-6 || echo "unknown")
+export NEXT_PUBLIC_GIT_COMMIT
+NEXT_PUBLIC_GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null | cut -c 1-6 || echo "unknown")
 
 # 3. Get the current Git branch
-export NEXT_PUBLIC_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+export NEXT_PUBLIC_GIT_BRANCH
+NEXT_PUBLIC_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
-# 3.1 Resolve deployment mode unless caller explicitly sets it
-if [ -z "${NEXT_PUBLIC_DEPLOYMENT_MODE}" ]; then
+if [ -z "${TARGET_MODE}" ]; then
     case "${NEXT_PUBLIC_GIT_BRANCH}" in
         main|master|production)
-            export NEXT_PUBLIC_DEPLOYMENT_MODE="production"
+            TARGET_MODE="production"
             ;;
         *)
-            export NEXT_PUBLIC_DEPLOYMENT_MODE="staging"
+            TARGET_MODE="staging"
             ;;
     esac
 fi
 
-# 4. Set human-readable date (e.g., "May 1, 2026")
-export NEXT_PUBLIC_DEPLOY_DATE=$(date +"%B %-d, %Y")
+if [ -t 0 ] && [ "${AUTO_YES}" != "true" ]; then
+    echo "Select deployment environment:"
+    echo "  1) Staging    (profile: staging, host port 3000)"
+    echo "  2) Production (profile: production, host port 3001)"
+    read -r -p "Enter choice [1 or 2, default based on branch: ${TARGET_MODE}]: " env_choice
+    case "${env_choice}" in
+        1) TARGET_MODE="staging" ;;
+        2) TARGET_MODE="production" ;;
+        "") ;;
+        *)
+            echo "Invalid choice. Exiting."
+            exit 1
+            ;;
+    esac
+fi
 
-# Display the gathered metadata
+if [[ "${TARGET_MODE}" != "staging" && "${TARGET_MODE}" != "production" ]]; then
+    echo "Invalid deployment mode: ${TARGET_MODE}. Use staging or production."
+    exit 1
+fi
+
+export NEXT_PUBLIC_DEPLOYMENT_MODE="${TARGET_MODE}"
+export NEXT_PUBLIC_DEPLOY_DATE
+NEXT_PUBLIC_DEPLOY_DATE=$(date +"%B %-d, %Y")
+
 echo "========================================"
 echo "Ready to build ModelSEED UI:"
 echo " Version: $NEXT_PUBLIC_GIT_VERSION"
@@ -41,14 +75,13 @@ echo " Date:    $NEXT_PUBLIC_DEPLOY_DATE"
 echo "========================================"
 echo ""
 
-# Ask for confirmation
-read -p "Trigger Build? [y/N]: " confirm
-
-# Check the user's input
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    echo "Starting build process..."
-    docker compose up -d --build
-else
-    echo "Build aborted. No changes were made."
-    exit 0
+if [ -t 0 ] && [ "${AUTO_YES}" != "true" ]; then
+    read -r -p "Trigger Build? [y/N]: " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Build aborted. No changes were made."
+        exit 0
+    fi
 fi
+
+echo "Starting build process for ${NEXT_PUBLIC_DEPLOYMENT_MODE}..."
+docker compose --profile "${NEXT_PUBLIC_DEPLOYMENT_MODE}" up -d --build

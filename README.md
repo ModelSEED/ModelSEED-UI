@@ -40,7 +40,7 @@ ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the Model
 
 Key configuration constants live in `lib/api/config.ts`:
 
-- `DEPLOYMENT_MODE` – `NEXT_PUBLIC_DEPLOYMENT_MODE` (`staging|production`), or unset for strict manual override mode.
+- `DEPLOYMENT_MODE` – `NEXT_PUBLIC_DEPLOYMENT_MODE` (`staging|production|manual`). Unset defaults to `staging`; use `manual` for strict override mode.
 - `MODELSEED_API_URL` – base URL for Poplar (currently `http://poplar.cels.anl.gov:8000` in development).
 - `USE_MODELSEED_API` – when `true`, user data flows (My Models, My Media, jobs) use `modelseed-api`.
 - `USE_NEW_PROXY` – when `true`, workspace calls route through the REST proxy at `${MODELSEED_API_URL}/api/workspace`.

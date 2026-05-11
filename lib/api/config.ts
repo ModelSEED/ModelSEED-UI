@@ -25,19 +25,27 @@ function ensureTrailingSlash(value: string): string {
 
 const DEPLOYMENT_MODE_VAR = 'NEXT_PUBLIC_DEPLOYMENT_MODE';
 
-export type DeploymentMode = 'staging' | 'production' | '';
+export type DeploymentMode = 'staging' | 'production' | 'manual';
 
 function resolveDeploymentMode(raw: string | undefined): DeploymentMode {
     const normalized = raw?.trim().toLowerCase();
     if (normalized === 'staging' || normalized === 'production') {
         return normalized;
     }
-    return '';
+    if (normalized === 'manual') {
+        return normalized;
+    }
+    if (!normalized) {
+        return 'staging';
+    }
+    throw new Error(
+        `Invalid ${DEPLOYMENT_MODE_VAR} value "${raw}". Use staging, production, or manual.`,
+    );
 }
 
 function throwManualModeError(overrideVar: string, description: string): never {
     throw new Error(
-        `Missing required environment variable ${overrideVar} while ${DEPLOYMENT_MODE_VAR} is unset. ` +
+        `Missing required environment variable ${overrideVar} while ${DEPLOYMENT_MODE_VAR}=manual. ` +
         `Set ${overrideVar} (${description}) or set ${DEPLOYMENT_MODE_VAR}=staging|production.`,
     );
 }
@@ -53,7 +61,7 @@ function resolveModeValue(params: {
     const overrideValue = toNonEmpty(readEnv(params.overrideVar));
     if (overrideValue) return overrideValue;
 
-    if (!DEPLOYMENT_MODE) {
+    if (DEPLOYMENT_MODE === 'manual') {
         return throwManualModeError(params.overrideVar, params.manualDescription);
     }
 
@@ -76,8 +84,9 @@ const SITE_DEFAULTS = {
 
 /**
  * Canonical deployment mode selector.
- * - staging | production
- * - unset/invalid => strict manual mode (explicit overrides required)
+ * - staging | production | manual
+ * - unset => staging (build-safe default)
+ * - manual => strict override mode (explicit endpoint vars required)
  */
 export const DEPLOYMENT_MODE = resolveDeploymentMode(readEnv(DEPLOYMENT_MODE_VAR));
 
@@ -85,9 +94,9 @@ export const DEPLOYMENT_MODE = resolveDeploymentMode(readEnv(DEPLOYMENT_MODE_VAR
  * Backward-compatible constant name for existing imports.
  * This is not an env var alias.
  */
-export const DEPLOY_ENV = DEPLOYMENT_MODE;
+export const DEPLOY_ENV = DEPLOYMENT_MODE === 'manual' ? '' : DEPLOYMENT_MODE;
 
-export const DEPLOY_ENV_LABEL = DEPLOYMENT_MODE || 'manual';
+export const DEPLOY_ENV_LABEL = DEPLOYMENT_MODE;
 
 /**
  * Base ModelSEED site host (no trailing slash).
@@ -204,7 +213,7 @@ function resolveSolrCollection(params: {
     const overrideValue = toNonEmpty(readEnv(params.overrideVar));
     if (overrideValue) return overrideValue;
 
-    if (!DEPLOYMENT_MODE) {
+    if (DEPLOYMENT_MODE === 'manual') {
         return throwManualModeError(params.overrideVar, params.description);
     }
 

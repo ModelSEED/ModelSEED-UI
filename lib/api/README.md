@@ -120,7 +120,7 @@ const filtered = await getReactions({
 
 | Constant | Default | Description |
 |----------|---------|-------------|
-| `DEPLOYMENT_MODE` | `staging` \| `production` \| `manual` (unset) | Deployment mode (`NEXT_PUBLIC_DEPLOYMENT_MODE`) |
+| `DEPLOYMENT_MODE` | `staging` \| `production` \| `manual` | Deployment mode (`NEXT_PUBLIC_DEPLOYMENT_MODE`, defaults to `staging` when unset) |
 | `MODELSEED_API_URL` | mode-derived (`https://<host>/PMS`) | ModelSEED REST API base |
 | `USE_NEW_PROXY` | `true` | Route Workspace through REST proxy |
 | `USE_MODELSEED_API` | `true` | Use modelseed-api for user data |
@@ -128,7 +128,7 @@ const filtered = await getReactions({
 **Environment Variables:**
 | Variable | Controls |
 |----------|----------|
-| `NEXT_PUBLIC_DEPLOYMENT_MODE` | Endpoint profile (`staging`, `production`, or unset/manual with required overrides) |
+| `NEXT_PUBLIC_DEPLOYMENT_MODE` | Endpoint profile (`staging`, `production`, or `manual`; unset defaults to `staging`) |
 | `NEXT_PUBLIC_API_BASE_URL` | Override API base URL |
 | `NEXT_PUBLIC_API_BASE_URL_STAGING` / `NEXT_PUBLIC_API_BASE_URL_PRODUCTION` | Mode defaults for API base URL |
 | `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION` | Override Solr reactions core |
