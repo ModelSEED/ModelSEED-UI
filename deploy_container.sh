@@ -12,7 +12,6 @@ if [[ "${2:-}" == "--yes" ]]; then
     AUTO_YES="true"
 fi
 
-# 1. Grab the manually set version from VERSION.md
 if [ -f "VERSION.md" ]; then
     export NEXT_PUBLIC_GIT_VERSION
     NEXT_PUBLIC_GIT_VERSION=$(xargs < VERSION.md)
@@ -21,11 +20,9 @@ else
     export NEXT_PUBLIC_GIT_VERSION="unknown"
 fi
 
-# 2. Get strictly the first 6 characters of the current commit hash
 export NEXT_PUBLIC_GIT_COMMIT
 NEXT_PUBLIC_GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null | cut -c 1-6 || echo "unknown")
 
-# 3. Get the current Git branch
 export NEXT_PUBLIC_GIT_BRANCH
 NEXT_PUBLIC_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
@@ -61,17 +58,20 @@ if [[ "${TARGET_MODE}" != "staging" && "${TARGET_MODE}" != "production" ]]; then
     exit 1
 fi
 
+ENV_DISPLAY_NAME=$(printf '%s' "${TARGET_MODE}" | tr '[:lower:]' '[:upper:]')
+
 export NEXT_PUBLIC_DEPLOYMENT_MODE="${TARGET_MODE}"
 export NEXT_PUBLIC_DEPLOY_DATE
 NEXT_PUBLIC_DEPLOY_DATE=$(date +"%B %-d, %Y")
 
 echo "========================================"
-echo "Ready to build ModelSEED UI:"
+echo "Ready to build ModelSEED UI for ${ENV_DISPLAY_NAME}:"
 echo " Version: $NEXT_PUBLIC_GIT_VERSION"
 echo " Commit:  $NEXT_PUBLIC_GIT_COMMIT"
 echo " Branch:  $NEXT_PUBLIC_GIT_BRANCH"
 echo " Mode:    $NEXT_PUBLIC_DEPLOYMENT_MODE"
 echo " Date:    $NEXT_PUBLIC_DEPLOY_DATE"
+echo " Profile: $TARGET_MODE"
 echo "========================================"
 echo ""
 
@@ -83,5 +83,5 @@ if [ -t 0 ] && [ "${AUTO_YES}" != "true" ]; then
     fi
 fi
 
-echo "Starting build process for ${NEXT_PUBLIC_DEPLOYMENT_MODE}..."
-docker compose --profile "${NEXT_PUBLIC_DEPLOYMENT_MODE}" up -d --build
+echo "Starting build process for ${ENV_DISPLAY_NAME}..."
+docker compose --profile "${TARGET_MODE}" up -d --build
