@@ -30,7 +30,7 @@
     "@rdkit/rdkit": "2025.3.4-1.0.0",
     "@tanstack/react-query": "^5.90.21",
     "next": "^16.2.4",
-    "react": "19.2.3",
+    "react": "19.2.6",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "zustand": "^5.0.11"
