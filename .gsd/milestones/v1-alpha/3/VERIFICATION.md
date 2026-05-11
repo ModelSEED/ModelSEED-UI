@@ -56,7 +56,7 @@ File: lib/data/publications.ts (48317 bytes)
 29: Link href="/projects/fusions"         (internal)
 42: href="http://komodo.modelseed.org"     (external, target="_blank")
 66: Link href="/projects/regulons"         (internal)
-87: href="http://minedatabase.mcs.anl.gov" (external, target="_blank")
+87: href="https://minedatabase.mcs.anl.gov" (external, target="_blank")
 103: href="http://coremodels.mcs.anl.gov"  (external, target="_blank")
 ```
 **Screenshot:** `phase3_projects_1772578681570.png` — Shows "ModelSEED Projects" heading, two-column grid with:
