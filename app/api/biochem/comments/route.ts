@@ -11,13 +11,19 @@ interface CommentRequestBody {
 }
 
 export async function POST(request: NextRequest) {
-    const body = (await request.json()) as CommentRequestBody;
+    let body: CommentRequestBody;
+    try {
+        body = (await request.json()) as CommentRequestBody;
+    } catch {
+        return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 });
+    }
+
     const reactionId = typeof body.reactionId === 'string' ? body.reactionId.trim() : '';
     const remarks = typeof body.remarks === 'string' ? body.remarks.trim() : '';
     const email = typeof body.email === 'string' ? body.email.trim() : '';
     const username = typeof body.username === 'string' ? body.username.trim() : '';
-    const isAlias = Boolean(body.isAlias);
-    const wrongStoichiometry = Boolean(body.wrongStoichiometry);
+    const isAlias = typeof body.isAlias === 'boolean' ? body.isAlias : false;
+    const wrongStoichiometry = typeof body.wrongStoichiometry === 'boolean' ? body.wrongStoichiometry : false;
 
     if (!reactionId) {
         return NextResponse.json({ message: 'reactionId is required' }, { status: 400 });

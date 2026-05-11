@@ -3,10 +3,52 @@
  * Centralized API endpoint configuration.
  *
  * RAST / modelseed_support calls remain on legacy endpoints (per backend directive).
+ *
+ * IMPORTANT: Next.js only inlines process.env.NEXT_PUBLIC_* when the key is
+ * statically referenced. We use a static map with explicit property access
+ * to ensure proper inlining at build time.
  */
 
-function readEnv(name: string): string | undefined {
+const PUBLIC_ENV = {
+    NEXT_PUBLIC_DEPLOYMENT_MODE: process.env.NEXT_PUBLIC_DEPLOYMENT_MODE,
+    NEXT_PUBLIC_SITE_BASE_URL: process.env.NEXT_PUBLIC_SITE_BASE_URL,
+    NEXT_PUBLIC_SITE_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SITE_BASE_URL_STAGING,
+    NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_API_BASE_URL_STAGING: process.env.NEXT_PUBLIC_API_BASE_URL_STAGING,
+    NEXT_PUBLIC_API_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_API_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_REST_BASE_URL: process.env.NEXT_PUBLIC_REST_BASE_URL,
+    NEXT_PUBLIC_REST_BASE_URL_STAGING: process.env.NEXT_PUBLIC_REST_BASE_URL_STAGING,
+    NEXT_PUBLIC_REST_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_REST_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_STATUS_API_URL: process.env.NEXT_PUBLIC_STATUS_API_URL,
+    NEXT_PUBLIC_STATUS_API_URL_STAGING: process.env.NEXT_PUBLIC_STATUS_API_URL_STAGING,
+    NEXT_PUBLIC_STATUS_API_URL_PRODUCTION: process.env.NEXT_PUBLIC_STATUS_API_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_BASE_URL: process.env.NEXT_PUBLIC_SOLR_BASE_URL,
+    NEXT_PUBLIC_SOLR_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_BASE_URL_STAGING,
+    NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_USE_MODELSEED_API: process.env.NEXT_PUBLIC_USE_MODELSEED_API,
+    NEXT_PUBLIC_USE_NEW_PROXY: process.env.NEXT_PUBLIC_USE_NEW_PROXY,
+    NEXT_PUBLIC_PROBMODELSEED_URL: process.env.NEXT_PUBLIC_PROBMODELSEED_URL,
+} as const;
+
+type PublicEnvKey = keyof typeof PUBLIC_ENV;
+
+function readEnv(name: PublicEnvKey): string | undefined {
     if (typeof process === 'undefined') return undefined;
+    return PUBLIC_ENV[name];
+}
+
+function readEnvSafe(name: string): string | undefined {
+    if (typeof process === 'undefined') return undefined;
+    if (name in PUBLIC_ENV) {
+        return PUBLIC_ENV[name as PublicEnvKey];
+    }
     return process.env[name];
 }
 
@@ -58,7 +100,7 @@ function resolveModeValue(params: {
     productionFallback: string | (() => string);
     manualDescription: string;
 }): string {
-    const overrideValue = toNonEmpty(readEnv(params.overrideVar));
+    const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
     if (overrideValue) return overrideValue;
 
     if (DEPLOYMENT_MODE === 'manual') {
@@ -68,7 +110,7 @@ function resolveModeValue(params: {
     const modeDefaultVar = DEPLOYMENT_MODE === 'staging'
         ? params.stagingDefaultVar
         : params.productionDefaultVar;
-    const modeDefaultValue = toNonEmpty(readEnv(modeDefaultVar));
+    const modeDefaultValue = toNonEmpty(readEnvSafe(modeDefaultVar));
     if (modeDefaultValue) return modeDefaultValue;
 
     const fallback = DEPLOYMENT_MODE === 'staging'
@@ -155,7 +197,7 @@ export const MODELSEED_API_TEST_URL = stripTrailingSlash(
 );
 
 function readBooleanEnv(name: string, fallback: boolean): boolean {
-    const raw = readEnv(name);
+    const raw = readEnvSafe(name);
     if (raw === 'true') return true;
     if (raw === 'false') return false;
     return fallback;
@@ -210,7 +252,7 @@ function resolveSolrCollection(params: {
     productionFallback: string;
     description: string;
 }): string {
-    const overrideValue = toNonEmpty(readEnv(params.overrideVar));
+    const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
     if (overrideValue) return overrideValue;
 
     if (DEPLOYMENT_MODE === 'manual') {
@@ -220,7 +262,7 @@ function resolveSolrCollection(params: {
     const defaultVar = DEPLOYMENT_MODE === 'staging'
         ? params.stagingDefaultVar
         : params.productionDefaultVar;
-    const modeDefault = toNonEmpty(readEnv(defaultVar));
+    const modeDefault = toNonEmpty(readEnvSafe(defaultVar));
     if (modeDefault) return modeDefault;
 
     return DEPLOYMENT_MODE === 'staging'
