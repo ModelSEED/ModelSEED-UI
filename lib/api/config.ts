@@ -78,7 +78,7 @@ function resolveDeploymentMode(raw: string | undefined): DeploymentMode {
         return normalized;
     }
     if (!normalized) {
-        return 'staging';
+        return 'manual';
     }
     throw new Error(
         `Invalid ${DEPLOYMENT_MODE_VAR} value "${raw}". Use staging, production, or manual.`,
@@ -87,8 +87,9 @@ function resolveDeploymentMode(raw: string | undefined): DeploymentMode {
 
 function throwManualModeError(overrideVar: string, description: string): never {
     throw new Error(
-        `Missing required environment variable ${overrideVar} while ${DEPLOYMENT_MODE_VAR}=manual. ` +
-        `Set ${overrideVar} (${description}) or set ${DEPLOYMENT_MODE_VAR}=staging|production.`,
+        `Missing required environment variable ${overrideVar}. ` +
+        `Set ${DEPLOYMENT_MODE_VAR}=staging|production for default endpoints, ` +
+        `or set ${overrideVar} (${description}) for manual mode.`,
     );
 }
 
