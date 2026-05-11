@@ -40,10 +40,11 @@ ModelSEED-UI is the modern Next.js 16 + React 19 + MUI 7 interface for the Model
 
 Key configuration constants live in `lib/api/config.ts`:
 
+- `DEPLOYMENT_MODE` – `NEXT_PUBLIC_DEPLOYMENT_MODE` (`staging|production`), or unset for strict manual override mode.
 - `MODELSEED_API_URL` – base URL for Poplar (currently `http://poplar.cels.anl.gov:8000` in development).
 - `USE_MODELSEED_API` – when `true`, user data flows (My Models, My Media, jobs) use `modelseed-api`.
 - `USE_NEW_PROXY` – when `true`, workspace calls route through the REST proxy at `${MODELSEED_API_URL}/api/workspace`.
-- `SOLR_BASE` / `USE_NEW_BIOCHEM` – control whether biochem lookups use legacy Solr or the new biochem endpoints (by default, tables stay on Solr).
+- `SOLR_BASE` / `SOLR_REACTIONS_COLLECTION` / `SOLR_COMPOUNDS_COLLECTION` – control Solr endpoint and core selection for biochem pages.
 
 ## Running the App Locally
 
@@ -156,7 +157,7 @@ When initializing a debugging or feature session, start by reading `INDEX.md` fo
 3. **Configure `.env.local`:**
    ```bash
    # When using SSH tunnel
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    
    # For authenticated tests
    PATRIC_USERNAME=your_username
@@ -197,7 +198,7 @@ See [`tests/README.md`](tests/README.md) for full documentation.
 1. Check SSH tunnel is running (see above)
 2. Verify environment variable in `.env.local`:
    ```bash
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    ```
 3. Restart the development server after changing `.env.local`
 4. Test API connection: `curl http://localhost:8000/api/media/public`

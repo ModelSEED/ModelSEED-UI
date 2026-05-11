@@ -1,13 +1,20 @@
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
-import * as biochemApi from '@/lib/api/biochem';
+
+async function loadBiochemApi() {
+  vi.resetModules();
+  vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'staging');
+  return import('@/lib/api/biochem');
+}
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 describe('Biochem API Integration Tests', () => {
   let isApiAvailable = true;
+  let biochemApi: Awaited<ReturnType<typeof loadBiochemApi>>;
 
   beforeAll(async () => {
+    biochemApi = await loadBiochemApi();
     try {
       const res = await biochemApi.getReactions({ limit: 1 });
       expect(res.docs).toBeDefined();
@@ -70,6 +77,7 @@ describe('getCompounds Solr query shape', () => {
   });
 
   it('quick search must not reference ontology (undefined field on compounds_staging)', async () => {
+    const biochemApi = await loadBiochemApi();
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
         status: 200,
@@ -101,6 +109,7 @@ describe('getReactions Solr case-variant filters', () => {
   });
 
   it('expands lowercase equals filters with case variants', async () => {
+    const biochemApi = await loadBiochemApi();
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
         status: 200,
@@ -123,5 +132,52 @@ describe('getReactions Solr case-variant filters', () => {
     const q = decodeURIComponent(new URL(calledUrl).searchParams.get('q') ?? '');
     expect(q).toContain('status:"ok"');
     expect(q).toContain('status:"OK"');
+  });
+});
+
+describe('Solr collection routing', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it('uses production collections when NEXT_PUBLIC_DEPLOYMENT_MODE=production', async () => {
+    vi.resetModules();
+    vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'production');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds');
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    const api = await import('@/lib/api/biochem');
+    await api.getReactions({ limit: 1 });
+
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    expect(calledUrl).toContain('/reactions/select');
+    expect(calledUrl).not.toContain('/reactions_staging/select');
+  });
+
+  it('uses explicit Solr collection overrides when provided', async () => {
+    vi.resetModules();
+    vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'production');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions_custom');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds');
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    const api = await import('@/lib/api/biochem');
+    await api.getReactions({ limit: 1 });
+
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    expect(calledUrl).toContain('/reactions_custom/select');
   });
 });

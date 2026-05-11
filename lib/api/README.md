@@ -96,7 +96,7 @@ if (current) {
 | `findReactionsForCompound(cpdId)` | Find reactions using a compound |
 | `getCompoundImageUrl(id)` | Get compound structure image URL |
 
-**Routing**: Controlled by `USE_NEW_BIOCHEM` flag. Default is legacy Solr.
+**Routing**: Reactions/compounds pages are Solr-backed (configured collections + base URL from `config.ts`).
 
 **Usage:**
 ```tsx
@@ -120,18 +120,23 @@ const filtered = await getReactions({
 
 | Constant | Default | Description |
 |----------|---------|-------------|
-| `MODELSEED_API_URL` | `http://poplar.cels.anl.gov:8000` | ModelSEED REST API base |
+| `DEPLOYMENT_MODE` | `staging` \| `production` \| `manual` (unset) | Deployment mode (`NEXT_PUBLIC_DEPLOYMENT_MODE`) |
+| `MODELSEED_API_URL` | mode-derived (`https://<host>/PMS`) | ModelSEED REST API base |
 | `USE_NEW_PROXY` | `true` | Route Workspace through REST proxy |
 | `USE_MODELSEED_API` | `true` | Use modelseed-api for user data |
-| `USE_NEW_BIOCHEM` | `false` | Route biochemistry through REST |
 
 **Environment Variables:**
 | Variable | Controls |
 |----------|----------|
-| `NEXT_PUBLIC_MODELSEED_API_URL` | Override API base URL |
+| `NEXT_PUBLIC_DEPLOYMENT_MODE` | Endpoint profile (`staging`, `production`, or unset/manual with required overrides) |
+| `NEXT_PUBLIC_API_BASE_URL` | Override API base URL |
+| `NEXT_PUBLIC_API_BASE_URL_STAGING` / `NEXT_PUBLIC_API_BASE_URL_PRODUCTION` | Mode defaults for API base URL |
+| `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION` | Override Solr reactions core |
+| `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION` | Override Solr compounds core |
+| `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING` / `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION` | Mode defaults for reactions core |
+| `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING` / `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION` | Mode defaults for compounds core |
 | `NEXT_PUBLIC_USE_NEW_PROXY` | Toggle Workspace proxy |
 | `NEXT_PUBLIC_USE_MODELSEED_API` | Toggle modelseed-api |
-| `NEXT_PUBLIC_USE_NEW_BIOCHEM` | Toggle biochem routing |
 
 ### jobTracker.ts
 

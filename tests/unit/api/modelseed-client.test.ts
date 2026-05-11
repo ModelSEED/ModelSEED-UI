@@ -13,7 +13,7 @@ describe('modelseed API client wrappers', () => {
         vi.restoreAllMocks();
         vi.resetModules();
         vi.stubEnv('NEXT_PUBLIC_USE_MODELSEED_API', 'true');
-        vi.stubEnv('NEXT_PUBLIC_MODELSEED_API_URL', 'http://localhost:8000');
+        vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:8000');
         localStorage.clear();
         setAuthToken();
     });

@@ -9,7 +9,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-const API_URL = process.env.NEXT_PUBLIC_MODELSEED_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 function fixToken(token) {
   if (!token) return null;

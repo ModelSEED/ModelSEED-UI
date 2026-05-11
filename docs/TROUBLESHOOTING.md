@@ -41,7 +41,7 @@ This guide covers common issues encountered during development and deployment of
 4. **Check Environment Variable:**
    In `.env.local`:
    ```bash
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    ```
 
 5. **Restart Dev Server:** After changing `.env.local`, restart:
@@ -129,7 +129,7 @@ This guide covers common issues encountered during development and deployment of
    ```bash
    ssh -L 8001:localhost:8000 user@poplar.cels.anl.gov
    # Then update .env.local:
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8001
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8001
    ```
 
 ---
@@ -495,7 +495,7 @@ npm run lint -- --fix    # Auto-fix
 
 ```bash
 # .env.local
-NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 NEXT_PUBLIC_USE_MODELSEED_API=true
 NEXT_PUBLIC_USE_NEW_PROXY=true
 PATRIC_USERNAME=your_username

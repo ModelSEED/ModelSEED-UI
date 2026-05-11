@@ -9,7 +9,7 @@ Before testing, ensure you have:
 2. ✅ SSH tunnel active: `ssh -L 8000:localhost:8000 user@poplar.cels.anl.gov`
 3. ✅ Environment configured in `.env.local`:
    ```bash
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    PATRIC_USERNAME=your_username
    PATRIC_PASSWORD=your_password
    ```
@@ -287,7 +287,7 @@ npm audit --omit=dev
 
 3. **Test Environment**:
    - Use `.env.local` for configuration
-   - Ensure `NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000` when using tunnel
+   - Ensure `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` when using tunnel
    - Keep SSH tunnel terminal open during testing
 
 4. **Known Limitations**:

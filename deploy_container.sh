@@ -15,6 +15,18 @@ export NEXT_PUBLIC_GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null | cut -c 1-6 || e
 # 3. Get the current Git branch
 export NEXT_PUBLIC_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
+# 3.1 Resolve deployment mode unless caller explicitly sets it
+if [ -z "${NEXT_PUBLIC_DEPLOYMENT_MODE}" ]; then
+    case "${NEXT_PUBLIC_GIT_BRANCH}" in
+        main|master|production)
+            export NEXT_PUBLIC_DEPLOYMENT_MODE="production"
+            ;;
+        *)
+            export NEXT_PUBLIC_DEPLOYMENT_MODE="staging"
+            ;;
+    esac
+fi
+
 # 4. Set human-readable date (e.g., "May 1, 2026")
 export NEXT_PUBLIC_DEPLOY_DATE=$(date +"%B %-d, %Y")
 
@@ -24,6 +36,7 @@ echo "Ready to build ModelSEED UI:"
 echo " Version: $NEXT_PUBLIC_GIT_VERSION"
 echo " Commit:  $NEXT_PUBLIC_GIT_COMMIT"
 echo " Branch:  $NEXT_PUBLIC_GIT_BRANCH"
+echo " Mode:    $NEXT_PUBLIC_DEPLOYMENT_MODE"
 echo " Date:    $NEXT_PUBLIC_DEPLOY_DATE"
 echo "========================================"
 echo ""

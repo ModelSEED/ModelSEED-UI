@@ -51,7 +51,7 @@ export async function checkApiHealth(baseUrl: string): Promise<boolean> {
  */
 export const testConfig = {
     api: {
-        baseUrl: process.env.NEXT_PUBLIC_MODELSEED_API_URL || 'http://poplar.cels.anl.gov:8000',
+        baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://poplar.cels.anl.gov:8000',
         timeout: 30000,
     },
     auth: {
