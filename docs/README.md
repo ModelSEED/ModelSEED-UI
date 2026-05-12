@@ -13,6 +13,7 @@ This directory contains the technical documentation for the ModelSEED-UI applica
 | **Scientific Data** | [BIOCHEMISTRY.md](./BIOCHEMISTRY.md) | Solr-indexed reactions/compounds lookup and chemical formula/stoichiometry UX rendering rules. |
 | **Legacy Codebase** | [LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md) | Transitioning from the AngularJS source code to modern React patterns. |
 | **Testing Platform** | [TESTING.md](./TESTING.md) | Vitest unit tests, Playwright E2E tests, and CI/CD pipeline. |
+| **Deploying** | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environment variables, deployment modes, URL resolution, and configuration guide. |
 | **Contributing** | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Guidelines for maintaining the documentation. |
 
 ## Project Design Principles
