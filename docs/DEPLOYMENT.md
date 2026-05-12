@@ -28,11 +28,11 @@ the application uses. It is the **primary switch** that controls all URL resolut
 
 **Default:** `staging` (when the variable is unset or empty)
 
-**Required:** Yes. The app will not start with an invalid or unrecognized value.
+**Required:** No. The app defaults to `staging` automatically. Only set this to `production` or `manual` if you need a different behavior. Invalid non-empty values will cause a startup error.
 
 **Important:** When switching between staging and production, you do not need to
-touch any of the individual URL variables. The mode defaults in
-`.env.example` (and the hardcoded fallbacks in `lib/api/config.ts`) handle everything.
+touch any of the individual URL variables. The mode defaults in `.env.example`
+(and the hardcoded fallbacks in `lib/api/config.ts`) handle everything.
 
 ---
 
@@ -48,7 +48,7 @@ Every URL-type variable follows a strict three-tier resolution order:
    e.g. NEXT_PUBLIC_API_BASE_URL_STAGING=https://staging.modelseed.org/PMS
 
 3. Hardcoded fallback in lib/api/config.ts
-   e.g. `${MODELSEED_SITE_BASE_URL}/PMS`
+   e.g. ${MODELSEED_SITE_BASE_URL}/PMS
 ```
 
 The app checks tier 1 first. If it is empty, tier 2 is consulted. If that is also
@@ -63,27 +63,27 @@ deployments, leave all override variables **blank** and rely on the mode default
 
 ## Environment Variable Reference
 
-### `NEXT_PUBLIC_DEPLOYMENT_MODE` -- REQUIRED
+### `NEXT_PUBLIC_DEPLOYMENT_MODE`
 
 Controls which mode-default set is active.
 
 - **Values:** `staging` | `production` | `manual`
 - **Default:** `staging`
-- **Required:** Yes
+- **Required:** No. Defaults to `staging` when unset.
 
 ---
 
 ### Base URLs (no trailing slash)
 
-#### `NEXT_PUBLIC_SITE_BASE_URL` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_SITE_BASE_URL` -- Required in manual mode, otherwise optional
 
 The base origin for the ModelSEED website. All other URL fallbacks derive from this.
 
 - **Override:** Required in manual mode, optional otherwise
 - **Mode defaults:** `staging=https://staging.modelseed.org` / `production=https://modelseed.org`
-- **Hardcoded fallback:** (none -- mode defaults always available)
+- **Hardcoded fallback:** `SITE_DEFAULTS` in `lib/api/config.ts` (`staging=https://staging.modelseed.org` / `production=https://modelseed.org`)
 
-#### `NEXT_PUBLIC_API_BASE_URL` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_API_BASE_URL` -- Required in manual mode, otherwise optional
 
 Base URL for the modelseed-api (Poplar) service.
 
@@ -92,7 +92,7 @@ Base URL for the modelseed-api (Poplar) service.
 - **Fallback:** `{MODELSEED_SITE_BASE_URL}/PMS`
 - **Common local setup:** `http://localhost:8000` (via Poplar SSH tunnel)
 
-#### `NEXT_PUBLIC_REST_BASE_URL` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_REST_BASE_URL` -- Required in manual mode, otherwise optional
 
 Base URL for the legacy ModelSEED REST v0 API.
 
@@ -100,7 +100,7 @@ Base URL for the legacy ModelSEED REST v0 API.
 - **Mode defaults:** `staging=https://staging.modelseed.org/api/v0` / `production=https://modelseed.org/api/v0`
 - **Fallback:** `{MODELSEED_SITE_BASE_URL}/api/v0`
 
-#### `NEXT_PUBLIC_STATUS_API_URL` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_STATUS_API_URL` -- Required in manual mode, otherwise optional
 
 Status endpoint used by the `/about/version` page for build and service checks.
 
@@ -112,7 +112,7 @@ Status endpoint used by the `/about/version` page for build and service checks.
 
 ### Solr Configuration
 
-#### `NEXT_PUBLIC_SOLR_BASE_URL` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_SOLR_BASE_URL` -- Required in manual mode, otherwise optional
 
 Base URL for the Solr search backend. Trailing slash is stripped at runtime.
 
@@ -120,7 +120,7 @@ Base URL for the Solr search backend. Trailing slash is stripped at runtime.
 - **Mode defaults:** `staging=https://staging.modelseed.org/solr/` / `production=https://modelseed.org/solr/`
 - **Fallback:** `{MODELSEED_SITE_BASE_URL}/solr/`
 
-#### `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION` -- Required in manual mode, otherwise optional
 
 Solr core name for the reactions collection.
 
@@ -128,7 +128,7 @@ Solr core name for the reactions collection.
 - **Mode defaults:** `staging=reactions_staging` / `production=reactions`
 - **Fallback:** `reactions_staging` (staging) / `reactions` (production)
 
-#### `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION` -- REQUIRED in manual mode, otherwise optional
+#### `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION` -- Required in manual mode, otherwise optional
 
 Solr core name for the compounds collection.
 
@@ -140,7 +140,7 @@ Solr core name for the compounds collection.
 
 ### Feature Flags (optional)
 
-#### `NEXT_PUBLIC_USE_MODELSEED_API` -- Optional
+#### `NEXT_PUBLIC_USE_MODELSEED_API`
 
 Enables the modelseed-api (Poplar) proxy for workspace operations. When `false`,
 the legacy Workspace URL (`https://p3.theseed.org/services/Workspace`) is used.
@@ -148,12 +148,10 @@ the legacy Workspace URL (`https://p3.theseed.org/services/Workspace`) is used.
 - **Values:** `true` | `false`
 - **Default:** `true`
 
-#### `NEXT_PUBLIC_USE_NEW_PROXY` -- Optional
+#### `NEXT_PUBLIC_USE_NEW_PROXY`
 
-Enables the new proxy layer for all backend services. When `false`, the following
-services fall back to their legacy endpoints:
-- **Workspace:** `https://p3.theseed.org/services/Workspace`
-- **ProbModelSEED:** `https://p3.theseed.org/services/ProbModelSEED`
+Enables the new proxy layer for backend services. When `false`, certain services
+(ProbModelSEED, Workspace) fall back to their legacy endpoints.
 
 - **Values:** `true` | `false`
 - **Default:** `true`
@@ -162,44 +160,46 @@ services fall back to their legacy endpoints:
 
 ### ProbModelSEED URL (optional)
 
-#### `NEXT_PUBLIC_PROBMODELSEED_URL` -- Optional
+#### `NEXT_PUBLIC_PROBMODELSEED_URL`
 
 Override for the ProbModelSEED API endpoint. No trailing slash.
 
-- **When `USE_NEW_PROXY=true` and this is empty:** Resolves to `{SITE_BASE_URL}/api/model`
-- **When `USE_NEW_PROXY=false`:** This is ignored; the legacy URL is used instead.
+- **When `NEXT_PUBLIC_USE_NEW_PROXY=true` and this is empty:** Resolves to `{SITE_BASE_URL}/api/model`
+- **When `NEXT_PUBLIC_USE_NEW_PROXY=false`:** This is ignored; the legacy URL is used instead.
 
 ---
 
 ### RDKit.js URL (optional)
 
-#### `NEXT_PUBLIC_RDKIT_BASE_URL` -- Optional
+#### `NEXT_PUBLIC_RDKIT_BASE_URL`
 
 Override for self-hosted RDKit.js assets. No trailing slash.
 
 - **When empty:** RDKit.js loads from the unpkg CDN (`https://unpkg.com/@rdkit/rdkit@{VERSION}/dist`).
 - **When set:** Must point to a directory containing `RDKit_minimal.js` and `RDKit_minimal.wasm`.
-  Example for self-hosting via the `/public` directory: `/public/rdkit`
+  Example for self-hosting via the `/public` directory: `/rdkit`
+
+**Note:** Next.js serves files under `public/` at the site root, so `public/rdkit` maps to the URL `/rdkit`, not `/public/rdkit`.
 
 ---
 
 ### Build Metadata (displayed on /about/version)
 
-These are injected at build time by CI/CD and do not affect runtime behavior.
+These values are injected at build time by CI/CD and do not affect runtime behavior.
 They are safe to leave blank for local development.
 
-| Variable             | Purpose                             |
-| :------------------- | :---------------------------------- |
-| `NEXT_PUBLIC_GIT_VERSION` | Semantic version string         |
-| `NEXT_PUBLIC_GIT_BRANCH`  | Git branch name                  |
-| `NEXT_PUBLIC_GIT_COMMIT`  | Git commit SHA                   |
-| `NEXT_PUBLIC_DEPLOY_DATE` | Deployment date string           |
+| Variable | Purpose |
+| :--- | :--- |
+| `NEXT_PUBLIC_GIT_VERSION` | Semantic version string |
+| `NEXT_PUBLIC_GIT_BRANCH` | Git branch name |
+| `NEXT_PUBLIC_GIT_COMMIT` | Git commit SHA |
+| `NEXT_PUBLIC_DEPLOY_DATE` | Deployment date string |
 
 ---
 
 ### Test Credentials (optional)
 
-#### `PATRIC_TOKEN` -- Optional
+#### `PATRIC_TOKEN`
 
 PATRIC authentication token for integration testing. Obtain from
 <https://p3.theseed.org/user/authenticate>.
