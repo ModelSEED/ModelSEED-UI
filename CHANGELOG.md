@@ -5,7 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [{{VERSION}}] - 2026-04-06
+## [Unreleased] - TBD
+
+### Known Issues
+- RAST MS FBA not working
+- PATRIC-only model submission
+- Workspace write operations limited
+
+### Expected Behaviors
+- Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.0.1] - 2026-05-12
+
+### Added
+- Find-in-page style search replacing the legacy search bar across the application
+- Multiple filter rows with AND/OR logic in the DataControlHeader toolbar
+- Case-insensitive Solr matching via case-variant filter clauses
+- Hover tooltips and popup dialog for pathway visualization in the reactions table
+- Reaction comments API route with modal UI integration
+- PlantSEED copy functionality with editing restrictions for reconstructed models
+- Branch name and upstream repository link displayed on the `/about/version` screen
+- Compound synonym formatting with chemistry-aware scripts and improved list layout
+- Gene reactions rendered as linked chips on model detail pages
+- Production-quality polish applied to 8 secondary pages
+
+### Changed
+- Compound detail and reaction detail pages stabilized with improved metadata presentation
+- Reaction structure cards fixed and compound detail refined
+
+### Fixed
+- Compounds Solr quick search repaired (was using invalid ontology field)
+- DataControlHeader hardened across all grid consumers to prevent filter state loss
+- Dual-backend filtering in search hardened
+- Grid state preserved when using `onApplyFilterModel` for server-side pagination
+- Toolbar filter intent preserved correctly across community grid constraint changes
+- FBA detail data now loaded by `fba_id` instead of incorrect reference
+- Model detail pages now use canonical model ref for both FBA and gapfill data
+- Gapfill page fixed to properly parse solution data and handle incorrect API refs
+- Explicit unavailable-image placeholders added to prevent broken image UI
+- Filtered row count now used in CustomPagination for accurate display
+- JSON parse error handling in the comments route returns 400 on malformed input
+- Boolean parsing in the comments route fixed with explicit `typeof` check
+- React key uniqueness enforced in ChemicalEquation token rendering
+- Next.js upgraded to patched **16.2.6** to resolve high-severity advisories
+
+---
+
+## [3.0.0] - 2026-04-06
 
 ### Added
 - Compound structure images on reaction pages with click-through to compound detail pages
@@ -17,21 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Invalid gapfill URL handling to gracefully return empty results instead of 404 errors
 - Improved Reaction/Compound detail drawer with better typography and monospace formatting
-
-### Documentation
-- SSH tunnel requirements, environment variables, and account separation expectations
-
----
-
-## [Unreleased] - TBD
-
-### Known Issues
-- RAST MS FBA not working
-- PATRIC-only model submission
-- Workspace write operations limited
-
-### Expected Behaviors
-- Models/Media differ between RAST and PATRIC (intentional system design)
 
 ---
 
@@ -138,7 +171,7 @@ Below contains a summary of notable changes and deploy dates for each release fr
 
 ## [1.3.1-beta] - 2016-03-03
 
-- Add permalink compound and reaction pages. e.g., [cpd00001](http://modelseed.org/biochem/compounds/cpd00001) and [rxn00001](http://modelseed.org/biochem/reactions/rxn00001)
+- Add permalink compound and reaction pages
 - Add [Fusions](http://modelseed.org/projects/fusions) project
 - Stylistic fixes
 
