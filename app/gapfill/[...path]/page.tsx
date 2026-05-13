@@ -24,6 +24,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import { listModelGapfillsFromApi } from '@/lib/api/modelseed';
 import { workspaceGet, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
+import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 /* ---------- types ---------- */
@@ -317,6 +318,14 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
             },
         },
         { field: 'name', headerName: 'Name', width: 280 },
+        {
+            field: 'equation',
+            headerName: 'Equation',
+            flex: 1,
+            minWidth: 280,
+            sortable: false,
+            renderCell: (params) => <ChemicalEquation equation={params.value} />,
+        },
         { field: 'direction', headerName: 'Direction', width: 120 },
         { field: 'compartment', headerName: 'Compartment', width: 140 },
     ], []);
