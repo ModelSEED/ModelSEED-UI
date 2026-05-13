@@ -32,24 +32,27 @@ export default function RastGenomePreviewDialog({ open, job, onProceed, onClose 
         if (!open || !job) return;
 
         const genomeId = job.genome_id || job.id;
-        if (!genomeId) {
-            setError('No genome ID available');
-            return;
-        }
+        if (!genomeId) return;
 
+        let cancelled = false;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setGenomeData(null);
         setError(null);
 
         getRastGenomeData(genomeId)
             .then((data) => {
+                if (cancelled) return;
                 setGenomeData(data);
                 setLoading(false);
             })
             .catch((err) => {
+                if (cancelled) return;
                 setError(err instanceof Error ? err.message : 'Failed to fetch genome data');
                 setLoading(false);
             });
+
+        return () => { cancelled = true; };
     }, [open, job]);
 
     const metadataRows: { label: string; value: string }[] = [];
