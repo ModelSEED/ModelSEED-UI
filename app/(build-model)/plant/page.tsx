@@ -22,6 +22,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { RastGenomeJob, submitReconstructJobFromApi } from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import PatricGenomesTable from '@/components/build-model/PatricGenomesTable';
+import RastGenomePreviewDialog from '@/components/build-model/RastGenomePreviewDialog';
 import RastGenomesTable from '@/components/build-model/RastGenomesTable';
 import { PatricGenome } from '@/lib/api/patric';
 
@@ -102,6 +103,7 @@ export default function BuildModelPlantPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [plantseedDialogOpen, setPlantseedDialogOpen] = useState(false);
+    const [selectedRastJob, setSelectedRastJob] = useState<RastGenomeJob | null>(null);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         if (PLANTSEED_MAINTENANCE && newValue === 0) {
@@ -230,6 +232,11 @@ export default function BuildModelPlantPage() {
     };
 
     const handleRastGenomeSelect = (job: RastGenomeJob) => {
+        setSelectedRastJob(job);
+    };
+
+    const handleProceedFromRastPreview = (job: RastGenomeJob) => {
+        setSelectedRastJob(null);
         const genomeId = job.genome_id || job.id;
         void handleReferenceSubmit('rast', 'RAST', genomeId, job.genome_name);
     };
@@ -441,18 +448,25 @@ export default function BuildModelPlantPage() {
                     </Button>
                 </Box>
 
-                <Dialog
-                    open={plantseedDialogOpen}
-                    onClose={() => setPlantseedDialogOpen(false)}
-                    maxWidth="sm"
-                    fullWidth
-                >
-                    <DialogActions>
-                        <Button onClick={() => setPlantseedDialogOpen(false)}>
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                <RastGenomePreviewDialog
+                open={selectedRastJob !== null}
+                job={selectedRastJob}
+                onProceed={handleProceedFromRastPreview}
+                onClose={() => setSelectedRastJob(null)}
+            />
+
+            <Dialog
+                open={plantseedDialogOpen}
+                onClose={() => setPlantseedDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogActions>
+                    <Button onClick={() => setPlantseedDialogOpen(false)}>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
             </Box>
         </AuthGuard >
     );

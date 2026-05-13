@@ -62,6 +62,61 @@ export interface RastGenomeJob {
     type: 'Genome';
 }
 
+/**
+ * Fetch genome annotation data from RAST.
+ *
+ * Calls MSSeedSupportServer.get_rast_genome_data over JSON-RPC.
+ * Returns genome metadata including taxonomy, domain, features, and contigs.
+ *
+ * @param genomeId - RAST genome ID to fetch data for
+ * @returns Promise resolving to genome data record
+ */
+export async function getRastGenomeData(genomeId: string): Promise<Record<string, unknown>> {
+    const response = await fetch(MODELSEED_SUPPORT_URL, {
+        method: 'POST',
+        headers: withRawTokenAuth(
+            {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            true,
+        ),
+        body: JSON.stringify({
+            version: '1.1',
+            method: 'MSSeedSupportServer.get_rast_genome_data',
+            id: 'get-rast-genome-data',
+            params: [{ genome_id: genomeId }],
+        }),
+    });
+
+    const { payload: rawPayload, rawText } = await parseJsonResponse(response);
+    const payload = rawPayload as RastJobsRpcResponse | null;
+
+    if (!response.ok) {
+        if (payload?.error) {
+            throw new Error(payload.error.message || payload.error.error || 'RAST genome data fetch failed');
+        }
+        throw new Error(
+            `RAST genome data fetch failed (${response.status})${rawText ? `: ${rawText}` : ''}`,
+        );
+    }
+
+    if (!payload) {
+        throw new Error('RAST genome data returned an empty or non-JSON response');
+    }
+
+    if (payload.error) {
+        throw new Error(payload.error.message || payload.error.error || 'RAST genome data fetch failed');
+    }
+
+    const result = Array.isArray(payload.result) ? payload.result[0] : payload.result;
+    if (!result || typeof result !== 'object') {
+        throw new Error('Unexpected RAST genome data format');
+    }
+
+    return result as Record<string, unknown>;
+}
+
 export interface ModelDetailBundle {
     ref: string;
     data: Record<string, unknown>;
