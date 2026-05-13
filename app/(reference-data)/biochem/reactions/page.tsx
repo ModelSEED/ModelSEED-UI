@@ -298,12 +298,13 @@ export default function ReactionsPage() {
         {
             field: 'definition',
             headerName: 'Equation',
-            width: 350,
+            flex: 1,
+            minWidth: 280,
             sortable: false,
             renderCell: (params) => (
-                <TruncatedWithTooltip text={params.value} maxWidth={330}>
+                <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.5 }}>
                     <ChemicalEquation equation={params.value} />
-                </TruncatedWithTooltip>
+                </Box>
             ),
         },
         {
