@@ -108,7 +108,7 @@ export async function getRastGenomeData(genomeId: string, jobId?: string): Promi
             version: '1.1',
             method: 'MSSeedSupportServer.getRastGenomeData',
             id: 'get-rast-genome-data',
-            params: [{ genome_id: genomeId }],
+            params: [{ genome: genomeId }],
         }),
     });
 
