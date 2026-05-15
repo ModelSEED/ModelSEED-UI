@@ -65,13 +65,36 @@ export interface RastGenomeJob {
 /**
  * Fetch genome annotation data from RAST.
  *
- * Calls MSSeedSupportServer.get_rast_genome_data over JSON-RPC.
- * Returns genome metadata including taxonomy, domain, features, and contigs.
+ * Tries José's modelseed-api endpoint first (GET /api/rast/genome),
+ * then falls back to MSSS JSON-RPC (MSSeedSupportServer.getRastGenomeData).
  *
  * @param genomeId - RAST genome ID to fetch data for
+ * @param jobId - Optional RAST job ID (needed for the modelseed-api endpoint)
  * @returns Promise resolving to genome data record
  */
-export async function getRastGenomeData(genomeId: string): Promise<Record<string, unknown>> {
+export async function getRastGenomeData(genomeId: string, jobId?: string): Promise<Record<string, unknown>> {
+    // Try José's modelseed-api endpoint first
+    if (jobId) {
+        try {
+            const token = getStoredAuthUsername();
+            const headers: Record<string, string> = { Accept: 'application/json' };
+            if (token) {
+                headers['Authorization'] = token;
+            }
+            const params = new URLSearchParams({ genome_id: genomeId, job_id: jobId });
+            const res = await fetch(`/api/rast/genome?${params}`, { headers });
+            if (res.ok) {
+                const data: unknown = await res.json();
+                if (data && typeof data === 'object') {
+                    return data as Record<string, unknown>;
+                }
+            }
+        } catch {
+            // Fall through to MSSS
+        }
+    }
+
+    // Fallback: MSSS JSON-RPC
     const response = await fetch(MODELSEED_SUPPORT_URL, {
         method: 'POST',
         headers: withRawTokenAuth(
@@ -83,7 +106,7 @@ export async function getRastGenomeData(genomeId: string): Promise<Record<string
         ),
         body: JSON.stringify({
             version: '1.1',
-            method: 'MSSeedSupportServer.get_rast_genome_data',
+            method: 'MSSeedSupportServer.getRastGenomeData',
             id: 'get-rast-genome-data',
             params: [{ genome_id: genomeId }],
         }),

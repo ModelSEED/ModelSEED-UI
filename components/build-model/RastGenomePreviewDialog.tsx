@@ -32,6 +32,7 @@ export default function RastGenomePreviewDialog({ open, job, onProceed, onClose 
         if (!open || !job) return;
 
         const genomeId = job.genome_id || job.id;
+        const jobId = job.id;
         if (!genomeId) return;
 
         let cancelled = false;
@@ -40,7 +41,7 @@ export default function RastGenomePreviewDialog({ open, job, onProceed, onClose 
         setGenomeData(null);
         setError(null);
 
-        getRastGenomeData(genomeId)
+        getRastGenomeData(genomeId, jobId)
             .then((data) => {
                 if (cancelled) return;
                 setGenomeData(data);
