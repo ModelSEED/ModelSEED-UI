@@ -18,7 +18,7 @@ import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import IconButton from '@mui/material/IconButton';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
+/* import ReactionCommentModal from '@/components/ui/ReactionCommentModal'; */
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
@@ -272,23 +272,7 @@ export default function ReactionsPage() {
                 </Link>
             ),
         },
-        {
-            field: 'actions',
-            headerName: '',
-            width: 50,
-            sortable: false,
-            disableColumnMenu: true,
-            renderCell: (params) => (
-                <IconButton
-                    size="small"
-                    title="Comment on this reaction"
-                    onClick={() => handleOpenComment(params.row.id)}
-                    sx={{ color: '#00acc1' }}
-                >
-                    <ChatBubbleOutlineIcon fontSize="small" />
-                </IconButton>
-            )
-        },
+        /* comment button column disabled */
         {
             field: 'name',
             headerName: 'Name',
@@ -348,13 +332,7 @@ export default function ReactionsPage() {
                 );
             },
         },
-        {
-            field: 'notes',
-            headerName: 'Notes',
-            width: 100,
-            sortable: false,
-            renderCell: (params) => <GridHighlightText text={(params.row.notes ?? []).join(' | ')} />,
-        },
+        /* notes column disabled */
         {
             field: 'synonyms',
             headerName: 'Synonyms',
@@ -463,11 +441,11 @@ export default function ReactionsPage() {
                 autoHeight
             />
 
-            <ReactionCommentModal
+            {/* <ReactionCommentModal
                 open={commentModalOpen}
                 onClose={() => setCommentModalOpen(false)}
                 reactionId={commentReactionId}
-            />
+            /> */}
 
             <ExportModal
                 open={exportModalOpen}
