@@ -461,11 +461,23 @@ export default function BuildModelPlantPage() {
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogActions>
-                    <Button onClick={() => setPlantseedDialogOpen(false)}>
-                        Close
-                    </Button>
-                </DialogActions>
+                <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" fontWeight={600} gutterBottom>
+                        PlantSEED — Update In Progress
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                        PlantSEED v2.0 → PlantSEED v3.0
+                    </Typography>
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        Annotation and reconstruction services are temporarily offline for updates
+                        and will be restored shortly.
+                    </Alert>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button onClick={() => setPlantseedDialogOpen(false)} variant="contained">
+                            Close
+                        </Button>
+                    </Box>
+                </Box>
             </Dialog>
             </Box>
         </AuthGuard >
