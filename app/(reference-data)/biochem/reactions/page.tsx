@@ -17,7 +17,7 @@ import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import IconButton from '@mui/material/IconButton';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+/* import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; */
 /* import ReactionCommentModal from '@/components/ui/ReactionCommentModal'; */
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';

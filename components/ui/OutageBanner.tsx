@@ -14,8 +14,11 @@ export default function OutageBanner() {
     const [status, setStatus] = useState<MaintenanceStatus | null>(null);
 
     useEffect(() => {
-        fetch('/api/maintenance')
-            .then((res) => res.json())
+        fetch('/api/maintenance', { cache: 'no-store' })
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
             .then((data: MaintenanceStatus) => setStatus(data))
             .catch(() => setStatus({ enabled: false, message: '' }));
     }, []);

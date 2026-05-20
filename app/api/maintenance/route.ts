@@ -2,13 +2,15 @@
  * Maintenance mode status endpoint.
  *
  * Returns whether the site is in maintenance mode and an optional message.
- * Sam can toggle this by:
- *   1. Setting MAINTENANCE_MODE env var (requires container restart)
- *   2. Creating /tmp/maintenance.json with {"enabled":true,"message":"..."}
+ * Operators can toggle this by:
+ *   1. Creating /tmp/maintenance.json with {"enabled":true,"message":"..."}
  *      (file is checked at runtime, no restart needed)
+ *   2. Setting MAINTENANCE_MODE env var (requires container restart)
  */
 import { NextResponse } from 'next/server';
 import fs from 'fs';
+
+const NO_CACHE_HEADERS = { 'Cache-Control': 'no-store, max-age=0' };
 
 interface MaintenanceStatus {
     enabled: boolean;
@@ -35,7 +37,7 @@ export async function GET(): Promise<NextResponse> {
     // 1. Check file-based toggle first (runtime toggle, no restart needed)
     const fileStatus = readFileStatus();
     if (fileStatus) {
-        return NextResponse.json(fileStatus);
+        return NextResponse.json(fileStatus, { headers: NO_CACHE_HEADERS });
     }
 
     // 2. Fall back to env var (requires container restart)
@@ -44,9 +46,12 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json({
             enabled: true,
             message: process.env.MAINTENANCE_MESSAGE || 'Site is undergoing maintenance. Please check back shortly.',
-        });
+        }, { headers: NO_CACHE_HEADERS });
     }
 
     // 3. Default: not in maintenance
-    return NextResponse.json({ enabled: false, message: '' });
+    return NextResponse.json(
+        { enabled: false, message: '' },
+        { headers: NO_CACHE_HEADERS },
+    );
 }
