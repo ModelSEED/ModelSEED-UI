@@ -211,8 +211,8 @@ export default function ReactionsPage() {
     }, [handleFilterModelChange]);
 
     // Modal state
-    const [commentModalOpen, setCommentModalOpen] = useState(false);
-    const [commentReactionId, setCommentReactionId] = useState<string | null>(null);
+    /* const [commentModalOpen, setCommentModalOpen] = useState(false); */
+    /* const [commentReactionId, setCommentReactionId] = useState<string | null>(null); */
     const [exportModalOpen, setExportModalOpen] = useState(false);
     const [pathwaysModalOpen, setPathwaysModalOpen] = useState(false);
     const [pathwaysModalReactionId, setPathwaysModalReactionId] = useState<string | null>(null);
@@ -250,10 +250,10 @@ export default function ReactionsPage() {
         }));
     }, [filterModel]);
 
-    const handleOpenComment = useCallback((id: string) => {
+    /* const handleOpenComment = useCallback((id: string) => {
         setCommentReactionId(id);
         setCommentModalOpen(true);
-    }, []);
+    }, []); */
 
     const handleOpenPathwaysModal = useCallback((reaction: Reaction) => {
         setPathwaysModalReactionId(reaction.id);
@@ -375,7 +375,7 @@ export default function ReactionsPage() {
                 return row.ontology;
             },
         },
-    ], [handleOpenComment, handleOpenPathwaysModal]);
+    ], [handleOpenPathwaysModal]);
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
         limit: paginationModel.pageSize,

@@ -1,29 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 
-interface MaintenanceStatus {
-    enabled: boolean;
-    message: string;
-}
+const MAINTENANCE_ENABLED = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+const MAINTENANCE_MESSAGE = process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE || 'Site is undergoing maintenance. Please check back shortly.';
 
 export default function OutageBanner() {
-    const [status, setStatus] = useState<MaintenanceStatus | null>(null);
-
-    useEffect(() => {
-        fetch('/api/maintenance', { cache: 'no-store' })
-            .then((res) => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-            })
-            .then((data: MaintenanceStatus) => setStatus(data))
-            .catch(() => setStatus({ enabled: false, message: '' }));
-    }, []);
-
-    if (!status || !status.enabled) return null;
+    if (!MAINTENANCE_ENABLED) return null;
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -37,7 +22,7 @@ export default function OutageBanner() {
                 }}
             >
                 <Typography variant="body1" fontWeight={600}>
-                    {status.message || 'Site is undergoing maintenance. Please check back shortly.'}
+                    {MAINTENANCE_MESSAGE}
                 </Typography>
             </Alert>
         </Box>
