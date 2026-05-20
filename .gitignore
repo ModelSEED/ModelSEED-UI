@@ -61,6 +61,7 @@ playwright-report/
 
 # AI assistant/tooling metadata (keep local, do not track)
 .agent/
+.antigravitycli/
 .cursor/
 .gemini/
 .cursorrules
