@@ -105,8 +105,8 @@ Base URL for the legacy ModelSEED REST v0 API.
 Status endpoint used by the `/about/version` page for build and service checks.
 
 - **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `staging=https://staging.modelseed.org/api/test-service` / `production=https://modelseed.org/api/test-service`
-- **Fallback:** `{MODELSEED_SITE_BASE_URL}/api/test-service`
+- **Mode defaults:** `staging=https://staging.modelseed.org/PMS/api/health` / `production=https://modelseed.org/PMS/api/health`
+- **Fallback:** `{MODELSEED_SITE_BASE_URL}/PMS/api/health`
 
 ---
 

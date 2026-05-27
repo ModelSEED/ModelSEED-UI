@@ -192,8 +192,8 @@ export const MODELSEED_API_TEST_URL = stripTrailingSlash(
         overrideVar: 'NEXT_PUBLIC_STATUS_API_URL',
         stagingDefaultVar: 'NEXT_PUBLIC_STATUS_API_URL_STAGING',
         productionDefaultVar: 'NEXT_PUBLIC_STATUS_API_URL_PRODUCTION',
-        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/api/test-service`,
-        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/api/test-service`,
+        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS/api/health`,
+        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS/api/health`,
         manualDescription: 'status check endpoint used by /about/version',
     }),
 );
