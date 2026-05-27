@@ -34,13 +34,14 @@ describe('api config deployment resolution', () => {
         vi.stubEnv('NEXT_PUBLIC_SITE_BASE_URL', 'https://custom.modelseed.org');
         vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'https://custom.modelseed.org/PMS');
         vi.stubEnv('NEXT_PUBLIC_REST_BASE_URL', 'https://custom.modelseed.org/api/v0');
-        vi.stubEnv('NEXT_PUBLIC_STATUS_API_URL', 'https://custom.modelseed.org/api/test-service');
+        vi.stubEnv('NEXT_PUBLIC_STATUS_API_URL', 'https://custom.modelseed.org/PMS/api/health');
         vi.stubEnv('NEXT_PUBLIC_SOLR_BASE_URL', 'https://custom.modelseed.org/solr');
         vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions_custom');
         vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds_custom');
         const config = await loadConfig();
         expect(config.DEPLOYMENT_MODE).toBe('manual');
         expect(config.MODELSEED_API_URL).toBe('https://custom.modelseed.org/PMS');
+        expect(config.MODELSEED_API_TEST_URL).toBe('https://custom.modelseed.org/PMS/api/health');
         expect(config.SOLR_BASE).toBe('https://custom.modelseed.org/solr/');
     });
 
@@ -49,6 +50,7 @@ describe('api config deployment resolution', () => {
         const config = await loadConfig();
         expect(config.DEPLOYMENT_MODE).toBe('staging');
         expect(config.MODELSEED_SITE_BASE_URL).toBe('https://staging.modelseed.org');
+        expect(config.MODELSEED_API_TEST_URL).toBe('https://staging.modelseed.org/PMS/api/health');
         expect(config.SOLR_REACTIONS_COLLECTION).toBe('reactions_staging');
     });
 
@@ -58,6 +60,7 @@ describe('api config deployment resolution', () => {
         const config = await loadConfig();
         expect(config.DEPLOYMENT_MODE).toBe('production');
         expect(config.MODELSEED_API_URL).toBe('https://modelseed.org/PMS');
+        expect(config.MODELSEED_API_TEST_URL).toBe('https://modelseed.org/PMS/api/health');
         expect(config.SOLR_REACTIONS_COLLECTION).toBe('reactions');
         expect(config.SOLR_COMPOUNDS_COLLECTION).toBe('compounds');
     });

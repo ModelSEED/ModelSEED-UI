@@ -104,9 +104,9 @@ Base URL for the legacy ModelSEED REST v0 API.
 
 Status endpoint used by the `/about/version` page for build and service checks.
 
-- **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `staging=https://staging.modelseed.org/api/test-service` / `production=https://modelseed.org/api/test-service`
-- **Fallback:** `{MODELSEED_SITE_BASE_URL}/api/test-service`
+- **Override:** Required in manual mode; when set explicitly, use `{MODELSEED_SITE_BASE_URL}/PMS/api/health`
+- **Mode defaults:** `staging=https://staging.modelseed.org/PMS/api/health` / `production=https://modelseed.org/PMS/api/health`
+- **Fallback:** `{MODELSEED_SITE_BASE_URL}/PMS/api/health`
 
 ---
 
@@ -246,7 +246,7 @@ NEXT_PUBLIC_DEPLOYMENT_MODE=manual
 NEXT_PUBLIC_SITE_BASE_URL=https://my-custom-host.example.com
 NEXT_PUBLIC_API_BASE_URL=https://my-custom-host.example.com/PMS
 NEXT_PUBLIC_REST_BASE_URL=https://my-custom-host.example.com/api/v0
-NEXT_PUBLIC_STATUS_API_URL=https://my-custom-host.example.com/api/test-service
+NEXT_PUBLIC_STATUS_API_URL=https://my-custom-host.example.com/PMS/api/health
 NEXT_PUBLIC_SOLR_BASE_URL=https://my-custom-host.example.com/solr/
 NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION=reactions
 NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION=compounds
