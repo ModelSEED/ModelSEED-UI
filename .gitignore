@@ -34,6 +34,7 @@ lib/REVIEW_SUMMARY.md
 # misc
 .DS_Store
 *.pem
+*.bak
 .vscode/
 
 # debug
@@ -60,6 +61,7 @@ playwright-report/
 
 # AI assistant/tooling metadata (keep local, do not track)
 .agent/
+.antigravitycli/
 .cursor/
 .gemini/
 .cursorrules

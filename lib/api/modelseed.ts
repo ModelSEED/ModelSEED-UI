@@ -62,6 +62,84 @@ export interface RastGenomeJob {
     type: 'Genome';
 }
 
+/**
+ * Fetch genome annotation data from RAST.
+ *
+ * Tries José's modelseed-api endpoint first (GET /api/rast/genome),
+ * then falls back to MSSS JSON-RPC (MSSeedSupportServer.getRastGenomeData).
+ *
+ * @param genomeId - RAST genome ID to fetch data for
+ * @param jobId - Optional RAST job ID (needed for the modelseed-api endpoint)
+ * @returns Promise resolving to genome data record
+ */
+export async function getRastGenomeData(genomeId: string, jobId?: string): Promise<Record<string, unknown>> {
+    // Try José's modelseed-api endpoint first
+    if (jobId) {
+        try {
+            const token = getStoredAuthUsername();
+            const headers: Record<string, string> = { Accept: 'application/json' };
+            if (token) {
+                headers['Authorization'] = token;
+            }
+            const params = new URLSearchParams({ genome_id: genomeId, job_id: jobId });
+            const res = await fetch(`/api/rast/genome?${params}`, { headers });
+            if (res.ok) {
+                const data: unknown = await res.json();
+                if (data && typeof data === 'object') {
+                    return data as Record<string, unknown>;
+                }
+            }
+        } catch {
+            // Fall through to MSSS
+        }
+    }
+
+    // Fallback: MSSS JSON-RPC
+    const response = await fetch(MODELSEED_SUPPORT_URL, {
+        method: 'POST',
+        headers: withRawTokenAuth(
+            {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            true,
+        ),
+        body: JSON.stringify({
+            version: '1.1',
+            method: 'MSSeedSupportServer.getRastGenomeData',
+            id: 'get-rast-genome-data',
+            params: [{ genome: genomeId }],
+        }),
+    });
+
+    const { payload: rawPayload, rawText } = await parseJsonResponse(response);
+    const payload = rawPayload as RastJobsRpcResponse | null;
+
+    if (!response.ok) {
+        if (payload?.error) {
+            throw new Error(payload.error.message || payload.error.error || 'RAST genome data fetch failed');
+        }
+        throw new Error(
+            `RAST genome data fetch failed (${response.status})${rawText ? `: ${rawText}` : ''}`,
+        );
+    }
+
+    if (!payload) {
+        throw new Error('RAST genome data returned an empty or non-JSON response');
+    }
+
+    if (payload.error) {
+        throw new Error(payload.error.message || payload.error.error || 'RAST genome data fetch failed');
+    }
+
+    const result = Array.isArray(payload.result) ? payload.result[0] : payload.result;
+    if (!result || typeof result !== 'object') {
+        throw new Error('Unexpected RAST genome data format');
+    }
+
+    return result as Record<string, unknown>;
+}
+
 export interface ModelDetailBundle {
     ref: string;
     data: Record<string, unknown>;
@@ -481,6 +559,67 @@ type RawRastJob = {
  * ```
  */
 export async function listRastGenomes(): Promise<RastGenomeJob[]> {
+    // Try José's modelseed-api endpoint first via the local proxy.
+    // Falls back to direct MSSS JSON-RPC if the proxy is unavailable.
+    try {
+        const token = getStoredAuthUsername();
+        const headers: Record<string, string> = { Accept: 'application/json' };
+        if (token) {
+            headers['Authorization'] = token;
+        }
+        const proxyRes = await fetch('/api/rast/jobs', { headers });
+        if (proxyRes.ok) {
+            const data: unknown = await proxyRes.json();
+            if (Array.isArray(data)) {
+                return (data as RawRastJob[])
+                    .filter((job) => String(job.type ?? '') === 'Genome')
+                    .map((job) => {
+                        const id = String(job.id ?? '');
+                        const genomeId = String(job.genome_id ?? '');
+                        return {
+                            id,
+                            genome_id: genomeId,
+                            genome_name: String(job.genome_name ?? genomeId ?? id),
+                            contig_count:
+                                typeof job.contig_count === 'number'
+                                    ? job.contig_count
+                                    : Number.isFinite(Number(job.contig_count))
+                                        ? Number(job.contig_count)
+                                        : undefined,
+                            mod_time: job.mod_time ? String(job.mod_time) : undefined,
+                            type: 'Genome',
+                        } satisfies RastGenomeJob;
+                    });
+            }
+            // Some backends wrap in { jobs: [...] }
+            const wrapped = data as Record<string, unknown>;
+            if (wrapped.jobs && Array.isArray(wrapped.jobs)) {
+                return (wrapped.jobs as RawRastJob[])
+                    .filter((job) => String(job.type ?? '') === 'Genome')
+                    .map((job) => {
+                        const id = String(job.id ?? '');
+                        const genomeId = String(job.genome_id ?? '');
+                        return {
+                            id,
+                            genome_id: genomeId,
+                            genome_name: String(job.genome_name ?? genomeId ?? id),
+                            contig_count:
+                                typeof job.contig_count === 'number'
+                                    ? job.contig_count
+                                    : Number.isFinite(Number(job.contig_count))
+                                        ? Number(job.contig_count)
+                                        : undefined,
+                            mod_time: job.mod_time ? String(job.mod_time) : undefined,
+                            type: 'Genome',
+                        } satisfies RastGenomeJob;
+                    });
+            }
+        }
+    } catch {
+        // Proxy unavailable — fall through to MSSS
+    }
+
+    // Fallback: direct MSSS JSON-RPC (legacy path)
     const callRastList = async (method: string, params: Record<string, unknown>) => {
         const response = await fetch(MODELSEED_SUPPORT_URL, {
             method: 'POST',
@@ -502,8 +641,6 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
         const payload = rawPayload as RastJobsRpcResponse | null;
 
         if (!response.ok) {
-            // Some deployments return RPC JSON error payloads with HTTP 500.
-            // Preserve payload so caller can apply compatibility fallbacks.
             if (payload?.error) {
                 return payload;
             }
@@ -520,10 +657,7 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
     };
 
     const candidateMethods = [
-        // Legacy ModelSEED UI used `service=msSupport` + `method=list_rast_jobs`,
-        // which resolved to `MSSeedSupportServer.list_rast_jobs`.
         'MSSeedSupportServer.list_rast_jobs',
-        // Keep compatibility fallbacks for any non-standard deployments.
         'msSupport.list_rast_jobs',
         'ms_fba.list_rast_jobs',
     ];
@@ -544,13 +678,9 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
                 methodErrors.push(
                     `${method} (${paramsLabel}): ${message || `error code ${attempt.error.code ?? 'unknown'}`}`,
                 );
-                // -32601 indicates "method not found" in most deployments. Some gateways also use it
-                // for "package not found". Either way, move to the next compatible method name.
                 if (attempt.error.code === -32601) {
                     break;
                 }
-                // This backend error appears when owner cannot be resolved internally.
-                // Try the alternate param payload before failing.
                 if ((attempt.error.message || '').includes('selectall_arrayref')) {
                     continue;
                 }
@@ -570,8 +700,6 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
     }
 
     if (!payload) {
-        // Preserve legacy behavior: if backend-side RAST listing is broken, avoid hard failure
-        // in the Build Model tab and return an empty list with a clear warning in the console.
         if (methodErrors.some((entry) => entry.includes('selectall_arrayref'))) {
             console.warn(
                 'RAST list jobs backend returned selectall_arrayref errors. '
@@ -609,8 +737,7 @@ export async function listRastGenomes(): Promise<RastGenomeJob[]> {
                 mod_time: job.mod_time ? String(job.mod_time) : undefined,
                 type: 'Genome',
             } satisfies RastGenomeJob;
-        })
-        .filter((job) => job.genome_id.length > 0 || job.id.length > 0);
+        });
 }
 
 /**

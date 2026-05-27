@@ -15,13 +15,13 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import Link from 'next/link';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { RastGenomeJob, submitReconstructJobFromApi } from '@/lib/api/modelseed';
 import { extractTrackedJobId, trackJob } from '@/lib/api/jobTracker';
 import PatricGenomesTable from '@/components/build-model/PatricGenomesTable';
+import RastGenomePreviewDialog from '@/components/build-model/RastGenomePreviewDialog';
 import RastGenomesTable from '@/components/build-model/RastGenomesTable';
 import { PatricGenome } from '@/lib/api/patric';
 
@@ -102,6 +102,7 @@ export default function BuildModelPlantPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [plantseedDialogOpen, setPlantseedDialogOpen] = useState(false);
+    const [selectedRastJob, setSelectedRastJob] = useState<RastGenomeJob | null>(null);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         if (PLANTSEED_MAINTENANCE && newValue === 0) {
@@ -230,6 +231,11 @@ export default function BuildModelPlantPage() {
     };
 
     const handleRastGenomeSelect = (job: RastGenomeJob) => {
+        setSelectedRastJob(job);
+    };
+
+    const handleProceedFromRastPreview = (job: RastGenomeJob) => {
+        setSelectedRastJob(null);
         const genomeId = job.genome_id || job.id;
         void handleReferenceSubmit('rast', 'RAST', genomeId, job.genome_name);
     };
@@ -441,18 +447,37 @@ export default function BuildModelPlantPage() {
                     </Button>
                 </Box>
 
-                <Dialog
-                    open={plantseedDialogOpen}
-                    onClose={() => setPlantseedDialogOpen(false)}
-                    maxWidth="sm"
-                    fullWidth
-                >
-                    <DialogActions>
-                        <Button onClick={() => setPlantseedDialogOpen(false)}>
+                <RastGenomePreviewDialog
+                open={selectedRastJob !== null}
+                job={selectedRastJob}
+                onProceed={handleProceedFromRastPreview}
+                onClose={() => setSelectedRastJob(null)}
+            />
+
+            <Dialog
+                open={plantseedDialogOpen}
+                onClose={() => setPlantseedDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" fontWeight={600} gutterBottom>
+                        PlantSEED — Update In Progress
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                        PlantSEED v2.0 → PlantSEED v3.0
+                    </Typography>
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        Annotation and reconstruction services are temporarily offline for updates
+                        and will be restored shortly.
+                    </Alert>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button onClick={() => setPlantseedDialogOpen(false)} variant="contained">
                             Close
                         </Button>
-                    </DialogActions>
-                </Dialog>
+                    </Box>
+                </Box>
+            </Dialog>
             </Box>
         </AuthGuard >
     );

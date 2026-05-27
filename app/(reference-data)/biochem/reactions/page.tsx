@@ -7,13 +7,18 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import Link from 'next/link';
 import { getReactions, type Reaction, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import IconButton from '@mui/material/IconButton';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ReactionCommentModal from '@/components/ui/ReactionCommentModal';
+/* import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; */
+/* import ReactionCommentModal from '@/components/ui/ReactionCommentModal'; */
 import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
@@ -92,10 +97,12 @@ function SynonymsCell({ synonyms }: { synonyms: string[] }) {
     );
 }
 
-function parsePathways(pathways?: string[]): React.ReactNode {
-    if (!pathways || pathways.length === 0) return 'N/A';
-    
-    const allPathways: { prefix: string; items: string[] }[] = [];
+type PathwayGroup = { prefix: string; items: string[] };
+
+function parsePathways(pathways?: string[]): PathwayGroup[] {
+    if (!pathways || pathways.length === 0) return [];
+
+    const allPathways: PathwayGroup[] = [];
     pathways.forEach((p) => {
         const colonIdx = p.indexOf(':');
         if (colonIdx === -1) {
@@ -108,31 +115,54 @@ function parsePathways(pathways?: string[]): React.ReactNode {
         allPathways.push({ prefix, items });
     });
 
+    return allPathways;
+}
+
+function PathwaysCell({ pathways, onOpenAll }: { pathways?: string[]; onOpenAll: () => void }) {
+    const groups = parsePathways(pathways);
+    if (groups.length === 0) return <span style={{ color: '#999' }}>N/A</span>;
+
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 0.5 }}>
-            {allPathways.map((group, i) => (
+        <Box
+            onClick={(event) => {
+                event.stopPropagation();
+                onOpenAll();
+            }}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 0.5, cursor: 'pointer' }}
+        >
+            {groups.map((group, i) => (
                 <Box key={i} sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
                     {group.prefix && (
                         <Box component="span" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', mr: 0.5 }}>
                             {group.prefix}:
                         </Box>
                     )}
-                    {group.items.map((item) => (
-                        <Chip
-                            key={item}
-                            label={item}
-                            size="small"
-                            sx={{
-                                bgcolor: '#f8fafc',
-                                border: '1px solid #e2e8f0',
-                                color: '#475569',
-                                fontSize: '0.72rem',
-                                height: 22,
-                            }}
-                        />
+                    {group.items.map((item, itemIndex) => (
+                        <Tooltip key={`${group.prefix}-${item}-${itemIndex}`} title={item} placement="top" arrow>
+                            <Chip
+                                label={item}
+                                size="small"
+                                sx={{
+                                    bgcolor: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    color: '#475569',
+                                    fontSize: '0.72rem',
+                                    height: 22,
+                                    maxWidth: 210,
+                                    '& .MuiChip-label': {
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    },
+                                }}
+                            />
+                        </Tooltip>
                     ))}
                 </Box>
             ))}
+            <Typography variant="caption" sx={{ color: '#64748b', mt: 0.25 }}>
+                Click cell to view all pathways
+            </Typography>
         </Box>
     );
 }
@@ -181,9 +211,12 @@ export default function ReactionsPage() {
     }, [handleFilterModelChange]);
 
     // Modal state
-    const [commentModalOpen, setCommentModalOpen] = useState(false);
-    const [commentReactionId, setCommentReactionId] = useState<string | null>(null);
+    /* const [commentModalOpen, setCommentModalOpen] = useState(false); */
+    /* const [commentReactionId, setCommentReactionId] = useState<string | null>(null); */
     const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [pathwaysModalOpen, setPathwaysModalOpen] = useState(false);
+    const [pathwaysModalReactionId, setPathwaysModalReactionId] = useState<string | null>(null);
+    const [pathwaysModalGroups, setPathwaysModalGroups] = useState<PathwayGroup[]>([]);
 
     const exportColumns = useMemo(() => [
         { field: 'id', headerName: 'ID', defaultSelected: true },
@@ -217,9 +250,15 @@ export default function ReactionsPage() {
         }));
     }, [filterModel]);
 
-    const handleOpenComment = useCallback((id: string) => {
+    /* const handleOpenComment = useCallback((id: string) => {
         setCommentReactionId(id);
         setCommentModalOpen(true);
+    }, []); */
+
+    const handleOpenPathwaysModal = useCallback((reaction: Reaction) => {
+        setPathwaysModalReactionId(reaction.id);
+        setPathwaysModalGroups(parsePathways(reaction.pathways));
+        setPathwaysModalOpen(true);
     }, []);
 
     const columns = useMemo<GridColDef<Reaction>[]>(() => [
@@ -233,23 +272,7 @@ export default function ReactionsPage() {
                 </Link>
             ),
         },
-        {
-            field: 'actions',
-            headerName: '',
-            width: 50,
-            sortable: false,
-            disableColumnMenu: true,
-            renderCell: (params) => (
-                <IconButton
-                    size="small"
-                    title="Comment on this reaction"
-                    onClick={() => handleOpenComment(params.row.id)}
-                    sx={{ color: '#00acc1' }}
-                >
-                    <ChatBubbleOutlineIcon fontSize="small" />
-                </IconButton>
-            )
-        },
+        /* comment button column disabled */
         {
             field: 'name',
             headerName: 'Name',
@@ -259,12 +282,13 @@ export default function ReactionsPage() {
         {
             field: 'definition',
             headerName: 'Equation',
-            width: 350,
+            flex: 1,
+            minWidth: 280,
             sortable: false,
             renderCell: (params) => (
-                <TruncatedWithTooltip text={params.value} maxWidth={330}>
+                <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.5 }}>
                     <ChemicalEquation equation={params.value} />
-                </TruncatedWithTooltip>
+                </Box>
             ),
         },
         {
@@ -308,13 +332,7 @@ export default function ReactionsPage() {
                 );
             },
         },
-        {
-            field: 'notes',
-            headerName: 'Notes',
-            width: 100,
-            sortable: false,
-            renderCell: (params) => <GridHighlightText text={(params.row.notes ?? []).join(' | ')} />,
-        },
+        /* notes column disabled */
         {
             field: 'synonyms',
             headerName: 'Synonyms',
@@ -341,7 +359,12 @@ export default function ReactionsPage() {
             headerName: 'Pathways',
             width: 280,
             sortable: false,
-            renderCell: (params) => parsePathways(params.row.pathways),
+            renderCell: (params) => (
+                <PathwaysCell
+                    pathways={params.row.pathways}
+                    onOpenAll={() => handleOpenPathwaysModal(params.row)}
+                />
+            ),
         },
         {
             field: 'ontology',
@@ -352,7 +375,7 @@ export default function ReactionsPage() {
                 return row.ontology;
             },
         },
-    ], [handleOpenComment]);
+    ], [handleOpenPathwaysModal]);
 
     const queryOpts = useMemo<SolrQueryOpts>(() => ({
         limit: paginationModel.pageSize,
@@ -418,11 +441,11 @@ export default function ReactionsPage() {
                 autoHeight
             />
 
-            <ReactionCommentModal
+            {/* <ReactionCommentModal
                 open={commentModalOpen}
                 onClose={() => setCommentModalOpen(false)}
                 reactionId={commentReactionId}
-            />
+            /> */}
 
             <ExportModal
                 open={exportModalOpen}
@@ -446,6 +469,62 @@ export default function ReactionsPage() {
                 activeSearch={filterModel.quickFilterValues?.join(' ') || undefined}
                 activeFilter={filterModel.items.length > 0 ? `${filterModel.items.length} column filter(s)` : undefined}
             />
+
+            <Dialog
+                open={pathwaysModalOpen}
+                onClose={() => setPathwaysModalOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5 }}>
+                    <Typography variant="h6" component="span" fontWeight={600}>
+                        Pathways {pathwaysModalReactionId ? `for ${pathwaysModalReactionId}` : ''}
+                    </Typography>
+                    <IconButton
+                        aria-label="Close pathways dialog"
+                        onClick={() => setPathwaysModalOpen(false)}
+                        size="small"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    {pathwaysModalGroups.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary">No pathway data available.</Typography>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                            {pathwaysModalGroups.map((group, i) => (
+                                <Box key={`${group.prefix}-${i}`} sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+                                    {group.prefix ? (
+                                        <Typography variant="subtitle2" sx={{ color: '#334155', fontWeight: 700 }}>
+                                            {group.prefix}
+                                        </Typography>
+                                    ) : null}
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                                        {group.items.map((item, itemIndex) => (
+                                            <Chip
+                                                key={`${group.prefix}-${item}-${itemIndex}`}
+                                                label={item}
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: '#f8fafc',
+                                                    border: '1px solid #cbd5e1',
+                                                    color: '#1e293b',
+                                                    height: 'auto',
+                                                    '& .MuiChip-label': {
+                                                        whiteSpace: 'normal',
+                                                        py: 0.5,
+                                                    },
+                                                }}
+                                            />
+                                        ))}
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

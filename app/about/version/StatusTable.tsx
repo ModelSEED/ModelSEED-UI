@@ -22,8 +22,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useAuth } from '@/components/auth/AuthProvider';
 import {
+    MODELSEED_API_TEST_URL,
     MODELSEED_API_URL,
     PROBMODELSEED_URL,
+    SOLR_BASE_LEGACY,
     USE_MODELSEED_API,
     USE_NEW_PROXY,
     WORKSPACE_URL,
@@ -60,8 +62,8 @@ const SERVICES: ServiceConfig[] = [
     { id: 'auth', service: 'RAST Auth', endpoint: 'https://p3.theseed.org/Sessions/Login', pingUrl: null, authReq: false },
     { id: 'patric', service: 'PATRIC Auth', endpoint: 'https://user.patricbrc.org/authenticate', pingUrl: null, authReq: false },
     { id: 'shock', service: 'Shock', endpoint: 'https://p3.theseed.org/services/shock_api', link: 'https://github.com/MG-RAST/Shock', pingUrl: 'https://p3.theseed.org/services/shock_api/', authReq: false, api: [{ label: 'GitHub', url: 'https://github.com/MG-RAST/Shock' }] },
-    { id: 'solr', service: 'SOLR', endpoint: 'https://modelseed.org/solr/', pingUrl: 'https://modelseed.org/solr/', authReq: false },
-    { id: 'api', service: 'API', endpoint: 'https://modelseed.org/api/test-service', pingUrl: 'https://modelseed.org/api/test-service', authReq: false },
+    { id: 'solr', service: 'SOLR', endpoint: SOLR_BASE_LEGACY, pingUrl: SOLR_BASE_LEGACY, authReq: false },
+    { id: 'api', service: 'API', endpoint: MODELSEED_API_TEST_URL, pingUrl: MODELSEED_API_TEST_URL, authReq: false },
     {
         id: 'pms',
         service: 'ProbModelSEED',

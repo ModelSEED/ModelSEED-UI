@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { submitReactionComment } from '@/lib/api/reactionComments';
 
 interface ReactionCommentModalProps {
     open: boolean;
@@ -23,23 +24,37 @@ export default function ReactionCommentModal({ open, onClose, reactionId }: Reac
     const [wrongStoichiometry, setWrongStoichiometry] = useState(false);
     const [comments, setComments] = useState('');
     const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = () => {
-        // Mock submission — backend endpoint not yet available
-        console.info('Reaction comment submitted for', reactionId, {
-            isAlias,
-            wrongStoichiometry,
-            comments,
-            email
-        });
-        alert(`Comment submitted for ${reactionId} (Mocked)`);
+    const handleSubmit = async () => {
+        if (!reactionId) {
+            alert('Unable to submit comment: reaction ID is missing.');
+            return;
+        }
 
-        // Reset and close
-        setIsAlias(false);
-        setWrongStoichiometry(false);
-        setComments('');
-        setEmail('');
-        onClose();
+        setIsSubmitting(true);
+        try {
+            const { message } = await submitReactionComment({
+                reactionId,
+                isAlias,
+                wrongStoichiometry,
+                remarks: comments,
+                email,
+            });
+            alert(message);
+
+            // Reset and close
+            setIsAlias(false);
+            setWrongStoichiometry(false);
+            setComments('');
+            setEmail('');
+            onClose();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to submit comment.';
+            alert(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -107,11 +122,16 @@ export default function ReactionCommentModal({ open, onClose, reactionId }: Reac
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} color="inherit">
+                <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
                     Cancel
                 </Button>
-                <Button onClick={handleSubmit} variant="contained" sx={{ bgcolor: '#00acc1', '&:hover': { bgcolor: '#008ba3' } }}>
-                    Submit
+                <Button
+                    onClick={handleSubmit}
+                    variant="contained"
+                    disabled={isSubmitting}
+                    sx={{ bgcolor: '#00acc1', '&:hover': { bgcolor: '#008ba3' } }}
+                >
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
                 </Button>
             </DialogActions>
         </Dialog>

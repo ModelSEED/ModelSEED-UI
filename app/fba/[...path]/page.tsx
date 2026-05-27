@@ -30,6 +30,7 @@ import { getModelFbaDataFromApi, getModelFbaFromApi } from '@/lib/api/modelseed'
 import { useAuth } from '@/components/auth/AuthProvider';
 import { workspaceGet, workspaceLs, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
+import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import DataControlHeader from '@/components/layout/DataControlHeader';
 
 /* ---------- types ---------- */
@@ -623,6 +624,14 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
             },
         },
         { field: 'name', headerName: 'Name', width: 240 },
+        {
+            field: 'equation',
+            headerName: 'Equation',
+            flex: 1,
+            minWidth: 280,
+            sortable: false,
+            renderCell: (params) => <ChemicalEquation equation={params.value} />,
+        },
         { field: 'flux', headerName: 'Flux', width: 120, type: 'number' },
         { field: 'min', headerName: 'Min', width: 100, type: 'number' },
         { field: 'max', headerName: 'Max', width: 100, type: 'number' },

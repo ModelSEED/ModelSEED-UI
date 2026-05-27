@@ -16,6 +16,7 @@ import Link from '@mui/material/Link';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import StatusTable from '@/app/about/version/StatusTable';
+import { DEPLOY_ENV_LABEL } from '@/lib/api/config';
 
 /**
  * Reads CHANGELOG.md file from project root.
@@ -37,6 +38,7 @@ type BuildMetadata = {
     commit: string;
     branch: string;
     date: string;
+    environment: string;
 };
 
 function getVersion(): string {
@@ -76,6 +78,7 @@ function getBuildMetadata(): BuildMetadata {
         branch: getBranchName(),
         commit: getCommitSha(),
         date: getBuildDate(),
+        environment: DEPLOY_ENV_LABEL,
     };
 }
 
@@ -110,7 +113,8 @@ export default async function VersionPage() {
                         </Link><br />
                         Branch: {metadata.branch}<br />
                         Commit: {metadata.commit}<br />
-                        Date: {metadata.date}
+                        Date: {metadata.date}<br />
+                        Environment: {metadata.environment}
                     </Typography>
                 </Box>
                 <Box>

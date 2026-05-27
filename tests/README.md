@@ -94,7 +94,7 @@ npx playwright test -g "public"
    ```
 3. **Environment variables** in `.env.local`:
    ```bash
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    PATRIC_TOKEN=your_patric_token   # For PATRIC workspace tests
    RAST_TOKEN=your_rast_token       # For RAST workspace tests
    ```
@@ -136,7 +136,7 @@ npm run test:api
    ```
 2. **Environment variables** in `.env.local`:
    ```bash
-   NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
    
    # PATRIC credentials (for /seaver@patricbrc.org/... paths)
    PATRIC_TOKEN=un=seaver@patricbrc.org|...
@@ -199,7 +199,7 @@ The CI workflow (`.github/workflows/ci.yml`) runs on:
 | `RAST_USERNAME` | For API login | RAST username |
 | `RAST_PASSWORD` | For API login | RAST password |
 | `NEXT_PUBLIC_USE_MODELSEED_API` | No | Enable ModelSEED API (default: true) |
-| `NEXT_PUBLIC_MODELSEED_API_URL` | No | API base URL |
+| `NEXT_PUBLIC_API_BASE_URL` | No | API base URL |
 | `NEXT_PUBLIC_USE_NEW_PROXY` | No | Use new proxy (default: true) |
 
 ### PATRIC vs RAST Tokens
@@ -219,7 +219,7 @@ RAST_TOKEN=un=seaver|...
 ### Example .env.local
 
 ```bash
-NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 NEXT_PUBLIC_USE_MODELSEED_API=true
 
 # PATRIC credentials

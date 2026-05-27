@@ -4,7 +4,7 @@ describe('biochem REST path local filter/sort/pagination', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.resetModules();
-    process.env.NEXT_PUBLIC_MODELSEED_API_URL = 'http://localhost:8000';
+    process.env.NEXT_PUBLIC_API_BASE_URL = 'http://localhost:8000';
   });
 
   it('applies DataGrid filter operators in REST mode', async () => {

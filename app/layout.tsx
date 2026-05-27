@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/lib/theme';
 import Box from '@mui/material/Box';
 import HeaderLayoutRouter from '@/app/HeaderLayoutRouter';
+import OutageBanner from '@/components/ui/OutageBanner';
 import Providers from '@/components/Providers';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import type { Metadata } from "next";
@@ -35,6 +36,7 @@ export default function RootLayout({
                         <Providers>
                             <AuthProvider>
                                 <CssBaseline />
+                                <OutageBanner />
                                 <HeaderLayoutRouter />
                                 <Box
                                     component="main"

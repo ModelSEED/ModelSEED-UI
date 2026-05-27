@@ -30,7 +30,7 @@ Rebuild the `/projects` and `/events` hubs, replicating the simple layout struct
     - Set up the grid blocks (`<md-content layout-margin layout="row">...</div>`) into MUI Grid/Flex components (using `Box` or `Stack` or equivalent inline CSS `display: flex`).
     - Build links (using `<Link>` vs `<a>` where appropriate):
        - Internal: `href="/projects/fusions"`, `href="/projects/regulons"`
-       - External: `http://komodo.modelseed.org`, `http://minedatabase.mcs.anl.gov`, `http://coremodels.mcs.anl.gov`.
+       - External: `http://komodo.modelseed.org`, `https://minedatabase.mcs.anl.gov`, `http://coremodels.mcs.anl.gov`.
     - Fix missing image references `ms-projects/img/atomic-regulons.png` (can use placeholders if image doesn't exist locally, or verify we copied those in Phase 1).
   </action>
   <verify>npm run check</verify>

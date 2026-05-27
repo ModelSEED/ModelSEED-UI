@@ -2,160 +2,315 @@
 /**
  * Centralized API endpoint configuration.
  *
- * Toggle USE_NEW_PROXY to route Workspace calls through José's
- * unified proxy instead of the legacy direct endpoints.
+ * RAST / modelseed_support calls remain on legacy endpoints (per backend directive).
  *
- * RAST / modelseed_support calls are ALWAYS routed to the legacy
- * endpoint regardless of this toggle (per Chris Henry's directive).
+ * IMPORTANT: Next.js only inlines process.env.NEXT_PUBLIC_* when the key is
+ * statically referenced. We use a static map with explicit property access
+ * to ensure proper inlining at build time.
  */
 
-/* ─── modelseed-api Base URL ─────────────────────────────────── */
+const PUBLIC_ENV = {
+    NEXT_PUBLIC_DEPLOYMENT_MODE: process.env.NEXT_PUBLIC_DEPLOYMENT_MODE,
+    NEXT_PUBLIC_SITE_BASE_URL: process.env.NEXT_PUBLIC_SITE_BASE_URL,
+    NEXT_PUBLIC_SITE_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SITE_BASE_URL_STAGING,
+    NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_API_BASE_URL_STAGING: process.env.NEXT_PUBLIC_API_BASE_URL_STAGING,
+    NEXT_PUBLIC_API_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_API_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_REST_BASE_URL: process.env.NEXT_PUBLIC_REST_BASE_URL,
+    NEXT_PUBLIC_REST_BASE_URL_STAGING: process.env.NEXT_PUBLIC_REST_BASE_URL_STAGING,
+    NEXT_PUBLIC_REST_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_REST_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_STATUS_API_URL: process.env.NEXT_PUBLIC_STATUS_API_URL,
+    NEXT_PUBLIC_STATUS_API_URL_STAGING: process.env.NEXT_PUBLIC_STATUS_API_URL_STAGING,
+    NEXT_PUBLIC_STATUS_API_URL_PRODUCTION: process.env.NEXT_PUBLIC_STATUS_API_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_BASE_URL: process.env.NEXT_PUBLIC_SOLR_BASE_URL,
+    NEXT_PUBLIC_SOLR_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_BASE_URL_STAGING,
+    NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING,
+    NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_USE_MODELSEED_API: process.env.NEXT_PUBLIC_USE_MODELSEED_API,
+    NEXT_PUBLIC_USE_NEW_PROXY: process.env.NEXT_PUBLIC_USE_NEW_PROXY,
+    NEXT_PUBLIC_PROBMODELSEED_URL: process.env.NEXT_PUBLIC_PROBMODELSEED_URL,
+} as const;
+
+type PublicEnvKey = keyof typeof PUBLIC_ENV;
+
+function readEnv(name: PublicEnvKey): string | undefined {
+    if (typeof process === 'undefined') return undefined;
+    return PUBLIC_ENV[name];
+}
+
+function readEnvSafe(name: string): string | undefined {
+    if (typeof process === 'undefined') return undefined;
+    if (name in PUBLIC_ENV) {
+        return PUBLIC_ENV[name as PublicEnvKey];
+    }
+    return process.env[name];
+}
+
+function toNonEmpty(value: string | undefined): string | undefined {
+    const trimmed = value?.trim();
+    return trimmed ? trimmed : undefined;
+}
+
+function stripTrailingSlash(value: string): string {
+    return value.replace(/\/+$/, '');
+}
+
+function ensureTrailingSlash(value: string): string {
+    return `${stripTrailingSlash(value)}/`;
+}
+
+const DEPLOYMENT_MODE_VAR = 'NEXT_PUBLIC_DEPLOYMENT_MODE';
+
+export type DeploymentMode = 'staging' | 'production' | 'manual';
+
+function resolveDeploymentMode(raw: string | undefined): DeploymentMode {
+    const normalized = raw?.trim().toLowerCase();
+    if (normalized === 'staging' || normalized === 'production') {
+        return normalized;
+    }
+    if (normalized === 'manual') {
+        return normalized;
+    }
+    if (!normalized) {
+        // Default to staging for build convenience when unset
+        return 'staging';
+    }
+    throw new Error(
+        `Invalid ${DEPLOYMENT_MODE_VAR} value "${raw}". Use staging, production, or manual.`,
+    );
+}
+
+function throwManualModeError(overrideVar: string, description: string): never {
+    throw new Error(
+        `Missing required environment variable ${overrideVar}. ` +
+        `Set ${DEPLOYMENT_MODE_VAR}=staging|production for default endpoints, ` +
+        `or set ${overrideVar} (${description}) for manual mode.`,
+    );
+}
+
+function resolveModeValue(params: {
+    overrideVar: string;
+    stagingDefaultVar: string;
+    productionDefaultVar: string;
+    stagingFallback: string | (() => string);
+    productionFallback: string | (() => string);
+    manualDescription: string;
+}): string {
+    const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
+    if (overrideValue) return overrideValue;
+
+    if (DEPLOYMENT_MODE === 'manual') {
+        return throwManualModeError(params.overrideVar, params.manualDescription);
+    }
+
+    const modeDefaultVar = DEPLOYMENT_MODE === 'staging'
+        ? params.stagingDefaultVar
+        : params.productionDefaultVar;
+    const modeDefaultValue = toNonEmpty(readEnvSafe(modeDefaultVar));
+    if (modeDefaultValue) return modeDefaultValue;
+
+    const fallback = DEPLOYMENT_MODE === 'staging'
+        ? params.stagingFallback
+        : params.productionFallback;
+    return typeof fallback === 'function' ? fallback() : fallback;
+}
+
+const SITE_DEFAULTS = {
+    staging: 'https://staging.modelseed.org',
+    production: 'https://modelseed.org',
+} as const;
 
 /**
- * Base URL for the ModelSEED REST API (Poplar backend).
- * 
- * In development, set NEXT_PUBLIC_MODELSEED_API_URL=http://localhost:8000
- * when running the FastAPI server locally. In production, this should point
- * to the deployed modelseed-api instance.
- * 
- * @default 'http://poplar.cels.anl.gov:8000' (José's demo instance)
+ * Canonical deployment mode selector.
+ * - staging | production | manual
+ * - unset => staging (build-safe default)
+ * - manual => strict override mode (explicit endpoint vars required)
  */
-export const MODELSEED_API_URL =
-    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_MODELSEED_API_URL) ||
-    // Poplar demo instance provided by José for development/testing.
-    'http://poplar.cels.anl.gov:8000';
+export const DEPLOYMENT_MODE = resolveDeploymentMode(readEnv(DEPLOYMENT_MODE_VAR));
+
+/**
+ * Backward-compatible constant name for existing imports.
+ * This is not an env var alias.
+ */
+export const DEPLOY_ENV = DEPLOYMENT_MODE === 'manual' ? '' : DEPLOYMENT_MODE;
+
+export const DEPLOY_ENV_LABEL = DEPLOYMENT_MODE;
+
+/**
+ * Base ModelSEED site host (no trailing slash).
+ */
+export const MODELSEED_SITE_BASE_URL = stripTrailingSlash(
+    resolveModeValue({
+        overrideVar: 'NEXT_PUBLIC_SITE_BASE_URL',
+        stagingDefaultVar: 'NEXT_PUBLIC_SITE_BASE_URL_STAGING',
+        productionDefaultVar: 'NEXT_PUBLIC_SITE_BASE_URL_PRODUCTION',
+        stagingFallback: SITE_DEFAULTS.staging,
+        productionFallback: SITE_DEFAULTS.production,
+        manualDescription: 'site base host, e.g. https://staging.modelseed.org',
+    }),
+);
+
+/**
+ * Base URL for modelseed-api (no trailing slash).
+ */
+export const MODELSEED_API_URL = stripTrailingSlash(
+    resolveModeValue({
+        overrideVar: 'NEXT_PUBLIC_API_BASE_URL',
+        stagingDefaultVar: 'NEXT_PUBLIC_API_BASE_URL_STAGING',
+        productionDefaultVar: 'NEXT_PUBLIC_API_BASE_URL_PRODUCTION',
+        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS`,
+        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS`,
+        manualDescription: 'modelseed-api base URL, e.g. http://localhost:8000',
+    }),
+);
+
+/**
+ * Base URL for legacy ModelSEED REST v0 endpoints (no trailing slash).
+ */
+export const MODELSEED_REST_URL = stripTrailingSlash(
+    resolveModeValue({
+        overrideVar: 'NEXT_PUBLIC_REST_BASE_URL',
+        stagingDefaultVar: 'NEXT_PUBLIC_REST_BASE_URL_STAGING',
+        productionDefaultVar: 'NEXT_PUBLIC_REST_BASE_URL_PRODUCTION',
+        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/api/v0`,
+        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/api/v0`,
+        manualDescription: 'legacy REST base URL for /api/v0 endpoints',
+    }),
+);
+
+/**
+ * Public API status endpoint used by /about/version checks (no trailing slash).
+ */
+export const MODELSEED_API_TEST_URL = stripTrailingSlash(
+    resolveModeValue({
+        overrideVar: 'NEXT_PUBLIC_STATUS_API_URL',
+        stagingDefaultVar: 'NEXT_PUBLIC_STATUS_API_URL_STAGING',
+        productionDefaultVar: 'NEXT_PUBLIC_STATUS_API_URL_PRODUCTION',
+        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS/api/health`,
+        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/PMS/api/health`,
+        manualDescription: 'status check endpoint used by /about/version',
+    }),
+);
+
+function readBooleanEnv(name: string, fallback: boolean): boolean {
+    const raw = readEnvSafe(name);
+    if (raw === 'true') return true;
+    if (raw === 'false') return false;
+    return fallback;
+}
 
 /* ─── Feature Flags ──────────────────────────────────────────── */
 
 /**
- * Feature flag: Enable new unified proxy for Workspace operations.
- * 
- * When true, Workspace calls route through the new REST proxy service at
- * MODELSEED_API_URL/api/workspace. Phase 20+ targets the new proxy by default.
- * Set NEXT_PUBLIC_USE_NEW_PROXY=false only when intentionally falling back to
- * the legacy JSON-RPC Workspace service.
- * 
- * @default true
+ * Workspace routing toggle.
  */
-let useNewProxyDefault = true;
-if (typeof process !== 'undefined') {
-    const raw = process.env.NEXT_PUBLIC_USE_NEW_PROXY;
-    if (raw === 'false') {
-        useNewProxyDefault = false;
-    } else if (raw === 'true') {
-        useNewProxyDefault = true;
-    }
-}
-export const USE_NEW_PROXY = useNewProxyDefault;
+export const USE_NEW_PROXY = readBooleanEnv('NEXT_PUBLIC_USE_NEW_PROXY', true);
 
 /**
- * Feature flag: Use modelseed-api for user data pages.
- * 
- * When true, user-data pages (My Models, My Media, related flows) communicate
- * with the modelseed-api backend instead of legacy JSON-RPC services. This is
- * controlled via NEXT_PUBLIC_USE_MODELSEED_API environment variable.
- * 
- * @default true (use modelseed-api when available)
+ * User-data backend toggle.
  */
-let useModelseedApiDefault = true;
-if (typeof process !== 'undefined') {
-    const raw = process.env.NEXT_PUBLIC_USE_MODELSEED_API;
-    if (raw === 'false') {
-        useModelseedApiDefault = false;
-    } else if (raw === 'true') {
-        useModelseedApiDefault = true;
-    }
-}
-export const USE_MODELSEED_API = useModelseedApiDefault;
+export const USE_MODELSEED_API = readBooleanEnv('NEXT_PUBLIC_USE_MODELSEED_API', true);
 
 /* ─── Workspace Service ─────────────────────────────────────── */
 
-/**
- * Legacy direct Workspace JSON-RPC endpoint.
- * Used when USE_NEW_PROXY=false (deprecated).
- */
 export const WORKSPACE_URL_LEGACY = 'https://p3.theseed.org/services/Workspace';
-
-/**
- * New unified proxy endpoint for Workspace operations.
- * Routes through modelseed-api for better error handling and compatibility.
- */
 export const WORKSPACE_URL_PROXY = `${MODELSEED_API_URL}/api/workspace`;
-
-/**
- * Resolved Workspace URL based on USE_NEW_PROXY feature flag.
- * Most code should use this constant rather than the specific variants.
- */
-export const WORKSPACE_URL = USE_NEW_PROXY
-    ? WORKSPACE_URL_PROXY
-    : WORKSPACE_URL_LEGACY;
+export const WORKSPACE_URL = USE_NEW_PROXY ? WORKSPACE_URL_PROXY : WORKSPACE_URL_LEGACY;
 
 /* ─── Biochemistry (Solr) Service ───────────────────────────── */
 
-/** Legacy direct Solr endpoint for biochemistry queries. */
-export const SOLR_BASE_LEGACY = 'https://modelseed.org/solr/';
+/**
+ * Biochemistry pages are Solr-backed by design.
+ */
+export const BIOCHEM_BACKEND = 'solr' as const;
+
+export const SOLR_BASE_LEGACY = ensureTrailingSlash(
+    resolveModeValue({
+        overrideVar: 'NEXT_PUBLIC_SOLR_BASE_URL',
+        stagingDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_STAGING',
+        productionDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION',
+        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
+        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
+        manualDescription: 'Solr base URL, e.g. https://staging.modelseed.org/solr',
+    }),
+);
 
 /**
- * New proxy endpoint for biochemistry queries.
- * Update this URL once the new service supports biochem lookups.
+ * Kept for callers expecting SOLR_BASE in config.
  */
-export const SOLR_BASE_PROXY = `${MODELSEED_API_URL}/api/solr/`;
+export const SOLR_BASE = SOLR_BASE_LEGACY;
 
-/**
- * When `true`, Biochemistry calls are routed through the new modelseed-api.
- * Set to `false` (default) to keep using legacy Solr for the main tables,
- * as recommended by the backend team for now.
- */
-let useNewBiochemDefault = false;
-if (typeof process !== 'undefined') {
-    const raw = process.env.NEXT_PUBLIC_USE_NEW_BIOCHEM;
-    if (raw === 'true') useNewBiochemDefault = true;
+function resolveSolrCollection(params: {
+    overrideVar: string;
+    stagingDefaultVar: string;
+    productionDefaultVar: string;
+    stagingFallback: string;
+    productionFallback: string;
+    description: string;
+}): string {
+    const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
+    if (overrideValue) return overrideValue;
+
+    if (DEPLOYMENT_MODE === 'manual') {
+        return throwManualModeError(params.overrideVar, params.description);
+    }
+
+    const defaultVar = DEPLOYMENT_MODE === 'staging'
+        ? params.stagingDefaultVar
+        : params.productionDefaultVar;
+    const modeDefault = toNonEmpty(readEnvSafe(defaultVar));
+    if (modeDefault) return modeDefault;
+
+    return DEPLOYMENT_MODE === 'staging'
+        ? params.stagingFallback
+        : params.productionFallback;
 }
-export const USE_NEW_BIOCHEM = useNewBiochemDefault;
 
-/** Resolved Solr base URL. */
-export const SOLR_BASE = USE_NEW_BIOCHEM
-    ? SOLR_BASE_PROXY
-    : SOLR_BASE_LEGACY;
+export const SOLR_REACTIONS_COLLECTION = resolveSolrCollection({
+    overrideVar: 'NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION',
+    stagingDefaultVar: 'NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING',
+    productionDefaultVar: 'NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION',
+    stagingFallback: 'reactions_staging',
+    productionFallback: 'reactions',
+    description: 'Solr reactions core name (e.g. reactions_staging or reactions)',
+});
+
+export const SOLR_COMPOUNDS_COLLECTION = resolveSolrCollection({
+    overrideVar: 'NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION',
+    stagingDefaultVar: 'NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING',
+    productionDefaultVar: 'NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION',
+    stagingFallback: 'compounds_staging',
+    productionFallback: 'compounds',
+    description: 'Solr compounds core name (e.g. compounds_staging or compounds)',
+});
+
+export function getSolrCollection(collection: 'reactions' | 'compounds'): string {
+    return collection === 'reactions' ? SOLR_REACTIONS_COLLECTION : SOLR_COMPOUNDS_COLLECTION;
+}
 
 /* ─── modelseed_support (RAST Jobs) ─────────────────────────── */
 
-/**
- * RAST job listings endpoint.
- * 
- * This ALWAYS points to the legacy modelseed_support server because it requires
- * physical access to the jobs directory on a specific machine. Do NOT route
- * through the new proxy. Per Chris Henry's directive, this endpoint is not
- * being migrated.
- */
 export const MODELSEED_SUPPORT_URL = 'https://modelseed.org/services/ms_fba';
 
 /* ─── ProbModelSEED ─────────────────────────────────────────── */
 
-/**
- * Legacy ProbModelSEED service endpoint (being replaced by new proxy).
- */
 export const PROBMODELSEED_URL_LEGACY = 'https://p3.theseed.org/services/ProbModelSEED';
 
-/**
- * New proxy endpoint replacing ProbModelSEED operations.
- * Handles list_models, get_model, run_fba, etc.
- */
-export const PROBMODELSEED_URL_PROXY = 'https://modelseed.org/api/model';
+export const PROBMODELSEED_URL_PROXY = stripTrailingSlash(
+    toNonEmpty(readEnv('NEXT_PUBLIC_PROBMODELSEED_URL'))
+    ?? `${MODELSEED_SITE_BASE_URL}/api/model`,
+);
 
-/**
- * Resolved ProbModelSEED URL based on USE_NEW_PROXY feature flag.
- */
 export const PROBMODELSEED_URL = USE_NEW_PROXY
     ? PROBMODELSEED_URL_PROXY
     : PROBMODELSEED_URL_LEGACY;
 
 /* ─── Compound Images ───────────────────────────────────────── */
 
-/**
- * Base URL for pre-rendered compound structure images.
- * Images are PNG format, named by compound ID (e.g., cpd00001.png).
- */
 export const CPD_IMG_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
-
-

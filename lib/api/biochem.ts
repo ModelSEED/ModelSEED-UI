@@ -9,7 +9,14 @@
  * the unified proxy when available.
  */
 
-import { SOLR_BASE, SOLR_BASE_LEGACY, CPD_IMG_BASE, MODELSEED_API_URL } from './config';
+import {
+    CPD_IMG_BASE,
+    MODELSEED_API_URL,
+    SOLR_BASE,
+    SOLR_BASE_LEGACY,
+    SOLR_COMPOUNDS_COLLECTION,
+    SOLR_REACTIONS_COLLECTION,
+} from './config';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -342,7 +349,13 @@ function buildQuickSearchClause(
  * Builds a Solr query URL from options, mirroring legacy `get_solr`.
  */
 function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
-    let url = `${SOLR_BASE}${collection}_staging/select?wt=json`;
+    const collectionName =
+        collection === 'reactions'
+            ? SOLR_REACTIONS_COLLECTION
+            : collection === 'compounds'
+                ? SOLR_COMPOUNDS_COLLECTION
+                : collection;
+    let url = `${SOLR_BASE}${collectionName}/select?wt=json`;
 
     const {
         query,
@@ -788,8 +801,7 @@ const CPD_VISIBLE = [
  * Search and retrieve biochemical reactions.
  * 
  * Queries the ModelSEED biochemistry database for reactions with support for
- * advanced filtering, pagination, and sorting. Routes to either legacy Solr
- * or new REST API based on configuration.
+ * advanced filtering, pagination, and sorting. Main UI queries are Solr-backed.
  * 
  * @param opts - Query options (query, limit, offset, sort, filterModel)
  * @returns Promise resolving to paginated reaction results
@@ -837,7 +849,7 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
  * Search and retrieve biochemical compounds.
  * 
  * Queries the ModelSEED biochemistry database for compounds (metabolites)
- * with pagination, filtering, and sorting support.
+ * with pagination, filtering, and sorting support. Main UI queries are Solr-backed.
  * 
  * @param opts - Query options (query, limit, offset, sort, filterModel)
  * @returns Promise resolving to paginated compound results
@@ -918,7 +930,7 @@ export async function getCompoundsFromModelseedApi(
  */
 export async function getReactionById(id: string): Promise<Reaction> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}reactions_staging/select?wt=json&q=id:${id}`;
+    const url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Reaction>(url);
     return res.docs[0];
 }
@@ -938,7 +950,7 @@ export async function getReactionById(id: string): Promise<Reaction> {
  */
 export async function getCompoundById(id: string): Promise<Compound> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}compounds_staging/select?wt=json&q=id:${id}`;
+    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=id:${id}`;
     const res = await fetchSolr<Compound>(url);
     return res.docs[0];
 }
@@ -982,7 +994,7 @@ function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<M
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
     // Batch ID fetch is currently Solr-backed for both modes.
-    const url = `${SOLR_BASE_LEGACY}compounds_staging/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
 
     return fetchSolr<Compound>(url).then((res) => {
         const map = new Map<string, Compound>();
@@ -1018,7 +1030,7 @@ export async function findReactionsForCompound(
     const sort = opts.sort;
 
     // Reverse compound lookup remains Solr-backed for now.
-    let url = `${SOLR_BASE_LEGACY}reactions_staging/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    let url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {

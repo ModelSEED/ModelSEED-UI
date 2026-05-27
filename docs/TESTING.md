@@ -202,7 +202,7 @@ npm run test:e2e:ui
 
 ```yaml
 NEXT_PUBLIC_USE_MODELSEED_API: 'true'
-NEXT_PUBLIC_MODELSEED_API_URL: 'http://poplar.cels.anl.gov:8000'
+NEXT_PUBLIC_API_BASE_URL: 'http://poplar.cels.anl.gov:8000'
 PATRIC_TOKEN: ${{ secrets.PATRIC_TOKEN }}
 ```
 
