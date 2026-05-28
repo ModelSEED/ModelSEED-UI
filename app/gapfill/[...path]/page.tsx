@@ -26,6 +26,7 @@ import { workspaceGet, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/l
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 /* ---------- types ---------- */
 
@@ -330,6 +331,16 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
         { field: 'compartment', headerName: 'Compartment', width: 140 },
     ], []);
 
+    const {
+        filterModel,
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<GapfillReaction>({
+        rows: (gfReactions ?? []) as GapfillReaction[],
+        onFilterApplied: () => setPagination((p) => ({ ...p, page: 0 })),
+    });
+
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             {/* Breadcrumb */}
@@ -370,16 +381,24 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
 
             {gfReactions && gfReactions.length > 0 && (
                 <DataGrid<GapfillReaction>
-                    rows={gfReactions}
+                    rows={filteredRows}
                     columns={withQuickSearchHeaders(columns)}
                     pageSizeOptions={[10, 25, 50, 100]}
                     paginationModel={pagination}
                     onPaginationModelChange={setPagination}
                     sortModel={sortModel}
                     onSortModelChange={setSortModel}
+                    filterModel={filterModel}
+                    filterMode="server"
+                    onFilterModelChange={handleFilterModelChange}
                     showToolbar
                     slots={{ toolbar: DataControlHeader }}
-                    slotProps={{ toolbar: { showQuickFilter: true } }}
+                    slotProps={{
+                        toolbar: {
+                            showQuickFilter: true,
+                            onApplyFilterModel: handleToolbarApplyFilterModel,
+                        },
+                    }}
                     hideFooter
                     disableRowSelectionOnClick
                     getRowId={(row) => row.id}

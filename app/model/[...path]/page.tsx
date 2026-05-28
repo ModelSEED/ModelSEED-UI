@@ -57,6 +57,7 @@ import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering, filterRowsWithGridModel } from '@/lib/hooks/useToolbarGridFiltering';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import { formatFormula } from '@/components/utils/formatFormula';
 import AddReactionsDialog from '@/components/ui/AddReactionsDialog';
@@ -599,6 +600,99 @@ function applyGridSortModel(
 
         return String(aValue).localeCompare(String(bValue), undefined, { numeric: true }) * direction;
     });
+}
+
+/**
+ * Per-tab DataGrid wrapper that owns the multi-column filter state via
+ * useToolbarGridFiltering, so per-column quick filters AND together.  Filters
+ * are applied to `allRows` before sort/paginate (lazy tabs) so the visible
+ * page reflects the full filtered set.
+ */
+function ModelTabDataGrid(props: {
+    tabKey: string;
+    allRows: Record<string, unknown>[];
+    columns: GridColDef<Record<string, unknown>>[];
+    isLazyLargeTab: boolean;
+    paginationModel: GridPaginationModel;
+    onPaginationModelChange: (model: GridPaginationModel) => void;
+    sortModel: GridSortModel;
+    onSortModelChange: (model: GridSortModel) => void;
+    onRowClick?: (row: Record<string, unknown>) => void;
+}) {
+    const {
+        tabKey,
+        allRows,
+        columns,
+        isLazyLargeTab,
+        paginationModel,
+        onPaginationModelChange,
+        sortModel,
+        onSortModelChange,
+        onRowClick,
+    } = props;
+
+    const {
+        filterModel,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<Record<string, unknown>>({
+        rows: allRows,
+        onFilterApplied: () => onPaginationModelChange({ ...paginationModel, page: 0 }),
+    });
+
+    const filteredRows = useMemo(
+        () => filterRowsWithGridModel(allRows, filterModel),
+        [allRows, filterModel],
+    );
+    const preparedRows = useMemo(
+        () => (isLazyLargeTab ? applyGridSortModel(filteredRows, sortModel) : filteredRows),
+        [isLazyLargeTab, filteredRows, sortModel],
+    );
+    const pageStart = paginationModel.page * paginationModel.pageSize;
+    const pageEnd = pageStart + paginationModel.pageSize;
+    const displayedRows = isLazyLargeTab ? preparedRows.slice(pageStart, pageEnd) : preparedRows;
+
+    return (
+        <DataGrid<Record<string, unknown>>
+            rows={displayedRows}
+            columns={withQuickSearchHeaders(columns)}
+            pageSizeOptions={[10, 25, 50, 100]}
+            paginationMode={isLazyLargeTab ? 'server' : 'client'}
+            sortingMode={isLazyLargeTab ? 'server' : 'client'}
+            rowCount={isLazyLargeTab ? preparedRows.length : undefined}
+            paginationModel={paginationModel}
+            onPaginationModelChange={onPaginationModelChange}
+            sortModel={sortModel}
+            onSortModelChange={onSortModelChange}
+            filterModel={filterModel}
+            filterMode="server"
+            onFilterModelChange={handleFilterModelChange}
+            showToolbar
+            slots={{ toolbar: DataControlHeader }}
+            slotProps={{
+                toolbar: {
+                    showQuickFilter: true,
+                    onApplyFilterModel: handleToolbarApplyFilterModel,
+                },
+            }}
+            hideFooter
+            getRowId={(row) => String(row.id ?? '')}
+            onRowClick={onRowClick ? ({ row }) => onRowClick(row) : undefined}
+            disableRowSelectionOnClick
+            autoHeight
+            sx={{
+                border: '1px solid #e0e0e0',
+                backgroundColor: '#fff',
+                '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#f5f5f5',
+                    borderBottom: '1px solid #ddd',
+                },
+                '& .MuiDataGrid-row:hover': {
+                    cursor: tabKey === 'reactions' || tabKey === 'compounds' ? 'pointer' : 'default',
+                },
+            }}
+        />
+    );
 }
 
 function normalizeWorkspaceRef(value: unknown): string {
@@ -2481,81 +2575,37 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                             />
                         </Box>
                     ) : (
-                        <>
-                            {(() => {
-                                const isLazyLargeTab = tab.key === 'reactions' || tab.key === 'compounds';
-                                const activePagination = paginationByTab[tab.key] ?? { page: 0, pageSize: 25 };
-                                const activeSortModel = sortByTab[tab.key] ?? [];
-                                const allRows = tableConfig[tab.key].rows;
-                                const preparedRows = isLazyLargeTab
-                                    ? applyGridSortModel(allRows, activeSortModel)
-                                    : allRows;
-                                const pageStart = activePagination.page * activePagination.pageSize;
-                                const pageEnd = pageStart + activePagination.pageSize;
-                                const displayedRows = isLazyLargeTab
-                                    ? preparedRows.slice(pageStart, pageEnd)
-                                    : preparedRows;
-
-                                return (
-                            <DataGrid<Record<string, unknown>>
-                                rows={displayedRows}
-                                columns={withQuickSearchHeaders(
-                                    tab.key === 'reactions'
-                                        ? reactionColumns
-                                        : tab.key === 'compounds'
-                                            ? compoundColumns
-                                            : tab.key === 'fba'
-                                                ? fbaColumns
-                                                : tab.key === 'pathways'
-                                                    ? pathwayColumns
-                                                    : tableConfig[tab.key].columns
-                                )}
-                                pageSizeOptions={[10, 25, 50, 100]}
-                                paginationMode={isLazyLargeTab ? 'server' : 'client'}
-                                sortingMode={isLazyLargeTab ? 'server' : 'client'}
-                                rowCount={isLazyLargeTab ? preparedRows.length : undefined}
-                                paginationModel={activePagination}
-                                onPaginationModelChange={(model) =>
-                                    setPaginationByTab((prev) => ({ ...prev, [tab.key]: model }))
-                                }
-                                sortModel={activeSortModel}
-                                onSortModelChange={(model) =>
-                                    setSortByTab((prev) => ({
-                                        ...prev,
-                                        [tab.key]: model,
-                                    }))
-                                }
-                                showToolbar
-                                slots={{ toolbar: DataControlHeader }}
-                                slotProps={{
-                                    toolbar: { showQuickFilter: true },
-                                }}
-                                hideFooter
-                                getRowId={(row) => String(row.id ?? '')}
-                                onRowClick={
-                                    tab.key === 'reactions'
-                                        ? ({ row }) => openDetailDrawer('reaction', row)
-                                        : tab.key === 'compounds'
-                                            ? ({ row }) => openDetailDrawer('compound', row)
-                                            : undefined
-                                }
-                                disableRowSelectionOnClick
-                                autoHeight
-                                sx={{
-                                    border: '1px solid #e0e0e0',
-                                    backgroundColor: '#fff',
-                                    '& .MuiDataGrid-columnHeaders': {
-                                        backgroundColor: '#f5f5f5',
-                                        borderBottom: '1px solid #ddd',
-                                    },
-                                    '& .MuiDataGrid-row:hover': {
-                                        cursor: tab.key === 'reactions' || tab.key === 'compounds' ? 'pointer' : 'default',
-                                    },
-                                }}
-                            />
-                                );
-                            })()}
-                        </>
+                        <ModelTabDataGrid
+                            tabKey={tab.key}
+                            allRows={tableConfig[tab.key].rows}
+                            columns={
+                                tab.key === 'reactions'
+                                    ? reactionColumns
+                                    : tab.key === 'compounds'
+                                        ? compoundColumns
+                                        : tab.key === 'fba'
+                                            ? fbaColumns
+                                            : tab.key === 'pathways'
+                                                ? pathwayColumns
+                                                : tableConfig[tab.key].columns
+                            }
+                            isLazyLargeTab={tab.key === 'reactions' || tab.key === 'compounds'}
+                            paginationModel={paginationByTab[tab.key] ?? { page: 0, pageSize: 25 }}
+                            onPaginationModelChange={(model) =>
+                                setPaginationByTab((prev) => ({ ...prev, [tab.key]: model }))
+                            }
+                            sortModel={sortByTab[tab.key] ?? []}
+                            onSortModelChange={(model) =>
+                                setSortByTab((prev) => ({ ...prev, [tab.key]: model }))
+                            }
+                            onRowClick={
+                                tab.key === 'reactions'
+                                    ? (row) => openDetailDrawer('reaction', row)
+                                    : tab.key === 'compounds'
+                                        ? (row) => openDetailDrawer('compound', row)
+                                        : undefined
+                            }
+                        />
                     )}
                 </TabPanel>
             ))}

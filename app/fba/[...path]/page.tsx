@@ -32,6 +32,7 @@ import { workspaceGet, workspaceLs, workspaceDownloadUrl, parseWorkspaceGetObjec
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 /* ---------- types ---------- */
 
@@ -600,6 +601,19 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
         [fbaData],
     );
 
+    const rxnFiltering = useToolbarGridFiltering<FbaReactionFlux>({
+        rows: rxnFluxes,
+        onFilterApplied: () => setRxnPagination((p) => ({ ...p, page: 0 })),
+    });
+    const exchFiltering = useToolbarGridFiltering<FbaExchangeFlux>({
+        rows: exchFluxes,
+        onFilterApplied: () => setExchPagination((p) => ({ ...p, page: 0 })),
+    });
+    const mapFiltering = useToolbarGridFiltering<FbaPathwayMap>({
+        rows: pathwayMaps,
+        onFilterApplied: () => setMapPagination((p) => ({ ...p, page: 0 })),
+    });
+
     const fluxByReaction = useMemo(() => buildFluxByReaction(rxnFluxes), [rxnFluxes]);
     const maxAbsFlux = useMemo(() => {
         let maxAbs = 1;
@@ -828,16 +842,24 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
 
                     {tabIndex === 0 && (
                         <DataGrid<FbaReactionFlux>
-                            rows={rxnFluxes}
+                            rows={rxnFiltering.filteredRows}
                             columns={withQuickSearchHeaders(rxnColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={rxnPagination}
                             onPaginationModelChange={setRxnPagination}
                             sortModel={rxnSort}
                             onSortModelChange={setRxnSort}
+                            filterModel={rxnFiltering.filterModel}
+                            filterMode="server"
+                            onFilterModelChange={rxnFiltering.handleFilterModelChange}
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
-                            slotProps={{ toolbar: { showQuickFilter: true } }}
+                            slotProps={{
+                                toolbar: {
+                                    showQuickFilter: true,
+                                    onApplyFilterModel: rxnFiltering.handleToolbarApplyFilterModel,
+                                },
+                            }}
                             hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
@@ -847,16 +869,24 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
 
                     {tabIndex === 1 && (
                         <DataGrid<FbaExchangeFlux>
-                            rows={exchFluxes}
+                            rows={exchFiltering.filteredRows}
                             columns={withQuickSearchHeaders(exchColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={exchPagination}
                             onPaginationModelChange={setExchPagination}
                             sortModel={exchSort}
                             onSortModelChange={setExchSort}
+                            filterModel={exchFiltering.filterModel}
+                            filterMode="server"
+                            onFilterModelChange={exchFiltering.handleFilterModelChange}
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
-                            slotProps={{ toolbar: { showQuickFilter: true } }}
+                            slotProps={{
+                                toolbar: {
+                                    showQuickFilter: true,
+                                    onApplyFilterModel: exchFiltering.handleToolbarApplyFilterModel,
+                                },
+                            }}
                             hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
@@ -889,16 +919,24 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
 
                             {pathwayMaps.length > 0 && (
                                 <DataGrid<FbaPathwayMap>
-                                    rows={pathwayMaps}
+                                    rows={mapFiltering.filteredRows}
                                     columns={withQuickSearchHeaders(mapColumns)}
                                     pageSizeOptions={[10, 25, 50, 100]}
                                     paginationModel={mapPagination}
                                     onPaginationModelChange={setMapPagination}
                                     sortModel={mapSort}
                                     onSortModelChange={setMapSort}
+                                    filterModel={mapFiltering.filterModel}
+                                    filterMode="server"
+                                    onFilterModelChange={mapFiltering.handleFilterModelChange}
                                     showToolbar
                                     slots={{ toolbar: DataControlHeader }}
-                                    slotProps={{ toolbar: { showQuickFilter: true } }}
+                                    slotProps={{
+                                        toolbar: {
+                                            showQuickFilter: true,
+                                            onApplyFilterModel: mapFiltering.handleToolbarApplyFilterModel,
+                                        },
+                                    }}
                                     hideFooter
                                     disableRowSelectionOnClick
                                     getRowId={(row) => row.id}

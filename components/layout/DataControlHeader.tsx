@@ -1110,8 +1110,18 @@ function QuickSearchHeader({
 
             const onApply = onApplyFilterModelRegistry.get(apiRef.current);
             if (typeof onApply === 'function') {
+                // Page (server-side or useToolbarGridFiltering) owns the multi-item AND.
+                // Do NOT call apiRef.current.setFilterModel — the Community grid would
+                // truncate items to length 1 and fire onFilterModelChange with the
+                // truncated list, racing the page state we just set.
                 onApply(fullModel, { source: 'toolbar' });
+                return;
             }
+            // Bare client-side grid (no page handler registered): the grid IS the
+            // filter engine.  Community Edition can only honor one item, so we apply
+            // the most recent quick-column filter — other items still live in the
+            // registry for badge/state but won't filter rows.  Pages that need
+            // multi-item AND should adopt useToolbarGridFiltering.
             apiRef.current.setFilterModel({
                 items: items.slice(0, 1),
                 logicOperator,

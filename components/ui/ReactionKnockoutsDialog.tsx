@@ -13,6 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 import Link from 'next/link';
 
 interface ModelReaction {
@@ -66,6 +67,13 @@ export default function ReactionKnockoutsDialog({
         ],
         [],
     );
+
+    const {
+        filterModel,
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<ModelReaction>({ rows: reactions });
 
     const handleSave = () => {
         const selectedIds =
@@ -152,7 +160,7 @@ export default function ReactionKnockoutsDialog({
                 )}
 
                 <DataGrid
-                    rows={reactions}
+                    rows={filteredRows}
                     columns={withQuickSearchHeaders(columns)}
                     getRowId={(row) => row.id}
                     checkboxSelection
@@ -162,9 +170,17 @@ export default function ReactionKnockoutsDialog({
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25 } },
                     }}
+                    filterModel={filterModel}
+                    filterMode="server"
+                    onFilterModelChange={handleFilterModelChange}
                     showToolbar
                     slots={{ toolbar: DataControlHeader }}
-                    slotProps={{ toolbar: { showQuickFilter: true } }}
+                    slotProps={{
+                        toolbar: {
+                            showQuickFilter: true,
+                            onApplyFilterModel: handleToolbarApplyFilterModel,
+                        },
+                    }}
                     hideFooter
                     autoHeight
                     disableRowSelectionOnClick={false}
