@@ -1324,26 +1324,41 @@ function QuickSearchHeader({
     return (
         <Box
             sx={{
+                // `flex: 1` and `width: 100%` together force this Box to
+                // occupy the full width of MUI's column-header title content
+                // slot. Without flex:1, the slot shrinks to fit its children
+                // and the auto-margin on the icon has nothing to expand into,
+                // which is why the icon used to sit immediately to the right
+                // of short header text in wide columns.
                 display: 'flex',
                 alignItems: 'center',
-                gap: 0.5,
                 minWidth: 0,
                 width: '100%',
+                flex: 1,
             }}
         >
             <Box
                 component="span"
                 sx={{
-                    flex: '1 1 auto',
                     minWidth: 0,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     fontWeight: 500,
+                    // Click on the name area triggers the column's sort
+                    // because we never stopPropagation here — MUI's column
+                    // header click handler picks it up.
                 }}
             >
                 {headerName}
             </Box>
+            {/* Spacer wrapper pushes the icon to the far right of the
+                header. We can't put `ml: 'auto'` directly on the Badge
+                because its dot indicator is absolutely positioned relative
+                to the Badge root — any padding on the Badge shifts the dot
+                off the icon corner. The wrapper handles layout; the Badge
+                stays free of layout-affecting padding. */}
+            <Box sx={{ ml: 'auto', pl: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
             <Tooltip
                 arrow
                 title={
@@ -1358,7 +1373,6 @@ function QuickSearchHeader({
                     overlap="circular"
                     invisible={!isActive}
                     sx={{
-                        flex: '0 0 auto',
                         '& .MuiBadge-badge': {
                             minWidth: 8,
                             height: 8,
@@ -1394,6 +1408,7 @@ function QuickSearchHeader({
                     </IconButton>
                 </Badge>
             </Tooltip>
+            </Box>
             <Popover
                 open={Boolean(anchorEl)}
                 anchorEl={anchorEl}
