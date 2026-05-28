@@ -95,7 +95,6 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
                 slotProps={{ toolbar: { onApplyFilterModel: handleToolbarApplyFilterModel } }}
                 hideFooter
                 disableRowSelectionOnClick
-                disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',
                     backgroundColor: '#fff',

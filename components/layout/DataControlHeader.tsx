@@ -420,10 +420,54 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                 committedItemsRef.current = items;
                 committedLogicOperatorRef.current =
                     filterModel.logicOperator ?? GridLogicOperator.And;
+                committedFilterRegistry.set(apiRef.current, {
+                    items,
+                    logicOperator: committedLogicOperatorRef.current,
+                });
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally runs once on mount only
+
+    /**
+     * Sync grid filter model changes that originate OUTSIDE the toolbar editor
+     * (e.g. a user clicked the column header kebab menu's "Filter" item) into our
+     * committed refs + registry.  Without this, applying a per-column filter would:
+     *   • leave the "Filter & Columns (N)" badge at the wrong count, and
+     *   • be silently overwritten the next time the user typed in the search box
+     *     (ToolbarSearchField.applySearch reads items from the registry).
+     *
+     * Skip the sync when the grid is reporting fewer items than we already committed
+     * — that's the Community Edition truncation firing right after a toolbar multi-save.
+     */
+    useEffect(() => {
+        const incoming = ((filterModel?.items ?? []) as GridFilterItem[]).filter(
+            (item) => item.field && item.operator,
+        );
+        const committed = committedItemsRef.current;
+        // CE-truncation guard: when the grid drops items it can't display,
+        // committed (≥2) shrinks toward 1.  Only ignore that specific case so we
+        // still sync genuine user-driven shrinks (e.g. clearing a single filter
+        // via the column header menu).
+        if (incoming.length < committed.length && committed.length > 1) return;
+        // No-op if identical (avoid re-render loop).
+        const same =
+            incoming.length === committed.length &&
+            incoming.every((it, i) =>
+                it.field === committed[i].field &&
+                it.operator === committed[i].operator &&
+                JSON.stringify(it.value ?? null) === JSON.stringify(committed[i].value ?? null),
+            ) &&
+            (filterModel?.logicOperator ?? GridLogicOperator.And) === committedLogicOperatorRef.current;
+        if (same) return;
+        committedItemsRef.current = incoming;
+        committedLogicOperatorRef.current = filterModel?.logicOperator ?? GridLogicOperator.And;
+        committedFilterRegistry.set(apiRef.current, {
+            items: incoming,
+            logicOperator: committedLogicOperatorRef.current,
+        });
+        forceUpdate((n) => n + 1);
+    }, [filterModel, apiRef]);
 
     const open = Boolean(anchorEl);
     const filterableColumns = allColumns.filter((column) => column.filterable !== false);

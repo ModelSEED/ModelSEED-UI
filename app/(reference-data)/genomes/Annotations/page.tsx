@@ -219,7 +219,6 @@ export default function SubsystemsPage() {
                     },
                 }}
                 hideFooter
-                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 getRowHeight={() => 'auto'}

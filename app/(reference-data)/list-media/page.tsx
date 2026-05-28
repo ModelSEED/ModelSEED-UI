@@ -130,7 +130,6 @@ export default function MediaPage() {
                     },
                 }}
                 hideFooter
-                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 onRowClick={(params) => goToMediaPath(params.row.path)}

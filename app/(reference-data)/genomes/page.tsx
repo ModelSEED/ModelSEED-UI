@@ -140,7 +140,6 @@ export default function PlantsPage() {
                     },
                 }}
                 hideFooter
-                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 autoHeight

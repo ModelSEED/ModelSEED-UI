@@ -2531,7 +2531,6 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                     toolbar: { showQuickFilter: true },
                                 }}
                                 hideFooter
-                                disableColumnMenu
                                 getRowId={(row) => String(row.id ?? '')}
                                 onRowClick={
                                     tab.key === 'reactions'

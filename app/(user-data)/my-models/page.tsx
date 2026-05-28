@@ -750,7 +750,6 @@ export default function MyModelsPage() {
                             },
                         }}
                         hideFooter
-                        disableColumnMenu
                         checkboxSelection
                         disableMultipleRowSelection={false}
                         rowSelectionModel={{
