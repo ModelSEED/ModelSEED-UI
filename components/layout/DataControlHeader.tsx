@@ -12,6 +12,7 @@ import {
     type GridColDef,
     type GridFilterItem,
     type GridFilterModel,
+    type GridValidRowModel,
     GridLogicOperator,
 } from '@mui/x-data-grid';
 
@@ -1358,7 +1359,7 @@ const wrappedColumnsCache = new WeakMap<object, unknown>();
  *   the toolbar uses, and call the page's `onApplyFilterModel` (registered
  *   by DataControlHeader) when present.
  */
-export function withQuickSearchHeaders<R extends Record<string, unknown> = Record<string, unknown>>(
+export function withQuickSearchHeaders<R extends GridValidRowModel = GridValidRowModel>(
     columns: GridColDef<R>[],
 ): GridColDef<R>[] {
     const cached = wrappedColumnsCache.get(columns as unknown as object);
