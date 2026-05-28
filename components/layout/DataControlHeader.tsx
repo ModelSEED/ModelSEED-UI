@@ -44,7 +44,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 import CloseIcon from '@mui/icons-material/Close';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState, useCallback, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback, type MouseEvent } from 'react';
 
 /**
  * Module-level registry that maps DataGrid apiRef instances to the toolbar's
@@ -1120,6 +1120,14 @@ function QuickSearchHeader({
     // between single-value and range operators doesn't clobber either entry.
     const [draftRangeFrom, setDraftRangeFrom] = useState<string>('');
     const [draftRangeTo, setDraftRangeTo] = useState<string>('');
+    // Refs for the value input(s) so we can force-focus the right field after
+    // the Popover finishes its enter transition.  Relying on `autoFocus`
+    // alone is unreliable here — MUI's FocusTrap can latch onto the first
+    // focusable child (the Operator select), so the user has to click the
+    // value field before typing.  Explicit focus on the transition's
+    // `onEntered` callback wins the race.
+    const valueInputRef = useRef<HTMLInputElement | null>(null);
+    const rangeFromInputRef = useRef<HTMLInputElement | null>(null);
 
     // Subscribe to committed-filter updates so the active-state highlight refreshes
     // when other components (toolbar editor, etc.) change the registry.
@@ -1393,6 +1401,23 @@ function QuickSearchHeader({
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                 slotProps={{ paper: { onClick: (e) => e.stopPropagation() } }}
+                TransitionProps={{
+                    // Focus the right input after the popover finishes its
+                    // enter transition — beats MUI's default FocusTrap which
+                    // would otherwise latch onto the Operator select and
+                    // force the user to click the value field before typing.
+                    onEntered: () => {
+                        if (noValueOp) return;
+                        const target = isRangeOp ? rangeFromInputRef.current : valueInputRef.current;
+                        if (!target) return;
+                        target.focus();
+                        // For native text/number/date inputs, select any
+                        // pre-seeded text so typing replaces it immediately.
+                        if (typeof target.select === 'function') {
+                            try { target.select(); } catch { /* select() may throw on date inputs in some browsers */ }
+                        }
+                    },
+                }}
             >
                 <Box
                     sx={{ p: 1.5, width: 320 }}
@@ -1446,6 +1471,7 @@ function QuickSearchHeader({
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
                                     <TextField
                                         autoFocus
+                                        inputRef={rangeFromInputRef}
                                         size="small"
                                         label="From"
                                         value={draftRangeFrom}
@@ -1473,6 +1499,7 @@ function QuickSearchHeader({
                                 <TextField
                                     select
                                     autoFocus
+                                    inputRef={valueInputRef}
                                     size="small"
                                     label="Value"
                                     value={draftValue}
@@ -1486,6 +1513,7 @@ function QuickSearchHeader({
                             ) : (
                                 <TextField
                                     autoFocus
+                                    inputRef={valueInputRef}
                                     size="small"
                                     label="Value"
                                     value={draftValue}
