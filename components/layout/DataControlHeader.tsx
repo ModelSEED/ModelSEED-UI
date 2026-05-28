@@ -44,7 +44,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 import CloseIcon from '@mui/icons-material/Close';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState, useRef, useCallback, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, useCallback, type MouseEvent } from 'react';
 
 /**
  * Module-level registry that maps DataGrid apiRef instances to the toolbar's
@@ -211,9 +211,22 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
     /**
      * Tracks the last committed value we observed so we can detect EXTERNAL
      * changes (e.g. Reset All in the Filter & Columns popover) and re-sync
-     * the draft without clobbering an in-flight edit.
+     * the draft without clobbering an in-flight edit.  Stored as state (not
+     * a ref) so the sync below can run during render — the React-recommended
+     * pattern for "adjust state when a prop changes" that avoids the lint
+     * rule against setState-in-effect.
+     * https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
      */
-    const prevCommittedRef = useRef<string>(committedQuick);
+    const [prevCommitted, setPrevCommitted] = useState<string>(committedQuick);
+    if (committedQuick !== prevCommitted) {
+        // Only overwrite the draft when the user hasn't diverged from the
+        // previously committed value, otherwise we'd silently discard their
+        // in-progress typing.
+        if (draft === prevCommitted) {
+            setDraft(committedQuick);
+        }
+        setPrevCommitted(committedQuick);
+    }
 
     const placeholder = useMemo(() => {
         if (!pathname) return 'Find in page...';
@@ -300,21 +313,6 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
         setDraft('');
         applySearch('');
     }, [applySearch]);
-
-    /**
-     * Re-sync the draft when the committed value changes from OUTSIDE this
-     * input (e.g. Reset All, programmatic filter change).  We only overwrite
-     * the draft when the user hasn't diverged from the previously committed
-     * value, otherwise we'd silently discard their in-progress typing.
-     */
-    useEffect(() => {
-        if (committedQuick !== prevCommittedRef.current) {
-            if (draft === prevCommittedRef.current) {
-                setDraft(committedQuick);
-            }
-            prevCommittedRef.current = committedQuick;
-        }
-    }, [committedQuick, draft]);
 
     // Apply CSS Custom Highlight API to highlight matches in the grid.  Driven
     // by the COMMITTED term (not the draft) so highlights appear only after the
