@@ -1050,8 +1050,13 @@ function QuickSearchHeader({
     const apiRef = useGridApiContext();
     const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const [draft, setDraft] = useState<string | null>(null);
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    /**
+     * Draft text the user has typed but NOT yet committed.  We deliberately
+     * do not auto-apply on typing — autoapply causes the parent page to
+     * re-render and remount the column header (and this Popover with it),
+     * which loses focus and the in-flight draft.  Enter commits.
+     */
+    const [draft, setDraft] = useState<string>('');
 
     // Subscribe to committed-filter updates so the active-state highlight refreshes
     // when other components (toolbar editor, etc.) change the registry.
@@ -1071,7 +1076,6 @@ function QuickSearchHeader({
     );
     const committedValueString =
         currentItem?.value == null ? '' : String(currentItem.value);
-    const inputValue = draft ?? committedValueString;
     const isActive = committedValueString.trim().length > 0;
 
     const applyQuickColumn = useCallback(
@@ -1134,44 +1138,45 @@ function QuickSearchHeader({
 
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            const text = e.target.value;
-            setDraft(text);
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => {
-                applyQuickColumn(text);
-                debounceRef.current = null;
-                setDraft(null);
-            }, 300);
+            setDraft(e.target.value);
+        },
+        [],
+    );
+
+    const commitAndClose = useCallback(
+        (text: string) => {
+            applyQuickColumn(text);
+            setAnchorEl(null);
         },
         [applyQuickColumn],
     );
 
     const handleClear = useCallback(() => {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-        setDraft(null);
-        applyQuickColumn('');
-    }, [applyQuickColumn]);
-
-    useEffect(() => {
-        return () => {
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-        };
-    }, []);
+        setDraft('');
+        commitAndClose('');
+    }, [commitAndClose]);
 
     const openPopover = useCallback(
         (e: React.MouseEvent<HTMLButtonElement>) => {
             // Stop propagation so the click doesn't trigger column sort/drag.
             e.stopPropagation();
             e.preventDefault();
+            // Seed the draft with whatever value is currently applied so the
+            // user can extend or replace it instead of starting from blank.
+            const existing = committedFilterRegistry.get(apiRef.current);
+            const existingItem = existing?.items.find(
+                (it) => it.id === quickColumnItemId(field),
+            );
+            setDraft(existingItem?.value == null ? '' : String(existingItem.value));
             setAnchorEl(e.currentTarget);
         },
-        [],
+        [apiRef, field],
     );
 
     const closePopover = useCallback(() => {
+        // Cancel: close without applying the draft.  User must press Enter to
+        // commit (matches the "apply on Enter" contract).
         setAnchorEl(null);
-        setDraft(null);
     }, []);
 
     return (
@@ -1224,30 +1229,32 @@ function QuickSearchHeader({
                         autoFocus
                         size="small"
                         fullWidth
-                        value={inputValue}
+                        value={draft}
                         onChange={handleChange}
                         onKeyDown={(e) => {
                             if (e.key === 'Escape') {
+                                e.stopPropagation();
                                 closePopover();
                             }
                             if (e.key === 'Enter') {
-                                if (debounceRef.current) {
-                                    clearTimeout(debounceRef.current);
-                                    debounceRef.current = null;
-                                    applyQuickColumn(inputValue);
-                                    setDraft(null);
-                                }
-                                setAnchorEl(null);
+                                e.preventDefault();
+                                e.stopPropagation();
+                                commitAndClose(draft);
                             }
                         }}
-                        placeholder={`Filter ${headerName}…`}
+                        placeholder={`Filter ${headerName}…  (Enter to apply)`}
+                        helperText={
+                            isActive
+                                ? `Applied: contains "${committedValueString}"`
+                                : 'Press Enter to apply'
+                        }
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
                                     <SearchIcon fontSize="small" />
                                 </InputAdornment>
                             ),
-                            endAdornment: inputValue ? (
+                            endAdornment: draft || isActive ? (
                                 <InputAdornment position="end">
                                     <IconButton
                                         size="small"
@@ -1268,6 +1275,19 @@ function QuickSearchHeader({
 }
 
 /**
+ * Cache wrapped column arrays by their input identity.  Keeping the output
+ * stable for the same input means MUI does not see a new `columns` prop on
+ * every parent re-render — and therefore does not remount the column header
+ * (and the open QuickSearchHeader Popover with it).  Without this cache,
+ * any parent re-render while the user is typing into the per-column search
+ * popover would tear down the input and reset the draft text.
+ *
+ * Consumers should keep their `columns` array stable themselves (module-
+ * level const, or useMemo with stable deps) — which they already do.
+ */
+const wrappedColumnsCache = new WeakMap<object, unknown>();
+
+/**
  * Wrap a column array so each filterable column gets an always-visible
  * magnifying-glass icon in its header that opens a per-column quick filter.
  *
@@ -1281,7 +1301,9 @@ function QuickSearchHeader({
 export function withQuickSearchHeaders<R extends Record<string, unknown> = Record<string, unknown>>(
     columns: GridColDef<R>[],
 ): GridColDef<R>[] {
-    return columns.map((col) => {
+    const cached = wrappedColumnsCache.get(columns as unknown as object);
+    if (cached) return cached as GridColDef<R>[];
+    const wrapped = columns.map((col) => {
         if (col.filterable === false) return col;
         if (col.field.startsWith('__')) return col;
         if (col.renderHeader) return col;
@@ -1298,6 +1320,8 @@ export function withQuickSearchHeaders<R extends Record<string, unknown> = Recor
             ),
         };
     });
+    wrappedColumnsCache.set(columns as unknown as object, wrapped);
+    return wrapped;
 }
 
 /* ────────────────────────────────────────────────────────────────
