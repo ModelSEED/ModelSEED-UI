@@ -477,10 +477,10 @@ export default function MyModelsPage() {
                 </Link>
             )
         },
-        { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
-        { field: 'numGenes', headerName: 'Genes', width: 100, type: 'number' },
+        { field: 'numReactions', headerName: 'Reactions', width: 130, type: 'number' },
+        { field: 'numGenes', headerName: 'Genes', width: 110, type: 'number' },
         { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
-        { field: 'gapfills', headerName: 'Gapfilling', width: 100, type: 'number' },
+        { field: 'gapfills', headerName: 'Gapfilling', width: 130, type: 'number' },
         {
             field: 'status',
             headerName: 'Status',

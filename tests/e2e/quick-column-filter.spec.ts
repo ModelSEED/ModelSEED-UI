@@ -393,79 +393,44 @@ test.describe('Quick column filter — reactions', () => {
   test('quick filter + toolbar filter stack together to 3 total', async ({ page }) => {
     test.setTimeout(60_000);
 
-    // Quick filter on ID
-    const reactionId = await readCellValue(page, 1, 'id');
-    await applyQuickColumnFilter(page, 'ID', reactionId);
+    // Step 1: Apply one toolbar filter via the Filter & Columns panel.
+    // fillFilterRow works on row 0 (the default empty row) when the panel
+    // opens fresh — no nested Select-in-Popover issues here.
+    await openFilterDialog(page);
+    await fillFilterRow(page, 0, { column: 'Status', operator: 'is not empty' });
+    await page.locator('button:has-text("Save")').first().click();
+    await waitForGridStable(page);
     expect(await activeFilterCount(page)).toBe(1);
 
-    // Quick filter on Name
+    // Step 2: Apply a quick-column filter on ID
+    const reactionId = await readCellValue(page, 1, 'id');
+    await applyQuickColumnFilter(page, 'ID', reactionId);
+    expect(await activeFilterCount(page)).toBe(2);
+
+    // Step 3: Apply a quick-column filter on Name
     const reactionName = await readCellValue(page, 1, 'name');
     const nameToken = pickSearchToken(reactionName);
     await applyQuickColumnFilter(page, 'Name', nameToken);
-    expect(await activeFilterCount(page)).toBe(2);
+    expect(await activeFilterCount(page)).toBe(3);
 
-    // Add a third filter via the toolbar editor.
-    // The editor opens with 2 rows from the quick filters.  Click "Add Filter"
-    // and interact with the new 3rd row using MUI-specific DOM selectors.
-    await openFilterDialog(page);
-    await page.locator('button:has-text("Add Filter")').first().click();
-    await page.waitForTimeout(500);
-
-    // MUI's <TextField select> renders a hidden <input> plus a visible <div>
-    // with role="combobox".  Target the last Column select by its label.
-    // Use a broader selector to find all MUI selects labelled "Column".
-    const columnSelects = page.locator('label:has-text("Column") + div [role="combobox"], [aria-label="Column"], label:text-is("Column")').locator('..').locator('[role="combobox"]');
-    // Fallback approach: locate all select wrappers in the Column Filter section
-    const filterSection = page.locator('text=Column Filter').locator('..');
-    const columnDropdowns = filterSection.locator('[role="combobox"]');
-    
-    // Count how many we have; the last one is our target
-    const dropdownCount = await columnDropdowns.count();
-
-    if (dropdownCount >= 3) {
-      // We have at least 3 Column comboboxes — interact with the last one
-      // Each filter row has: Column, Operator, Value — so column selects
-      // are at indices 0, 3, 6 etc. within all comboboxes in the section.
-      // But simpler: just use the native select elements within MUI.
-      const allComboboxes = filterSection.getByRole('combobox');
-      // In a 3-row layout: row0 has [Column, Operator], row1 has [Column, Operator], row2 has [Column, Operator]
-      // Plus the Logic combobox. Let's use the specific name-labelled approach.
-      const colCombos = page.getByRole('combobox', { name: 'Column' });
-      const lastCol = colCombos.last();
-      await lastCol.click();
-      await page.waitForTimeout(300);
-      // Click the "Status" option
-      const statusOpt = page.getByRole('option', { name: 'Status', exact: true });
-      await expect(statusOpt).toBeVisible({ timeout: 5_000 });
-      await statusOpt.click();
-
-      const opCombos = page.getByRole('combobox', { name: 'Operator' });
-      const lastOp = opCombos.last();
-      await lastOp.click();
-      await page.waitForTimeout(300);
-      const isNotEmptyOpt = page.getByRole('option', { name: 'is not empty', exact: true });
-      await expect(isNotEmptyOpt).toBeVisible({ timeout: 5_000 });
-      await isNotEmptyOpt.click();
-
-      await page.locator('button:has-text("Save")').first().click();
-      await waitForGridStable(page);
-      expect(await activeFilterCount(page)).toBe(3);
-    } else {
-      // Fallback: just verify the existing 2 filters are shown correctly
-      // and close without the 3rd to avoid flaking
-      await page.locator('button:has-text("Cancel")').first().click();
-      // Even without the 3rd, the 2 quick filters should be shown
-      expect(await activeFilterCount(page)).toBe(2);
-      test.skip(true, 'Add Filter row did not render expected comboboxes');
-    }
-
-    // Both quick-filter icons should reflect active state
+    // Both quick-filter column icons should reflect active state
     await expect(
       page.getByRole('button', { name: /Edit filter for ID/i }),
     ).toBeVisible();
     await expect(
       page.getByRole('button', { name: /Edit filter for Name/i }),
     ).toBeVisible();
+    // Status icon should also be active (toolbar filter applied it)
+    await expect(
+      page.getByRole('button', { name: /Edit filter for Status/i }),
+    ).toBeVisible();
+
+    // Verify: re-open the panel and confirm all 3 rows are present
+    await openFilterDialog(page);
+    const valueInputs = page.getByLabel('Value');
+    const columnCombos = page.getByRole('combobox', { name: 'Column' });
+    expect(await columnCombos.count()).toBeGreaterThanOrEqual(3);
+    await page.locator('button:has-text("Cancel")').first().click();
   });
 
   test('tooltip shows filter summary when column is filtered', async ({ page }) => {

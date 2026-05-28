@@ -55,10 +55,10 @@ const columns: GridColDef<PlantModelItem>[] = [
         )
     },
     { field: 'source', headerName: 'Domain', width: 140 },
-    { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
-    { field: 'numGenes', headerName: 'Genes', width: 80, type: 'number' },
-    { field: 'fbaCount', headerName: 'FBA', width: 80, type: 'number' },
-    { field: 'gapfills', headerName: 'Gapfills', width: 80, type: 'number' },
+    { field: 'numReactions', headerName: 'Reactions', width: 130, type: 'number' },
+    { field: 'numGenes', headerName: 'Genes', width: 110, type: 'number' },
+    { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
+    { field: 'gapfills', headerName: 'Gapfills', width: 120, type: 'number' },
     {
         field: 'modDate',
         headerName: 'Modification Date',

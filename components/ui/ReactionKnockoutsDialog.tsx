@@ -62,7 +62,7 @@ export default function ReactionKnockoutsDialog({
                 ),
             },
             { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
-            { field: 'direction', headerName: 'Direction', width: 100 },
+            { field: 'direction', headerName: 'Direction', width: 120 },
             { field: 'equation', headerName: 'Equation', flex: 1.5, minWidth: 300 },
         ],
         [],
