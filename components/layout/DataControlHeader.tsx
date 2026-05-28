@@ -1055,12 +1055,17 @@ function QuickSearchHeader({
 
     // Subscribe to committed-filter updates so the active-state highlight refreshes
     // when other components (toolbar editor, etc.) change the registry.
+    // Store committed state outside render to avoid ref access during render (lint rule react-hooks/refs).
     const [, forceTick] = useState(0);
+    const [committed, setCommitted] = useState<{ items: GridFilterItem[]; logicOperator: GridLogicOperator } | undefined>();
     useEffect(() => {
-        return subscribeCommittedFilter(apiRef.current, () => forceTick((n) => n + 1));
+        setCommitted(committedFilterRegistry.get(apiRef.current));
+        return subscribeCommittedFilter(apiRef.current, () => {
+            setCommitted(committedFilterRegistry.get(apiRef.current));
+            forceTick((n) => n + 1);
+        });
     }, [apiRef]);
 
-    const committed = committedFilterRegistry.get(apiRef.current);
     const currentItem = committed?.items.find(
         (it) => it.id === quickColumnItemId(field),
     );
