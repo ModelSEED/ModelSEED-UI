@@ -111,11 +111,11 @@ const columns: GridColDef<Compound>[] = [
     {
         field: 'formula',
         headerName: 'Formula',
-        width: 140,
+        width: 160,
         renderCell: (params) => formatFormula(params.value)
     },
     { field: 'mass', headerName: 'Mass', width: 100, type: 'number' },
-    { field: 'charge', headerName: 'Charge', width: 80, type: 'number' },
+    { field: 'charge', headerName: 'Charge', width: 120, type: 'number' },
     {
         field: 'synonyms',
         headerName: 'Synonyms',

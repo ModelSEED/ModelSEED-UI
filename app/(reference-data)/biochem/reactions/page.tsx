@@ -294,7 +294,7 @@ export default function ReactionsPage() {
         {
             field: 'is_transport',
             headerName: 'Transport',
-            width: 90,
+            width: 130,
             // Underlying value is a JS boolean; declaring the column type lets
             // the per-column quick filter offer is/is-not (with a Yes/No
             // dropdown) instead of string `contains`, which never matches
@@ -306,13 +306,13 @@ export default function ReactionsPage() {
         {
             field: 'status',
             headerName: 'Status',
-            width: 110,
+            width: 130,
             renderCell: (params) => <GridHighlightText text={params.value as string} />
         },
         {
             field: 'ec_numbers',
             headerName: 'EC Numbers',
-            width: 160,
+            width: 180,
             sortable: false,
             renderCell: (params) => {
                 const ecNumbers = params.row.ec_numbers ?? [];
