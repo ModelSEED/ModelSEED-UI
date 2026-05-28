@@ -297,6 +297,21 @@ function buildFilterClause(item: GridFilterItem): string | null {
                 .filter((clause): clause is string => Boolean(clause));
             return joinOrClauses(valueClauses);
         }
+        case 'between': {
+            // Two-position range. Either side may be empty for an open-ended
+            // bound; Solr accepts `*` as the unbounded sentinel.  We preserve
+            // empty positions (do NOT filterBoolean) so `[*, 100]` produces
+            // `field:[* TO 100]`.
+            const parts = Array.isArray(rawValue)
+                ? rawValue.map((entry) => normalizeFilterValue(entry))
+                : value.split(',').slice(0, 2).map((entry) => entry.trim());
+            const from = (parts[0] ?? '').trim();
+            const to = (parts[1] ?? '').trim();
+            if (!from && !to) return null;
+            const fromBound = from ? toRangeBoundary(from) : '*';
+            const toBound = to ? toRangeBoundary(to) : '*';
+            return `${field}:[${fromBound} TO ${toBound}]`;
+        }
         case 'contains':
         default:
             return buildWildcardVariantClause(field, value, 'contains');
@@ -653,6 +668,48 @@ function matchesFilterItem(
 
     if (operator === 'isEmpty') return fieldValue.trim().length === 0;
     if (operator === 'isNotEmpty') return fieldValue.trim().length > 0;
+    if (operator === 'between') {
+        // Two-position range; either side may be empty for an open bound.
+        // Prefers numeric comparison when both the field and the bounds parse
+        // as numbers; falls back to date comparison; otherwise lexical.
+        const parts = Array.isArray(item.value)
+            ? (item.value as unknown[]).map((entry) => normalizeFilterValue(entry))
+            : value.split(',').slice(0, 2).map((entry) => entry.trim());
+        const fromStr = (parts[0] ?? '').trim();
+        const toStr = (parts[1] ?? '').trim();
+        if (!fromStr && !toStr) return true;
+
+        const fieldNum = Number(fieldValue);
+        const fromNum = fromStr ? Number(fromStr) : null;
+        const toNum = toStr ? Number(toStr) : null;
+        const allNumeric =
+            Number.isFinite(fieldNum) &&
+            (fromNum === null || Number.isFinite(fromNum)) &&
+            (toNum === null || Number.isFinite(toNum));
+        if (allNumeric) {
+            if (fromNum !== null && fieldNum < fromNum) return false;
+            if (toNum !== null && fieldNum > toNum) return false;
+            return true;
+        }
+
+        const fieldDate = new Date(fieldValue);
+        const fromDate = fromStr ? new Date(fromStr) : null;
+        const toDate = toStr ? new Date(toStr) : null;
+        const allDates =
+            !Number.isNaN(fieldDate.getTime()) &&
+            (fromDate === null || !Number.isNaN(fromDate.getTime())) &&
+            (toDate === null || !Number.isNaN(toDate.getTime()));
+        if (allDates) {
+            if (fromDate !== null && fieldDate < fromDate) return false;
+            if (toDate !== null && fieldDate > toDate) return false;
+            return true;
+        }
+
+        // Lexical fallback (rare — strings used as a range).
+        if (fromStr && fieldValue < fromStr) return false;
+        if (toStr && fieldValue > toStr) return false;
+        return true;
+    }
     if (operator === 'isAnyOf') {
         const values = Array.isArray(item.value)
             ? item.value.map((v) => normalizeFilterValue(v)).filter(Boolean)

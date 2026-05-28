@@ -38,7 +38,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DeleteModelModal from '@/components/ui/DeleteModelModal';
 import CopyModelModal from '@/components/ui/CopyModelModal';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 import {
     isActiveJobStatus,
@@ -477,10 +477,10 @@ export default function MyModelsPage() {
                 </Link>
             )
         },
-        { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
-        { field: 'numGenes', headerName: 'Genes', width: 100, type: 'number' },
+        { field: 'numReactions', headerName: 'Reactions', width: 130, type: 'number' },
+        { field: 'numGenes', headerName: 'Genes', width: 110, type: 'number' },
         { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
-        { field: 'gapfills', headerName: 'Gapfilling', width: 100, type: 'number' },
+        { field: 'gapfills', headerName: 'Gapfilling', width: 130, type: 'number' },
         {
             field: 'status',
             headerName: 'Status',
@@ -726,7 +726,7 @@ export default function MyModelsPage() {
                 ) : (
                     <DataGrid<MyModelItem>
                         rows={filteredRows}
-                        columns={columns}
+                        columns={withQuickSearchHeaders(columns)}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
                         paginationModel={paginationModel}
@@ -750,7 +750,6 @@ export default function MyModelsPage() {
                             },
                         }}
                         hideFooter
-                        disableColumnMenu
                         checkboxSelection
                         disableMultipleRowSelection={false}
                         rowSelectionModel={{

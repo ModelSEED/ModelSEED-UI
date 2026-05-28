@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import { workspaceLs } from '@/lib/api/workspace';
 import { USE_NEW_PROXY } from '@/lib/api/config';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface PlantModelItem {
@@ -55,10 +55,10 @@ const columns: GridColDef<PlantModelItem>[] = [
         )
     },
     { field: 'source', headerName: 'Domain', width: 140 },
-    { field: 'numReactions', headerName: 'Reactions', width: 100, type: 'number' },
-    { field: 'numGenes', headerName: 'Genes', width: 80, type: 'number' },
-    { field: 'fbaCount', headerName: 'FBA', width: 80, type: 'number' },
-    { field: 'gapfills', headerName: 'Gapfills', width: 80, type: 'number' },
+    { field: 'numReactions', headerName: 'Reactions', width: 130, type: 'number' },
+    { field: 'numGenes', headerName: 'Genes', width: 110, type: 'number' },
+    { field: 'fbaCount', headerName: 'FBA', width: 100, type: 'number' },
+    { field: 'gapfills', headerName: 'Gapfills', width: 120, type: 'number' },
     {
         field: 'modDate',
         headerName: 'Modification Date',
@@ -122,7 +122,7 @@ export default function PlantsPage() {
             </Alert>
             <DataGrid<PlantModelItem>
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}
@@ -140,7 +140,6 @@ export default function PlantsPage() {
                     },
                 }}
                 hideFooter
-                disableColumnMenu
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 autoHeight

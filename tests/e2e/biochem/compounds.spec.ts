@@ -9,6 +9,7 @@ test.describe('Compounds Page - Search & Display', () => {
     test('should search across all compound fields', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('cpd');
+        await searchInput.press('Enter');
         await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
@@ -19,6 +20,7 @@ test.describe('Compounds Page - Search & Display', () => {
     test('should resolve a specific compound ID (cpd05323)', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('cpd05323');
+        await searchInput.press('Enter');
         await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
             timeout: 20000,
         });
@@ -29,6 +31,7 @@ test.describe('Compounds Page - Search & Display', () => {
     }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('glucoiberin');
+        await searchInput.press('Enter');
         await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
             timeout: 20000,
         });
@@ -48,6 +51,7 @@ test.describe('Compounds Page - Search & Display', () => {
     test('export modal should show active search filter', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('cpd');
+        await searchInput.press('Enter');
         await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const exportButton = page.locator('button:has-text("Export CSV")');

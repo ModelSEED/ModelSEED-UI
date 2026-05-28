@@ -24,7 +24,7 @@ import { getJobsFromApi } from '@/lib/api/modelseed';
 import { listTrackedJobs, TrackedJob } from '@/lib/api/jobTracker';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
@@ -409,7 +409,7 @@ function MyJobsContent() {
 
             <DataGrid<JobRow>
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={pagination}
                 onPaginationModelChange={setPagination}

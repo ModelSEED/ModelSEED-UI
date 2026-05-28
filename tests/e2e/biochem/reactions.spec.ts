@@ -9,6 +9,7 @@ test.describe('Reactions Page - Search Functionality', () => {
     test('should search across all fields including chemical equations', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('rxn');
+        await searchInput.press('Enter');
         await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
@@ -19,6 +20,7 @@ test.describe('Reactions Page - Search Functionality', () => {
     test('should search by reaction ID', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('rxn00001');
+        await searchInput.press('Enter');
         await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
@@ -29,6 +31,7 @@ test.describe('Reactions Page - Search Functionality', () => {
     test('should show active search in filter button', async ({ page }) => {
         const searchInput = page.locator('input[placeholder*="Find in"]').first();
         await searchInput.fill('glucose');
+        await searchInput.press('Enter');
         await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
 
         const filterButton = page.locator('button:has-text("Filter & Columns")');

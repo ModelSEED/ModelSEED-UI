@@ -20,7 +20,7 @@ import IconButton from '@mui/material/IconButton';
 /* import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; */
 /* import ReactionCommentModal from '@/components/ui/ReactionCommentModal'; */
 import { GridHighlightText } from '@/components/GridHighlightText';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
@@ -294,20 +294,25 @@ export default function ReactionsPage() {
         {
             field: 'is_transport',
             headerName: 'Transport',
-            width: 90,
+            width: 130,
+            // Underlying value is a JS boolean; declaring the column type lets
+            // the per-column quick filter offer is/is-not (with a Yes/No
+            // dropdown) instead of string `contains`, which never matches
+            // boolean docs in Solr.
+            type: 'boolean',
             renderCell: (params) => <GridHighlightText text={params.row.is_transport ? 'Yes' : 'No'} />,
         },
         { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
         {
             field: 'status',
             headerName: 'Status',
-            width: 110,
+            width: 130,
             renderCell: (params) => <GridHighlightText text={params.value as string} />
         },
         {
             field: 'ec_numbers',
             headerName: 'EC Numbers',
-            width: 160,
+            width: 180,
             sortable: false,
             renderCell: (params) => {
                 const ecNumbers = params.row.ec_numbers ?? [];
@@ -411,7 +416,7 @@ export default function ReactionsPage() {
 
             <DataGrid<Reaction>
                 rows={data?.docs ?? []}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -430,7 +435,6 @@ export default function ReactionsPage() {
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
                 hideFooter
-                disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',
                     '& .MuiDataGrid-cell': {

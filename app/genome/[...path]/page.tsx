@@ -23,7 +23,8 @@ import Alert from '@mui/material/Alert';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 
 import { workspaceGet, parseWorkspaceGetObject } from '@/lib/api/workspace';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 /* ─── Types ─── */
 
@@ -183,6 +184,15 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
         { field: 'subsystem', headerName: 'Subsystem', width: 300 },
     ], []);
 
+    const featureFiltering = useToolbarGridFiltering<GenomeFeature>({
+        rows: features,
+        onFilterApplied: () => setFeatPagination((p) => ({ ...p, page: 0 })),
+    });
+    const annotationFiltering = useToolbarGridFiltering<GenomeAnnotation>({
+        rows: annotations,
+        onFilterApplied: () => setAnnoPagination((p) => ({ ...p, page: 0 })),
+    });
+
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 1 }}>
@@ -218,16 +228,24 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
 
                     {tabIndex === 0 && (
                         <DataGrid<GenomeFeature>
-                            rows={features}
-                            columns={featureColumns}
+                            rows={featureFiltering.filteredRows}
+                            columns={withQuickSearchHeaders(featureColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={featPagination}
                             onPaginationModelChange={setFeatPagination}
                             sortModel={featSort}
                             onSortModelChange={setFeatSort}
+                            filterModel={featureFiltering.filterModel}
+                            filterMode="server"
+                            onFilterModelChange={featureFiltering.handleFilterModelChange}
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
-                            slotProps={{ toolbar: { showQuickFilter: true } }}
+                            slotProps={{
+                                toolbar: {
+                                    showQuickFilter: true,
+                                    onApplyFilterModel: featureFiltering.handleToolbarApplyFilterModel,
+                                },
+                            }}
                             hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
@@ -237,16 +255,24 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
 
                     {tabIndex === 1 && (
                         <DataGrid<GenomeAnnotation>
-                            rows={annotations}
-                            columns={annotationColumns}
+                            rows={annotationFiltering.filteredRows}
+                            columns={withQuickSearchHeaders(annotationColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={annoPagination}
                             onPaginationModelChange={setAnnoPagination}
                             sortModel={annoSort}
                             onSortModelChange={setAnnoSort}
+                            filterModel={annotationFiltering.filterModel}
+                            filterMode="server"
+                            onFilterModelChange={annotationFiltering.handleFilterModelChange}
                             showToolbar
                             slots={{ toolbar: DataControlHeader }}
-                            slotProps={{ toolbar: { showQuickFilter: true } }}
+                            slotProps={{
+                                toolbar: {
+                                    showQuickFilter: true,
+                                    onApplyFilterModel: annotationFiltering.handleToolbarApplyFilterModel,
+                                },
+                            }}
                             hideFooter
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id}
