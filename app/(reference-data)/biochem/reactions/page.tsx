@@ -295,6 +295,11 @@ export default function ReactionsPage() {
             field: 'is_transport',
             headerName: 'Transport',
             width: 90,
+            // Underlying value is a JS boolean; declaring the column type lets
+            // the per-column quick filter offer is/is-not (with a Yes/No
+            // dropdown) instead of string `contains`, which never matches
+            // boolean docs in Solr.
+            type: 'boolean',
             renderCell: (params) => <GridHighlightText text={params.row.is_transport ? 'Yes' : 'No'} />,
         },
         { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },

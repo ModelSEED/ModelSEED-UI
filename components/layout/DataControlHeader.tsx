@@ -112,9 +112,13 @@ const STRING_OPERATORS = [
 /** Operators whose value field should be treated as a comma-separated list. */
 const ARRAY_VALUE_OPERATORS = new Set(['isAnyOf']);
 
-/** Hint shown below the value input when an array operator is selected. */
+/** Operators that take a two-position range (from, to). Either side may be empty for open-ended. */
+const RANGE_OPERATORS = new Set(['between']);
+
+/** Hint shown below the value input when an array/range operator is selected. */
 const ARRAY_OPERATOR_HINT: Record<string, string> = {
     isAnyOf: 'Comma-separated values, e.g. cpd00001, cpd00002',
+    between: 'From, To  (leave a side empty for open-ended)',
 };
 
 const NUMBER_OPERATORS = [
@@ -124,11 +128,13 @@ const NUMBER_OPERATORS = [
     { value: '>=', label: '>=' },
     { value: '<', label: '<' },
     { value: '<=', label: '<=' },
+    { value: 'between', label: 'between' },
     { value: 'isEmpty', label: 'is empty' },
     { value: 'isNotEmpty', label: 'is not empty' },
 ];
 
 const DATE_OPERATORS = [
+    { value: 'between', label: 'between' },
     { value: 'is', label: 'is' },
     { value: 'after', label: 'after' },
     { value: 'onOrAfter', label: 'on or after' },
@@ -153,19 +159,8 @@ function operatorOptionsForType(type?: string): { value: string; label: string }
     return STRING_OPERATORS;
 }
 
-/** Coerce a raw text input to the GridFilterItem.value shape expected for this operator + column type. */
-function coerceFilterValue(
-    operator: string,
-    type: string | undefined,
-    raw: string,
-): GridFilterItem['value'] {
-    if (NO_VALUE_OPERATORS.has(operator)) return undefined;
-    if (ARRAY_VALUE_OPERATORS.has(operator)) {
-        return raw
-            .split(',')
-            .map((v) => v.trim())
-            .filter(Boolean);
-    }
+/** Coerce a single scalar text input to the column type. */
+function coerceScalarValue(type: string | undefined, raw: string): string | number | boolean {
     if (type === 'number') {
         const parsed = Number(raw);
         return Number.isFinite(parsed) ? parsed : raw;
@@ -175,6 +170,34 @@ function coerceFilterValue(
         if (raw === 'false') return false;
     }
     return raw;
+}
+
+/** Coerce a raw text input to the GridFilterItem.value shape expected for this operator + column type. */
+function coerceFilterValue(
+    operator: string,
+    type: string | undefined,
+    raw: string | string[],
+): GridFilterItem['value'] {
+    if (NO_VALUE_OPERATORS.has(operator)) return undefined;
+    if (RANGE_OPERATORS.has(operator)) {
+        // Always two positions; either side may be empty (open-ended range).
+        // Preserve empty positions — do NOT filter — so the server knows which
+        // side is unbounded.
+        const parts = Array.isArray(raw)
+            ? [raw[0] ?? '', raw[1] ?? '']
+            : raw.split(',').slice(0, 2).map((v) => v.trim());
+        const [from, to] = [parts[0] ?? '', parts[1] ?? ''];
+        return [
+            from === '' ? '' : String(coerceScalarValue(type, from)),
+            to === '' ? '' : String(coerceScalarValue(type, to)),
+        ];
+    }
+    if (ARRAY_VALUE_OPERATORS.has(operator)) {
+        const list = Array.isArray(raw) ? raw : raw.split(',');
+        return list.map((v) => String(v).trim()).filter(Boolean);
+    }
+    const text = Array.isArray(raw) ? String(raw[0] ?? '') : raw;
+    return coerceScalarValue(type, text);
 }
 
 function CustomPagination() {
@@ -613,41 +636,22 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
 
     const isNoValueOperator = (operator: string): boolean => NO_VALUE_OPERATORS.has(operator);
 
-    const isFilled = (row: ToolbarFilterRow): boolean =>
-        Boolean(
-            row.field &&
-            row.operator &&
-            (
-                isNoValueOperator(row.operator) ||
-                (ARRAY_VALUE_OPERATORS.has(row.operator)
-                    ? row.value.trim().split(',').some((v) => v.trim().length > 0)
-                    : row.value.trim().length > 0)
-            ),
-        );
+    const isFilled = (row: ToolbarFilterRow): boolean => {
+        if (!row.field || !row.operator) return false;
+        if (isNoValueOperator(row.operator)) return true;
+        if (RANGE_OPERATORS.has(row.operator) || ARRAY_VALUE_OPERATORS.has(row.operator)) {
+            return row.value.split(',').some((v) => v.trim().length > 0);
+        }
+        return row.value.trim().length > 0;
+    };
 
     const toFilterValue = (row: ToolbarFilterRow): GridFilterItem['value'] => {
         if (isNoValueOperator(row.operator)) return undefined;
-
-        const raw = row.value.trim();
         const type = getColumnType(row.field);
-
-        // isAnyOf needs an array
-        if (ARRAY_VALUE_OPERATORS.has(row.operator)) {
-            return raw
-                .split(',')
-                .map((v) => v.trim())
-                .filter(Boolean);
-        }
-
-        if (type === 'number') {
-            const parsed = Number(raw);
-            return Number.isFinite(parsed) ? parsed : raw;
-        }
-        if (type === 'boolean') {
-            if (raw === 'true') return true;
-            if (raw === 'false') return false;
-        }
-        return raw;
+        // Delegate range/array/scalar coercion to the shared helper so the
+        // toolbar editor and the per-column quick search produce identical
+        // GridFilterItem shapes for the same operator.
+        return coerceFilterValue(row.operator, type, row.value);
     };
 
     const addFilterRow = () => {
@@ -883,6 +887,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                                     const type = getColumnType(row.field);
                                     const noValueOp = isNoValueOperator(row.operator);
                                     const isArrayOp = ARRAY_VALUE_OPERATORS.has(row.operator);
+                                    const isRangeOp = RANGE_OPERATORS.has(row.operator);
                                     const isBoolean = type === 'boolean';
                                     const inputType =
                                         type === 'number'
@@ -893,7 +898,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                                                     ? 'date'
                                                     : 'text';
                                     const isDateInput = inputType === 'date' || inputType === 'datetime-local';
-                                    const hint = isArrayOp ? ARRAY_OPERATOR_HINT[row.operator] : undefined;
+                                    const hint = (isArrayOp || isRangeOp) ? ARRAY_OPERATOR_HINT[row.operator] : undefined;
 
                                     return (
                                         <Box
@@ -961,8 +966,8 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                                                     SelectProps={{ MenuProps: { disablePortal: true } }}
                                                 >
                                                     <MenuItem value="">Select</MenuItem>
-                                                    <MenuItem value="true">true</MenuItem>
-                                                    <MenuItem value="false">false</MenuItem>
+                                                    <MenuItem value="true">Yes</MenuItem>
+                                                    <MenuItem value="false">No</MenuItem>
                                                 </TextField>
                                             ) : (
                                                 <TextField
@@ -971,10 +976,20 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                                                     value={row.value}
                                                     onChange={(e) => updateFilterRow(row.id, { value: e.target.value })}
                                                     disabled={!row.field || !row.operator || noValueOp}
-                                                    type={inputType}
-                                                    InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                                    // For range ops the user types two values separated by a comma,
+                                                    // so the underlying input must accept text (a "number"-type input
+                                                    // would block the comma).  Single-value numeric/date ops keep
+                                                    // their typed inputs for the native picker UI.
+                                                    type={isRangeOp ? 'text' : inputType}
+                                                    InputLabelProps={isDateInput && !isRangeOp ? { shrink: true } : undefined}
                                                     helperText={hint}
-                                                    placeholder={isArrayOp ? 'value1, value2, ...' : undefined}
+                                                    placeholder={
+                                                        isRangeOp
+                                                            ? 'from, to'
+                                                            : isArrayOp
+                                                                ? 'value1, value2, ...'
+                                                                : undefined
+                                                    }
                                                 />
                                             )}
 
@@ -1072,7 +1087,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
 function quickSearchOperatorFor(type?: string): string {
     if (type === 'number') return '=';
     if (type === 'boolean') return 'is';
-    if (type === 'date' || type === 'dateTime') return 'is';
+    if (type === 'date' || type === 'dateTime') return 'between';
     return 'contains';
 }
 
@@ -1101,6 +1116,10 @@ function QuickSearchHeader({
     const defaultOperator = quickSearchOperatorFor(columnType);
     const [draftOperator, setDraftOperator] = useState<string>(defaultOperator);
     const [draftValue, setDraftValue] = useState<string>('');
+    // Separate state for the two-position range used by `between`, so swapping
+    // between single-value and range operators doesn't clobber either entry.
+    const [draftRangeFrom, setDraftRangeFrom] = useState<string>('');
+    const [draftRangeTo, setDraftRangeTo] = useState<string>('');
 
     // Subscribe to committed-filter updates so the active-state highlight refreshes
     // when other components (toolbar editor, etc.) change the registry.
@@ -1143,25 +1162,35 @@ function QuickSearchHeader({
      * the data control header remains the single owner of filter state.
      */
     const applyQuickColumn = useCallback(
-        (operator: string, rawValue: string) => {
+        (operator: string, rawValue: string | string[]) => {
             const existing = committedFilterRegistry.get(apiRef.current);
             const otherItems = (existing?.items ?? []).filter(
                 (it) => it.id !== quickColumnItemId(field),
             );
-            const trimmed = rawValue.trim();
             const noValueOp = NO_VALUE_OPERATORS.has(operator);
-            const hasValue =
-                noValueOp ||
-                (ARRAY_VALUE_OPERATORS.has(operator)
-                    ? trimmed.split(',').some((v) => v.trim().length > 0)
-                    : trimmed.length > 0);
+            const hasValue = (() => {
+                if (noValueOp) return true;
+                if (RANGE_OPERATORS.has(operator)) {
+                    const parts = Array.isArray(rawValue)
+                        ? rawValue
+                        : String(rawValue).split(',');
+                    return parts.some((v) => String(v ?? '').trim().length > 0);
+                }
+                if (ARRAY_VALUE_OPERATORS.has(operator)) {
+                    const parts = Array.isArray(rawValue)
+                        ? rawValue
+                        : String(rawValue).split(',');
+                    return parts.some((v) => String(v ?? '').trim().length > 0);
+                }
+                return String(rawValue).trim().length > 0;
+            })();
             const newItem: GridFilterItem | null =
                 operator && hasValue
                     ? {
                           id: quickColumnItemId(field),
                           field,
                           operator,
-                          value: coerceFilterValue(operator, columnType, trimmed),
+                          value: coerceFilterValue(operator, columnType, rawValue),
                       }
                     : null;
             // Put the quick-column item FIRST so on Community Edition (which
@@ -1210,20 +1239,32 @@ function QuickSearchHeader({
             e.preventDefault();
             // Seed operator + value from the existing quick-col item if one
             // already applies; otherwise start at the type's default operator
-            // ("contains" for strings) with an empty value.
+            // ("contains" for strings, "between" for dates) with empty value.
             const existing = committedFilterRegistry.get(apiRef.current);
             const existingQuickItem = existing?.items.find(
                 (it) => it.id === quickColumnItemId(field),
             );
             if (existingQuickItem) {
-                setDraftOperator(String(existingQuickItem.operator ?? defaultOperator));
+                const op = String(existingQuickItem.operator ?? defaultOperator);
+                setDraftOperator(op);
                 const v = existingQuickItem.value;
-                setDraftValue(
-                    Array.isArray(v) ? v.map(String).join(', ') : v == null ? '' : String(v),
-                );
+                if (RANGE_OPERATORS.has(op)) {
+                    const arr = Array.isArray(v) ? v : String(v ?? '').split(',');
+                    setDraftRangeFrom(arr[0] == null ? '' : String(arr[0]));
+                    setDraftRangeTo(arr[1] == null ? '' : String(arr[1]));
+                    setDraftValue('');
+                } else {
+                    setDraftValue(
+                        Array.isArray(v) ? v.map(String).join(', ') : v == null ? '' : String(v),
+                    );
+                    setDraftRangeFrom('');
+                    setDraftRangeTo('');
+                }
             } else {
                 setDraftOperator(defaultOperator);
                 setDraftValue('');
+                setDraftRangeFrom('');
+                setDraftRangeTo('');
             }
             setAnchorEl(e.currentTarget);
         },
@@ -1235,19 +1276,26 @@ function QuickSearchHeader({
     }, []);
 
     const handleApply = useCallback(() => {
-        applyQuickColumn(draftOperator, draftValue);
+        if (RANGE_OPERATORS.has(draftOperator)) {
+            applyQuickColumn(draftOperator, [draftRangeFrom, draftRangeTo]);
+        } else {
+            applyQuickColumn(draftOperator, draftValue);
+        }
         setAnchorEl(null);
-    }, [applyQuickColumn, draftOperator, draftValue]);
+    }, [applyQuickColumn, draftOperator, draftValue, draftRangeFrom, draftRangeTo]);
 
     const handleClear = useCallback(() => {
-        applyQuickColumn(draftOperator, '');
+        applyQuickColumn(draftOperator, RANGE_OPERATORS.has(draftOperator) ? ['', ''] : '');
         setDraftValue('');
+        setDraftRangeFrom('');
+        setDraftRangeTo('');
         setAnchorEl(null);
     }, [applyQuickColumn, draftOperator]);
 
     const operators = operatorOptionsForType(columnType);
     const noValueOp = NO_VALUE_OPERATORS.has(draftOperator);
     const isArrayOp = ARRAY_VALUE_OPERATORS.has(draftOperator);
+    const isRangeOp = RANGE_OPERATORS.has(draftOperator);
     const isBoolean = columnType === 'boolean';
     const inputType =
         columnType === 'number'
@@ -1258,8 +1306,12 @@ function QuickSearchHeader({
                     ? 'date'
                     : 'text';
     const isDateInput = inputType === 'date' || inputType === 'datetime-local';
-    const hint = isArrayOp ? ARRAY_OPERATOR_HINT[draftOperator] : undefined;
-    const canClear = isActive || draftValue.trim().length > 0;
+    const hint = (isArrayOp || isRangeOp) ? ARRAY_OPERATOR_HINT[draftOperator] : undefined;
+    const canClear =
+        isActive ||
+        draftValue.trim().length > 0 ||
+        draftRangeFrom.trim().length > 0 ||
+        draftRangeTo.trim().length > 0;
 
     return (
         <Box
@@ -1390,7 +1442,34 @@ function QuickSearchHeader({
                         </TextField>
 
                         {!noValueOp && (
-                            isBoolean ? (
+                            isRangeOp ? (
+                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                                    <TextField
+                                        autoFocus
+                                        size="small"
+                                        label="From"
+                                        value={draftRangeFrom}
+                                        onChange={(e) => setDraftRangeFrom(e.target.value)}
+                                        type={inputType}
+                                        InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                    />
+                                    <TextField
+                                        size="small"
+                                        label="To"
+                                        value={draftRangeTo}
+                                        onChange={(e) => setDraftRangeTo(e.target.value)}
+                                        type={inputType}
+                                        InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                    />
+                                    {hint && (
+                                        <Box sx={{ gridColumn: '1 / -1', mt: -0.5 }}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {hint}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            ) : isBoolean ? (
                                 <TextField
                                     select
                                     autoFocus
@@ -1401,8 +1480,8 @@ function QuickSearchHeader({
                                     SelectProps={{ MenuProps: { disablePortal: true } }}
                                 >
                                     <MenuItem value="">Select</MenuItem>
-                                    <MenuItem value="true">true</MenuItem>
-                                    <MenuItem value="false">false</MenuItem>
+                                    <MenuItem value="true">Yes</MenuItem>
+                                    <MenuItem value="false">No</MenuItem>
                                 </TextField>
                             ) : (
                                 <TextField
