@@ -435,59 +435,54 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
     const [appliedHiddenColumnCount, setAppliedHiddenColumnCount] = useState(0);
 
     /**
-     * The community DataGrid hard-forces disableMultipleColumnsFiltering=true and silently
-     * truncates filterModel.items to a single entry via sanitizeFilterModel.  We work around
-     * this by keeping our own committed filter list in a ref that lives entirely outside the
-     * grid's state — it is the single source of truth for the button label and reopen state.
+     * The committed multi-filter state is held in React state (not a ref) so
+     * any registry change — whether from the toolbar editor itself, a per-
+     * column QuickSearchHeader, or the grid's column-menu Filter option —
+     * automatically re-renders the badge label and is visible to openEditor
+     * when the user opens the Filter & Columns popover.
+     *
+     * The committed state lives in committedFilterRegistry (a WeakMap keyed
+     * by apiRef.current) as the single shared source of truth.  Our local
+     * state is just a mirror that triggers re-renders.
      */
-    const committedItemsRef = useRef<GridFilterItem[]>([]);
-    const committedLogicOperatorRef = useRef<GridLogicOperator>(GridLogicOperator.And);
-    // Force re-render after saving so the button label updates immediately.
-    const [, forceUpdate] = useState(0);
+    const [committedState, setCommittedState] = useState<{
+        items: GridFilterItem[];
+        logicOperator: GridLogicOperator;
+    }>(() => committedFilterRegistry.get(apiRef.current) ?? { items: [], logicOperator: GridLogicOperator.And });
 
-    // Bootstrap the ref from a controlled filterModel on the first render.
-    // This handles externally-supplied initial filters (e.g. from URL params / page state).
-    // We only do this when our own ref is still empty to avoid overwriting user edits.
+    // Bootstrap the registry from a controlled filterModel on the first
+    // render (e.g. URL params or page state seeded into the grid before any
+    // toolbar interaction).  Only seed when the registry is still empty so
+    // we don't clobber per-column work already in flight.
     useEffect(() => {
-        if (committedItemsRef.current.length === 0 && (filterModel?.items ?? []).length > 0) {
-            const items = (filterModel.items as GridFilterItem[]).filter(
-                (item) => item.field && item.operator,
-            );
-            if (items.length > 0) {
-                committedItemsRef.current = items;
-                committedLogicOperatorRef.current =
-                    filterModel.logicOperator ?? GridLogicOperator.And;
-                setCommittedFilter(apiRef.current, {
-                    items,
-                    logicOperator: committedLogicOperatorRef.current,
-                });
-            }
-        }
+        const existing = committedFilterRegistry.get(apiRef.current);
+        if ((existing?.items.length ?? 0) > 0) return;
+        const seed = ((filterModel?.items ?? []) as GridFilterItem[]).filter(
+            (item) => item.field && item.operator,
+        );
+        if (seed.length === 0) return;
+        setCommittedFilter(apiRef.current, {
+            items: seed,
+            logicOperator: filterModel?.logicOperator ?? GridLogicOperator.And,
+        });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally runs once on mount only
 
     /**
-     * Sync grid filter model changes that originate OUTSIDE the toolbar editor
-     * (e.g. a user clicked the column header kebab menu's "Filter" item) into our
-     * committed refs + registry.  Without this, applying a per-column filter would:
-     *   • leave the "Filter & Columns (N)" badge at the wrong count, and
-     *   • be silently overwritten the next time the user typed in the search box
-     *     (ToolbarSearchField.applySearch reads items from the registry).
-     *
-     * Skip the sync when the grid is reporting fewer items than we already committed
-     * — that's the Community Edition truncation firing right after a toolbar multi-save.
+     * Sync grid-filter-model changes that originate OUTSIDE the toolbar
+     * editor (e.g. user clicked the column header kebab menu's "Filter").
+     * The grid only ever reports up to one item (Community Edition), so we
+     * skip the sync when our registry has more items than the grid claims —
+     * that's the CE truncation firing right after a multi-save.
      */
     useEffect(() => {
         const incoming = ((filterModel?.items ?? []) as GridFilterItem[]).filter(
             (item) => item.field && item.operator,
         );
-        const committed = committedItemsRef.current;
-        // CE-truncation guard: when the grid drops items it can't display,
-        // committed (≥2) shrinks toward 1.  Only ignore that specific case so we
-        // still sync genuine user-driven shrinks (e.g. clearing a single filter
-        // via the column header menu).
+        const existing = committedFilterRegistry.get(apiRef.current);
+        const committed = existing?.items ?? [];
         if (incoming.length < committed.length && committed.length > 1) return;
-        // No-op if identical (avoid re-render loop).
+        const incomingLogic = filterModel?.logicOperator ?? GridLogicOperator.And;
         const same =
             incoming.length === committed.length &&
             incoming.every((it, i) =>
@@ -495,52 +490,41 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                 it.operator === committed[i].operator &&
                 JSON.stringify(it.value ?? null) === JSON.stringify(committed[i].value ?? null),
             ) &&
-            (filterModel?.logicOperator ?? GridLogicOperator.And) === committedLogicOperatorRef.current;
+            incomingLogic === (existing?.logicOperator ?? GridLogicOperator.And);
         if (same) return;
-        committedItemsRef.current = incoming;
-        committedLogicOperatorRef.current = filterModel?.logicOperator ?? GridLogicOperator.And;
-        setCommittedFilter(apiRef.current, {
-            items: incoming,
-            logicOperator: committedLogicOperatorRef.current,
-        });
-        forceUpdate((n) => n + 1);
+        setCommittedFilter(apiRef.current, { items: incoming, logicOperator: incomingLogic });
     }, [filterModel, apiRef]);
 
     /**
-     * Subscribe to committed-filter changes triggered by other components
-     * (notably QuickSearchHeader's per-column popover, which writes directly
-     * to the shared registry).  When that happens we mirror the change into
-     * our own ref so the "Filter & Columns (N)" badge and the reopen state
-     * stay in sync.  Skipping the sync if values are already identical avoids
-     * a re-render loop with the effect above.
+     * Subscribe to committed-filter changes from any source (the per-column
+     * QuickSearchHeader, the editor itself, the grid-menu sync above, etc.).
+     * Each change drives a setState, which re-renders the badge label and
+     * makes openEditor see the latest snapshot.
      */
     useEffect(() => {
+        // Pick up whatever the registry had at mount, since the snapshot we
+        // computed via useState's initializer was taken before subscribe.
+        const initial = committedFilterRegistry.get(apiRef.current);
+        if (initial) setCommittedState(initial);
         return subscribeCommittedFilter(apiRef.current, () => {
             const state = committedFilterRegistry.get(apiRef.current);
-            if (!state) return;
-            const same =
-                state.items.length === committedItemsRef.current.length &&
-                state.items.every((it, i) => {
-                    const cur = committedItemsRef.current[i];
-                    return (
-                        it.field === cur.field &&
-                        it.operator === cur.operator &&
-                        JSON.stringify(it.value ?? null) === JSON.stringify(cur.value ?? null)
-                    );
-                }) &&
-                state.logicOperator === committedLogicOperatorRef.current;
-            if (same) return;
-            committedItemsRef.current = state.items;
-            committedLogicOperatorRef.current = state.logicOperator;
-            forceUpdate((n) => n + 1);
+            if (state) setCommittedState(state);
         });
     }, [apiRef]);
+
+    // Local aliases — these always reflect the latest committed registry
+    // (state-backed, so re-renders automatically when the registry changes).
+    const committedItems = committedState.items;
+    const committedLogicOperator = committedState.logicOperator;
 
     const open = Boolean(anchorEl);
     const filterableColumns = allColumns.filter((column) => column.filterable !== false);
 
-    // Count from our ref (not gridFilterModelSelector which only ever has ≤1 item).
-    const activeAppliedFilterCount = committedItemsRef.current.filter((item) => {
+    // Count from our state mirror of the registry (not gridFilterModelSelector
+    // which only ever has ≤1 item).  State updates whenever any component
+    // calls setCommittedFilter — including the per-column QuickSearchHeader —
+    // so the badge label is always in sync.
+    const activeAppliedFilterCount = committedItems.filter((item) => {
         if (!item.field || !item.operator) return false;
         if (NO_VALUE_OPERATORS.has(String(item.operator))) return true;
         if (Array.isArray(item.value)) return item.value.length > 0;
@@ -645,9 +629,14 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
             Object.values(visibilityModel).filter((visible) => visible === false).length,
         );
 
-        // Restore from our ref — this is the only reliable source for multi-filter rows
-        // because the grid's internal state only retains the first item (community edition).
-        const committed = committedItemsRef.current;
+        // Read the latest committed state directly from the registry — this
+        // is the single source of truth and is updated synchronously by both
+        // the editor (saveChanges) and per-column QuickSearchHeader (Enter
+        // commits).  Falling back to the state mirror handles the brief case
+        // where the registry was just cleared.
+        const registryState = committedFilterRegistry.get(apiRef.current);
+        const committed = registryState?.items ?? committedItems;
+        const committedLogic = registryState?.logicOperator ?? committedLogicOperator;
         if (committed.length > 0 && committed[0]?.field) {
             setDraftRows(
                 committed.map((item) => ({
@@ -662,7 +651,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
         } else {
             setDraftRows([makeEmptyFilterRow()]);
         }
-        setDraftLogicOperator(committedLogicOperatorRef.current);
+        setDraftLogicOperator(committedLogic);
 
         setAnchorEl(event.currentTarget);
     };
@@ -689,9 +678,9 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
         setDraftColumnVisibilityModel(visible);
         setDraftRows([makeEmptyFilterRow()]);
         setDraftLogicOperator(GridLogicOperator.And);
-        // Clear the committed state so searches don't carry stale filters after a Reset All.
-        committedItemsRef.current = [];
-        committedLogicOperatorRef.current = GridLogicOperator.And;
+        // Clear the committed state so searches don't carry stale filters
+        // after a Reset All.  setCommittedFilter pub/sub notifies the badge
+        // (state mirror auto-updates) and every QuickSearchHeader icon.
         setCommittedFilter(apiRef.current, { items: [], logicOperator: GridLogicOperator.And });
         // Notify the page of the cleared state.
         const quickFilterValues = filterModel?.quickFilterValues ?? [];
@@ -704,7 +693,6 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
             apiRef.current.setColumnVisibility(column.field, true);
         });
         setAppliedHiddenColumnCount(0);
-        forceUpdate((n) => n + 1);
         closeEditor();
     };
 
@@ -718,9 +706,10 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                 value: toFilterValue(row),
             }));
 
-        // Persist all filled items in our refs AND the shared registry.
-        committedItemsRef.current = filledItems;
-        committedLogicOperatorRef.current = draftLogicOperator;
+        // Persist all filled items in the shared registry.  setCommittedFilter
+        // notifies every subscriber (the state mirror here, every per-column
+        // QuickSearchHeader's `committed` state) so badges and icon highlights
+        // update automatically.
         setCommittedFilter(apiRef.current, { items: filledItems, logicOperator: draftLogicOperator });
 
         // Preserve the current quick-filter search term from the grid's internal model.
@@ -754,7 +743,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
             });
         } else {
             // Client-side page: let the grid apply item[0] for native row filtering.
-            // Rows 2+ won't be applied by the grid, but they are stored in committedItemsRef.
+            // Rows 2+ won't be applied by the grid, but they live in the registry.
             const gridModel: GridFilterModel = {
                 items: filledItems.slice(0, 1),
                 logicOperator: draftLogicOperator,
@@ -772,8 +761,6 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
             Object.values(draftColumnVisibilityModel).filter((visible) => visible === false).length,
         );
 
-        // Trigger a re-render so the button label picks up the new count from the ref.
-        forceUpdate((n) => n + 1);
         closeEditor();
     };
 
