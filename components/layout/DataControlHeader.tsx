@@ -145,6 +145,38 @@ const BOOLEAN_OPERATORS = [
     { value: 'isNotEmpty', label: 'is not empty' },
 ];
 
+/** Operator list for a given column type. Shared by the toolbar editor and the per-column popover. */
+function operatorOptionsForType(type?: string): { value: string; label: string }[] {
+    if (type === 'number') return NUMBER_OPERATORS;
+    if (type === 'boolean') return BOOLEAN_OPERATORS;
+    if (type === 'date' || type === 'dateTime') return DATE_OPERATORS;
+    return STRING_OPERATORS;
+}
+
+/** Coerce a raw text input to the GridFilterItem.value shape expected for this operator + column type. */
+function coerceFilterValue(
+    operator: string,
+    type: string | undefined,
+    raw: string,
+): GridFilterItem['value'] {
+    if (NO_VALUE_OPERATORS.has(operator)) return undefined;
+    if (ARRAY_VALUE_OPERATORS.has(operator)) {
+        return raw
+            .split(',')
+            .map((v) => v.trim())
+            .filter(Boolean);
+    }
+    if (type === 'number') {
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : raw;
+    }
+    if (type === 'boolean') {
+        if (raw === 'true') return true;
+        if (raw === 'false') return false;
+    }
+    return raw;
+}
+
 function CustomPagination() {
     const apiRef = useGridApiContext();
     const page = useGridSelector(apiRef, gridPageSelector);
@@ -1044,19 +1076,6 @@ function quickSearchOperatorFor(type?: string): string {
     return 'contains';
 }
 
-/** Coerce the raw text value to the column's expected type. */
-function quickSearchValueFor(type: string | undefined, raw: string): GridFilterItem['value'] {
-    if (type === 'number') {
-        const parsed = Number(raw);
-        return Number.isFinite(parsed) ? parsed : raw;
-    }
-    if (type === 'boolean') {
-        if (raw === 'true') return true;
-        if (raw === 'false') return false;
-    }
-    return raw;
-}
-
 /** Item id used to identify per-column quick-search items in the registry. */
 const quickColumnItemId = (field: string) => `quick-col-${field}`;
 
@@ -1072,38 +1091,30 @@ function QuickSearchHeader({
     const apiRef = useGridApiContext();
     const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
     /**
-     * Draft text the user has typed but NOT yet committed.  We deliberately
-     * do not auto-apply on typing — autoapply causes the parent page to
-     * re-render and remount the column header (and this Popover with it),
-     * which loses focus and the in-flight draft.  Enter commits.
+     * Draft operator + value the user is editing inside the popover.  Not
+     * committed until Apply (button or Enter).  Pre-seeded from the existing
+     * quick-col item when the popover opens, so re-opening shows what was
+     * already applied.
      */
-    const [draft, setDraft] = useState<string>('');
+    const defaultOperator = quickSearchOperatorFor(columnType);
+    const [draftOperator, setDraftOperator] = useState<string>(defaultOperator);
+    const [draftValue, setDraftValue] = useState<string>('');
 
     // Subscribe to committed-filter updates so the active-state highlight refreshes
     // when other components (toolbar editor, etc.) change the registry.
-    // Store committed state outside render to avoid ref access during render (lint rule react-hooks/refs).
-    const [, forceTick] = useState(0);
     const [committed, setCommitted] = useState<{ items: GridFilterItem[]; logicOperator: GridLogicOperator } | undefined>();
     useEffect(() => {
         setCommitted(committedFilterRegistry.get(apiRef.current));
         return subscribeCommittedFilter(apiRef.current, () => {
             setCommitted(committedFilterRegistry.get(apiRef.current));
-            forceTick((n) => n + 1);
         });
     }, [apiRef]);
 
-    // Quick-column-specific item (id-based) — used for seeding the popover
-    // input when the user re-opens the icon, so editing extends the value
-    // they previously typed.
-    const quickItem = committed?.items.find(
-        (it) => it.id === quickColumnItemId(field),
-    );
     // ANY filter on this column (field-based) — used for the active-state
-    // visual indicator.  This covers both quick-search filters AND filters
-    // added via the toolbar's Filter & Columns editor, so the magnifying-
-    // glass icon reflects the column's true filtered state regardless of
-    // how the filter was added.
+    // visual indicator.  Covers both quick-search filters AND filters added
+    // via the toolbar's Filter & Columns editor.
     const fieldFilterItems = (committed?.items ?? []).filter((it) => {
         if (it.field !== field) return false;
         if (!it.operator) return false;
@@ -1112,9 +1123,7 @@ function QuickSearchHeader({
         return String(it.value ?? '').trim().length > 0;
     });
     const isActive = fieldFilterItems.length > 0;
-    const quickValueString =
-        quickItem?.value == null ? '' : String(quickItem.value);
-    /** Summary string shown in the tooltip + helper text when the column is filtered. */
+    /** Summary string shown in the tooltip when the column is filtered. */
     const activeSummary = fieldFilterItems
         .map((it) => {
             const op = String(it.operator ?? '');
@@ -1127,25 +1136,37 @@ function QuickSearchHeader({
         })
         .join(' AND ');
 
+    /**
+     * Write (or remove) this column's quick-search item in the shared
+     * committed-filter registry, then route the new model through the page's
+     * onApplyFilterModel handler — the same path ToolbarFilterEditor uses, so
+     * the data control header remains the single owner of filter state.
+     */
     const applyQuickColumn = useCallback(
-        (text: string) => {
-            const trimmed = text.trim();
+        (operator: string, rawValue: string) => {
             const existing = committedFilterRegistry.get(apiRef.current);
             const otherItems = (existing?.items ?? []).filter(
                 (it) => it.id !== quickColumnItemId(field),
             );
-            const newItem: GridFilterItem | null = trimmed
-                ? {
-                      id: quickColumnItemId(field),
-                      field,
-                      operator: quickSearchOperatorFor(columnType),
-                      value: quickSearchValueFor(columnType, trimmed),
-                  }
-                : null;
+            const trimmed = rawValue.trim();
+            const noValueOp = NO_VALUE_OPERATORS.has(operator);
+            const hasValue =
+                noValueOp ||
+                (ARRAY_VALUE_OPERATORS.has(operator)
+                    ? trimmed.split(',').some((v) => v.trim().length > 0)
+                    : trimmed.length > 0);
+            const newItem: GridFilterItem | null =
+                operator && hasValue
+                    ? {
+                          id: quickColumnItemId(field),
+                          field,
+                          operator,
+                          value: coerceFilterValue(operator, columnType, trimmed),
+                      }
+                    : null;
             // Put the quick-column item FIRST so on Community Edition (which
             // truncates filterModel.items to one entry) the per-column search
-            // is the active filter — that matches the "click icon, see filtered
-            // rows" expectation.
+            // is the active filter.
             const items: GridFilterItem[] = newItem ? [newItem, ...otherItems] : otherItems;
             const logicOperator = existing?.logicOperator ?? GridLogicOperator.And;
 
@@ -1170,11 +1191,8 @@ function QuickSearchHeader({
                 onApply(fullModel, { source: 'toolbar' });
                 return;
             }
-            // Bare client-side grid (no page handler registered): the grid IS the
-            // filter engine.  Community Edition can only honor one item, so we apply
-            // the most recent quick-column filter — other items still live in the
-            // registry for badge/state but won't filter rows.  Pages that need
-            // multi-item AND should adopt useToolbarGridFiltering.
+            // Bare client-side grid: Community Edition can only honor one item;
+            // we apply the quick-column filter first so it wins.
             apiRef.current.setFilterModel({
                 items: items.slice(0, 1),
                 logicOperator,
@@ -1185,52 +1203,63 @@ function QuickSearchHeader({
         [apiRef, field, columnType, gridFilterModel],
     );
 
-    const handleChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setDraft(e.target.value);
-        },
-        [],
-    );
-
-    const commitAndClose = useCallback(
-        (text: string) => {
-            applyQuickColumn(text);
-            setAnchorEl(null);
-        },
-        [applyQuickColumn],
-    );
-
-    const handleClear = useCallback(() => {
-        setDraft('');
-        commitAndClose('');
-    }, [commitAndClose]);
-
     const openPopover = useCallback(
         (e: React.MouseEvent<HTMLButtonElement>) => {
             // Stop propagation so the click doesn't trigger column sort/drag.
             e.stopPropagation();
             e.preventDefault();
-            // Seed the draft with whatever the quick-search filter is currently
-            // applied (matched by quick-col id) so the user can extend or
-            // replace it instead of starting from blank.  Toolbar-added filters
-            // are intentionally NOT pulled in — they may use operators the
-            // quick search doesn't expose (e.g. isAnyOf) and editing them here
-            // would silently lose that fidelity.
+            // Seed operator + value from the existing quick-col item if one
+            // already applies; otherwise start at the type's default operator
+            // ("contains" for strings) with an empty value.
             const existing = committedFilterRegistry.get(apiRef.current);
             const existingQuickItem = existing?.items.find(
                 (it) => it.id === quickColumnItemId(field),
             );
-            setDraft(existingQuickItem?.value == null ? '' : String(existingQuickItem.value));
+            if (existingQuickItem) {
+                setDraftOperator(String(existingQuickItem.operator ?? defaultOperator));
+                const v = existingQuickItem.value;
+                setDraftValue(
+                    Array.isArray(v) ? v.map(String).join(', ') : v == null ? '' : String(v),
+                );
+            } else {
+                setDraftOperator(defaultOperator);
+                setDraftValue('');
+            }
             setAnchorEl(e.currentTarget);
         },
-        [apiRef, field],
+        [apiRef, field, defaultOperator],
     );
 
     const closePopover = useCallback(() => {
-        // Cancel: close without applying the draft.  User must press Enter to
-        // commit (matches the "apply on Enter" contract).
         setAnchorEl(null);
     }, []);
+
+    const handleApply = useCallback(() => {
+        applyQuickColumn(draftOperator, draftValue);
+        setAnchorEl(null);
+    }, [applyQuickColumn, draftOperator, draftValue]);
+
+    const handleClear = useCallback(() => {
+        applyQuickColumn(draftOperator, '');
+        setDraftValue('');
+        setAnchorEl(null);
+    }, [applyQuickColumn, draftOperator]);
+
+    const operators = operatorOptionsForType(columnType);
+    const noValueOp = NO_VALUE_OPERATORS.has(draftOperator);
+    const isArrayOp = ARRAY_VALUE_OPERATORS.has(draftOperator);
+    const isBoolean = columnType === 'boolean';
+    const inputType =
+        columnType === 'number'
+            ? 'number'
+            : columnType === 'dateTime'
+                ? 'datetime-local'
+                : columnType === 'date'
+                    ? 'date'
+                    : 'text';
+    const isDateInput = inputType === 'date' || inputType === 'datetime-local';
+    const hint = isArrayOp ? ARRAY_OPERATOR_HINT[draftOperator] : undefined;
+    const canClear = isActive || draftValue.trim().length > 0;
 
     return (
         <Box
@@ -1259,7 +1288,7 @@ function QuickSearchHeader({
                 arrow
                 title={
                     isActive
-                        ? `Filtered: ${activeSummary} (click to edit, Enter to apply)`
+                        ? `Filtered: ${activeSummary} (click to edit)`
                         : `Quick filter ${headerName}`
                 }
             >
@@ -1271,9 +1300,6 @@ function QuickSearchHeader({
                     sx={{
                         flex: '0 0 auto',
                         '& .MuiBadge-badge': {
-                            // Small but visible dot at the corner of the icon
-                            // so even at a glance the user sees which columns
-                            // are filtered.
                             minWidth: 8,
                             height: 8,
                             borderRadius: '50%',
@@ -1316,50 +1342,95 @@ function QuickSearchHeader({
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                 slotProps={{ paper: { onClick: (e) => e.stopPropagation() } }}
             >
-                <Box sx={{ p: 1, width: 260 }}>
-                    <TextField
-                        autoFocus
-                        size="small"
-                        fullWidth
-                        value={draft}
-                        onChange={handleChange}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                                e.stopPropagation();
-                                closePopover();
-                            }
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                commitAndClose(draft);
-                            }
-                        }}
-                        placeholder={`Filter ${headerName}…  (Enter to apply)`}
-                        helperText={
-                            isActive
-                                ? `Applied: ${activeSummary}`
-                                : 'Press Enter to apply'
+                <Box
+                    sx={{ p: 1.5, width: 320 }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleApply();
+                        } else if (e.key === 'Escape') {
+                            e.stopPropagation();
+                            closePopover();
                         }
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                            endAdornment: draft || quickValueString ? (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        size="small"
-                                        aria-label="Clear column filter"
-                                        onClick={handleClear}
-                                        edge="end"
-                                    >
-                                        <CloseIcon fontSize="small" />
-                                    </IconButton>
-                                </InputAdornment>
-                            ) : undefined,
-                        }}
-                    />
+                    }}
+                >
+                    <Stack spacing={1.25}>
+                        {/* Column is locked to whichever header was clicked.
+                            Disabled select renders the same shape as the toolbar
+                            editor's column field but is not interactive. */}
+                        <TextField
+                            select
+                            size="small"
+                            label="Column"
+                            value={field}
+                            disabled
+                            SelectProps={{ MenuProps: { disablePortal: true } }}
+                        >
+                            <MenuItem value={field}>{headerName}</MenuItem>
+                        </TextField>
+
+                        <TextField
+                            select
+                            size="small"
+                            label="Operator"
+                            value={draftOperator}
+                            onChange={(e) => {
+                                const next = e.target.value;
+                                setDraftOperator(next);
+                                if (NO_VALUE_OPERATORS.has(next)) setDraftValue('');
+                            }}
+                            SelectProps={{ MenuProps: { disablePortal: true } }}
+                        >
+                            {operators.map((op) => (
+                                <MenuItem key={op.value} value={op.value}>
+                                    {op.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        {!noValueOp && (
+                            isBoolean ? (
+                                <TextField
+                                    select
+                                    autoFocus
+                                    size="small"
+                                    label="Value"
+                                    value={draftValue}
+                                    onChange={(e) => setDraftValue(e.target.value)}
+                                    SelectProps={{ MenuProps: { disablePortal: true } }}
+                                >
+                                    <MenuItem value="">Select</MenuItem>
+                                    <MenuItem value="true">true</MenuItem>
+                                    <MenuItem value="false">false</MenuItem>
+                                </TextField>
+                            ) : (
+                                <TextField
+                                    autoFocus
+                                    size="small"
+                                    label="Value"
+                                    value={draftValue}
+                                    onChange={(e) => setDraftValue(e.target.value)}
+                                    type={inputType}
+                                    InputLabelProps={isDateInput ? { shrink: true } : undefined}
+                                    helperText={hint ?? 'Press Enter to apply'}
+                                    placeholder={isArrayOp ? 'value1, value2, ...' : undefined}
+                                />
+                            )
+                        )}
+
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                            <Button size="small" onClick={handleClear} disabled={!canClear}>
+                                Clear
+                            </Button>
+                            <Button size="small" onClick={closePopover}>
+                                Cancel
+                            </Button>
+                            <Button size="small" variant="contained" onClick={handleApply}>
+                                Apply
+                            </Button>
+                        </Box>
+                    </Stack>
                 </Box>
             </Popover>
         </Box>
@@ -1396,13 +1467,17 @@ export function withQuickSearchHeaders<R extends GridValidRowModel = GridValidRo
     const cached = wrappedColumnsCache.get(columns as unknown as object);
     if (cached) return cached as GridColDef<R>[];
     const wrapped = columns.map((col) => {
-        if (col.filterable === false) return col;
-        if (col.field.startsWith('__')) return col;
-        if (col.renderHeader) return col;
+        // Hide MUI's 3-dot column menu on every column the helper sees — the
+        // magnifying-glass popover is now the sole per-column filter entry
+        // point, and the kebab menu would duplicate (and bypass) it.
+        const base = { ...col, disableColumnMenu: true };
+        if (col.filterable === false) return base;
+        if (col.field.startsWith('__')) return base;
+        if (col.renderHeader) return base;
         const headerName = String(col.headerName ?? col.field);
         const columnType = col.type;
         return {
-            ...col,
+            ...base,
             renderHeader: () => (
                 <QuickSearchHeader
                     field={col.field}
