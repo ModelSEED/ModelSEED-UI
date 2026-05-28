@@ -25,7 +25,7 @@ import { listModelGapfillsFromApi } from '@/lib/api/modelseed';
 import { workspaceGet, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 
 /* ---------- types ---------- */
 
@@ -371,7 +371,7 @@ export default function GapfillPage({ params }: { params: Promise<{ path: string
             {gfReactions && gfReactions.length > 0 && (
                 <DataGrid<GapfillReaction>
                     rows={gfReactions}
-                    columns={columns}
+                    columns={withQuickSearchHeaders(columns)}
                     pageSizeOptions={[10, 25, 50, 100]}
                     paginationModel={pagination}
                     onPaginationModelChange={setPagination}

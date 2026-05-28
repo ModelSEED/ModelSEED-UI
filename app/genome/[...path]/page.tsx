@@ -23,7 +23,7 @@ import Alert from '@mui/material/Alert';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 
 import { workspaceGet, parseWorkspaceGetObject } from '@/lib/api/workspace';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 
 /* ─── Types ─── */
 
@@ -219,7 +219,7 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
                     {tabIndex === 0 && (
                         <DataGrid<GenomeFeature>
                             rows={features}
-                            columns={featureColumns}
+                            columns={withQuickSearchHeaders(featureColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={featPagination}
                             onPaginationModelChange={setFeatPagination}
@@ -238,7 +238,7 @@ export default function GenomePage({ params }: { params: Promise<{ path: string[
                     {tabIndex === 1 && (
                         <DataGrid<GenomeAnnotation>
                             rows={annotations}
-                            columns={annotationColumns}
+                            columns={withQuickSearchHeaders(annotationColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={annoPagination}
                             onPaginationModelChange={setAnnoPagination}

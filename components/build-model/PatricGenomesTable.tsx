@@ -13,7 +13,7 @@ import {
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { filterDocsByGridModel, sortGridDocsLocally } from '@/lib/api/biochem';
 import { PatricGenome, searchPatricGenomes } from '@/lib/api/patric';
 
@@ -158,7 +158,7 @@ export default function PatricGenomesTable({ onSelectGenome, disabled = false }:
                 rows={data?.rows ?? []}
                 rowCount={data?.total ?? 0}
                 loading={isLoading}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 getRowId={(row) => row.genome_id}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}

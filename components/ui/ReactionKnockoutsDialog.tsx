@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import Link from 'next/link';
 
 interface ModelReaction {
@@ -153,7 +153,7 @@ export default function ReactionKnockoutsDialog({
 
                 <DataGrid
                     rows={reactions}
-                    columns={columns}
+                    columns={withQuickSearchHeaders(columns)}
                     getRowId={(row) => row.id}
                     checkboxSelection
                     rowSelectionModel={selectionModel}

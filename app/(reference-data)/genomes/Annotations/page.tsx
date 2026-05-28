@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { parseWorkspaceGetObject, workspaceGet } from '@/lib/api/workspace';
 import { USE_NEW_PROXY } from '@/lib/api/config';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface SubsystemItem {
@@ -201,7 +201,7 @@ export default function SubsystemsPage() {
             </Typography>
             <DataGrid<SubsystemItem>
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}

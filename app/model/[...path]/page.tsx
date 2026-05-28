@@ -56,7 +56,7 @@ import { parseWorkspaceDate } from '@/lib/utils/date';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import { formatFormula } from '@/components/utils/formatFormula';
 import AddReactionsDialog from '@/components/ui/AddReactionsDialog';
@@ -2499,7 +2499,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                 return (
                             <DataGrid<Record<string, unknown>>
                                 rows={displayedRows}
-                                columns={
+                                columns={withQuickSearchHeaders(
                                     tab.key === 'reactions'
                                         ? reactionColumns
                                         : tab.key === 'compounds'
@@ -2509,7 +2509,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                                                 : tab.key === 'pathways'
                                                     ? pathwayColumns
                                                     : tableConfig[tab.key].columns
-                                }
+                                )}
                                 pageSizeOptions={[10, 25, 50, 100]}
                                 paginationMode={isLazyLargeTab ? 'server' : 'client'}
                                 sortingMode={isLazyLargeTab ? 'server' : 'client'}

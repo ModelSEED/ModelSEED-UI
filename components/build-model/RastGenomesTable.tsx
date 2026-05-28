@@ -6,7 +6,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { listRastGenomes, RastGenomeJob } from '@/lib/api/modelseed';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
@@ -80,7 +80,7 @@ export default function RastGenomesTable({ onSelectGenome, disabled = false }: R
             <DataGrid<RastGenomeJob>
                 autoHeight
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 loading={isLoading}
                 getRowId={(row) => row.id || row.genome_id}
                 pageSizeOptions={[10, 25, 50, 100]}

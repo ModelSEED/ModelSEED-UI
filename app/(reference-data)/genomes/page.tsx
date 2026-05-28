@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import { workspaceLs } from '@/lib/api/workspace';
 import { USE_NEW_PROXY } from '@/lib/api/config';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface PlantModelItem {
@@ -122,7 +122,7 @@ export default function PlantsPage() {
             </Alert>
             <DataGrid<PlantModelItem>
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}

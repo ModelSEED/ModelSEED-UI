@@ -20,7 +20,7 @@ import IconButton from '@mui/material/IconButton';
 /* import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; */
 /* import ReactionCommentModal from '@/components/ui/ReactionCommentModal'; */
 import { GridHighlightText } from '@/components/GridHighlightText';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
@@ -411,7 +411,7 @@ export default function ReactionsPage() {
 
             <DataGrid<Reaction>
                 rows={data?.docs ?? []}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}

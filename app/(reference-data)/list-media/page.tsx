@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { workspaceLs } from '@/lib/api/workspace';
 import { listPublicMediaFromApi } from '@/lib/api/modelseed';
 import { USE_MODELSEED_API, USE_NEW_PROXY } from '@/lib/api/config';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 interface MediaItem {
@@ -112,7 +112,7 @@ export default function MediaPage() {
             </Typography>
             <DataGrid<MediaItem>
                 rows={filteredRows}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 loading={isLoading}
                 pageSizeOptions={[10, 25, 50, 100]}
                 paginationModel={paginationModel}

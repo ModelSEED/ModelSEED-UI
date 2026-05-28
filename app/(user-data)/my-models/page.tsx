@@ -38,7 +38,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
 import DeleteModelModal from '@/components/ui/DeleteModelModal';
 import CopyModelModal from '@/components/ui/CopyModelModal';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 import {
     isActiveJobStatus,
@@ -726,7 +726,7 @@ export default function MyModelsPage() {
                 ) : (
                     <DataGrid<MyModelItem>
                         rows={filteredRows}
-                        columns={columns}
+                        columns={withQuickSearchHeaders(columns)}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
                         paginationModel={paginationModel}

@@ -31,7 +31,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { workspaceGet, workspaceLs, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 
 /* ---------- types ---------- */
 
@@ -829,7 +829,7 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
                     {tabIndex === 0 && (
                         <DataGrid<FbaReactionFlux>
                             rows={rxnFluxes}
-                            columns={rxnColumns}
+                            columns={withQuickSearchHeaders(rxnColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={rxnPagination}
                             onPaginationModelChange={setRxnPagination}
@@ -848,7 +848,7 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
                     {tabIndex === 1 && (
                         <DataGrid<FbaExchangeFlux>
                             rows={exchFluxes}
-                            columns={exchColumns}
+                            columns={withQuickSearchHeaders(exchColumns)}
                             pageSizeOptions={[10, 25, 50, 100]}
                             paginationModel={exchPagination}
                             onPaginationModelChange={setExchPagination}
@@ -890,7 +890,7 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
                             {pathwayMaps.length > 0 && (
                                 <DataGrid<FbaPathwayMap>
                                     rows={pathwayMaps}
-                                    columns={mapColumns}
+                                    columns={withQuickSearchHeaders(mapColumns)}
                                     pageSizeOptions={[10, 25, 50, 100]}
                                     paginationModel={mapPagination}
                                     onPaginationModelChange={setMapPagination}

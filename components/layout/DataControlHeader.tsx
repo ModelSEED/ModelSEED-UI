@@ -44,14 +44,51 @@ import { useEffect, useMemo, useState, useRef, useCallback, type MouseEvent } fr
 
 /**
  * Module-level registry that maps DataGrid apiRef instances to the toolbar's
- * committed filter items + logic operator.  This lets ToolbarSearchField (a
- * sibling component with no prop access to ToolbarFilterEditor's refs) read
- * the current multi-filter state when building quick-filter updates — ensuring
- * that a search never accidentally wipes committed column filters.
+ * committed filter items + logic operator.  This lets sibling components with
+ * no shared prop tree (ToolbarSearchField, ToolbarFilterEditor, and the per-
+ * column QuickSearchHeader rendered inside renderHeader) read/update the same
+ * committed multi-filter state, so a search/quick-column filter never
+ * accidentally wipes other committed column filters.
+ *
+ * The registry has a tiny pub/sub so QuickSearchHeader can notify the toolbar
+ * editor when an external write happens (badge count + reopen state stay in sync).
  */
 const committedFilterRegistry = new WeakMap<
     object,
     { items: GridFilterItem[]; logicOperator: GridLogicOperator }
+>();
+const committedFilterListeners = new WeakMap<object, Set<() => void>>();
+
+function setCommittedFilter(
+    apiRef: object,
+    state: { items: GridFilterItem[]; logicOperator: GridLogicOperator },
+) {
+    committedFilterRegistry.set(apiRef, state);
+    const subs = committedFilterListeners.get(apiRef);
+    if (subs) subs.forEach((fn) => fn());
+}
+
+function subscribeCommittedFilter(apiRef: object, fn: () => void): () => void {
+    let subs = committedFilterListeners.get(apiRef);
+    if (!subs) {
+        subs = new Set();
+        committedFilterListeners.set(apiRef, subs);
+    }
+    subs.add(fn);
+    return () => {
+        subs?.delete(fn);
+    };
+}
+
+/**
+ * Maps DataGrid apiRef → the page's onApplyFilterModel callback.  Lets the
+ * per-column QuickSearchHeader push filter updates through the same path as
+ * the toolbar (so server-side pages re-fetch correctly) without prop-drilling
+ * the callback through every column's renderHeader.
+ */
+const onApplyFilterModelRegistry = new WeakMap<
+    object,
+    (model: GridFilterModel, details: { source?: 'toolbar' }) => void
 >();
 
 const NO_VALUE_OPERATORS = new Set(['isEmpty', 'isNotEmpty']);
@@ -420,7 +457,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
                 committedItemsRef.current = items;
                 committedLogicOperatorRef.current =
                     filterModel.logicOperator ?? GridLogicOperator.And;
-                committedFilterRegistry.set(apiRef.current, {
+                setCommittedFilter(apiRef.current, {
                     items,
                     logicOperator: committedLogicOperatorRef.current,
                 });
@@ -462,12 +499,42 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
         if (same) return;
         committedItemsRef.current = incoming;
         committedLogicOperatorRef.current = filterModel?.logicOperator ?? GridLogicOperator.And;
-        committedFilterRegistry.set(apiRef.current, {
+        setCommittedFilter(apiRef.current, {
             items: incoming,
             logicOperator: committedLogicOperatorRef.current,
         });
         forceUpdate((n) => n + 1);
     }, [filterModel, apiRef]);
+
+    /**
+     * Subscribe to committed-filter changes triggered by other components
+     * (notably QuickSearchHeader's per-column popover, which writes directly
+     * to the shared registry).  When that happens we mirror the change into
+     * our own ref so the "Filter & Columns (N)" badge and the reopen state
+     * stay in sync.  Skipping the sync if values are already identical avoids
+     * a re-render loop with the effect above.
+     */
+    useEffect(() => {
+        return subscribeCommittedFilter(apiRef.current, () => {
+            const state = committedFilterRegistry.get(apiRef.current);
+            if (!state) return;
+            const same =
+                state.items.length === committedItemsRef.current.length &&
+                state.items.every((it, i) => {
+                    const cur = committedItemsRef.current[i];
+                    return (
+                        it.field === cur.field &&
+                        it.operator === cur.operator &&
+                        JSON.stringify(it.value ?? null) === JSON.stringify(cur.value ?? null)
+                    );
+                }) &&
+                state.logicOperator === committedLogicOperatorRef.current;
+            if (same) return;
+            committedItemsRef.current = state.items;
+            committedLogicOperatorRef.current = state.logicOperator;
+            forceUpdate((n) => n + 1);
+        });
+    }, [apiRef]);
 
     const open = Boolean(anchorEl);
     const filterableColumns = allColumns.filter((column) => column.filterable !== false);
@@ -625,7 +692,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
         // Clear the committed state so searches don't carry stale filters after a Reset All.
         committedItemsRef.current = [];
         committedLogicOperatorRef.current = GridLogicOperator.And;
-        committedFilterRegistry.set(apiRef.current, { items: [], logicOperator: GridLogicOperator.And });
+        setCommittedFilter(apiRef.current, { items: [], logicOperator: GridLogicOperator.And });
         // Notify the page of the cleared state.
         const quickFilterValues = filterModel?.quickFilterValues ?? [];
         if (typeof onApplyFilterModel === 'function') {
@@ -654,7 +721,7 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
         // Persist all filled items in our refs AND the shared registry.
         committedItemsRef.current = filledItems;
         committedLogicOperatorRef.current = draftLogicOperator;
-        committedFilterRegistry.set(apiRef.current, { items: filledItems, logicOperator: draftLogicOperator });
+        setCommittedFilter(apiRef.current, { items: filledItems, logicOperator: draftLogicOperator });
 
         // Preserve the current quick-filter search term from the grid's internal model.
         const quickFilterValues = filterModel?.quickFilterValues ?? [];
@@ -943,6 +1010,307 @@ function ToolbarFilterEditor({ onApplyFilterModel }: { onApplyFilterModel?: (mod
     );
 }
 
+/* ────────────────────────────────────────────────────────────────
+ * Per-column quick search (magnifying-glass icon in each header)
+ * ──────────────────────────────────────────────────────────────── */
+
+/** Pick a sensible default operator for the column's type. */
+function quickSearchOperatorFor(type?: string): string {
+    if (type === 'number') return '=';
+    if (type === 'boolean') return 'is';
+    if (type === 'date' || type === 'dateTime') return 'is';
+    return 'contains';
+}
+
+/** Coerce the raw text value to the column's expected type. */
+function quickSearchValueFor(type: string | undefined, raw: string): GridFilterItem['value'] {
+    if (type === 'number') {
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : raw;
+    }
+    if (type === 'boolean') {
+        if (raw === 'true') return true;
+        if (raw === 'false') return false;
+    }
+    return raw;
+}
+
+/** Item id used to identify per-column quick-search items in the registry. */
+const quickColumnItemId = (field: string) => `quick-col-${field}`;
+
+function QuickSearchHeader({
+    field,
+    headerName,
+    columnType,
+}: {
+    field: string;
+    headerName: string;
+    columnType?: string;
+}) {
+    const apiRef = useGridApiContext();
+    const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [draft, setDraft] = useState<string | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Subscribe to committed-filter updates so the active-state highlight refreshes
+    // when other components (toolbar editor, etc.) change the registry.
+    const [, forceTick] = useState(0);
+    useEffect(() => {
+        return subscribeCommittedFilter(apiRef.current, () => forceTick((n) => n + 1));
+    }, [apiRef]);
+
+    const committed = committedFilterRegistry.get(apiRef.current);
+    const currentItem = committed?.items.find(
+        (it) => it.id === quickColumnItemId(field),
+    );
+    const committedValueString =
+        currentItem?.value == null ? '' : String(currentItem.value);
+    const inputValue = draft ?? committedValueString;
+    const isActive = committedValueString.trim().length > 0;
+
+    const applyQuickColumn = useCallback(
+        (text: string) => {
+            const trimmed = text.trim();
+            const existing = committedFilterRegistry.get(apiRef.current);
+            const otherItems = (existing?.items ?? []).filter(
+                (it) => it.id !== quickColumnItemId(field),
+            );
+            const newItem: GridFilterItem | null = trimmed
+                ? {
+                      id: quickColumnItemId(field),
+                      field,
+                      operator: quickSearchOperatorFor(columnType),
+                      value: quickSearchValueFor(columnType, trimmed),
+                  }
+                : null;
+            // Put the quick-column item FIRST so on Community Edition (which
+            // truncates filterModel.items to one entry) the per-column search
+            // is the active filter — that matches the "click icon, see filtered
+            // rows" expectation.
+            const items: GridFilterItem[] = newItem ? [newItem, ...otherItems] : otherItems;
+            const logicOperator = existing?.logicOperator ?? GridLogicOperator.And;
+
+            setCommittedFilter(apiRef.current, { items, logicOperator });
+
+            const quickFilterValues = gridFilterModel?.quickFilterValues ?? [];
+            const quickFilterLogicOperator =
+                gridFilterModel?.quickFilterLogicOperator ?? GridLogicOperator.And;
+            const fullModel: GridFilterModel = {
+                items,
+                logicOperator,
+                quickFilterValues,
+                quickFilterLogicOperator,
+            };
+
+            const onApply = onApplyFilterModelRegistry.get(apiRef.current);
+            if (typeof onApply === 'function') {
+                onApply(fullModel, { source: 'toolbar' });
+            }
+            apiRef.current.setFilterModel({
+                items: items.slice(0, 1),
+                logicOperator,
+                quickFilterValues,
+                quickFilterLogicOperator,
+            });
+        },
+        [apiRef, field, columnType, gridFilterModel],
+    );
+
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const text = e.target.value;
+            setDraft(text);
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = setTimeout(() => {
+                applyQuickColumn(text);
+                debounceRef.current = null;
+                setDraft(null);
+            }, 300);
+        },
+        [applyQuickColumn],
+    );
+
+    const handleClear = useCallback(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+        setDraft(null);
+        applyQuickColumn('');
+    }, [applyQuickColumn]);
+
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
+    const openPopover = useCallback(
+        (e: React.MouseEvent<HTMLButtonElement>) => {
+            // Stop propagation so the click doesn't trigger column sort/drag.
+            e.stopPropagation();
+            e.preventDefault();
+            setAnchorEl(e.currentTarget);
+        },
+        [],
+    );
+
+    const closePopover = useCallback(() => {
+        setAnchorEl(null);
+        setDraft(null);
+    }, []);
+
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                minWidth: 0,
+                width: '100%',
+            }}
+        >
+            <Box
+                component="span"
+                sx={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontWeight: 500,
+                }}
+            >
+                {headerName}
+            </Box>
+            <IconButton
+                size="small"
+                onClick={openPopover}
+                onMouseDown={(e) => e.stopPropagation()}
+                aria-label={`Quick filter for ${headerName}`}
+                sx={{
+                    p: 0.25,
+                    flex: '0 0 auto',
+                    color: isActive ? 'primary.main' : 'text.secondary',
+                    '&:hover': { color: 'primary.main' },
+                }}
+            >
+                <SearchIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+            <Popover
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                onClose={closePopover}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                slotProps={{ paper: { onClick: (e) => e.stopPropagation() } }}
+            >
+                <Box sx={{ p: 1, width: 260 }}>
+                    <TextField
+                        autoFocus
+                        size="small"
+                        fullWidth
+                        value={inputValue}
+                        onChange={handleChange}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                                closePopover();
+                            }
+                            if (e.key === 'Enter') {
+                                if (debounceRef.current) {
+                                    clearTimeout(debounceRef.current);
+                                    debounceRef.current = null;
+                                    applyQuickColumn(inputValue);
+                                    setDraft(null);
+                                }
+                                setAnchorEl(null);
+                            }
+                        }}
+                        placeholder={`Filter ${headerName}…`}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon fontSize="small" />
+                                </InputAdornment>
+                            ),
+                            endAdornment: inputValue ? (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        size="small"
+                                        aria-label="Clear column filter"
+                                        onClick={handleClear}
+                                        edge="end"
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : undefined,
+                        }}
+                    />
+                </Box>
+            </Popover>
+        </Box>
+    );
+}
+
+/**
+ * Wrap a column array so each filterable column gets an always-visible
+ * magnifying-glass icon in its header that opens a per-column quick filter.
+ *
+ * - Skips columns where `filterable === false`, internal `__`-prefixed columns,
+ *   and columns that already define a custom `renderHeader` (caller wins).
+ * - The wrapped columns work with both client-side and server-side pages
+ *   because filter changes flow through the same committed-filter registry
+ *   the toolbar uses, and call the page's `onApplyFilterModel` (registered
+ *   by DataControlHeader) when present.
+ */
+export function withQuickSearchHeaders<R extends Record<string, unknown> = Record<string, unknown>>(
+    columns: GridColDef<R>[],
+): GridColDef<R>[] {
+    return columns.map((col) => {
+        if (col.filterable === false) return col;
+        if (col.field.startsWith('__')) return col;
+        if (col.renderHeader) return col;
+        const headerName = String(col.headerName ?? col.field);
+        const columnType = col.type;
+        return {
+            ...col,
+            renderHeader: () => (
+                <QuickSearchHeader
+                    field={col.field}
+                    headerName={headerName}
+                    columnType={columnType}
+                />
+            ),
+        };
+    });
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * DataControlHeader (toolbar)
+ * ──────────────────────────────────────────────────────────────── */
+
+/** Stash the page's onApplyFilterModel in the apiRef-keyed registry so
+ *  QuickSearchHeader can call it without prop-drilling. */
+function ApplyFilterRegistration({
+    onApplyFilterModel,
+}: {
+    onApplyFilterModel?: (model: GridFilterModel, details: object) => void;
+}) {
+    const apiRef = useGridApiContext();
+    useEffect(() => {
+        const api = apiRef.current;
+        if (onApplyFilterModel) {
+            onApplyFilterModelRegistry.set(api, onApplyFilterModel as never);
+        } else {
+            onApplyFilterModelRegistry.delete(api);
+        }
+        return () => {
+            onApplyFilterModelRegistry.delete(api);
+        };
+    }, [apiRef, onApplyFilterModel]);
+    return null;
+}
+
 /**
  * Single data control bar for tables: white search box (with icon),
  * merged Filters + Columns panel, and pagination.
@@ -964,6 +1332,7 @@ export default function DataControlHeader(props: {
                 flexWrap: 'wrap',
             }}
         >
+            <ApplyFilterRegistration onApplyFilterModel={onApplyFilterModel} />
             <Box
                 sx={{
                     display: 'flex',

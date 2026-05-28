@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { GridHighlightText } from '@/components/GridHighlightText';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import Chip from '@mui/material/Chip';
 
@@ -252,7 +252,7 @@ export default function CompoundsPage() {
 
             <DataGrid<Compound>
                 rows={data?.docs ?? []}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
