@@ -35,8 +35,11 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Tooltip from '@mui/material/Tooltip';
+import Badge from '@mui/material/Badge';
 
 import SearchIcon from '@mui/icons-material/Search';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 import CloseIcon from '@mui/icons-material/Close';
 import { usePathname } from 'next/navigation';
@@ -1058,12 +1061,39 @@ function QuickSearchHeader({
         });
     }, [apiRef]);
 
-    const currentItem = committed?.items.find(
+    // Quick-column-specific item (id-based) — used for seeding the popover
+    // input when the user re-opens the icon, so editing extends the value
+    // they previously typed.
+    const quickItem = committed?.items.find(
         (it) => it.id === quickColumnItemId(field),
     );
-    const committedValueString =
-        currentItem?.value == null ? '' : String(currentItem.value);
-    const isActive = committedValueString.trim().length > 0;
+    // ANY filter on this column (field-based) — used for the active-state
+    // visual indicator.  This covers both quick-search filters AND filters
+    // added via the toolbar's Filter & Columns editor, so the magnifying-
+    // glass icon reflects the column's true filtered state regardless of
+    // how the filter was added.
+    const fieldFilterItems = (committed?.items ?? []).filter((it) => {
+        if (it.field !== field) return false;
+        if (!it.operator) return false;
+        if (NO_VALUE_OPERATORS.has(String(it.operator))) return true;
+        if (Array.isArray(it.value)) return it.value.length > 0;
+        return String(it.value ?? '').trim().length > 0;
+    });
+    const isActive = fieldFilterItems.length > 0;
+    const quickValueString =
+        quickItem?.value == null ? '' : String(quickItem.value);
+    /** Summary string shown in the tooltip + helper text when the column is filtered. */
+    const activeSummary = fieldFilterItems
+        .map((it) => {
+            const op = String(it.operator ?? '');
+            const valStr = Array.isArray(it.value)
+                ? it.value.map(String).join(', ')
+                : it.value == null
+                    ? ''
+                    : String(it.value);
+            return valStr ? `${op} "${valStr}"` : op;
+        })
+        .join(' AND ');
 
     const applyQuickColumn = useCallback(
         (text: string) => {
@@ -1148,13 +1178,17 @@ function QuickSearchHeader({
             // Stop propagation so the click doesn't trigger column sort/drag.
             e.stopPropagation();
             e.preventDefault();
-            // Seed the draft with whatever value is currently applied so the
-            // user can extend or replace it instead of starting from blank.
+            // Seed the draft with whatever the quick-search filter is currently
+            // applied (matched by quick-col id) so the user can extend or
+            // replace it instead of starting from blank.  Toolbar-added filters
+            // are intentionally NOT pulled in — they may use operators the
+            // quick search doesn't expose (e.g. isAnyOf) and editing them here
+            // would silently lose that fidelity.
             const existing = committedFilterRegistry.get(apiRef.current);
-            const existingItem = existing?.items.find(
+            const existingQuickItem = existing?.items.find(
                 (it) => it.id === quickColumnItemId(field),
             );
-            setDraft(existingItem?.value == null ? '' : String(existingItem.value));
+            setDraft(existingQuickItem?.value == null ? '' : String(existingQuickItem.value));
             setAnchorEl(e.currentTarget);
         },
         [apiRef, field],
@@ -1189,20 +1223,59 @@ function QuickSearchHeader({
             >
                 {headerName}
             </Box>
-            <IconButton
-                size="small"
-                onClick={openPopover}
-                onMouseDown={(e) => e.stopPropagation()}
-                aria-label={`Quick filter for ${headerName}`}
-                sx={{
-                    p: 0.25,
-                    flex: '0 0 auto',
-                    color: isActive ? 'primary.main' : 'text.secondary',
-                    '&:hover': { color: 'primary.main' },
-                }}
+            <Tooltip
+                arrow
+                title={
+                    isActive
+                        ? `Filtered: ${activeSummary} (click to edit, Enter to apply)`
+                        : `Quick filter ${headerName}`
+                }
             >
-                <SearchIcon sx={{ fontSize: 16 }} />
-            </IconButton>
+                <Badge
+                    variant="dot"
+                    color="primary"
+                    overlap="circular"
+                    invisible={!isActive}
+                    sx={{
+                        flex: '0 0 auto',
+                        '& .MuiBadge-badge': {
+                            // Small but visible dot at the corner of the icon
+                            // so even at a glance the user sees which columns
+                            // are filtered.
+                            minWidth: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            border: '1px solid #fff',
+                        },
+                    }}
+                >
+                    <IconButton
+                        size="small"
+                        onClick={openPopover}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        aria-label={
+                            isActive
+                                ? `Edit filter for ${headerName} (currently: ${activeSummary})`
+                                : `Quick filter for ${headerName}`
+                        }
+                        sx={{
+                            p: 0.25,
+                            color: isActive ? 'common.white' : 'text.secondary',
+                            bgcolor: isActive ? 'primary.main' : 'transparent',
+                            borderRadius: '50%',
+                            transition: 'background-color 120ms, color 120ms',
+                            '&:hover': {
+                                color: isActive ? 'common.white' : 'primary.main',
+                                bgcolor: isActive ? 'primary.dark' : 'action.hover',
+                            },
+                        }}
+                    >
+                        {isActive
+                            ? <FilterAltIcon sx={{ fontSize: 16 }} />
+                            : <SearchIcon sx={{ fontSize: 16 }} />}
+                    </IconButton>
+                </Badge>
+            </Tooltip>
             <Popover
                 open={Boolean(anchorEl)}
                 anchorEl={anchorEl}
@@ -1232,7 +1305,7 @@ function QuickSearchHeader({
                         placeholder={`Filter ${headerName}…  (Enter to apply)`}
                         helperText={
                             isActive
-                                ? `Applied: contains "${committedValueString}"`
+                                ? `Applied: ${activeSummary}`
                                 : 'Press Enter to apply'
                         }
                         InputProps={{
@@ -1241,7 +1314,7 @@ function QuickSearchHeader({
                                     <SearchIcon fontSize="small" />
                                 </InputAdornment>
                             ),
-                            endAdornment: draft || isActive ? (
+                            endAdornment: draft || quickValueString ? (
                                 <InputAdornment position="end">
                                     <IconButton
                                         size="small"
