@@ -198,10 +198,22 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
     const pathname = usePathname();
     const gridFilterModel = useGridSelector(apiRef, gridFilterModelSelector);
     const committedQuick = (gridFilterModel?.quickFilterValues ?? []).join(' ').trim();
-    /** When non-null, the user is editing; otherwise show the grid's committed quick filter. */
-    const [draftQuick, setDraftQuick] = useState<string | null>(null);
-    const displayValue = draftQuick ?? committedQuick;
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    /**
+     * Draft text the user has typed but NOT yet committed.  We deliberately do
+     * NOT auto-apply on every keystroke — debounced auto-apply races with the
+     * multi-column-filter state machine on pages that re-render frequently
+     * (e.g. my-models polls tracked-job status every 15s), and the resulting
+     * chain of state updates can drop subsequent keystrokes when multiple
+     * per-column quick filters are already committed.  Mirror the per-column
+     * QuickSearchHeader contract: type freely in local state, Enter commits.
+     */
+    const [draft, setDraft] = useState<string>(committedQuick);
+    /**
+     * Tracks the last committed value we observed so we can detect EXTERNAL
+     * changes (e.g. Reset All in the Filter & Columns popover) and re-sync
+     * the draft without clobbering an in-flight edit.
+     */
+    const prevCommittedRef = useRef<string>(committedQuick);
 
     const placeholder = useMemo(() => {
         if (!pathname) return 'Find in page...';
@@ -275,36 +287,40 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
 
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            const term = e.target.value;
-            setDraftQuick(term);
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => {
-                applySearch(term);
-                debounceRef.current = null;
-                setDraftQuick(null);
-            }, 300);
+            setDraft(e.target.value);
         },
-        [applySearch],
+        [],
     );
 
+    const handleCommit = useCallback(() => {
+        applySearch(draft);
+    }, [applySearch, draft]);
+
     const handleClear = useCallback(() => {
-        setDraftQuick(null);
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = null;
+        setDraft('');
         applySearch('');
     }, [applySearch]);
 
-    // Cleanup pending debounce only. Avoid grid state updates during unmount.
+    /**
+     * Re-sync the draft when the committed value changes from OUTSIDE this
+     * input (e.g. Reset All, programmatic filter change).  We only overwrite
+     * the draft when the user hasn't diverged from the previously committed
+     * value, otherwise we'd silently discard their in-progress typing.
+     */
     useEffect(() => {
-        return () => {
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = null;
-        };
-    }, []);
+        if (committedQuick !== prevCommittedRef.current) {
+            if (draft === prevCommittedRef.current) {
+                setDraft(committedQuick);
+            }
+            prevCommittedRef.current = committedQuick;
+        }
+    }, [committedQuick, draft]);
 
-    // Apply CSS Custom Highlight API to highlight matches in the grid
+    // Apply CSS Custom Highlight API to highlight matches in the grid.  Driven
+    // by the COMMITTED term (not the draft) so highlights appear only after the
+    // user presses Enter — matching the "apply on Enter" contract.
     useEffect(() => {
-        const term = displayValue.trim();
+        const term = committedQuick.trim();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!term || typeof CSS === 'undefined' || !('highlights' in (CSS as any))) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -366,7 +382,9 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
                 ((CSS as any).highlights as any).delete('search-results');
             }
         };
-    }, [displayValue, apiRef]);
+    }, [committedQuick, apiRef]);
+
+    const hasUncommittedChange = draft.trim() !== committedQuick;
 
     return (
         <>
@@ -378,21 +396,36 @@ function ToolbarSearchField({ onApplyFilterModel }: { onApplyFilterModel?: (mode
                 }
             `}} />
             <TextField
-                value={displayValue}
+                value={draft}
                 onChange={handleChange}
                 onKeyDown={(e) => {
-                    if (e.key === 'Escape') handleClear();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCommit();
+                    } else if (e.key === 'Escape') {
+                        // Escape: if there's an uncommitted edit, revert to
+                        // the committed value; if the input already matches
+                        // the committed value, clear the search entirely.
+                        if (hasUncommittedChange) {
+                            setDraft(committedQuick);
+                        } else {
+                            handleClear();
+                        }
+                    }
                 }}
                 size="small"
                 fullWidth
                 placeholder={placeholder}
+                inputProps={{
+                    title: hasUncommittedChange ? 'Press Enter to apply' : undefined,
+                }}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
                             <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
                         </InputAdornment>
                     ),
-                    endAdornment: displayValue ? (
+                    endAdornment: draft || committedQuick ? (
                         <InputAdornment position="end">
                             <IconButton
                                 size="small"

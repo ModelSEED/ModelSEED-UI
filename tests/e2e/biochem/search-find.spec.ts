@@ -6,6 +6,9 @@ import { test, expect } from '@playwright/test';
  * The search bar sets DataGrid quickFilterValues → triggers server-side re-fetch
  * → only matching rows are returned.  GridHighlightText renders <mark> highlights
  * inside each cell that contains the matching text.
+ *
+ * The search bar commits on Enter (matches the per-column quick filter contract);
+ * `fill` alone leaves the text in the draft state and does NOT trigger filtering.
  */
 test.describe('Find in Page Search', () => {
     test.beforeEach(async ({ page }) => {
@@ -36,7 +39,7 @@ test.describe('Find in Page Search', () => {
 
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
-        // Debounce (300ms) + server round-trip
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         const filteredRows = await page.locator('[role="row"]').count();
@@ -49,6 +52,7 @@ test.describe('Find in Page Search', () => {
     test('matching text is highlighted in cells', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         // GridHighlightText renders <mark> inside cells
@@ -60,6 +64,7 @@ test.describe('Find in Page Search', () => {
     test('highlighted mark text matches the search term (case-insensitive)', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         const firstMark = page.locator('[role="gridcell"] mark').first();
@@ -71,6 +76,7 @@ test.describe('Find in Page Search', () => {
     test('clear button removes filter and restores all rows', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         const filteredRows = await page.locator('[role="row"]').count();
@@ -93,8 +99,10 @@ test.describe('Find in Page Search', () => {
     test('Escape key clears search', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
+        // Input already equals committed term → Escape clears.
         await searchBox.press('Escape');
         await page.waitForTimeout(1500);
 
@@ -105,6 +113,7 @@ test.describe('Find in Page Search', () => {
     test('search for "phos" returns rows and highlights across pagination', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('phos');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         // Should find rows (phosphate reactions exist in ModelSEED)
@@ -120,6 +129,7 @@ test.describe('Find in Page Search', () => {
     test('no-match search returns empty grid gracefully', async ({ page }) => {
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('xyzxyzxyz_no_match_9999');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         // Only header row should remain (no data rows)
@@ -134,6 +144,7 @@ test.describe('Find in Page Search', () => {
         // Apply a search first
         const searchBox = page.locator('input[placeholder*="Find in"]').first();
         await searchBox.fill('atp');
+        await searchBox.press('Enter');
         await page.waitForTimeout(1500);
 
         // Filter panel should still open

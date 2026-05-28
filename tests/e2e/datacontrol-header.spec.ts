@@ -21,6 +21,9 @@ async function searchWithHeader(page: Page, term: string): Promise<void> {
   const searchInput = page.locator('input[placeholder*="Find in"]').first();
   await expect(searchInput).toBeVisible({ timeout: 10000 });
   await searchInput.fill(term);
+  // Global search now commits on Enter (matches the per-column quick filter
+  // contract) — see ToolbarSearchField in components/layout/DataControlHeader.tsx.
+  await searchInput.press('Enter');
   await page.waitForTimeout(1400);
 }
 
