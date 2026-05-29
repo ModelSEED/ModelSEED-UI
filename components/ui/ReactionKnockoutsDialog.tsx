@@ -12,7 +12,8 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
+import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 import Link from 'next/link';
 
 interface ModelReaction {
@@ -61,11 +62,18 @@ export default function ReactionKnockoutsDialog({
                 ),
             },
             { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
-            { field: 'direction', headerName: 'Direction', width: 100 },
+            { field: 'direction', headerName: 'Direction', width: 120 },
             { field: 'equation', headerName: 'Equation', flex: 1.5, minWidth: 300 },
         ],
         [],
     );
+
+    const {
+        filterModel,
+        filteredRows,
+        handleFilterModelChange,
+        handleToolbarApplyFilterModel,
+    } = useToolbarGridFiltering<ModelReaction>({ rows: reactions });
 
     const handleSave = () => {
         const selectedIds =
@@ -152,8 +160,8 @@ export default function ReactionKnockoutsDialog({
                 )}
 
                 <DataGrid
-                    rows={reactions}
-                    columns={columns}
+                    rows={filteredRows}
+                    columns={withQuickSearchHeaders(columns)}
                     getRowId={(row) => row.id}
                     checkboxSelection
                     rowSelectionModel={selectionModel}
@@ -162,9 +170,17 @@ export default function ReactionKnockoutsDialog({
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25 } },
                     }}
+                    filterModel={filterModel}
+                    filterMode="server"
+                    onFilterModelChange={handleFilterModelChange}
                     showToolbar
                     slots={{ toolbar: DataControlHeader }}
-                    slotProps={{ toolbar: { showQuickFilter: true } }}
+                    slotProps={{
+                        toolbar: {
+                            showQuickFilter: true,
+                            onApplyFilterModel: handleToolbarApplyFilterModel,
+                        },
+                    }}
                     hideFooter
                     autoHeight
                     disableRowSelectionOnClick={false}

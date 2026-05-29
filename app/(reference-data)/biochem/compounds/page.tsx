@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { getCompounds, type Compound, type SolrQueryOpts, EXTERNAL_DBS } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { GridHighlightText } from '@/components/GridHighlightText';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import Chip from '@mui/material/Chip';
 
@@ -111,11 +111,11 @@ const columns: GridColDef<Compound>[] = [
     {
         field: 'formula',
         headerName: 'Formula',
-        width: 140,
+        width: 160,
         renderCell: (params) => formatFormula(params.value)
     },
     { field: 'mass', headerName: 'Mass', width: 100, type: 'number' },
-    { field: 'charge', headerName: 'Charge', width: 80, type: 'number' },
+    { field: 'charge', headerName: 'Charge', width: 120, type: 'number' },
     {
         field: 'synonyms',
         headerName: 'Synonyms',
@@ -252,7 +252,7 @@ export default function CompoundsPage() {
 
             <DataGrid<Compound>
                 rows={data?.docs ?? []}
-                columns={columns}
+                columns={withQuickSearchHeaders(columns)}
                 rowCount={data?.numFound ?? 0}
                 loading={isFetching}
                 pageSizeOptions={[10, 25, 50, 100]}
@@ -271,7 +271,6 @@ export default function CompoundsPage() {
                 getRowHeight={() => 'auto'}
                 disableRowSelectionOnClick
                 hideFooter
-                disableColumnMenu
                 sx={{
                     border: '1px solid #e0e0e0',
                     '& .MuiDataGrid-cell': {

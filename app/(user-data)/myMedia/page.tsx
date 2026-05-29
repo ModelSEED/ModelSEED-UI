@@ -18,7 +18,7 @@ import { USE_MODELSEED_API } from '@/lib/api/config';
 import { exportMediaFromApi, listMyMediaFromApi } from '@/lib/api/modelseed';
 import { workspaceDelete } from '@/lib/api/workspace';
 import { useAuth } from '@/components/auth/AuthProvider';
-import DataControlHeader from '@/components/layout/DataControlHeader';
+import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import { parseWorkspaceDate } from '@/lib/utils/date';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
@@ -268,7 +268,7 @@ export default function MyMediaPage() {
                 ) : (
                     <DataGrid<MyMediaItem>
                         rows={filteredRows}
-                        columns={columns}
+                        columns={withQuickSearchHeaders(columns)}
                         loading={isLoading}
                         pageSizeOptions={[10, 25, 50, 100]}
                         paginationModel={paginationModel}
@@ -287,7 +287,6 @@ export default function MyMediaPage() {
                             },
                         }}
                         hideFooter
-                        disableColumnMenu
                         getRowId={(row) => row.id}
                         disableRowSelectionOnClick
                         onRowClick={(params) => goToMediaPath(params.row.path)}

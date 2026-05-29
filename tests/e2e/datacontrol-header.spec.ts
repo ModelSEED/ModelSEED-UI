@@ -21,6 +21,9 @@ async function searchWithHeader(page: Page, term: string): Promise<void> {
   const searchInput = page.locator('input[placeholder*="Find in"]').first();
   await expect(searchInput).toBeVisible({ timeout: 10000 });
   await searchInput.fill(term);
+  // Global search now commits on Enter (matches the per-column quick filter
+  // contract) — see ToolbarSearchField in components/layout/DataControlHeader.tsx.
+  await searchInput.press('Enter');
   await page.waitForTimeout(1400);
 }
 
@@ -150,6 +153,58 @@ async function activeFilterCount(page: Page): Promise<number> {
   return m ? parseInt(m[1], 10) : 0;
 }
 
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function quickFilterButton(page: Page, headerName: string): Locator {
+  const escaped = escapeRegex(headerName);
+  return page.getByRole('button', {
+    name: new RegExp(`(Quick filter for|Edit filter for) ${escaped}`),
+  }).first();
+}
+
+async function openQuickFilterPopover(page: Page, headerName: string): Promise<Locator> {
+  const button = quickFilterButton(page, headerName);
+  await expect(button).toBeVisible({ timeout: 10000 });
+  await button.click();
+  const input = page.locator(`input[placeholder^="Filter ${headerName}"]`).first();
+  await expect(input).toBeVisible({ timeout: 10000 });
+  return input;
+}
+
+async function applyQuickColumnFilter(page: Page, headerName: string, value: string): Promise<void> {
+  const input = await openQuickFilterPopover(page, headerName);
+  await input.fill(value);
+  await input.press('Enter');
+  await expect(input).toBeHidden({ timeout: 10000 });
+  await waitForGridStable(page);
+}
+
+async function readCellValue(page: Page, rowIndex: number, field: string): Promise<string> {
+  const row = page.locator('[role="row"]').nth(rowIndex);
+  const cell = row.locator(`[role="gridcell"][data-field="${field}"]`).first();
+  const text = await cell.innerText();
+  return text.trim();
+}
+
+function pickSearchToken(text: string): string {
+  const cleaned = text.replace(/[^a-zA-Z0-9]+/g, ' ').trim();
+  if (!cleaned) return 'a';
+  const parts = cleaned.split(/\s+/).filter(Boolean);
+  const long = parts.find((part) => part.length >= 3);
+  if (long) return long.slice(0, 6);
+  return cleaned.slice(0, 4);
+}
+
+async function currentPageStart(page: Page): Promise<number> {
+  const label = page.locator('.MuiTablePagination-displayedRows').first();
+  await expect(label).toBeVisible({ timeout: 10000 });
+  const text = (await label.innerText()).trim();
+  const match = text.match(/^(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 test.describe('DataControlHeader - biochem operator matrix', () => {
@@ -271,6 +326,87 @@ test.describe('DataControlHeader - biochem operator matrix', () => {
     const orCount = await dataRows(page).count();
     expect(orCount).toBeGreaterThanOrEqual(andCount);
     expect(await activeFilterCount(page)).toBe(2);
+  });
+
+  test('reactions: quick column filter applies on Enter and syncs toolbar', async ({ page }) => {
+    await page.goto('/biochem/reactions');
+    await waitForGridData(page);
+
+    const reactionId = await readIdentifierFromFirstDataRow(page, 'rxn');
+
+    const quickInput = await openQuickFilterPopover(page, 'ID');
+    await quickInput.fill(reactionId);
+    await page.waitForTimeout(500);
+    expect(await activeFilterCount(page)).toBe(0);
+    await expect(page.getByRole('button', { name: /Quick filter for ID/i })).toBeVisible();
+
+    await quickInput.press('Enter');
+    await waitForGridStable(page);
+    expect(await activeFilterCount(page)).toBe(1);
+    await expect(page.getByRole('button', { name: /Edit filter for ID/i })).toBeVisible();
+
+    await openFilterDialog(page);
+    const valueInputs = page.getByLabel('Value');
+    await expect(valueInputs.first()).toBeVisible({ timeout: 10000 });
+    await expect(valueInputs.first()).toHaveValue(reactionId);
+    await page.locator('button:has-text("Cancel")').first().click();
+
+    await searchWithHeader(page, 'atp');
+    expect(await activeFilterCount(page)).toBe(1);
+    await expect(page.getByRole('button', { name: /Edit filter for ID/i })).toBeVisible();
+  });
+
+  test('reactions: quick column filters stack, remain in editor, and reset pagination', async ({ page }) => {
+    await page.goto('/biochem/reactions');
+    await waitForGridData(page);
+
+    const nextPageButton = page.locator('button[aria-label="Go to next page"]');
+    const pageStartBefore = await currentPageStart(page);
+    if (await nextPageButton.isEnabled()) {
+      await nextPageButton.click();
+      await waitForGridStable(page);
+    }
+    const pageStartAfter = await currentPageStart(page);
+    if (await nextPageButton.isEnabled()) {
+      expect(pageStartAfter).toBeGreaterThan(pageStartBefore);
+    }
+
+    const reactionId = await readCellValue(page, 1, 'id');
+    const reactionName = await readCellValue(page, 1, 'name');
+    const nameToken = pickSearchToken(reactionName);
+
+    await applyQuickColumnFilter(page, 'ID', reactionId);
+    const pageStartFiltered = await currentPageStart(page);
+    expect(pageStartFiltered).toBe(1);
+    expect(await activeFilterCount(page)).toBe(1);
+
+    const rowsAfterFirst = await dataRows(page).count();
+
+    await applyQuickColumnFilter(page, 'Name', nameToken);
+    expect(await activeFilterCount(page)).toBe(2);
+    const rowsAfterSecond = await dataRows(page).count();
+    expect(rowsAfterSecond).toBeLessThanOrEqual(rowsAfterFirst);
+
+    await openFilterDialog(page);
+    const columnCombos = page.getByLabel('Column');
+    expect(await columnCombos.count()).toBe(2);
+    const valueInputs = page.getByLabel('Value');
+    const valueTexts = [
+      (await valueInputs.nth(0).inputValue()).trim(),
+      (await valueInputs.nth(1).inputValue()).trim(),
+    ];
+    expect(valueTexts).toContain(reactionId);
+    expect(valueTexts).toContain(nameToken);
+    await page.locator('button:has-text("Cancel")').first().click();
+
+    await openFilterDialog(page);
+    await page.locator('button:has-text("Add Filter")').first().click();
+    await fillFilterRow(page, 2, { column: 'Status', operator: 'is not empty' });
+    await page.locator('button:has-text("Save")').first().click();
+    await waitForGridStable(page);
+
+    expect(await activeFilterCount(page)).toBe(3);
+    await expect(page.getByRole('button', { name: /Edit filter for Status/i })).toBeVisible();
   });
 });
 
