@@ -15,8 +15,17 @@ describe('Biochem API Integration Tests', () => {
 
   beforeAll(async () => {
     biochemApi = await loadBiochemApi();
+    // Race the live probe against an internal timeout so the catch path runs
+    // (marking isApiAvailable = false) before the vitest hookTimeout aborts the
+    // hook itself. Otherwise CI fails on slow networks even though the suite is
+    // designed to skip gracefully when the API is unreachable.
     try {
-      const res = await biochemApi.getReactions({ limit: 1 });
+      const res = await Promise.race([
+        biochemApi.getReactions({ limit: 1 }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Biochem API probe timed out after 7s')), 7000),
+        ),
+      ]);
       expect(res.docs).toBeDefined();
     } catch (e: unknown) {
       console.warn('Biochem API is unavailable, skipping tests:', getErrorMessage(e));
