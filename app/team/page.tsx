@@ -42,13 +42,28 @@ export default function TeamPage() {
 
                     {category.members.map((member) => (
                         <div key={member.name} className={styles.teamMember}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={member.imageSrc}
-                                alt={member.name}
-                                width={member.imageWidth ?? undefined}
-                                height={member.imageHeight ?? undefined}
-                            />
+                            {member.imageSrc ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                    src={member.imageSrc}
+                                    alt={member.name}
+                                    width={member.imageWidth ?? undefined}
+                                    height={member.imageHeight ?? undefined}
+                                />
+                            ) : (
+                                <div
+                                    className={styles.avatarPlaceholder}
+                                    aria-label={`${member.name} (photo pending)`}
+                                >
+                                    {member.name
+                                        .split(' ')
+                                        .map((part) => part[0])
+                                        .filter(Boolean)
+                                        .slice(0, 2)
+                                        .join('')
+                                        .toUpperCase()}
+                                </div>
+                            )}
                             <div>
                                 <h4>
                                     {member.url ? (

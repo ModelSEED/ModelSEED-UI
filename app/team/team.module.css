@@ -21,6 +21,21 @@
     object-fit: cover;
 }
 
+.avatarPlaceholder {
+    flex-shrink: 0;
+    width: 160px;
+    height: 160px;
+    border-radius: 4px;
+    background: #e6e8eb;
+    color: #4a5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
 .teamMember h4 {
     margin: 0 0 2px 0;
 }

@@ -24,8 +24,8 @@ export interface TeamMember {
     affiliation: string;
     /** Institution website URL */
     affiliationUrl?: string;
-    /** Path to team member image (relative to /public) */
-    imageSrc: string;
+    /** Path to team member image (relative to /public). Optional — page renders an initials placeholder when absent. */
+    imageSrc?: string;
     /** Image width in pixels (for consistent layout) */
     imageWidth?: number;
     /** Image height in pixels (for consistent layout) */
@@ -201,6 +201,18 @@ export const TEAM_DATA: TeamCategory[] = [
                 affiliation: 'Argonne National Laboratory',
                 imageSrc: '/img/team/pam.jpeg',
                 imageHeight: 160,
+            },
+        ],
+    },
+    {
+        title: 'Research Associates',
+        level: 'h3',
+        members: [
+            {
+                name: 'Vibhav Setlur',
+                url: 'https://github.com/VibhavSetlur',
+                role: 'Research Associate',
+                affiliation: 'Argonne National Laboratory',
             },
         ],
     },
