@@ -53,6 +53,7 @@ import {
     type TrackedJob,
 } from '@/lib/api/jobTracker';
 import { parseWorkspaceDate } from '@/lib/utils/date';
+import { formatJobError } from '@/lib/utils/jobErrors';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
@@ -2042,10 +2043,26 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         setActionLoading(kind);
         setActionMessage(null);
         const selectedMedia = media || defaultMedia;
+        const modelRef = workspaceCandidates[0];
         try {
+            // Pre-flight: confirm the model object actually exists in the workspace
+            // before enqueuing the celery job. Without this, users who navigate
+            // (or follow a stale link) to a model ref whose backing object is
+            // missing trigger a backend WorkspaceError per submission — the symptom
+            // surfacing in Flower as `_ERROR_Object not found!_ERROR_`. Catching
+            // it here avoids the wasted job and shows actionable wording.
+            try {
+                await workspaceGet([modelRef]);
+            } catch (probeErr) {
+                throw new Error(
+                    formatJobError(probeErr, modelRef) ??
+                    `No model found at '${modelRef}'.`,
+                );
+            }
+
             // Build FBA payload with optional advanced options (reaction knockouts)
             const fbaPayload: Record<string, unknown> = {
-                model: workspaceCandidates[0],
+                model: modelRef,
                 media: selectedMedia,
                 media_supplement: [],
             };
@@ -2060,7 +2077,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 kind === 'fba'
                     ? await submitFbaJobFromApi(fbaPayload)
                     : await submitGapfillJobFromApi({
-                        model: workspaceCandidates[0],
+                        model: modelRef,
                         template_type: 'gn',
                         media: selectedMedia,
                     });
@@ -2083,8 +2100,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     : `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted.`,
             );
         } catch (err) {
-            const message = err instanceof Error ? err.message : `Failed to submit ${kind} job`;
-            setActionMessage(message);
+            const raw = err instanceof Error ? err.message : `Failed to submit ${kind} job`;
+            setActionMessage(formatJobError(raw, modelRef) ?? raw);
         } finally {
             setActionLoading(null);
         }
