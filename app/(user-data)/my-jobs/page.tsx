@@ -22,6 +22,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 
 import { getJobsFromApi } from '@/lib/api/modelseed';
 import { listTrackedJobs, TrackedJob } from '@/lib/api/jobTracker';
+import { formatJobError } from '@/lib/utils/jobErrors';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
@@ -135,8 +136,13 @@ function mergeApiAndTrackedJobs(
             statusHistory.set(id, { status, timestamp: now, sameCount: 1 });
         }
 
-        const errorMsg = job.error ? String(job.error) : undefined;
         const outputPath = args?.output_path ? String(args.output_path) : undefined;
+        // Some legacy backend job records still carry the raw
+        // `_ERROR_Object not found!_ERROR_` string. Translate to actionable
+        // wording, substituting the job's own model ref when present so the
+        // tooltip points users at the path their reconstruct never produced.
+        const modelArg = typeof args?.model === 'string' ? String(args.model) : undefined;
+        const errorMsg = formatJobError(job.error, modelArg);
         const app = String(params?.command ?? job.app ?? job.type ?? 'Unknown');
 
         rows.push({
