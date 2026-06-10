@@ -53,7 +53,8 @@ import {
     type TrackedJob,
 } from '@/lib/api/jobTracker';
 import { parseWorkspaceDate } from '@/lib/utils/date';
-import { formatJobError } from '@/lib/utils/jobErrors';
+import { formatJobError, presentJobSubmitError } from '@/lib/utils/jobErrors';
+import { useTokenExpiredRedirect } from '@/lib/hooks/useTokenExpiredRedirect';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
@@ -1620,6 +1621,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
     const [actionLoading, setActionLoading] = useState<'fba' | 'gapfill' | null>(null);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [actionError, setActionError] = useState<ReturnType<typeof presentJobSubmitError> | null>(null);
+    const maybeRedirectOnTokenExpiry = useTokenExpiredRedirect();
     const [editReactionId, setEditReactionId] = useState('');
     const [editSummary, setEditSummary] = useState('');
     const [editSubmitting, setEditSubmitting] = useState(false);
@@ -2042,6 +2045,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string, advancedOptions?: FbaAdvancedOptions) => {
         setActionLoading(kind);
         setActionMessage(null);
+        setActionError(null);
         const selectedMedia = media || defaultMedia;
         const modelRef = workspaceCandidates[0];
         try {
@@ -2100,8 +2104,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     : `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted.`,
             );
         } catch (err) {
-            const raw = err instanceof Error ? err.message : `Failed to submit ${kind} job`;
-            setActionMessage(formatJobError(raw, modelRef) ?? raw);
+            const presented = presentJobSubmitError(err, { modelRef });
+            if (maybeRedirectOnTokenExpiry(presented)) return;
+            setActionError(presented);
         } finally {
             setActionLoading(null);
         }
@@ -2217,6 +2222,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaName)}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
+                actionError={actionError}
+                onDismissActionError={() => setActionError(null)}
                 isPlantModel={isPlantModel}
             />
 

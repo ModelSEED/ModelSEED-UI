@@ -10,6 +10,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Alert from '@mui/material/Alert';
 import MediaSelectionDialog, { type FbaAdvancedOptions } from './MediaSelectionDialog';
+import JobSubmitErrorAlert from './JobSubmitErrorAlert';
+import type { PresentedJobSubmitError } from '@/lib/utils/jobErrors';
 
 interface ModelReaction {
     id: string;
@@ -26,6 +28,14 @@ interface ModelDetailHeaderProps {
     onRunGapfill?: (mediaId?: string, mediaName?: string) => void;
     actionLoading?: 'fba' | 'gapfill' | null;
     actionMessage?: string | null;
+    /**
+     * Structured job-submit error from the modelseed-api pre-flight check
+     * (see docs/JOB_ERROR_UI_INTEGRATION.md). When set, takes precedence over
+     * `actionMessage` so the user sees the API's hint/field alongside the message.
+     */
+    actionError?: PresentedJobSubmitError | null;
+    /** Called when the user dismisses the structured error Alert. */
+    onDismissActionError?: () => void;
     /** Whether this is a plant model — affects default media note in dialog */
     isPlantModel?: boolean;
     /** Model reactions for knockout selection */
@@ -40,6 +50,8 @@ export default function ModelDetailHeader({
     onRunGapfill,
     actionLoading,
     actionMessage,
+    actionError,
+    onDismissActionError,
     isPlantModel = false,
     modelReactions = [],
 }: ModelDetailHeaderProps) {
@@ -118,11 +130,17 @@ export default function ModelDetailHeader({
                 </Button>
             </Box>
 
-            {actionMessage && (
+            {actionError ? (
+                <JobSubmitErrorAlert
+                    presented={actionError}
+                    onClose={onDismissActionError}
+                    sx={{ mt: 0, mb: 3 }}
+                />
+            ) : actionMessage ? (
                 <Alert severity="info" sx={{ mb: 3 }}>
                     {actionMessage}
                 </Alert>
-            )}
+            ) : null}
 
             <Divider sx={{ mb: 3 }} />
 

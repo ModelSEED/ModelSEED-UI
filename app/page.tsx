@@ -88,6 +88,8 @@ function HomePageContent() {
     const searchParams = useSearchParams();
     const { login, isAuthenticated, user, loading } = useAuth();
 
+    const sessionExpired = searchParams.get('reason') === 'token_expired';
+
     const currentMethod = AUTH_METHODS[method];
     const altMethod = method === 'rast' ? 'patric' : 'rast';
 
@@ -182,6 +184,12 @@ function HomePageContent() {
                                         <Typography variant="h6" sx={{ mb: 2 }}>
                                             Sign in with {currentMethod.name} account to continue
                                         </Typography>
+                                        {sessionExpired && !error && (
+                                            <Alert severity="warning" sx={{ mb: 2 }} data-testid="session-expired-notice">
+                                                <AlertTitle>Session expired</AlertTitle>
+                                                Your sign-in token expired. Sign in again to continue where you left off.
+                                            </Alert>
+                                        )}
                                         {error && (
                                             <Alert severity="error" sx={{ mb: 2 }}>
                                                 <AlertTitle>Error</AlertTitle>
