@@ -50,6 +50,9 @@ import {
     TrackedJob,
 } from '@/lib/api/jobTracker';
 import { parseWorkspaceDate } from '@/lib/utils/date';
+import { presentJobSubmitError, type PresentedJobSubmitError } from '@/lib/utils/jobErrors';
+import { useTokenExpiredRedirect } from '@/lib/hooks/useTokenExpiredRedirect';
+import JobSubmitErrorAlert from '@/components/ui/JobSubmitErrorAlert';
 
 interface MyModelItem {
     id: string; // Model name / filename
@@ -111,6 +114,8 @@ export default function MyModelsPage() {
     const [mergeOutputPath, setMergeOutputPath] = useState('');
     const [isSubmittingMerge, setIsSubmittingMerge] = useState(false);
     const [mergeMessage, setMergeMessage] = useState<string | null>(null);
+    const [mergeErrorPresented, setMergeErrorPresented] = useState<PresentedJobSubmitError | null>(null);
+    const maybeRedirectOnTokenExpiry = useTokenExpiredRedirect();
     const [trackedJobs, setTrackedJobs] = useState<TrackedJob[]>([]);
     const [jobActionError, setJobActionError] = useState<string | null>(null);
     const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -411,6 +416,7 @@ export default function MyModelsPage() {
         }
 
         setMergeMessage(null);
+        setMergeErrorPresented(null);
         setIsSubmittingMerge(true);
         try {
             const payload = await submitMergeJobFromApi({
@@ -438,12 +444,13 @@ export default function MyModelsPage() {
             setMergeDialogOpen(false);
             setSelectedModelIds([]);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to submit merge job';
-            setMergeMessage(message);
+            const presented = presentJobSubmitError(err);
+            if (maybeRedirectOnTokenExpiry(presented)) return;
+            setMergeErrorPresented(presented);
         } finally {
             setIsSubmittingMerge(false);
         }
-    }, [mergeModelName, mergeOutputPath, selectedModels]);
+    }, [mergeModelName, mergeOutputPath, selectedModels, maybeRedirectOnTokenExpiry]);
 
     const columns = useMemo<GridColDef<MyModelItem>[]>(() => [
         {
@@ -691,6 +698,14 @@ export default function MyModelsPage() {
                             )}
                         </Stack>
                     </Alert>
+                )}
+
+                {mergeErrorPresented && (
+                    <JobSubmitErrorAlert
+                        presented={mergeErrorPresented}
+                        onClose={() => setMergeErrorPresented(null)}
+                        sx={{ mt: 0 }}
+                    />
                 )}
 
                 {mergeMessage && (

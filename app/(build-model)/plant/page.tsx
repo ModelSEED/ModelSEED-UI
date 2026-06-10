@@ -24,6 +24,9 @@ import PatricGenomesTable from '@/components/build-model/PatricGenomesTable';
 import RastGenomePreviewDialog from '@/components/build-model/RastGenomePreviewDialog';
 import RastGenomesTable from '@/components/build-model/RastGenomesTable';
 import { PatricGenome } from '@/lib/api/patric';
+import { presentJobSubmitError, type PresentedJobSubmitError } from '@/lib/utils/jobErrors';
+import { useTokenExpiredRedirect } from '@/lib/hooks/useTokenExpiredRedirect';
+import JobSubmitErrorAlert from '@/components/ui/JobSubmitErrorAlert';
 
 /**
  * When true, the PlantSEED build pipeline is disabled in the UI.
@@ -100,9 +103,11 @@ export default function BuildModelPlantPage() {
     const [uploadForm, setUploadForm] = useState<MicrobeUploadForm>(DEFAULT_UPLOAD_FORM);
     const [submitting, setSubmitting] = useState<SubmissionKey>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errorPresented, setErrorPresented] = useState<PresentedJobSubmitError | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [plantseedDialogOpen, setPlantseedDialogOpen] = useState(false);
     const [selectedRastJob, setSelectedRastJob] = useState<RastGenomeJob | null>(null);
+    const maybeRedirectOnTokenExpiry = useTokenExpiredRedirect();
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         if (PLANTSEED_MAINTENANCE && newValue === 0) {
@@ -121,6 +126,7 @@ export default function BuildModelPlantPage() {
     ) => {
         setSubmitting(key);
         setErrorMessage(null);
+        setErrorPresented(null);
         setSuccessMessage(null);
 
         try {
@@ -142,8 +148,9 @@ export default function BuildModelPlantPage() {
                     : 'Reconstruct job submitted successfully.',
             );
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to submit reconstruct job';
-            setErrorMessage(message);
+            const presented = presentJobSubmitError(err);
+            if (maybeRedirectOnTokenExpiry(presented)) return;
+            setErrorPresented(presented);
         } finally {
             setSubmitting(null);
         }
@@ -252,6 +259,14 @@ export default function BuildModelPlantPage() {
                         Users can reconstruct models from public databases like PATRIC and RAST or upload their own annotated sequences for comprehensive metabolic analysis.
                     </Typography>
                 </Box>
+
+                {errorPresented && (
+                    <JobSubmitErrorAlert
+                        presented={errorPresented}
+                        onClose={() => setErrorPresented(null)}
+                        sx={{ mt: 0, mb: 3 }}
+                    />
+                )}
 
                 {(errorMessage || successMessage) && (
                     <Alert severity={errorMessage ? 'error' : 'success'} sx={{ mb: 3 }}>
