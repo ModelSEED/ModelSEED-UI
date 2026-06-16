@@ -28,6 +28,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import { getModelFbaDataFromApi, getModelFbaFromApi } from '@/lib/api/modelseed';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { expandOwnerRef } from '@/lib/utils/workspacePaths';
 import { workspaceGet, workspaceLs, workspaceDownloadUrl, parseWorkspaceGetObject } from '@/lib/api/workspace';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
@@ -127,15 +128,6 @@ function extractModelName(fbaPath: string): string {
 function normalizeWorkspaceRef(value: string): string {
     if (!value) return '';
     return value.startsWith('/') ? value : `/${value}`;
-}
-
-function expandOwnerRef(ref: string, authMethod?: string | null): string {
-    if (authMethod !== 'PATRIC') return ref;
-    const normalized = normalizeWorkspaceRef(ref);
-    if (!normalized) return '';
-    const match = normalized.match(/^\/([^/@]+)\/modelseed\/(.+)$/);
-    if (!match) return normalized;
-    return `/${match[1]}@patricbrc.org/modelseed/${match[2]}`;
 }
 
 function dedupeRefs(refs: string[]): string[] {
@@ -467,7 +459,7 @@ function parseExchangeFluxes(data: Record<string, unknown>): FbaExchangeFlux[] {
  * @returns JSX containing FBA results with reaction flux table
  */
 export default function FbaPage({ params }: { params: Promise<{ path: string[] }> }) {
-    const { method: authMethod } = useAuth();
+    const { user: owner } = useAuth();
     const resolvedParams = use(params);
     const workspacePath = `/${resolvedParams.path.join('/')}`;
     const modelRef = extractModelRef(workspacePath);
@@ -487,11 +479,11 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
         const base = workspacePath.endsWith('/') ? workspacePath.slice(0, -1) : workspacePath;
         const modelBase = modelRef.endsWith('/') ? modelRef.slice(0, -1) : modelRef;
         
-        const expandedWs = expandOwnerRef(base, authMethod);
+        const expandedWs = expandOwnerRef(base, owner);
         const wsBases = [expandedWs];
         if (expandedWs !== base) wsBases.push(base);
 
-        const expandedModel = expandOwnerRef(modelBase, authMethod);
+        const expandedModel = expandOwnerRef(modelBase, owner);
         const modelBases = [expandedModel];
         if (expandedModel !== modelBase) modelBases.push(modelBase);
 
@@ -505,7 +497,7 @@ export default function FbaPage({ params }: { params: Promise<{ path: string[] }
             apiCandidates: dedupeRefs(modelBases),
             workspaceCandidates: dedupeRefs(wsCandidates),
         };
-    }, [workspacePath, modelRef, authMethod]);
+    }, [workspacePath, modelRef, owner]);
 
     const { data: fbaData, isLoading, error } = useQuery({
         queryKey: ['fbaDetail', workspacePath, modelRef],
