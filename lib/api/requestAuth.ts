@@ -64,46 +64,46 @@ export function withRawTokenAuth(
 }
 
 /**
- * Retrieve the stored username from authentication data.
- * 
- * Extracts user_id from stored auth and ensures PATRIC usernames include
- * the @patricbrc.org suffix required for workspace paths. Returns null
- * in SSR context or if no auth is stored.
- * 
- * @returns Username string with @patricbrc.org suffix for PATRIC auth, or null
- * 
+ * Retrieve the authenticated workspace owner, VERBATIM.
+ *
+ * The owner is read from the token's `un=` field — PATRIC/BV-BRC encode the
+ * fully-qualified owner there (e.g. `user@patricbrc.org`, `user@bvbrc`). It is
+ * returned exactly as stored: never stripped, split on `@`, or re-suffixed with
+ * a realm. This value is what workspace/output paths must use, so that users
+ * with `@bvbrc` / `@patricbrc.org` suffixes resolve to the right workspace
+ * (`/user@bvbrc/...`) instead of being rejected for "Insufficient permissions".
+ *
+ * Falls back to the stored `user_id` (itself derived from `un=` at login) if the
+ * token is unavailable. Returns null in SSR context or when no auth is stored.
+ *
+ * @returns The workspace owner string (verbatim), or null
+ *
  * @example
  * ```typescript
- * const username = getStoredAuthUsername();
- * if (username) {
- *   const userWorkspacePath = `/${username}/models`;
+ * const owner = getStoredAuthUsername(); // e.g. "compchemist726@bvbrc"
+ * if (owner) {
+ *   const outputPath = `/${owner}/modelseed`;
  * }
  * ```
  */
 export function getStoredAuthUsername(): string | null {
     if (typeof window === 'undefined') return null;
+
+    // Most authoritative source: the token's `un=` field, used verbatim.
+    const token = getStoredAuthToken();
+    if (token) {
+        const match = token.match(/un=([^|]+)/);
+        const un = match?.[1]?.trim();
+        if (un) return un;
+    }
+
+    // Fallback: the stored user_id (already the verbatim `un=` from login).
     try {
         const raw = localStorage.getItem(AUTH_STORAGE_KEY);
         if (!raw) return null;
-        const parsed = JSON.parse(raw) as { user_id?: string; method?: string };
-        const userId = parsed?.user_id;
-        if (!userId) return null;
-        // PATRIC usernames need @patricbrc.org suffix for workspace paths
-        if (parsed.method === 'PATRIC' && !userId.includes('@')) {
-            return `${userId}@patricbrc.org`;
-        }
-        return userId;
+        const parsed = JSON.parse(raw) as { user_id?: string };
+        return parsed?.user_id?.trim() || null;
     } catch {
-        // Fallback: extract username from token directly if JSON parse fails
-        const token = getStoredAuthToken();
-        if (!token) return null;
-        const parts = token.split('|');
-        for (const part of parts) {
-            if (part.startsWith('un=')) {
-                const value = part.slice(3).trim();
-                return value ? `${value}@patricbrc.org` : null;
-            }
-        }
         return null;
     }
 }

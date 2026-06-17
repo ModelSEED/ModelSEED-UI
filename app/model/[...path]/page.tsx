@@ -43,7 +43,8 @@ import {
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
-import { getStoredAuthMethod } from '@/lib/api/requestAuth';
+import { getStoredAuthMethod, getStoredAuthUsername } from '@/lib/api/requestAuth';
+import { expandOwnerRef } from '@/lib/utils/workspacePaths';
 import {
     extractTrackedJobId,
     isTerminalJobStatus,
@@ -780,15 +781,6 @@ function ownerAliasRef(ref: string, authMethod?: string | null): string {
     return `/${match[1]}/${match[2]}`;
 }
 
-function expandOwnerRef(ref: string, authMethod?: string | null): string {
-    if (authMethod !== 'PATRIC') return ref;
-    const normalized = normalizeWorkspaceRef(ref);
-    if (!normalized) return '';
-    const match = normalized.match(/^\/([^/@]+)\/modelseed\/(.+)$/);
-    if (!match) return normalized;
-    return `/${match[1]}@patricbrc.org/modelseed/${match[2]}`;
-}
-
 interface WorkspaceListingEntry {
     ref: string;
     id: string;
@@ -1428,6 +1420,7 @@ function VisualizeDataPanel({
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
     const authMethod = getStoredAuthMethod();
+    const owner = getStoredAuthUsername();
     const resolvedParams = use(params);
     const [loadingTooLong, setLoadingTooLong] = useState(false);
     const urlSegments = useMemo(
@@ -1452,13 +1445,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         ? workspacePath.slice(0, -('/model'.length))
         : workspacePath;
     const modelRootCandidates = useMemo(
-        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, authMethod)]),
-        [modelRootPath, authMethod],
+        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, owner)]),
+        [modelRootPath, authMethod, owner],
     );
 
     const { apiCandidates, workspaceCandidates } = useMemo(() => {
         const base = workspacePath.endsWith('/') ? workspacePath.slice(0, -1) : workspacePath;
-        const expanded = expandOwnerRef(base, authMethod);
+        const expanded = expandOwnerRef(base, owner);
         const bases = [expanded];
         if (expanded !== base) bases.push(base);
 
@@ -1473,7 +1466,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             apiCandidates: dedupeRefs(bases),
             workspaceCandidates: dedupeRefs(wsCandidates),
         };
-    }, [workspacePath, authMethod]);
+    }, [workspacePath, owner]);
 
     const { data: apiModel, isLoading: apiLoading } = useQuery({
         queryKey: ['apiModel', workspacePath],
@@ -1542,14 +1535,14 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         }
         // modelseed-api expects the canonical model ref (without trailing /model).
         const canonical = modelRootPath;
-        const expandedCanonical = expandOwnerRef(canonical, authMethod);
+        const expandedCanonical = expandOwnerRef(canonical, owner);
         const canonicalCandidates = dedupeRefs([
             expandedCanonical,
             canonical,
             ownerAliasRef(canonical, authMethod),
         ]);
         return canonicalCandidates[0] ?? null;
-    }, [workspacePath, modelRootPath, authMethod]);
+    }, [workspacePath, modelRootPath, authMethod, owner]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, modelApiRef],
