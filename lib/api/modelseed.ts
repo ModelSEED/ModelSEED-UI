@@ -156,10 +156,58 @@ function buildQueryString(params: Record<string, string | undefined>): string {
     return encoded ? `?${encoded}` : '';
 }
 
+/**
+ * Structured error body emitted by modelseed-api pre-flight validation on
+ * job-submit routes (`POST /api/jobs/{reconstruct,gapfill,fba,merge}`).
+ *
+ * FastAPI wraps this object in `{ detail: { ... } }`. See
+ * docs/JOB_ERROR_UI_INTEGRATION.md in the modelseed-api repo.
+ *
+ * `code` is a stable SCREAMING_SNAKE_CASE identifier; treat as an open
+ * enum (new codes may appear without a UI update).
+ */
+export interface ModelseedApiErrorDetail {
+    code: string;
+    message: string;
+    hint?: string | null;
+    field?: string | null;
+    retryable?: boolean;
+}
+
+/**
+ * Thrown by `modelseedFetch` on non-2xx responses. Carries the HTTP status
+ * and (when present) the structured `detail` body so callers can render
+ * `message` + `hint`, highlight the `field` input, or branch on `code`
+ * (e.g. redirect to login on `TOKEN_EXPIRED`).
+ */
+export class ModelseedApiError extends Error {
+    readonly status: number;
+    readonly detail?: ModelseedApiErrorDetail;
+    readonly rawText: string;
+    readonly path: string;
+
+    constructor(
+        status: number,
+        message: string,
+        opts: { detail?: ModelseedApiErrorDetail; rawText?: string; path?: string } = {},
+    ) {
+        super(message);
+        this.name = 'ModelseedApiError';
+        this.status = status;
+        this.detail = opts.detail;
+        this.rawText = opts.rawText ?? '';
+        this.path = opts.path ?? '';
+    }
+}
+
 function extractApiErrorMessage(payload: unknown): string | null {
     if (!payload || typeof payload !== 'object') return null;
     const rec = payload as Record<string, unknown>;
     if (typeof rec.detail === 'string' && rec.detail) return rec.detail;
+    if (rec.detail && typeof rec.detail === 'object') {
+        const det = rec.detail as Record<string, unknown>;
+        if (typeof det.message === 'string' && det.message) return det.message;
+    }
     if (typeof rec.message === 'string' && rec.message) return rec.message;
     const err = rec.error;
     if (err && typeof err === 'object') {
@@ -168,6 +216,31 @@ function extractApiErrorMessage(payload: unknown): string | null {
         if (typeof rpcErr.error === 'string' && rpcErr.error) return rpcErr.error;
     }
     return null;
+}
+
+/**
+ * Pull the structured pre-flight error body out of a FastAPI response.
+ *
+ * Returns null when the body isn't shaped like
+ * `{ detail: { code, message, ... } }` — falls back on string parsing
+ * via `extractApiErrorMessage` so legacy plain-string `detail` responses
+ * still render their text.
+ */
+function extractApiErrorDetail(payload: unknown): ModelseedApiErrorDetail | null {
+    if (!payload || typeof payload !== 'object') return null;
+    const rec = payload as Record<string, unknown>;
+    const det = rec.detail;
+    if (!det || typeof det !== 'object' || Array.isArray(det)) return null;
+    const obj = det as Record<string, unknown>;
+    if (typeof obj.code !== 'string' || !obj.code) return null;
+    if (typeof obj.message !== 'string' || !obj.message) return null;
+    return {
+        code: obj.code,
+        message: obj.message,
+        hint: typeof obj.hint === 'string' ? obj.hint : null,
+        field: typeof obj.field === 'string' ? obj.field : null,
+        retryable: typeof obj.retryable === 'boolean' ? obj.retryable : undefined,
+    };
 }
 
 async function parseJsonResponse(response: Response): Promise<{ payload: unknown; rawText: string }> {
@@ -199,9 +272,12 @@ async function modelseedFetch<T>(path: string, init: RequestInit = {}, requireAu
     const { payload, rawText } = await parseJsonResponse(response);
 
     if (!response.ok) {
-        const detail = extractApiErrorMessage(payload);
-        throw new Error(
-            `modelseed-api ${path} failed (${response.status})${detail ? `: ${detail}` : rawText ? `: ${rawText}` : ''}`,
+        const detail = extractApiErrorDetail(payload);
+        const detailMessage = detail?.message ?? extractApiErrorMessage(payload);
+        throw new ModelseedApiError(
+            response.status,
+            `modelseed-api ${path} failed (${response.status})${detailMessage ? `: ${detailMessage}` : rawText ? `: ${rawText}` : ''}`,
+            { detail: detail ?? undefined, rawText, path },
         );
     }
 

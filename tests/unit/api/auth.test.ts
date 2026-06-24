@@ -55,6 +55,32 @@ describe('auth API', () => {
       expect(result.method).toBe('PATRIC');
       expect(mockFetch).not.toHaveBeenCalled();
     });
+
+    it('uses a fully-qualified un= verbatim (@bvbrc — no strip, no re-suffix)', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve('tok|un=compchemist726@bvbrc|tokenid=x|expiry=1'),
+      });
+
+      const { loginPatric } = await import('@/lib/api/auth');
+      const result = await loginPatric('compchemist726', 'pw');
+
+      // Regression: the workspace lives at /compchemist726@bvbrc/... — the
+      // suffix must survive so output paths aren't rejected for permissions.
+      expect(result.user_id).toBe('compchemist726@bvbrc');
+    });
+
+    it('does not append @patricbrc.org to a bare un=', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve('tok|un=plainuser|tokenid=x|expiry=1'),
+      });
+
+      const { loginPatric } = await import('@/lib/api/auth');
+      const result = await loginPatric('plainuser', 'pw');
+
+      expect(result.user_id).toBe('plainuser');
+    });
   });
 
   describe('RAST login flow', () => {

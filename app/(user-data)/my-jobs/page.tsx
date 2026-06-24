@@ -22,10 +22,12 @@ import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x
 
 import { getJobsFromApi } from '@/lib/api/modelseed';
 import { listTrackedJobs, TrackedJob } from '@/lib/api/jobTracker';
+import { formatJobError } from '@/lib/utils/jobErrors';
 import { USE_MODELSEED_API } from '@/lib/api/config';
 import AuthGuard from '@/components/auth/AuthGuard';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
+import FailedJobDetailsDialog, { type FailedJobDetails } from '@/components/ui/FailedJobDetailsDialog';
 import { useToolbarGridFiltering } from '@/lib/hooks/useToolbarGridFiltering';
 
 /* ---------- types ---------- */
@@ -42,6 +44,10 @@ interface JobRow {
     errorMsg?: string;
     outputPath?: string;
     app?: string;
+    /** Last progress note returned by the API (e.g. "Saving model…"). */
+    progress?: string;
+    /** Flattened `parameters.arguments` for the failed-job detail panel. */
+    parameters?: Record<string, unknown>;
 }
 
 interface JobStatusHistory {
@@ -135,9 +141,17 @@ function mergeApiAndTrackedJobs(
             statusHistory.set(id, { status, timestamp: now, sameCount: 1 });
         }
 
-        const errorMsg = job.error ? String(job.error) : undefined;
         const outputPath = args?.output_path ? String(args.output_path) : undefined;
+        // Some legacy backend job records still carry the raw
+        // `_ERROR_Object not found!_ERROR_` string. Translate to actionable
+        // wording, substituting the job's own model ref when present so the
+        // tooltip points users at the path their reconstruct never produced.
+        const modelArg = typeof args?.model === 'string' ? String(args.model) : undefined;
+        const errorMsg = formatJobError(job.error, modelArg);
         const app = String(params?.command ?? job.app ?? job.type ?? 'Unknown');
+        const progress = typeof job.progress === 'string' && job.progress
+            ? String(job.progress)
+            : undefined;
 
         rows.push({
             id,
@@ -151,6 +165,8 @@ function mergeApiAndTrackedJobs(
             errorMsg,
             outputPath,
             app,
+            progress,
+            parameters: args,
         });
     }
 
@@ -183,6 +199,19 @@ function MyJobsContent() {
     const statusHistoryRef = useRef<Map<string, JobStatusHistory>>(new Map());
 
     const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [failedJobDetails, setFailedJobDetails] = useState<FailedJobDetails | null>(null);
+
+    const openFailedJobDialog = useCallback((row: JobRow) => {
+        setFailedJobDetails({
+            id: row.id,
+            app: row.app,
+            status: row.status,
+            progress: row.progress,
+            errorMsg: row.errorMsg,
+            parameters: row.parameters,
+            outputPath: row.outputPath,
+        });
+    }, []);
 
     const { data: jobRows = [], isLoading, error, refetch } = useQuery({
         queryKey: ['myJobs'],
@@ -270,17 +299,37 @@ function MyJobsContent() {
             field: 'status',
             headerName: 'Status',
             width: 180,
-            renderCell: (p) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            renderCell: (p) => {
+                const isFailed = p.row.rawStatus.toLowerCase() === 'failed';
+                const chip = (
                     <Chip
                         label={p.row.isStuck ? `${p.row.status} (possibly stuck)` : p.row.status}
                         size="small"
                         color={statusColor(p.row.status, p.row.isStuck)}
                         variant="outlined"
                         icon={p.row.isStuck ? <WarningAmberIcon /> : undefined}
+                        onClick={isFailed ? () => openFailedJobDialog(p.row) : undefined}
+                        sx={isFailed ? { cursor: 'pointer' } : undefined}
+                        data-failed-job-chip={isFailed ? 'true' : undefined}
                     />
-                </Box>
-            ),
+                );
+
+                return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {isFailed ? (
+                            <Tooltip
+                                title={p.row.errorMsg
+                                    ? `${p.row.errorMsg.slice(0, 220)}${p.row.errorMsg.length > 220 ? '…' : ''} (click for details)`
+                                    : 'Job failed. Click for details.'}
+                            >
+                                {chip}
+                            </Tooltip>
+                        ) : (
+                            chip
+                        )}
+                    </Box>
+                );
+            },
         },
         {
             field: 'actions',
@@ -297,10 +346,13 @@ function MyJobsContent() {
                         </Tooltip>
                     )}
                     {p.row.rawStatus.toLowerCase() === 'failed' && (
-                        <Tooltip title={p.row.errorMsg || "Job failed. No error details provided by API."}>
+                        <Tooltip title="View error details">
                             <IconButton
                                 size="small"
                                 color="error"
+                                onClick={() => openFailedJobDialog(p.row)}
+                                aria-label="View failed job details"
+                                data-testid={`open-failed-job-${p.row.id}`}
                             >
                                 <InfoOutlinedIcon fontSize="small" />
                             </IconButton>
@@ -321,7 +373,7 @@ function MyJobsContent() {
                 </Box>
             ),
         },
-    ], [handleRefreshJob]);
+    ], [handleRefreshJob, openFailedJobDialog]);
 
     const handleFiltersApplied = useCallback(() => {
         setPagination((prev) => ({ ...prev, page: 0 }));
@@ -447,6 +499,12 @@ function MyJobsContent() {
                     No jobs found. Submit an FBA, Gapfill, or Reconstruction job to see it here.
                 </Typography>
             )}
+
+            <FailedJobDetailsDialog
+                open={failedJobDetails !== null}
+                onClose={() => setFailedJobDetails(null)}
+                job={failedJobDetails}
+            />
 
             <ExportModal
                 open={exportModalOpen}

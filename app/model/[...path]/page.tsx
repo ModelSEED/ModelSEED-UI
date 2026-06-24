@@ -43,7 +43,8 @@ import {
     submitFbaJobFromApi,
     submitGapfillJobFromApi,
 } from '@/lib/api/modelseed';
-import { getStoredAuthMethod } from '@/lib/api/requestAuth';
+import { getStoredAuthMethod, getStoredAuthUsername } from '@/lib/api/requestAuth';
+import { expandOwnerRef } from '@/lib/utils/workspacePaths';
 import {
     extractTrackedJobId,
     isTerminalJobStatus,
@@ -53,6 +54,8 @@ import {
     type TrackedJob,
 } from '@/lib/api/jobTracker';
 import { parseWorkspaceDate } from '@/lib/utils/date';
+import { formatJobError, presentJobSubmitError } from '@/lib/utils/jobErrors';
+import { useTokenExpiredRedirect } from '@/lib/hooks/useTokenExpiredRedirect';
 import ModelDetailHeader from '@/components/ui/ModelDetailHeader';
 import type { FbaAdvancedOptions } from '@/components/ui/MediaSelectionDialog';
 import DownloadModelMenu from '@/components/ui/DownloadModelMenu';
@@ -778,15 +781,6 @@ function ownerAliasRef(ref: string, authMethod?: string | null): string {
     return `/${match[1]}/${match[2]}`;
 }
 
-function expandOwnerRef(ref: string, authMethod?: string | null): string {
-    if (authMethod !== 'PATRIC') return ref;
-    const normalized = normalizeWorkspaceRef(ref);
-    if (!normalized) return '';
-    const match = normalized.match(/^\/([^/@]+)\/modelseed\/(.+)$/);
-    if (!match) return normalized;
-    return `/${match[1]}@patricbrc.org/modelseed/${match[2]}`;
-}
-
 interface WorkspaceListingEntry {
     ref: string;
     id: string;
@@ -1426,6 +1420,7 @@ function VisualizeDataPanel({
 export default function ModelDetailPage({ params }: { params: Promise<{ path: string[] }> }) {
     const router = useRouter();
     const authMethod = getStoredAuthMethod();
+    const owner = getStoredAuthUsername();
     const resolvedParams = use(params);
     const [loadingTooLong, setLoadingTooLong] = useState(false);
     const urlSegments = useMemo(
@@ -1450,13 +1445,13 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         ? workspacePath.slice(0, -('/model'.length))
         : workspacePath;
     const modelRootCandidates = useMemo(
-        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, authMethod)]),
-        [modelRootPath, authMethod],
+        () => dedupeRefs([modelRootPath, ownerAliasRef(modelRootPath, authMethod), expandOwnerRef(modelRootPath, owner)]),
+        [modelRootPath, authMethod, owner],
     );
 
     const { apiCandidates, workspaceCandidates } = useMemo(() => {
         const base = workspacePath.endsWith('/') ? workspacePath.slice(0, -1) : workspacePath;
-        const expanded = expandOwnerRef(base, authMethod);
+        const expanded = expandOwnerRef(base, owner);
         const bases = [expanded];
         if (expanded !== base) bases.push(base);
 
@@ -1471,7 +1466,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
             apiCandidates: dedupeRefs(bases),
             workspaceCandidates: dedupeRefs(wsCandidates),
         };
-    }, [workspacePath, authMethod]);
+    }, [workspacePath, owner]);
 
     const { data: apiModel, isLoading: apiLoading } = useQuery({
         queryKey: ['apiModel', workspacePath],
@@ -1540,14 +1535,14 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
         }
         // modelseed-api expects the canonical model ref (without trailing /model).
         const canonical = modelRootPath;
-        const expandedCanonical = expandOwnerRef(canonical, authMethod);
+        const expandedCanonical = expandOwnerRef(canonical, owner);
         const canonicalCandidates = dedupeRefs([
             expandedCanonical,
             canonical,
             ownerAliasRef(canonical, authMethod),
         ]);
         return canonicalCandidates[0] ?? null;
-    }, [workspacePath, modelRootPath, authMethod]);
+    }, [workspacePath, modelRootPath, authMethod, owner]);
 
     const { data: modelFba, error: modelFbaError, refetch: refetchModelFba } = useQuery({
         queryKey: ['modelFba', USE_MODELSEED_API, modelApiRef],
@@ -1619,6 +1614,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const [sortByTab, setSortByTab] = useState<Record<string, GridSortModel>>({});
     const [actionLoading, setActionLoading] = useState<'fba' | 'gapfill' | null>(null);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [actionError, setActionError] = useState<ReturnType<typeof presentJobSubmitError> | null>(null);
+    const maybeRedirectOnTokenExpiry = useTokenExpiredRedirect();
     const [editReactionId, setEditReactionId] = useState('');
     const [editSummary, setEditSummary] = useState('');
     const [editSubmitting, setEditSubmitting] = useState(false);
@@ -2041,11 +2038,28 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
     const submitModelJob = async (kind: 'fba' | 'gapfill', media?: string, advancedOptions?: FbaAdvancedOptions) => {
         setActionLoading(kind);
         setActionMessage(null);
+        setActionError(null);
         const selectedMedia = media || defaultMedia;
+        const modelRef = workspaceCandidates[0];
         try {
+            // Pre-flight: confirm the model object actually exists in the workspace
+            // before enqueuing the celery job. Without this, users who navigate
+            // (or follow a stale link) to a model ref whose backing object is
+            // missing trigger a backend WorkspaceError per submission — the symptom
+            // surfacing in Flower as `_ERROR_Object not found!_ERROR_`. Catching
+            // it here avoids the wasted job and shows actionable wording.
+            try {
+                await workspaceGet([modelRef]);
+            } catch (probeErr) {
+                throw new Error(
+                    formatJobError(probeErr, modelRef) ??
+                    `No model found at '${modelRef}'.`,
+                );
+            }
+
             // Build FBA payload with optional advanced options (reaction knockouts)
             const fbaPayload: Record<string, unknown> = {
-                model: workspaceCandidates[0],
+                model: modelRef,
                 media: selectedMedia,
                 media_supplement: [],
             };
@@ -2060,7 +2074,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 kind === 'fba'
                     ? await submitFbaJobFromApi(fbaPayload)
                     : await submitGapfillJobFromApi({
-                        model: workspaceCandidates[0],
+                        model: modelRef,
                         template_type: 'gn',
                         media: selectedMedia,
                     });
@@ -2083,8 +2097,9 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                     : `${kind === 'fba' ? 'FBA' : 'Gapfill'} job submitted.`,
             );
         } catch (err) {
-            const message = err instanceof Error ? err.message : `Failed to submit ${kind} job`;
-            setActionMessage(message);
+            const presented = presentJobSubmitError(err, { modelRef });
+            if (maybeRedirectOnTokenExpiry(presented)) return;
+            setActionError(presented);
         } finally {
             setActionLoading(null);
         }
@@ -2200,6 +2215,8 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                 onRunGapfill={(mediaId?: string, mediaName?: string) => void submitModelJob('gapfill', mediaName)}
                 actionLoading={actionLoading}
                 actionMessage={actionMessage}
+                actionError={actionError}
+                onDismissActionError={() => setActionError(null)}
                 isPlantModel={isPlantModel}
             />
 

@@ -94,12 +94,13 @@ export async function loginPatric(
     // PATRIC returns a raw token string on 200
     const token = await response.text();
 
-    // Extract user_id from un=<user> segment
+    // Extract user_id from the un=<user> segment and use it VERBATIM.
+    // PATRIC/BV-BRC encode the fully-qualified workspace owner here
+    // (e.g. `user@patricbrc.org`, `user@bvbrc`). Never strip the realm or
+    // append one — workspace paths must match `un=` exactly, otherwise users
+    // with `@bvbrc`/`@patricbrc.org` suffixes get "Insufficient permissions".
     const userIdMatch = token.match(/un=([^|]+)/);
-    let user_id = userIdMatch ? userIdMatch[1] : username;
-    if (!user_id.includes('@')) {
-        user_id = `${user_id}@patricbrc.org`;
-    }
+    const user_id = userIdMatch ? userIdMatch[1].trim() : username;
 
     return { user_id, token: token.trim(), method: 'PATRIC' };
 }
