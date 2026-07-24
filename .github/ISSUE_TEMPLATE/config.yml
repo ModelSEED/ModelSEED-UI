@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ModelSEED documentation & help
+    url: https://modelseed.org/
+    about: Browse ModelSEED docs and the app's built-in help before filing an issue.
+  - name: Ask on the ModelSEED mailing list
+    url: https://modelseed.org/
+    about: For broad usage or research questions, the mailing list may be a better fit.
+  - name: Security disclosure (do not open a public issue)
+    url: https://github.com/ModelSEED/ModelSEED-UI/security/advisories/new
+    about: Report a security vulnerability privately via GitHub Security Advisories.
