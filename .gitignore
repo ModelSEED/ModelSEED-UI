@@ -1,4 +1,5 @@
 # Local
+,claude/
 /legacy/
 PRODUCTION_POLISH_PLAN.md
 scripts/local
@@ -72,3 +73,6 @@ CLAUDE.local.md
 .opencode/
 .gsd/.opencode/
 .build-date
+.claude/
+.omo/
+GEMINI.md
