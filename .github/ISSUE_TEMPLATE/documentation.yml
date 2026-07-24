@@ -1,0 +1,55 @@
+name: Documentation improvement
+description: Report missing, unclear, or incorrect documentation or in-app help text.
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve the docs and in-app guidance. Point us at what was confusing.
+
+  - type: dropdown
+    id: doc_location
+    attributes:
+      label: Where is the documentation problem?
+      options:
+        - In-app help / tooltip text
+        - About / version pages
+        - README or repository docs
+        - API documentation
+        - Team / contact info
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: page_url
+    attributes:
+      label: Page or URL (if applicable)
+      description: "e.g. https://modelseed.org/about or a repo file path."
+    validations:
+      required: false
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is missing, unclear, or wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: How would you word or structure it instead?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: false

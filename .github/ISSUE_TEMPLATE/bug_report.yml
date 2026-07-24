@@ -1,0 +1,116 @@
+name: Bug report
+description: Something is broken or behaving unexpectedly in the ModelSEED web app.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please describe what went wrong in your own words —
+        no technical knowledge required. Fields marked with an asterisk are required.
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Which site were you using?
+      options:
+        - "staging.modelseed.org (staging)"
+        - "modelseed.org (production)"
+        - "localhost / dev"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app?
+      options:
+        - FBA
+        - Gapfill
+        - Model viewer
+        - Biochem browser
+        - Media
+        - Genomes
+        - My Jobs / My Models
+        - Auth / Sign-in
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: auth_status
+    attributes:
+      label: Were you signed in?
+      options:
+        - "Signed in (PATRIC / BV-BRC)"
+        - "Signed in (RAST)"
+        - "Not signed in"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Describe the problem you saw, in your own words.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen instead?
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: "List what you did, e.g. 1) opened FBA, 2) selected model X, 3) clicked Run."
+    validations:
+      required: false
+
+  - type: input
+    id: model_ref
+    attributes:
+      label: Model / object reference (if relevant)
+      description: "e.g. a model id, workspace path, or reaction/compound id."
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop or paste any screenshots here.
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & OS
+      description: "e.g. Chrome 130 on macOS, Firefox on Windows."
+    validations:
+      required: false
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (optional)
+      description: "If comfortable, paste any red errors from the browser dev-tools console."
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: false

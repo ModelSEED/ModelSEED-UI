@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import FooterFeedbackButton from '@/components/feedback/FooterFeedbackButton';
 
 export default function Footer() {
     return (
@@ -99,6 +100,9 @@ export default function Footer() {
                                 >
                                     <GitHubIcon />
                                 </IconButton>
+                                <Box sx={{ mt: 2 }}>
+                                    <FooterFeedbackButton />
+                                </Box>
                             </Box>
                         </Grid>
 
