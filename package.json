@@ -29,7 +29,7 @@
     "@mui/x-data-grid": "^8.27.3",
     "@rdkit/rdkit": "2025.3.4-1.0.0",
     "@tanstack/react-query": "^5.90.21",
-    "next": "^16.2.6",
+    "next": "^16.2.12",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
