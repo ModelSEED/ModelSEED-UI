@@ -1,0 +1,77 @@
+name: Feature request
+description: Suggest a new capability or an improvement to the ModelSEED web app.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Tell us what you'd like to be able to do and why it would help.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app is this about?
+      options:
+        - FBA
+        - Gapfill
+        - Model viewer
+        - Biochem browser
+        - Media
+        - Genomes
+        - My Jobs / My Models
+        - Auth / Sign-in
+        - New / general idea
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: What would you like to be able to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: What's your use case?
+      description: Describe the workflow or research task this would support.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds you've tried
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this to you?
+      options:
+        - Nice to have
+        - Would help a lot
+        - Blocking my work
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples, sketches, or screenshots
+      description: Anything that shows what you have in mind. You can drag images in here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and did not find a duplicate request.
+          required: false

@@ -17,6 +17,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.0] - 2026-08-04
+
+### Added
+- User feedback FAB and dialog with `/api/feedback` proxy route and unit test
+- GitHub issue templates, pull request template, and CODEOWNERS
+
+### Fixed
+- Production `npm audit` findings resolved: Next.js upgraded to **16.3.0**,
+  `eslint-config-next` upgraded to **16.3.0**, and `postcss` override bumped
+  to **8.5.25** to close high-severity advisories
+
+---
+
 ## [3.0.1] - 2026-05-12
 
 ### Added

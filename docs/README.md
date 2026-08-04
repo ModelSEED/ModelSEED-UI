@@ -15,6 +15,7 @@ This directory contains the technical documentation for the ModelSEED-UI applica
 | **Testing Platform** | [TESTING.md](./TESTING.md) | Vitest unit tests, Playwright E2E tests, and CI/CD pipeline. |
 | **Deploying** | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environment variables, deployment modes, URL resolution, and configuration guide. |
 | **Contributing** | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Guidelines for maintaining the documentation. |
+| **Release Process** | [CONTRIBUTING.md](../CONTRIBUTING.md) | Branching/staging workflow, and the versioning & changelog policy. |
 
 ## Project Design Principles
 
