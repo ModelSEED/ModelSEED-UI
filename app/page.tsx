@@ -14,6 +14,7 @@ import styles from './home.module.css';
 import { useAuth } from '@/components/auth/AuthProvider';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { GITHUB_ISSUES_URL } from '@/components/feedback/feedbackOptions';
 
 type AuthMethod = 'rast' | 'patric';
 
@@ -406,11 +407,23 @@ function HomePageContent() {
                     <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1 }}>
                         Questions, comments, and bug reports?
                     </Typography>
-                    <Typography>
-                        <a href="mailto:help@modelseed.org" style={{ color: '#30BCCF', textDecoration: 'none' }}>
-                            Contact us
-                        </a>
-                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                        <Typography>
+                            <a href="mailto:help@modelseed.org" style={{ color: '#30BCCF', textDecoration: 'none' }}>
+                                Contact us
+                            </a>
+                        </Typography>
+                        <Typography>
+                            <a
+                                href={GITHUB_ISSUES_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#30BCCF', textDecoration: 'none' }}
+                            >
+                                GitHub Issues
+                            </a>
+                        </Typography>
+                    </Box>
                 </Container>
             </Box>
         </>

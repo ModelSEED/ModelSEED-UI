@@ -61,6 +61,20 @@ test.describe('01. Public Pages', () => {
     expect(await links.count()).toBeGreaterThan(5);
   });
 
+  test('Homepage support section has Contact us and GitHub Issues links', async ({ page }) => {
+    await page.goto('/');
+    const contactLink = page.getByRole('link', { name: 'Contact us' });
+    await expect(contactLink).toBeVisible();
+    await expect(contactLink).toHaveAttribute('href', 'mailto:help@modelseed.org');
+
+    const issuesLink = page.getByRole('link', { name: 'GitHub Issues' });
+    await expect(issuesLink).toBeVisible();
+    await expect(issuesLink).toHaveAttribute('href', 'https://github.com/ModelSEED/ModelSEED-UI/issues');
+    await expect(issuesLink).toHaveAttribute('target', '_blank');
+    await expect(issuesLink).toHaveAttribute('rel', /noopener/);
+    await expect(issuesLink).toHaveAttribute('rel', /noreferrer/);
+  });
+
   const publicPages = [
     { path: '/about', name: 'About' },
     { path: '/about/version', name: 'Version' },
