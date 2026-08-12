@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
+### Added
+- Compound and reaction detail pages now list every thermodynamics record returned by the upgraded Solr schema, one row per source with energy, error and (for reactions) direction operator
+- Compound detail page now shows all pKa and pKb values instead of only the first
+- Reaction detail page now shows an atom-mapping summary with per-compound element counts, a confidence indicator and an expandable raw list
+- All of the above is feature-detected, so pages render exactly as before against the current production Solr
+
 ### Known Issues
 - RAST MS FBA not working
 - PATRIC-only model submission
