@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
@@ -13,6 +14,9 @@ import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
+import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
+import AtomMappingSummary from '@/components/ui/AtomMappingSummary';
+import { parseAtomMappings } from '@/lib/utils/atomMapping';
 
 function extractCompoundIds(equation: string): string[] {
     if (!equation) return [];
@@ -308,6 +312,8 @@ export default function ReactionDetailPage() {
         enabled: !!id,
     });
 
+    const atomPairs = useMemo(() => parseAtomMappings(rxn?.atom_mapping), [rxn?.atom_mapping]);
+
     if (isLoading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -334,6 +340,8 @@ export default function ReactionDetailPage() {
     const pathways = (rxn.pathways ?? []).map((v) => v.replace(/"/g, '').trim()).filter(Boolean);
 
     const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
+
+    const thermoRecords = rxn.thermodynamics ?? [];
 
     const dg = Number(rxn.deltag);
     const err = Number(rxn.deltagerr);
@@ -381,11 +389,38 @@ export default function ReactionDetailPage() {
                         <ChemicalEquation equation={rxn.equation} />
                     </DetailRow>
 
-                    <DetailRow label="Gibbs free energy change (ΔG)">
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {deltaGLabel}
-                        </Typography>
-                    </DetailRow>
+                    {thermoRecords.length > 0 ? (
+                        <DetailRow
+                            label={
+                                typeof rxn.n_sources_thermodynamics === 'number' &&
+                                rxn.n_sources_thermodynamics > 0
+                                    ? `Thermodynamics (${rxn.n_sources_thermodynamics} sources)`
+                                    : 'Thermodynamics'
+                            }
+                        >
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                {typeof rxn.sources_agree_direction === 'boolean' && (
+                                    <Chip
+                                        size="small"
+                                        label={
+                                            rxn.sources_agree_direction
+                                                ? 'Sources agree on direction'
+                                                : 'Sources disagree on direction'
+                                        }
+                                        color={rxn.sources_agree_direction ? 'success' : 'warning'}
+                                        sx={{ alignSelf: 'flex-start' }}
+                                    />
+                                )}
+                                <ThermodynamicsTable records={thermoRecords} showOperator />
+                            </Box>
+                        </DetailRow>
+                    ) : (
+                        <DetailRow label="Gibbs free energy change (ΔG)">
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {deltaGLabel}
+                            </Typography>
+                        </DetailRow>
+                    )}
 
                     <DetailRow label="EC numbers">
                         {ecNumbers.length ? (
@@ -452,6 +487,15 @@ export default function ReactionDetailPage() {
                             <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
                                 {rxn.ontology}
                             </Typography>
+                        </DetailRow>
+                    )}
+
+                    {atomPairs.length > 0 && (
+                        <DetailRow label="Atom mappings">
+                            <AtomMappingSummary
+                                entries={rxn.atom_mapping}
+                                confidence={rxn.atom_mapping_confidence}
+                            />
                         </DetailRow>
                     )}
                 </CardContent>
