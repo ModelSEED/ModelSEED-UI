@@ -2227,7 +2227,7 @@ export default function ModelDetailPage({ params }: { params: Promise<{ path: st
                         modelRef={workspaceCandidates[0]}
                         modelId={modelName}
                         buttonLabel="Download options"
-                        helperText="Export this model as SBML, JSON, or TSV."
+                        helperText="Export this model as SBML or JSON, or download the reaction and compound tables as TSV."
                     />
                     {isPlantModel && (
                         <Button

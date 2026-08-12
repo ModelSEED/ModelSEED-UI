@@ -469,7 +469,9 @@ export async function getModelDetailBundleFromApi(ref: string): Promise<ModelDet
 
 /**
  * Returns a Blob containing the exported model file.
- * formats: 'sbml' | 'json' | 'tsv'
+ * Backend-supported formats (GET /api/models/export): 'json' | 'sbml' | 'cobrapy'.
+ * TSV is not a backend format; reaction/compound TSV tables are derived client-side
+ * from the 'json' export - see lib/utils/modelTsv.ts.
  */
 export async function exportModelFromApi(ref: string, format: string): Promise<Blob> {
     const response = await fetch(
