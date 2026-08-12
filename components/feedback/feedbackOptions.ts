@@ -25,6 +25,7 @@ export type Environment = (typeof ENVIRONMENTS)[number];
 
 // Maps the dialog "Type" to the GitHub Issue Form template filename + label to prefill.
 export const GITHUB_REPO = 'ModelSEED/ModelSEED-UI';
+export const GITHUB_ISSUES_URL = `https://github.com/${GITHUB_REPO}/issues`;
 export const TEMPLATE_BY_TYPE: Record<FeedbackType, string> = {
   Bug: 'bug_report.yml',
   Feature: 'feature_request.yml',
@@ -72,5 +73,5 @@ export function buildGitHubIssueUrl(input: {
     params.set('environment', ENV_TO_GH_OPTION[input.environment]);
     params.set('question', input.description);
   }
-  return `https://github.com/${GITHUB_REPO}/issues/new?${params.toString()}`;
+  return `${GITHUB_ISSUES_URL}/new?${params.toString()}`;
 }

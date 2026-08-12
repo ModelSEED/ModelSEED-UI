@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - User feedback FAB and dialog with `/api/feedback` proxy route and unit test
 - GitHub issue templates, pull request template, and CODEOWNERS
+- GitHub Issues link beside Contact us in the homepage support section
 
 ### Fixed
 - Production `npm audit` findings resolved: Next.js upgraded to **16.3.0**,
