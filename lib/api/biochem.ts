@@ -17,6 +17,7 @@ import {
     SOLR_COMPOUNDS_COLLECTION,
     SOLR_REACTIONS_COLLECTION,
 } from './config';
+import { hasNestedSchema, parentDocTypeFilter } from './solrSchema';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -95,6 +96,8 @@ export interface SolrQueryOpts {
     queryColumn?: Record<string, string>;
     visible?: string[];
     filterModel?: GridFilterModel;
+    /** Raw Solr `fq` clauses, appended in order (e.g. a nested-schema parent-doc filter). */
+    filterQueries?: string[];
 }
 
 /* ─── External DB Links ──────────────────────────────────────── */
@@ -381,11 +384,17 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         queryColumn,
         visible = [],
         filterModel,
+        filterQueries = [],
     } = opts;
 
     // Field list
     if (visible.length > 0) {
         url += `&fl=${visible.join(',')}`;
+    }
+
+    // Explicit filter queries (e.g. nested-schema parent-doc filter)
+    for (const fq of filterQueries) {
+        url += `&fq=${encodeURIComponent(fq)}`;
     }
 
     // Filter out ontology field for compounds (Solr compounds_staging has no ontology field)
@@ -889,7 +898,14 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     // Reactions page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('reactions', mergedOpts);
+    const nested = await hasNestedSchema('reactions');
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('reactions')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('reactions', queryOpts);
     const res = await fetchSolr<Reaction>(url);
 
     // Mark obsolete reactions (matching legacy logic)
@@ -930,7 +946,14 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     // Compounds page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('compounds', mergedOpts);
+    const nested = await hasNestedSchema('compounds');
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('compounds')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('compounds', queryOpts);
     return fetchSolr<Compound>(url);
 }
 

@@ -87,11 +87,13 @@ describe('getCompounds Solr query shape', () => {
 
   it('quick search must not reference ontology (undefined field on compounds_staging)', async () => {
     const biochemApi = await loadBiochemApi();
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
     );
 
     await biochemApi.getCompounds({
@@ -101,7 +103,9 @@ describe('getCompounds Solr query shape', () => {
     });
 
     expect(fetchMock).toHaveBeenCalled();
-    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    // The Solr-9 nested-schema probe (a separate `select?...&fq=doc_type:...` request)
+    // runs before the real list query, so assert on the *last* fetch call.
+    const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
     const u = new URL(calledUrl);
     const qRaw = u.searchParams.get('q');
     expect(qRaw).toBeTruthy();
@@ -119,11 +123,13 @@ describe('getReactions Solr case-variant filters', () => {
 
   it('expands lowercase equals filters with case variants', async () => {
     const biochemApi = await loadBiochemApi();
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
     );
 
     await biochemApi.getReactions({
@@ -137,7 +143,8 @@ describe('getReactions Solr case-variant filters', () => {
     });
 
     expect(fetchMock).toHaveBeenCalled();
-    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    // The Solr-9 nested-schema probe runs before the real list query.
+    const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
     const q = decodeURIComponent(new URL(calledUrl).searchParams.get('q') ?? '');
     expect(q).toContain('status:"ok"');
     expect(q).toContain('status:"OK"');
@@ -156,17 +163,20 @@ describe('Solr collection routing', () => {
     vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'production');
     vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions');
     vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds');
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
     );
 
     const api = await import('@/lib/api/biochem');
     await api.getReactions({ limit: 1 });
 
-    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    // The Solr-9 nested-schema probe runs before the real list query.
+    const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
     expect(calledUrl).toContain('/reactions/select');
     expect(calledUrl).not.toContain('/reactions_staging/select');
   });
@@ -176,17 +186,86 @@ describe('Solr collection routing', () => {
     vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'production');
     vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', 'reactions_custom');
     vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', 'compounds');
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
     );
 
     const api = await import('@/lib/api/biochem');
     await api.getReactions({ limit: 1 });
 
-    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? '');
+    // The Solr-9 nested-schema probe runs before the real list query.
+    const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
     expect(calledUrl).toContain('/reactions_custom/select');
+  });
+});
+
+describe('getReactions/getCompounds nested-schema parent-doc filter', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it('adds no fq when the nested-schema probe finds no parent docs (legacy schema)', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+
+    await biochemApi.getReactions({ limit: 5 });
+
+    // One probe call plus the real list query.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const listUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
+    expect(listUrl).not.toContain('fq=');
+  });
+
+  it('adds a doc_type:reaction fq when the nested-schema probe finds parent docs', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 1, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+
+    await biochemApi.getReactions({ limit: 5 });
+
+    const listUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
+    expect(listUrl).toContain(`fq=${encodeURIComponent('doc_type:reaction')}`);
+  });
+
+  it('adds a doc_type:compound fq when the nested-schema probe finds parent docs', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ response: { numFound: 1, start: 0, docs: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+
+    await biochemApi.getCompounds({ limit: 5 });
+
+    const listUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
+    expect(listUrl).toContain(`fq=${encodeURIComponent('doc_type:compound')}`);
   });
 });

@@ -35,6 +35,7 @@ const PUBLIC_ENV = {
     NEXT_PUBLIC_USE_MODELSEED_API: process.env.NEXT_PUBLIC_USE_MODELSEED_API,
     NEXT_PUBLIC_USE_NEW_PROXY: process.env.NEXT_PUBLIC_USE_NEW_PROXY,
     NEXT_PUBLIC_PROBMODELSEED_URL: process.env.NEXT_PUBLIC_PROBMODELSEED_URL,
+    NEXT_PUBLIC_SOLR_NESTED_SCHEMA: process.env.NEXT_PUBLIC_SOLR_NESTED_SCHEMA,
 } as const;
 
 type PublicEnvKey = keyof typeof PUBLIC_ENV;
@@ -293,6 +294,20 @@ export const SOLR_COMPOUNDS_COLLECTION = resolveSolrCollection({
 export function getSolrCollection(collection: 'reactions' | 'compounds'): string {
     return collection === 'reactions' ? SOLR_REACTIONS_COLLECTION : SOLR_COMPOUNDS_COLLECTION;
 }
+
+function readTriStateBooleanEnv(name: string): boolean | null {
+    const raw = readEnvSafe(name);
+    if (raw === 'true' || raw === '1') return true;
+    if (raw === 'false' || raw === '0') return false;
+    return null;
+}
+
+/**
+ * Manual override for whether the Solr biochem collections use the Solr-9
+ * nested-document schema. `null` means unset/unparseable, in which case
+ * callers should auto-detect (see `lib/api/solrSchema.ts`).
+ */
+export const SOLR_NESTED_SCHEMA_OVERRIDE = readTriStateBooleanEnv('NEXT_PUBLIC_SOLR_NESTED_SCHEMA');
 
 /* ─── modelseed_support (RAST Jobs) ─────────────────────────── */
 
