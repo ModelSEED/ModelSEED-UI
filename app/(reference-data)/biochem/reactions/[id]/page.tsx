@@ -16,7 +16,13 @@ import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 import AtomMappingSummary from '@/components/ui/AtomMappingSummary';
+import AtomFlowDiagram from '@/components/ui/AtomFlowDiagram';
 import { parseAtomMappings } from '@/lib/utils/atomMapping';
+import {
+    directionAgreementFromRecords,
+    DIRECTION_AGREEMENT_COLOR,
+    DIRECTION_AGREEMENT_LABEL,
+} from '@/lib/utils/reactionDirection';
 
 function extractCompoundIds(equation: string): string[] {
     if (!equation) return [];
@@ -342,6 +348,7 @@ export default function ReactionDetailPage() {
     const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
 
     const thermoRecords = rxn.thermodynamics ?? [];
+    const agreement = directionAgreementFromRecords(thermoRecords);
 
     const dg = Number(rxn.deltag);
     const err = Number(rxn.deltagerr);
@@ -399,17 +406,26 @@ export default function ReactionDetailPage() {
                             }
                         >
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                {typeof rxn.sources_agree_direction === 'boolean' && (
+                                {agreement !== null ? (
                                     <Chip
                                         size="small"
-                                        label={
-                                            rxn.sources_agree_direction
-                                                ? 'Sources agree on direction'
-                                                : 'Sources disagree on direction'
-                                        }
-                                        color={rxn.sources_agree_direction ? 'success' : 'warning'}
+                                        label={DIRECTION_AGREEMENT_LABEL[agreement]}
+                                        color={DIRECTION_AGREEMENT_COLOR[agreement]}
                                         sx={{ alignSelf: 'flex-start' }}
                                     />
+                                ) : (
+                                    typeof rxn.sources_agree_direction === 'boolean' && (
+                                        <Chip
+                                            size="small"
+                                            label={
+                                                rxn.sources_agree_direction
+                                                    ? 'Sources agree on direction'
+                                                    : 'Sources disagree on direction'
+                                            }
+                                            color={rxn.sources_agree_direction ? 'success' : 'warning'}
+                                            sx={{ alignSelf: 'flex-start' }}
+                                        />
+                                    )
                                 )}
                                 <ThermodynamicsTable records={thermoRecords} showOperator />
                             </Box>
@@ -492,10 +508,13 @@ export default function ReactionDetailPage() {
 
                     {atomPairs.length > 0 && (
                         <DetailRow label="Atom mappings">
-                            <AtomMappingSummary
-                                entries={rxn.atom_mapping}
-                                confidence={rxn.atom_mapping_confidence}
-                            />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                <AtomFlowDiagram pairs={atomPairs} />
+                                <AtomMappingSummary
+                                    entries={rxn.atom_mapping}
+                                    confidence={rxn.atom_mapping_confidence}
+                                />
+                            </Box>
                         </DetailRow>
                     )}
                 </CardContent>
