@@ -168,3 +168,48 @@ export function countAtomsPerElement(
 
     return counts;
 }
+
+export interface AtomFlow {
+    from: string;
+    to: string;
+    total: number;
+    byElement: ReadonlyMap<string, number>;
+}
+
+/** Summarize distinct source atoms as directed compound-to-compound flows. */
+export function summarizeAtomFlows(pairs: readonly AtomMappingPair[]): AtomFlow[] {
+    const flows = new Map<
+        string,
+        { from: string; to: string; total: number; byElement: Map<string, number>; seen: Set<string> }
+    >();
+
+    for (const pair of pairs) {
+        const { left, right } = pair;
+        const key = `${left.compoundId}>${right.compoundId}`;
+        let flow = flows.get(key);
+        if (!flow) {
+            flow = {
+                from: left.compoundId,
+                to: right.compoundId,
+                total: 0,
+                byElement: new Map<string, number>(),
+                seen: new Set<string>(),
+            };
+            flows.set(key, flow);
+        }
+
+        const sourceAtom = `${left.element}#${left.index}`;
+        if (!flow.seen.has(sourceAtom)) {
+            flow.seen.add(sourceAtom);
+            flow.total += 1;
+            flow.byElement.set(left.element, (flow.byElement.get(left.element) ?? 0) + 1);
+        }
+    }
+
+    return Array.from(flows.values(), ({ from, to, total, byElement }) => ({
+        from,
+        to,
+        total,
+        byElement,
+    }));
+}

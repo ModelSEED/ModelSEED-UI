@@ -4,6 +4,7 @@ import {
     groupAtomMappingsByCompound,
     parseAtomMappingEntry,
     parseAtomMappings,
+    summarizeAtomFlows,
 } from '@/lib/utils/atomMapping';
 
 // Five real upstream lines (rxn00001), the last two sharing cpd00009:O#3.
@@ -13,6 +14,11 @@ const UPSTREAM_LINES = [
     'rxn00001 cpd00012:O#2=cpd00009:O#2',
     'rxn00001 cpd00012:O#3=cpd00009:O#3',
     'rxn00001 cpd00012:O#4=cpd00009:O#3',
+    'rxn00001 cpd00012:O#5=cpd00009:O#1',
+    'rxn00001 cpd00012:O#6=cpd00009:O#4',
+    'rxn00001 cpd00012:O#7=cpd00009:O#4',
+    'rxn00001 cpd00012:P#1=cpd00009:P#1',
+    'rxn00001 cpd00012:P#2=cpd00009:P#1',
 ];
 
 describe('parseAtomMappingEntry', () => {
@@ -92,9 +98,9 @@ describe('parseAtomMappings', () => {
         expect(pairs[1].raw).toBe('cpd00012:O#1=cpd00009:O#1');
     });
 
-    it('parses all five real upstream lines in order', () => {
+    it('parses all real upstream lines in order', () => {
         const pairs = parseAtomMappings(UPSTREAM_LINES);
-        expect(pairs).toHaveLength(5);
+        expect(pairs).toHaveLength(10);
         expect(pairs.map((p) => p.raw)).toEqual(
             UPSTREAM_LINES.map((l) => l.replace(/^rxn\d+\s+/, '')),
         );
@@ -107,8 +113,8 @@ describe('groupAtomMappingsByCompound', () => {
         const groups = groupAtomMappingsByCompound(pairs);
 
         expect(groups.get('cpd00001')).toHaveLength(1);
-        expect(groups.get('cpd00009')).toHaveLength(5);
-        expect(groups.get('cpd00012')).toHaveLength(4);
+        expect(groups.get('cpd00009')).toHaveLength(10);
+        expect(groups.get('cpd00012')).toHaveLength(9);
     });
 
     it('adds a self-pair to its shared compound bucket exactly once', () => {
@@ -130,15 +136,54 @@ describe('groupAtomMappingsByCompound', () => {
     });
 });
 
+describe('summarizeAtomFlows', () => {
+    it('summarizes the real rxn00001 mappings by directed compound pair', () => {
+        const flows = summarizeAtomFlows(parseAtomMappings(UPSTREAM_LINES));
+
+        expect(flows).toHaveLength(2);
+        expect(flows[0]).toMatchObject({ from: 'cpd00001', to: 'cpd00009', total: 1 });
+        expect(Array.from(flows[0].byElement)).toEqual([['O', 1]]);
+        expect(flows[1]).toMatchObject({ from: 'cpd00012', to: 'cpd00009', total: 9 });
+        expect(Array.from(flows[1].byElement)).toEqual([['O', 7], ['P', 2]]);
+    });
+
+    it('returns an empty array for empty input', () => {
+        expect(summarizeAtomFlows([])).toEqual([]);
+    });
+
+    it('keeps self-pairs and counts a repeated source atom once', () => {
+        const flows = summarizeAtomFlows(parseAtomMappings([
+            'cpd00001:O#1=cpd00001:O#2',
+            'cpd00001:O#1=cpd00001:O#3',
+        ]));
+
+        expect(flows[0]).toMatchObject({ from: 'cpd00001', to: 'cpd00001', total: 1 });
+    });
+
+    it('preserves first appearance order for flow groups', () => {
+        const flows = summarizeAtomFlows(parseAtomMappings([
+            'cpd00002:O#1=cpd00003:O#1',
+            'cpd00001:O#1=cpd00003:O#2',
+            'cpd00002:P#1=cpd00003:P#1',
+        ]));
+
+        expect(flows.map(({ from, to }) => `${from}>${to}`)).toEqual([
+            'cpd00002>cpd00003',
+            'cpd00001>cpd00003',
+        ]);
+    });
+});
+
 describe('countAtomsPerElement', () => {
     it('counts distinct atom indices per element per compound', () => {
         const pairs = parseAtomMappings(UPSTREAM_LINES);
         const counts = countAtomsPerElement(pairs);
 
-        // cpd00009:O appears at indices 2, 1, 2, 3, 3 across the five lines -> 3 distinct.
-        expect(counts.get('cpd00009')?.get('O')).toBe(3);
-        // cpd00012:O appears at indices 1, 2, 3, 4 -> 4 distinct.
-        expect(counts.get('cpd00012')?.get('O')).toBe(4);
+        // cpd00009:O appears at indices 2, 1, 2, 3, 3, 1, 4, 4 -> 4 distinct.
+        expect(counts.get('cpd00009')?.get('O')).toBe(4);
+        // cpd00012:O appears at indices 1 through 7 -> 7 distinct.
+        expect(counts.get('cpd00012')?.get('O')).toBe(7);
+        expect(counts.get('cpd00012')?.get('P')).toBe(2);
         // cpd00001:O appears once.
         expect(counts.get('cpd00001')?.get('O')).toBe(1);
     });
