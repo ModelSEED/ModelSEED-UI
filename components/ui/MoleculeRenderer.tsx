@@ -200,10 +200,8 @@ export default function MoleculeRenderer({
                 height={height}
                 style={{
                     objectFit: 'contain',
-                    border: '1px solid #e0e0e0',
                     borderRadius: 4,
                     padding: 4,
-                    background: '#fff',
                 }}
                 onError={() => setState('hidden')}
             />
@@ -220,9 +218,7 @@ export default function MoleculeRenderer({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px dashed #cbd5e1',
                 borderRadius: 4,
-                background: '#f8fafc',
                 padding: 8,
                 boxSizing: 'border-box',
             }}

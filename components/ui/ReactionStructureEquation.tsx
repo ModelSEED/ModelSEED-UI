@@ -113,8 +113,9 @@ function CompoundColumn({ token, data, inventory, atomColors, elementColors, map
     const simple = isSimpleIon(inventory);
     const label = data?.name || token.id;
     const metadata = [token.id, data?.formula, formatCharge(data?.charge)].filter(Boolean).join(' · ');
+    const elementColorValues = Object.values(elementColors ?? {});
     const contents = simple ? (
-        <Typography variant="body1" sx={{ fontWeight: 600, color: Object.values(elementColors ?? {})[0] }}>
+        <Typography variant="body1" sx={{ fontWeight: 600, ...(elementColorValues.length === 1 ? { color: elementColorValues[0] } : {}) }}>
             {label}{formatCharge(data?.charge) && <sup>{formatCharge(data?.charge)}</sup>}
         </Typography>
     ) : (
@@ -183,7 +184,7 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
     const allIds = useMemo(() => [...parsed.reactants, ...parsed.products].map((token) => token.id), [parsed]);
     const uniqueCompoundIds = useMemo(() => Array.from(new Set(allIds)), [allIds]);
     const compoundIdsKey = useMemo(() => [...uniqueCompoundIds].sort().join(','), [uniqueCompoundIds]);
-    const { data: compoundMap, isLoading } = useQuery({
+    const { data: compoundMap, isLoading, error } = useQuery({
         queryKey: ['reaction-structure-compounds', compoundIdsKey], queryFn: () => getCompoundsForReaction(uniqueCompoundIds),
         enabled: uniqueCompoundIds.length > 0, staleTime: 5 * 60 * 1000,
     });
@@ -203,6 +204,8 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
     const useElementColors = pairs.length > 0;
     const plan = useMemo(() => buildAtomMappingColorPlan(pairs, inventories), [pairs, inventories]);
     const reasons = useMemo(() => Array.from(new Set(plan.unmappable.map((block) => block.reason).filter((reason): reason is UnmappableReason => Boolean(reason)))).map((reason) => REASON_TEXT[reason]), [plan]);
+    const hasMultiElementSimpleIon = useMemo(() => uniqueCompoundIds.some((compoundId) => isSimpleIon(inventories[compoundId])
+        && Object.keys(elementColorsForCompound(plan, compoundId)).length > 1), [uniqueCompoundIds, inventories, plan]);
 
     if (!equation) return null;
     if (isLoading) return <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', py: 1 }}>{allIds.map((id, index) => <Skeleton key={`${id}-${index}`} variant="rectangular" width={150} height={150} sx={{ borderRadius: 1 }} />)}</Box>;
@@ -213,6 +216,7 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
             <Typography variant="h5" aria-hidden="true" sx={{ color: 'text.primary', fontWeight: 300, flexShrink: 0, px: 1, userSelect: 'none' }}>{arrow}</Typography>
             <EquationSide tokens={parsed.products} displayMap={displayMap} inventories={inventories} atomMapping={atomMapping} useElementColors={useElementColors} plan={plan} callbacks={inventoryCallbacks} />
         </Box>
+        {error && <Typography variant="caption" color="text.secondary">Compound details could not be loaded.</Typography>}
         {useElementColors && <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {(plan.colorableCount > 0 || atomMappingConfidence || atomMappingHasSymmetryGroups) && <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                 {plan.colorableCount > 0 && <Typography variant="body2" sx={{ fontWeight: 600 }}>Atom mapping</Typography>}
@@ -225,7 +229,7 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
                     <Typography variant="caption">{entry.element}: {entry.compoundIds.join(' and ')}</Typography>
                 </Box>)}
             </Box>}
-            {reasons.length > 0 && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {reasons.join('; ')}.</Typography>}
+            {(reasons.length > 0 || hasMultiElementSimpleIon) && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {[...reasons, ...(hasMultiElementSimpleIon ? ['simple ions with multiple independently mapped elements'] : [])].join('; ')}.</Typography>}
         </Box>}
     </Box>;
 }
