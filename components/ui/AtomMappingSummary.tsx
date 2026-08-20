@@ -11,11 +11,13 @@ import {
     parseAtomMappings,
     groupAtomMappingsByCompound,
     countAtomsPerElement,
+    formatAtomGroup,
 } from '@/lib/utils/atomMapping';
 
 export interface AtomMappingSummaryProps {
     entries: readonly string[] | undefined;
     confidence?: string;
+    hasSymmetryGroups?: boolean;
 }
 
 function confidenceColor(value: string): 'success' | 'warning' | 'default' {
@@ -26,8 +28,13 @@ function confidenceColor(value: string): 'success' | 'warning' | 'default' {
 
 const compoundLinkStyle = { color: '#00838f', textDecoration: 'none', fontWeight: 600 };
 
-export default function AtomMappingSummary({ entries, confidence }: AtomMappingSummaryProps) {
+export default function AtomMappingSummary({
+    entries,
+    confidence,
+    hasSymmetryGroups,
+}: AtomMappingSummaryProps) {
     const pairs = useMemo(() => parseAtomMappings(entries), [entries]);
+    const grouped = useMemo(() => pairs.filter((pair) => pair.hasSymmetryGroup), [pairs]);
     const [showAll, setShowAll] = useState(false);
 
     if (pairs.length === 0) return null;
@@ -46,6 +53,18 @@ export default function AtomMappingSummary({ entries, confidence }: AtomMappingS
                     <Chip size="small" label={confidence} color={confidenceColor(confidence)} />
                 )}
             </Box>
+
+            {(hasSymmetryGroups || grouped.length > 0) && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip size="small" label="symmetry groups" />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        A grouped mapping resolves to any one member of a set of symmetry-equivalent atoms, so the specific atom is not determined.
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {grouped.length} of {pairs.length} mappings resolve to a symmetry-equivalent group
+                    </Typography>
+                </Box>
+            )}
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4 }}>
                 {compoundIds.map((compoundId) => {
@@ -87,7 +106,9 @@ export default function AtomMappingSummary({ entries, confidence }: AtomMappingS
                                 variant="body2"
                                 sx={{ fontFamily: 'monospace' }}
                             >
-                                {pair.raw}
+                                {pair.leftAtoms.length > 1 ? 'any of ' : ''}{formatAtomGroup(pair.leftAtoms)}
+                                {' = '}
+                                {pair.rightAtoms.length > 1 ? 'any of ' : ''}{formatAtomGroup(pair.rightAtoms)}
                             </Typography>
                         ))}
                     </Box>

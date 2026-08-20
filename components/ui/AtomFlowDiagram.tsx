@@ -15,6 +15,14 @@ const ROW_HEIGHT = 44;
 
 export default function AtomFlowDiagram({ pairs }: AtomFlowDiagramProps): React.ReactElement | null {
     const flows = useMemo(() => summarizeAtomFlows(pairs), [pairs]);
+    const groupedEdges = useMemo(
+        () => new Set(
+            pairs
+                .filter((pair) => pair.hasSymmetryGroup)
+                .map((pair) => `${pair.left.compoundId}>${pair.right.compoundId}`),
+        ),
+        [pairs],
+    );
 
     if (flows.length === 0) return null;
 
@@ -50,6 +58,7 @@ export default function AtomFlowDiagram({ pairs }: AtomFlowDiagramProps): React.
                             stroke="#00838f"
                             strokeOpacity="0.65"
                             strokeWidth={strokeWidth(flow.total)}
+                            strokeDasharray={groupedEdges.has(`${flow.from}>${flow.to}`) ? '6 4' : undefined}
                         >
                             <title>{`${flow.from} to ${flow.to}: ${flow.total} atoms (${breakdown})`}</title>
                         </line>
@@ -71,6 +80,7 @@ export default function AtomFlowDiagram({ pairs }: AtomFlowDiagramProps): React.
                 ))}
             </svg>
             <small>Counts are mapped atoms per compound pair; individual atom positions are not shown.</small>
+            {groupedEdges.size > 0 && <small>A dashed edge carries at least one symmetry-grouped mapping.</small>}
         </div>
     );
 }

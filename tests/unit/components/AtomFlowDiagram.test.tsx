@@ -32,5 +32,17 @@ describe('AtomFlowDiagram', () => {
         expect(getByText('cpd00009').closest('a')?.getAttribute('href')).toBe(
             '/biochem/compounds/cpd00009',
         );
+        expect(container.querySelector('line')?.getAttribute('stroke-dasharray')).toBeNull();
+        expect(container.textContent).not.toContain('A dashed edge carries');
+    });
+
+    it('uses a dashed edge and legend for symmetry-grouped mappings', () => {
+        const pairs = parseAtomMappings(['cpd00001:(O#1;O#2)=cpd00009:O#1']);
+        const { container } = render(<AtomFlowDiagram pairs={pairs} />);
+
+        expect(container.querySelector('line')?.getAttribute('stroke-dasharray')).toBe('6 4');
+        expect(container.textContent).toContain(
+            'A dashed edge carries at least one symmetry-grouped mapping.',
+        );
     });
 });

@@ -17,7 +17,7 @@ import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation
 import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 import AtomMappingSummary from '@/components/ui/AtomMappingSummary';
 import AtomFlowDiagram from '@/components/ui/AtomFlowDiagram';
-import { parseAtomMappings } from '@/lib/utils/atomMapping';
+import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
 import {
     directionAgreementFromRecords,
     DIRECTION_AGREEMENT_COLOR,
@@ -318,7 +318,8 @@ export default function ReactionDetailPage() {
         enabled: !!id,
     });
 
-    const atomPairs = useMemo(() => parseAtomMappings(rxn?.atom_mapping), [rxn?.atom_mapping]);
+    const atomMapping = useMemo(() => normalizeAtomMapping(rxn), [rxn]);
+    const atomPairs = useMemo(() => parseAtomMappings(atomMapping.entries), [atomMapping.entries]);
 
     if (isLoading) {
         return (
@@ -511,8 +512,9 @@ export default function ReactionDetailPage() {
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                                 <AtomFlowDiagram pairs={atomPairs} />
                                 <AtomMappingSummary
-                                    entries={rxn.atom_mapping}
-                                    confidence={rxn.atom_mapping_confidence}
+                                    entries={atomMapping.entries}
+                                    confidence={atomMapping.confidence}
+                                    hasSymmetryGroups={atomMapping.hasSymmetryGroups}
                                 />
                             </Box>
                         </DetailRow>

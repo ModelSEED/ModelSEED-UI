@@ -56,7 +56,25 @@ describe('AtomMappingSummary', () => {
 
         fireEvent.click(getByText('Show all mappings'));
 
-        expect(container.textContent).toContain('cpd00001:O#1=cpd00009:O#2');
-        expect(container.textContent).toContain('cpd00012:O#4=cpd00009:O#3');
+        expect(container.textContent).toContain('O#1 = O#2');
+        expect(container.textContent).toContain('O#4 = O#3');
+    });
+
+    it('explains symmetry groups and labels multi-member sides as any of', () => {
+        const { container, getByText } = render(
+            <AtomMappingSummary
+                entries={['cpd00001:(O#1;O#2)=cpd00009:O#3']}
+                hasSymmetryGroups
+            />,
+        );
+
+        expect(container.textContent).toContain('symmetry groups');
+        expect(container.textContent).toContain(
+            'A grouped mapping resolves to any one member of a set of symmetry-equivalent atoms, so the specific atom is not determined.',
+        );
+        expect(container.textContent).toContain('1 of 1 mappings resolve to a symmetry-equivalent group');
+
+        fireEvent.click(getByText('Show all mappings'));
+        expect(container.textContent).toContain('any of O#1, O#2 = O#3');
     });
 });
