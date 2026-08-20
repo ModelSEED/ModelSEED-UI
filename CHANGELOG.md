@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
+### Known Issues
+- RAST MS FBA not working
+- PATRIC-only model submission
+- Workspace write operations limited
+
+### Expected Behaviors
+- Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.2.0] - 2026-08-20
+
+### Added
+- Reaction structure equations now use an open, continuous canvas with prominent common names, secondary IDs, formulas and charges; plain `+` and direction operators; text-rendered simple ions; and compound-page links
+- Reaction atom mappings now colour atoms and bonds by mapped group across reactants and products, with a legend that discloses mappings that cannot safely be coloured
+- Mapping colours are applied only to fully covered, mutually mapped compound-element blocks, never by treating InChI canonical-order `#N` indices as renderer atom indices
+
+### Changed
+- Replaced the flat reaction atom-flow diagram with the structure canvas; the raw mapping list remains available as secondary detail
+
 ### Added
 - Compound and reaction detail pages now list every thermodynamics record returned by the upgraded Solr schema, one row per source with energy, error and (for reactions) direction operator
 - Compound detail page now shows all pKa and pKb values instead of only the first
