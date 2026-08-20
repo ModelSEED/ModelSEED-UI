@@ -55,6 +55,10 @@ export interface Reaction {
     atom_mapping?: string[];
     atom_mapping_confidence?: string;
     has_atom_mapping?: boolean;
+    /** Live Solr `atom_mapping_data` field. */
+    atom_mapping_data?: string[];
+    /** Live Solr `atom_mapping_has_symmetry_groups` field. */
+    atom_mapping_has_symmetry_groups?: boolean;
 }
 
 export interface Compound {
