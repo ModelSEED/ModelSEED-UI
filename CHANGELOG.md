@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compound detail page now shows all pKa and pKb values instead of only the first
 - Reaction detail page now shows an atom-mapping summary with per-compound element counts, a confidence indicator and an expandable raw list
 - Reaction detail page now visualises atom mappings as a reactant-to-product atom-flow diagram, with one edge per compound pair scaled by the number of mapped atoms and a per-element breakdown
+- Reaction atom mappings now disclose symmetry-equivalent groups in summaries and diagrams without claiming a specific atom correspondence
 - All of the above is feature-detected, so pages render exactly as before against the current production Solr
+
+### Fixed
+- Reaction detail pages now read the live Solr `atom_mapping_data` field while retaining legacy `atom_mapping` fallback
 
 ### Changed
 - Reaction thermodynamics direction agreement is now derived from the per-source direction operators rather than a single server flag, and reports three states: "Sources agree on direction" (all operators identical), "Sources could agree on direction" (only one angle-bracket direction, optionally mixed with `=`) and "Sources disagree on direction" (both `>` and `<` present)
