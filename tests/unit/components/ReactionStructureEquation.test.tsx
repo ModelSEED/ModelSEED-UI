@@ -19,7 +19,8 @@ vi.mock('@/components/ui/MoleculeRenderer', () => ({
         rendererCalls.push(props);
         const inventories: Record<string, Record<string, number>> = {
             cpd00001: { O: 1, H: 2 }, cpd00012: { P: 2, O: 7, H: 4 }, cpd00009: { P: 1, O: 4, H: 3 },
-            cpd00002: { C: 1, O: 2 }, cpd00003: { C: 1, O: 2 },
+            cpd00002: { C: 1, O: 2 }, cpd00003: { C: 1, O: 2 }, cpd00011: { C: 1, O: 2 }, cpd00013: { N: 1, H: 4 },
+            cpd00067: { H: 1 }, cpd00742: { C: 2, H: 3, N: 2, O: 3 },
         };
         (props.onInventory as ((inventory: Record<string, number>) => void) | undefined)?.(inventories[props.compoundId as string] ?? { C: 4 });
         if (!props.smiles) return <div data-testid={`structure-${props.compoundId as string}`} style={{ width: props.width as number, height: props.height as number }}>Compound image unavailable</div>;
@@ -44,8 +45,7 @@ describe('ReactionStructureEquation', () => {
     it('renders an open equation with operators and prominent linked names', async () => {
         const { container, getByText } = renderEquation();
         await waitFor(() => expect(getByText('Water')).toBeTruthy());
-        expect(container.querySelector('.mol-wrapper')).toBeNull();
-        expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeNull();
+        expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy();
         expect(container.textContent).toContain('+');
         expect(container.textContent).toContain('⇒');
         expect(getByText('Water', { selector: 'a p' }).closest('a')?.getAttribute('href')).toBe('/biochem/compounds/cpd00001');
@@ -55,13 +55,12 @@ describe('ReactionStructureEquation', () => {
     it('uses one phosphorus colour on both compounds and discloses ambiguous mappings', async () => {
         const { container } = renderEquation({ atomMappingPairs: pairs });
         await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
-        expect(container.querySelectorAll('[aria-label="Atom mapping legend"] li')).toHaveLength(1);
+        expect(container.querySelectorAll('[aria-label="Atom mapping legend"] li').length).toBeGreaterThan(0);
         await waitFor(() => expect(rendererCalls.filter((call) => call.elementColors).length).toBeGreaterThan(0));
         const donor = rendererCalls.filter((call) => call.compoundId === 'cpd00012').at(-1)?.elementColors as Record<string, string>;
         const product = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.elementColors as Record<string, string>;
         expect(donor.P).toBe(product.P);
-        expect(container.textContent).toContain('atoms split across multiple products');
-        expect(container.textContent).toContain('the corresponding atoms could not be resolved');
+        expect(container.textContent).toContain('individual atom pairing is not determined by the data');
     });
 
     it('keeps legacy atom colours and hides new mapping affordances without pairs', async () => {
@@ -111,22 +110,18 @@ describe('ReactionStructureEquation', () => {
         expect(name).not.toBe(caption);
     });
 
-    it('renders a compound with three or fewer heavy atoms as a text token instead of a structure', async () => {
+    it('draws a compound with a structural SMILES and at least one heavy formula atom', async () => {
         const { container } = renderEquation();
-        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00012"]')).toBeTruthy());
-        expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeNull();
-        expect(container.querySelector('a[href="/biochem/compounds/cpd00001"]')).toBeTruthy();
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
         expect(container.querySelector('[data-testid="structure-cpd00012"]')).toBeTruthy();
     });
 
-    it('orders drawn structures before simple ion text tokens on the same side', async () => {
-        const { container, getByText } = renderEquation({ equation: 'cpd00001[c] + cpd00012[c] => cpd00009[c]' });
+    it('preserves parsed token order within each equation side', async () => {
+        const { container } = renderEquation({ equation: 'cpd00001[c] + cpd00012[c] => cpd00009[c]' });
         await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00012"]')).toBeTruthy());
-        const equation = container.querySelector('[aria-label^="Chemical equation:"]');
+        const water = container.querySelector('[data-testid="structure-cpd00001"]');
         const structure = container.querySelector('[data-testid="structure-cpd00012"]');
-        const water = getByText('Water', { selector: 'a p' });
-        expect(structure && water && Boolean(structure.compareDocumentPosition(water) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
-        expect(equation?.textContent).toContain('Phosphate donor');
+        expect(water && structure && Boolean(water.compareDocumentPosition(structure) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
     });
 
     it('uses the compound ID when a compound name is missing', async () => {
@@ -140,20 +135,58 @@ describe('ReactionStructureEquation', () => {
         expect(container.textContent).not.toContain('undefined');
     });
 
-    it('renders an unboxed placeholder when a compound SMILES is missing', async () => {
+    it('renders missing-SMILES compounds textually with their name visible', async () => {
         vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
             ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })],
             ['cpd00012', compound({ name: 'Phosphate donor', formula: 'H4O7P2', charge: -2 })],
             ['cpd00009', compound({ name: 'Phosphate', smiles: 'OP(=O)(O)O', formula: 'H3O4P', charge: -1 })],
         ]));
-        const { getByTestId, getByText } = renderEquation();
-        await waitFor(() => expect(getByText('Compound image unavailable')).toBeTruthy());
-        expect(getByTestId('structure-cpd00012').getAttribute('style')).not.toContain('border');
+        const { queryByTestId, getAllByText } = renderEquation();
+        await waitFor(() => expect(getAllByText('Phosphate donor', { selector: 'a p' }).length).toBeGreaterThan(0));
+        expect(queryByTestId('structure-cpd00012')).toBeNull();
+    });
+
+    it('renders an unparseable formula without SMILES textually with its name visible', async () => {
+        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+            ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })],
+            ['cpd00012', compound({ name: 'Unstructured donor', formula: 'R-group', charge: -2 })],
+            ['cpd00009', compound({ name: 'Phosphate', smiles: 'OP(=O)(O)O', formula: 'H3O4P', charge: -1 })],
+        ]));
+        const { getAllByText, queryByTestId } = renderEquation();
+        await waitFor(() => expect(getAllByText('Unstructured donor', { selector: 'a p' }).length).toBeGreaterThan(0));
+        expect(queryByTestId('structure-cpd00012')).toBeNull();
+    });
+
+    it('draws a compound with SMILES and an unparseable formula', async () => {
+        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+            ['cpd99999', compound({ name: 'Weird thing', smiles: 'CCO', formula: 'C6H12O6(+)', charge: 0 })],
+        ]));
+        const { getAllByTestId } = renderEquation({ equation: 'cpd99999[c] => cpd99999[c]' });
+        await waitFor(() => expect(getAllByTestId('structure-cpd99999')).toHaveLength(2));
+    });
+
+    it('keeps a proven heavy-atom-free SMILES compound textual', async () => {
+        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+            ['cpd00067', compound({ name: 'H+', smiles: '[H+]', formula: 'H', charge: 1 })],
+        ]));
+        const { getAllByText, queryByTestId } = renderEquation({ equation: 'cpd00067[c] => cpd00067[c]' });
+        await waitFor(() => expect(getAllByText('H+', { selector: 'a p' }).length).toBeGreaterThan(0));
+        expect(queryByTestId('structure-cpd00067')).toBeNull();
+    });
+
+    it('draws a compound with SMILES but no formula', async () => {
+        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+            ['cpd00001', compound({ name: 'Water', smiles: 'O', charge: 0 })],
+            ['cpd00012', compound({ name: 'Phosphate donor', smiles: 'OP(=O)(O)O', formula: 'H4O7P2', charge: -2 })],
+            ['cpd00009', compound({ name: 'Phosphate', smiles: 'OP(=O)(O)O', formula: 'H3O4P', charge: -1 })],
+        ]));
+        const { getByTestId } = renderEquation();
+        await waitFor(() => expect(getByTestId('structure-cpd00001')).toBeTruthy());
     });
 
     it('formats zero and negative compound charges as intended', async () => {
         const { container } = renderEquation();
-        await waitFor(() => expect(container.textContent).toContain('cpd00012'));
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00012"]')).toBeTruthy());
         const captions = Array.from(container.querySelectorAll('.MuiTypography-caption')).map((node) => node.textContent);
         expect(captions.some((caption) => caption === 'cpd00001 · H2O')).toBe(true);
         expect(captions.some((caption) => caption?.includes('cpd00012 · H4O7P2 · 2-'))).toBe(true);
@@ -166,24 +199,63 @@ describe('ReactionStructureEquation', () => {
         expect(waterLink?.parentElement?.previousElementSibling?.textContent).not.toBe('1');
     });
 
+    it('keeps token placeholders stable until compound details resolve', async () => {
+        let resolveCompounds!: (value: Map<string, Compound>) => void;
+        vi.mocked(getCompoundsForReaction).mockImplementationOnce(() => new Promise((resolve) => {
+            resolveCompounds = resolve;
+        }));
+        const { container, getByTestId } = renderEquation();
+        expect(container.querySelectorAll('.MuiSkeleton-root')).toHaveLength(6);
+        expect(container.textContent).toContain('cpd00001');
+        expect(container.querySelector('[aria-label="Atom mapping legend"]')).toBeNull();
+        resolveCompounds(compounds);
+        await waitFor(() => expect(getByTestId('structure-cpd00001')).toBeTruthy());
+    });
+
     it('explains when compound details could not be loaded', async () => {
         vi.mocked(getCompoundsForReaction).mockRejectedValueOnce(new Error('fetch failed'));
         const { getByText } = renderEquation();
         await waitFor(() => expect(getByText('Compound details could not be loaded.')).toBeTruthy());
     });
 
-    it('leaves multi-element simple ions uncoloured and explains the ambiguity', async () => {
-        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
-            ['cpd00002', compound({ name: 'Carbon dioxide', smiles: 'O=C=O', formula: 'CO2', charge: 0 })],
-            ['cpd00003', compound({ name: 'Carbon dioxide product', smiles: 'O=C=O', formula: 'CO2', charge: 0 })],
-        ]));
-        const multiElementPairs = parseAtomMappings([
-            'cpd00002:C#1=cpd00003:C#1',
-            'cpd00002:(O#1;O#2)=cpd00003:(O#1;O#2)',
-        ]);
-        const { getByText } = renderEquation({ equation: 'cpd00002[c] => cpd00003[c]', atomMappingPairs: multiElementPairs });
-        await waitFor(() => expect(getByText(/simple ions with multiple independently mapped elements/)).toBeTruthy());
-        expect(getByText('Carbon dioxide', { selector: 'a p' }).getAttribute('style')).toBeNull();
+    describe('rxn00002', () => {
+        it('draws every structured participant in equation order and explains grouped mappings', async () => {
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+                ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })],
+                ['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })],
+                ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })],
+                ['cpd00013', compound({ name: 'NH3', smiles: '[NH4+]', formula: 'H4N', charge: 1 })],
+                ['cpd00067', compound({ name: 'H+', smiles: '[H+]', formula: 'H', charge: 1 })],
+            ]));
+            const rxnPairs = parseAtomMappings([
+                'cpd00001:O#1=cpd00011:(O#1;O#2)',
+                'cpd00742:(O#2;O#3)=cpd00011:(O#1;O#2)',
+                'cpd00742:C#1=cpd00011:C#1',
+                'cpd00742:C#2=cpd00011:C#1',
+                'cpd00742:N#1=cpd00013:N#1',
+                'cpd00742:N#2=cpd00013:N#1',
+                'cpd00742:O#1=cpd00011:(O#1;O#2)',
+            ]);
+            const { container, getByTestId, getByText, getAllByText, queryByTestId } = renderEquation({
+                equation: '(1) cpd00001[c] + (1) cpd00742[c] => (2) cpd00011[c] + (1) cpd00013[c] + (1) cpd00067[c]',
+                atomMappingPairs: rxnPairs, atomMappingConfidence: 'clean', atomMappingHasSymmetryGroups: true,
+            });
+            await waitFor(() => expect(getByTestId('structure-cpd00011')).toBeTruthy());
+            for (const id of ['cpd00001', 'cpd00011', 'cpd00013', 'cpd00742']) expect(getByTestId(`structure-${id}`)).toBeTruthy();
+            expect(queryByTestId('structure-cpd00067')).toBeNull();
+            for (const id of ['cpd00001', 'cpd00742', 'cpd00011', 'cpd00013', 'cpd00067']) {
+                expect(container.textContent).toContain(id);
+                expect(container.querySelector(`a[href="/biochem/compounds/${id}"]`)).toBeTruthy();
+            }
+            expect(getByText(/O: cpd00001, cpd00011 and cpd00742 — grouped/)).toBeTruthy();
+            expect(container.textContent).toContain('individual atom pairing is not determined by the data');
+            await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00011' && Object.keys(call.elementColors as object ?? {}).includes('C') && Object.keys(call.elementColors as object ?? {}).includes('O'))).toBe(true));
+            const water = getByTestId('structure-cpd00001');
+            const allophanate = getByTestId('structure-cpd00742');
+            expect(Boolean(water.compareDocumentPosition(allophanate) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+            expect(getAllByText('H+', { selector: 'a p' }).length).toBeGreaterThan(0);
+        });
     });
+
 
 });

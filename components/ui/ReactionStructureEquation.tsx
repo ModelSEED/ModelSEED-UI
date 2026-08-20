@@ -10,6 +10,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { getCompoundsForReaction } from '@/lib/api/biochem';
+import { heavyAtomCount, isParsableFormula, parseFormulaInventory } from '@/lib/utils/chemicalFormula';
 import type { AtomMappingPair } from '@/lib/utils/atomMapping';
 import {
     buildAtomMappingColorPlan,
@@ -47,12 +48,16 @@ const EMPTY_MAP = new Map<string, DisplayData>();
 const REASON_TEXT: Record<UnmappableReason, string> = {
     'no-mapping': 'no mapping data',
     'element-mismatch': 'element mismatch between sides',
-    'multiple-destinations': 'atoms split across multiple products',
     'structure-unknown': 'structure unavailable',
     'partial-coverage': 'mapping covers only part of the structure',
-    'counterpart-unresolved': 'the corresponding atoms could not be resolved',
+    'counterpart-unresolved': 'no matching atoms found on the other side',
 };
 const compoundLinkStyle = { color: '#00838f', textDecoration: 'none', fontWeight: 600 };
+
+function joinCompoundIds(ids: readonly string[]): string {
+    if (ids.length <= 2) return ids.join(' and ');
+    return `${ids.slice(0, -1).join(', ')} and ${ids.at(-1)}`;
+}
 
 function parseEquation(equation: string): ParsedEquation {
     let arrow = '⇒';
@@ -76,12 +81,6 @@ function parseSide(side: string): CompoundToken[] {
     }).filter((token) => token.id.startsWith('cpd'));
 }
 
-function isSimpleIon(inventory: Inventory | undefined): boolean {
-    return inventory !== undefined
-        && Object.entries(inventory).filter(([element]) => element !== 'H')
-            .reduce((total, [, count]) => total + count, 0) <= 3;
-}
-
 function formatCharge(charge: number | undefined): string {
     if (!charge) return '';
     return `${Math.abs(charge) === 1 ? '' : Math.abs(charge)}${charge > 0 ? '+' : '-'}`;
@@ -102,23 +101,20 @@ function confidenceColor(value: string): 'success' | 'warning' | 'default' {
 interface CompoundColumnProps {
     token: CompoundToken;
     data?: DisplayData;
-    inventory?: Inventory;
     atomColors?: AtomColors;
     elementColors?: Readonly<Record<string, string>>;
     mappingDescription?: string;
     onInventory: (inventory: Inventory) => void;
+    isLoading: boolean;
 }
 
-function CompoundColumn({ token, data, inventory, atomColors, elementColors, mappingDescription, onInventory }: CompoundColumnProps) {
-    const simple = isSimpleIon(inventory);
+function CompoundColumn({ token, data, atomColors, elementColors, mappingDescription, onInventory, isLoading }: CompoundColumnProps) {
+    const drawStructure = Boolean(data?.smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1);
     const label = data?.name || token.id;
     const metadata = [token.id, data?.formula, formatCharge(data?.charge)].filter(Boolean).join(' · ');
-    const elementColorValues = Object.values(elementColors ?? {});
-    const contents = simple ? (
-        <Typography variant="body1" sx={{ fontWeight: 600, ...(elementColorValues.length === 1 ? { color: elementColorValues[0] } : {}) }}>
-            {label}{formatCharge(data?.charge) && <sup>{formatCharge(data?.charge)}</sup>}
-        </Typography>
-    ) : (
+    const contents = isLoading ? (
+        <Skeleton variant="rectangular" width={134} height={134} />
+    ) : drawStructure ? (
         <MoleculeRenderer
             smiles={data?.smiles}
             compoundId={token.id}
@@ -129,6 +125,10 @@ function CompoundColumn({ token, data, inventory, atomColors, elementColors, map
             height={134}
             alt={mappingDescription ? `Structure of ${label}; ${mappingDescription}` : `Structure of ${label}`}
         />
+    ) : (
+        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+            {label}{formatCharge(data?.charge) && <sup>{formatCharge(data?.charge)}</sup>}
+        </Typography>
     );
     return (
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, maxWidth: 160, minWidth: 0 }}>
@@ -136,38 +136,41 @@ function CompoundColumn({ token, data, inventory, atomColors, elementColors, map
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.4, minWidth: 0 }}>
                 <Tooltip title={mappingDescription ?? ''} disableHoverListener={!mappingDescription}>
                     <Box sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-                        <NextLink href={`/biochem/compounds/${token.id}`} aria-label={`Open ${label}`} style={simple ? compoundLinkStyle : undefined}>{contents}</NextLink>
+                        <NextLink href={`/biochem/compounds/${token.id}`} aria-label={`Open ${label}`} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
                     </Box>
                 </Tooltip>
-                {!simple && <NextLink href={`/biochem/compounds/${token.id}`} style={compoundLinkStyle}>
+                {isLoading ? <Skeleton variant="text" width={100} /> : <NextLink href={`/biochem/compounds/${token.id}`} style={compoundLinkStyle}>
                     <Typography variant="body1" sx={{ fontWeight: 600, textAlign: 'center', overflowWrap: 'anywhere' }}>{label}</Typography>
                 </NextLink>}
                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', overflowWrap: 'anywhere' }}>{metadata}</Typography>
+                {!isLoading && elementColors && <Box role="group" aria-label={`Mapped elements: ${Object.keys(elementColors).join(', ')}`} sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {Object.entries(elementColors).map(([element, color]) => <Box key={element} sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                        <Box aria-hidden="true" sx={{ width: 8, height: 8, bgcolor: color, borderRadius: '50%' }} />
+                        <Typography variant="caption">{element}</Typography>
+                    </Box>)}
+                </Box>}
             </Box>
         </Box>
     );
 }
 
-function EquationSide({ tokens, displayMap, inventories, atomMapping, useElementColors, plan, callbacks }: {
-    tokens: CompoundToken[]; displayMap: Map<string, DisplayData>; inventories: Record<string, Inventory>;
+function EquationSide({ tokens, displayMap, atomMapping, useElementColors, plan, callbacks, isLoading }: {
+    tokens: CompoundToken[]; displayMap: Map<string, DisplayData>;
     atomMapping?: ReactionAtomMapping; useElementColors: boolean; plan: ReturnType<typeof buildAtomMappingColorPlan>;
     callbacks: Readonly<Record<string, (inventory: Inventory) => void>>;
+    isLoading: boolean;
 }) {
-    const ordered = useMemo(() => {
-        const drawn = tokens.filter((token) => !isSimpleIon(inventories[token.id]));
-        return [...drawn, ...tokens.filter((token) => isSimpleIon(inventories[token.id]))];
-    }, [tokens, inventories]);
     return <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1.5 }}>
-        {ordered.map((token, index) => {
+        {tokens.map((token, index) => {
             const elementColors = useElementColors ? elementColorsForCompound(plan, token.id) : undefined;
             const colors = elementColors && Object.keys(elementColors).length > 0 ? elementColors : undefined;
             const descriptions = plan.blocks.filter((block) => block.colorable && block.compoundId === token.id)
                 .map((block) => `${block.element} mapped to ${block.counterpartCompoundIds.join(', ')}`);
             return <Box key={`${token.id}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <CompoundColumn token={token} data={displayMap.get(token.id)} inventory={inventories[token.id]}
+                <CompoundColumn token={token} data={displayMap.get(token.id)}
                     atomColors={useElementColors ? undefined : atomMapping?.[token.id]} elementColors={colors}
-                    mappingDescription={descriptions.join('; ') || undefined} onInventory={callbacks[token.id]} />
-                {index < ordered.length - 1 && <Typography variant="h6" aria-hidden="true" sx={{ color: 'text.secondary', fontWeight: 400 }}>+</Typography>}
+                    mappingDescription={descriptions.join('; ') || undefined} onInventory={callbacks[token.id]} isLoading={isLoading} />
+                {index < tokens.length - 1 && <Typography variant="h6" aria-hidden="true" sx={{ color: 'text.secondary', fontWeight: 400 }}>+</Typography>}
             </Box>;
         })}
     </Box>;
@@ -184,7 +187,7 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
     const allIds = useMemo(() => [...parsed.reactants, ...parsed.products].map((token) => token.id), [parsed]);
     const uniqueCompoundIds = useMemo(() => Array.from(new Set(allIds)), [allIds]);
     const compoundIdsKey = useMemo(() => [...uniqueCompoundIds].sort().join(','), [uniqueCompoundIds]);
-    const { data: compoundMap, isLoading, error } = useQuery({
+    const { data: compoundMap, error, isLoading } = useQuery({
         queryKey: ['reaction-structure-compounds', compoundIdsKey], queryFn: () => getCompoundsForReaction(uniqueCompoundIds),
         enabled: uniqueCompoundIds.length > 0, staleTime: 5 * 60 * 1000,
     });
@@ -202,22 +205,26 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
     const inventoryCallbacks = useMemo(() => Object.fromEntries(uniqueCompoundIds.map((id) => [id, (inventory: Inventory) => saveInventory(id, inventory)])), [uniqueCompoundIds, saveInventory]);
     const pairs = useMemo(() => atomMappingPairs ?? [], [atomMappingPairs]);
     const useElementColors = pairs.length > 0;
-    const plan = useMemo(() => buildAtomMappingColorPlan(pairs, inventories), [pairs, inventories]);
+    const inventoriesForPlan = useMemo(() => {
+        const seeded = Object.fromEntries(Array.from(displayMap.entries()).flatMap(([id, data]) => {
+            const inventory = parseFormulaInventory(data.formula);
+            return Object.keys(inventory).length > 0 ? [[id, inventory]] : [];
+        }));
+        return { ...seeded, ...inventories };
+    }, [displayMap, inventories]);
+    const plan = useMemo(() => buildAtomMappingColorPlan(pairs, inventoriesForPlan), [pairs, inventoriesForPlan]);
     const reasons = useMemo(() => Array.from(new Set(plan.unmappable.map((block) => block.reason).filter((reason): reason is UnmappableReason => Boolean(reason)))).map((reason) => REASON_TEXT[reason]), [plan]);
-    const hasMultiElementSimpleIon = useMemo(() => uniqueCompoundIds.some((compoundId) => isSimpleIon(inventories[compoundId])
-        && Object.keys(elementColorsForCompound(plan, compoundId)).length > 1), [uniqueCompoundIds, inventories, plan]);
 
     if (!equation) return null;
-    if (isLoading) return <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', py: 1 }}>{allIds.map((id, index) => <Skeleton key={`${id}-${index}`} variant="rectangular" width={150} height={150} sx={{ borderRadius: 1 }} />)}</Box>;
 
     return <Box>
         <Box aria-label={`Chemical equation: ${directionText(arrow)}`} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 2, py: 1 }}>
-            <EquationSide tokens={parsed.reactants} displayMap={displayMap} inventories={inventories} atomMapping={atomMapping} useElementColors={useElementColors} plan={plan} callbacks={inventoryCallbacks} />
+            <EquationSide tokens={parsed.reactants} displayMap={displayMap} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} callbacks={inventoryCallbacks} isLoading={isLoading} />
             <Typography variant="h5" aria-hidden="true" sx={{ color: 'text.primary', fontWeight: 300, flexShrink: 0, px: 1, userSelect: 'none' }}>{arrow}</Typography>
-            <EquationSide tokens={parsed.products} displayMap={displayMap} inventories={inventories} atomMapping={atomMapping} useElementColors={useElementColors} plan={plan} callbacks={inventoryCallbacks} />
+            <EquationSide tokens={parsed.products} displayMap={displayMap} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} callbacks={inventoryCallbacks} isLoading={isLoading} />
         </Box>
         {error && <Typography variant="caption" color="text.secondary">Compound details could not be loaded.</Typography>}
-        {useElementColors && <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        {useElementColors && !isLoading && <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {(plan.colorableCount > 0 || atomMappingConfidence || atomMappingHasSymmetryGroups) && <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                 {plan.colorableCount > 0 && <Typography variant="body2" sx={{ fontWeight: 600 }}>Atom mapping</Typography>}
                 {atomMappingConfidence && <Chip size="small" label={atomMappingConfidence} color={confidenceColor(atomMappingConfidence)} />}
@@ -226,10 +233,10 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
             {plan.colorableCount > 0 && <Box component="ul" aria-label="Atom mapping legend" sx={{ m: 0, pl: 2.5 }}>
                 {plan.legend.map((entry) => <Box component="li" key={entry.groupId} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                     <Box aria-hidden="true" sx={{ width: 12, height: 12, bgcolor: entry.color, borderRadius: '50%' }} />
-                    <Typography variant="caption">{entry.element}: {entry.compoundIds.join(' and ')}</Typography>
+                    <Typography variant="caption">{entry.element}: {entry.kind === 'one-to-one' ? entry.compoundIds.join(' and ') : `${joinCompoundIds(entry.compoundIds)} — grouped; individual atom pairing is not determined by the data`}{entry.uncoloredCompoundIds.length > 0 && ` (not coloured: ${joinCompoundIds(entry.uncoloredCompoundIds)})`}</Typography>
                 </Box>)}
             </Box>}
-            {(reasons.length > 0 || hasMultiElementSimpleIon) && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {[...reasons, ...(hasMultiElementSimpleIon ? ['simple ions with multiple independently mapped elements'] : [])].join('; ')}.</Typography>}
+            {reasons.length > 0 && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {reasons.join('; ')}.</Typography>}
         </Box>}
     </Box>;
 }
