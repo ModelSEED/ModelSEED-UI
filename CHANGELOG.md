@@ -20,25 +20,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.0] - 2026-08-20
 
 ### Added
-- Reaction structure equations now use an open, continuous canvas with prominent common names, secondary IDs, formulas and charges; plain `+` and direction operators; text-rendered simple ions; and compound-page links
+- Reaction structure equations now use an open, continuous canvas with prominent common names, secondary IDs, formulas and charges; plain `+` and direction operators; and compound-page links
+- Every reaction participant that has a structure is now drawn, including small species such as water, CO2 and ammonium; only heavy-atom-free species such as H+ stay textual, and they keep their name, formula, charge and compound link
 - Reaction atom mappings now colour atoms and bonds by mapped group across reactants and products, with a legend that discloses mappings that cannot safely be coloured
+- Atom mappings in which several compounds contribute the same element to one product are now coloured as one merged group, and the legend states plainly that individual atom pairing is not determined by the data; group members that are only partially covered are named as uncoloured rather than dropped
+- Each participant shows a labelled colour-dot row naming its mapped elements, so colour is never the only carrier of meaning
 - Mapping colours are applied only to fully covered, mutually mapped compound-element blocks, never by treating InChI canonical-order `#N` indices as renderer atom indices
-
-### Changed
-- Replaced the flat reaction atom-flow diagram with the structure canvas; the raw mapping list remains available as secondary detail
-
-### Added
 - Compound and reaction detail pages now list every thermodynamics record returned by the upgraded Solr schema, one row per source with energy, error and (for reactions) direction operator
 - Compound detail page now shows all pKa and pKb values instead of only the first
 - Reaction detail page now shows an atom-mapping summary with per-compound element counts, a confidence indicator and an expandable raw list
-- Reaction detail page now visualises atom mappings as a reactant-to-product atom-flow diagram, with one edge per compound pair scaled by the number of mapped atoms and a per-element breakdown
-- Reaction atom mappings now disclose symmetry-equivalent groups in summaries and diagrams without claiming a specific atom correspondence
+- Reaction atom mappings now disclose symmetry-equivalent groups without claiming a specific atom correspondence
 - All of the above is feature-detected, so pages render exactly as before against the current production Solr
 
 ### Fixed
 - Reaction detail pages now read the live Solr `atom_mapping_data` field while retaining legacy `atom_mapping` fallback
 
 ### Changed
+- Replaced the flat reaction atom-flow diagram with the structure canvas; the raw mapping list remains available as secondary detail
 - Reaction thermodynamics direction agreement is now derived from the per-source direction operators rather than a single server flag, and reports three states: "Sources agree on direction" (all operators identical), "Sources could agree on direction" (only one angle-bracket direction, optionally mixed with `=`) and "Sources disagree on direction" (both `>` and `<` present)
 
 ### Known Issues
