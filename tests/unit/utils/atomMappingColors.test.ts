@@ -19,27 +19,30 @@ function pairs(entries: readonly string[]): AtomMappingPair[] {
 }
 
 describe('buildAtomMappingColorPlan', () => {
-    it('safely colours only the mutually covered phosphorus blocks in the real rxn00001 payload', () => {
-        const plan = buildAtomMappingColorPlan(pairs(REAL_ENTRIES), {
-            cpd00001: { O: 1 },
-            cpd00012: { P: 2, O: 7 },
-            cpd00009: { P: 1, O: 4 },
+    it('colours merged components in the real rxn00002 payload', () => {
+        const plan = buildAtomMappingColorPlan(pairs([
+            'cpd00001:O#1=cpd00011:(O#1;O#2)',
+            'cpd00742:(O#2;O#3)=cpd00011:(O#1;O#2)',
+            'cpd00742:C#1=cpd00011:C#1',
+            'cpd00742:C#2=cpd00011:C#1',
+            'cpd00742:N#1=cpd00013:N#1',
+            'cpd00742:N#2=cpd00013:N#1',
+            'cpd00742:O#1=cpd00011:(O#1;O#2)',
+        ]), {
+            cpd00001: { O: 1, H: 2 },
+            cpd00011: { C: 1, O: 2 },
+            cpd00013: { N: 1, H: 4 },
+            cpd00742: { C: 2, H: 3, N: 2, O: 3 },
         });
-        const leftP = blockAssignment(plan, 'cpd00012', 'P');
-        const rightP = blockAssignment(plan, 'cpd00009', 'P');
-
-        expect(leftP.colorable).toBe(true);
-        expect(rightP.colorable).toBe(true);
-        // The parenthesized P group contributes both distinct mapped references.
-        expect(leftP.mappedIndexCount).toBe(2);
-        expect(leftP.groupId).toBe(rightP.groupId);
-        expect(leftP.color).toBe(MAPPING_PALETTE[0]);
-        expect(rightP.color).toBe(MAPPING_PALETTE[0]);
-        expect(blockAssignment(plan, 'cpd00009', 'O').reason).toBe('multiple-destinations');
-        expect(blockAssignment(plan, 'cpd00001', 'O').reason).toBe('counterpart-unresolved');
-        expect(blockAssignment(plan, 'cpd00012', 'O').reason).toBe('counterpart-unresolved');
-        expect(plan.colorableCount).toBe(2);
-        expect(plan.legend).toHaveLength(1);
+        expect(plan.legend).toHaveLength(3);
+        expect(plan.legend.map((entry) => entry.element).sort()).toEqual(['C', 'N', 'O']);
+        expect(plan.legend.find((entry) => entry.element === 'O')).toMatchObject({
+            kind: 'merged', compoundIds: ['cpd00001', 'cpd00011', 'cpd00742'],
+        });
+        expect(plan.legend.filter((entry) => entry.element !== 'O').map((entry) => entry.kind))
+            .toEqual(['one-to-one', 'one-to-one']);
+        expect(plan.unmappable).toEqual([]);
+        expect(new Set(plan.legend.map((entry) => entry.color)).size).toBe(3);
     });
 
     it('reports partial coverage when mapped indices do not cover the rendered structure', () => {
@@ -65,6 +68,25 @@ describe('buildAtomMappingColorPlan', () => {
         }], { cpd00001: { O: 1 }, cpd00002: { P: 1 } });
         expect(blockAssignment(plan, 'cpd00001', 'O').reason).toBe('element-mismatch');
         expect(blockAssignment(plan, 'cpd00002', 'P').reason).toBe('element-mismatch');
+    });
+
+    it('leaves a singleton component counterpart-unresolved', () => {
+        const plan = buildAtomMappingColorPlan(pairs(['cpd00001:O#1=cpd00002:O#1']), {
+            cpd00001: { O: 1 },
+        });
+        expect(blockAssignment(plan, 'cpd00001', 'O').reason).toBe('counterpart-unresolved');
+    });
+
+    it('terminates and colours a cyclic three-compound component', () => {
+        const plan = buildAtomMappingColorPlan(pairs([
+            'cpd00001:O#1=cpd00002:O#1',
+            'cpd00002:O#1=cpd00003:O#1',
+            'cpd00003:O#1=cpd00001:O#1',
+        ]), { cpd00001: { O: 1 }, cpd00002: { O: 1 }, cpd00003: { O: 1 } });
+        expect(plan.legend).toHaveLength(1);
+        expect(plan.legend[0]).toMatchObject({
+            kind: 'merged', compoundIds: ['cpd00001', 'cpd00002', 'cpd00003'],
+        });
     });
 
     it('synthesises no-mapping assignments for absent blocks', () => {
@@ -102,7 +124,9 @@ describe('buildAtomMappingColorPlan', () => {
         const plan = buildAtomMappingColorPlan(pairs(REAL_ENTRIES), {
             cpd00001: { O: 1 }, cpd00012: { P: 2, O: 7 }, cpd00009: { P: 1, O: 4 },
         });
-        expect(elementColorsForCompound(plan, 'cpd00012')).toEqual({ P: MAPPING_PALETTE[0] });
+        expect(elementColorsForCompound(plan, 'cpd00012')).toEqual({
+            O: MAPPING_PALETTE[0], P: MAPPING_PALETTE[1],
+        });
         expect(elementColorsForCompound(plan, 'missing')).toEqual({});
     });
 

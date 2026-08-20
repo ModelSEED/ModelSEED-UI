@@ -7,8 +7,10 @@ import type { AtomMappingPair, AtomRef } from './atomMapping';
  * 1-based per-element, per-compound indices in InChI canonical atom order,
  * not SMILES or RDKit atom indices. RDKit MinimalLib cannot recover that
  * order, so this module never emits or accepts atom-index-to-colour mappings:
- * an entire (compound, element) block is coloured only after full coverage
- * and mutuality make that scientifically safe.
+ * an entire (compound, element) block is coloured only after its mapped index
+ * count equals its structural atom count. Colours never assert atom-index-level
+ * correspondence; merged components assert only set-level correspondence among
+ * their fully covered member blocks.
  */
 
 export type ElementInventory = Readonly<Record<string, number>>;
@@ -16,10 +18,11 @@ export type ElementInventory = Readonly<Record<string, number>>;
 export type UnmappableReason =
     | 'no-mapping'
     | 'element-mismatch'
-    | 'multiple-destinations'
     | 'structure-unknown'
     | 'partial-coverage'
     | 'counterpart-unresolved';
+
+export type BlockGroupKind = 'one-to-one' | 'merged';
 
 export interface ElementBlockAssignment {
     readonly compoundId: string;
@@ -27,6 +30,8 @@ export interface ElementBlockAssignment {
     readonly colorable: boolean;
     readonly color?: string;
     readonly groupId?: string;
+    readonly kind?: BlockGroupKind;
+    readonly groupCompoundIds?: readonly string[];
     readonly counterpartCompoundIds: readonly string[];
     readonly mappedIndexCount: number;
     readonly structureAtomCount?: number;
@@ -38,6 +43,8 @@ export interface AtomMappingColorLegendEntry {
     readonly color: string;
     readonly element: string;
     readonly compoundIds: readonly string[];
+    readonly kind: BlockGroupKind;
+    readonly uncoloredCompoundIds: readonly string[];
 }
 
 export interface AtomMappingColorPlan {
@@ -123,18 +130,13 @@ function stateFor(
 ): BlockState {
     const counterpartCompoundIds = Array.from(block.counterparts).sort();
     const structureAtomCount = readInventory(inventories, block.compoundId, block.element);
-    let basicReason: UnmappableReason | undefined;
-
-    if (Array.from(block.counterpartElements).some((element) => element !== block.element)) {
-        basicReason = 'element-mismatch';
-    } else if (counterpartCompoundIds.length !== 1) {
-        basicReason = 'multiple-destinations';
-    } else if (structureAtomCount === undefined) {
-        basicReason = 'structure-unknown';
-    } else if (block.indices.size !== structureAtomCount) {
-        basicReason = 'partial-coverage';
-    }
-
+    const basicReason = Array.from(block.counterpartElements).some((element) => element !== block.element)
+        ? 'element-mismatch' as const
+        : structureAtomCount === undefined
+            ? 'structure-unknown' as const
+            : block.indices.size !== structureAtomCount
+                ? 'partial-coverage' as const
+                : undefined;
     return { block, counterpartCompoundIds, structureAtomCount, basicReason };
 }
 
@@ -147,58 +149,102 @@ export function buildAtomMappingColorPlan(
     for (const pair of Array.isArray(pairs) ? pairs : []) {
         const leftAtoms = Array.isArray(pair?.leftAtoms) ? pair.leftAtoms : [];
         const rightAtoms = Array.isArray(pair?.rightAtoms) ? pair.rightAtoms : [];
-        for (const ref of leftAtoms) {
-            if (isAtomRef(ref)) accumulateBlock(blocks, ref, rightAtoms);
-        }
-        for (const ref of rightAtoms) {
-            if (isAtomRef(ref)) accumulateBlock(blocks, ref, leftAtoms);
-        }
+        for (const ref of leftAtoms) if (isAtomRef(ref)) accumulateBlock(blocks, ref, rightAtoms);
+        for (const ref of rightAtoms) if (isAtomRef(ref)) accumulateBlock(blocks, ref, leftAtoms);
     }
 
     const states = new Map<string, BlockState>();
     for (const [key, block] of blocks) states.set(key, stateFor(block, inventories));
-
-    const colorableGroups = new Map<string, { element: string; compoundIds: readonly string[] }>();
+    const neighbors = new Map<string, Set<string>>();
+    for (const key of states.keys()) neighbors.set(key, new Set<string>());
     for (const [key, state] of states) {
-        if (state.basicReason || state.counterpartCompoundIds.length !== 1) continue;
-        const counterpartCompoundId = state.counterpartCompoundIds[0];
-        const counterpartKey = blockKey(counterpartCompoundId, state.block.element);
-        const counterpart = states.get(counterpartKey);
-        if (!counterpart || counterpart.basicReason || counterpart.counterpartCompoundIds.length !== 1
-            || counterpart.counterpartCompoundIds[0] !== state.block.compoundId) continue;
+        if (state.basicReason === 'element-mismatch') continue;
+        for (const compoundId of state.counterpartCompoundIds) {
+            const counterpartKey = blockKey(compoundId, state.block.element);
+            if (states.has(counterpartKey)) {
+                neighbors.get(key)?.add(counterpartKey);
+                neighbors.get(counterpartKey)?.add(key);
+            }
+        }
+    }
 
-        const groupId = [key, counterpartKey].sort().join('=');
-        colorableGroups.set(groupId, {
-            element: state.block.element,
-            compoundIds: [state.block.compoundId, counterpartCompoundId].sort(),
+    const components: string[][] = [];
+    const componentForKey = new Map<string, number>();
+    for (const key of Array.from(states.keys()).sort((left, right) => left.localeCompare(right))) {
+        if (componentForKey.has(key)) continue;
+        const component: string[] = [];
+        const queue = [key];
+        componentForKey.set(key, components.length);
+        while (queue.length > 0) {
+            const current = queue.shift()!;
+            component.push(current);
+            for (const neighbor of neighbors.get(current) ?? []) {
+                if (!componentForKey.has(neighbor)) {
+                    componentForKey.set(neighbor, components.length);
+                    queue.push(neighbor);
+                }
+            }
+        }
+        components.push(component.sort((left, right) => left.localeCompare(right)));
+    }
+
+    const componentGroups = new Map<number, {
+        readonly groupId: string;
+        readonly element: string;
+        readonly compoundIds: readonly string[];
+        readonly uncoloredCompoundIds: readonly string[];
+        readonly kind: BlockGroupKind;
+        readonly colorable: boolean;
+    }>();
+    for (const [index, component] of components.entries()) {
+        const members = component.map((key) => states.get(key)!);
+        const candidates = members.filter((state) => !state.basicReason);
+        const compoundIds = Array.from(new Set(members.map((state) => state.block.compoundId)))
+            .sort((left, right) => left.localeCompare(right));
+        const colorable = candidates.length >= 2 && compoundIds.length >= 2;
+        componentGroups.set(index, {
+            groupId: component.join('='),
+            element: members[0].block.element,
+            compoundIds,
+            uncoloredCompoundIds: Array.from(new Set(members.filter((state) => state.basicReason)
+                .map((state) => state.block.compoundId))).sort((left, right) => left.localeCompare(right)),
+            kind: component.length === 2 && members.every((state) => state.counterpartCompoundIds.length === 1)
+                ? 'one-to-one' : 'merged',
+            colorable,
         });
     }
 
     const groupColors = new Map<string, string>();
-    const legend = Array.from(colorableGroups.entries())
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([groupId, group], index) => {
+    const legend = Array.from(componentGroups.values()).filter((group) => group.colorable)
+        .sort((left, right) => left.groupId.localeCompare(right.groupId))
+        .map((group, index) => {
             const color = MAPPING_PALETTE[index % MAPPING_PALETTE.length];
-            groupColors.set(groupId, color);
-            return { groupId, color, element: group.element, compoundIds: group.compoundIds };
+            groupColors.set(group.groupId, color);
+            return {
+                groupId: group.groupId,
+                color,
+                element: group.element,
+                compoundIds: group.compoundIds,
+                kind: group.kind,
+                uncoloredCompoundIds: group.uncoloredCompoundIds,
+            };
         });
 
     const assignments = Array.from(states.entries())
         .sort(([, left], [, right]) => left.block.compoundId.localeCompare(right.block.compoundId)
             || left.block.element.localeCompare(right.block.element))
         .map(([key, state]): ElementBlockAssignment => {
-            const counterpartKey = state.counterpartCompoundIds.length === 1
-                ? blockKey(state.counterpartCompoundIds[0], state.block.element)
-                : undefined;
-            const groupId = counterpartKey ? [key, counterpartKey].sort().join('=') : undefined;
-            const color = groupId ? groupColors.get(groupId) : undefined;
-            if (color && groupId) {
+            const group = componentGroups.get(componentForKey.get(key)!);
+            const color = group?.colorable ? groupColors.get(group.groupId) : undefined;
+            if (color && group && !state.basicReason) {
                 return {
                     compoundId: state.block.compoundId,
                     element: state.block.element,
                     colorable: true,
                     color,
-                    groupId,
+                    groupId: group.groupId,
+                    kind: group.kind,
+                    groupCompoundIds: group.compoundIds,
                     counterpartCompoundIds: state.counterpartCompoundIds,
                     mappedIndexCount: state.block.indices.size,
                     structureAtomCount: state.structureAtomCount,
