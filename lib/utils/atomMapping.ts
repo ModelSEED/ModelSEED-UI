@@ -2,13 +2,13 @@
  * Parse the Solr-9 reaction `atom_mapping` field into typed, grouped atom-pair
  * records.
  *
- * Wire format: the field is an array of strings, ONE ATOM PAIR PER ELEMENT,
- * shaped as:
+ * Wire format: the field is an array of strings, shaped as:
  *
  *   cpdAAAAA:E#N=cpdBBBBB:E#M
+ *   cpdAAAAA:(E#N;E#N)=cpdBBBBB:E#M
  *
- * where `E` is an element symbol (e.g. `O`, `H`, `Mg`) and `N`/`M` are
- * 1-based atom indices. The raw upstream `.txt` export prefixes each line
+ * where a parenthesized side is a symmetry group and `E` is an element symbol
+ * (e.g. `O`, `H`, `Mg`). `N`/`M` are 1-based atom indices. The raw upstream `.txt` export prefixes each line
  * with a reaction id token (`rxn00001 cpd00001:O#1=cpd00009:O#2`); the Solr
  * field itself may or may not carry that prefix, so both forms are accepted.
  *
@@ -34,26 +34,114 @@ export interface AtomRef {
 export interface AtomMappingPair {
     left: AtomRef;
     right: AtomRef;
+    leftAtoms: readonly AtomRef[];
+    rightAtoms: readonly AtomRef[];
+    hasSymmetryGroup: boolean;
     raw: string;
+}
+
+export interface NormalizedAtomMapping {
+    entries: string[];
+    confidence?: string;
+    hasSymmetryGroups: boolean;
+    source: 'atom_mapping_data' | 'atom_mapping' | 'none';
+}
+
+export interface AtomMappingSource {
+    atom_mapping_data?: unknown;
+    atom_mapping?: unknown;
+    atom_mapping_confidence?: unknown;
+    atom_mapping_has_symmetry_groups?: unknown;
 }
 
 const LEADING_REACTION_ID = /^rxn\d+\s+/;
 const ATOM_REF = /^([A-Za-z][A-Za-z0-9]*\d+):([A-Za-z][a-z]?)#(\d+)$/;
+const COMPOUND_ID = /^[A-Za-z][A-Za-z0-9]*\d+$/;
+const SINGLE_ATOM_REF = /^([A-Za-z][a-z]?)#(\d+)$/;
+
+function toStringArray(value: unknown): string[] {
+    const values = Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
+    return values
+        .filter((entry): entry is string => typeof entry === 'string')
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+}
+
+export function normalizeAtomMapping(
+    doc: AtomMappingSource | null | undefined,
+): NormalizedAtomMapping {
+    const dataEntries = toStringArray(doc?.atom_mapping_data);
+    const legacyEntries = toStringArray(doc?.atom_mapping);
+    const entries = dataEntries.length > 0 ? dataEntries : legacyEntries;
+    const source = dataEntries.length > 0
+        ? 'atom_mapping_data'
+        : legacyEntries.length > 0
+            ? 'atom_mapping'
+            : 'none';
+    const confidence = typeof doc?.atom_mapping_confidence === 'string'
+        ? doc.atom_mapping_confidence.trim() || undefined
+        : undefined;
+    const symmetryFlag = doc?.atom_mapping_has_symmetry_groups;
+    const hasSymmetryGroups = typeof symmetryFlag === 'boolean'
+        ? symmetryFlag
+        : typeof symmetryFlag === 'string' && /^(true|false)$/i.test(symmetryFlag)
+            ? symmetryFlag.toLowerCase() === 'true'
+            : entries.some((entry) => entry.includes('('));
+
+    return { entries, confidence, hasSymmetryGroups, source };
+}
+
+function parseAtomSpec(compoundId: string, spec: string): AtomRef[] | null {
+    const parseMember = (member: string): AtomRef | null => {
+        const match = SINGLE_ATOM_REF.exec(member);
+        if (!match) return null;
+
+        const [, element, indexText] = match;
+        const index = Number.parseInt(indexText, 10);
+        if (!Number.isFinite(index) || index <= 0) return null;
+
+        return { compoundId, element, index };
+    };
+
+    if (spec.startsWith('(')) {
+        if (!spec.endsWith(')')) return null;
+
+        const members = spec.slice(1, -1).split(';').map((member) => member.trim());
+        if (members.length === 0 || members.some((member) => !member)) return null;
+
+        const atoms = members.map(parseMember);
+        return atoms.every((atom): atom is AtomRef => atom !== null) ? atoms : null;
+    }
+
+    if (spec.includes('(') || spec.includes(')') || spec.includes(';')) return null;
+
+    const atom = parseMember(spec);
+    return atom ? [atom] : null;
+}
 
 /**
  * Parse one side of an atom-mapping entry, e.g. `cpd00001:O#1`.
  * Returns `null` for anything that does not match the expected shape,
  * including a zero or non-numeric index.
  */
-function parseAtomRef(side: string): AtomRef | null {
-    const match = ATOM_REF.exec(side);
-    if (!match) return null;
+function parseAtomRef(side: string): AtomRef[] | null {
+    const separator = side.indexOf(':');
+    if (separator === -1) return null;
 
-    const [, compoundId, element, indexText] = match;
-    const index = Number.parseInt(indexText, 10);
-    if (!Number.isFinite(index) || index <= 0) return null;
+    const compoundId = side.slice(0, separator);
+    if (!COMPOUND_ID.test(compoundId)) return null;
 
-    return { compoundId, element, index };
+    const spec = side.slice(separator + 1);
+    if (!spec.includes('(') && !spec.includes(')') && !spec.includes(';') && !ATOM_REF.test(side)) {
+        return null;
+    }
+
+    return parseAtomSpec(compoundId, spec);
+}
+
+/** Format a singleton atom or symmetry group for display. */
+export function formatAtomGroup(atoms: readonly AtomRef[]): string {
+    return atoms.map(({ element, index }) => `${element}#${index}`).join(', ');
 }
 
 /**
@@ -72,11 +160,18 @@ export function parseAtomMappingEntry(entry: string): AtomMappingPair | null {
     const parts = raw.split('=');
     if (parts.length !== 2) return null;
 
-    const left = parseAtomRef(parts[0]);
-    const right = parseAtomRef(parts[1]);
-    if (!left || !right) return null;
+    const leftAtoms = parseAtomRef(parts[0]);
+    const rightAtoms = parseAtomRef(parts[1]);
+    if (!leftAtoms || !rightAtoms) return null;
 
-    return { left, right, raw };
+    return {
+        left: leftAtoms[0],
+        right: rightAtoms[0],
+        leftAtoms,
+        rightAtoms,
+        hasSymmetryGroup: leftAtoms.length > 1 || rightAtoms.length > 1,
+        raw,
+    };
 }
 
 /**
@@ -153,8 +248,8 @@ export function countAtomsPerElement(
     };
 
     for (const pair of pairs) {
-        record(pair.left);
-        record(pair.right);
+        for (const atom of pair.leftAtoms) record(atom);
+        for (const atom of pair.rightAtoms) record(atom);
     }
 
     const counts = new Map<string, Map<string, number>>();
