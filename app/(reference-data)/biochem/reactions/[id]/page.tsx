@@ -16,7 +16,6 @@ import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 import AtomMappingSummary from '@/components/ui/AtomMappingSummary';
-import AtomFlowDiagram from '@/components/ui/AtomFlowDiagram';
 import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
 import {
     directionAgreementFromRecords,
@@ -380,7 +379,22 @@ export default function ReactionDetailPage() {
                                 <ReactionStructureEquation
                                     equation={rxn.equation ?? rxn.definition}
                                     reversibility={rxn.reversibility}
+                                    atomMappingPairs={atomPairs}
+                                    atomMappingConfidence={atomMapping.confidence}
+                                    atomMappingHasSymmetryGroups={atomMapping.hasSymmetryGroups}
                                 />
+                            )}
+                            {atomPairs.length > 0 && (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                        Raw mapping entries are available as supporting detail.
+                                    </Typography>
+                                    <AtomMappingSummary
+                                        entries={atomMapping.entries}
+                                        confidence={atomMapping.confidence}
+                                        hasSymmetryGroups={atomMapping.hasSymmetryGroups}
+                                    />
+                                </Box>
                             )}
                         </Box>
                     </DetailRow>
@@ -507,18 +521,6 @@ export default function ReactionDetailPage() {
                         </DetailRow>
                     )}
 
-                    {atomPairs.length > 0 && (
-                        <DetailRow label="Atom mappings">
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                <AtomFlowDiagram pairs={atomPairs} />
-                                <AtomMappingSummary
-                                    entries={atomMapping.entries}
-                                    confidence={atomMapping.confidence}
-                                    hasSymmetryGroups={atomMapping.hasSymmetryGroups}
-                                />
-                            </Box>
-                        </DetailRow>
-                    )}
                 </CardContent>
             </Card>
         </Box>
