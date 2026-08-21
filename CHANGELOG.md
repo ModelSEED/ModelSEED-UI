@@ -7,12 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
-### Added
-- Reaction structure equations now let researchers hover, focus, or select atom-mapping groups to emphasise every participating compound across the canvas
-
-### Fixed
-- Formula-derived atom inventories no longer temporarily colour drawn structures before RDKit has verified their element coverage
-
 ### Known Issues
 - RAST MS FBA not working
 - PATRIC-only model submission
@@ -20,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Expected Behaviors
 - Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.3.0] - 2026-08-21
+
+### Added
+- Reaction structure equations now resolve atom-mapping colours from raw InChI canonical order through the structures Solr core, rather than treating canonical `#N` references as SMILES or renderer positions
+- Each mapped participant and the legend now disclose whether a highlight is an exact atom, a symmetry-equivalent orbit, a whole-element block, or unresolved, so researchers can see precisely what the mapping supports
+
+### Fixed
+- Atom-mapping highlights no longer assign chemically false colours when InChI canonical order diverges from stored-SMILES order
 
 ---
 
