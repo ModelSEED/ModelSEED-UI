@@ -1,4 +1,4 @@
-import { SOLR_BASE_LEGACY, SOLR_STRUCTURES_COLLECTION } from './config';
+import { solrCorpusEndpoint } from './config';
 
 export interface CompoundStructure {
     id: string;
@@ -43,7 +43,7 @@ function normalizeStructure(doc: unknown, requestedIds: Set<string>): CompoundSt
 
 async function fetchStructureChunk(ids: string[]): Promise<unknown> {
     const idQuery = ids.map((id) => `id:${id}`).join(' OR ');
-    const url = `${SOLR_BASE_LEGACY}${SOLR_STRUCTURES_COLLECTION}/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,smiles,inchi,inchikey,svg`;
+    const url = `${solrCorpusEndpoint('structures')}/select?wt=json&q=(${idQuery})&rows=${ids.length}&fl=id,smiles,inchi,inchikey,svg`;
     const response = await fetch(url);
     if (!response.ok) return undefined;
     return response.json();

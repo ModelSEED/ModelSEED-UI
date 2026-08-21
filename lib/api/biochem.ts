@@ -12,12 +12,10 @@
 import {
     CPD_IMG_BASE,
     MODELSEED_API_URL,
-    SOLR_BASE,
-    SOLR_BASE_LEGACY,
-    SOLR_COMPOUNDS_COLLECTION,
-    SOLR_REACTIONS_COLLECTION,
+    solrCorpusEndpoint,
 } from './config';
 import { hasNestedSchema, parentDocTypeFilter } from './solrSchema';
+import type { BiochemCollection } from './solrSchema';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -387,14 +385,9 @@ function buildQuickSearchClause(
 /**
  * Builds a Solr query URL from options, mirroring legacy `get_solr`.
  */
-function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
-    const collectionName =
-        collection === 'reactions'
-            ? SOLR_REACTIONS_COLLECTION
-            : collection === 'compounds'
-                ? SOLR_COMPOUNDS_COLLECTION
-                : collection;
-    let url = `${SOLR_BASE}${collectionName}/select?wt=json`;
+function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): string {
+    const endpoint = solrCorpusEndpoint(collection);
+    let url = `${endpoint}/select?wt=json`;
 
     const {
         query,
@@ -1077,7 +1070,7 @@ export async function getCompoundsFromModelseedApi(
  */
 export async function getReactionById(id: string): Promise<Reaction> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    let url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=id:${id}`;
     const nested = await hasNestedSchema('reactions');
     if (nested) {
         url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
@@ -1102,7 +1095,7 @@ export async function getReactionById(id: string): Promise<Reaction> {
  */
 export async function getCompoundById(id: string): Promise<Compound> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    let url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=id:${id}`;
     const nested = await hasNestedSchema('compounds');
     if (nested) {
         url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
@@ -1151,7 +1144,7 @@ function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<M
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
     // Batch ID fetch is currently Solr-backed for both modes.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    const url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
 
     return fetchSolr<Compound>(url).then((res) => {
         const map = new Map<string, Compound>();
@@ -1187,7 +1180,7 @@ export async function findReactionsForCompound(
     const sort = opts.sort;
 
     // Reverse compound lookup remains Solr-backed for now.
-    let url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {

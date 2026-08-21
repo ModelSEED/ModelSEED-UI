@@ -10,7 +10,7 @@
  * override for deployments that already know their schema.
  */
 
-import { getSolrCollection, SOLR_BASE, SOLR_NESTED_SCHEMA_OVERRIDE } from './config';
+import { SOLR_NESTED_SCHEMA_OVERRIDE, solrCorpusEndpoint } from './config';
 
 export type BiochemCollection = 'reactions' | 'compounds';
 
@@ -27,7 +27,7 @@ let hasWarnedOnProbeFailure = false;
 
 async function probeNestedSchema(collection: BiochemCollection): Promise<boolean> {
     try {
-        const url = `${SOLR_BASE}${getSolrCollection(collection)}/select?wt=json&rows=0&q=*:*&fq=${encodeURIComponent(parentDocTypeFilter(collection))}`;
+        const url = `${solrCorpusEndpoint(collection)}/select?wt=json&rows=0&q=*:*&fq=${encodeURIComponent(parentDocTypeFilter(collection))}`;
         const res = await fetch(url);
         if (!res.ok) return false;
         const json = await res.json();
