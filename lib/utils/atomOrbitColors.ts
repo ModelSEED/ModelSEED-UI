@@ -201,7 +201,7 @@ function degrade(compoundId: string, graph: HeavyAtomGraph, groups: InternalGrou
         }
         const indices = new Set(matching.map(({ ref }) => ref.index));
         const count = graph.elements.filter((item) => item === element).length;
-        if (indices.size !== count) {
+        if (indices.size !== count || Math.min(...indices) !== 1 || Math.max(...indices) !== count) {
             denialReason ??= 'partial-coverage';
             continue;
         }

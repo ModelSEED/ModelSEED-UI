@@ -43,6 +43,18 @@ describe('getStructuresByIds', () => {
     expect(url).toContain('fl=id,smiles,inchi,inchikey,svg');
   });
 
+  it('drops unsafe ids while returning structures for well-formed ids', async () => {
+    const api = await loadStructuresApi();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(solrResponse({
+      response: { docs: [{ id: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2' }] },
+    }));
+
+    const structures = await api.getStructuresByIds(['cpd00001', 'cpd00001 OR *:*']);
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).not.toContain('cpd00001 OR *:*');
+    expect(structures.get('cpd00001')).toEqual({ id: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2' });
+  });
+
   it.each([
     ['HTTP 404', () => Promise.resolve(solrResponse({}, 404))],
     ['a rejected fetch', () => Promise.reject(new Error('network failure'))],

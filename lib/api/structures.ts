@@ -54,7 +54,7 @@ export async function getStructuresByIds(ids: string[]): Promise<Map<string, Com
         (Array.isArray(ids) ? ids : [])
             .filter((id): id is string => typeof id === 'string')
             .map((id) => id.trim())
-            .filter(Boolean),
+            .filter((id) => /^[A-Za-z0-9_.-]+$/.test(id)),
     ));
     const structures = new Map<string, CompoundStructure>();
     if (uniqueIds.length === 0) return structures;

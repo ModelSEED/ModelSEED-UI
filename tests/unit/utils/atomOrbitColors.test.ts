@@ -52,6 +52,25 @@ describe('buildAtomOrbitColorPlan', () => {
         expect(partial.compounds.cpd00001).toMatchObject({ precision: 'unresolved', reason: 'partial-coverage' });
     });
 
+    it('requires contiguous element indices before claiming a degraded element block', () => {
+        const invalid = buildAtomOrbitColorPlan(
+            parseAtomMappings(['cpd00001:(O#1;O#3)=cpd00002:(O#1;O#2)']),
+            [{ compoundId: 'cpd00001', graph: { elements: ['O', 'O'], bonds: [] } }],
+        );
+        expect(invalid.compounds.cpd00001).toMatchObject({
+            precision: 'unresolved', reason: 'partial-coverage', coloredAtomCount: 0,
+        });
+
+        const valid = buildAtomOrbitColorPlan(
+            parseAtomMappings(['cpd00001:(O#1;O#2)=cpd00002:(O#1;O#2)']),
+            [{ compoundId: 'cpd00001', graph: { elements: ['O', 'O'], bonds: [] } }],
+        );
+        expect(valid.compounds.cpd00001).toMatchObject({
+            precision: 'element-block', coloredAtomCount: 2,
+            atomColors: { 0: MAPPING_PALETTE[0], 1: MAPPING_PALETTE[0] },
+        });
+    });
+
     it('drops invalid references, tolerates invalid inputs, and is deterministic', () => {
         const malformed = [{ ...pair('cpd00001', 'cpd00002'), leftAtoms: [{ compoundId: 'cpd00001', element: 'O', index: 99 }, { compoundId: 'cpd00001', element: 'O', index: 0 }, { compoundId: 'cpd00001', element: 'X', index: Number.NaN }], rightAtoms: [{ compoundId: 'cpd00002', element: 'O', index: 1 }] }];
         const input = [{ compoundId: 'cpd00001', inchi: 'InChI=1S/O4/c1-2-3-4', graph: { elements: ['O', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [2, 3]] as Array<[number, number]> } }];
