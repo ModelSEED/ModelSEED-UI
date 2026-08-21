@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
+### Added
+- Reaction structure equations now let researchers hover, focus, or select atom-mapping groups to emphasise every participating compound across the canvas
+
+### Fixed
+- Formula-derived atom inventories no longer temporarily colour drawn structures before RDKit has verified their element coverage
+
 ### Known Issues
 - RAST MS FBA not working
 - PATRIC-only model submission

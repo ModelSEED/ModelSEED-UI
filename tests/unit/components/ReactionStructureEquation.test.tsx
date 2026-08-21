@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { parseAtomMappings } from '@/lib/utils/atomMapping';
 import { getCompoundsForReaction, type Compound } from '@/lib/api/biochem';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 
 const rendererCalls: Array<Record<string, unknown>> = [];
+const suppressedInventories = new Set<string>();
 const compound = (data: Partial<Compound>) => data as Compound;
 const compounds = new Map([
     ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })],
@@ -22,7 +23,9 @@ vi.mock('@/components/ui/MoleculeRenderer', () => ({
             cpd00002: { C: 1, O: 2 }, cpd00003: { C: 1, O: 2 }, cpd00011: { C: 1, O: 2 }, cpd00013: { N: 1, H: 4 },
             cpd00067: { H: 1 }, cpd00742: { C: 2, H: 3, N: 2, O: 3 },
         };
-        (props.onInventory as ((inventory: Record<string, number>) => void) | undefined)?.(inventories[props.compoundId as string] ?? { C: 4 });
+        if (!suppressedInventories.has(props.compoundId as string)) {
+            (props.onInventory as ((inventory: Record<string, number>) => void) | undefined)?.(inventories[props.compoundId as string] ?? { C: 4 });
+        }
         if (!props.smiles) return <div data-testid={`structure-${props.compoundId as string}`} style={{ width: props.width as number, height: props.height as number }}>Compound image unavailable</div>;
         return <div data-testid={`structure-${props.compoundId as string}`} />;
     },
@@ -30,6 +33,7 @@ vi.mock('@/components/ui/MoleculeRenderer', () => ({
 
 function renderEquation(props: Partial<React.ComponentProps<typeof ReactionStructureEquation>> = {}) {
     rendererCalls.length = 0;
+    suppressedInventories.clear();
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     return render(<QueryClientProvider client={client}><ReactionStructureEquation equation="cpd00001[c] + cpd00012[c] => cpd00009[c]" {...props} /></QueryClientProvider>);
 }
@@ -254,6 +258,69 @@ describe('ReactionStructureEquation', () => {
             const allophanate = getByTestId('structure-cpd00742');
             expect(Boolean(water.compareDocumentPosition(allophanate) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
             expect(getAllByText('H+', { selector: 'a p' }).length).toBeGreaterThan(0);
+        });
+
+        it('lets a legend group highlight matching tokens and toggles it off', async () => {
+            const rxnPairs = parseAtomMappings([
+                'cpd00001:O#1=cpd00011:(O#1;O#2)', 'cpd00742:(O#2;O#3)=cpd00011:(O#1;O#2)',
+                'cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1',
+                'cpd00742:N#1=cpd00013:N#1', 'cpd00742:N#2=cpd00013:N#1', 'cpd00742:O#1=cpd00011:(O#1;O#2)',
+            ]);
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+                ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })], ['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })],
+                ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })], ['cpd00013', compound({ name: 'NH3', smiles: '[NH4+]', formula: 'H4N', charge: 1 })], ['cpd00067', compound({ name: 'H+', smiles: '[H+]', formula: 'H', charge: 1 })],
+            ]));
+            const { container, getByRole } = renderEquation({ equation: 'cpd00001[c] + cpd00742[c] => cpd00011[c] + cpd00013[c] + cpd00067[c]', atomMappingPairs: rxnPairs });
+            await waitFor(() => expect(getByRole('button', { name: /^C:/ })).toBeTruthy());
+            expect(container.querySelectorAll('[data-mapping-dimmed="true"]')).toHaveLength(0);
+            const carbon = getByRole('button', { name: /^C:/ });
+            fireEvent.click(carbon);
+            expect(carbon.getAttribute('aria-pressed')).toBe('true');
+            for (const id of ['cpd00011', 'cpd00742']) expect(container.querySelector(`[data-mapping-token="${id}"]`)?.getAttribute('data-mapping-dimmed')).toBe('false');
+            for (const id of ['cpd00001', 'cpd00013', 'cpd00067']) expect(container.querySelector(`[data-mapping-token="${id}"]`)?.getAttribute('data-mapping-dimmed')).toBe('true');
+            fireEvent.click(carbon);
+            expect(container.querySelectorAll('[data-mapping-dimmed="true"]')).toHaveLength(0);
+        });
+
+        it('highlights on focus and Escape clears a sticky legend selection', async () => {
+            const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
+            const { container, getByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
+            await waitFor(() => expect(getByRole('button', { name: /^C:/ })).toBeTruthy());
+            const carbon = getByRole('button', { name: /^C:/ });
+            fireEvent.focus(carbon);
+            expect(container.querySelector('[data-mapping-token="cpd00011"]')?.getAttribute('data-mapping-dimmed')).toBe('false');
+            fireEvent.click(carbon);
+            fireEvent.keyDown(container.firstElementChild!, { key: 'Escape' });
+            expect(carbon.getAttribute('aria-pressed')).toBe('false');
+        });
+
+        it('exposes element indicators as named mapping-group buttons', async () => {
+            const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
+            const { getAllByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
+            await waitFor(() => expect(getAllByRole('button', { name: 'Highlight C mapping group' }).length).toBeGreaterThan(0));
+        });
+
+        it('keeps the selected group after pointer hover leaves another control', async () => {
+            const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
+            const { container, getByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
+            await waitFor(() => expect(getByRole('button', { name: /^C:/ })).toBeTruthy());
+            const carbon = getByRole('button', { name: /^C:/ });
+            fireEvent.click(carbon);
+            fireEvent.mouseLeave(carbon);
+            expect(carbon.getAttribute('aria-pressed')).toBe('true');
+            expect(container.querySelector('[data-mapping-token="cpd00011"]')?.getAttribute('data-mapping-dimmed')).toBe('false');
+        });
+
+        it('does not formula-seed a drawn structure before RDKit inventory arrives', async () => {
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00013', compound({ name: 'NH3', smiles: '[NH4+]', formula: 'H4N', charge: 1 })], ['cpd00067', compound({ name: 'H+', smiles: '[H+]', formula: 'H', charge: 1 })]]));
+            suppressedInventories.add('cpd00013');
+            const { container } = render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><ReactionStructureEquation equation="cpd00742[c] + cpd00067[c] => cpd00013[c]" atomMappingPairs={parseAtomMappings(['cpd00742:N#1=cpd00013:N#1', 'cpd00742:N#2=cpd00013:N#1'])} /></QueryClientProvider>);
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00013"]')).toBeTruthy());
+            expect(rendererCalls.filter((call) => call.compoundId === 'cpd00013').at(-1)?.elementColors).toBeUndefined();
+            expect(container.querySelector('[data-testid="structure-cpd00067"]')).toBeNull();
         });
     });
 
