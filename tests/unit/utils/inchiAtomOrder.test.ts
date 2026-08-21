@@ -100,3 +100,25 @@ describe('buildInchiAtomOrbits', () => {
             .toEqual(buildInchiAtomOrbits(phosphateInchi, phosphateGraph));
     });
 });
+
+describe('live InChI forms', () => {
+    it('preserves phosphate orbit results with its full charge layer', () => {
+        const result = buildInchiAtomOrbits('InChI=1S/H3O4P/c1-5(2,3)4/h(H3,1,2,3,4)/p-2', phosphateGraph);
+        expect(result).toMatchObject({ ok: true, solutionCount: 24, exact: false });
+        if (result.ok) expect(result.orbits[4]).toEqual([1]);
+    });
+
+    it('accepts ammonium and rejects the hydrogen ion InChI safely', () => {
+        expect(buildInchiAtomOrbits('InChI=1S/H3N/h1H3/p+1', { elements: ['N'], bonds: [] }))
+            .toEqual(expect.objectContaining({ ok: true }));
+        expect(buildInchiAtomOrbits('InChI=1S/p+1', { elements: ['H'], bonds: [] }))
+            .toEqual({ ok: false, reason: 'unsupported-inchi' });
+    });
+
+    it('handles the live multi-layer allophanate InChI', () => {
+        expect(buildInchiAtomOrbits('InChI=1S/C2H4N2O3/c3-1(5)4-2(6)7/h(H,6,7)(H3,3,4,5)/p-1', {
+            elements: ['N', 'C', 'O', 'N', 'C', 'O', 'O'],
+            bonds: [[0, 1], [1, 2], [1, 3], [3, 4], [4, 5], [4, 6]],
+        })).toEqual(expect.objectContaining({ ok: true }));
+    });
+});

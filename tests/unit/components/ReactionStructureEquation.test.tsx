@@ -375,3 +375,66 @@ describe('ReactionStructureEquation', () => {
 
 
 });
+
+    describe('mapping precision disclosure', () => {
+        const graphFor = (compoundId: string) => ({
+            cpd00001: { elements: ['O'], bonds: [] },
+            cpd00009: { elements: ['O', 'P', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [1, 3], [1, 4]] },
+        }[compoundId]);
+
+        async function provideGraphs() {
+            await waitFor(() => expect(rendererCalls.some((call) => graphFor(call.compoundId as string))).toBe(true));
+            for (const call of rendererCalls.slice()) {
+                const graph = graphFor(call.compoundId as string);
+                if (graph) (call.onGraph as (value: typeof graph) => void)(graph);
+            }
+        }
+
+        it('renders exact, symmetry-orbit, element-level, and unresolved precision labels', async () => {
+            vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([
+                ['cpd00001', { id: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2' }],
+                ['cpd00009', { id: 'cpd00009', inchi: 'InChI=1S/H3O4P/c1-5(2,3)4/h(H3,1,2,3,4)/p-2' }],
+            ]));
+            const { getByRole, container } = renderEquation({ equation: 'cpd00001[c] => cpd00009[c]', atomMappingPairs: parseAtomMappings(['cpd00001:O#1=cpd00009:O#1']) });
+            await provideGraphs();
+            await waitFor(() => expect(getByRole('button', { name: 'Water: Exact atom mapping' })).toBeTruthy());
+            expect(getByRole('button', { name: 'Phosphate: Symmetry-equivalent atoms' })).toBeTruthy();
+            const precisionSummary = Array.from(container.querySelectorAll('.MuiTypography-caption')).find((node) => node.textContent?.startsWith('Precision:'));
+            expect(precisionSummary?.textContent).toContain('Precision:');
+            expect(precisionSummary?.textContent).not.toContain('0 ');
+
+            // Unsupported InChI can honestly colour a complete element block, while absent structure remains unresolved.
+            vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([['cpd00001', { id: 'cpd00001', inchi: 'InChI=1S/p+1' }]]));
+            const elementBlock = renderEquation({ equation: 'cpd00001[c] => cpd00009[c]', atomMappingPairs: parseAtomMappings(['cpd00001:O#1=cpd00009:O#1']) });
+            await provideGraphs();
+            await waitFor(() => expect(elementBlock.getByRole('button', { name: 'Water: Element-level mapping' })).toBeTruthy());
+            expect(elementBlock.getByRole('button', { name: 'Phosphate: No atom mapping shown' })).toBeTruthy();
+        });
+
+        it('associates a keyboard-activated precision control with its explanation', async () => {
+            vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([['cpd00001', { id: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2' }]]));
+            const { getAllByRole } = renderEquation({ equation: 'cpd00001[c] => cpd00001[c]', atomMappingPairs: parseAtomMappings(['cpd00001:O#1=cpd00001:O#1']) });
+            await provideGraphs();
+            const control = await waitFor(() => getAllByRole('button', { name: 'Water: Exact atom mapping' })[0]);
+            fireEvent.keyDown(control, { key: 'Enter' });
+            expect(control.getAttribute('aria-expanded')).toBe('true');
+            expect(document.getElementById(control.getAttribute('aria-describedby') ?? '')?.textContent).toContain('exact mapped atom');
+        });
+
+        it('keeps participants visible and reports a structures-query error while preserving honest element-level colours', async () => {
+            vi.mocked(getStructuresByIds).mockRejectedValueOnce(new Error('structure fetch failed'));
+            const { container, getByRole } = renderEquation({ atomMappingPairs: pairs });
+            await waitFor(() => expect(getByRole('status').textContent).toContain('Structure data could not be loaded, so atom-level mapping precision is unavailable and any colours shown are element-level at best.'));
+            expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy();
+            const phosphate = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)!;
+            (phosphate.onGraph as (graph: unknown) => void)({ elements: ['O', 'P', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [1, 3], [1, 4]] });
+            await waitFor(() => expect(Object.keys(rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.atomColors as Record<number, string>)).not.toHaveLength(0));
+        });
+
+        it('renders no mapping legend or precision controls when no mapping pairs exist', async () => {
+            const { container, queryByRole } = renderEquation();
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+            expect(queryByRole('list', { name: 'Atom mapping legend' })).toBeNull();
+            expect(queryByRole('button', { name: /mapping$/ })).toBeNull();
+        });
+    });
