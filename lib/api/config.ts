@@ -254,11 +254,13 @@ function resolveSolrCollection(params: {
     stagingFallback: string;
     productionFallback: string;
     description: string;
+    manualFallback?: string;
 }): string {
     const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
     if (overrideValue) return overrideValue;
 
     if (DEPLOYMENT_MODE === 'manual') {
+        if (params.manualFallback) return params.manualFallback;
         return throwManualModeError(params.overrideVar, params.description);
     }
 
@@ -289,6 +291,16 @@ export const SOLR_COMPOUNDS_COLLECTION = resolveSolrCollection({
     stagingFallback: 'compounds_staging',
     productionFallback: 'compounds',
     description: 'Solr compounds core name (e.g. compounds_staging or compounds)',
+});
+
+export const SOLR_STRUCTURES_COLLECTION = resolveSolrCollection({
+    overrideVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION',
+    stagingDefaultVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_STAGING',
+    productionDefaultVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_PRODUCTION',
+    stagingFallback: 'structures_staging',
+    productionFallback: 'structures',
+    description: 'Solr structures core name (e.g. structures_staging or structures)',
+    manualFallback: 'structures',
 });
 
 export function getSolrCollection(collection: 'reactions' | 'compounds'): string {
