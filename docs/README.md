@@ -11,6 +11,7 @@ This directory contains the technical documentation for the ModelSEED-UI applica
 | **User Sessions** | [AUTHENTICATION.md](./AUTHENTICATION.md) | RAST/PATRIC login flow, `useAuth` Zustand store, and Token management for API requests. |
 | **External Data** | [WORKSPACE.md](./WORKSPACE.md) | Handling PATRIC Workspace JSON-RPC objects and the `modelseed-api` proxy endpoints. |
 | **Scientific Data** | [BIOCHEMISTRY.md](./BIOCHEMISTRY.md) | Solr-indexed reactions/compounds lookup and chemical formula/stoichiometry UX rendering rules. |
+| **Atom Mapping** | [ATOM_MAPPING.md](./ATOM_MAPPING.md) | The `atom_mapping_data` grammar, why per-atom colouring is impossible client-side, and the server-side contract that would enable it. |
 | **Legacy Codebase** | [LEGACY_TRANSITION.md](./LEGACY_TRANSITION.md) | Transitioning from the AngularJS source code to modern React patterns. |
 | **Testing Platform** | [TESTING.md](./TESTING.md) | Vitest unit tests, Playwright E2E tests, and CI/CD pipeline. |
 | **Deploying** | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environment variables, deployment modes, URL resolution, and configuration guide. |
