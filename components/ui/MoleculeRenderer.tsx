@@ -6,7 +6,8 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
-import { applyBondColors, buildMoleculeHighlightPlan, elementInventoryFromMolJson } from '@/lib/utils/moleculeHighlights';
+import { applyBondColors, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
+import type { HeavyAtomGraph } from '@/lib/utils/inchiAtomOrder';
 
 /**
  * Maps atom index (0-based) to a CSS color string.
@@ -25,6 +26,12 @@ interface MoleculeRendererProps {
     elementColors?: Readonly<Record<string, string>>;
     /** Called after a successful RDKit parse with the molecule's element inventory. */
     onInventory?: (inventory: Record<string, number>) => void;
+    /** Optional per-bond color map, keyed by the RDKit graph bond-array index. */
+    bondColors?: Record<number, string>;
+    /** Called after a successful RDKit parse with the molecule's local heavy-atom graph. */
+    onGraph?: (graph: HeavyAtomGraph) => void;
+    /** Plain stored SVG used only when a local RDKit SVG cannot be produced. */
+    fallbackSvg?: string;
     width?: number;
     height?: number;
     alt?: string;
@@ -38,6 +45,9 @@ export default function MoleculeRenderer({
     atomColors,
     elementColors,
     onInventory,
+    bondColors,
+    onGraph,
+    fallbackSvg,
     width = 150,
     height = 150,
     alt,
@@ -46,22 +56,33 @@ export default function MoleculeRenderer({
     const [svgString, setSvgString] = useState<string>('');
     const atomColorsKey = useMemo(() => JSON.stringify(atomColors ?? {}), [atomColors]);
     const elementColorsKey = useMemo(() => JSON.stringify(elementColors ?? {}), [elementColors]);
+    const bondColorsKey = useMemo(() => JSON.stringify(bondColors ?? {}), [bondColors]);
     const onInventoryRef = useRef(onInventory);
+    const onGraphRef = useRef(onGraph);
     const atomColorsRef = useRef(atomColors);
     const elementColorsRef = useRef(elementColors);
+    const bondColorsRef = useRef(bondColors);
 
     useEffect(() => {
         onInventoryRef.current = onInventory;
+        onGraphRef.current = onGraph;
         atomColorsRef.current = atomColors;
         elementColorsRef.current = elementColors;
-    }, [onInventory, atomColors, elementColors]);
+        bondColorsRef.current = bondColors;
+    }, [onInventory, onGraph, atomColors, elementColors, bondColors]);
 
     useEffect(() => {
         let cancelled = false;
 
         if (!smiles) {
-            // No structural string from API; avoid rendering empty/transparent fallback images.
-            setState('hidden');
+            // Stored SVG is already rendered and must not receive local highlight processing.
+            if (fallbackSvg) {
+                setSvgString(fallbackSvg);
+                setState('svg');
+            } else {
+                // No structural string from API; avoid rendering empty/transparent fallback images.
+                setState('hidden');
+            }
             return;
         }
 
@@ -76,10 +97,21 @@ export default function MoleculeRenderer({
                         let molJson: unknown;
                         const currentElementColors = elementColorsRef.current;
                         const currentAtomColors = atomColorsRef.current;
-                        if ((currentElementColors && Object.keys(currentElementColors).length > 0) || onInventoryRef.current) {
+                        const currentBondColors = bondColorsRef.current;
+                        if ((currentElementColors && Object.keys(currentElementColors).length > 0) || onInventoryRef.current || onGraphRef.current) {
                             try {
                                 molJson = JSON.parse(mol.get_json());
                                 onInventoryRef.current?.(elementInventoryFromMolJson(molJson));
+                                const molecule = (molJson as { molecules?: Array<{ atoms?: Array<{ z?: number }>; bonds?: Array<{ atoms?: readonly number[] }> }> }).molecules?.[0];
+                                if (molecule?.atoms && molecule.bonds) {
+                                    onGraphRef.current?.({
+                                        elements: molecule.atoms.map((atom) => elementSymbolForAtomicNumber(atom.z ?? 6)),
+                                        bonds: molecule.bonds.flatMap((bond) => {
+                                            const [left, right] = bond.atoms ?? [];
+                                            return Number.isInteger(left) && Number.isInteger(right) ? [[left, right] as [number, number]] : [];
+                                        }),
+                                    });
+                                }
                             } catch {
                                 molJson = undefined;
                             }
@@ -139,6 +171,9 @@ export default function MoleculeRenderer({
                             svg = mol.get_svg(width, height);
                         }
 
+                        if (currentBondColors && Object.keys(currentBondColors).length > 0) {
+                            svg = applyBondColors(svg, currentBondColors);
+                        }
                         if (!cancelled) {
                             setSvgString(svg);
                             setState('svg');
@@ -148,18 +183,24 @@ export default function MoleculeRenderer({
                         mol.delete();
                     }
                 } catch {
-                    // Invalid SMILES or RDKit error — fall back to CDN PNG silently
-                    if (!cancelled) setState('png');
+                    // Invalid SMILES or RDKit error — use a stored SVG before the CDN PNG fallback.
+                    if (!cancelled && fallbackSvg) {
+                        setSvgString(fallbackSvg);
+                        setState('svg');
+                    } else if (!cancelled) setState('png');
                 }
             })
             .catch(() => {
-                if (!cancelled) setState('png');
+                if (!cancelled && fallbackSvg) {
+                    setSvgString(fallbackSvg);
+                    setState('svg');
+                } else if (!cancelled) setState('png');
             });
 
         return () => {
             cancelled = true;
         };
-    }, [smiles, atomColorsKey, elementColorsKey, width, height]);
+    }, [smiles, atomColorsKey, elementColorsKey, bondColorsKey, fallbackSvg, width, height]);
 
     if (state === 'loading') {
         return (

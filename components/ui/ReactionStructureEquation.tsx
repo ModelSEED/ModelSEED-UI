@@ -10,6 +10,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { getCompoundsForReaction } from '@/lib/api/biochem';
+import { getStructuresByIds, type CompoundStructure } from '@/lib/api/structures';
 import { heavyAtomCount, isParsableFormula, parseFormulaInventory } from '@/lib/utils/chemicalFormula';
 import type { AtomMappingPair } from '@/lib/utils/atomMapping';
 import {
@@ -17,6 +18,8 @@ import {
     elementColorsForCompound,
     type UnmappableReason,
 } from '@/lib/utils/atomMappingColors';
+import { buildAtomOrbitColorPlan, compoundColorResult } from '@/lib/utils/atomOrbitColors';
+import type { HeavyAtomGraph } from '@/lib/utils/inchiAtomOrder';
 import type { AtomColors } from './MoleculeRenderer';
 
 const MoleculeRenderer = dynamic(() => import('./MoleculeRenderer'), {
@@ -45,6 +48,7 @@ type DisplayData = { name?: string; smiles?: string; formula?: string; charge?: 
 
 const EMPTY_PARSED: ParsedEquation = { reactants: [], products: [], arrow: '⇒' };
 const EMPTY_MAP = new Map<string, DisplayData>();
+const EMPTY_STRUCTURES = new Map<string, CompoundStructure>();
 const REASON_TEXT: Record<UnmappableReason, string> = {
     'no-mapping': 'no mapping data',
     'element-mismatch': 'element mismatch between sides',
@@ -101,7 +105,9 @@ function confidenceColor(value: string): 'success' | 'warning' | 'default' {
 interface CompoundColumnProps {
     token: CompoundToken;
     data?: DisplayData;
+    structure?: CompoundStructure;
     atomColors?: AtomColors;
+    bondColors?: Record<number, string>;
     elementColors?: Readonly<Record<string, string>>;
     mappingDescription?: string;
     mappingControls?: Readonly<Record<string, { groupId: string; color: string }>>;
@@ -110,22 +116,27 @@ interface CompoundColumnProps {
     onClearHighlight: () => void;
     onSelectGroup: (groupId: string) => void;
     onInventory: (inventory: Inventory) => void;
+    onGraph: (graph: HeavyAtomGraph) => void;
     isLoading: boolean;
 }
 
-function CompoundColumn({ token, data, atomColors, elementColors, mappingDescription, mappingControls, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup, onInventory, isLoading }: CompoundColumnProps) {
-    const drawStructure = Boolean(data?.smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1);
+function CompoundColumn({ token, data, structure, atomColors, bondColors, elementColors, mappingDescription, mappingControls, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup, onInventory, onGraph, isLoading }: CompoundColumnProps) {
+    const smiles = data?.smiles ?? structure?.smiles;
+    const drawStructure = Boolean(structure?.svg) || (Boolean(smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1));
     const label = data?.name || token.id;
     const metadata = [token.id, data?.formula, formatCharge(data?.charge)].filter(Boolean).join(' · ');
     const contents = isLoading ? (
         <Skeleton variant="rectangular" width={134} height={134} />
     ) : drawStructure ? (
         <MoleculeRenderer
-            smiles={data?.smiles}
+            smiles={smiles}
             compoundId={token.id}
             atomColors={atomColors}
+            bondColors={bondColors}
             elementColors={elementColors}
+            fallbackSvg={structure?.svg}
             onInventory={onInventory}
+            onGraph={onGraph}
             width={134}
             height={134}
             alt={mappingDescription ? `Structure of ${label}; ${mappingDescription}` : `Structure of ${label}`}
@@ -151,10 +162,10 @@ function CompoundColumn({ token, data, atomColors, elementColors, mappingDescrip
                     <Typography variant="body1" sx={{ fontWeight: 600, textAlign: 'center', overflowWrap: 'anywhere' }}>{label}</Typography>
                 </NextLink>}
                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', overflowWrap: 'anywhere' }}>{metadata}</Typography>
-                {!isLoading && elementColors && <Box role="group" aria-label={`Mapped elements: ${Object.keys(elementColors).join(', ')}`} sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    {Object.entries(elementColors).map(([element, color]) => {
-                        const control = mappingControls?.[element];
-                        return <Box key={element} component="button" type="button" data-mapping-group={control?.groupId} aria-label={`Highlight ${element} mapping group`} onClick={() => control && onSelectGroup(control.groupId)} onMouseEnter={() => control && onHighlight(control.groupId)} onMouseLeave={onClearHighlight} onFocus={() => control && onHighlight(control.groupId)} onBlur={onClearHighlight} sx={{ display: 'flex', alignItems: 'center', gap: 0.25, border: 0, bgcolor: 'transparent', p: 0, cursor: 'pointer', font: 'inherit' }}>
+                {!isLoading && Object.keys(mappingControls ?? {}).length > 0 && <Box role="group" aria-label={`Mapped elements: ${Object.keys(mappingControls ?? {}).join(', ')}`} sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {Object.entries(mappingControls ?? {}).map(([element, control]) => {
+                        const color = control.color;
+                        return <Box key={element} component="button" type="button" data-mapping-group={control.groupId} aria-label={`Highlight ${element} mapping group`} onClick={() => onSelectGroup(control.groupId)} onMouseEnter={() => onHighlight(control.groupId)} onMouseLeave={onClearHighlight} onFocus={() => onHighlight(control.groupId)} onBlur={onClearHighlight} sx={{ display: 'flex', alignItems: 'center', gap: 0.25, border: 0, bgcolor: 'transparent', p: 0, cursor: 'pointer', font: 'inherit' }}>
                             <Box aria-hidden="true" sx={{ width: 8, height: 8, bgcolor: color, borderRadius: '50%' }} />
                             <Typography variant="caption">{element}</Typography>
                         </Box>;
@@ -165,23 +176,24 @@ function CompoundColumn({ token, data, atomColors, elementColors, mappingDescrip
     );
 }
 
-function EquationSide({ tokens, displayMap, atomMapping, useElementColors, plan, callbacks, isLoading, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup }: {
-    tokens: CompoundToken[]; displayMap: Map<string, DisplayData>;
-    atomMapping?: ReactionAtomMapping; useElementColors: boolean; plan: ReturnType<typeof buildAtomMappingColorPlan>;
-    callbacks: Readonly<Record<string, (inventory: Inventory) => void>>;
+function EquationSide({ tokens, displayMap, structures, atomMapping, useElementColors, plan, orbitPlan, callbacks, graphCallbacks, isLoading, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup }: {
+    tokens: CompoundToken[]; displayMap: Map<string, DisplayData>; structures: Map<string, CompoundStructure>;
+    atomMapping?: ReactionAtomMapping; useElementColors: boolean; plan: ReturnType<typeof buildAtomMappingColorPlan>; orbitPlan: ReturnType<typeof buildAtomOrbitColorPlan>;
+    callbacks: Readonly<Record<string, (inventory: Inventory) => void>>; graphCallbacks: Readonly<Record<string, (graph: HeavyAtomGraph) => void>>;
     isLoading: boolean; highlightedGroup?: string; onHighlight: (groupId: string) => void; onClearHighlight: () => void; onSelectGroup: (groupId: string) => void;
 }) {
     return <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1.5 }}>
         {tokens.map((token, index) => {
             const elementColors = useElementColors ? elementColorsForCompound(plan, token.id) : undefined;
             const colors = elementColors && Object.keys(elementColors).length > 0 ? elementColors : undefined;
+            const orbitColors = compoundColorResult(orbitPlan, token.id);
             const tokenBlocks = plan.blocks.filter((block) => block.colorable && block.compoundId === token.id);
             const mappingControls = Object.fromEntries(tokenBlocks.filter((block): block is typeof block & { groupId: string; color: string } => Boolean(block.groupId && block.color)).map((block) => [block.element, { groupId: block.groupId, color: block.color }]));
             const descriptions = tokenBlocks.map((block) => `${block.element} mapped to ${block.counterpartCompoundIds.join(', ')}`);
             return <Box key={`${token.id}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <CompoundColumn token={token} data={displayMap.get(token.id)}
-                    atomColors={useElementColors ? undefined : atomMapping?.[token.id]} elementColors={colors}
-                    mappingDescription={descriptions.join('; ') || undefined} mappingControls={mappingControls} highlightedGroup={highlightedGroup} onHighlight={onHighlight} onClearHighlight={onClearHighlight} onSelectGroup={onSelectGroup} onInventory={callbacks[token.id]} isLoading={isLoading} />
+                <CompoundColumn token={token} data={displayMap.get(token.id)} structure={structures.get(token.id)}
+                    atomColors={useElementColors ? orbitColors.atomColors : atomMapping?.[token.id]} bondColors={useElementColors ? orbitColors.bondColors : undefined} elementColors={useElementColors ? undefined : colors}
+                    mappingDescription={descriptions.join('; ') || undefined} mappingControls={mappingControls} highlightedGroup={highlightedGroup} onHighlight={onHighlight} onClearHighlight={onClearHighlight} onSelectGroup={onSelectGroup} onInventory={callbacks[token.id]} onGraph={graphCallbacks[token.id]} isLoading={isLoading} />
                 {index < tokens.length - 1 && <Typography variant="h6" aria-hidden="true" sx={{ color: 'text.secondary', fontWeight: 400 }}>+</Typography>}
             </Box>;
         })}
@@ -203,6 +215,11 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
         queryKey: ['reaction-structure-compounds', compoundIdsKey], queryFn: () => getCompoundsForReaction(uniqueCompoundIds),
         enabled: uniqueCompoundIds.length > 0, staleTime: 5 * 60 * 1000,
     });
+    const { data: structureMap } = useQuery({
+        queryKey: ['reaction-structure-structures', compoundIdsKey], queryFn: () => getStructuresByIds(uniqueCompoundIds),
+        enabled: uniqueCompoundIds.length > 0, staleTime: 5 * 60 * 1000,
+    });
+    const structures = structureMap ?? EMPTY_STRUCTURES;
     const displayMap = useMemo<Map<string, DisplayData>>(() => {
         if (!compoundMap) return EMPTY_MAP;
         return new Map(Array.from(compoundMap.entries(), ([id, compound]) => [id, {
@@ -215,6 +232,15 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
             ? previous : { ...previous, [compoundId]: inventory });
     }, []);
     const inventoryCallbacks = useMemo(() => Object.fromEntries(uniqueCompoundIds.map((id) => [id, (inventory: Inventory) => saveInventory(id, inventory)])), [uniqueCompoundIds, saveInventory]);
+    const [graphs, setGraphs] = useState<Record<string, HeavyAtomGraph>>({});
+    const saveGraph = useCallback((compoundId: string, graph: HeavyAtomGraph) => {
+        setGraphs((previous) => {
+            const existing = previous[compoundId];
+            return existing && existing.elements.length === graph.elements.length && existing.bonds.length === graph.bonds.length
+                ? previous : { ...previous, [compoundId]: graph };
+        });
+    }, []);
+    const graphCallbacks = useMemo(() => Object.fromEntries(uniqueCompoundIds.map((id) => [id, (graph: HeavyAtomGraph) => saveGraph(id, graph)])), [uniqueCompoundIds, saveGraph]);
     const pairs = useMemo(() => atomMappingPairs ?? [], [atomMappingPairs]);
     const useElementColors = pairs.length > 0;
     const inventoriesForPlan = useMemo(() => {
@@ -227,6 +253,9 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
         return { ...seeded, ...inventories };
     }, [displayMap, inventories]);
     const plan = useMemo(() => buildAtomMappingColorPlan(pairs, inventoriesForPlan), [pairs, inventoriesForPlan]);
+    const orbitPlan = useMemo(() => buildAtomOrbitColorPlan(pairs, uniqueCompoundIds.map((compoundId) => ({
+        compoundId, inchi: structures.get(compoundId)?.inchi, graph: graphs[compoundId],
+    }))), [pairs, structures, graphs, uniqueCompoundIds]);
     const [selectedGroup, setSelectedGroup] = useState<string>();
     const [hoveredGroup, setHoveredGroup] = useState<string>();
     const highlightedGroup = selectedGroup ?? hoveredGroup;
@@ -237,9 +266,9 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
 
     return <Box onKeyDown={(event) => { if (event.key === 'Escape') setSelectedGroup(undefined); }}>
         <Box aria-label={`Chemical equation: ${directionText(arrow)}`} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 2, py: 1 }}>
-            <EquationSide tokens={parsed.reactants} displayMap={displayMap} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} callbacks={inventoryCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} />
+            <EquationSide tokens={parsed.reactants} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} />
             <Typography variant="h5" aria-hidden="true" sx={{ color: 'text.primary', fontWeight: 300, flexShrink: 0, px: 1, userSelect: 'none' }}>{arrow}</Typography>
-            <EquationSide tokens={parsed.products} displayMap={displayMap} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} callbacks={inventoryCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} />
+            <EquationSide tokens={parsed.products} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useElementColors={useElementColors && !isLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} />
         </Box>
         {error && <Typography variant="caption" color="text.secondary">Compound details could not be loaded.</Typography>}
         {useElementColors && !isLoading && <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>

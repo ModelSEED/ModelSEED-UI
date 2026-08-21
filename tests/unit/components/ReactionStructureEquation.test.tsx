@@ -3,6 +3,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { parseAtomMappings } from '@/lib/utils/atomMapping';
 import { getCompoundsForReaction, type Compound } from '@/lib/api/biochem';
+import { getStructuresByIds } from '@/lib/api/structures';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 
 const rendererCalls: Array<Record<string, unknown>> = [];
@@ -15,6 +16,7 @@ const compounds = new Map([
 ]);
 
 vi.mock('@/lib/api/biochem', () => ({ getCompoundsForReaction: vi.fn(async () => compounds) }));
+vi.mock('@/lib/api/structures', () => ({ getStructuresByIds: vi.fn(async () => new Map()) }));
 vi.mock('@/components/ui/MoleculeRenderer', () => ({
     default: (props: Record<string, unknown>) => {
         rendererCalls.push(props);
@@ -60,11 +62,58 @@ describe('ReactionStructureEquation', () => {
         const { container } = renderEquation({ atomMappingPairs: pairs });
         await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
         expect(container.querySelectorAll('[aria-label="Atom mapping legend"] li').length).toBeGreaterThan(0);
-        await waitFor(() => expect(rendererCalls.filter((call) => call.elementColors).length).toBeGreaterThan(0));
-        const donor = rendererCalls.filter((call) => call.compoundId === 'cpd00012').at(-1)?.elementColors as Record<string, string>;
-        const product = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.elementColors as Record<string, string>;
-        expect(donor.P).toBe(product.P);
         expect(container.textContent).toContain('individual atom pairing is not determined by the data');
+        expect(rendererCalls.some((call) => call.elementColors)).toBe(false);
+    });
+
+    it('colours cpd00009 phosphorus separately from its oxygens after its graph arrives', async () => {
+        vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([
+            ['cpd00009', { id: 'cpd00009', inchi: 'InChI=1S/H3O4P/c1-5(2,3)4', smiles: 'O=P([O-])([O-])O' }],
+        ]));
+        renderEquation({ atomMappingPairs: pairs });
+        await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00009')).toBe(true));
+        const initial = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)!;
+        (initial.onGraph as (graph: unknown) => void)({ elements: ['O', 'P', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [1, 3], [1, 4]] });
+        await waitFor(() => {
+            const colors = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.atomColors as Record<number, string>;
+            expect(colors[1]).not.toBe(colors[0]);
+            expect(colors[1]).not.toBe(colors[2]);
+            expect(colors[1]).not.toBe(colors[3]);
+            expect(colors[1]).not.toBe(colors[4]);
+        });
+    });
+
+    it('renders without orbit colours when structures are absent', async () => {
+        vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map());
+        const { container } = renderEquation({ atomMappingPairs: pairs });
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+        const result = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.atomColors as Record<number, string>;
+        expect(result ?? {}).toEqual({});
+    });
+
+    it('passes stored SVG fallback when compound SMILES is absent', async () => {
+        vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+            ['cpd00009', compound({ name: 'Phosphate', formula: 'H3O4P', charge: -1 })],
+        ]));
+        vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([
+            ['cpd00009', { id: 'cpd00009', svg: '<svg data-stored="true" />' }],
+        ]));
+        renderEquation({ equation: 'cpd00009[c] => cpd00009[c]' });
+        await waitFor(() => expect(rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.fallbackSvg).toBe('<svg data-stored="true" />'));
+        expect(rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.smiles).toBeUndefined();
+    });
+
+    it('keeps repeated equivalent graph reports idempotent', async () => {
+        renderEquation({ atomMappingPairs: pairs });
+        await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00009')).toBe(true));
+        const initial = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)!;
+        const graph = { elements: ['O', 'P', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [1, 3], [1, 4]] };
+        (initial.onGraph as (graph: unknown) => void)(graph);
+        await waitFor(() => expect(rendererCalls.filter((call) => call.compoundId === 'cpd00009').length).toBeGreaterThan(1));
+        const rendersAfterFirstGraph = rendererCalls.length;
+        (rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)?.onGraph as (graph: unknown) => void)(graph);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(rendererCalls.length).toBe(rendersAfterFirstGraph);
     });
 
     it('keeps legacy atom colours and hides new mapping affordances without pairs', async () => {
@@ -253,7 +302,7 @@ describe('ReactionStructureEquation', () => {
             }
             expect(getByText(/O: cpd00001, cpd00011 and cpd00742 — grouped/)).toBeTruthy();
             expect(container.textContent).toContain('individual atom pairing is not determined by the data');
-            await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00011' && Object.keys(call.elementColors as object ?? {}).includes('C') && Object.keys(call.elementColors as object ?? {}).includes('O'))).toBe(true));
+            await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00011' && call.onGraph)).toBe(true));
             const water = getByTestId('structure-cpd00001');
             const allophanate = getByTestId('structure-cpd00742');
             expect(Boolean(water.compareDocumentPosition(allophanate) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
