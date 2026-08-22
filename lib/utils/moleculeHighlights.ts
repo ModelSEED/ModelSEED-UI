@@ -92,6 +92,30 @@ export function buildMoleculeHighlightPlan(
     return { atomColors, bondColors };
 }
 
+export function applyAtomLabelColors(svg: string, atomColors: Readonly<Record<number, string>>): string {
+    if (typeof svg !== 'string' || !atomColors || Object.keys(atomColors).length === 0) return svg;
+
+    try {
+        return svg.replace(/<[^>]+>/g, (tag) => {
+            const classMatch = /\bclass=(['"])(.*?)\1/.exec(tag);
+            if (!classMatch) return tag;
+            const atomMatch = /^atom-(\d+)(?:\s|$)/.exec(classMatch[2]);
+            if (!atomMatch) return tag;
+            const color = atomColors[Number(atomMatch[1])];
+            if (typeof color !== 'string') return tag;
+            return tag
+                .replace(/\bstyle=(['"])(.*?)\1/, (_styleAttribute, quote, style) => (
+                    `style=${quote}${style.replace(/fill:\s*#[0-9a-f]{6}/gi, `fill:${color}`)}${quote}`
+                ))
+                .replace(/\bfill=(['"])#[0-9a-f]{6}\1/gi, (_fillAttribute, quote) => (
+                    `fill=${quote}${color}${quote}`
+                ));
+        });
+    } catch {
+        return svg;
+    }
+}
+
 export function applyBondColors(svg: string, bondColors: Readonly<Record<number, string>>): string {
     if (typeof svg !== 'string' || !bondColors || Object.keys(bondColors).length === 0) return svg;
 

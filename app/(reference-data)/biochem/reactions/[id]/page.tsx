@@ -386,9 +386,6 @@ export default function ReactionDetailPage() {
                             )}
                             {atomPairs.length > 0 && (
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                        Raw mapping entries are available as supporting detail.
-                                    </Typography>
                                     <AtomMappingSummary
                                         entries={atomMapping.entries}
                                         confidence={atomMapping.confidence}

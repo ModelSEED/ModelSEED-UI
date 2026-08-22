@@ -123,20 +123,23 @@ interface CompoundColumnProps {
     mappingDescription?: string;
     mappingControls?: Readonly<Record<string, { groupId: string; color: string }>>;
     highlightedGroup?: string;
-    onHighlight: (groupId: string) => void;
-    onClearHighlight: () => void;
-    onSelectGroup: (groupId: string) => void;
     onInventory: (inventory: Inventory) => void;
     onGraph: (graph: HeavyAtomGraph) => void;
-    isLoading: boolean; precisionResult?: CompoundColorResult; precisionControlId?: string;
+    isLoading: boolean; precisionResult?: CompoundColorResult;
 }
 
-function CompoundColumn({ token, data, structure, atomColors, bondColors, mappingDescription, mappingControls, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup, onInventory, onGraph, isLoading, precisionResult, precisionControlId }: CompoundColumnProps) {
-    const [precisionExpanded, setPrecisionExpanded] = useState(false);
+function CompoundColumn({ token, data, structure, atomColors, bondColors, mappingDescription, mappingControls, highlightedGroup, onInventory, onGraph, isLoading, precisionResult }: CompoundColumnProps) {
     const smiles = data?.smiles ?? structure?.smiles;
     const drawStructure = Boolean(structure?.svg) || (Boolean(smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1));
     const label = data?.name || token.id;
-    const metadata = [token.id, data?.formula, formatCharge(data?.charge)].filter(Boolean).join(' · ');
+    const metadata = token.id;
+    const accessibleDescription = [
+        data?.formula && `Formula ${data.formula}`,
+        formatCharge(data?.charge) && `charge ${formatCharge(data?.charge)}`,
+        precisionResult && PRECISION_LABELS[precisionResult.precision],
+        precisionResult && precisionExplanation(precisionResult),
+        mappingDescription,
+    ].filter(Boolean).join(' · ');
     const contents = isLoading ? (
         <Skeleton variant="rectangular" width={134} height={134} />
     ) : drawStructure ? (
@@ -150,7 +153,7 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, mappin
             onGraph={onGraph}
             width={134}
             height={134}
-            alt={mappingDescription ? `Structure of ${label}; ${mappingDescription}` : `Structure of ${label}`}
+            alt={accessibleDescription ? `Structure of ${label}; ${accessibleDescription}` : `Structure of ${label}`}
         />
     ) : (
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -161,38 +164,28 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, mappin
     const isDimmed = Boolean(highlightedGroup && !isMember);
     const highlightColor = isMember ? Object.values(mappingControls ?? {}).find((control) => control.groupId === highlightedGroup)?.color : undefined;
     return (
-        <Box data-mapping-token={token.id} data-mapping-dimmed={isDimmed ? 'true' : 'false'} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, maxWidth: 160, minWidth: 0, ...(highlightedGroup ? { opacity: isDimmed ? 0.4 : 1, outline: isMember ? `2px solid ${highlightColor}` : undefined, borderRadius: isMember ? 0.5 : undefined } : {}) }}>
-            {token.stoich && <Typography variant="body2" sx={{ fontWeight: 600, pt: 0.5 }}>{token.stoich}</Typography>}
+        <Box data-mapping-token={token.id} data-mapping-dimmed={isDimmed ? 'true' : 'false'} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, maxWidth: 160, minWidth: 0, ...(highlightedGroup ? { opacity: isDimmed ? 0.4 : 1 } : {}) }}>
+            {token.stoich && <Typography variant="body2" sx={{ fontWeight: 600, pt: 0.5, color: highlightColor }}>{token.stoich}</Typography>}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.4, minWidth: 0 }}>
-                <Tooltip title={mappingDescription ?? ''} disableHoverListener={!mappingDescription}>
+                <Tooltip title={accessibleDescription} disableHoverListener={!accessibleDescription}>
                     <Box sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
                         <NextLink href={`/biochem/compounds/${token.id}`} aria-label={`Open ${label}`} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
                     </Box>
                 </Tooltip>
                 {isLoading ? <Skeleton variant="text" width={100} /> : <NextLink href={`/biochem/compounds/${token.id}`} style={compoundLinkStyle}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, textAlign: 'center', overflowWrap: 'anywhere' }}>{label}</Typography>
+                    <Typography variant="body1" style={highlightColor ? { color: highlightColor } : undefined} sx={{ fontWeight: 600, textAlign: 'center', overflowWrap: 'anywhere' }}>{label}</Typography>
                 </NextLink>}
                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', overflowWrap: 'anywhere' }}>{metadata}</Typography>
-                {!isLoading && precisionResult && precisionControlId && <Box sx={{ textAlign: 'center', minWidth: 0 }}><Box component="button" type="button" aria-label={`${label}: ${PRECISION_LABELS[precisionResult.precision]}`} aria-expanded={precisionExpanded} aria-controls={precisionControlId} aria-describedby={precisionControlId} onFocus={() => setPrecisionExpanded(true)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPrecisionExpanded((expanded) => !expanded); } }} onClick={() => setPrecisionExpanded((expanded) => !expanded)} sx={{ border: 0, bgcolor: 'transparent', p: 0, cursor: 'pointer', color: 'text.secondary', font: 'inherit', textDecoration: 'underline', overflowWrap: 'anywhere' }}><Typography component="span" variant="caption">{PRECISION_LABELS[precisionResult.precision]}</Typography></Box>{precisionExpanded && <Typography id={precisionControlId} role="region" variant="caption" color="text.secondary" sx={{ display: 'block', overflowWrap: 'anywhere' }}>{precisionExplanation(precisionResult)}</Typography>}</Box>}
-                {!isLoading && Object.keys(mappingControls ?? {}).length > 0 && <Box role="group" aria-label={`Mapped elements: ${Object.keys(mappingControls ?? {}).join(', ')}`} sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    {Object.entries(mappingControls ?? {}).map(([element, control]) => {
-                        const color = control.color;
-                        return <Box key={element} component="button" type="button" data-mapping-group={control.groupId} aria-label={`Highlight ${element} mapping group`} onClick={() => onSelectGroup(control.groupId)} onMouseEnter={() => onHighlight(control.groupId)} onMouseLeave={onClearHighlight} onFocus={() => onHighlight(control.groupId)} onBlur={onClearHighlight} sx={{ display: 'flex', alignItems: 'center', gap: 0.25, border: 0, bgcolor: 'transparent', p: 0, cursor: 'pointer', font: 'inherit' }}>
-                            <Box aria-hidden="true" sx={{ width: 8, height: 8, bgcolor: color, borderRadius: '50%' }} />
-                            <Typography variant="caption">{element}</Typography>
-                        </Box>;
-                    })}
-                </Box>}
             </Box>
         </Box>
     );
 }
 
-function EquationSide({ tokens, displayMap, structures, atomMapping, useOrbitColors, plan, orbitPlan, callbacks, graphCallbacks, isLoading, highlightedGroup, onHighlight, onClearHighlight, onSelectGroup, side }: {
+function EquationSide({ tokens, displayMap, structures, atomMapping, useOrbitColors, plan, orbitPlan, callbacks, graphCallbacks, isLoading, highlightedGroup }: {
     tokens: CompoundToken[]; displayMap: Map<string, DisplayData>; structures: Map<string, CompoundStructure>;
     atomMapping?: ReactionAtomMapping; useOrbitColors: boolean; plan: ReturnType<typeof buildAtomMappingColorPlan>; orbitPlan: ReturnType<typeof buildAtomOrbitColorPlan>;
     callbacks: Readonly<Record<string, (inventory: Inventory) => void>>; graphCallbacks: Readonly<Record<string, (graph: HeavyAtomGraph) => void>>;
-    isLoading: boolean; side: string; highlightedGroup?: string; onHighlight: (groupId: string) => void; onClearHighlight: () => void; onSelectGroup: (groupId: string) => void;
+    isLoading: boolean; highlightedGroup?: string;
 }) {
     return <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1.5 }}>
         {tokens.map((token, index) => {
@@ -204,7 +197,7 @@ function EquationSide({ tokens, displayMap, structures, atomMapping, useOrbitCol
             return <Box key={`${token.id}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <CompoundColumn token={token} data={displayMap.get(token.id)} structure={structures.get(token.id)}
                     atomColors={useOrbitColors ? orbitColors.atomColors : atomMapping?.[token.id]} bondColors={useOrbitColors ? orbitColors.bondColors : undefined}
-                    mappingDescription={descriptions.join('; ') || undefined} mappingControls={mappingControls} highlightedGroup={highlightedGroup} onHighlight={onHighlight} onClearHighlight={onClearHighlight} onSelectGroup={onSelectGroup} onInventory={callbacks[token.id]} onGraph={graphCallbacks[token.id]} isLoading={isLoading} precisionResult={precisionResult} precisionControlId={`mapping-precision-${side}-${token.id}-${index}`} />
+                    mappingDescription={descriptions.join('; ') || undefined} mappingControls={mappingControls} highlightedGroup={highlightedGroup} onInventory={callbacks[token.id]} onGraph={graphCallbacks[token.id]} isLoading={isLoading} precisionResult={precisionResult} />
                 {index < tokens.length - 1 && <Typography variant="h6" aria-hidden="true" sx={{ color: 'text.secondary', fontWeight: 400 }}>+</Typography>}
             </Box>;
         })}
@@ -277,36 +270,39 @@ export default function ReactionStructureEquation({ equation, reversibility, ato
 
     return <Box onKeyDown={(event) => { if (event.key === 'Escape') setSelectedGroup(undefined); }}>
         <Box aria-label={`Chemical equation: ${directionText(arrow)}`} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 2, py: 1 }}>
-            <EquationSide tokens={parsed.reactants} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useOrbitColors={useOrbitColors && !isLoading && !structuresLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} side="reactant" />
+            <EquationSide tokens={parsed.reactants} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useOrbitColors={useOrbitColors && !isLoading && !structuresLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} />
             <Typography variant="h5" aria-hidden="true" sx={{ color: 'text.primary', fontWeight: 300, flexShrink: 0, px: 1, userSelect: 'none' }}>{arrow}</Typography>
-            <EquationSide tokens={parsed.products} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useOrbitColors={useOrbitColors && !isLoading && !structuresLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} onHighlight={setHoveredGroup} onClearHighlight={() => setHoveredGroup(undefined)} onSelectGroup={selectGroup} side="product" />
+            <EquationSide tokens={parsed.products} displayMap={displayMap} structures={structures} atomMapping={atomMapping} useOrbitColors={useOrbitColors && !isLoading && !structuresLoading} plan={plan} orbitPlan={orbitPlan} callbacks={inventoryCallbacks} graphCallbacks={graphCallbacks} isLoading={isLoading} highlightedGroup={highlightedGroup} />
         </Box>
         {error && <Typography variant="caption" color="text.secondary">Compound details could not be loaded.</Typography>}
         {useOrbitColors && !isLoading && !structuresLoading && orbitPlan.groups.length > 0 && <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {(plan.colorableCount > 0 || atomMappingConfidence || atomMappingHasSymmetryGroups) && <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                 {orbitPlan.groups.length > 0 && <Typography variant="body2" sx={{ fontWeight: 600 }}>Atom mapping</Typography>}
                 {atomMappingConfidence && <Chip size="small" label={atomMappingConfidence} color={confidenceColor(atomMappingConfidence)} />}
-                {atomMappingHasSymmetryGroups && <Typography variant="caption" color="text.secondary">A grouped mapping resolves to any one member of a set of symmetry-equivalent atoms, so the specific atom is not determined.</Typography>}
             </Box>}
-            {(() => {
-                const summary = (['exact-atom', 'symmetry-orbit', 'element-block', 'unresolved'] as MappingPrecision[])
-                    .filter((precision) => orbitPlan.precisionSummary[precision] > 0)
-                    .map((precision) => `${orbitPlan.precisionSummary[precision]} ${PRECISION_LABELS[precision].toLowerCase()}`)
-                    .join('; ');
-                return summary && <Typography variant="caption" color="text.secondary">Precision: {summary}.</Typography>;
-            })()}
             <Box component="ul" aria-label="Atom mapping legend" sx={{ m: 0, pl: 2.5 }}>
                 {orbitPlan.groups.map((entry) => {
                     const description = `${entry.elements.join(', ')}: ${joinCompoundIds(entry.compoundIds)}${entry.hasSymmetryGroup ? ' — grouped; individual atom pairing is not determined by the data' : ''}`;
                     return <Box component="li" key={entry.groupId} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <Tooltip title={description}><Box component="button" type="button" data-mapping-group={entry.groupId} aria-pressed={selectedGroup === entry.groupId} aria-label={description} onClick={() => selectGroup(entry.groupId)} onMouseEnter={() => setHoveredGroup(entry.groupId)} onMouseLeave={() => setHoveredGroup(undefined)} onFocus={() => setHoveredGroup(entry.groupId)} onBlur={() => setHoveredGroup(undefined)} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, border: 0, bgcolor: 'transparent', p: 0, cursor: 'pointer', textAlign: 'left' }}>
                             <Box aria-hidden="true" sx={{ width: 12, height: 12, bgcolor: entry.color, borderRadius: '50%' }} />
-                            <Typography variant="caption">{description}</Typography>
+                            <Typography variant="caption">{entry.elements.join(', ')} · {entry.compoundIds.join(', ')}{entry.hasSymmetryGroup ? ' †' : ''}</Typography>
                         </Box></Tooltip>
                     </Box>;
                 })}
             </Box>
-            {reasons.length > 0 && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {reasons.join('; ')}.</Typography>}
+            <Box component="details">
+                <Box component="summary" sx={{ cursor: 'pointer' }}>Mapping details</Box>
+                {atomMappingHasSymmetryGroups && <Typography variant="caption" color="text.secondary">A grouped mapping resolves to any one member of a set of symmetry-equivalent atoms, so the specific atom is not determined.</Typography>}
+                {(() => {
+                    const summary = (['exact-atom', 'symmetry-orbit', 'element-block', 'unresolved'] as MappingPrecision[])
+                        .filter((precision) => orbitPlan.precisionSummary[precision] > 0)
+                        .map((precision) => `${orbitPlan.precisionSummary[precision]} ${PRECISION_LABELS[precision].toLowerCase()}`)
+                        .join('; ');
+                    return summary && <Typography variant="caption" color="text.secondary">Precision: {summary}.</Typography>;
+                })()}
+                {reasons.length > 0 && <Typography variant="caption" color="text.secondary">Some atoms could not be unambiguously mapped and therefore are not coloured: {reasons.join('; ')}.</Typography>}
+            </Box>
         </Box>}
         {structureError && <Typography role="status" variant="caption" color="text.secondary">Structure data could not be loaded, so atom-level mapping precision is unavailable and any colours shown are element-level at best.</Typography>}
     </Box>;

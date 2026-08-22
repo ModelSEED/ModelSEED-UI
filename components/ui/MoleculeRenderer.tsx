@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
-import { applyBondColors, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
+import { applyAtomLabelColors, applyBondColors, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
 import type { HeavyAtomGraph } from '@/lib/utils/inchiAtomOrder';
 
 /**
@@ -146,27 +146,7 @@ export default function MoleculeRenderer({
                                 svg = mol.get_svg(width, height);
                             }
                         } else if (currentAtomColors && Object.keys(currentAtomColors).length > 0) {
-                            const atomIndices = Object.keys(currentAtomColors).map(Number);
-                            const highlightColors: Record<number, [number, number, number]> = {};
-
-                            for (const idx of atomIndices) {
-                                // Convert CSS hex color (#rrggbb) to RDKit [r, g, b] floats
-                                const hex = currentAtomColors[idx].replace('#', '');
-                                const r = parseInt(hex.slice(0, 2), 16) / 255;
-                                const g = parseInt(hex.slice(2, 4), 16) / 255;
-                                const b = parseInt(hex.slice(4, 6), 16) / 255;
-                                highlightColors[idx] = [r, g, b];
-                            }
-
-                            svg = mol.get_svg_with_highlights(
-                                JSON.stringify({
-                                    atoms: atomIndices,
-                                    bonds: [],
-                                    highlightAtomColors: highlightColors,
-                                    width,
-                                    height,
-                                })
-                            );
+                            svg = applyAtomLabelColors(mol.get_svg(width, height), currentAtomColors);
                         } else {
                             svg = mol.get_svg(width, height);
                         }

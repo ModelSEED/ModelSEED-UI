@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+    applyAtomLabelColors,
     applyBondColors,
     buildMoleculeHighlightPlan,
     elementInventoryFromMolJson,
@@ -47,6 +48,26 @@ describe('moleculeHighlights', () => {
 
         expect(plan.atomColors).toEqual({ 0: '#ff0000', 1: '#ff0000', 3: '#0000ff' });
         expect(plan.bondColors).toEqual({ 0: '#ff0000' });
+    });
+
+    it('recolours atom label fill attributes and styles', () => {
+        const fillAttribute = "<path class='atom-2' fill='#000000'/>";
+        const fillStyle = "<path class='atom-3' style='fill:#000000;stroke:#000000'/>";
+        expect(applyAtomLabelColors(fillAttribute, { 2: '#00ff00' })).toContain("fill='#00ff00'");
+        expect(applyAtomLabelColors(fillStyle, { 3: '#abcdef' })).toContain('fill:#abcdef;stroke:#000000');
+    });
+
+    it('does not recolour bond tags or unmapped atom labels', () => {
+        const bond = "<path class='bond-0 atom-0 atom-1' style='stroke:#000000'/>";
+        const unmappedAtom = "<path class='atom-2' fill='#000000'/>";
+        expect(applyAtomLabelColors(bond, { 0: '#00ff00' })).toBe(bond);
+        expect(applyAtomLabelColors(unmappedAtom, { 1: '#00ff00' })).toBe(unmappedAtom);
+    });
+
+    it('returns the identical SVG for an empty atom colour map or SVG', () => {
+        const atomLabel = "<path class='atom-2' fill='#000000'/>";
+        expect(applyAtomLabelColors(atomLabel, {})).toBe(atomLabel);
+        expect(applyAtomLabelColors('', { 2: '#00ff00' })).toBe('');
     });
 
     it('recolours a bond stroke without changing its path or fill', () => {
