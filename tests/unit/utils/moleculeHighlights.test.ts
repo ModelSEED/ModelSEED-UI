@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     applyAtomLabelColors,
     applyBondColors,
+    buildExplicitAtomLabels,
     buildMoleculeHighlightPlan,
     elementInventoryFromMolJson,
     elementSymbolForAtomicNumber,
@@ -36,6 +37,26 @@ describe('moleculeHighlights', () => {
                 atomColors: {}, bondColors: {},
             });
         }
+    });
+
+    describe('buildExplicitAtomLabels', () => {
+        it('labels every carbon in a pure carbon chain', () => {
+            expect(buildExplicitAtomLabels({ molecules: [{ atoms: [{}, {}, {}] }] })).toEqual({ 0: 'C', 1: 'C', 2: 'C' });
+        });
+
+        it('labels only carbon atoms in a mixed molecule', () => {
+            expect(buildExplicitAtomLabels({ molecules: [{ atoms: [{}, { z: 8 }, { z: 7 }, {}] }] })).toEqual({ 0: 'C', 3: 'C' });
+        });
+
+        it('excludes charged and isotopic carbons', () => {
+            expect(buildExplicitAtomLabels({ molecules: [{ atoms: [{}, { chg: 1 }, { isotope: 13 }] }] })).toEqual({ 0: 'C' });
+        });
+
+        it('returns no labels for unusable input', () => {
+            for (const value of [null, 'x', {}, { molecules: [] }, { molecules: [{ atoms: [] }] }]) {
+                expect(buildExplicitAtomLabels(value)).toEqual({});
+            }
+        });
     });
 
     it('colours only bonds between atoms with the same colour', () => {

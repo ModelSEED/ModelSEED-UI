@@ -120,6 +120,7 @@ interface CompoundColumnProps {
     structure?: CompoundStructure;
     atomColors?: AtomColors;
     bondColors?: Record<number, string>;
+    showAllAtomLabels?: boolean;
     mappingDescription?: string;
     mappingControls?: Readonly<Record<string, { groupId: string; color: string }>>;
     highlightedGroup?: string;
@@ -128,7 +129,7 @@ interface CompoundColumnProps {
     isLoading: boolean; precisionResult?: CompoundColorResult;
 }
 
-function CompoundColumn({ token, data, structure, atomColors, bondColors, mappingDescription, mappingControls, highlightedGroup, onInventory, onGraph, isLoading, precisionResult }: CompoundColumnProps) {
+function CompoundColumn({ token, data, structure, atomColors, bondColors, showAllAtomLabels, mappingDescription, mappingControls, highlightedGroup, onInventory, onGraph, isLoading, precisionResult }: CompoundColumnProps) {
     const smiles = data?.smiles ?? structure?.smiles;
     const drawStructure = Boolean(structure?.svg) || (Boolean(smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1));
     const label = data?.name || token.id;
@@ -148,6 +149,7 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, mappin
             compoundId={token.id}
             atomColors={atomColors}
             bondColors={bondColors}
+            showAllAtomLabels={showAllAtomLabels}
             fallbackSvg={structure?.svg}
             onInventory={onInventory}
             onGraph={onGraph}
@@ -196,7 +198,7 @@ function EquationSide({ tokens, displayMap, structures, atomMapping, useOrbitCol
             const descriptions = tokenBlocks.map((block) => `${block.element} mapped to ${block.counterpartCompoundIds.join(', ')}`);
             return <Box key={`${token.id}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <CompoundColumn token={token} data={displayMap.get(token.id)} structure={structures.get(token.id)}
-                    atomColors={useOrbitColors ? orbitColors.atomColors : atomMapping?.[token.id]} bondColors={useOrbitColors ? orbitColors.bondColors : undefined}
+                    atomColors={useOrbitColors ? orbitColors.atomColors : atomMapping?.[token.id]} bondColors={useOrbitColors ? orbitColors.bondColors : undefined} showAllAtomLabels
                     mappingDescription={descriptions.join('; ') || undefined} mappingControls={mappingControls} highlightedGroup={highlightedGroup} onInventory={callbacks[token.id]} onGraph={graphCallbacks[token.id]} isLoading={isLoading} precisionResult={precisionResult} />
                 {index < tokens.length - 1 && <Typography variant="h6" aria-hidden="true" sx={{ color: 'text.secondary', fontWeight: 400 }}>+</Typography>}
             </Box>;

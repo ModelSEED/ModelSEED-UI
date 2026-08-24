@@ -58,12 +58,25 @@ describe('ReactionStructureEquation', () => {
         expect(container.textContent).toContain('cpd00001');
     });
 
+    it('requests explicit labels for every rendered compound structure', async () => {
+        const { getByText } = renderEquation();
+        await waitFor(() => expect(getByText('Water')).toBeTruthy());
+        expect(rendererCalls.length).toBeGreaterThan(0);
+        expect(rendererCalls.every((call) => call.showAllAtomLabels === true)).toBe(true);
+    });
+
     it('uses one phosphorus colour on both compounds and discloses ambiguous mappings', async () => {
         const { container } = renderEquation({ atomMappingPairs: pairs });
         await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
         expect(container.querySelectorAll('[aria-label="Atom mapping legend"] li').length).toBeGreaterThan(0);
         expect(container.querySelector('[aria-label="Atom mapping legend"] button[aria-label*="individual atom pairing"]')).toBeTruthy();
         expect(rendererCalls.some((call) => call.elementColors)).toBe(false);
+    });
+
+    it('does not render the removed atom-pair summary disclosure', async () => {
+        const { container, queryByText } = renderEquation({ atomMappingPairs: pairs });
+        await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
+        expect(queryByText(/Show all mappings|Show all .*atom|atom pairs/i)).toBeNull();
     });
 
     it('colours cpd00009 phosphorus separately from its oxygens after its graph arrives', async () => {

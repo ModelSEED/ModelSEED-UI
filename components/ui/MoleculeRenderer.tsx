@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
-import { applyAtomLabelColors, applyBondColors, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
+import { applyAtomLabelColors, applyBondColors, buildExplicitAtomLabels, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
 import type { HeavyAtomGraph } from '@/lib/utils/inchiAtomOrder';
 
 /**
@@ -28,6 +28,8 @@ interface MoleculeRendererProps {
     onInventory?: (inventory: Record<string, number>) => void;
     /** Optional per-bond color map, keyed by the RDKit graph bond-array index. */
     bondColors?: Record<number, string>;
+    /** Forces explicit carbon labels for atom-level mapping readability. */
+    showAllAtomLabels?: boolean;
     /** Called after a successful RDKit parse with the molecule's local heavy-atom graph. */
     onGraph?: (graph: HeavyAtomGraph) => void;
     /** Plain stored SVG used only when a local RDKit SVG cannot be produced. */
@@ -46,6 +48,7 @@ export default function MoleculeRenderer({
     elementColors,
     onInventory,
     bondColors,
+    showAllAtomLabels = false,
     onGraph,
     fallbackSvg,
     width = 150,
@@ -98,7 +101,7 @@ export default function MoleculeRenderer({
                         const currentElementColors = elementColorsRef.current;
                         const currentAtomColors = atomColorsRef.current;
                         const currentBondColors = bondColorsRef.current;
-                        if ((currentElementColors && Object.keys(currentElementColors).length > 0) || onInventoryRef.current || onGraphRef.current) {
+                        if ((currentElementColors && Object.keys(currentElementColors).length > 0) || onInventoryRef.current || onGraphRef.current || showAllAtomLabels) {
                             try {
                                 molJson = JSON.parse(mol.get_json());
                                 onInventoryRef.current?.(elementInventoryFromMolJson(molJson));
@@ -146,9 +149,16 @@ export default function MoleculeRenderer({
                                 svg = mol.get_svg(width, height);
                             }
                         } else if (currentAtomColors && Object.keys(currentAtomColors).length > 0) {
-                            svg = applyAtomLabelColors(mol.get_svg(width, height), currentAtomColors);
+                            const atomLabels = showAllAtomLabels ? buildExplicitAtomLabels(molJson) : {};
+                            const baseSvg = Object.keys(atomLabels).length > 0
+                                ? mol.get_svg_with_highlights(JSON.stringify({ width, height, atomLabels }))
+                                : mol.get_svg(width, height);
+                            svg = applyAtomLabelColors(baseSvg, currentAtomColors);
                         } else {
-                            svg = mol.get_svg(width, height);
+                            const atomLabels = showAllAtomLabels ? buildExplicitAtomLabels(molJson) : {};
+                            svg = Object.keys(atomLabels).length > 0
+                                ? mol.get_svg_with_highlights(JSON.stringify({ width, height, atomLabels }))
+                                : mol.get_svg(width, height);
                         }
 
                         if (currentBondColors && Object.keys(currentBondColors).length > 0) {
@@ -180,7 +190,7 @@ export default function MoleculeRenderer({
         return () => {
             cancelled = true;
         };
-    }, [smiles, atomColorsKey, elementColorsKey, bondColorsKey, fallbackSvg, width, height]);
+    }, [smiles, atomColorsKey, elementColorsKey, bondColorsKey, showAllAtomLabels, fallbackSvg, width, height]);
 
     if (state === 'loading') {
         return (

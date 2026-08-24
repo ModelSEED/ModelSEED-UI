@@ -1,6 +1,8 @@
 export interface RdkitAtomJson {
     z?: number;
     impHs?: number;
+    chg?: number;
+    isotope?: number;
 }
 
 export interface RdkitBondJson {
@@ -56,6 +58,21 @@ export function elementInventoryFromMolJson(parsed: unknown): Record<string, num
         if (implicitHydrogens > 0) inventory.H = (inventory.H ?? 0) + implicitHydrogens;
     }
     return inventory;
+}
+
+export function buildExplicitAtomLabels(parsed: unknown): Record<number, string> {
+    const atoms = atomsFromMolJson(parsed);
+    if (!atoms || atoms.length === 0) return {};
+
+    const labels: Record<number, string> = {};
+    for (const [index, atom] of atoms.entries()) {
+        if (!isRecord(atom)) continue;
+        const rdkitAtom = atom as RdkitAtomJson;
+        if (elementSymbolForAtomicNumber(rdkitAtom.z) === 'C' && !rdkitAtom.chg && !rdkitAtom.isotope) {
+            labels[index] = 'C';
+        }
+    }
+    return labels;
 }
 
 export function buildMoleculeHighlightPlan(

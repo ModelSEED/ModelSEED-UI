@@ -25,6 +25,22 @@ describe('MoleculeRenderer', () => {
         expect(mol.get_svg_with_highlights).not.toHaveBeenCalled();
     });
 
+    it('uses explicit carbon labels and preserves atom label colours when requested', async () => {
+        getMol.mockImplementationOnce(() => ({
+            get_json: () => JSON.stringify({ molecules: [{ atoms: [{}, { z: 8 }, {}], bonds: [] }] }),
+            get_svg: vi.fn(),
+            get_svg_with_highlights: vi.fn(() => "<svg><path class='atom-0' fill='#000000'/><path class='atom-2' fill='#000000'/></svg>"),
+            delete: vi.fn(),
+        }));
+        const { container } = render(<MoleculeRenderer compoundId="cpd00001" smiles="CCO" showAllAtomLabels atomColors={{ 0: '#123456', 2: '#abcdef' }} />);
+        await waitFor(() => expect(container.querySelector('[class="atom-0"]')?.getAttribute('fill')).toBe('#123456'));
+        expect(container.querySelector('[class="atom-2"]')?.getAttribute('fill')).toBe('#abcdef');
+        const mol = getMol.mock.results.at(-1)?.value;
+        expect(JSON.parse(mol.get_svg_with_highlights.mock.calls[0][0])).toMatchObject({
+            atomLabels: { 0: 'C', 2: 'C' },
+        });
+    });
+
     it('renders a stored SVG unmodified when no SMILES is available', () => {
         const fallbackSvg = '<svg data-stored="true"><path style="stroke:#000000" /></svg>';
         const { container } = render(<MoleculeRenderer compoundId="cpd00009" fallbackSvg={fallbackSvg} />);

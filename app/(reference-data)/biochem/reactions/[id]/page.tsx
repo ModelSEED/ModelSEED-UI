@@ -15,7 +15,6 @@ import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
-import AtomMappingSummary from '@/components/ui/AtomMappingSummary';
 import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
 import {
     directionAgreementFromRecords,
@@ -383,15 +382,6 @@ export default function ReactionDetailPage() {
                                     atomMappingConfidence={atomMapping.confidence}
                                     atomMappingHasSymmetryGroups={atomMapping.hasSymmetryGroups}
                                 />
-                            )}
-                            {atomPairs.length > 0 && (
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                    <AtomMappingSummary
-                                        entries={atomMapping.entries}
-                                        confidence={atomMapping.confidence}
-                                        hasSymmetryGroups={atomMapping.hasSymmetryGroups}
-                                    />
-                                </Box>
                             )}
                         </Box>
                     </DetailRow>
