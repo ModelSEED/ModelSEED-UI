@@ -105,19 +105,22 @@ describe('buildAtomMappingColorPlan', () => {
         expect(blockAssignment(buildAtomMappingColorPlan(input, inventories), 'cpd00001', 'O').mappedIndexCount).toBe(1);
     });
 
-    it('cycles the palette after twelve sorted groups', () => {
-        const entries = Array.from({ length: 13 }, (_, index) =>
+    it('cycles the palette once the sorted groups outnumber it', () => {
+        const count = MAPPING_PALETTE.length + 1;
+        const entries = Array.from({ length: count }, (_, index) =>
             `cpd${String(index + 1).padStart(5, '0')}:O#1=cpd${String(index + 101).padStart(5, '0')}:O#1`,
         );
-        const inventories = Object.fromEntries(Array.from({ length: 13 }, (_, index) => [
+        const inventories = Object.fromEntries(Array.from({ length: count }, (_, index) => [
             `cpd${String(index + 1).padStart(5, '0')}`, { O: 1 },
-        ]).concat(Array.from({ length: 13 }, (_, index) => [
+        ]).concat(Array.from({ length: count }, (_, index) => [
             `cpd${String(index + 101).padStart(5, '0')}`, { O: 1 },
         ])));
         const plan = buildAtomMappingColorPlan(pairs(entries), inventories);
-        expect(plan.legend).toHaveLength(13);
-        expect(plan.legend[12].color).toBe(MAPPING_PALETTE[0]);
-        expect(new Set(plan.legend.map((entry) => entry.groupId)).size).toBe(13);
+        expect(plan.legend).toHaveLength(count);
+        expect(plan.legend.map((entry) => entry.color)).toEqual(
+            Array.from({ length: count }, (_, index) => MAPPING_PALETTE[index % MAPPING_PALETTE.length]),
+        );
+        expect(new Set(plan.legend.map((entry) => entry.groupId)).size).toBe(count);
     });
 
     it('returns only colourable element colours and an empty object for unknown compounds', () => {

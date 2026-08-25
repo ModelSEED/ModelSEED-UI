@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { parseAtomMappings } from '@/lib/utils/atomMapping';
+import { MAPPING_PALETTE } from '@/lib/utils/atomMappingColors';
 import { getCompoundsForReaction, type Compound } from '@/lib/api/biochem';
 import { getStructuresByIds } from '@/lib/api/structures';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
@@ -88,6 +89,10 @@ describe('ReactionStructureEquation', () => {
             expect(colors[1]).not.toBe(colors[2]);
             expect(colors[1]).not.toBe(colors[3]);
             expect(colors[1]).not.toBe(colors[4]);
+            // Colours reaching the SVG renderer come from the CVD-safe palette.
+            const applied = Object.values(colors);
+            expect(applied.length).toBeGreaterThan(0);
+            for (const color of applied) expect(MAPPING_PALETTE).toContain(color);
         });
     });
 

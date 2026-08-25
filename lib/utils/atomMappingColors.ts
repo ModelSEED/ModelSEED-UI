@@ -55,9 +55,55 @@ export interface AtomMappingColorPlan {
     readonly totalCount: number;
 }
 
+/**
+ * Colour-vision-deficiency-safe categorical palette for atom mapping groups.
+ *
+ * Colours are assigned by group order (`MAPPING_PALETTE[index % length]`) and
+ * are consumed in three SVG roles by `components/ui/MoleculeRenderer.tsx`:
+ * RDKit highlight halo fills, atom-label `fill:` text, and bond `stroke:`.
+ * The molecule canvas is always white (`lib/theme.ts` sets both `background.default`
+ * and `background.paper` to `#ffffff`; there is no dark mode) and RDKit draws
+ * unmapped atoms and bonds in black, so every entry must read against white
+ * *and* stay clearly distinct from black.
+ *
+ * Design constraints, all asserted by `tests/unit/utils/mappingPaletteSafety.test.ts`:
+ *
+ * 1. Entries 0-3 are the four Okabe-Ito (Okabe & Ito 2008; Wong, *Nature Methods*
+ *    8:441, 2011) colours that clear the contrast bar unmodified. The remaining
+ *    Okabe-Ito members are deliberately excluded: orange `#E69F00` (2.25:1) and
+ *    sky blue `#56B4E9` (2.31:1) fail against white, and darkening them to pass
+ *    collapses the set's own separation (darkened orange approaches vermillion,
+ *    darkened sky blue approaches blue), which defeats the purpose.
+ * 2. Entries 4-7 extend the set under the same rules rather than borrowing from
+ *    a palette that was never CVD-checked.
+ * 3. Contrast against white is >= 3:1 for every entry (WCAG 2.1 SC 1.4.11
+ *    Non-text Contrast, the applicable bar for bond strokes and atom glyphs as
+ *    graphical objects).
+ * 4. Under simulated protanopia and deuteranopia — the common red-green
+ *    deficiencies, ~8% of males — the minimum CIE-Lab dE76 between any two
+ *    entries is 19.0. No pair is separated by red-versus-green hue alone.
+ * 5. Every entry stays far from black (min dE76 59.4) so mapped atoms never read
+ *    as unmapped.
+ *
+ * Deliberately eight colours, not more: a longer list only helps if its members
+ * stay distinguishable. The previous twelve-colour set collapsed to dE76 4.22
+ * under deuteranopia (`#8C564B` brown vs `#20854E` green), i.e. it was ambiguous
+ * for every reaction; eight true colours are ambiguous only once a reaction
+ * exceeds eight mapping groups and the palette wraps.
+ *
+ * Known limitation: under tritanopia (~0.01% prevalence, both sexes) vermillion
+ * and reddish purple converge (dE76 0.96). That is inherent to Okabe-Ito itself
+ * and is accepted here in favour of red-green separation.
+ */
 export const MAPPING_PALETTE: readonly string[] = [
-    '#0072B2', '#D55E00', '#009E73', '#CC79A7', '#E69F00', '#56B4E9', '#8C564B',
-    '#7F3FBF', '#BC3C29', '#20854E', '#6F99AD', '#EE4C97',
+    '#0072B2', // blue
+    '#D55E00', // vermillion
+    '#009E73', // bluish green
+    '#CC79A7', // reddish purple
+    '#FA3C5A', // rose red
+    '#0A5A14', // deep green
+    '#960A82', // magenta
+    '#0A5AE6', // indigo blue
 ];
 
 interface AccumulatedBlock {
