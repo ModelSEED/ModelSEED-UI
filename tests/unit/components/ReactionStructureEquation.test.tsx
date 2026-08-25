@@ -65,18 +65,13 @@ describe('ReactionStructureEquation', () => {
         expect(rendererCalls.every((call) => call.showAllAtomLabels === true)).toBe(true);
     });
 
-    it('uses one phosphorus colour on both compounds and discloses ambiguous mappings', async () => {
+    it('colors mapped atoms without rendering a mapping text section', async () => {
         const { container } = renderEquation({ atomMappingPairs: pairs });
-        await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
-        expect(container.querySelectorAll('[aria-label="Atom mapping legend"] li').length).toBeGreaterThan(0);
-        expect(container.querySelector('[aria-label="Atom mapping legend"] button[aria-label*="individual atom pairing"]')).toBeTruthy();
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+        expect(container.textContent).not.toContain('Atom mapping');
+        expect(container.textContent).not.toContain('Mapping details');
+        expect(container.querySelector('[aria-label="Atom mapping legend"]')).toBeNull();
         expect(rendererCalls.some((call) => call.elementColors)).toBe(false);
-    });
-
-    it('does not render the removed atom-pair summary disclosure', async () => {
-        const { container, queryByText } = renderEquation({ atomMappingPairs: pairs });
-        await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
-        expect(queryByText(/Show all mappings|Show all .*atom|atom pairs/i)).toBeNull();
     });
 
     it('colours cpd00009 phosphorus separately from its oxygens after its graph arrives', async () => {
@@ -140,8 +135,9 @@ describe('ReactionStructureEquation', () => {
     it('settles inventory effects without a maximum-depth update error', async () => {
         const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
         const { container } = renderEquation({ atomMappingPairs: pairs });
-        await waitFor(() => expect(container.textContent).toContain('Atom mapping'));
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
         expect(error.mock.calls.flat().join(' ')).not.toContain('Maximum update depth');
+        expect(container.textContent).not.toContain('Mapping details');
         error.mockRestore();
     });
 
@@ -300,7 +296,7 @@ describe('ReactionStructureEquation', () => {
                 'cpd00742:N#2=cpd00013:N#1',
                 'cpd00742:O#1=cpd00011:(O#1;O#2)',
             ]);
-            const { container, getByTestId, getByText, getAllByText, queryByTestId } = renderEquation({
+             const { container, getByTestId, getAllByText, queryByTestId } = renderEquation({
                 equation: '(1) cpd00001[c] + (1) cpd00742[c] => (2) cpd00011[c] + (1) cpd00013[c] + (1) cpd00067[c]',
                 atomMappingPairs: rxnPairs, atomMappingConfidence: 'clean', atomMappingHasSymmetryGroups: true,
             });
@@ -311,8 +307,10 @@ describe('ReactionStructureEquation', () => {
                 expect(container.textContent).toContain(id);
                 expect(container.querySelector(`a[href="/biochem/compounds/${id}"]`)).toBeTruthy();
             }
-            expect(getByText(/O · cpd00001, cpd00011, cpd00742 †/)).toBeTruthy();
-            expect(container.querySelector('[aria-label="Atom mapping legend"] button[aria-label*="individual atom pairing"]')).toBeTruthy();
+             expect(container.textContent).not.toContain('Atom mapping');
+             expect(container.querySelector('[aria-label="Atom mapping legend"]')).toBeNull();
+             expect(container.textContent).not.toContain('Mapping details');
+
             await waitFor(() => expect(rendererCalls.some((call) => call.compoundId === 'cpd00011' && call.onGraph)).toBe(true));
             const water = getByTestId('structure-cpd00001');
             const allophanate = getByTestId('structure-cpd00742');
@@ -320,7 +318,7 @@ describe('ReactionStructureEquation', () => {
             expect(getAllByText('H+', { selector: 'a p' }).length).toBeGreaterThan(0);
         });
 
-        it('lets a legend group highlight matching tokens and toggles it off', async () => {
+        it.skip('legacy legend group interaction (mapping text section removed)', async () => {
             const rxnPairs = parseAtomMappings([
                 'cpd00001:O#1=cpd00011:(O#1;O#2)', 'cpd00742:(O#2;O#3)=cpd00011:(O#1;O#2)',
                 'cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1',
@@ -342,7 +340,7 @@ describe('ReactionStructureEquation', () => {
             expect(container.querySelectorAll('[data-mapping-dimmed="true"]')).toHaveLength(0);
         });
 
-        it('highlights on focus and Escape clears a sticky legend selection', async () => {
+        it.skip('legacy legend keyboard interaction (mapping text section removed)', async () => {
             const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
             vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
             const { container, getByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
@@ -355,7 +353,7 @@ describe('ReactionStructureEquation', () => {
             expect(carbon.getAttribute('aria-pressed')).toBe('false');
         });
 
-        it('uses the legend as the only operable mapping-group control', async () => {
+        it.skip('legacy legend controls (mapping text section removed)', async () => {
             const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
             vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
             const { getByRole, queryByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
@@ -365,7 +363,7 @@ describe('ReactionStructureEquation', () => {
             expect(legend.getAttribute('aria-pressed')).toBe('true');
         });
 
-        it('keeps the selected group after pointer hover leaves another control', async () => {
+        it.skip('legacy selected-group hover interaction (mapping text section removed)', async () => {
             const rxnPairs = parseAtomMappings(['cpd00742:C#1=cpd00011:C#1', 'cpd00742:C#2=cpd00011:C#1']);
             vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([['cpd00742', compound({ name: 'Allophanate', smiles: 'NC(=O)NC(=O)[O-]', formula: 'C2H3N2O3', charge: -1 })], ['cpd00011', compound({ name: 'CO2', smiles: 'O=C=O', formula: 'CO2', charge: 0 })]]));
             const { container, getByRole } = renderEquation({ equation: 'cpd00742[c] => cpd00011[c]', atomMappingPairs: rxnPairs });
@@ -404,32 +402,30 @@ describe('ReactionStructureEquation', () => {
             }
         }
 
-        it('keeps precision labels and explanations in accessible descriptions and Mapping details', async () => {
+        it('keeps accessible compound descriptions while omitting mapping prose', async () => {
             vi.mocked(getStructuresByIds).mockResolvedValueOnce(new Map([
                 ['cpd00001', { id: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2' }],
                 ['cpd00009', { id: 'cpd00009', inchi: 'InChI=1S/H3O4P/c1-5(2,3)4/h(H3,1,2,3,4)/p-2' }],
             ]));
-            const { getByText, queryByRole } = renderEquation({ equation: 'cpd00001[c] => cpd00009[c]', atomMappingPairs: parseAtomMappings(['cpd00001:O#1=cpd00009:O#1']) });
+            const { container } = renderEquation({ equation: 'cpd00001[c] => cpd00009[c]', atomMappingPairs: parseAtomMappings(['cpd00001:O#1=cpd00009:O#1']) });
             await provideGraphs();
-            await waitFor(() => expect(rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)?.alt).toContain('Exact atom mapping'));
-            expect(rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)?.alt).toContain('Each colour identifies the exact mapped atom.');
-            expect(queryByRole('button', { name: /mapping$/ })).toBeNull();
-            expect(getByText('Mapping details').closest('details')?.textContent).toContain('Precision:');
+            await waitFor(() => expect(rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)?.alt).toContain('Formula H2O'));
+            expect(rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)?.alt).not.toContain('Exact atom mapping');
+            expect(container.textContent).not.toContain('Mapping details');
+            expect(container.querySelector('[aria-label="Atom mapping legend"]')).toBeNull();
         });
 
-        it('colours highlighted participant names without outlining token boxes', async () => {
-            const { container, getByRole, getByText } = renderEquation({ atomMappingPairs: pairs });
-            const phosphorus = await waitFor(() => getByRole('button', { name: /^P:/ }));
-            fireEvent.click(phosphorus);
-            const token = container.querySelector('[data-mapping-token="cpd00009"]') as HTMLElement;
-            expect(token.style.outline).toBe('');
-            expect((getByText('Phosphate', { selector: 'a p' }) as HTMLElement).style.color).not.toBe('');
+        it('keeps compound participants visible without mapping controls', async () => {
+            const { container } = renderEquation({ atomMappingPairs: pairs });
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+            expect(container.querySelector('[data-mapping-token="cpd00009"]')).toBeTruthy();
+            expect(container.querySelector('[aria-label="Atom mapping legend"]')).toBeNull();
         });
 
-        it('renders Mapping details with the precision summary', async () => {
-            const { getByText } = renderEquation({ atomMappingPairs: pairs });
-            const details = await waitFor(() => getByText('Mapping details').closest('details'));
-            expect(details?.textContent).toContain('Precision:');
+        it('does not render Mapping details', async () => {
+            const { container } = renderEquation({ atomMappingPairs: pairs });
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+            expect(container.textContent).not.toContain('Mapping details');
         });
 
         it('keeps participants visible and reports a structures-query error while preserving honest element-level colours', async () => {
