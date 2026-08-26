@@ -12,13 +12,19 @@
 import {
     CPD_IMG_BASE,
     MODELSEED_API_URL,
-    SOLR_BASE,
-    SOLR_BASE_LEGACY,
-    SOLR_COMPOUNDS_COLLECTION,
-    SOLR_REACTIONS_COLLECTION,
+    solrCorpusEndpoint,
 } from './config';
+import { hasNestedSchema, parentDocTypeFilter } from './solrSchema';
+import type { BiochemCollection } from './solrSchema';
 
 /* ─── Types ──────────────────────────────────────────────────── */
+
+export interface ThermodynamicsRecord {
+    source_name: string;
+    energy: number | null;
+    error: number | null;
+    operator?: string;
+}
 
 export interface Reaction {
     id: string;
@@ -41,6 +47,16 @@ export interface Reaction {
     compound_ids?: string[];
     linked_reaction?: string;
     source?: string;
+    thermodynamics?: ThermodynamicsRecord[];
+    n_sources_thermodynamics?: number;
+    sources_agree_direction?: boolean;
+    atom_mapping?: string[];
+    atom_mapping_confidence?: string;
+    has_atom_mapping?: boolean;
+    /** Live Solr `atom_mapping_data` field. */
+    atom_mapping_data?: string[];
+    /** Live Solr `atom_mapping_has_symmetry_groups` field. */
+    atom_mapping_has_symmetry_groups?: boolean;
 }
 
 export interface Compound {
@@ -63,6 +79,10 @@ export interface Compound {
     pkb?: string[];
     source?: string;
     structure?: string;
+    thermodynamics?: ThermodynamicsRecord[];
+    n_sources_thermodynamics?: number;
+    pka_value?: string[];
+    pkb_value?: string[];
 }
 
 export interface GridFilterItem {
@@ -95,6 +115,8 @@ export interface SolrQueryOpts {
     queryColumn?: Record<string, string>;
     visible?: string[];
     filterModel?: GridFilterModel;
+    /** Raw Solr `fq` clauses, appended in order (e.g. a nested-schema parent-doc filter). */
+    filterQueries?: string[];
 }
 
 /* ─── External DB Links ──────────────────────────────────────── */
@@ -363,14 +385,9 @@ function buildQuickSearchClause(
 /**
  * Builds a Solr query URL from options, mirroring legacy `get_solr`.
  */
-function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
-    const collectionName =
-        collection === 'reactions'
-            ? SOLR_REACTIONS_COLLECTION
-            : collection === 'compounds'
-                ? SOLR_COMPOUNDS_COLLECTION
-                : collection;
-    let url = `${SOLR_BASE}${collectionName}/select?wt=json`;
+function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): string {
+    const endpoint = solrCorpusEndpoint(collection);
+    let url = `${endpoint}/select?wt=json`;
 
     const {
         query,
@@ -381,11 +398,17 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         queryColumn,
         visible = [],
         filterModel,
+        filterQueries = [],
     } = opts;
 
     // Field list
     if (visible.length > 0) {
         url += `&fl=${visible.join(',')}`;
+    }
+
+    // Explicit filter queries (e.g. nested-schema parent-doc filter)
+    for (const fq of filterQueries) {
+        url += `&fq=${encodeURIComponent(fq)}`;
     }
 
     // Filter out ontology field for compounds (Solr compounds_staging has no ontology field)
@@ -798,6 +821,52 @@ function sortDocs<T>(
     });
 }
 
+/** Coerces a Solr thermodynamics child's `energy`/`error` value to a finite number or null. */
+function coerceThermodynamicsNumber(value: unknown): number | null {
+    const raw = Array.isArray(value) ? value[0] : value;
+    const num = Number(raw);
+    return Number.isFinite(num) ? num : null;
+}
+
+/**
+ * Normalizes the raw Solr-9 nested `thermodynamics` child documents (or the
+ * legacy `_childDocuments_` shape) attached to a reaction/compound doc into
+ * a flat, typed `ThermodynamicsRecord[]`. Pure and never throws: malformed
+ * or missing input yields `[]`.
+ */
+export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
+    if (!doc || typeof doc !== 'object') return [];
+    const record = doc as Record<string, unknown>;
+    const children = Array.isArray(record.thermodynamics)
+        ? record.thermodynamics
+        : Array.isArray(record._childDocuments_)
+            ? record._childDocuments_
+            : [];
+
+    const results: ThermodynamicsRecord[] = [];
+    for (const child of children) {
+        if (!child || typeof child !== 'object') continue;
+        const c = child as Record<string, unknown>;
+
+        const docType = c.doc_type;
+        if (typeof docType === 'string' && docType !== 'thermodynamics') continue;
+
+        const sourceName = c.source_name;
+        if (typeof sourceName !== 'string' || sourceName.length === 0) continue;
+
+        const entry: ThermodynamicsRecord = {
+            source_name: sourceName,
+            energy: coerceThermodynamicsNumber(c.energy),
+            error: coerceThermodynamicsNumber(c.error),
+        };
+        if (typeof c.operator === 'string' && c.operator.length > 0) {
+            entry.operator = c.operator;
+        }
+        results.push(entry);
+    }
+    return results;
+}
+
 /**
  * Apply MUI column filter items to row objects locally (for APIs that cannot express filters server-side).
  * Uses the same operator semantics as Solr-backed biochem when used with `get*FromModelseedApi`.
@@ -889,7 +958,14 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     // Reactions page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('reactions', mergedOpts);
+    const nested = await hasNestedSchema('reactions');
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('reactions')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('reactions', queryOpts);
     const res = await fetchSolr<Reaction>(url);
 
     // Mark obsolete reactions (matching legacy logic)
@@ -930,7 +1006,14 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     // Compounds page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('compounds', mergedOpts);
+    const nested = await hasNestedSchema('compounds');
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('compounds')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('compounds', queryOpts);
     return fetchSolr<Compound>(url);
 }
 
@@ -987,9 +1070,14 @@ export async function getCompoundsFromModelseedApi(
  */
 export async function getReactionById(id: string): Promise<Reaction> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=id:${id}`;
+    const nested = await hasNestedSchema('reactions');
+    if (nested) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
+    }
     const res = await fetchSolr<Reaction>(url);
-    return res.docs[0];
+    const raw = res.docs[0];
+    return raw ? { ...raw, thermodynamics: normalizeThermodynamics(raw) } : raw;
 }
 
 /**
@@ -1007,9 +1095,14 @@ export async function getReactionById(id: string): Promise<Reaction> {
  */
 export async function getCompoundById(id: string): Promise<Compound> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=id:${id}`;
+    const nested = await hasNestedSchema('compounds');
+    if (nested) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
+    }
     const res = await fetchSolr<Compound>(url);
-    return res.docs[0];
+    const raw = res.docs[0];
+    return raw ? { ...raw, thermodynamics: normalizeThermodynamics(raw) } : raw;
 }
 
 /**
@@ -1051,7 +1144,7 @@ function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<M
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
     // Batch ID fetch is currently Solr-backed for both modes.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    const url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
 
     return fetchSolr<Compound>(url).then((res) => {
         const map = new Map<string, Compound>();
@@ -1087,7 +1180,7 @@ export async function findReactionsForCompound(
     const sort = opts.sort;
 
     // Reverse compound lookup remains Solr-backed for now.
-    let url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {

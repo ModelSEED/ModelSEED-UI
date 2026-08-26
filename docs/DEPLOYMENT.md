@@ -114,18 +114,42 @@ Status endpoint used by the `/about/version` page for build and service checks.
 
 #### `NEXT_PUBLIC_SOLR_BASE_URL` -- Required in manual mode, otherwise optional
 
-Base URL for the Solr search backend. Trailing slash is stripped at runtime.
+Shared base URL for the Solr search backend. Trailing slash is normalized at runtime.
 
 - **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `staging=https://staging.modelseed.org/solr/` / `production=https://modelseed.org/solr/`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_BASE_URL_STAGING=https://staging.modelseed.org/solr/` / `NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION=https://modelseed.org/solr/`
 - **Fallback:** `{MODELSEED_SITE_BASE_URL}/solr/`
+
+#### `NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL` -- Optional in every mode
+
+Base URL for only the reactions corpus. When unset, it inherits the shared Solr base URL.
+
+- **Override:** `NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_STAGING` / `NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_PRODUCTION`
+- **Fallback:** `NEXT_PUBLIC_SOLR_BASE_URL` resolution; mode-suffixed values are ignored in manual mode
+
+#### `NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL` -- Optional in every mode
+
+Base URL for only the compounds corpus. When unset, it inherits the shared Solr base URL.
+
+- **Override:** `NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_STAGING` / `NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_PRODUCTION`
+- **Fallback:** `NEXT_PUBLIC_SOLR_BASE_URL` resolution; mode-suffixed values are ignored in manual mode
+
+#### `NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL` -- Optional in every mode
+
+Base URL for only the structures corpus. When unset, it inherits the shared Solr base URL.
+
+- **Override:** `NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_STAGING` / `NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_PRODUCTION`
+- **Fallback:** `NEXT_PUBLIC_SOLR_BASE_URL` resolution; mode-suffixed values are ignored in manual mode
 
 #### `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION` -- Required in manual mode, otherwise optional
 
 Solr core name for the reactions collection.
 
 - **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `staging=reactions_staging` / `production=reactions`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING=reactions_staging` / `NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION=reactions`
 - **Fallback:** `reactions_staging` (staging) / `reactions` (production)
 
 #### `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION` -- Required in manual mode, otherwise optional
@@ -133,8 +157,30 @@ Solr core name for the reactions collection.
 Solr core name for the compounds collection.
 
 - **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `staging=compounds_staging` / `production=compounds`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING=compounds_staging` / `NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION=compounds`
 - **Fallback:** `compounds_staging` (staging) / `compounds` (production)
+
+#### `NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION` -- Optional in manual mode
+
+Solr core name for the structures collection. It remains optional in manual mode to keep pre-existing manual-mode deployments working.
+
+- **Override:** Optional in every mode
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_STAGING=structures_staging` / `NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_PRODUCTION=structures`
+- **Fallback:** `structures_staging` (staging) / `structures` (production); `structures` in manual mode
+
+#### `NEXT_PUBLIC_SOLR_NESTED_SCHEMA` -- Optional
+
+Controls whether reactions and compounds use Solr-9 nested-document queries.
+
+- **When unset:** Auto-detects by a one-time probe per collection.
+- **Values:** `true` / `1` forces Solr-9 nested-document queries (parent documents only); `false` / `0` forces legacy flat behavior.
+- **Failure behavior:** A non-OK response or failed probe falls back to legacy flat queries.
+
+#### `SOLR_PROXY_UPSTREAM` -- Server-only, optional
+
+Server-only (no `NEXT_PUBLIC_` prefix) and never sent to the browser. When set, `next.config.ts` registers the rewrite `/solr/:path*` to `${SOLR_PROXY_UPSTREAM}/:path*`; when unset or empty, no proxy route exists. This makes a relative base such as `/solr/` work.
+
+- **Internal hosts:** `http://poplar:8983/solr` is an internal host for development/internal deployments only and must never be used as a public production value.
 
 ---
 
@@ -251,6 +297,39 @@ NEXT_PUBLIC_SOLR_BASE_URL=https://my-custom-host.example.com/solr/
 NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION=reactions
 NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION=compounds
 ```
+
+### Pointing Biochemistry at a Different Solr (legacy, Solr 9, or temporary)
+
+**Legacy / do nothing.** Leave every Solr override empty. The shared mode default applies, and the nested-schema probe falls back to legacy; this is the zero-configuration state.
+
+```env
+# Leave all NEXT_PUBLIC_SOLR_* and SOLR_PROXY_UPSTREAM values empty
+```
+
+**New Solr 9, whole site.** Set the shared base (or its active mode variant) and collection names for the new instance.
+
+```env
+NEXT_PUBLIC_SOLR_BASE_URL=https://solr.example.org/solr/
+NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION=reactions
+NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION=compounds
+NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION=structures
+```
+
+**One corpus only / temporary instance.** Set only the base for the corpus being moved; the other corpora continue using the shared legacy base.
+
+```env
+NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL=https://solr.example.org/solr/
+NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION=structures
+```
+
+**Internal upstream via the built-in proxy.** Set the server-only upstream to an internal URL and use `/solr/` as the shared or per-corpus base.
+
+```env
+SOLR_PROXY_UPSTREAM=http://internal-host:8983/solr
+NEXT_PUBLIC_SOLR_BASE_URL=/solr/
+```
+
+`NEXT_PUBLIC_*` values are inlined at build time, so restart a dev server and rebuild a deployed application for changes to take effect; `SOLR_PROXY_UPSTREAM` is read when the Next.js configuration loads, so it also requires a restart.
 
 ---
 

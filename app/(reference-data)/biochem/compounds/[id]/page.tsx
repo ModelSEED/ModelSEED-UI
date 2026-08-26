@@ -20,6 +20,7 @@ import {
 } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { formatEquation } from '@/components/utils/formatEquation';
+import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -365,11 +366,18 @@ export default function CompoundDetailPage() {
         : [];
     const aliasesWithoutName = cpd.aliases?.filter((a) => !a.startsWith('Name:')) ?? [];
 
-    const pkaDisplay = cpd.pka?.[0]?.replace(/"/g, '') ?? null;
-    const pkbDisplay = cpd.pkb?.[0]?.replace(/"/g, '') ?? null;
+    const pkaValues = (Array.isArray(cpd.pka_value) ? cpd.pka_value : Array.isArray(cpd.pka) ? cpd.pka : [])
+        .map((v) => String(v).replace(/"/g, ''));
+    const pkbValues = (Array.isArray(cpd.pkb_value) ? cpd.pkb_value : Array.isArray(cpd.pkb) ? cpd.pkb : [])
+        .map((v) => String(v).replace(/"/g, ''));
 
     const deltaGDisplay = cpd.deltag === 10000000 ? 'unspecified' : String(cpd.deltag);
     const deltaGerrDisplay = cpd.deltagerr === 10000000 ? 'unspecified' : String(cpd.deltagerr);
+
+    const thermoRecords = cpd.thermodynamics ?? [];
+    const thermoLabel = cpd.n_sources_thermodynamics && cpd.n_sources_thermodynamics > 0
+        ? `Thermodynamics (${cpd.n_sources_thermodynamics} sources)`
+        : 'Thermodynamics';
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
@@ -419,19 +427,33 @@ export default function CompoundDetailPage() {
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    <DetailRow label="ΔG">
-                        <Typography variant="body2">
-                            {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
-                        </Typography>
-                    </DetailRow>
-                    {pkaDisplay && (
-                        <DetailRow label="pKa">
-                            <PKaDisplay value={pkaDisplay} />
+                    {thermoRecords.length > 0 ? (
+                        <DetailRow label={thermoLabel}>
+                            <ThermodynamicsTable records={thermoRecords} />
+                        </DetailRow>
+                    ) : (
+                        <DetailRow label="ΔG">
+                            <Typography variant="body2">
+                                {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
+                            </Typography>
                         </DetailRow>
                     )}
-                    {pkbDisplay && (
+                    {pkaValues.length > 0 && (
+                        <DetailRow label="pKa">
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+                                {pkaValues.map((v, i) => (
+                                    <PKaDisplay value={v} key={`pka-${i}`} />
+                                ))}
+                            </Box>
+                        </DetailRow>
+                    )}
+                    {pkbValues.length > 0 && (
                         <DetailRow label="pKb">
-                            <PKaDisplay value={pkbDisplay} />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+                                {pkbValues.map((v, i) => (
+                                    <PKaDisplay value={v} key={`pkb-${i}`} />
+                                ))}
+                            </Box>
                         </DetailRow>
                     )}
                     <DetailRow label="Weight">
