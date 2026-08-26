@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Solr reaction, compound and structure lookups can now each use their own endpoint and core through separate environment variables, while retaining the shared Solr base when no per-corpus value is set
 - An optional server-side proxy lets a deployment or local checkout serve Solr from its own origin
 
+### Documentation
+- Documented the full Solr environment surface and endpoint switching scenarios for legacy, Solr 9, temporary, and proxied instances
+
 ### Fixed
 - Structure-core environment overrides now reach browser lookups instead of silently falling back to the shared endpoint
 
