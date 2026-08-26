@@ -3,8 +3,23 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "security"
+    # Routine version updates are batched into two pull requests. Dependabot
+    # security updates are generated independently of these groups and are NOT
+    # suppressed by grouping - they continue to open individually and promptly.
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
