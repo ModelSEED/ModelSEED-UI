@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
+### Removed
+- Unused tracked `.gsd/` planning scaffolding, `.clauderules`, and orphan `gsd-opencode` submodule gitlink.
+- Dead GSD references from `.gitignore`, `INDEX.md`, `README.md`, `docs/DEVELOPER_GUIDE.md`, `eslint.config.mjs`, and `vitest.config.ts`.
+
 ### Known Issues
 - RAST MS FBA not working
 - PATRIC-only model submission
