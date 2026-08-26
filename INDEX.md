@@ -29,11 +29,4 @@ Each directory contains a specific domain of the application and has its own `RE
 | `test-data/` | Mock JSON responses and static structure definitions for tests. | [test-data/README.md](./test-data/README.md) |
 | `legacy/` | Externa or outdated dependencies, previous implementation phases, and legacy codebase artifacts. | [legacy/README.md](./legacy/README.md) |
 
-## State and Planning
-
-| Directory | Purpose |
-| :--- | :--- |
-| `.gsd/` | Project roadmap, current state, and specific agent tasks. |
-| `.agent/` | Skills, workflows, and rules for AI agents. |
-
 Please navigate to individual folder `README.md` files for deeper domain information.

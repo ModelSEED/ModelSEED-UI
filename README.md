@@ -125,7 +125,6 @@ For a deeper architectural view, see:
 - `INDEX.md` – High-level map of files and folders (Primary entry point for onboarding).
 - `docs/README.md` – Developer manual index.
 - `issues.md` - Verified current API limitations and bug tracker.
-- `.gsd/ROADMAP.md` – Current phases and milestones.
 
 ### Note for AI Agents
 When initializing a debugging or feature session, start by reading `INDEX.md` for the context protocol, then review `issues.md` to ensure you are not debugging a known backend limitation (such as 501 Not Implemented endpoints).
