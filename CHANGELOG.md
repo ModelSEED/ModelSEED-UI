@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.1] - 2026-08-26
+
+### Fixed
+- Production `npm audit` high-severity finding resolved: `nanoid` bumped to
+  **3.3.18** to close GHSA-2v37-7h3g-55p8, restoring a green nightly CI audit
+  on the staging line
+
+### Changed
+- Dependabot now groups routine minor and patch npm updates into one production
+  and one development pull request per week instead of one pull request per
+  package; security updates are unaffected and continue to open individually
+
+---
+
 ## [3.1.0] - 2026-08-04
 
 ### Added
