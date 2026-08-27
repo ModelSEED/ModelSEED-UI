@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
-## [3.4.1] - 2026-08-27
-
-### Fixed
-- Reaction quick-search no longer queries Solr 9 nested stoichiometry child paths as parent fields, and reaction details now return normalized stoichiometry participants.
-- Solr 9 compound batch and reverse reaction lookups now restrict results to parent documents.
-
----
-
-
 ### Removed
 - Unused tracked `.gsd/` planning scaffolding, `.clauderules`, and orphan `gsd-opencode` submodule gitlink.
 - Dead GSD references from `.gitignore`, `INDEX.md`, `README.md`, `docs/DEVELOPER_GUIDE.md`, `eslint.config.mjs`, and `vitest.config.ts`.
@@ -27,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Expected Behaviors
 - Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.4.1] - 2026-08-27
+
+### Fixed
+- Reaction quick-search no longer queries Solr 9 nested stoichiometry child paths as parent fields, and reaction details now return normalized stoichiometry participants.
+- Solr 9 compound batch and reverse reaction lookups now restrict results to parent documents.
 
 ---
 
