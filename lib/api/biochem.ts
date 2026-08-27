@@ -34,6 +34,7 @@ export interface Reaction {
     deltagerr: number;
     reversibility: string;
     stoichiometry: string;
+    participants?: StoichiometryParticipant[];
     status: string;
     aliases: string[];
     ec_numbers: string[];
@@ -821,6 +822,17 @@ function sortDocs<T>(
     });
 }
 
+export interface StoichiometryParticipant {
+    compound: string;
+    coefficient: number;
+    compartment: number;
+    name: string;
+    /** true when the participant is consumed (coefficient < 0). */
+    is_reactant: boolean;
+    charge?: number;
+    formula?: string;
+}
+
 /** Coerces a Solr thermodynamics child's `energy`/`error` value to a finite number or null. */
 function coerceThermodynamicsNumber(value: unknown): number | null {
     const raw = Array.isArray(value) ? value[0] : value;
@@ -868,6 +880,83 @@ export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
 }
 
 /**
+ * Normalizes raw Solr nested or legacy reaction stoichiometry into typed
+ * participants. Pure and never throws: malformed or missing input yields `[]`.
+ */
+export function normalizeStoichiometry(doc: unknown): StoichiometryParticipant[] {
+    if (!doc || typeof doc !== 'object') return [];
+    const record = doc as Record<string, unknown>;
+
+    if (Array.isArray(record.stoichiometry) || Array.isArray(record._childDocuments_)) {
+        const children = Array.isArray(record.stoichiometry)
+            ? record.stoichiometry
+            : record._childDocuments_ as unknown[];
+        const results: Array<StoichiometryParticipant & { nestPath?: number }> = [];
+        let canSortByNestPath = true;
+        for (const child of children) {
+            if (!child || typeof child !== 'object') continue;
+            const c = child as Record<string, unknown>;
+            if (typeof c.doc_type === 'string' && c.doc_type !== 'stoichiometry') continue;
+            if (typeof c.compound !== 'string' || c.compound.length === 0) continue;
+            const coefficient = coerceThermodynamicsNumber(c.coefficient);
+            if (coefficient === null) continue;
+            const nestMatch = typeof c._nest_path_ === 'string'
+                ? /\/stoichiometry#(\d+)$/.exec(c._nest_path_)
+                : null;
+            if (!nestMatch) canSortByNestPath = false;
+            const entry: StoichiometryParticipant & { nestPath?: number } = {
+                compound: c.compound,
+                coefficient,
+                compartment: coerceThermodynamicsNumber(c.compartment) ?? 0,
+                name: typeof c.participant_name === 'string' && c.participant_name.length > 0
+                    ? c.participant_name : c.compound,
+                is_reactant: typeof c.is_reactant === 'boolean' ? c.is_reactant : coefficient < 0,
+                nestPath: nestMatch ? Number(nestMatch[1]) : undefined,
+            };
+            const charge = coerceThermodynamicsNumber(c.participant_charge);
+            if (charge !== null) entry.charge = charge;
+            if (typeof c.participant_formula === 'string' && c.participant_formula.length > 0) entry.formula = c.participant_formula;
+            results.push(entry);
+        }
+        if (canSortByNestPath) results.sort((a, b) => a.nestPath! - b.nestPath!);
+        return results.map(({ compound, coefficient, compartment, name, is_reactant, charge, formula }) => ({
+            compound,
+            coefficient,
+            compartment,
+            name,
+            is_reactant,
+            ...(charge === undefined ? {} : { charge }),
+            ...(formula === undefined ? {} : { formula }),
+        }));
+    }
+
+    if (typeof record.stoichiometry !== 'string') return [];
+    const results: StoichiometryParticipant[] = [];
+    for (const segment of record.stoichiometry.split(';')) {
+        if (!segment) continue;
+        const [coefficientRaw, compound = '', compartmentRaw, , nameRaw = ''] = segment.split(':', 5);
+        const coefficient = coerceThermodynamicsNumber(coefficientRaw);
+        if (coefficient === null || compound.length === 0) continue;
+        const name = nameRaw.length >= 2 && nameRaw.startsWith('"') && nameRaw.endsWith('"')
+            ? nameRaw.slice(1, -1) : nameRaw;
+        results.push({
+            compound,
+            coefficient,
+            compartment: coerceThermodynamicsNumber(compartmentRaw) ?? 0,
+            name,
+            is_reactant: coefficient < 0,
+        });
+    }
+    return results;
+}
+
+export function serializeStoichiometry(participants: StoichiometryParticipant[]): string {
+    return participants.map(({ coefficient, compound, compartment, name }) =>
+        `${coefficient}:${compound}:${compartment}:0:"${name}"`,
+    ).join(';');
+}
+
+/**
  * Apply MUI column filter items to row objects locally (for APIs that cannot express filters server-side).
  * Uses the same operator semantics as Solr-backed biochem when used with `get*FromModelseedApi`.
  */
@@ -900,6 +989,9 @@ const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
 const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+
+/** Solr 9 nested stoichiometry is a child path, not a queryable parent field; querying it yields HTTP 400 "undefined field stoichiometry". */
+const RXN_SEARCH_FIELDS_NESTED = RXN_SEARCH_FIELDS.filter((field) => field !== 'stoichiometry');
 
 /** Reaction visible fields matching legacy `rxnOpts.visible`. */
 const RXN_VISIBLE = [
@@ -948,17 +1040,16 @@ const CPD_VISIBLE = [
  * ```
  */
 export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrResponse<Reaction>> {
+    const nested = await hasNestedSchema('reactions');
     const mergedOpts: SolrQueryOpts = {
         limit: 25,
         offset: 0,
         sort: { field: 'id' },
-        searchFields: RXN_SEARCH_FIELDS,
+        searchFields: nested ? RXN_SEARCH_FIELDS_NESTED : RXN_SEARCH_FIELDS,
         visible: RXN_VISIBLE,
         ...opts,
     };
 
-    // Reactions page is intentionally pinned to legacy Solr.
-    const nested = await hasNestedSchema('reactions');
     const queryOpts = nested
         ? {
             ...mergedOpts,
@@ -1073,11 +1164,20 @@ export async function getReactionById(id: string): Promise<Reaction> {
     let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=id:${id}`;
     const nested = await hasNestedSchema('reactions');
     if (nested) {
-        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]')}`;
     }
     const res = await fetchSolr<Reaction>(url);
     const raw = res.docs[0];
-    return raw ? { ...raw, thermodynamics: normalizeThermodynamics(raw) } : raw;
+    if (!raw) return raw;
+    const participants = normalizeStoichiometry(raw);
+    return {
+        ...raw,
+        thermodynamics: normalizeThermodynamics(raw),
+        participants,
+        stoichiometry: typeof raw.stoichiometry === 'string'
+            ? raw.stoichiometry
+            : participants.length > 0 ? serializeStoichiometry(participants) : '',
+    };
 }
 
 /**
@@ -1137,22 +1237,23 @@ export async function getCompoundsForReaction(ids: string[]): Promise<Map<string
     return getCompoundsByIdsWithFields(ids, ['id', 'name', 'formula', 'charge', 'smiles', 'inchikey', 'aliases']);
 }
 
-function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<Map<string, Compound>> {
+async function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<Map<string, Compound>> {
     const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
-    if (uniqueIds.length === 0) return Promise.resolve(new Map());
+    if (uniqueIds.length === 0) return new Map();
 
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
     // Batch ID fetch is currently Solr-backed for both modes.
-    const url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
-
-    return fetchSolr<Compound>(url).then((res) => {
-        const map = new Map<string, Compound>();
-        for (const doc of res.docs) {
-            map.set(doc.id, doc);
-        }
-        return map;
-    });
+    let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    if (await hasNestedSchema('compounds')) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}`;
+    }
+    const res = await fetchSolr<Compound>(url);
+    const map = new Map<string, Compound>();
+    for (const doc of res.docs) {
+        map.set(doc.id, doc);
+    }
+    return map;
 }
 
 /**
@@ -1180,7 +1281,12 @@ export async function findReactionsForCompound(
     const sort = opts.sort;
 
     // Reverse compound lookup remains Solr-backed for now.
-    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    const nested = await hasNestedSchema('reactions');
+    const query = nested && /^[A-Za-z0-9_]+$/.test(cpdId)
+        ? `{!parent which="doc_type:reaction"}doc_type:stoichiometry AND compound:${cpdId}`
+        : `equation:*${cpdId}*`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=${query}&fl=*`;
+    if (nested) url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {
