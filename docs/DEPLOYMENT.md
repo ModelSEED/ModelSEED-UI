@@ -116,9 +116,16 @@ Status endpoint used by the `/about/version` page for build and service checks.
 
 Shared base URL for the Solr search backend. Trailing slash is normalized at runtime.
 
+Solr is not deployed per-site. A single instance at `modelseed.org/solr` hosts both
+core sets -- `reactions`/`compounds`/`structures` and their `*_staging` twins -- so
+staging and production share this base URL and differ only in the collection names.
+`staging.modelseed.org/solr` is an older, separate deployment still on the pre-Solr-9
+flat schema (no nested child documents, no `atom_mapping`); it is not a valid target
+for this build.
+
 - **Override:** Required in manual mode, optional otherwise
-- **Mode defaults:** `NEXT_PUBLIC_SOLR_BASE_URL_STAGING=https://staging.modelseed.org/solr/` / `NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION=https://modelseed.org/solr/`
-- **Fallback:** `{MODELSEED_SITE_BASE_URL}/solr/`
+- **Mode defaults:** `NEXT_PUBLIC_SOLR_BASE_URL_STAGING=https://modelseed.org/solr/` / `NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION=https://modelseed.org/solr/`
+- **Fallback:** `https://modelseed.org/solr/`
 
 #### `NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL` -- Optional in every mode
 
