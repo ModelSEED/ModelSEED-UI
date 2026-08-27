@@ -2,9 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getCompoundsForReaction } from '@/lib/api/biochem';
@@ -45,6 +47,7 @@ const EMPTY_PARSED: ParsedEquation = { reactants: [], products: [], arrow: '⇒'
 const EMPTY_MAP = new Map<string, DisplayData>();
 const EMPTY_STRUCTURES = new Map<string, CompoundStructure>();
 const compoundLinkStyle = { color: '#00838f', textDecoration: 'none', fontWeight: 600 };
+const PREVIEW_SIZE = 360;
 function parseEquation(equation: string): ParsedEquation {
     let arrow = '⇒';
     let lhs = equation;
@@ -94,6 +97,10 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, showAl
     const smiles = data?.smiles ?? structure?.smiles;
     const drawStructure = Boolean(structure?.svg) || (Boolean(smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1));
     const label = data?.name || token.id;
+    const [previewAnchor, setPreviewAnchor] = useState<HTMLElement | null>(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const previewId = useId();
+    const canPreview = drawStructure && !isLoading;
     const metadata = token.id;
     const accessibleDescription = [
         data?.formula && `Formula ${data.formula}`,
@@ -124,9 +131,25 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, showAl
         <Box data-mapping-token={token.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, maxWidth: 160, minWidth: 0 }}>
             {token.stoich && <Typography variant="body2" sx={{ fontWeight: 600, pt: 0.5 }}>{token.stoich}</Typography>}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.4, minWidth: 0 }}>
-                <Box sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-                    <NextLink href={`/biochem/compounds/${token.id}`} aria-label={accessibleDescription ? `Open ${label}; ${accessibleDescription}` : `Open ${label}`} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
+                <Box ref={setPreviewAnchor} onMouseEnter={() => canPreview && setPreviewOpen(true)} onMouseLeave={() => setPreviewOpen(false)} onFocus={() => canPreview && setPreviewOpen(true)} onBlur={() => setPreviewOpen(false)} onKeyDown={(event) => { if (event.key === 'Escape') setPreviewOpen(false); }} sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+                    <NextLink href={`/biochem/compounds/${token.id}`} aria-label={accessibleDescription ? `Open ${label}; ${accessibleDescription}` : `Open ${label}`} aria-describedby={previewOpen ? previewId : undefined} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
                 </Box>
+                <Popper open={canPreview && previewOpen && Boolean(previewAnchor)} anchorEl={previewAnchor} placement="top" sx={{ pointerEvents: 'none', zIndex: (theme) => theme.zIndex.tooltip }}>
+                    <Paper elevation={8} role="tooltip" id={previewId} aria-label={`Enlarged structure of ${label}`} sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, maxWidth: '90vw', maxHeight: '90vh', overflow: 'hidden' }}>
+                        <MoleculeRenderer
+                            smiles={smiles}
+                            compoundId={token.id}
+                            atomColors={atomColors}
+                            bondColors={bondColors}
+                            showAllAtomLabels={showAllAtomLabels}
+                            fallbackSvg={structure?.svg}
+                            width={PREVIEW_SIZE}
+                            height={PREVIEW_SIZE}
+                            alt={`Enlarged structure of ${label}${accessibleDescription ? `; ${accessibleDescription}` : ''}`}
+                        />
+                        <Typography variant="caption" color="text.secondary">{`${label} · ${token.id}`}</Typography>
+                    </Paper>
+                </Popper>
                 {isLoading ? <Skeleton variant="text" width={100} /> : <NextLink href={`/biochem/compounds/${token.id}`} style={compoundLinkStyle}>
                     <Typography variant="body1" sx={{ fontWeight: 600, textAlign: 'center', overflowWrap: 'anywhere' }}>{label}</Typography>
                 </NextLink>}
