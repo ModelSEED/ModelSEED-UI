@@ -90,15 +90,15 @@ describe('Solr stoichiometry support', () => {
         const api = await loadBiochemApi();
         const fetchMock = mockFetch({ reactions: false }, { id: 'rxn00001', stoichiometry: '-1:cpd00001:0:0:"H2O"' });
         const reaction = await api.getReactionById('rxn00001');
-        expect(dataUrl(fetchMock)).toBe('https://staging.modelseed.org/solr/reactions_staging/select?wt=json&q=id:rxn00001');
+        expect(dataUrl(fetchMock)).toBe('https://modelseed.org/solr/reactions_staging/select?wt=json&q=id:rxn00001');
         expect(reaction.stoichiometry).toBe('-1:cpd00001:0:0:"H2O"');
         expect(reaction.participants).toHaveLength(1);
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['cpd00001'] } });
         expect(dataUrl(fetchMock)).toBe(
-            `https://staging.modelseed.org/solr/reactions_staging/select?wt=json&fl=name,id,definition,deltag,deltagerr,reversibility,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes&q=${encodeURIComponent('(id:*cpd00001* OR name:*cpd00001* OR status:*cpd00001* OR ec_numbers:*cpd00001* OR aliases:*cpd00001* OR pathways:*cpd00001* OR stoichiometry:*cpd00001* OR notes:*cpd00001*)')}&rows=25&sort=id asc`,
+            `https://modelseed.org/solr/reactions_staging/select?wt=json&fl=name,id,definition,deltag,deltagerr,reversibility,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes&q=${encodeURIComponent('(id:*cpd00001* OR name:*cpd00001* OR status:*cpd00001* OR ec_numbers:*cpd00001* OR aliases:*cpd00001* OR pathways:*cpd00001* OR stoichiometry:*cpd00001* OR notes:*cpd00001*)')}&rows=25&sort=id asc`,
         );
         await api.findReactionsForCompound('cpd00002');
-        expect(dataUrl(fetchMock)).toBe('https://staging.modelseed.org/solr/reactions_staging/select?wt=json&q=equation:*cpd00002*&fl=*&rows=25');
+        expect(dataUrl(fetchMock)).toBe('https://modelseed.org/solr/reactions_staging/select?wt=json&q=equation:*cpd00002*&fl=*&rows=25');
     });
 
     it('uses parent-only nested quick search, reaction joins, and compound batches', async () => {
