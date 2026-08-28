@@ -243,14 +243,24 @@ export const WORKSPACE_URL = USE_NEW_PROXY ? WORKSPACE_URL_PROXY : WORKSPACE_URL
  */
 export const BIOCHEM_BACKEND = 'solr' as const;
 
+/**
+ * Solr is not deployed per-site: a single instance at modelseed.org/solr hosts
+ * both core sets (reactions/compounds/structures and their *_staging twins),
+ * and it is the only instance carrying the Solr-9 nested-document schema.
+ * staging.modelseed.org/solr is an older, separate deployment still on the flat
+ * pre-Solr-9 schema, so staging must not derive its Solr base from
+ * MODELSEED_SITE_BASE_URL the way the other services do.
+ */
+const SOLR_BASE_SHARED = 'https://modelseed.org/solr';
+
 export const SOLR_BASE_LEGACY = ensureTrailingSlash(
     resolveModeValue({
         overrideVar: 'NEXT_PUBLIC_SOLR_BASE_URL',
         stagingDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_STAGING',
         productionDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION',
-        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
-        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
-        manualDescription: 'Solr base URL, e.g. https://staging.modelseed.org/solr',
+        stagingFallback: SOLR_BASE_SHARED,
+        productionFallback: SOLR_BASE_SHARED,
+        manualDescription: 'Solr base URL, e.g. https://modelseed.org/solr',
     }),
 );
 
