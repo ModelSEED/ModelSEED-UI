@@ -97,7 +97,9 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
         const dataCall = fetchMock.mock.calls.find(([input]) => !String(input).includes('rows=0'));
         const dataUrl = String(dataCall?.[0]);
         expect(dataUrl).toContain(`fq=${encodeURIComponent('doc_type:reaction')}`);
-        expect(dataUrl).toContain(`fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`);
+        expect(dataUrl).toContain(`fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]')}`);
+        expect(dataUrl).toContain('doc_type%3Astoichiometry');
+        expect(dataUrl).toContain('limit%3D200');
     });
 
     it('drops malformed children and coerces array-wrapped/absent numeric values', async () => {

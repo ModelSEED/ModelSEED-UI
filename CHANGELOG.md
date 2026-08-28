@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.1] - 2026-08-27
+
+### Fixed
+- Reaction quick-search no longer queries Solr 9 nested stoichiometry child paths as parent fields, and reaction details now return normalized stoichiometry participants.
+- Solr 9 compound batch and reverse reaction lookups now restrict results to parent documents.
+
+---
+
 ## [3.4.0] - 2026-08-21
 
 ### Added
