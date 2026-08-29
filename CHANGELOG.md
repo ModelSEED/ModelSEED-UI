@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.0] - 2026-08-27
+
+### Added
+- Hovering or keyboard-focusing a compound in a reaction's structure equation now shows an enlarged preview of that compound's structure with the same atom-mapping colors, making large molecules legible.
+
+---
+
 ## [3.4.1] - 2026-08-27
 
 ### Fixed

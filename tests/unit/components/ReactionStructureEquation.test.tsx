@@ -390,6 +390,70 @@ describe('ReactionStructureEquation', () => {
         });
     });
 
+    describe('enlarged compound structure preview', () => {
+        function previewAnchor(container: HTMLElement, compoundId: string) {
+            return container.querySelector(`[data-mapping-token="${compoundId}"] a[href="/biochem/compounds/${compoundId}"]`)!.parentElement!;
+        }
+
+        it('is closed by default and opens on pointer enter with a larger renderer', async () => {
+            const { container } = renderEquation();
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+            const anchor = previewAnchor(container, 'cpd00001');
+            const link = anchor.querySelector('a')!;
+            fireEvent.mouseEnter(anchor);
+            const tooltip = Array.from(document.body.querySelectorAll('[role="tooltip"]'))
+                .find((node) => node.getAttribute('aria-label') === 'Enlarged structure of Water');
+            expect(tooltip).toBeTruthy();
+            const preview = rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)!;
+            expect(preview.width).toBe(360);
+            expect(preview.height).toBe(360);
+            expect(preview.onInventory).toBeUndefined();
+            expect(preview.onGraph).toBeUndefined();
+            expect(preview.showAllAtomLabels).toBe(true);
+            expect(link.getAttribute('href')).toBe('/biochem/compounds/cpd00001');
+            expect(link.getAttribute('aria-describedby')).toBeTruthy();
+            fireEvent.mouseLeave(anchor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+            expect(link.getAttribute('aria-describedby')).toBeNull();
+        });
+
+        it('opens on focus and closes on blur or Escape', async () => {
+            const { container } = renderEquation();
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
+            const anchor = previewAnchor(container, 'cpd00001');
+            fireEvent.focus(anchor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeTruthy();
+            fireEvent.blur(anchor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+            fireEvent.focus(anchor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeTruthy();
+            fireEvent.keyDown(anchor, { key: 'Escape' });
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+        });
+
+        it('reuses atom-mapping colours without element colours in the preview', async () => {
+            const { container } = renderEquation({ atomMappingPairs: pairs });
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+            const thumbnail = rendererCalls.filter((call) => call.compoundId === 'cpd00009' && call.width === 134).at(-1)!;
+            fireEvent.mouseEnter(previewAnchor(container, 'cpd00009'));
+            const preview = rendererCalls.filter((call) => call.compoundId === 'cpd00009' && call.width === 360).at(-1)!;
+            expect(preview.atomColors).toEqual(thumbnail.atomColors);
+            expect(preview.elementColors).toBeUndefined();
+            expect(thumbnail.elementColors).toBeUndefined();
+        });
+
+        it('does not preview a compound without a drawn structure', async () => {
+            vi.mocked(getCompoundsForReaction).mockResolvedValueOnce(new Map([
+                ['cpd00001', compound({ name: 'Water', smiles: 'O', formula: 'H2O', charge: 0 })],
+                ['cpd00067', compound({ name: 'H+', smiles: '[H+]', formula: 'H', charge: 1 })],
+            ]));
+            const { container } = renderEquation({ equation: 'cpd00067[c] + cpd00001[c] => cpd00001[c]' });
+            await waitFor(() => expect(container.querySelector('[data-mapping-token="cpd00067"]')).toBeTruthy());
+            fireEvent.mouseEnter(previewAnchor(container, 'cpd00067'));
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+        });
+    });
 
 });
 
