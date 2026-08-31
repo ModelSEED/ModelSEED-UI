@@ -5,7 +5,10 @@ import { parseAtomMappings } from '@/lib/utils/atomMapping';
 import { MAPPING_PALETTE } from '@/lib/utils/atomMappingColors';
 import { getCompoundsForReaction, type Compound } from '@/lib/api/biochem';
 import { getStructuresByIds } from '@/lib/api/structures';
-import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
+import ReactionStructureEquation, {
+    PREVIEW_POPPER_MODIFIERS,
+    PREVIEW_POPPER_PLACEMENT,
+} from '@/components/ui/ReactionStructureEquation';
 
 const rendererCalls: Array<Record<string, unknown>> = [];
 const suppressedInventories = new Set<string>();
@@ -395,6 +398,15 @@ describe('ReactionStructureEquation', () => {
             return container.querySelector(`[data-mapping-token="${compoundId}"] a[href="/biochem/compounds/${compoundId}"]`)!.parentElement!;
         }
 
+        it('uses a below-first viewport-safe Popper configuration', () => {
+            expect(PREVIEW_POPPER_PLACEMENT).toBe('bottom');
+            expect(PREVIEW_POPPER_MODIFIERS).toEqual([
+                { name: 'offset', options: { offset: [0, 8] } },
+                { name: 'flip', enabled: true, options: { fallbackPlacements: ['top'], rootBoundary: 'viewport', padding: 8 } },
+                { name: 'preventOverflow', enabled: true, options: { altAxis: true, tether: false, rootBoundary: 'viewport', padding: 8 } },
+            ]);
+        });
+
         it('is closed by default and opens on pointer enter with a larger renderer', async () => {
             const { container } = renderEquation();
             await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
@@ -405,6 +417,7 @@ describe('ReactionStructureEquation', () => {
             const tooltip = Array.from(document.body.querySelectorAll('[role="tooltip"]'))
                 .find((node) => node.getAttribute('aria-label') === 'Enlarged structure of Water');
             expect(tooltip).toBeTruthy();
+            expect(tooltip?.parentElement?.getAttribute('data-popper-placement')).toBe('bottom');
             const preview = rendererCalls.filter((call) => call.compoundId === 'cpd00001').at(-1)!;
             expect(preview.width).toBe(360);
             expect(preview.height).toBe(360);
