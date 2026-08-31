@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.1] - 2026-08-31
+
+### Fixed
+- Within a single reaction, atom-mapping group colours now use the maximally separated subset of the existing colour-blind-safe palette instead of the first N entries, preventing reported brown/rust versus red-orange confusion; worst-case four-group separation rises from dE76 19.0 to 36.1, while reactions with more than the eight-colour palette still wrap.
+- Enlarged compound-structure previews now open below the hovered or focused compound and stay inside the viewport, flipping above only when there is no room below, so they are no longer cut off at the top.
+
+---
+
 ## [3.5.0] - 2026-08-27
 
 ### Added
