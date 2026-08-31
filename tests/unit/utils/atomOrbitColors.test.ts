@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseAtomMappings, type AtomMappingPair } from '@/lib/utils/atomMapping';
-import { MAPPING_PALETTE } from '@/lib/utils/atomMappingColors';
+import { MAPPING_PALETTE, selectMappingColors } from '@/lib/utils/atomMappingColors';
 import { buildAtomOrbitColorPlan } from '@/lib/utils/atomOrbitColors';
 
 const pair = (left: string, right: string): AtomMappingPair => ({
@@ -12,9 +12,10 @@ describe('buildAtomOrbitColorPlan', () => {
     it('constructs transitive groups in first-appearance order and cycles palette', () => {
         const plan = buildAtomOrbitColorPlan([pair('cpd00001', 'cpd00002'), pair('cpd00002', 'cpd00003'), pair('cpd00004', 'cpd00005')], []);
         expect(plan.groups.map((group) => group.groupId)).toEqual(['g1', 'g2']);
-        expect(plan.groups.map((group) => group.color)).toEqual([MAPPING_PALETTE[0], MAPPING_PALETTE[1]]);
+        expect(plan.groups.map((group) => group.color)).toEqual(selectMappingColors(2));
         const many = buildAtomOrbitColorPlan(Array.from({ length: MAPPING_PALETTE.length + 1 }, (_, i) => pair(`cpd${String(i + 100).padStart(5, '0')}`, `cpd${String(i + 200).padStart(5, '0')}`)), []);
-        expect(many.groups.map((group) => group.color)).toEqual(Array.from({ length: MAPPING_PALETTE.length + 1 }, (_, i) => MAPPING_PALETTE[i % MAPPING_PALETTE.length]));
+        const selection = selectMappingColors(MAPPING_PALETTE.length + 1);
+        expect(many.groups.map((group) => group.color)).toEqual(Array.from({ length: MAPPING_PALETTE.length + 1 }, (_, i) => selection[i % selection.length]));
     });
 
     it('colours exact water and refuses unmapped and missing structures', () => {
@@ -45,7 +46,7 @@ describe('buildAtomOrbitColorPlan', () => {
 
     it('degrades only fully covered one-group elements and applies the bond rule', () => {
         const good = buildAtomOrbitColorPlan(parseAtomMappings(['cpd00001:(O#1;O#2)=cpd00002:(O#1;O#2)']), [{ compoundId: 'cpd00001', graph: { elements: ['O', 'O'], bonds: [[0, 1]] } }]);
-        expect(good.compounds.cpd00001).toMatchObject({ precision: 'element-block', elementClaims: { O: 'g1' }, atomColors: { 0: MAPPING_PALETTE[0], 1: MAPPING_PALETTE[0] }, bondColors: { 0: MAPPING_PALETTE[0] } });
+        expect(good.compounds.cpd00001).toMatchObject({ precision: 'element-block', elementClaims: { O: 'g1' }, atomColors: { 0: selectMappingColors(1)[0], 1: selectMappingColors(1)[0] }, bondColors: { 0: selectMappingColors(1)[0] } });
         const merged = buildAtomOrbitColorPlan([pair('cpd00001', 'cpd00002'), { ...pair('cpd00001', 'cpd00003'), left: { compoundId: 'cpd00001', element: 'O', index: 2 }, leftAtoms: [{ compoundId: 'cpd00001', element: 'O', index: 2 }] }], [{ compoundId: 'cpd00001', graph: { elements: ['O', 'O'], bonds: [] } }]);
         expect(merged.compounds.cpd00001).toMatchObject({ precision: 'unresolved', reason: 'merged-groups' });
         const partial = buildAtomOrbitColorPlan(parseAtomMappings(['cpd00001:(O#1;O#2)=cpd00002:(O#1;O#2)']), [{ compoundId: 'cpd00001', graph: { elements: ['O', 'O', 'O', 'O'], bonds: [] } }]);
@@ -67,7 +68,7 @@ describe('buildAtomOrbitColorPlan', () => {
         );
         expect(valid.compounds.cpd00001).toMatchObject({
             precision: 'element-block', coloredAtomCount: 2,
-            atomColors: { 0: MAPPING_PALETTE[0], 1: MAPPING_PALETTE[0] },
+            atomColors: { 0: selectMappingColors(1)[0], 1: selectMappingColors(1)[0] },
         });
     });
 

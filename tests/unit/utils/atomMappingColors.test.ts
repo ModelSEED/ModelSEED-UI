@@ -5,6 +5,7 @@ import {
     buildAtomMappingColorPlan,
     elementColorsForCompound,
     MAPPING_PALETTE,
+    selectMappingColors,
 } from '@/lib/utils/atomMappingColors';
 
 const REAL_ENTRIES = [
@@ -117,8 +118,9 @@ describe('buildAtomMappingColorPlan', () => {
         ])));
         const plan = buildAtomMappingColorPlan(pairs(entries), inventories);
         expect(plan.legend).toHaveLength(count);
+        const selection = selectMappingColors(count);
         expect(plan.legend.map((entry) => entry.color)).toEqual(
-            Array.from({ length: count }, (_, index) => MAPPING_PALETTE[index % MAPPING_PALETTE.length]),
+            Array.from({ length: count }, (_, index) => selection[index % selection.length]),
         );
         expect(new Set(plan.legend.map((entry) => entry.groupId)).size).toBe(count);
     });
@@ -128,7 +130,7 @@ describe('buildAtomMappingColorPlan', () => {
             cpd00001: { O: 1 }, cpd00012: { P: 2, O: 7 }, cpd00009: { P: 1, O: 4 },
         });
         expect(elementColorsForCompound(plan, 'cpd00012')).toEqual({
-            O: MAPPING_PALETTE[0], P: MAPPING_PALETTE[1],
+            O: selectMappingColors(2)[0], P: selectMappingColors(2)[1],
         });
         expect(elementColorsForCompound(plan, 'missing')).toEqual({});
     });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAPPING_PALETTE } from '@/lib/utils/atomMappingColors';
+import { MAPPING_PALETTE, selectMappingColors } from '@/lib/utils/atomMappingColors';
+import { deltaE76, perceptualDistance } from '@/lib/utils/colorDistance';
 import { buildAtomOrbitColorPlan } from '@/lib/utils/atomOrbitColors';
 import type { AtomMappingPair } from '@/lib/utils/atomMapping';
 
@@ -110,6 +111,9 @@ const worstPair = (palette: readonly string[], kind: Deficiency | 'normal'): { d
         }))
         .reduce((worst, candidate) => (candidate.delta < worst.delta ? candidate : worst));
 
+const worstPerceptualPair = (palette: readonly string[]): number => Math.min(...pairs(palette)
+    .map(([a, b]) => Math.min(deltaE(a, b), deltaE(simulate(a, 'protan'), simulate(b, 'protan'),), deltaE(simulate(a, 'deutan'), simulate(b, 'deutan')))));
+
 describe('colour maths used by these checks', () => {
     // Guards the assertions below: if this helper drifts, the palette checks are meaningless.
     it('reproduces known reference values', () => {
@@ -187,6 +191,49 @@ describe('MAPPING_PALETTE', () => {
     });
 });
 
+describe('selectMappingColors', () => {
+    it('maximises worst-case normal and red-green-deficiency separation', () => {
+        for (let count = 2; count <= MAPPING_PALETTE.length; count += 1) {
+            const selected = worstPerceptualPair(selectMappingColors(count));
+            const sequential = worstPerceptualPair(MAPPING_PALETTE.slice(0, count));
+            expect(selected).toBeGreaterThanOrEqual(sequential);
+            expect(selected).toBeGreaterThanOrEqual(MIN_DELTA_E_CVD);
+            if (count < MAPPING_PALETTE.length) expect(selected).toBeGreaterThan(sequential);
+        }
+    });
+
+    it('returns deterministic palette-order selections and defined boundary shapes', () => {
+        for (let count = 1; count <= MAPPING_PALETTE.length; count += 1) {
+            const selection = selectMappingColors(count);
+            expect(selection).toHaveLength(count);
+            expect(new Set(selection).size).toBe(count);
+            expect(selection).toEqual(MAPPING_PALETTE.filter((color) => selection.includes(color)));
+        }
+        for (const count of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) expect(selectMappingColors(count)).toEqual([]);
+        expect(selectMappingColors(9)).toEqual(MAPPING_PALETTE);
+        expect(selectMappingColors(20)).toEqual(MAPPING_PALETTE);
+        expect(selectMappingColors(4)).toEqual(selectMappingColors(4));
+    });
+
+    it('prevents the reported retired brown and rose-red collapse', () => {
+        expect(worstPerceptualPair(['#8C564B', '#FA3C5A'])).toBeLessThan(MIN_DELTA_E_CVD);
+        for (let count = 2; count <= MAPPING_PALETTE.length; count += 1) {
+            expect(worstPerceptualPair(selectMappingColors(count))).toBeGreaterThanOrEqual(MIN_DELTA_E_CVD);
+        }
+    });
+
+    it('matches the independent colour-maths reference', () => {
+        const colours = [...MAPPING_PALETTE, '#8C564B', '#FA3C5A', BLACK, WHITE];
+        for (const [a, b] of pairs(colours)) {
+            expect(deltaE76(a, b)).toBeCloseTo(deltaE(a, b), 9);
+            expect(perceptualDistance(a, b)).toBeCloseTo(
+                Math.min(deltaE(a, b), deltaE(simulate(a, 'protan'), simulate(b, 'protan')), deltaE(simulate(a, 'deutan'), simulate(b, 'deutan'))),
+                9,
+            );
+        }
+    });
+});
+
 describe('palette assignment', () => {
     const pair = (left: string, right: string): AtomMappingPair => ({
         left: { compoundId: left, element: 'O', index: 1 },
@@ -197,7 +244,7 @@ describe('palette assignment', () => {
         raw: '',
     });
 
-    it('assigns colours by group order and is stable across runs', () => {
+    it('assigns selected colours by group order and is stable across runs', () => {
         const build = (): readonly string[] =>
             buildAtomOrbitColorPlan(
                 Array.from({ length: MAPPING_PALETTE.length + 2 }, (_, i) =>
@@ -205,9 +252,10 @@ describe('palette assignment', () => {
                 [],
             ).groups.map((group) => group.color);
 
+        const selection = selectMappingColors(MAPPING_PALETTE.length + 2);
         const expected = Array.from(
             { length: MAPPING_PALETTE.length + 2 },
-            (_, i) => MAPPING_PALETTE[i % MAPPING_PALETTE.length],
+            (_, i) => selection[i % selection.length],
         );
         expect(build()).toEqual(expected);
         expect(build()).toEqual(build());

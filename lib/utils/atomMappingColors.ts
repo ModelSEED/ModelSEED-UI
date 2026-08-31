@@ -1,4 +1,5 @@
 import type { AtomMappingPair, AtomRef } from './atomMapping';
+import { perceptualDistance } from './colorDistance';
 
 /**
  * Build whole-element colour assignments for parsed reaction atom mappings.
@@ -84,6 +85,9 @@ export interface AtomMappingColorPlan {
  *    entries is 19.0. No pair is separated by red-versus-green hue alone.
  * 5. Every entry stays far from black (min dE76 59.4) so mapped atoms never read
  *    as unmapped.
+ * 6. Each reaction selects the palette subset that maximises its minimum normal,
+ *    protan, and deutan separation before assigning sorted group order; for four
+ *    groups this improves the minimum dE76 from 19.00 to 36.14.
  *
  * Deliberately eight colours, not more: a longer list only helps if its members
  * stay distinguishable. The previous twelve-colour set collapsed to dE76 4.22
@@ -105,6 +109,39 @@ export const MAPPING_PALETTE: readonly string[] = [
     '#960A82', // magenta
     '#0A5AE6', // indigo blue
 ];
+
+const paletteDistances: readonly (readonly number[])[] = MAPPING_PALETTE.map((color) =>
+    MAPPING_PALETTE.map((other) => perceptualDistance(color, other)));
+const mappingColorSelections = new Map<number, readonly string[]>();
+
+/** Select the lexicographically first maximum-minimum-separation palette subset. */
+export function selectMappingColors(groupCount: number): readonly string[] {
+    if (!Number.isFinite(groupCount) || !Number.isInteger(groupCount) || groupCount <= 0) return [];
+    if (groupCount > MAPPING_PALETTE.length) return MAPPING_PALETTE;
+    const cached = mappingColorSelections.get(groupCount);
+    if (cached) return cached;
+
+    let bestIndices: readonly number[] = [];
+    let bestScore = -Infinity;
+    const visit = (start: number, indices: number[]): void => {
+        if (indices.length === groupCount) {
+            const score = indices.length === 1 ? Infinity : Math.min(...indices.flatMap((index, offset) =>
+                indices.slice(offset + 1).map((other) => paletteDistances[index][other])));
+            if (score > bestScore) {
+                bestScore = score;
+                bestIndices = indices;
+            }
+            return;
+        }
+        for (let index = start; index <= MAPPING_PALETTE.length - (groupCount - indices.length); index += 1) {
+            visit(index + 1, [...indices, index]);
+        }
+    };
+    visit(0, []);
+    const selection = bestIndices.map((index) => MAPPING_PALETTE[index]);
+    mappingColorSelections.set(groupCount, selection);
+    return selection;
+}
 
 interface AccumulatedBlock {
     readonly compoundId: string;
@@ -261,10 +298,11 @@ export function buildAtomMappingColorPlan(
     }
 
     const groupColors = new Map<string, string>();
-    const legend = Array.from(componentGroups.values()).filter((group) => group.colorable)
-        .sort((left, right) => left.groupId.localeCompare(right.groupId))
-        .map((group, index) => {
-            const color = MAPPING_PALETTE[index % MAPPING_PALETTE.length];
+    const colourable = Array.from(componentGroups.values()).filter((group) => group.colorable)
+        .sort((left, right) => left.groupId.localeCompare(right.groupId));
+    const selection = selectMappingColors(colourable.length);
+    const legend = colourable.map((group, index) => {
+            const color = selection[index % selection.length];
             groupColors.set(group.groupId, color);
             return {
                 groupId: group.groupId,
