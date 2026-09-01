@@ -59,55 +59,33 @@ export interface AtomMappingColorPlan {
 /**
  * Colour-vision-deficiency-safe categorical palette for atom mapping groups.
  *
- * Colours are assigned by group order (`MAPPING_PALETTE[index % length]`) and
- * are consumed in three SVG roles by `components/ui/MoleculeRenderer.tsx`:
- * RDKit highlight halo fills, atom-label `fill:` text, and bond `stroke:`.
- * The molecule canvas is always white (`lib/theme.ts` sets both `background.default`
- * and `background.paper` to `#ffffff`; there is no dark mode) and RDKit draws
- * unmapped atoms and bonds in black, so every entry must read against white
- * *and* stay clearly distinct from black.
+ * Colours are assigned by sorted group order and rendered as RDKit highlight halos,
+ * atom-label fills, and bond strokes on the white molecule canvas. The set uses six
+ * hue families; repeated green and blue families are split by about 31 L* so they
+ * read as dark versus bright green and deep versus sky blue rather than near-twins.
+ * The warm band is deliberately excluded: on white, the 3:1 contrast requirement
+ * makes warm colours dark, which reads as brown; it also avoids collisions with
+ * RDKit's unmapped phosphorus and oxygen colours.
  *
- * Design constraints, all asserted by `tests/unit/utils/mappingPaletteSafety.test.ts`:
+ * Measured for this eight-colour set: minimum normal-vision dE76 is 48.6; minimum
+ * protan/deutan dE76 is 23.4; minimum contrast is 3.01:1 against white and 2.22:1
+ * against black; minimum dE76 from black is 50; and minimum dE76 from any RDKit
+ * default (#FF0000, #FF7F00, #0000FF, #CCCC00, #00FF00) is 29.4.
  *
- * 1. Entries 0-3 are the four Okabe-Ito (Okabe & Ito 2008; Wong, *Nature Methods*
- *    8:441, 2011) colours that clear the contrast bar unmodified. The remaining
- *    Okabe-Ito members are deliberately excluded: orange `#E69F00` (2.25:1) and
- *    sky blue `#56B4E9` (2.31:1) fail against white, and darkening them to pass
- *    collapses the set's own separation (darkened orange approaches vermillion,
- *    darkened sky blue approaches blue), which defeats the purpose.
- * 2. Entries 4-7 extend the set under the same rules rather than borrowing from
- *    a palette that was never CVD-checked.
- * 3. Contrast against white is >= 3:1 for every entry (WCAG 2.1 SC 1.4.11
- *    Non-text Contrast, the applicable bar for bond strokes and atom glyphs as
- *    graphical objects).
- * 4. Under simulated protanopia and deuteranopia — the common red-green
- *    deficiencies, ~8% of males — the minimum CIE-Lab dE76 between any two
- *    entries is 19.0. No pair is separated by red-versus-green hue alone.
- * 5. Every entry stays far from black (min dE76 59.4) so mapped atoms never read
- *    as unmapped.
- * 6. Each reaction selects the palette subset that maximises its minimum normal,
- *    protan, and deutan separation before assigning sorted group order; for four
- *    groups this improves the minimum dE76 from 19.00 to 36.14.
- *
- * Deliberately eight colours, not more: a longer list only helps if its members
- * stay distinguishable. The previous twelve-colour set collapsed to dE76 4.22
- * under deuteranopia (`#8C564B` brown vs `#20854E` green), i.e. it was ambiguous
- * for every reaction; eight true colours are ambiguous only once a reaction
- * exceeds eight mapping groups and the palette wraps.
- *
- * Known limitation: under tritanopia (~0.01% prevalence, both sexes) vermillion
- * and reddish purple converge (dE76 0.96). That is inherent to Okabe-Ito itself
- * and is accepted here in favour of red-green separation.
+ * `selectMappingColors` chooses a maximum-minimum-separation subset when the group
+ * count fits the palette. When it exceeds the palette length, it returns this full
+ * palette unchanged; `buildAtomMappingColorPlan` then cycles it with
+ * `index % selection.length`, so distinct groups can share a colour.
  */
 export const MAPPING_PALETTE: readonly string[] = [
-    '#0072B2', // blue
-    '#D55E00', // vermillion
-    '#009E73', // bluish green
-    '#CC79A7', // reddish purple
-    '#FA3C5A', // rose red
-    '#0A5A14', // deep green
-    '#960A82', // magenta
-    '#0A5AE6', // indigo blue
+    '#355214', // dark green
+    '#3FAA18', // bright green
+    '#00A398', // teal
+    '#2994FF', // sky blue
+    '#0B26D5', // deep blue
+    '#6F2183', // violet
+    '#FF14EF', // magenta
+    '#E00069', // crimson
 ];
 
 const paletteDistances: readonly (readonly number[])[] = MAPPING_PALETTE.map((color) =>

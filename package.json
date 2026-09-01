@@ -1,6 +1,6 @@
 {
   "name": "modelseed-ui",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "private": true,
   "scripts": {
     "predev": "node scripts/sync-version-from-env.mjs",

@@ -114,44 +114,44 @@ describe('moleculeHighlights', () => {
 
     it('recolours a heteroatom half-bond', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' d='M 1,1 L 2,2' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />";
-        const result = applyBondColors(svg, { 0: '#0072B2' });
-        expect(result).toContain('stroke:#0072B2');
+        const result = applyBondColors(svg, { 0: '#355214' });
+        expect(result).toContain('stroke:#355214');
         expect(result).not.toContain('#FF0000');
     });
 
     it('recolours both halves of a bond', () => {
         const svg = `${BOND_PATH}<path class='bond-0 atom-0 atom-1' style='stroke:#0000FF' />`;
-        const result = applyBondColors(svg, { 0: '#0072B2' });
-        expect(result.match(/stroke:#0072B2/g)).toHaveLength(2);
+        const result = applyBondColors(svg, { 0: '#355214' });
+        expect(result.match(/stroke:#355214/g)).toHaveLength(2);
     });
 
     it('recolours every hex stroke declaration in a bond style', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:#FF0000;stroke:#0000FF' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toBe(
-            "<path class='bond-0 atom-0 atom-1' style='stroke:#0072B2;stroke:#0072B2' />",
+        expect(applyBondColors(svg, { 0: '#355214' })).toBe(
+            "<path class='bond-0 atom-0 atom-1' style='stroke:#355214;stroke:#355214' />",
         );
     });
 
     it('recolours standalone stroke attributes', () => {
         const svg = '<path class=\'bond-1 atom-2 atom-3\' stroke="#CC9900" />';
-        expect(applyBondColors(svg, { 1: '#009E73' })).toContain('stroke="#009E73"');
+        expect(applyBondColors(svg, { 1: '#3FAA18' })).toContain('stroke="#3FAA18"');
     });
 
     it('leaves fills and atom label glyphs untouched', () => {
         const atomLabel = "<path class='atom-2' d='M 1 1' fill='#FF0000'/>";
         const bond = "<path class='bond-0 atom-0 atom-1' style='fill:none;stroke:#FF0000'/>";
-        const result = applyBondColors(`${atomLabel}${bond}`, { 0: '#0072B2' });
+        const result = applyBondColors(`${atomLabel}${bond}`, { 0: '#355214' });
         expect(result).toContain(atomLabel);
-        expect(result).toContain('fill:none;stroke:#0072B2');
+        expect(result).toContain('fill:none;stroke:#355214');
     });
 
     it('leaves non-hex bond strokes unchanged', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:none' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toBe(svg);
+        expect(applyBondColors(svg, { 0: '#355214' })).toBe(svg);
     });
 
     it('recolours lowercase hex bond strokes', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:#ff0000' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toContain('stroke:#0072B2');
+        expect(applyBondColors(svg, { 0: '#355214' })).toContain('stroke:#355214');
     });
 });

@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.2] - 2026-09-01
+
+### Fixed
+- Atom-mapping colours in reactions with many mapped groups are now clearly distinguishable; the warm/brown band was removed and mapped colours no longer collide with unmapped phosphorus or oxygen atom colours.
+
+---
+
 ## [3.5.1] - 2026-08-31
 
 ### Fixed
