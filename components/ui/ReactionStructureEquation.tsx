@@ -6,7 +6,7 @@ import { useCallback, useId, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
+import Popper, { type PopperProps } from '@mui/material/Popper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getCompoundsForReaction } from '@/lib/api/biochem';
@@ -48,6 +48,12 @@ const EMPTY_MAP = new Map<string, DisplayData>();
 const EMPTY_STRUCTURES = new Map<string, CompoundStructure>();
 const compoundLinkStyle = { color: '#00838f', textDecoration: 'none', fontWeight: 600 };
 const PREVIEW_SIZE = 360;
+export const PREVIEW_POPPER_PLACEMENT = 'bottom' as const;
+export const PREVIEW_POPPER_MODIFIERS: NonNullable<PopperProps['modifiers']> = [
+    { name: 'offset', options: { offset: [0, 8] } },
+    { name: 'flip', enabled: true, options: { fallbackPlacements: ['top'], rootBoundary: 'viewport', padding: 8 } },
+    { name: 'preventOverflow', enabled: true, options: { altAxis: true, tether: false, rootBoundary: 'viewport', padding: 8 } },
+];
 function parseEquation(equation: string): ParsedEquation {
     let arrow = '⇒';
     let lhs = equation;
@@ -134,8 +140,9 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, showAl
                 <Box ref={setPreviewAnchor} onMouseEnter={() => canPreview && setPreviewOpen(true)} onMouseLeave={() => setPreviewOpen(false)} onFocus={() => canPreview && setPreviewOpen(true)} onBlur={() => setPreviewOpen(false)} onKeyDown={(event) => { if (event.key === 'Escape') setPreviewOpen(false); }} sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
                     <NextLink href={`/biochem/compounds/${token.id}`} aria-label={accessibleDescription ? `Open ${label}; ${accessibleDescription}` : `Open ${label}`} aria-describedby={previewOpen ? previewId : undefined} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
                 </Box>
-                <Popper open={canPreview && previewOpen && Boolean(previewAnchor)} anchorEl={previewAnchor} placement="top" sx={{ pointerEvents: 'none', zIndex: (theme) => theme.zIndex.tooltip }}>
-                    <Paper elevation={8} role="tooltip" id={previewId} aria-label={`Enlarged structure of ${label}`} sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, maxWidth: '90vw', maxHeight: '90vh', overflow: 'hidden' }}>
+                <Popper open={canPreview && previewOpen && Boolean(previewAnchor)} anchorEl={previewAnchor} placement={PREVIEW_POPPER_PLACEMENT} modifiers={PREVIEW_POPPER_MODIFIERS} sx={{ pointerEvents: 'none', zIndex: (theme) => theme.zIndex.tooltip }}>
+                    {/* Scrolling keeps the 360px renderer and caption within a short viewport. */}
+                    <Paper elevation={8} role="tooltip" id={previewId} aria-label={`Enlarged structure of ${label}`} sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
                         <MoleculeRenderer
                             smiles={smiles}
                             compoundId={token.id}

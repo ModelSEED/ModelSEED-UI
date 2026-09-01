@@ -1,5 +1,5 @@
 import type { AtomMappingPair, AtomRef } from './atomMapping';
-import { MAPPING_PALETTE } from './atomMappingColors';
+import { selectMappingColors } from './atomMappingColors';
 import {
     buildInchiAtomOrbits,
     canonicalIndexForElementRef,
@@ -116,13 +116,14 @@ function mappingGroups(pairs: unknown): InternalGroup[] {
         bucket.push(key);
         members.set(root, bucket);
     }
-    return Array.from(members.values())
-        .sort((left, right) => Math.min(...left.map((key) => firstSeen.get(key)!)) - Math.min(...right.map((key) => firstSeen.get(key)!)))
-        .map((keys, index) => {
+    const sorted = Array.from(members.values())
+        .sort((left, right) => Math.min(...left.map((key) => firstSeen.get(key)!)) - Math.min(...right.map((key) => firstSeen.get(key)!)));
+    const selection = selectMappingColors(sorted.length);
+    return sorted.map((keys, index) => {
             const groupRefs = keys.sort((left, right) => firstSeen.get(left)! - firstSeen.get(right)!).map((key) => refs.get(key)!);
             return {
                 groupId: `g${index + 1}`,
-                color: MAPPING_PALETTE[index % MAPPING_PALETTE.length] ?? '',
+                color: selection[index % selection.length] ?? '',
                 elements: Array.from(new Set(groupRefs.map((ref) => ref.element))).sort(),
                 compoundIds: Array.from(new Set(groupRefs.map((ref) => ref.compoundId))).sort(),
                 refCount: groupRefs.length,
