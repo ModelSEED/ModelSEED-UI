@@ -20,6 +20,8 @@ describe('MoleculeRenderer', () => {
     it('colours atom labels without requesting RDKit highlights', async () => {
         const { container } = render(<MoleculeRenderer compoundId="cpd00009" smiles="OP" atomColors={{ 0: '#123456' }} />);
         await waitFor(() => expect(container.querySelector('[class="atom-0"]')?.getAttribute('fill')).toBe('#123456'));
+        expect(container.querySelector('[class="atom-0"]')?.getAttribute('stroke')).toBe('#333333');
+        expect(container.querySelector('[class="atom-0"]')?.getAttribute('stroke-width')).toBe('1');
         const mol = getMol.mock.results.at(-1)?.value;
         expect(mol.get_svg).toHaveBeenCalled();
         expect(mol.get_svg_with_highlights).not.toHaveBeenCalled();

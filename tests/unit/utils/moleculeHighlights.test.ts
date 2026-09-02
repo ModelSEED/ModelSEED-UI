@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+    applyAtomGlyphOutline,
     applyAtomLabelColors,
     applyBondColors,
+    applyMoleculeBackground,
     buildExplicitAtomLabels,
     buildMoleculeHighlightPlan,
     elementInventoryFromMolJson,
@@ -69,6 +71,37 @@ describe('moleculeHighlights', () => {
 
         expect(plan.atomColors).toEqual({ 0: '#ff0000', 1: '#ff0000', 3: '#0000ff' });
         expect(plan.bondColors).toEqual({ 0: '#ff0000' });
+    });
+
+    it('replaces the RDKit canvas background and inserts one when absent', () => {
+        const rdkitSvg = "<svg><rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='150.0' height='150.0' x='0.0' y='0.0'></svg>";
+        expect(applyMoleculeBackground(rdkitSvg)).toContain("fill:#F5F5F5;stroke:none");
+        expect(applyMoleculeBackground('<svg><path /></svg>')).toContain("<svg><rect style='opacity:1.0;fill:#F5F5F5;stroke:none' width='100%' height='100%' x='0' y='0'/>");
+    });
+
+    it('leaves classified rects untouched', () => {
+        const rect = "<rect class='highlight' style='fill:#FFFFFF;stroke:none'/>";
+        expect(applyMoleculeBackground(`<svg>${rect}</svg>`)).toContain(rect);
+    });
+
+    it('outlines only atom glyph paths while preserving fill', () => {
+        const glyph = "<path class='atom-2' d='M 1 1' fill='#FF0000'/>";
+        const result = applyAtomGlyphOutline(glyph);
+        expect(result).toContain("stroke='#333333'");
+        expect(result).toContain("stroke-width='1'");
+        expect(result).toContain("paint-order='stroke'");
+        expect(result).toContain("fill='#FF0000'");
+        expect(applyAtomGlyphOutline(BOND_PATH)).toBe(BOND_PATH);
+        const ellipse = "<ellipse class='atom-0' style='fill:#FF0000;stroke:#FF0000'/>";
+        expect(applyAtomGlyphOutline(ellipse)).toBe(ellipse);
+        expect(applyAtomGlyphOutline(result)).toBe(result);
+    });
+
+    it('returns non-string and empty SVG inputs unchanged', () => {
+        expect(applyMoleculeBackground('')).toBe('');
+        expect(applyAtomGlyphOutline('')).toBe('');
+        expect(applyMoleculeBackground(null as unknown as string)).toBeNull();
+        expect(applyAtomGlyphOutline(null as unknown as string)).toBeNull();
     });
 
     it('recolours atom label fill attributes and styles', () => {

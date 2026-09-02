@@ -109,6 +109,51 @@ export function buildMoleculeHighlightPlan(
     return { atomColors, bondColors };
 }
 
+export const DEFAULT_MOLECULE_BACKGROUND_COLOR = '#F5F5F5';
+export const DEFAULT_ATOM_GLYPH_OUTLINE_COLOR = '#333333';
+export const DEFAULT_ATOM_GLYPH_OUTLINE_WIDTH = 1.0;
+
+export function applyMoleculeBackground(svg: string, color = DEFAULT_MOLECULE_BACKGROUND_COLOR): string {
+    if (typeof svg !== 'string' || !svg) return svg;
+
+    try {
+        let backgroundFound = false;
+        const withBackground = svg.replace(/<rect\b[^>]*>/gi, (tag) => {
+            if (backgroundFound || /\bclass=(['"])(.*?)\1/.test(tag)) return tag;
+            const styleMatch = /\bstyle=(['"])(.*?)\1/.exec(tag);
+            if (!styleMatch || !/stroke:\s*none\b/i.test(styleMatch[2])) return tag;
+            backgroundFound = true;
+            return tag.replace(/fill:\s*#[0-9a-f]{6}/i, `fill:${color}`);
+        });
+        if (backgroundFound) return withBackground;
+        return svg.replace(/<svg\b[^>]*>/i, (tag) => (
+            `${tag}<rect style='opacity:1.0;fill:${color};stroke:none' width='100%' height='100%' x='0' y='0'/>`
+        ));
+    } catch {
+        return svg;
+    }
+}
+
+export function applyAtomGlyphOutline(
+    svg: string,
+    options?: { color?: string; width?: number },
+): string {
+    if (typeof svg !== 'string' || !svg) return svg;
+
+    const color = options?.color ?? DEFAULT_ATOM_GLYPH_OUTLINE_COLOR;
+    const width = options?.width ?? DEFAULT_ATOM_GLYPH_OUTLINE_WIDTH;
+
+    try {
+        return svg.replace(/<path\b[^>]*>/gi, (tag) => {
+            const classMatch = /\bclass=(['"])(.*?)\1/.exec(tag);
+            if (!classMatch || !/^atom-(\d+)(?:\s|$)/.test(classMatch[2]) || /\bstroke\s*=/.test(tag)) return tag;
+            return tag.replace(/^<path\b/i, `<path stroke='${color}' stroke-width='${width}' stroke-linejoin='round' paint-order='stroke'`);
+        });
+    } catch {
+        return svg;
+    }
+}
+
 export function applyAtomLabelColors(svg: string, atomColors: Readonly<Record<number, string>>): string {
     if (typeof svg !== 'string' || !atomColors || Object.keys(atomColors).length === 0) return svg;
 
