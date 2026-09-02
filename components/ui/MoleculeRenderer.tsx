@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { getRDKit } from '@/lib/rdkit';
 import { getCompoundImageUrl } from '@/lib/api/biochem';
-import { applyAtomLabelColors, applyBondColors, buildExplicitAtomLabels, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
+import { applyAtomGlyphOutline, applyAtomLabelColors, applyBondColors, applyMoleculeBackground, buildExplicitAtomLabels, buildMoleculeHighlightPlan, elementInventoryFromMolJson, elementSymbolForAtomicNumber } from '@/lib/utils/moleculeHighlights';
 import type { HeavyAtomGraph } from '@/lib/utils/inchiAtomOrder';
 
 /**
@@ -164,6 +164,8 @@ export default function MoleculeRenderer({
                         if (currentBondColors && Object.keys(currentBondColors).length > 0) {
                             svg = applyBondColors(svg, currentBondColors);
                         }
+                        svg = applyMoleculeBackground(svg);
+                        svg = applyAtomGlyphOutline(svg);
                         if (!cancelled) {
                             setSvgString(svg);
                             setState('svg');

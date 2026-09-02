@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAPPING_PALETTE, selectMappingColors } from '@/lib/utils/atomMappingColors';
+import { buildAtomMappingColorPlan, MAPPING_PALETTE, selectMappingColors } from '@/lib/utils/atomMappingColors';
 import { deltaE76, perceptualDistance } from '@/lib/utils/colorDistance';
 import { buildAtomOrbitColorPlan } from '@/lib/utils/atomOrbitColors';
 import type { AtomMappingPair } from '@/lib/utils/atomMapping';
@@ -26,6 +26,9 @@ const MIN_DELTA_E_FROM_BLACK = 45;
 const MIN_DELTA_E_NORMAL = 25;
 /** ...and under the common red-green deficiencies. */
 const MIN_DELTA_E_CVD = 15;
+
+// At these sizes the maximum-minimum subset beats the palette-order prefix.
+const COUNTS_WHERE_SELECTION_BEATS_PREFIX = new Set([2, 3, 4, 5, 7]);
 
 type Rgb = readonly [number, number, number];
 
@@ -121,7 +124,7 @@ describe('colour maths used by these checks', () => {
         expect(contrastRatio(WHITE, WHITE)).toBeCloseTo(1, 5);
         expect(toLab(WHITE)[0]).toBeCloseTo(100, 3);
         expect(toLab(BLACK)[0]).toBeCloseTo(0, 3);
-        expect(deltaE('#0072B2', '#0072B2')).toBe(0);
+        expect(deltaE('#355214', '#355214')).toBe(0);
         // Deuteranopia collapses pure red against pure green; normal vision does not.
         const normal = deltaE('#FF0000', '#00FF00');
         const deutan = deltaE(simulate('#FF0000', 'deutan'), simulate('#00FF00', 'deutan'));
@@ -130,11 +133,11 @@ describe('colour maths used by these checks', () => {
     });
 
     it('flags the previously shipped palette that motivated this change', () => {
-        // The old 12-colour set: brown #8C564B and green #20854E were indistinguishable
-        // under deuteranopia. Proves these thresholds can actually fail a bad palette.
+        // The retired 12-colour set: brown #8C564B and green #20854E were
+        // indistinguishable under deuteranopia. Proves these thresholds can fail.
         const legacy = [
-            '#0072B2', '#D55E00', '#009E73', '#CC79A7', '#E69F00', '#56B4E9',
-            '#8C564B', '#7F3FBF', '#BC3C29', '#20854E', '#6F99AD', '#EE4C97',
+            '#E69F00', '#56B4E9', '#8C564B', '#7F3FBF', '#BC3C29', '#20854E',
+            '#6F99AD', '#EE4C97', '#0072B2', '#D55E00', '#009E73', '#CC79A7',
         ];
         expect(worstPair(legacy, 'deutan').delta).toBeLessThan(MIN_DELTA_E_CVD);
         expect(Math.min(...legacy.map((c) => contrastRatio(c, CANVAS)))).toBeLessThan(MIN_CONTRAST_ON_CANVAS);
@@ -148,8 +151,8 @@ describe('MAPPING_PALETTE', () => {
         for (const color of MAPPING_PALETTE) expect(color).toMatch(/^#[0-9A-F]{6}$/);
     });
 
-    it('opens with the Okabe-Ito colours that clear the contrast bar unmodified', () => {
-        expect(MAPPING_PALETTE.slice(0, 4)).toEqual(['#0072B2', '#D55E00', '#009E73', '#CC79A7']);
+    it('uses the high-salience six-family palette in its documented order', () => {
+        expect(MAPPING_PALETTE).toEqual(['#355214', '#3FAA18', '#00A398', '#2994FF', '#0B26D5', '#6F2183', '#FF14EF', '#E00069']);
     });
 
     it('drops the low-contrast and CVD-confusable entries of the previous palette', () => {
@@ -181,13 +184,12 @@ describe('MAPPING_PALETTE', () => {
         expect(delta, `closest ${kind} pair: ${pair[0]} vs ${pair[1]}`).toBeGreaterThanOrEqual(MIN_DELTA_E_CVD);
     });
 
-    // Documented, accepted limitation rather than a silent gap: tritanopia (~0.01%
-    // prevalence) merges Okabe-Ito's vermillion and reddish purple. Pinned so that any
-    // future palette change surfaces its tritan behaviour instead of hiding it.
-    it('has a known tritanopia limitation inherited from Okabe-Ito', () => {
+    // Tritanopia is excluded from subset ranking; pin its actual worst pair so a
+    // future palette change makes that trade-off visible.
+    it('has the documented tritanopia limitation', () => {
         const { delta, pair } = worstPair(MAPPING_PALETTE, 'tritan');
-        expect(delta).toBeLessThan(MIN_DELTA_E_CVD);
-        expect(pair).toEqual(['#D55E00', '#CC79A7']);
+        expect(delta).toBeCloseTo(4.95, 1);
+        expect(pair).toEqual(['#00A398', '#2994FF']);
     });
 });
 
@@ -198,7 +200,13 @@ describe('selectMappingColors', () => {
             const sequential = worstPerceptualPair(MAPPING_PALETTE.slice(0, count));
             expect(selected).toBeGreaterThanOrEqual(sequential);
             expect(selected).toBeGreaterThanOrEqual(MIN_DELTA_E_CVD);
-            if (count < MAPPING_PALETTE.length) expect(selected).toBeGreaterThan(sequential);
+            // At 6 and 8, the leading palette run is already an optimal subset, so the
+            // maximiser agrees with the prefix; this tie is never a regression.
+            if (COUNTS_WHERE_SELECTION_BEATS_PREFIX.has(count)) {
+                expect(selected).toBeGreaterThan(sequential);
+            } else {
+                expect(selected).toBeCloseTo(sequential, 9);
+            }
         }
     });
 
@@ -231,6 +239,37 @@ describe('selectMappingColors', () => {
                 9,
             );
         }
+    });
+
+    it('addresses the rxn00018 high-salience mapping colour report', () => {
+        expect(selectMappingColors(8)).toEqual([
+            '#355214', '#3FAA18', '#00A398', '#2994FF',
+            '#0B26D5', '#6F2183', '#FF14EF', '#E00069',
+        ]);
+        expect(selectMappingColors(4)).toEqual(['#3FAA18', '#00A398', '#2994FF', '#0B26D5']);
+        for (const [left, right] of pairs(MAPPING_PALETTE)) {
+            expect(deltaE76(left, right), `${left} vs ${right}`).toBeGreaterThanOrEqual(45);
+        }
+        for (const color of MAPPING_PALETTE) {
+            for (const rdkitDefault of ['#FF0000', '#FF7F00', '#0000FF', '#CCCC00', '#00FF00']) {
+                expect(deltaE76(color, rdkitDefault), `${color} vs ${rdkitDefault}`).toBeGreaterThanOrEqual(25);
+            }
+        }
+        expect(selectMappingColors(MAPPING_PALETTE.length + 1)).toEqual(MAPPING_PALETTE);
+        const mappingPairs: AtomMappingPair[] = Array.from({ length: MAPPING_PALETTE.length + 1 }, (_, index) => ({
+            left: { compoundId: `cpd${String(index).padStart(5, '0')}`, element: 'O', index: 1 },
+            right: { compoundId: `cpd${String(index + 100).padStart(5, '0')}`, element: 'O', index: 1 },
+            leftAtoms: [{ compoundId: `cpd${String(index).padStart(5, '0')}`, element: 'O', index: 1 }],
+            rightAtoms: [{ compoundId: `cpd${String(index + 100).padStart(5, '0')}`, element: 'O', index: 1 }],
+            hasSymmetryGroup: false,
+            raw: '',
+        }));
+        const inventories = Object.fromEntries(mappingPairs.flatMap(({ left, right }) => [
+            [left.compoundId, { O: 1 }], [right.compoundId, { O: 1 }],
+        ]));
+        const plan = buildAtomMappingColorPlan(mappingPairs, inventories);
+        expect(plan.legend).toHaveLength(MAPPING_PALETTE.length + 1);
+        expect(plan.legend[0].color).toBe(plan.legend[MAPPING_PALETTE.length].color);
     });
 });
 

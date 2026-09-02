@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+    applyAtomGlyphOutline,
     applyAtomLabelColors,
     applyBondColors,
+    applyMoleculeBackground,
     buildExplicitAtomLabels,
     buildMoleculeHighlightPlan,
     elementInventoryFromMolJson,
@@ -71,6 +73,37 @@ describe('moleculeHighlights', () => {
         expect(plan.bondColors).toEqual({ 0: '#ff0000' });
     });
 
+    it('replaces the RDKit canvas background and inserts one when absent', () => {
+        const rdkitSvg = "<svg><rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='150.0' height='150.0' x='0.0' y='0.0'></svg>";
+        expect(applyMoleculeBackground(rdkitSvg)).toContain("fill:#F5F5F5;stroke:none");
+        expect(applyMoleculeBackground('<svg><path /></svg>')).toContain("<svg><rect style='opacity:1.0;fill:#F5F5F5;stroke:none' width='100%' height='100%' x='0' y='0'/>");
+    });
+
+    it('leaves classified rects untouched', () => {
+        const rect = "<rect class='highlight' style='fill:#FFFFFF;stroke:none'/>";
+        expect(applyMoleculeBackground(`<svg>${rect}</svg>`)).toContain(rect);
+    });
+
+    it('outlines only atom glyph paths while preserving fill', () => {
+        const glyph = "<path class='atom-2' d='M 1 1' fill='#FF0000'/>";
+        const result = applyAtomGlyphOutline(glyph);
+        expect(result).toContain("stroke='#333333'");
+        expect(result).toContain("stroke-width='1'");
+        expect(result).toContain("paint-order='stroke'");
+        expect(result).toContain("fill='#FF0000'");
+        expect(applyAtomGlyphOutline(BOND_PATH)).toBe(BOND_PATH);
+        const ellipse = "<ellipse class='atom-0' style='fill:#FF0000;stroke:#FF0000'/>";
+        expect(applyAtomGlyphOutline(ellipse)).toBe(ellipse);
+        expect(applyAtomGlyphOutline(result)).toBe(result);
+    });
+
+    it('returns non-string and empty SVG inputs unchanged', () => {
+        expect(applyMoleculeBackground('')).toBe('');
+        expect(applyAtomGlyphOutline('')).toBe('');
+        expect(applyMoleculeBackground(null as unknown as string)).toBeNull();
+        expect(applyAtomGlyphOutline(null as unknown as string)).toBeNull();
+    });
+
     it('recolours atom label fill attributes and styles', () => {
         const fillAttribute = "<path class='atom-2' fill='#000000'/>";
         const fillStyle = "<path class='atom-3' style='fill:#000000;stroke:#000000'/>";
@@ -114,44 +147,44 @@ describe('moleculeHighlights', () => {
 
     it('recolours a heteroatom half-bond', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' d='M 1,1 L 2,2' style='fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2.0px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1' />";
-        const result = applyBondColors(svg, { 0: '#0072B2' });
-        expect(result).toContain('stroke:#0072B2');
+        const result = applyBondColors(svg, { 0: '#355214' });
+        expect(result).toContain('stroke:#355214');
         expect(result).not.toContain('#FF0000');
     });
 
     it('recolours both halves of a bond', () => {
         const svg = `${BOND_PATH}<path class='bond-0 atom-0 atom-1' style='stroke:#0000FF' />`;
-        const result = applyBondColors(svg, { 0: '#0072B2' });
-        expect(result.match(/stroke:#0072B2/g)).toHaveLength(2);
+        const result = applyBondColors(svg, { 0: '#355214' });
+        expect(result.match(/stroke:#355214/g)).toHaveLength(2);
     });
 
     it('recolours every hex stroke declaration in a bond style', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:#FF0000;stroke:#0000FF' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toBe(
-            "<path class='bond-0 atom-0 atom-1' style='stroke:#0072B2;stroke:#0072B2' />",
+        expect(applyBondColors(svg, { 0: '#355214' })).toBe(
+            "<path class='bond-0 atom-0 atom-1' style='stroke:#355214;stroke:#355214' />",
         );
     });
 
     it('recolours standalone stroke attributes', () => {
         const svg = '<path class=\'bond-1 atom-2 atom-3\' stroke="#CC9900" />';
-        expect(applyBondColors(svg, { 1: '#009E73' })).toContain('stroke="#009E73"');
+        expect(applyBondColors(svg, { 1: '#3FAA18' })).toContain('stroke="#3FAA18"');
     });
 
     it('leaves fills and atom label glyphs untouched', () => {
         const atomLabel = "<path class='atom-2' d='M 1 1' fill='#FF0000'/>";
         const bond = "<path class='bond-0 atom-0 atom-1' style='fill:none;stroke:#FF0000'/>";
-        const result = applyBondColors(`${atomLabel}${bond}`, { 0: '#0072B2' });
+        const result = applyBondColors(`${atomLabel}${bond}`, { 0: '#355214' });
         expect(result).toContain(atomLabel);
-        expect(result).toContain('fill:none;stroke:#0072B2');
+        expect(result).toContain('fill:none;stroke:#355214');
     });
 
     it('leaves non-hex bond strokes unchanged', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:none' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toBe(svg);
+        expect(applyBondColors(svg, { 0: '#355214' })).toBe(svg);
     });
 
     it('recolours lowercase hex bond strokes', () => {
         const svg = "<path class='bond-0 atom-0 atom-1' style='stroke:#ff0000' />";
-        expect(applyBondColors(svg, { 0: '#0072B2' })).toContain('stroke:#0072B2');
+        expect(applyBondColors(svg, { 0: '#355214' })).toContain('stroke:#355214');
     });
 });

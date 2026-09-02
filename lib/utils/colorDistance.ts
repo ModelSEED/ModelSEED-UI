@@ -58,7 +58,7 @@ export function deltaE76(a: string, b: string): number {
 
 /**
  * Minimum normal/protan/deutan distance. Tritanopia is excluded because accepted
- * Okabe-Ito #D55E00/#CC79A7 tritan dE76 0.96 would flatten every subset ranking.
+ * #00A398/#2994FF tritan dE76 4.95 would flatten every subset ranking.
  */
 export function perceptualDistance(a: string, b: string): number {
     return Math.min(
