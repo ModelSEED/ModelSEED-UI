@@ -104,9 +104,11 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, showAl
     const drawStructure = Boolean(structure?.svg) || (Boolean(smiles) && (!data?.formula || !isParsableFormula(data.formula) || heavyAtomCount(data.formula) >= 1));
     const label = data?.name || token.id;
     const [previewAnchor, setPreviewAnchor] = useState<HTMLElement | null>(null);
-    const [previewOpen, setPreviewOpen] = useState(false);
+    const [isPreviewHovered, setIsPreviewHovered] = useState(false);
+    const [isPreviewFocused, setIsPreviewFocused] = useState(false);
     const previewId = useId();
     const canPreview = drawStructure && !isLoading;
+    const previewOpen = canPreview && (isPreviewHovered || isPreviewFocused);
     const metadata = token.id;
     const accessibleDescription = [
         data?.formula && `Formula ${data.formula}`,
@@ -137,10 +139,10 @@ function CompoundColumn({ token, data, structure, atomColors, bondColors, showAl
         <Box data-mapping-token={token.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, maxWidth: 160, minWidth: 0 }}>
             {token.stoich && <Typography variant="body2" sx={{ fontWeight: 600, pt: 0.5 }}>{token.stoich}</Typography>}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.4, minWidth: 0 }}>
-                <Box ref={setPreviewAnchor} onMouseEnter={() => canPreview && setPreviewOpen(true)} onMouseLeave={() => setPreviewOpen(false)} onFocus={() => canPreview && setPreviewOpen(true)} onBlur={() => setPreviewOpen(false)} onKeyDown={(event) => { if (event.key === 'Escape') setPreviewOpen(false); }} sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+                <Box ref={setPreviewAnchor} onPointerEnter={() => setIsPreviewHovered(true)} onPointerLeave={() => setIsPreviewHovered(false)} onFocus={() => setIsPreviewFocused(true)} onBlur={() => setIsPreviewFocused(false)} onKeyDown={(event) => { if (event.key === 'Escape') { setIsPreviewHovered(false); setIsPreviewFocused(false); } }} sx={{ maxWidth: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
                     <NextLink href={`/biochem/compounds/${token.id}`} aria-label={accessibleDescription ? `Open ${label}; ${accessibleDescription}` : `Open ${label}`} aria-describedby={previewOpen ? previewId : undefined} style={drawStructure ? undefined : compoundLinkStyle}>{contents}</NextLink>
                 </Box>
-                <Popper open={canPreview && previewOpen && Boolean(previewAnchor)} anchorEl={previewAnchor} placement={PREVIEW_POPPER_PLACEMENT} modifiers={PREVIEW_POPPER_MODIFIERS} sx={{ pointerEvents: 'none', zIndex: (theme) => theme.zIndex.tooltip }}>
+                <Popper open={previewOpen && Boolean(previewAnchor)} anchorEl={previewAnchor} placement={PREVIEW_POPPER_PLACEMENT} modifiers={PREVIEW_POPPER_MODIFIERS} sx={{ pointerEvents: 'none', zIndex: (theme) => theme.zIndex.tooltip }}>
                     {/* Scrolling keeps the 360px renderer and caption within a short viewport. */}
                     <Paper elevation={8} role="tooltip" id={previewId} aria-label={`Enlarged structure of ${label}`} sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
                         <MoleculeRenderer

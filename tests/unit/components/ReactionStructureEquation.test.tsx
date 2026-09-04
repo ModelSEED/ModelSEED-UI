@@ -413,7 +413,7 @@ describe('ReactionStructureEquation', () => {
             expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
             const anchor = previewAnchor(container, 'cpd00001');
             const link = anchor.querySelector('a')!;
-            fireEvent.mouseEnter(anchor);
+            fireEvent.pointerEnter(anchor);
             const tooltip = Array.from(document.body.querySelectorAll('[role="tooltip"]'))
                 .find((node) => node.getAttribute('aria-label') === 'Enlarged structure of Water');
             expect(tooltip).toBeTruthy();
@@ -426,18 +426,21 @@ describe('ReactionStructureEquation', () => {
             expect(preview.showAllAtomLabels).toBe(true);
             expect(link.getAttribute('href')).toBe('/biochem/compounds/cpd00001');
             expect(link.getAttribute('aria-describedby')).toBeTruthy();
-            fireEvent.mouseLeave(anchor);
+            fireEvent.pointerLeave(anchor);
             expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
             expect(link.getAttribute('aria-describedby')).toBeNull();
         });
 
-        it('opens on focus and closes on blur or Escape', async () => {
+        it('keeps focus and hover lifecycles independent, and Escape closes either one', async () => {
             const { container } = renderEquation();
             await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
             const anchor = previewAnchor(container, 'cpd00001');
             fireEvent.focus(anchor);
             expect(document.body.querySelector('[role="tooltip"]')).toBeTruthy();
+            fireEvent.pointerEnter(anchor);
             fireEvent.blur(anchor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeTruthy();
+            fireEvent.pointerLeave(anchor);
             expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
             fireEvent.focus(anchor);
             expect(document.body.querySelector('[role="tooltip"]')).toBeTruthy();
@@ -445,15 +448,42 @@ describe('ReactionStructureEquation', () => {
             expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
         });
 
+        it('closes the prior preview when rapidly switching compounds', async () => {
+            const { container } = renderEquation();
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
+            const water = previewAnchor(container, 'cpd00001');
+            const donor = previewAnchor(container, 'cpd00012');
+            fireEvent.pointerEnter(water);
+            expect(document.body.querySelector('[aria-label="Enlarged structure of Water"]')).toBeTruthy();
+            fireEvent.pointerLeave(water);
+            fireEvent.pointerEnter(donor);
+            expect(document.body.querySelector('[aria-label="Enlarged structure of Phosphate donor"]')).toBeTruthy();
+            expect(document.body.querySelector('[aria-label="Enlarged structure of Water"]')).toBeNull();
+            fireEvent.pointerLeave(donor);
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+        });
+
         it('reuses atom-mapping colours without element colours in the preview', async () => {
             const { container } = renderEquation({ atomMappingPairs: pairs });
             await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
             const thumbnail = rendererCalls.filter((call) => call.compoundId === 'cpd00009' && call.width === 134).at(-1)!;
-            fireEvent.mouseEnter(previewAnchor(container, 'cpd00009'));
+            fireEvent.pointerEnter(previewAnchor(container, 'cpd00009'));
             const preview = rendererCalls.filter((call) => call.compoundId === 'cpd00009' && call.width === 360).at(-1)!;
             expect(preview.atomColors).toEqual(thumbnail.atomColors);
             expect(preview.elementColors).toBeUndefined();
             expect(thumbnail.elementColors).toBeUndefined();
+        });
+
+        it('closes immediately when a hovered compound loses its structure or unmounts', async () => {
+            const { container, rerender, unmount } = renderEquation();
+            await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00001"]')).toBeTruthy());
+            fireEvent.pointerEnter(previewAnchor(container, 'cpd00001'));
+            expect(document.body.querySelector('[aria-label="Enlarged structure of Water"]')).toBeTruthy();
+            rerender(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><ReactionStructureEquation equation="cpd00067[c]" /></QueryClientProvider>);
+            await waitFor(() => expect(container.querySelector('[data-mapping-token="cpd00067"]')).toBeTruthy());
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
+            unmount();
+            expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
         });
 
         it('does not preview a compound without a drawn structure', async () => {
@@ -463,7 +493,7 @@ describe('ReactionStructureEquation', () => {
             ]));
             const { container } = renderEquation({ equation: 'cpd00067[c] + cpd00001[c] => cpd00001[c]' });
             await waitFor(() => expect(container.querySelector('[data-mapping-token="cpd00067"]')).toBeTruthy());
-            fireEvent.mouseEnter(previewAnchor(container, 'cpd00067'));
+            fireEvent.pointerEnter(previewAnchor(container, 'cpd00067'));
             expect(document.body.querySelector('[role="tooltip"]')).toBeNull();
         });
     });
