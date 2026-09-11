@@ -267,6 +267,7 @@ function ThermodynamicsDetails({ reaction }: { reaction: Awaited<ReturnType<type
                     aria-label="Recommended reversibility"
                     sx={{
                         display: 'flex',
+                        flexWrap: 'wrap',
                         alignItems: 'center',
                         gap: 1,
                         alignSelf: 'flex-start',

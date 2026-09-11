@@ -95,7 +95,12 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
     const assessment = item.assessment ?? 'N/A';
     const crossSource = item.cross_source ?? '(absent)';
     const source = item.source ?? 'N/A';
-    const fields = [grade, assessment, crossSource, source];
+    const fields = [
+        { label: 'Grade', value: grade },
+        { label: 'Assessment', value: assessment },
+        { label: 'Cross-source', value: crossSource },
+        { label: 'Source', value: source },
+    ];
     const colors = evidenceColor(item.grade);
     return (
         <Box
@@ -103,28 +108,41 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
             data-grade={grade.toLowerCase()}
             aria-label={`Thermo evidence: grade ${grade}, assessment ${assessment}, cross-source ${crossSource}, source ${source}`}
             sx={{
-                display: 'inline-block',
+                display: 'inline-flex',
+                flexDirection: 'column',
+                minWidth: 260,
+                maxWidth: '100%',
                 color: colors.text,
-                px: 1,
-                py: 0.5,
                 border: '1px solid',
                 borderColor: colors.border,
-                borderRadius: 1,
-                fontWeight: 700,
+                borderRadius: 1.5,
+                overflow: 'hidden',
+                boxShadow: 1,
             }}
             style={{ backgroundColor: colors.background }}
         >
-            {fields.map((value, index) => {
-                const label = index === 0 ? 'grade' : index === 1 ? 'assessment' : index === 2 ? 'cross-source' : 'source';
-                return (
-                    <Typography component="span" variant="body2" key={`${value}-${index}`}>
-                        {index > 0 && '/'}
-                        <Tooltip title={EVIDENCE_TOOLTIPS[value] ?? `Thermodynamic evidence ${label}: ${value}.`} arrow>
-                            <Box component="span" tabIndex={0} aria-label={`${label} ${value}`} sx={{ outlineOffset: 2 }}>{value}</Box>
+            <Typography
+                component="div"
+                variant="caption"
+                className="thermo-evidence__header"
+                sx={{ px: 1.25, py: 0.625, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', borderBottom: '1px solid rgba(255, 255, 255, 0.3)' }}
+            >
+                Thermodynamic evidence
+            </Typography>
+            <Box
+                component="dl"
+                className="thermo-evidence__items"
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', m: 0, '& > :nth-of-type(odd)': { borderRight: '1px solid rgba(255, 255, 255, 0.3)' }, '& > :nth-of-type(-n+2)': { borderBottom: '1px solid rgba(255, 255, 255, 0.3)' }, '@media (max-width: 480px)': { gridTemplateColumns: '1fr', '& > :nth-of-type(odd)': { borderRight: 0 }, '& > :not(:last-child)': { borderBottom: '1px solid rgba(255, 255, 255, 0.3)' } } }}
+            >
+                {fields.map(({ label, value }) => (
+                    <Box component="div" className="thermo-evidence__item" key={label} sx={{ px: 1.25, py: 0.75, minWidth: 0 }}>
+                        <Typography component="dt" variant="caption" sx={{ color: 'inherit', opacity: 0.8, fontWeight: 700, lineHeight: 1.2 }}>{label}</Typography>
+                        <Tooltip title={EVIDENCE_TOOLTIPS[value] ?? `Thermodynamic evidence ${label.toLowerCase()}: ${value}.`} arrow>
+                            <Box component="dd" tabIndex={0} aria-label={`${label.toLowerCase()} ${value}`} sx={{ m: 0, mt: 0.25, outlineOffset: 2, fontSize: '0.875rem', fontWeight: 700, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{value}</Box>
                         </Tooltip>
-                    </Typography>
-                );
-            })}
+                    </Box>
+                ))}
+            </Box>
         </Box>
     );
 }

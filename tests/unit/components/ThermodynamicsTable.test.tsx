@@ -100,16 +100,25 @@ describe('ThermodynamicsTable', () => {
         expect(container.textContent).not.toContain('Grade:');
     });
 
-    it('renders exact evidence tooltips, including absent and unknown fallback', () => {
+    it('renders evidence as ordered labeled card items with focusable tooltip values', () => {
         const { container } = render(<EvidenceSummary item={{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }} />);
-        expect(container.textContent).toBe('bronze/unconfident/outvoted/eQ');
+        const card = container.querySelector('[data-grade="bronze"]');
+        expect(card?.textContent).not.toContain('/');
+        expect([...container.querySelectorAll('dt')].map((label) => label.textContent)).toEqual(['Grade', 'Assessment', 'Cross-source', 'Source']);
+        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(4);
+        expect(container.querySelector('.thermo-evidence__items')?.className).toContain('thermo-evidence__items');
         expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(4);
-        expect(container.querySelector('[data-grade="bronze"]')?.getAttribute('style')).toContain('background-color: #78350f');
-        expect(container.querySelector('[data-grade="bronze"]')?.className).toContain('thermo-evidence--bronze');
+        expect(card?.getAttribute('style')).toContain('background-color: #78350f');
+        expect(card?.className).toContain('thermo-evidence--bronze');
         expect(container.querySelector('[aria-label="grade bronze"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="assessment unconfident"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="cross-source outvoted"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="source eQ"]')).toBeTruthy();
+    });
+
+    it('distinguishes absent cross-source evidence from unpaired', () => {
+        const { container } = render(<EvidenceSummary item={{ grade: 'silver', assessment: 'self-confident', source: 'eQ' }} />);
+        expect(container.querySelector('[aria-label="cross-source (absent)"]')?.textContent).toBe('(absent)');
     });
 
     it('renders record, heuristic, recommended, and LLM operators as literal labeled badges without arrow decoration', () => {
