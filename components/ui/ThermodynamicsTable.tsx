@@ -21,13 +21,11 @@ function displayValue(value: number | null | undefined): string {
     return typeof value === 'number' ? String(value) : 'N/A';
 }
 
-function evidenceTone(grade: string | undefined): 'warning' | 'info' | 'secondary' {
-    switch (grade?.toLowerCase()) {
-        case 'gold': return 'warning';
-        case 'bronze': return 'secondary';
-        default: return 'info';
-    }
-}
+const EVIDENCE_FRAME_COLORS = {
+    gold: { light: '#fff8e1', border: '#b88900' },
+    silver: { light: '#f5f7fa', border: '#7b8794' },
+    bronze: { light: '#f8eee8', border: '#b87333' },
+} as const;
 
 export function DirectionOperator({ direction }: { direction: string }) {
     const isDirectional = direction === '>' || direction === '<';
@@ -100,7 +98,7 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
         { label: 'Cross-source', value: crossSource },
         { label: 'Source', value: source },
     ];
-    const tone = evidenceTone(item.grade);
+    const frameColors = EVIDENCE_FRAME_COLORS[item.grade?.toLowerCase() as keyof typeof EVIDENCE_FRAME_COLORS] ?? EVIDENCE_FRAME_COLORS.silver;
     return (
         <Box
             className={`thermo-evidence thermo-evidence--${grade.toLowerCase()}`}
@@ -111,10 +109,10 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
                 minWidth: 0,
                 p: 1.25,
                 border: '1px solid',
-                borderColor: `${tone}.main`,
+                borderColor: frameColors.border,
                 borderLeftWidth: 5,
                 borderRadius: 1,
-                bgcolor: `${tone}.light`,
+                bgcolor: frameColors.light,
                 color: 'text.primary',
             }}
         >
