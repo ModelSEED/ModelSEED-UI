@@ -26,6 +26,41 @@ export interface ThermodynamicsRecord {
     operator?: string;
 }
 
+export interface ThermoEvidence {
+    grade?: string;
+    assessment?: string;
+    source?: string;
+    cross_source?: string;
+}
+
+/** A direction proposed by the LLM council; unlike thermodynamic records it has no energy. */
+export interface LlmCouncilProposal {
+    source_name: string;
+    proposed_direction: string;
+}
+
+export interface CompoundPka {
+    source_name: string;
+    pka_kind?: string;
+    pka_number: number[];
+}
+
+export function normalizeThermoEvidence(value: unknown): ThermoEvidence[] | undefined {
+    const entries = Array.isArray(value) ? value : value == null ? [] : [value];
+    const evidence = entries.flatMap((entry) => {
+        if (!entry || typeof entry !== 'object') return [];
+        const record = entry as Record<string, unknown>;
+        const normalized: ThermoEvidence = {};
+        for (const field of ['grade', 'assessment', 'source'] as const) {
+            if (typeof record[field] === 'string') normalized[field] = record[field];
+        }
+        const crossSource = record.cross_source ?? record['cross-source'];
+        if (typeof crossSource === 'string') normalized.cross_source = crossSource;
+        return Object.keys(normalized).length > 0 ? [normalized] : [];
+    });
+    return evidence.length > 0 ? evidence : undefined;
+}
+
 export interface Reaction {
     id: string;
     name: string;
@@ -49,6 +84,8 @@ export interface Reaction {
     linked_reaction?: string;
     source?: string;
     thermodynamics?: ThermodynamicsRecord[];
+    llm_council_proposals?: LlmCouncilProposal[];
+    thermo_evidence?: ThermoEvidence[];
     n_sources_thermodynamics?: number;
     sources_agree_direction?: boolean;
     atom_mapping?: string[];
@@ -78,6 +115,8 @@ export interface Compound {
     is_obsolete?: string;
     pka?: string[];
     pkb?: string[];
+    pkas?: CompoundPka[];
+    thermo_evidence?: ThermoEvidence[];
     source?: string;
     structure?: string;
     thermodynamics?: ThermodynamicsRecord[];
@@ -501,10 +540,15 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
     }
     const json = await res.json() as { response?: Partial<SolrResponse<T>> };
     const response = json?.response;
+    const docs = Array.isArray(response?.docs) ? response.docs : [];
     return {
         numFound: typeof response?.numFound === 'number' ? response.numFound : 0,
         start: typeof response?.start === 'number' ? response.start : 0,
-        docs: Array.isArray(response?.docs) ? response.docs : [],
+        docs: docs.map((doc) => {
+            const record = doc as T & { thermo_evidence?: unknown };
+            if (!('thermo_evidence' in record)) return doc;
+            return { ...record, thermo_evidence: normalizeThermoEvidence(record.thermo_evidence) } as T;
+        }),
     };
 }
 
@@ -883,17 +927,32 @@ function coerceThermodynamicsNumber(value: unknown): number | null {
  * a flat, typed `ThermodynamicsRecord[]`. Pure and never throws: malformed
  * or missing input yields `[]`.
  */
-export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
+function thermodynamicsChildren(doc: unknown): unknown[] {
     if (!doc || typeof doc !== 'object') return [];
     const record = doc as Record<string, unknown>;
-    const children = Array.isArray(record.thermodynamics)
+    return Array.isArray(record.thermodynamics)
         ? record.thermodynamics
         : Array.isArray(record._childDocuments_)
             ? record._childDocuments_
             : [];
+}
 
+/** Extracts LLM council direction proposals without treating them as energy evidence. */
+export function normalizeLlmCouncilProposals(doc: unknown): LlmCouncilProposal[] {
+    const results: LlmCouncilProposal[] = [];
+    for (const child of thermodynamicsChildren(doc)) {
+        if (!child || typeof child !== 'object') continue;
+        const c = child as Record<string, unknown>;
+        if (c.doc_type !== 'thermodynamics' || c.source_name !== 'LLMs') continue;
+        const direction = unwrapSolrString(c.operator);
+        if (direction) results.push({ source_name: 'LLMs', proposed_direction: direction });
+    }
+    return results;
+}
+
+export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
     const results: ThermodynamicsRecord[] = [];
-    for (const child of children) {
+    for (const child of thermodynamicsChildren(doc)) {
         if (!child || typeof child !== 'object') continue;
         const c = child as Record<string, unknown>;
 
@@ -901,7 +960,7 @@ export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
         if (typeof docType === 'string' && docType !== 'thermodynamics') continue;
 
         const sourceName = c.source_name;
-        if (typeof sourceName !== 'string' || sourceName.length === 0) continue;
+        if (typeof sourceName !== 'string' || sourceName.length === 0 || sourceName === 'LLMs') continue;
 
         const entry: ThermodynamicsRecord = {
             source_name: sourceName,
@@ -1233,6 +1292,7 @@ export async function getReactionById(id: string): Promise<Reaction> {
     return {
         ...raw,
         thermodynamics: normalizeThermodynamics(raw),
+        llm_council_proposals: normalizeLlmCouncilProposals(raw),
         participants,
         stoichiometry: typeof raw.stoichiometry === 'string'
             ? raw.stoichiometry
