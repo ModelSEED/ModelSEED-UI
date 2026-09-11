@@ -265,18 +265,13 @@ function ThermodynamicsDetails({ reaction }: { reaction: Awaited<ReturnType<type
                 <Box
                     component="section"
                     aria-label="Recommended reversibility"
+                    data-testid="thermo-summary-band"
                     sx={{
                         display: 'flex',
                         flexWrap: 'wrap',
                         alignItems: 'center',
                         gap: 1,
-                        alignSelf: 'flex-start',
-                        px: 1,
-                        py: 0.75,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        borderRadius: 1,
-                        bgcolor: 'action.hover',
+                        py: 0.25,
                     }}
                 >
                     <Typography variant="body2" color="text.secondary">Recommended reversibility</Typography>

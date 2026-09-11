@@ -100,16 +100,19 @@ describe('ThermodynamicsTable', () => {
         expect(container.textContent).not.toContain('Grade:');
     });
 
-    it('renders evidence as ordered labeled card items with focusable tooltip values', () => {
+    it('renders evidence as ordered inline labeled values with focusable tooltips', () => {
         const { container } = render(<EvidenceSummary item={{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }} />);
-        const card = container.querySelector('[data-grade="bronze"]');
-        expect(card?.textContent).not.toContain('/');
+        const summary = container.querySelector('[data-grade="bronze"]');
+        expect(summary?.textContent).not.toContain('/');
         expect([...container.querySelectorAll('dt')].map((label) => label.textContent)).toEqual(['Grade', 'Assessment', 'Cross-source', 'Source']);
-        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(4);
-        expect(container.querySelector('.thermo-evidence__items')?.className).toContain('thermo-evidence__items');
+        expect(container.querySelectorAll('.thermo-evidence__token')).toHaveLength(4);
+        expect(container.querySelector('.thermo-evidence--inline')).toBeTruthy();
+        expect(container.querySelector('.thermo-evidence__list')).toBeTruthy();
+        expect(container.querySelector('.thermo-evidence__header')).toBeNull();
+        expect(container.querySelector('.thermo-evidence__items')).toBeNull();
+        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(0);
         expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(4);
-        expect(card?.getAttribute('style')).toContain('background-color: #78350f');
-        expect(card?.className).toContain('thermo-evidence--bronze');
+        expect(summary?.className).toContain('thermo-evidence--bronze');
         expect(container.querySelector('[aria-label="grade bronze"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="assessment unconfident"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="cross-source outvoted"]')).toBeTruthy();

@@ -104,8 +104,12 @@ describe('biochemistry detail thermodynamics tooltips', () => {
         render(<ReactionDetailPage />);
 
         expect(screen.getByText('Thermodynamics')).toBeTruthy();
-        const recommendedReversibility = screen.getByRole('region', { name: 'Recommended reversibility' });
+        const recommendedReversibility = screen.getByTestId('thermo-summary-band');
+        expect(recommendedReversibility.getAttribute('role')).toBeNull();
         expect(recommendedReversibility.textContent).toContain('Recommended reversibility');
+        expect(recommendedReversibility.querySelector('.thermo-evidence--inline')).toBeTruthy();
+        expect(recommendedReversibility.querySelector('.thermo-evidence__header')).toBeNull();
+        expect(recommendedReversibility.querySelector('.thermo-evidence__items')).toBeNull();
         const recommendedOperator = recommendedReversibility.querySelector('.thermo-direction-operator');
         expect(recommendedOperator?.textContent).toBe('=');
         expect(recommendedOperator?.getAttribute('data-direction')).toBe('=');
