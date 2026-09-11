@@ -103,25 +103,42 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
     const tone = evidenceTone(item.grade);
     return (
         <Box
-            className={`thermo-evidence thermo-evidence--inline thermo-evidence--${grade.toLowerCase()}`}
+            className={`thermo-evidence thermo-evidence--${grade.toLowerCase()}`}
             data-grade={grade.toLowerCase()}
             aria-label={`Thermo evidence: grade ${grade}, assessment ${assessment}, cross-source ${crossSource}, source ${source}`}
             sx={{
-                display: 'flex',
                 flex: '1 1 36rem',
                 minWidth: 0,
-                px: 1.25,
-                py: 0.875,
+                p: 1.25,
+                border: '1px solid',
+                borderColor: `${tone}.main`,
+                borderLeftWidth: 5,
+                borderRadius: 1,
                 bgcolor: `${tone}.light`,
-                color: `${tone}.contrastText`,
+                color: 'text.primary',
             }}
         >
-            <Box component="dl" className="thermo-evidence__list" sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '0.4rem 1.25rem', m: 0 }}>
-                {fields.map(({ label, value }) => (
-                    <Box component="div" className="thermo-evidence__token" key={label} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, minWidth: 0 }}>
-                        <Typography component="dt" variant="caption" sx={{ color: 'inherit', opacity: 0.82, fontWeight: 700, lineHeight: 1.2 }}>{label}</Typography>
+            <Typography className="thermo-evidence__title" variant="subtitle2" sx={{ fontWeight: 700, mb: 0.875 }}>
+                Thermodynamics evidence
+            </Typography>
+            <Box component="dl" className="thermo-evidence__list" sx={{ display: 'flex', flexWrap: 'wrap', m: 0 }}>
+                {fields.map(({ label, value }, index) => (
+                    <Box
+                        component="div"
+                        className="thermo-evidence__item"
+                        key={label}
+                        sx={{
+                            flex: '1 1 8rem',
+                            minWidth: 0,
+                            px: index ? 1.25 : 0,
+                            borderLeft: index ? '1px solid' : 0,
+                            borderColor: 'divider',
+                            '@media (max-width: 480px)': { flexBasis: '50%', px: 0.75, borderLeft: '1px solid', '&:nth-of-type(odd)': { borderLeft: 0, pl: 0 } },
+                        }}
+                    >
+                        <Typography component="dt" variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, lineHeight: 1.2, mb: 0.25 }}>{label}</Typography>
                         <Tooltip title={EVIDENCE_TOOLTIPS[value] ?? `Thermodynamic evidence ${label.toLowerCase()}: ${value}.`} arrow>
-                            <Box component="dd" tabIndex={0} aria-label={`${label.toLowerCase()} ${value}`} sx={{ m: 0, outlineOffset: 2, fontSize: '0.875rem', fontWeight: 700, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{value}</Box>
+                            <Box component="dd" tabIndex={0} aria-label={`${label.toLowerCase()} ${value}`} sx={{ m: 0, outlineOffset: 2, fontSize: '0.9375rem', fontWeight: 700, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{value}</Box>
                         </Tooltip>
                     </Box>
                 ))}

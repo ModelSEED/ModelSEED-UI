@@ -107,9 +107,9 @@ describe('biochemistry detail thermodynamics tooltips', () => {
         const recommendedReversibility = screen.getByTestId('thermo-summary-band');
         expect(recommendedReversibility.getAttribute('role')).toBeNull();
         expect(recommendedReversibility.textContent).toContain('Recommended reversibility');
-        expect(recommendedReversibility.querySelector('.thermo-evidence--inline')).toBeTruthy();
-        expect(recommendedReversibility.querySelector('.thermo-evidence__header')).toBeNull();
-        expect(recommendedReversibility.querySelector('.thermo-evidence__items')).toBeNull();
+        expect(recommendedReversibility.querySelector('.thermo-evidence--bronze')).toBeTruthy();
+        expect(recommendedReversibility.querySelector('.thermo-evidence__title')?.textContent).toBe('Thermodynamics evidence');
+        expect(recommendedReversibility.querySelectorAll('.thermo-evidence__item')).toHaveLength(4);
         const recommendedOperator = recommendedReversibility.querySelector('.thermo-direction-operator');
         expect(recommendedOperator?.textContent).toBe('=');
         expect(recommendedOperator?.getAttribute('data-direction')).toBe('=');

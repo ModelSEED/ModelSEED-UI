@@ -100,20 +100,18 @@ describe('ThermodynamicsTable', () => {
         expect(container.textContent).not.toContain('Grade:');
     });
 
-    it('renders evidence as ordered inline labeled values with focusable tooltips', () => {
-        const { container } = render(<EvidenceSummary item={{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }} />);
-        const summary = container.querySelector('[data-grade="bronze"]');
+    it.each(['gold', 'silver', 'bronze'])('renders %s evidence in an ordered grade-colored frame with focusable tooltips', (grade) => {
+        const { container } = render(<EvidenceSummary item={{ grade, assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }} />);
+        const summary = container.querySelector(`[data-grade="${grade}"]`);
         expect(summary?.textContent).not.toContain('/');
+        expect(summary?.textContent).toContain('Thermodynamics evidence');
         expect([...container.querySelectorAll('dt')].map((label) => label.textContent)).toEqual(['Grade', 'Assessment', 'Cross-source', 'Source']);
-        expect(container.querySelectorAll('.thermo-evidence__token')).toHaveLength(4);
-        expect(container.querySelector('.thermo-evidence--inline')).toBeTruthy();
+        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(4);
+        expect(container.querySelector('.thermo-evidence__title')).toBeTruthy();
         expect(container.querySelector('.thermo-evidence__list')).toBeTruthy();
-        expect(container.querySelector('.thermo-evidence__header')).toBeNull();
-        expect(container.querySelector('.thermo-evidence__items')).toBeNull();
-        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(0);
         expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(4);
-        expect(summary?.className).toContain('thermo-evidence--bronze');
-        expect(container.querySelector('[aria-label="grade bronze"]')).toBeTruthy();
+        expect(summary?.className).toContain(`thermo-evidence--${grade}`);
+        expect(container.querySelector(`[aria-label="grade ${grade}"]`)).toBeTruthy();
         expect(container.querySelector('[aria-label="assessment unconfident"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="cross-source outvoted"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="source eQ"]')).toBeTruthy();
