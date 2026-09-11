@@ -100,7 +100,7 @@ describe('Solr stoichiometry support', () => {
         const result = await api.getReactionById('rxn00001');
         const url = dataUrl(fetchMock);
         expect(url).toContain(`fq=${encodeURIComponent('doc_type:reaction')}`);
-        expect(url).toContain(encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]'));
+        expect(url).toContain(encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:thermo_evidence OR doc_type:stoichiometry OR doc_type:thermo-evidence" limit=200]'));
         expect(result.participants).toEqual([{ compound: 'cpd00001', coefficient: -1, compartment: 0, name: 'H2O', is_reactant: true }]);
         expect(result.stoichiometry).toBe('-1:cpd00001:0:0:"H2O"');
         expect(result.thermodynamics).toEqual([{ source_name: 'GC', energy: 4.18, error: 2.24 }]);

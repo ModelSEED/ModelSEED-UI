@@ -45,19 +45,58 @@ export interface CompoundPka {
     pka_number: number[];
 }
 
-export function normalizeThermoEvidence(value: unknown): ThermoEvidence[] | undefined {
+/** Normalizes structured pKa records while ignoring malformed values. */
+export function normalizeCompoundPkas(value: unknown): CompoundPka[] | undefined {
     const entries = Array.isArray(value) ? value : value == null ? [] : [value];
-    const evidence = entries.flatMap((entry) => {
+    const pkas = entries.flatMap((entry) => {
         if (!entry || typeof entry !== 'object') return [];
         const record = entry as Record<string, unknown>;
+        if (typeof record.source_name !== 'string' || record.source_name.length === 0) return [];
+        const numbers = (Array.isArray(record.pka_number) ? record.pka_number : [record.pka_number])
+            .map((number) => Number(unwrapSolrScalar(number)))
+            .filter(Number.isFinite);
+        if (numbers.length === 0) return [];
+        return [{
+            source_name: record.source_name,
+            ...(typeof record.pka_kind === 'string' && record.pka_kind.length > 0 ? { pka_kind: record.pka_kind } : {}),
+            pka_number: numbers,
+        }];
+    });
+    return pkas.length > 0 ? pkas : undefined;
+}
+
+export function normalizeThermoEvidence(value: unknown): ThermoEvidence[] | undefined {
+    const evidence: ThermoEvidence[] = [];
+    const append = (entry: unknown) => {
+        if (!entry || typeof entry !== 'object') return;
+        const record = entry as Record<string, unknown>;
         const normalized: ThermoEvidence = {};
-        for (const field of ['grade', 'assessment', 'source'] as const) {
+        for (const field of ['grade', 'assessment'] as const) {
             if (typeof record[field] === 'string') normalized[field] = record[field];
         }
+        const source = record.source ?? record.source_name;
+        if (typeof source === 'string') normalized.source = source;
         const crossSource = record.cross_source ?? record['cross-source'];
         if (typeof crossSource === 'string') normalized.cross_source = crossSource;
-        return Object.keys(normalized).length > 0 ? [normalized] : [];
-    });
+        if (normalized.grade || normalized.assessment || normalized.cross_source) evidence.push(normalized);
+    };
+    const appendField = (entry: unknown) => {
+        const items = Array.isArray(entry) ? entry : entry == null ? [] : [entry];
+        items.forEach(append);
+    };
+
+    appendField(value);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return evidence.length > 0 ? evidence : undefined;
+    const record = value as Record<string, unknown>;
+    appendField(record.thermo_evidence);
+    appendField(record['thermo-evidence']);
+    for (const child of thermodynamicsChildren(value)) {
+        append(child);
+        if (!child || typeof child !== 'object') continue;
+        const childRecord = child as Record<string, unknown>;
+        appendField(childRecord.thermo_evidence);
+        appendField(childRecord['thermo-evidence']);
+    }
     return evidence.length > 0 ? evidence : undefined;
 }
 
@@ -1283,7 +1322,7 @@ export async function getReactionById(id: string): Promise<Reaction> {
     let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=id:${id}`;
     const nested = await hasNestedSchema('reactions');
     if (nested) {
-        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]')}`;
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:thermo_evidence OR doc_type:stoichiometry OR doc_type:thermo-evidence" limit=200]')}`;
     }
     const res = await fetchSolr<Reaction>(url);
     const raw = res.docs[0];
@@ -1292,6 +1331,7 @@ export async function getReactionById(id: string): Promise<Reaction> {
     return {
         ...raw,
         thermodynamics: normalizeThermodynamics(raw),
+        thermo_evidence: normalizeThermoEvidence(raw),
         llm_council_proposals: normalizeLlmCouncilProposals(raw),
         participants,
         stoichiometry: typeof raw.stoichiometry === 'string'
@@ -1318,11 +1358,15 @@ export async function getCompoundById(id: string): Promise<Compound> {
     let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=id:${id}`;
     const nested = await hasNestedSchema('compounds');
     if (nested) {
-        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}&fl=${encodeURIComponent('*,[child childFilter=doc_type:thermodynamics]')}`;
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}&fl=${encodeURIComponent('*,[child childFilter=\"doc_type:thermodynamics OR doc_type:pkas OR doc_type:pka\" limit=200]')}`;
     }
     const res = await fetchSolr<Compound>(url);
     const raw = res.docs[0];
-    return raw ? { ...raw, thermodynamics: normalizeThermodynamics(raw) } : raw;
+    return raw ? {
+        ...raw,
+        thermodynamics: normalizeThermodynamics(raw),
+        pkas: normalizeCompoundPkas(raw.pkas ?? (raw as Compound & { _childDocuments_?: unknown[] })._childDocuments_),
+    } : raw;
 }
 
 /**

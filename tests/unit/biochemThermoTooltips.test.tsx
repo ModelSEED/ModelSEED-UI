@@ -16,17 +16,17 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 const tooltipCases = [
-    ['A', 'Grade is an evidence confidence tier.'],
-    ['curated', 'Assessment is a thermodynamic assessment.'],
-    ['ModelSEED', 'Source identifies the database or source.'],
-    ['consistent', 'Cross-source indicates agreement across sources.'],
+    ['bronze', 'Weakest evidence: below 70% likely, or contradicted by the other sources.'],
+    ['unconfident', 'Below 70% likely. Most reactions sit here.'],
+    ['outvoted', 'The other sources disagree by more than their error bars allow, and this one is the outlier. Costs a tier.'],
+    ['eQ', "eQuilibrator's component-contribution estimate."],
 ] as const;
 
 const thermoEvidence = {
-    grade: 'A',
-    assessment: 'curated',
-    source: 'ModelSEED',
-    cross_source: 'consistent',
+    grade: 'bronze',
+    assessment: 'unconfident',
+    source: 'eQ',
+    cross_source: 'outvoted',
 };
 
 async function expectThermodynamicsTooltips() {
@@ -53,7 +53,12 @@ describe('biochemistry detail thermodynamics tooltips', () => {
                         mass: 18,
                         charge: 0,
                         is_obsolete: '0',
-                        thermo_evidence: [thermoEvidence],
+                        deltag: -3.2,
+                        deltagerr: 0.2,
+                        thermodynamics: [
+                            { source_name: 'eQuilibrator', energy: -1, error: 0.1 },
+                            { source_name: 'Group contribution', energy: -1.1, error: 0.2 },
+                        ],
                     },
                     isLoading: false,
                     error: null,
@@ -69,10 +74,12 @@ describe('biochemistry detail thermodynamics tooltips', () => {
 
         render(<CompoundDetailPage />);
 
-        await expectThermodynamicsTooltips();
+        expect(screen.getByText('eQuilibrator')).toBeTruthy();
+        expect(screen.getByText('Group contribution')).toBeTruthy();
+        expect(screen.queryByText('ΔG: -3.2 ± 0.2 kcal/mol')).toBeNull();
     });
 
-    it('shows the LLM council direction separately from thermodynamics evidence on the reaction detail page', async () => {
+    it('keeps per-source reaction thermodynamics while omitting aggregate dG and dGErr', async () => {
         mockUseQuery.mockReturnValue({
             data: {
                 id: 'rxn00001',
@@ -81,6 +88,12 @@ describe('biochemistry detail thermodynamics tooltips', () => {
                 equation: 'H2O <=> H2O',
                 reversibility: '=',
                 is_obsolete: '0',
+                deltag: -7.5,
+                deltagerr: 0.4,
+                thermodynamics: [
+                    { source_name: 'eQuilibrator', energy: -7.5, error: 0.4, operator: '>' },
+                    { source_name: 'Alberty', energy: -7.2, error: 0.5, operator: '=' },
+                ],
                 thermo_evidence: [thermoEvidence],
                 llm_council_proposals: [{ source_name: 'LLMs', proposed_direction: '>' }],
             },
@@ -90,10 +103,22 @@ describe('biochemistry detail thermodynamics tooltips', () => {
 
         render(<ReactionDetailPage />);
 
-        expect(screen.getByText('LLM council proposal')).toBeTruthy();
-        expect(screen.getByText('LLMs')).toBeTruthy();
-        expect(screen.getByText('Proposed direction: >')).toBeTruthy();
-        expect(screen.queryByText('ΔG (kcal/mol)')).toBeNull();
+        expect(screen.getByText('Thermodynamics')).toBeTruthy();
+        const recommendedReversibility = screen.getByRole('region', { name: 'Recommended reversibility' });
+        expect(recommendedReversibility.textContent).toContain('Recommended reversibility');
+        const recommendedOperator = recommendedReversibility.querySelector('.thermo-direction-operator');
+        expect(recommendedOperator?.textContent).toBe('=');
+        expect(recommendedOperator?.getAttribute('data-direction')).toBe('=');
+        expect(recommendedOperator?.getAttribute('aria-label')).toBe('=');
+        expect(screen.queryByTestId('direction-agreement')).toBeNull();
+        expect(screen.queryByText(['Sources could', 'agree on direction'].join(' '))).toBeNull();
+        expect(screen.getByText('eQuilibrator')).toBeTruthy();
+        expect(screen.getByText('Alberty')).toBeTruthy();
+        expect(screen.getByText('LLM Council')).toBeTruthy();
+        expect(screen.getAllByText('>')).toHaveLength(2);
+        expect(screen.getByText('ΔG (kcal/mol)')).toBeTruthy();
+        expect(screen.queryByText('LLM Council Proposal: >')).toBeNull();
+        expect(screen.queryByText('ΔG: -7.5 ± 0.4 kcal/mol')).toBeNull();
         await expectThermodynamicsTooltips();
     });
 });

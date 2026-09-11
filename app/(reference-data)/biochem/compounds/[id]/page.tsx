@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
 import Chip from '@mui/material/Chip';
-import Tooltip from '@mui/material/Tooltip';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Link from 'next/link';
 import {
@@ -21,6 +20,7 @@ import {
 } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { formatEquation } from '@/components/utils/formatEquation';
+import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -373,6 +373,7 @@ export default function CompoundDetailPage() {
         ?.map((value) => String(value).replace(/\"/g, ''))
         .join('; ');
 
+    const thermoRecords = cpd.thermodynamics ?? [];
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
@@ -422,25 +423,29 @@ export default function CompoundDetailPage() {
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    {cpd.thermo_evidence?.map((evidence, index) => (
-                        <DetailRow key={`${evidence.source ?? evidence.cross_source ?? index}-${index}`} label="Thermo evidence">
-                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                                {evidence.grade && <Tooltip title="Grade is an evidence confidence tier." arrow><Chip size="small" label={evidence.grade} /></Tooltip>}
-                                {evidence.assessment && <Tooltip title="Assessment is a thermodynamic assessment." arrow><Typography component="span" variant="body2">{evidence.assessment}</Typography></Tooltip>}
-                                {evidence.source && <Tooltip title="Source identifies the database or source." arrow><Typography component="span" variant="body2">{evidence.source}</Typography></Tooltip>}
-                                {evidence.cross_source && <Tooltip title="Cross-source indicates agreement across sources." arrow><Typography component="span" variant="body2">{evidence.cross_source}</Typography></Tooltip>}
+                    {(thermoRecords.length > 0 || (cpd.thermo_evidence?.length ?? 0) > 0) && (
+                        <DetailRow label="Thermodynamics">
+                            <ThermodynamicsTable records={thermoRecords} evidence={cpd.thermo_evidence} />
+                        </DetailRow>
+                    )}
+                    {hasPkas ? (
+                        <DetailRow label="pKa">
+                            <Box
+                                component="table"
+                                aria-label="pKa values"
+                                sx={{ borderCollapse: 'collapse', '& th, & td': { px: 1, py: 0.5, borderBottom: '1px solid', borderColor: 'divider', textAlign: 'left' } }}
+                            >
+                                <thead><tr><th>Source</th><th>Kind</th><th>pKa values</th></tr></thead>
+                                <tbody>{cpd.pkas?.map((pka, index) => (
+                                    <tr key={`${pka.source_name}-${index}`}>
+                                        <td>{pka.source_name}</td>
+                                        <td>{pka.pka_kind ?? '—'}</td>
+                                        <td>{pka.pka_number.map((value) => String(value)).join(', ')}</td>
+                                    </tr>
+                                ))}</tbody>
                             </Box>
                         </DetailRow>
-                    ))}
-                    {hasPkas ? cpd.pkas?.map((pka, index) => (
-                        <DetailRow key={`${pka.source_name}-${index}`} label="pKa">
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-                                <Typography variant="body2">{pka.source_name}</Typography>
-                                {pka.pka_kind && <Chip size="small" label={pka.pka_kind} />}
-                                {pka.pka_number.map((value, valueIndex) => <Chip key={`${value}-${valueIndex}`} size="small" label={value} />)}
-                            </Box>
-                        </DetailRow>
-                    )) : <>
+                    ) : <>
                         {pkaDisplay && <DetailRow label="pKa"><PKaDisplay value={pkaDisplay} /></DetailRow>}
                         {pkbDisplay && <DetailRow label="pKb"><PKaDisplay value={pkbDisplay} /></DetailRow>}
                     </>}

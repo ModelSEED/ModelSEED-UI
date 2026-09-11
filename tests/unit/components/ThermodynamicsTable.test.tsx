@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Chip from '@mui/material/Chip';
-import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
+import ThermodynamicsTable, { EvidenceSummary } from '@/components/ui/ThermodynamicsTable';
 import type { ThermodynamicsRecord } from '@/lib/api/biochem';
 import {
     directionAgreementFromRecords,
@@ -72,6 +72,71 @@ describe('ThermodynamicsTable', () => {
         expect(rows[0].textContent).toContain('-1');
         expect(rows[1].textContent).toContain('-2');
     });
+
+    it('keeps record order and puts each proposal evidence in its LLM Council row', () => {
+        const records: ThermodynamicsRecord[] = [
+            { source_name: 'eQuilibrator', energy: -1, error: 0.1, operator: '=' },
+            { source_name: 'Alberty', energy: -2, error: 0.2, operator: '>' },
+        ];
+        const { container } = render(
+            <ThermodynamicsTable
+                records={records}
+                showOperator
+                llmCouncilProposals={[{ source_name: 'LLMs', proposed_direction: '<' }]}
+                evidence={[{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }]}
+            />,
+        );
+
+        const rows = container.querySelectorAll('tbody tr');
+        expect(rows).toHaveLength(3);
+        expect(rows[0].textContent).toContain('eQuilibrator');
+        expect(rows[1].textContent).toContain('Alberty');
+        expect(rows[2].textContent).toBe('LLM Council--<');
+        expect(rows[2].querySelectorAll('td')).toHaveLength(4);
+        expect(rows[2].querySelectorAll('td')[1]?.textContent).toBe('-');
+        expect(rows[2].querySelectorAll('td')[2]?.textContent).toBe('-');
+        expect(rows[2].querySelector('.thermo-direction-operator')?.textContent).toBe('<');
+        expect(container.querySelector('[data-grade="bronze"]')).toBeNull();
+        expect(container.textContent).not.toContain('Grade:');
+    });
+
+    it('renders exact evidence tooltips, including absent and unknown fallback', () => {
+        const { container } = render(<EvidenceSummary item={{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }} />);
+        expect(container.textContent).toBe('bronze/unconfident/outvoted/eQ');
+        expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(4);
+        expect(container.querySelector('[data-grade="bronze"]')?.getAttribute('style')).toContain('background-color: #78350f');
+        expect(container.querySelector('[data-grade="bronze"]')?.className).toContain('thermo-evidence--bronze');
+        expect(container.querySelector('[aria-label="grade bronze"]')).toBeTruthy();
+        expect(container.querySelector('[aria-label="assessment unconfident"]')).toBeTruthy();
+        expect(container.querySelector('[aria-label="cross-source outvoted"]')).toBeTruthy();
+        expect(container.querySelector('[aria-label="source eQ"]')).toBeTruthy();
+    });
+
+    it('renders record, heuristic, recommended, and LLM operators as literal labeled badges without arrow decoration', () => {
+        const { container } = render(
+            <ThermodynamicsTable
+                records={[
+                    { source_name: 'Heuristic', energy: -1, error: 0.1, operator: '>' },
+                    { source_name: 'Recommended reversibility', energy: -2, error: 0.2, operator: '<' },
+                    { source_name: 'Other source', energy: -3, error: 0.3, operator: '=' },
+                ]}
+                showOperator
+                llmCouncilProposals={[
+                    { source_name: 'LLMs', proposed_direction: '>' },
+                    { source_name: 'LLMs', proposed_direction: '<' },
+                ]}
+            />,
+        );
+
+        const operators = container.querySelectorAll('.thermo-direction-operator');
+        expect(operators).toHaveLength(5);
+        expect([...operators].map((operator) => operator.getAttribute('data-direction'))).toEqual(['>', '<', '=', '>', '<']);
+        expect([...operators].map((operator) => operator.getAttribute('aria-label'))).toEqual(['>', '<', '=', '>', '<']);
+        expect([...operators].map((operator) => operator.textContent)).toEqual(['>', '<', '=', '>', '<']);
+        expect([...operators].every((operator) => operator.classList.contains('thermo-direction-operator'))).toBe(true);
+        expect([...operators].every((operator) => operator.querySelector('svg, [data-arrow]') === null)).toBe(true);
+        expect(container.querySelectorAll('tbody tr').length).toBe(5);
+    });
 });
 
 describe('direction agreement labels', () => {
@@ -116,7 +181,7 @@ describe('direction agreement labels', () => {
             </>,
         );
 
-        expect(screen.getByText('Sources could agree on direction')).toBeTruthy();
+        expect(screen.getByText('Sources share a compatible direction')).toBeTruthy();
         records.forEach(({ source_name }) => expect(screen.getByText(source_name)).toBeTruthy());
     });
 

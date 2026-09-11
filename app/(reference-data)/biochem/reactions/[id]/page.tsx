@@ -9,11 +9,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
-import Tooltip from '@mui/material/Tooltip';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
+import ThermodynamicsTable, { DirectionOperator, EvidenceSummary } from '@/components/ui/ThermodynamicsTable';
 
 function extractCompoundIds(equation: string): string[] {
     if (!equation) return [];
@@ -255,6 +255,46 @@ function BooleanChip({ value }: { value: boolean }) {
     );
 }
 
+function ThermodynamicsDetails({ reaction }: { reaction: Awaited<ReturnType<typeof getReactionById>> }) {
+    const records = reaction.thermodynamics ?? [];
+    const evidence = reaction.thermo_evidence ?? [];
+    const proposals = reaction.llm_council_proposals ?? [];
+    return (
+        <DetailRow label="Thermodynamics">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                <Box
+                    component="section"
+                    aria-label="Recommended reversibility"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        alignSelf: 'flex-start',
+                        px: 1,
+                        py: 0.75,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        bgcolor: 'action.hover',
+                    }}
+                >
+                    <Typography variant="body2" color="text.secondary">Recommended reversibility</Typography>
+                    <DirectionOperator direction={reaction.reversibility || 'N/A'} />
+                    {evidence[0] && <EvidenceSummary item={evidence[0]} />}
+                </Box>
+                {(records.length > 0 || evidence.length > 0 || proposals.length > 0) && (
+                    <ThermodynamicsTable
+                        records={records}
+                        evidence={evidence}
+                        llmCouncilProposals={proposals}
+                        showOperator
+                    />
+                )}
+            </Box>
+        </DetailRow>
+    );
+}
+
 export default function ReactionDetailPage() {
     const { id } = useParams<{ id: string }>();
 
@@ -343,29 +383,7 @@ export default function ReactionDetailPage() {
                         )}
                     </DetailRow>
 
-                    <DetailRow label="Recommended reversibility">
-                        <Typography variant="body2">{rxn.reversibility}</Typography>
-                    </DetailRow>
-
-                    {rxn.llm_council_proposals?.map((proposal, index) => (
-                        <DetailRow key={`${proposal.source_name}-${index}`} label="LLM council proposal">
-                            <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', flexWrap: 'wrap' }}>
-                                <Chip size="small" label={proposal.source_name} />
-                                <Typography variant="body2">Proposed direction: {proposal.proposed_direction}</Typography>
-                            </Box>
-                        </DetailRow>
-                    ))}
-
-                    {rxn.thermo_evidence?.map((evidence, index) => (
-                        <DetailRow key={`${evidence.source ?? evidence.cross_source ?? index}-${index}`} label="Thermo evidence">
-                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                                {evidence.grade && <Tooltip title="Grade is an evidence confidence tier." arrow><Chip size="small" label={evidence.grade} /></Tooltip>}
-                                {evidence.assessment && <Tooltip title="Assessment is a thermodynamic assessment." arrow><Typography component="span" variant="body2">{evidence.assessment}</Typography></Tooltip>}
-                                {evidence.source && <Tooltip title="Source identifies the database or source." arrow><Typography component="span" variant="body2">{evidence.source}</Typography></Tooltip>}
-                                {evidence.cross_source && <Tooltip title="Cross-source indicates agreement across sources." arrow><Typography component="span" variant="body2">{evidence.cross_source}</Typography></Tooltip>}
-                            </Box>
-                        </DetailRow>
-                    ))}
+                    <ThermodynamicsDetails reaction={rxn} />
 
                     <DetailRow label="Status">
                         <Chip
