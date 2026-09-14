@@ -29,7 +29,7 @@ import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 const reversibilityGradeStyles = {
     gold: { backgroundColor: '#fff8e1', borderColor: '#b88900' },
     silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794' },
-    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.08)', borderColor: '#b87333' },
+    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.19)', borderColor: '#9a5c22' },
 } as const;
 
 export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
