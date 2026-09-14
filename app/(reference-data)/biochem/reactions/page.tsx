@@ -40,7 +40,6 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
     const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575' };
     const reversibility = reaction.reversibility || 'N/A';
     const evidenceGrade = grade || 'no grade';
-    const gradeText = grade ? `${grade[0].toUpperCase()}${grade.slice(1)}` : 'No grade';
     const label = `Reversibility ${reversibility}; evidence grade ${evidenceGrade}`;
 
     return (
@@ -50,15 +49,10 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
             data-grade={grade}
             title={label}
             aria-label={label}
-            sx={{ alignItems: 'center', display: 'inline-flex', gap: 0.5, whiteSpace: 'nowrap' }}
+            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
+            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', px: 0.75, whiteSpace: 'nowrap' }}
         >
-            <Box
-                component="span"
-                aria-hidden="true"
-                style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
-                sx={{ border: '1px solid', borderRadius: 1, display: 'inline-block', height: 12, width: 12 }}
-            />
-            {gradeText}
+            {reversibility}
         </Box>
     );
 }
