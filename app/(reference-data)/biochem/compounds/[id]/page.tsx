@@ -13,7 +13,6 @@ import Link from 'next/link';
 import {
     getCompoundById,
     findReactionsForCompound,
-    getCompoundImageUrl,
     EXTERNAL_DBS,
     type Reaction,
     type SolrQueryOpts,
@@ -21,6 +20,8 @@ import {
 import { formatFormula } from '@/components/utils/formatFormula';
 import { formatEquation } from '@/components/utils/formatEquation';
 import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
+import MoleculeRenderer from '@/components/ui/MoleculeRenderer';
+import { getStructuresByIds } from '@/lib/api/structures';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -307,7 +308,6 @@ const rxnColumns: GridColDef<Reaction>[] = [
 
 export default function CompoundDetailPage() {
     const { id } = useParams<{ id: string }>();
-    const [imageUnavailable, setImageUnavailable] = useState(false);
 
     // ── Compound data
     const { data: cpd, isLoading: loadingCpd, error } = useQuery({
@@ -315,6 +315,15 @@ export default function CompoundDetailPage() {
         queryFn: () => getCompoundById(id),
         enabled: !!id,
     });
+
+    // ── Structure (optional; compound data remains the safe fallback)
+    const { data: structureMap } = useQuery({
+        queryKey: ['compound-structure', id],
+        queryFn: () => getStructuresByIds([id]),
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000,
+    });
+    const structure = structureMap instanceof Map ? structureMap.get(id) : undefined;
 
     // ── Related reactions
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
@@ -388,37 +397,18 @@ export default function CompoundDetailPage() {
 
             {/* ── Two-column layout: image + properties ── */}
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
-                {/* Image */}
+                {/* Structure */}
                 <Box sx={{ width: 220, flexShrink: 0 }}>
-                    {(!cpd.smiles || imageUnavailable) ? (
-                        <Box
-                            aria-label={`Compound image unavailable for ${cpd.id}`}
-                            sx={{
-                                width: '100%',
-                                minHeight: 220,
-                                border: '1px dashed #cbd5e1',
-                                borderRadius: 1,
-                                bgcolor: '#f8fafc',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                px: 2,
-                            }}
-                        >
-                            <Typography variant="body2" color="text.secondary">
-                                Compound image unavailable
-                            </Typography>
-                        </Box>
-                    ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={getCompoundImageUrl(cpd.id)}
-                            alt={`Structure of ${cpd.id}`}
-                            style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-                            onError={() => setImageUnavailable(true)}
-                        />
-                    )}
+                    <MoleculeRenderer
+                        compoundId={cpd.id}
+                        smiles={structure?.smiles ?? cpd.smiles}
+                        fallbackSvg={structure?.svg}
+                        colorAtomsByElementOrdinal
+                        showAllAtomLabels
+                        width={220}
+                        height={220}
+                        alt={`Structure of ${cpd.id}`}
+                    />
                 </Box>
 
                 {/* Properties */}

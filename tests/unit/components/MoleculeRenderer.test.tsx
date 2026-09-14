@@ -27,6 +27,22 @@ describe('MoleculeRenderer', () => {
         expect(mol.get_svg_with_highlights).not.toHaveBeenCalled();
     });
 
+    it('colours every atom by element ordinal while keeping all labels visible', async () => {
+        getMol.mockImplementationOnce(() => ({
+            get_json: () => JSON.stringify({ molecules: [{ atoms: [{}, { z: 8 }, {}], bonds: [] }] }),
+            get_svg: vi.fn(),
+            get_svg_with_highlights: vi.fn(() => "<svg><path class='atom-0' fill='#000000'/><path class='atom-1' fill='#000000'/><path class='atom-2' fill='#000000'/></svg>"),
+            delete: vi.fn(),
+        }));
+        const { container } = render(<MoleculeRenderer compoundId="cpd00001" smiles="CCO" showAllAtomLabels colorAtomsByElementOrdinal />);
+        await waitFor(() => expect(container.querySelector('[class="atom-0"]')?.getAttribute('fill')).not.toBe('#000000'));
+        expect(container.querySelector('[class="atom-1"]')?.getAttribute('fill')).not.toBe('#000000');
+        expect(container.querySelector('[class="atom-2"]')?.getAttribute('fill')).not.toBe('#000000');
+        expect(container.querySelector('[class="atom-0"]')?.getAttribute('fill')).not.toBe(container.querySelector('[class="atom-2"]')?.getAttribute('fill'));
+        const mol = getMol.mock.results.at(-1)?.value;
+        expect(JSON.parse(mol.get_svg_with_highlights.mock.calls[0][0])).toMatchObject({ atomLabels: { 0: 'C', 2: 'C' } });
+    });
+
     it('uses explicit carbon labels and preserves atom label colours when requested', async () => {
         getMol.mockImplementationOnce(() => ({
             get_json: () => JSON.stringify({ molecules: [{ atoms: [{}, { z: 8 }, {}], bonds: [] }] }),

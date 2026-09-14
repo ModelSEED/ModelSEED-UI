@@ -106,6 +106,21 @@ export function mappingColorForElementOrdinal(element: string, ordinal: number):
     return MAPPING_PALETTE[(elementOffset + ordinal - 1) % MAPPING_PALETTE.length];
 }
 
+/** Assign every rendered atom a stable palette slot within its element namespace. */
+export function buildUnmappedAtomColors(elements: readonly string[]): Record<number, string> {
+    if (!Array.isArray(elements)) return {};
+    const ordinals: Record<string, number> = {};
+    const colors: Record<number, string> = {};
+    for (const [index, element] of elements.entries()) {
+        if (typeof element !== 'string' || !element) continue;
+        const ordinal = (ordinals[element] ?? 0) + 1;
+        ordinals[element] = ordinal;
+        const color = mappingColorForElementOrdinal(element, ordinal);
+        if (color) colors[index] = color;
+    }
+    return colors;
+}
+
 export function selectMappingColors(groupCount: number): readonly string[] {
     if (!Number.isFinite(groupCount) || !Number.isInteger(groupCount) || groupCount <= 0) return [];
     if (groupCount > MAPPING_PALETTE.length) return MAPPING_PALETTE;

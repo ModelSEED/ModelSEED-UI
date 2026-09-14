@@ -23,34 +23,39 @@ describe('buildAtomOrbitColorPlan', () => {
         expect(many.groups.map((group) => group.color)).toEqual(Array.from({ length: MAPPING_PALETTE.length + 1 }, (_, i) => mappingColorForElementOrdinal('O', i + 1)));
     });
 
-    it('gives matching C#1/C#2 endpoints stable, distinct slots across reactions', () => {
+    it('gives rxn00168 carbon endpoints stable, distinct slots and keeps its oxygen pair separate', () => {
         const reactionOne = buildAtomOrbitColorPlan(parseAtomMappings([
-            'cpd00020:C#2=cpd00071:C#2', 'cpd00020:C#1=cpd00011:C#1',
+            'cpd00020:C#2=cpd00071:C#1', 'cpd00020:C#1=cpd00011:C#1',
+            'cpd00020:C#3=cpd00071:C#2', 'cpd00020:O#1=cpd00071:O#1',
         ]), []);
         const reactionTwo = buildAtomOrbitColorPlan(parseAtomMappings([
             'cpd12345:C#1=cpd54321:C#1', 'cpd12345:C#2=cpd99999:C#2',
+            'cpd12345:C#3=cpd88888:C#3',
         ]), []);
         expect(reactionOne.groups.map((group) => group.color)).toEqual([
             mappingColorForElementOrdinal('C', 2), mappingColorForElementOrdinal('C', 1),
+            mappingColorForElementOrdinal('C', 3), mappingColorForElementOrdinal('O', 1),
         ]);
         expect(reactionTwo.groups.map((group) => group.color)).toEqual([
-            mappingColorForElementOrdinal('C', 1), mappingColorForElementOrdinal('C', 2),
+            mappingColorForElementOrdinal('C', 1), mappingColorForElementOrdinal('C', 2), mappingColorForElementOrdinal('C', 3),
         ]);
-        expect(reactionOne.groups[0].color).not.toBe(reactionOne.groups[1].color);
+        expect(new Set(reactionOne.groups.slice(0, 3).map((group) => group.color)).size).toBe(3);
         expect(reactionOne.groups[1].color).toBe(reactionTwo.groups[0].color);
         expect(reactionOne.groups[0].color).toBe(reactionTwo.groups[1].color);
+        expect(reactionOne.groups[2].color).toBe(reactionTwo.groups[2].color);
+        expect(reactionOne.groups[3].color).not.toBe(reactionOne.groups[0].color);
     });
 
     it('colours exact water and refuses unmapped and missing structures', () => {
         const pairs = parseAtomMappings(['cpd00001:O#1=cpd00002:O#1']);
         const plan = buildAtomOrbitColorPlan(pairs, [
             { compoundId: 'cpd00001', inchi: 'InChI=1S/H2O/h1H2', graph: { elements: ['O'], bonds: [] } },
+            { compoundId: 'cpd00002', inchi: 'InChI=1S/H2O/h1H2', graph: { elements: ['O'], bonds: [] } },
             { compoundId: 'cpd00067', inchi: 'InChI=1S/p+1', graph: { elements: ['H'], bonds: [] } },
-            { compoundId: 'cpd00002' },
         ]);
         expect(plan.compounds.cpd00001).toMatchObject({ precision: 'exact-atom', coloredAtomCount: 1, atomColors: { 0: plan.groups[0].color }, bondColors: {} });
+        expect(plan.compounds.cpd00002).toMatchObject({ precision: 'exact-atom', atomColors: { 0: plan.groups[0].color } });
         expect(plan.compounds.cpd00067).toMatchObject({ precision: 'unresolved', reason: 'no-mapping' });
-        expect(plan.compounds.cpd00002).toMatchObject({ precision: 'unresolved', reason: 'no-structure' });
     });
 
     it('uses InChI orbits, not local mapping positions, for cpd00009', () => {

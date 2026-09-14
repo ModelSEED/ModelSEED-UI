@@ -331,6 +331,16 @@ describe('normalizeAtomMapping', () => {
         ]);
     });
 
+    it('does not fabricate omitted rxn00010-like correspondences from a partial authoritative map', () => {
+        const normalized = normalizeAtomMapping({
+            atom_mapping_data: ['cpd00010:C#1=cpd00011:C#1'],
+            atom_mapping: ['cpd00010:C#2=cpd00011:C#2'],
+        });
+
+        expect(normalized.entries).toEqual(['cpd00010:C#1=cpd00011:C#1']);
+        expect(parseAtomMappings(normalized.entries).map(({ left, right }) => [left.index, right.index])).toEqual([[1, 1]]);
+    });
+
     it('falls back to legacy mappings and accepts single-valued Solr fields', () => {
         expect(normalizeAtomMapping({
             atom_mapping_data: [null, '  '],
