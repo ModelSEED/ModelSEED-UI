@@ -1,5 +1,5 @@
 import type { AtomMappingPair, AtomRef } from './atomMapping';
-import { selectMappingColors } from './atomMappingColors';
+import { mappingColorForElementOrdinal } from './atomMappingColors';
 import {
     buildInchiAtomOrbits,
     canonicalIndexForElementRef,
@@ -118,12 +118,14 @@ function mappingGroups(pairs: unknown): InternalGroup[] {
     }
     const sorted = Array.from(members.values())
         .sort((left, right) => Math.min(...left.map((key) => firstSeen.get(key)!)) - Math.min(...right.map((key) => firstSeen.get(key)!)));
-    const selection = selectMappingColors(sorted.length);
     return sorted.map((keys, index) => {
             const groupRefs = keys.sort((left, right) => firstSeen.get(left)! - firstSeen.get(right)!).map((key) => refs.get(key)!);
+            // Atom-mapping pairs are directional: anchor a correspondence to its
+            // first authoritative reference so C#1/C#2 slots remain stable across reactions.
+            const colorRef = groupRefs[0];
             return {
                 groupId: `g${index + 1}`,
-                color: selection[index % selection.length] ?? '',
+                color: mappingColorForElementOrdinal(colorRef.element, colorRef.index) ?? '',
                 elements: Array.from(new Set(groupRefs.map((ref) => ref.element))).sort(),
                 compoundIds: Array.from(new Set(groupRefs.map((ref) => ref.compoundId))).sort(),
                 refCount: groupRefs.length,

@@ -313,6 +313,34 @@ describe('normalizeAtomMapping', () => {
         });
     });
 
+    it('preserves rxn00168 authoritative carbon correspondences as three distinct pairs', () => {
+        const normalized = normalizeAtomMapping({
+            atom_mapping_data: [
+                'cpd00020:C#1=cpd00011:C#1',
+                'cpd00020:C#2=cpd00071:C#1',
+                'cpd00020:C#3=cpd00071:C#2',
+            ],
+            atom_mapping: ['cpd00020:C#1=cpd00071:C#1'],
+        });
+
+        expect(normalized.source).toBe('atom_mapping_data');
+        expect(parseAtomMappings(normalized.entries).map(({ raw }) => raw)).toEqual([
+            'cpd00020:C#1=cpd00011:C#1',
+            'cpd00020:C#2=cpd00071:C#1',
+            'cpd00020:C#3=cpd00071:C#2',
+        ]);
+    });
+
+    it('does not fabricate omitted rxn00010-like correspondences from a partial authoritative map', () => {
+        const normalized = normalizeAtomMapping({
+            atom_mapping_data: ['cpd00010:C#1=cpd00011:C#1'],
+            atom_mapping: ['cpd00010:C#2=cpd00011:C#2'],
+        });
+
+        expect(normalized.entries).toEqual(['cpd00010:C#1=cpd00011:C#1']);
+        expect(parseAtomMappings(normalized.entries).map(({ left, right }) => [left.index, right.index])).toEqual([[1, 1]]);
+    });
+
     it('falls back to legacy mappings and accepts single-valued Solr fields', () => {
         expect(normalizeAtomMapping({
             atom_mapping_data: [null, '  '],

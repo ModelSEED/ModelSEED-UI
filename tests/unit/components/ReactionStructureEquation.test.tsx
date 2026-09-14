@@ -33,7 +33,8 @@ vi.mock('@/components/ui/MoleculeRenderer', () => ({
             (props.onInventory as ((inventory: Record<string, number>) => void) | undefined)?.(inventories[props.compoundId as string] ?? { C: 4 });
         }
         if (!props.smiles) return <div data-testid={`structure-${props.compoundId as string}`} style={{ width: props.width as number, height: props.height as number }}>Compound image unavailable</div>;
-        return <div data-testid={`structure-${props.compoundId as string}`} />;
+        const atomColors = props.atomColors as Record<number, string> | undefined;
+        return <svg data-testid={`structure-${props.compoundId as string}`}><path data-atom-index="0" fill={atomColors?.[0] ?? '#000000'} /></svg>;
     },
 }));
 
@@ -97,6 +98,39 @@ describe('ReactionStructureEquation', () => {
             expect(applied.length).toBeGreaterThan(0);
             for (const color of applied) expect(MAPPING_PALETTE).toContain(color);
         });
+    });
+
+    it('renders mapped atom colours into the deterministic SVG fixture', async () => {
+        const { container } = renderEquation({ atomMappingPairs: pairs });
+        await waitFor(() => expect(container.querySelector('[data-testid="structure-cpd00009"]')).toBeTruthy());
+        const initial = rendererCalls.filter((call) => call.compoundId === 'cpd00009').at(-1)!;
+        (initial.onGraph as (graph: unknown) => void)({ elements: ['O', 'P', 'O', 'O', 'O'], bonds: [[0, 1], [1, 2], [1, 3], [1, 4]] });
+        await waitFor(() => expect(
+            container.querySelector('[data-testid="structure-cpd00009"] [data-atom-index="0"]')?.getAttribute('fill'),
+        ).not.toBe('#000000'));
+    });
+
+    it('assigns one correspondence color per supplied rxn00168 pair without inferring omitted pairs', async () => {
+        const { buildAtomOrbitColorPlan } = await import('@/lib/utils/atomOrbitColors');
+        const plan = buildAtomOrbitColorPlan(parseAtomMappings([
+            'cpd00020:C#1=cpd00011:C#1',
+            'cpd00020:C#2=cpd00071:C#1',
+            'cpd00020:C#3=cpd00071:C#2',
+        ]), []);
+
+        expect(plan.groups).toHaveLength(3);
+        expect(new Set(plan.groups.map((group) => group.color)).size).toBe(3);
+        expect(plan.groups.map((group) => group.color)).toEqual([
+            MAPPING_PALETTE[3], MAPPING_PALETTE[4], MAPPING_PALETTE[5],
+        ]);
+        expect(plan.groups.map((group) => group.refCount)).toEqual([2, 2, 2]);
+        expect(plan.groups.map((group) => group.compoundIds)).toEqual([
+            ['cpd00011', 'cpd00020'], ['cpd00020', 'cpd00071'], ['cpd00020', 'cpd00071'],
+        ]);
+        expect(plan.groups.flatMap((group) => group.compoundIds)).toEqual([
+            'cpd00011', 'cpd00020', 'cpd00020', 'cpd00071', 'cpd00020', 'cpd00071',
+        ]);
+        expect(buildAtomOrbitColorPlan(parseAtomMappings(['cpd00020:C#1=cpd00011:C#1']), []).groups).toHaveLength(1);
     });
 
     it('renders without orbit colours when structures are absent', async () => {

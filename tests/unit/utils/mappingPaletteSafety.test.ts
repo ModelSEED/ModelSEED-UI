@@ -274,29 +274,22 @@ describe('selectMappingColors', () => {
 });
 
 describe('palette assignment', () => {
-    const pair = (left: string, right: string): AtomMappingPair => ({
-        left: { compoundId: left, element: 'O', index: 1 },
-        right: { compoundId: right, element: 'O', index: 1 },
-        leftAtoms: [{ compoundId: left, element: 'O', index: 1 }],
-        rightAtoms: [{ compoundId: right, element: 'O', index: 1 }],
+    const pair = (left: string, right: string, index = 1): AtomMappingPair => ({
+        left: { compoundId: left, element: 'O', index },
+        right: { compoundId: right, element: 'O', index },
+        leftAtoms: [{ compoundId: left, element: 'O', index }],
+        rightAtoms: [{ compoundId: right, element: 'O', index }],
         hasSymmetryGroup: false,
         raw: '',
     });
-
-    it('assigns selected colours by group order and is stable across runs', () => {
-        const build = (): readonly string[] =>
-            buildAtomOrbitColorPlan(
-                Array.from({ length: MAPPING_PALETTE.length + 2 }, (_, i) =>
-                    pair(`cpd${String(i + 100).padStart(5, '0')}`, `cpd${String(i + 300).padStart(5, '0')}`)),
-                [],
-            ).groups.map((group) => group.color);
-
-        const selection = selectMappingColors(MAPPING_PALETTE.length + 2);
-        const expected = Array.from(
-            { length: MAPPING_PALETTE.length + 2 },
-            (_, i) => selection[i % selection.length],
-        );
-        expect(build()).toEqual(expected);
+    it('cycles the eight slots by ascending atom-map value, not group order', async () => {
+        const { mappingColorForElementOrdinal } = await import('@/lib/utils/atomMappingColors');
+        const build = (): readonly string[] => buildAtomOrbitColorPlan(
+            Array.from({ length: MAPPING_PALETTE.length + 2 }, (_, i) =>
+                pair(`cpd${String(i + 100).padStart(5, '0')}`, `cpd${String(i + 300).padStart(5, '0')}`, i + 1)),
+            [],
+        ).groups.map((group) => group.color);
+        expect(build()).toEqual(Array.from({ length: MAPPING_PALETTE.length + 2 }, (_, i) => mappingColorForElementOrdinal('O', i + 1)));
         expect(build()).toEqual(build());
     });
 });

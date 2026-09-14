@@ -178,6 +178,58 @@ describe('getReactions nested reversibility search and evidence', () => {
   });
 });
 
+describe('getReactions numeric ID quick search', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('preserves text and participant clauses while adding the canonical five-digit reaction ID', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      return Promise.resolve(new Response(JSON.stringify({
+        response: { numFound: isProbe ? 1 : 0, start: 0, docs: [] },
+      }), { status: 200 }));
+    });
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['168'] } });
+
+    const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    expect(query).toContain('id:rxn00168');
+    expect(query).toContain('id:*168*');
+    expect(query).toContain('name:*168*');
+    expect(query).toContain('aliases:*168*');
+    expect(query).toContain('compound:*168*');
+    expect(query).toContain('participant_name:*168*');
+  });
+
+  it('normalizes whitespace around bare IDs while preserving already-normalized IDs', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      return Promise.resolve(new Response(JSON.stringify({
+        response: { numFound: isProbe ? 1 : 0, start: 0, docs: [] },
+      }), { status: 200 }));
+    });
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['  168  '] } });
+    const whitespaceQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    expect(whitespaceQuery).toContain('id:rxn00168');
+    expect(whitespaceQuery).toContain('id:*168*');
+    expect(whitespaceQuery).not.toContain('%20');
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: [' rxn00168 '] } });
+    const normalizedIdQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    expect(normalizedIdQuery).toContain('id:*rxn00168*');
+    expect(normalizedIdQuery).not.toContain('id:rxnrxn00168');
+  });
+});
+
 describe('getReactions Solr case-variant filters', () => {
   afterEach(() => {
     vi.restoreAllMocks();

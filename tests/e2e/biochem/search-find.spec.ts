@@ -170,3 +170,63 @@ test.describe('Find in Page Search', () => {
         await page.locator('button:has-text("Cancel")').first().click();
     });
 });
+
+test('reaction quick search sends canonical 168 query and ignores a stale response', async ({ page }) => {
+    const response = (docs: object[]) => ({
+        responseHeader: { status: 0 },
+        response: { numFound: docs.length, start: 0, docs },
+    });
+    const reaction = (id: string, name: string) => ({
+        id,
+        name,
+        definition: 'cpd00001 => cpd00002',
+        equation: 'cpd00001 => cpd00002',
+        reversibility: '>',
+        aliases: [],
+        ec_numbers: [],
+        pathways: [],
+        is_obsolete: '0',
+    });
+    let releaseStale!: () => void;
+    const staleResponse = new Promise<void>((resolve) => {
+        releaseStale = resolve;
+    });
+    let sawCanonical168Query = false;
+
+    await page.route('**/solr/**', async (route) => {
+        const url = new URL(route.request().url());
+        const query = url.searchParams.get('q') ?? '';
+        if (url.searchParams.get('rows') === '0') {
+            await route.fulfill({ json: response([]) });
+            return;
+        }
+        if (query.includes('id:*168*')) {
+            sawCanonical168Query = query.includes('id:rxn00168');
+            await staleResponse;
+            await route.fulfill({ json: response([reaction('rxn00168', 'Stale numeric reaction')]) });
+            return;
+        }
+        if (query.includes('id:*rxn00168*')) {
+            await route.fulfill({ json: response([reaction('rxn00168', 'Current normalized reaction')]) });
+            return;
+        }
+        await route.fulfill({ json: response([reaction('rxn00001', 'Initial reaction')]) });
+    });
+
+    await page.goto('/biochem/reactions');
+    await expect(page.getByText('Initial reaction')).toBeVisible();
+
+    const searchBox = page.locator('input[placeholder*="Find in"]').first();
+    await searchBox.fill('168');
+    await searchBox.press('Enter');
+    await expect.poll(() => sawCanonical168Query).toBe(true);
+
+    await searchBox.fill('rxn00168');
+    await searchBox.press('Enter');
+    await expect(page.getByText('Current normalized reaction')).toBeVisible();
+
+    releaseStale();
+    await page.waitForTimeout(250);
+    await expect(page.getByText('Current normalized reaction')).toBeVisible();
+    await expect(page.getByText('Stale numeric reaction')).toHaveCount(0);
+});

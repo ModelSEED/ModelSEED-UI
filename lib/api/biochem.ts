@@ -422,6 +422,11 @@ function buildFilterClause(item: GridFilterItem): string | null {
     }
 }
 
+/** Return the five-digit ModelSEED reaction ID represented by a bare numeric search term. */
+function canonicalReactionIdCandidate(term: string): string | undefined {
+    return /^\d{1,5}$/.test(term) ? `rxn${term.padStart(5, '0')}` : undefined;
+}
+
 /** Build the Solr clause for quick/global search terms. */
 function buildQuickSearchClause(
     query: string | undefined,
@@ -430,6 +435,7 @@ function buildQuickSearchClause(
     quickFilterLogicOperator: 'and' | 'or',
     nestedStoichiometryQuickSearch = false,
     nestedThermoEvidenceQuickSearch = false,
+    canonicalReactionIdQuickSearch = false,
 ): string {
     if (query === '*' || query === '*:*') return '*';
 
@@ -464,6 +470,10 @@ function buildQuickSearchClause(
                         `({!parent which="${parentDocTypeFilter('reactions')}" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:${wildcard}"})`,
                     );
                 }
+                const canonicalReactionId = canonicalReactionIdQuickSearch
+                    ? canonicalReactionIdCandidate(term)
+                    : undefined;
+                if (canonicalReactionId) fieldClauses.push(`id:${canonicalReactionId}`);
                 return `(${fieldClauses.join(' OR ')})`;
             }
 
@@ -546,6 +556,7 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         filterModel?.quickFilterLogicOperator ?? 'and',
         nestedStoichiometryQuickSearch,
         nestedThermoEvidenceQuickSearch,
+        collection === 'reactions',
     );
 
     const finalClauses: string[] = [];
