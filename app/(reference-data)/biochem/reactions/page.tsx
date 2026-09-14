@@ -26,6 +26,33 @@ import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
+const reversibilityGradeStyles = {
+    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900' },
+    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794' },
+    bronze: { backgroundColor: '#f8eee8', borderColor: '#b87333' },
+} as const;
+
+export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
+    const grade = reaction.thermo_evidence?.find((item) => {
+        const value = item.grade?.toLowerCase();
+        return value === 'gold' || value === 'silver' || value === 'bronze';
+    })?.grade?.toLowerCase() as keyof typeof reversibilityGradeStyles | undefined;
+    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#e0e0e0' };
+
+    return (
+        <Box
+            component="span"
+            data-testid="reversibility-badge"
+            data-grade={grade}
+            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
+            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 0.75, py: 0.25 }}
+        >
+            <Box component="span">{reaction.reversibility || 'N/A'}</Box>
+            {grade && <Box component="span" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>{grade}</Box>}
+        </Box>
+    );
+}
+
 function parseAliases(aliases?: string[]): React.ReactNode {
     if (!aliases || aliases.length === 0) return 'N/A';
 
@@ -314,7 +341,12 @@ export default function ReactionsPage() {
             type: 'boolean',
             renderCell: (params) => <GridHighlightText text={params.row.is_transport ? 'Yes' : 'No'} />,
         },
-        { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
+        {
+            field: 'reversibility',
+            headerName: 'Reversibility',
+            width: 150,
+            renderCell: (params) => <ReversibilityCell reaction={params.row} />,
+        },
         {
             field: 'status',
             headerName: 'Status',
@@ -382,15 +414,6 @@ export default function ReactionsPage() {
                     onOpenAll={() => handleOpenPathwaysModal(params.row)}
                 />
             ),
-        },
-        {
-            field: 'ontology',
-            headerName: 'Ontology',
-            width: 200,
-            valueGetter: (_value, row) => {
-                if (!row.ontology || row.ontology === 'class:null|context:null|step:null') return 'N/A';
-                return row.ontology;
-            },
         },
     ], [handleOpenPathwaysModal]);
 

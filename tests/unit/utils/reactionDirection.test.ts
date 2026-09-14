@@ -61,7 +61,7 @@ describe('DIRECTION_AGREEMENT_LABEL', () => {
     it('uses the exact direction labels', () => {
         expect(DIRECTION_AGREEMENT_LABEL).toEqual({
             agree: 'Sources agree on direction',
-            'could-agree': 'Sources could agree on direction',
+            'could-agree': 'Sources share a compatible direction',
             disagree: 'Sources disagree on direction',
         });
     });

@@ -100,7 +100,7 @@ describe('Solr stoichiometry support', () => {
         const result = await api.getReactionById('rxn00001');
         const url = dataUrl(fetchMock);
         expect(url).toContain(`fq=${encodeURIComponent('doc_type:reaction')}`);
-        expect(url).toContain(encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]'));
+        expect(url).toContain(encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:thermo_evidence OR doc_type:stoichiometry OR doc_type:thermo-evidence" limit=200]'));
         expect(result.participants).toEqual([{ compound: 'cpd00001', coefficient: -1, compartment: 0, name: 'H2O', is_reactant: true }]);
         expect(result.stoichiometry).toBe('-1:cpd00001:0:0:"H2O"');
         expect(result.thermodynamics).toEqual([{ source_name: 'GC', energy: 4.18, error: 2.24 }]);
@@ -122,7 +122,7 @@ describe('Solr stoichiometry support', () => {
         const nested = await nestedApi.getReactions();
         const nestedUrl = new URL(dataUrl(nestedFetch));
         expect(nestedUrl.searchParams.get('fl')).toBe([
-            'name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility',
+            'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
             'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
             'is_transport', 'ontology', 'pathways', 'notes',
             'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
@@ -150,7 +150,7 @@ describe('Solr stoichiometry support', () => {
         expect(reaction.participants).toHaveLength(1);
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['cpd05331'] } });
         const legacyListUrl = new URL(dataUrl(fetchMock));
-        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,deltag,deltagerr,reversibility,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
+        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,reversibility,thermo_evidence,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
         expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
         expect(legacyListUrl.searchParams.get('sort')).toBe('id asc');
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['Glucoraphanin'] } });

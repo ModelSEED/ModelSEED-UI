@@ -56,6 +56,28 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
         ]);
     });
 
+    it('normalizes rxn00001 per-source thermo evidence alongside its visible energy rows', async () => {
+        const biochemApi = await loadBiochemApi();
+        mockFetch({
+            nested: true,
+            doc: {
+                id: 'rxn00001',
+                thermodynamics: [
+                    { doc_type: 'thermodynamics', source_name: 'Group contribution', energy: 4.18, error: 2.24, operator: '=', grade: 'gold', assessment: 'consistent', cross_source: 'agrees' },
+                    { doc_type: 'thermodynamics', source_name: 'LLMs', operator: '>' },
+                    { doc_type: 'thermodynamics', source_name: 'dGPredictor', energy: -3.78, error: 1.48, operator: '>' },
+                    { doc_type: 'thermodynamics', source_name: 'eQuilibrator', energy: -4.03, error: 0.05, operator: '>' },
+                ],
+            },
+        });
+
+        const result = await biochemApi.getReactionById('rxn00001');
+
+        expect(result.thermodynamics).toHaveLength(3);
+        expect(result.llm_council_proposals).toEqual([{ source_name: 'LLMs', proposed_direction: '>' }]);
+        expect(result.thermo_evidence).toEqual([{ grade: 'gold', assessment: 'consistent', cross_source: 'agrees', source: 'Group contribution' }]);
+    });
+
     it('normalizes children found under legacy _childDocuments_ for a compound', async () => {
         const biochemApi = await loadBiochemApi();
         const doc = {
@@ -87,19 +109,33 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
         expect(dataUrl).not.toContain('fl=');
     });
 
-    it('adds the encoded parent doc_type filter and [child] transformer on the nested schema', async () => {
+    it('requests and normalizes thermo_evidence alongside existing nested children', async () => {
         const biochemApi = await loadBiochemApi();
-        const doc = { id: 'rxn00001', thermodynamics: [] };
+        const doc = {
+            id: 'rxn00024',
+            thermodynamics: [
+                { doc_type: 'thermodynamics', source_name: 'Group contribution', energy: 4.18, error: 2.24 },
+                { doc_type: 'thermodynamics', source_name: 'LLMs', operator: '>' },
+                { doc_type: 'thermodynamics', source_name: 'dGPredictor', energy: -3.78, error: 1.48 },
+                { doc_type: 'thermodynamics', source_name: 'eQuilibrator', energy: -4.03, error: 0.05 },
+                { doc_type: 'thermo_evidence', thermo_evidence: { grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' } },
+            ],
+        };
         const fetchMock = mockFetch({ nested: true, doc });
 
-        await biochemApi.getReactionById('rxn00001');
+        const result = await biochemApi.getReactionById('rxn00024');
 
         const dataCall = fetchMock.mock.calls.find(([input]) => !String(input).includes('rows=0'));
         const dataUrl = String(dataCall?.[0]);
         expect(dataUrl).toContain(`fq=${encodeURIComponent('doc_type:reaction')}`);
-        expect(dataUrl).toContain(`fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:stoichiometry" limit=200]')}`);
-        expect(dataUrl).toContain('doc_type%3Astoichiometry');
-        expect(dataUrl).toContain('limit%3D200');
+        expect(dataUrl).toContain(`fl=${encodeURIComponent('*,[child childFilter=\"doc_type:thermodynamics OR doc_type:thermo_evidence OR doc_type:stoichiometry OR doc_type:thermo-evidence\" limit=200]')}`);
+        expect(result.thermodynamics).toEqual([
+            { source_name: 'Group contribution', energy: 4.18, error: 2.24 },
+            { source_name: 'dGPredictor', energy: -3.78, error: 1.48 },
+            { source_name: 'eQuilibrator', energy: -4.03, error: 0.05 },
+        ]);
+        expect(result.llm_council_proposals).toEqual([{ source_name: 'LLMs', proposed_direction: '>' }]);
+        expect(result.thermo_evidence).toEqual([{ grade: 'bronze', assessment: 'unconfident', cross_source: 'outvoted', source: 'eQ' }]);
     });
 
     it('separates an LLM council direction proposal from energy evidence', async () => {
@@ -123,6 +159,32 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
         expect(result.llm_council_proposals).toEqual([
             { source_name: 'LLMs', proposed_direction: '>' },
         ]);
+    });
+
+    it('requests and normalizes compound pKas without altering legacy pKa fields', async () => {
+        const biochemApi = await loadBiochemApi();
+        const fetchMock = mockFetch({
+            nested: true,
+            doc: {
+                id: 'cpd00002',
+                pka: ['\"4.2\"'],
+                pkas: [
+                    { source_name: 'Literature', pka_kind: 'macroscopic', pka_number: [7.6, 4.68] },
+                    { source_name: 'Marvin', pka_kind: 'microscopic', pka_number: [0.89, 2.06, 2.68] },
+                    { source_name: 'MolGpKa', pka_kind: 'microscopic', pka_number: [11.57, 'not-a-number', 0.98] },
+                ],
+            },
+        });
+
+        const result = await biochemApi.getCompoundById('cpd00002');
+        const dataCall = fetchMock.mock.calls.find(([input]) => !String(input).includes('rows=0'));
+        expect(String(dataCall?.[0])).toContain(encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:pkas OR doc_type:pka" limit=200]'));
+        expect(result.pkas).toEqual([
+            { source_name: 'Literature', pka_kind: 'macroscopic', pka_number: [7.6, 4.68] },
+            { source_name: 'Marvin', pka_kind: 'microscopic', pka_number: [0.89, 2.06, 2.68] },
+            { source_name: 'MolGpKa', pka_kind: 'microscopic', pka_number: [11.57, 0.98] },
+        ]);
+        expect(result.pka).toEqual(['\"4.2\"']);
     });
 
     it('normalizeThermodynamics(null | undefined | {} | 42) all return []', async () => {
