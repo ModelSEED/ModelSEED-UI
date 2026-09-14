@@ -11,6 +11,7 @@ import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
 import ThermodynamicsTable, { DirectionOperator, EvidenceSummary } from '@/components/ui/ThermodynamicsTable';
@@ -326,8 +327,7 @@ export default function ReactionDetailPage() {
     const pathways = (rxn.pathways ?? []).map((v) => v.replace(/"/g, '').trim()).filter(Boolean);
 
     const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
-
-
+    const atomMappingPairs = parseAtomMappings(normalizeAtomMapping(rxn).entries);
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1240, mx: 'auto' }}>
@@ -350,6 +350,7 @@ export default function ReactionDetailPage() {
                                 <ReactionStructureEquation
                                     equation={rxn.equation ?? rxn.definition}
                                     reversibility={rxn.reversibility}
+                                    atomMappingPairs={atomMappingPairs}
                                 />
                             )}
                         </Box>

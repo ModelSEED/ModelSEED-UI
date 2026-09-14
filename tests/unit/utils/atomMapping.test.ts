@@ -313,6 +313,24 @@ describe('normalizeAtomMapping', () => {
         });
     });
 
+    it('preserves rxn00168 authoritative carbon correspondences as three distinct pairs', () => {
+        const normalized = normalizeAtomMapping({
+            atom_mapping_data: [
+                'cpd00020:C#1=cpd00011:C#1',
+                'cpd00020:C#2=cpd00071:C#1',
+                'cpd00020:C#3=cpd00071:C#2',
+            ],
+            atom_mapping: ['cpd00020:C#1=cpd00071:C#1'],
+        });
+
+        expect(normalized.source).toBe('atom_mapping_data');
+        expect(parseAtomMappings(normalized.entries).map(({ raw }) => raw)).toEqual([
+            'cpd00020:C#1=cpd00011:C#1',
+            'cpd00020:C#2=cpd00071:C#1',
+            'cpd00020:C#3=cpd00071:C#2',
+        ]);
+    });
+
     it('falls back to legacy mappings and accepts single-valued Solr fields', () => {
         expect(normalizeAtomMapping({
             atom_mapping_data: [null, '  '],
