@@ -41,7 +41,7 @@ export function directionAgreementFromRecords(
 
 export const DIRECTION_AGREEMENT_LABEL: Record<DirectionAgreement, string> = {
     agree: 'Sources agree on direction',
-    'could-agree': 'Sources could agree on direction',
+    'could-agree': 'Sources share a compatible direction',
     disagree: 'Sources disagree on direction',
 };
 

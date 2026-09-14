@@ -130,18 +130,6 @@ const columns: GridColDef<Compound>[] = [
         sortable: false,
         renderCell: (params) => parseAliases(params.row.aliases),
     },
-    {
-        field: 'ontology',
-        headerName: 'Ontology',
-        width: 200,
-        sortable: false,
-        /** Solr compounds_staging has no ontology field — server filters cannot target it */
-        filterable: false,
-        valueGetter: (_value, row) => {
-            if (!row.ontology || row.ontology === 'class:null|context:null') return 'N/A';
-            return row.ontology;
-        },
-    },
 ];
 
 /* ─── Page Component ─────────────────────────────────────────── */
