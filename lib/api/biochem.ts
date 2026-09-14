@@ -1138,7 +1138,7 @@ const RXN_SEARCH_FIELDS_NESTED = RXN_SEARCH_FIELDS.filter((field) => field !== '
 
 /** Reaction visible fields matching legacy `rxnOpts.visible`. */
 const RXN_VISIBLE = [
-    'name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility',
+    'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
     'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
     'is_transport', 'ontology', 'pathways', 'notes',
 ];

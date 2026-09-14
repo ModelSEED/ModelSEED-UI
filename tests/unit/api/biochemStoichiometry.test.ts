@@ -122,7 +122,7 @@ describe('Solr stoichiometry support', () => {
         const nested = await nestedApi.getReactions();
         const nestedUrl = new URL(dataUrl(nestedFetch));
         expect(nestedUrl.searchParams.get('fl')).toBe([
-            'name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility',
+            'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
             'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
             'is_transport', 'ontology', 'pathways', 'notes',
             'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
@@ -150,7 +150,7 @@ describe('Solr stoichiometry support', () => {
         expect(reaction.participants).toHaveLength(1);
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['cpd05331'] } });
         const legacyListUrl = new URL(dataUrl(fetchMock));
-        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,deltag,deltagerr,reversibility,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
+        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,reversibility,thermo_evidence,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
         expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
         expect(legacyListUrl.searchParams.get('sort')).toBe('id asc');
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['Glucoraphanin'] } });

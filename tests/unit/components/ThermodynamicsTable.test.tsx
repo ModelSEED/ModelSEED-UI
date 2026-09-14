@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import Chip from '@mui/material/Chip';
 import ThermodynamicsTable, { EvidenceSummary } from '@/components/ui/ThermodynamicsTable';
 import type { ThermodynamicsRecord } from '@/lib/api/biochem';
+import { ReversibilityCell } from '@/app/(reference-data)/biochem/reactions/page';
 import {
     directionAgreementFromRecords,
     DIRECTION_AGREEMENT_COLOR,
@@ -115,6 +116,27 @@ describe('ThermodynamicsTable', () => {
         expect(container.querySelector('[aria-label="assessment unconfident"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="cross-source outvoted"]')).toBeTruthy();
         expect(container.querySelector('[aria-label="source eQ"]')).toBeTruthy();
+    });
+
+    it.each([
+        ['GOLD', '#fff8e1', '#b88900'],
+        ['silver', '#f5f7fa', '#7b8794'],
+        ['Bronze', '#f8eee8', '#b87333'],
+    ])('renders %s reaction reversibility with its evidence grade palette', (grade, backgroundColor, borderColor) => {
+        const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '>', thermo_evidence: [{ grade }] } as never} />);
+        const badge = container.querySelector(`[data-grade="${grade.toLowerCase()}"]`) as HTMLElement;
+        expect(badge.textContent).toContain('>');
+        expect(badge.textContent).toContain(grade.toLowerCase());
+        expect(badge.style.backgroundColor).toBe(backgroundColor);
+        expect(badge.style.borderColor).toBe(borderColor);
+    });
+
+    it('renders reaction reversibility in a plain white frame when evidence has no recognized grade', () => {
+        const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '<', thermo_evidence: [{ grade: 'unknown' }] } as never} />);
+        const badge = container.querySelector('[data-testid="reversibility-badge"]') as HTMLElement;
+        expect(badge.getAttribute('data-grade')).toBeNull();
+        expect(badge.textContent).toBe('<');
+        expect(badge.style.backgroundColor).toBe('#fff');
     });
 
     it('distinguishes absent cross-source evidence from unpaired', () => {
