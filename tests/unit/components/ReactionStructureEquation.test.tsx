@@ -120,6 +120,9 @@ describe('ReactionStructureEquation', () => {
 
         expect(plan.groups).toHaveLength(3);
         expect(new Set(plan.groups.map((group) => group.color)).size).toBe(3);
+        expect(plan.groups.map((group) => group.color)).toEqual([
+            MAPPING_PALETTE[3], MAPPING_PALETTE[4], MAPPING_PALETTE[5],
+        ]);
         expect(plan.groups.map((group) => group.refCount)).toEqual([2, 2, 2]);
         expect(plan.groups.map((group) => group.compoundIds)).toEqual([
             ['cpd00011', 'cpd00020'], ['cpd00020', 'cpd00071'], ['cpd00020', 'cpd00071'],

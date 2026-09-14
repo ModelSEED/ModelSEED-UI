@@ -93,6 +93,19 @@ const paletteDistances: readonly (readonly number[])[] = MAPPING_PALETTE.map((co
 const mappingColorSelections = new Map<number, readonly string[]>();
 
 /** Select the lexicographically first maximum-minimum-separation palette subset. */
+/**
+ * Return the stable palette slot for an element's ascending atom-map ordinal.
+ *
+ * Atom-map indices are authoritative one-based per-element values.  The element
+ * hash gives independent element namespaces; ordinal neighbours cycle through
+ * all eight CVD-safe slots before repeating.
+ */
+export function mappingColorForElementOrdinal(element: string, ordinal: number): string | undefined {
+    if (typeof element !== 'string' || !element || !Number.isSafeInteger(ordinal) || ordinal < 1) return undefined;
+    const elementOffset = Array.from(element).reduce((hash, character) => (hash * 31 + character.codePointAt(0)!) % MAPPING_PALETTE.length, 0);
+    return MAPPING_PALETTE[(elementOffset + ordinal - 1) % MAPPING_PALETTE.length];
+}
+
 export function selectMappingColors(groupCount: number): readonly string[] {
     if (!Number.isFinite(groupCount) || !Number.isInteger(groupCount) || groupCount <= 0) return [];
     if (groupCount > MAPPING_PALETTE.length) return MAPPING_PALETTE;

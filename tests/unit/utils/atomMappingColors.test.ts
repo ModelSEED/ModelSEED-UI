@@ -4,6 +4,7 @@ import {
     blockAssignment,
     buildAtomMappingColorPlan,
     elementColorsForCompound,
+    mappingColorForElementOrdinal,
     MAPPING_PALETTE,
     selectMappingColors,
 } from '@/lib/utils/atomMappingColors';
@@ -18,6 +19,15 @@ const REAL_ENTRIES = [
 function pairs(entries: readonly string[]): AtomMappingPair[] {
     return parseAtomMappings(entries);
 }
+
+describe('mappingColorForElementOrdinal', () => {
+    it('uses element namespaces and cycles only after all eight ordinal slots', () => {
+        expect(mappingColorForElementOrdinal('C', 1)).toBe(mappingColorForElementOrdinal('C', 1));
+        expect(mappingColorForElementOrdinal('C', 1)).not.toBe(mappingColorForElementOrdinal('C', 2));
+        expect(mappingColorForElementOrdinal('C', 9)).toBe(mappingColorForElementOrdinal('C', 1));
+        expect(mappingColorForElementOrdinal('C', 1)).not.toBe(mappingColorForElementOrdinal('O', 1));
+    });
+});
 
 describe('buildAtomMappingColorPlan', () => {
     it('colours merged components in the real rxn00002 payload', () => {
