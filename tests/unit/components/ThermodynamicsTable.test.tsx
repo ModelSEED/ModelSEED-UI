@@ -122,22 +122,23 @@ describe('ThermodynamicsTable', () => {
         ['GOLD', '#fff8e1', '#b88900'],
         ['silver', '#f5f7fa', '#7b8794'],
         ['Bronze', '#f8eee8', '#b87333'],
-    ])('renders %s reaction reversibility as an accessible color-only swatch', (grade, backgroundColor, borderColor) => {
+    ])('renders %s reaction reversibility as an accessible labeled swatch', (grade, backgroundColor, borderColor) => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '>', thermo_evidence: [{ grade }] } as never} />);
         const badge = container.querySelector(`[data-grade="${grade.toLowerCase()}"]`) as HTMLElement;
         const label = `Reversibility >; evidence grade ${grade.toLowerCase()}`;
-        expect(badge.textContent).toBe('');
+        expect(badge.textContent).toBe(`${grade[0].toUpperCase()}${grade.slice(1).toLowerCase()}`);
         expect(badge.getAttribute('title')).toBe(label);
         expect(badge.getAttribute('aria-label')).toBe(label);
-        expect(badge.style.backgroundColor).toBe(backgroundColor);
-        expect(badge.style.borderColor).toBe(borderColor);
+        const swatch = badge.querySelector('[aria-hidden="true"]') as HTMLElement;
+        expect(swatch.style.backgroundColor).toBe(backgroundColor);
+        expect(swatch.style.borderColor).toBe(borderColor);
     });
 
     it.each(['>', '<', '?', '='])('keeps the %s operator in swatch accessibility metadata', (reversibility) => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility, thermo_evidence: [{ grade: 'gold' }] } as never} />);
         const badge = container.querySelector('[data-testid="reversibility-badge"]');
         const label = `Reversibility ${reversibility}; evidence grade gold`;
-        expect(badge?.textContent).toBe('');
+        expect(badge?.textContent).toBe('Gold');
         expect(badge?.getAttribute('title')).toBe(label);
         expect(badge?.getAttribute('aria-label')).toBe(label);
     });
@@ -146,11 +147,12 @@ describe('ThermodynamicsTable', () => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '<', thermo_evidence: [{ grade: 'unknown' }] } as never} />);
         const badge = container.querySelector('[data-testid="reversibility-badge"]') as HTMLElement;
         expect(badge.getAttribute('data-grade')).toBeNull();
-        expect(badge.textContent).toBe('');
+        expect(badge.textContent).toBe('No grade');
         expect(badge.getAttribute('title')).toBe('Reversibility <; evidence grade no grade');
         expect(badge.getAttribute('aria-label')).toBe('Reversibility <; evidence grade no grade');
-        expect(badge.style.backgroundColor).toBe('#fff');
-        expect(badge.style.borderColor).toBe('#757575');
+        const swatch = badge.querySelector('[aria-hidden="true"]') as HTMLElement;
+        expect(swatch.style.backgroundColor).toBe('#fff');
+        expect(swatch.style.borderColor).toBe('#757575');
     });
 
     it('omits absent cross-source evidence while retaining the ordered remaining fields and accessible values', () => {

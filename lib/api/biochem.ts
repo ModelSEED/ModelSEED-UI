@@ -455,7 +455,7 @@ function buildQuickSearchClause(
                 if (nestedStoichiometryQuickSearch) {
                     const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
-                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard})"})`,
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR participant_aliases:${wildcard} OR aliases:${wildcard})"})`,
                     );
                 }
                 if (nestedThermoEvidenceQuickSearch) {

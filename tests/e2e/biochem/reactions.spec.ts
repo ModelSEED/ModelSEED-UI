@@ -35,7 +35,7 @@ test.describe('Reactions Page - Search Functionality', () => {
 
         const badge = page.getByTestId('reversibility-badge').first();
         await badge.scrollIntoViewIfNeeded();
-        await expect(badge).toHaveText('');
+        await expect(badge).toHaveText(/Gold|Silver|Bronze|No grade/);
         await expect(badge).toHaveAttribute('aria-label', /Reversibility .*; evidence grade /);
         await expect(badge).toHaveAttribute('title', /Reversibility .*; evidence grade /);
 

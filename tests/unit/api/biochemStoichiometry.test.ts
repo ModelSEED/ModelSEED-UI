@@ -176,8 +176,8 @@ describe('Solr stoichiometry support', () => {
         expect(nestedQuery).toContain('name:*Glucoraphanin*');
         expect(nestedQuery).toContain('definition:*Glucoraphanin*');
         expect(nestedQuery).not.toContain('stoichiometry:*');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin*)"})');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin* OR participant_aliases:*Glucoraphanin* OR aliases:*Glucoraphanin*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331* OR participant_aliases:*cpd05331* OR aliases:*cpd05331*)"})');
         expect(nestedQuery).toContain(') AND (');
         await api.findReactionsForCompound('cpd00002');
         expect(new URL(dataUrl(fetchMock)).searchParams.get('q')).toContain('{!parent which="doc_type:reaction" v="doc_type:stoichiometry AND compound:cpd00002"}');
@@ -229,6 +229,18 @@ describe('reaction request regression matrix', () => {
         expect(url.searchParams.get('sort')).toBe('name desc');
         expect(url.searchParams.get('fl')).toContain('definition');
         expect(url.searchParams.getAll('fq')).toEqual(nested ? ['doc_type:reaction'] : []);
+    });
+
+    it('includes supported nested participant alias fields in quick search clauses', async () => {
+        const api = await loadBiochemApi();
+        const fetchMock = mockFetch({ reactions: true });
+        await api.getReactions({ filterModel: { items: [], quickFilterValues: ['RegistryAlias'] } });
+
+        const query = new URL(dataUrl(fetchMock)).searchParams.get('q') ?? '';
+        expect(query).toContain('participant_aliases:*RegistryAlias*');
+        expect(query).toContain('aliases:*RegistryAlias*');
+        expect(query).toContain('participant_name:*RegistryAlias*');
+        expect(query).toContain('compound:*RegistryAlias*');
     });
 
     it('keeps blank and intentional wildcard direct queries broad without exposing raw syntax', async () => {
