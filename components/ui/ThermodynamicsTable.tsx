@@ -97,13 +97,14 @@ export function EvidenceSummary({ item }: { item: ThermoEvidence }) {
         { label: 'Assessment', value: assessment },
         { label: 'Cross-source', value: crossSource },
         { label: 'Source', value: source },
-    ];
+    ].filter((field) => field.label !== 'Cross-source' || field.value !== '(absent)');
     const frameColors = EVIDENCE_FRAME_COLORS[item.grade?.toLowerCase() as keyof typeof EVIDENCE_FRAME_COLORS] ?? EVIDENCE_FRAME_COLORS.silver;
+    const evidenceLabel = ['Thermo evidence', ...fields.map((field) => `${field.label.toLowerCase()} ${field.value}`)].join(', ');
     return (
         <Box
             className={`thermo-evidence thermo-evidence--${grade.toLowerCase()}`}
             data-grade={grade.toLowerCase()}
-            aria-label={`Thermo evidence: grade ${grade}, assessment ${assessment}, cross-source ${crossSource}, source ${source}`}
+            aria-label={evidenceLabel}
             sx={{
                 flex: '1 1 36rem',
                 minWidth: 0,

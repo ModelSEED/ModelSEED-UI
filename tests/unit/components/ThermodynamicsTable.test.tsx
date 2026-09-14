@@ -139,9 +139,18 @@ describe('ThermodynamicsTable', () => {
         expect(badge.style.backgroundColor).toBe('#fff');
     });
 
-    it('distinguishes absent cross-source evidence from unpaired', () => {
+    it('omits absent cross-source evidence while retaining the ordered remaining fields and accessible values', () => {
         const { container } = render(<EvidenceSummary item={{ grade: 'silver', assessment: 'self-confident', source: 'eQ' }} />);
-        expect(container.querySelector('[aria-label="cross-source (absent)"]')?.textContent).toBe('(absent)');
+        expect([...container.querySelectorAll('dt')].map((label) => label.textContent)).toEqual(['Grade', 'Assessment', 'Source']);
+        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(3);
+        expect(container.querySelector('[aria-label="cross-source (absent)"]')).toBeNull();
+        expect(container.querySelector('[aria-label="Thermo evidence, grade silver, assessment self-confident, source eQ"]')).toBeTruthy();
+        expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(3);
+    });
+
+    it('retains unpaired cross-source evidence', () => {
+        const { container } = render(<EvidenceSummary item={{ grade: 'silver', assessment: 'self-confident', cross_source: 'unpaired', source: 'eQ' }} />);
+        expect(container.querySelector('[aria-label="cross-source unpaired"]')?.textContent).toBe('unpaired');
     });
 
     it('renders record, heuristic, recommended, and LLM operators as literal labeled badges without arrow decoration', () => {

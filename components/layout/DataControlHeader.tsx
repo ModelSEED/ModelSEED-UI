@@ -1677,7 +1677,7 @@ export default function DataControlHeader(props: {
                         px: 1,
                         borderRadius: 1,
                         border: '1px solid #ccc',
-                        width: { xs: '100%', sm: 320 },
+                        width: { xs: '100%', sm: 320, md: 420 },
                         '& .MuiFormControl-root': { width: '100%' },
                         '& .MuiInputBase-root': { width: '100%' },
                         '& .MuiInputBase-input': { width: '100%', minWidth: 0 },
