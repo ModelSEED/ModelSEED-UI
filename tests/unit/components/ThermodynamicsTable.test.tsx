@@ -132,6 +132,8 @@ describe('ThermodynamicsTable', () => {
         expect(badge.getAttribute('aria-label')).toBe(label);
         expect(badge.style.backgroundColor).toBe(backgroundColor);
         expect(badge.style.borderColor).toBe(borderColor);
+        expect(getComputedStyle(badge).borderTopWidth).toBe('2px');
+        expect(getComputedStyle(badge).fontWeight).toBe('700');
     });
 
     it.each(['>', '<', '?', '='])('renders the %s operator visibly while retaining grade metadata', (reversibility) => {

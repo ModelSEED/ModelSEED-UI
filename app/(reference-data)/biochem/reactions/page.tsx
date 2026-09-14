@@ -50,7 +50,7 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
             title={label}
             aria-label={label}
             style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
-            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', px: 0.75, whiteSpace: 'nowrap' }}
+            sx={{ border: '2px solid', borderRadius: 1, display: 'inline-flex', fontWeight: 700, px: 0.75, whiteSpace: 'nowrap' }}
         >
             {reversibility}
         </Box>
