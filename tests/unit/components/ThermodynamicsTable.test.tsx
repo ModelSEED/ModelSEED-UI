@@ -121,7 +121,7 @@ describe('ThermodynamicsTable', () => {
     it.each([
         ['GOLD', '#fff8e1', '#b88900'],
         ['silver', '#f5f7fa', '#7b8794'],
-        ['Bronze', '#f8eee8', '#b87333'],
+        ['Bronze', 'rgba(184, 115, 51, 0.08)', '#b87333'],
     ])('renders %s reaction reversibility as a colored operator with accessible grade metadata', (grade, backgroundColor, borderColor) => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '>', thermo_evidence: [{ grade }] } as never} />);
         const badge = container.querySelector(`[data-grade="${grade.toLowerCase()}"]`) as HTMLElement;
