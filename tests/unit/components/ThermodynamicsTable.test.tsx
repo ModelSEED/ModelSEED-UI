@@ -119,10 +119,10 @@ describe('ThermodynamicsTable', () => {
     });
 
     it.each([
-        ['GOLD', '#fff8e1', '#b88900'],
-        ['silver', '#f5f7fa', '#7b8794'],
-        ['Bronze', 'rgba(184, 115, 51, 0.19)', '#9a5c22'],
-    ])('renders %s reaction reversibility as a colored operator with accessible grade metadata', (grade, backgroundColor, borderColor) => {
+        ['GOLD', '#fff8e1', '#b88900', '3px'],
+        ['silver', '#f5f7fa', '#7b8794', '2px'],
+        ['Bronze', 'rgba(184, 115, 51, 0.19)', '#9a5c22', '1px'],
+    ])('renders %s reaction reversibility as a colored operator with accessible grade metadata', (grade, backgroundColor, borderColor, borderWidth) => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '>', thermo_evidence: [{ grade }] } as never} />);
         const badge = container.querySelector(`[data-grade="${grade.toLowerCase()}"]`) as HTMLElement;
         const label = `Reversibility >; evidence grade ${grade.toLowerCase()}`;
@@ -132,7 +132,7 @@ describe('ThermodynamicsTable', () => {
         expect(badge.getAttribute('aria-label')).toBe(label);
         expect(badge.style.backgroundColor).toBe(backgroundColor);
         expect(badge.style.borderColor).toBe(borderColor);
-        expect(getComputedStyle(badge).borderTopWidth).toBe('2px');
+        expect(getComputedStyle(badge).borderTopWidth).toBe(borderWidth);
         expect(getComputedStyle(badge).fontWeight).toBe('700');
     });
 
@@ -154,6 +154,8 @@ describe('ThermodynamicsTable', () => {
         expect(badge.getAttribute('aria-label')).toBe('Reversibility <; evidence grade no grade');
         expect(badge.style.backgroundColor).toBe('#fff');
         expect(badge.style.borderColor).toBe('#757575');
+        expect(getComputedStyle(badge).borderTopWidth).toBe('1px');
+        expect(getComputedStyle(badge).fontWeight).toBe('700');
     });
 
     it('omits absent cross-source evidence while retaining the ordered remaining fields and accessible values', () => {

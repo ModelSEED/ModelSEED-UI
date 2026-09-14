@@ -27,9 +27,9 @@ import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
 const reversibilityGradeStyles = {
-    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900' },
-    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794' },
-    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.19)', borderColor: '#9a5c22' },
+    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900', borderWidth: 3 },
+    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794', borderWidth: 2 },
+    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.19)', borderColor: '#9a5c22', borderWidth: 1 },
 } as const;
 
 export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
@@ -37,7 +37,7 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
         const value = item.grade?.toLowerCase();
         return value === 'gold' || value === 'silver' || value === 'bronze';
     })?.grade?.toLowerCase() as keyof typeof reversibilityGradeStyles | undefined;
-    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575' };
+    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575', borderWidth: 1 };
     const reversibility = reaction.reversibility || 'N/A';
     const evidenceGrade = grade || 'no grade';
     const label = `Reversibility ${reversibility}; evidence grade ${evidenceGrade}`;
@@ -49,8 +49,8 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
             data-grade={grade}
             title={label}
             aria-label={label}
-            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
-            sx={{ border: '2px solid', borderRadius: 1, display: 'inline-flex', fontWeight: 700, px: 0.75, whiteSpace: 'nowrap' }}
+            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor, borderWidth: style.borderWidth }}
+            sx={{ borderStyle: 'solid', borderRadius: 1, display: 'inline-flex', fontWeight: 700, px: 0.75, whiteSpace: 'nowrap' }}
         >
             {reversibility}
         </Box>
