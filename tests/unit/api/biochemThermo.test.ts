@@ -102,13 +102,14 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
         expect(dataUrl).toContain('limit%3D200');
     });
 
-    it('drops malformed children and coerces array-wrapped/absent numeric values', async () => {
+    it('separates an LLM council direction proposal from energy evidence', async () => {
         const biochemApi = await loadBiochemApi();
         const doc = {
             id: 'rxn00001',
             thermodynamics: [
-                { doc_type: 'thermodynamics', energy: -1, error: 0.1 }, // missing source_name -> dropped
+                { doc_type: 'thermodynamics', source_name: 'LLMs', operator: '>' },
                 { doc_type: 'thermodynamics', source_name: 'good', energy: ['-1.5'] }, // error absent
+                { doc_type: 'thermodynamics', source_name: 'LLMs' }, // malformed proposal -> dropped
                 { doc_type: 'other', source_name: 'wrong-type', energy: -2, error: 0.2 }, // wrong doc_type -> dropped
             ],
         };
@@ -118,6 +119,9 @@ describe('getReactionById / getCompoundById thermodynamics', () => {
 
         expect(result.thermodynamics).toEqual([
             { source_name: 'good', energy: -1.5, error: null },
+        ]);
+        expect(result.llm_council_proposals).toEqual([
+            { source_name: 'LLMs', proposed_direction: '>' },
         ]);
     });
 

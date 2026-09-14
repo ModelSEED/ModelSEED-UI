@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Link from 'next/link';
 import {
@@ -20,7 +21,6 @@ import {
 } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { formatEquation } from '@/components/utils/formatEquation';
-import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -300,7 +300,6 @@ const rxnColumns: GridColDef<Reaction>[] = [
         width: 90,
         valueGetter: (_value, row) => (row.is_transport ? 'Yes' : 'No'),
     },
-    { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
     { field: 'status', headerName: 'Status', width: 110 },
 ];
 
@@ -366,18 +365,14 @@ export default function CompoundDetailPage() {
         : [];
     const aliasesWithoutName = cpd.aliases?.filter((a) => !a.startsWith('Name:')) ?? [];
 
-    const pkaValues = (Array.isArray(cpd.pka_value) ? cpd.pka_value : Array.isArray(cpd.pka) ? cpd.pka : [])
-        .map((v) => String(v).replace(/"/g, ''));
-    const pkbValues = (Array.isArray(cpd.pkb_value) ? cpd.pkb_value : Array.isArray(cpd.pkb) ? cpd.pkb : [])
-        .map((v) => String(v).replace(/"/g, ''));
+    const hasPkas = Array.isArray(cpd.pkas) && cpd.pkas.length > 0;
+    const pkaDisplay = (Array.isArray(cpd.pka_value) ? cpd.pka_value : cpd.pka)
+        ?.map((value) => String(value).replace(/\"/g, ''))
+        .join('; ');
+    const pkbDisplay = (Array.isArray(cpd.pkb_value) ? cpd.pkb_value : cpd.pkb)
+        ?.map((value) => String(value).replace(/\"/g, ''))
+        .join('; ');
 
-    const deltaGDisplay = cpd.deltag === 10000000 ? 'unspecified' : String(cpd.deltag);
-    const deltaGerrDisplay = cpd.deltagerr === 10000000 ? 'unspecified' : String(cpd.deltagerr);
-
-    const thermoRecords = cpd.thermodynamics ?? [];
-    const thermoLabel = cpd.n_sources_thermodynamics && cpd.n_sources_thermodynamics > 0
-        ? `Thermodynamics (${cpd.n_sources_thermodynamics} sources)`
-        : 'Thermodynamics';
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
@@ -427,35 +422,28 @@ export default function CompoundDetailPage() {
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    {thermoRecords.length > 0 ? (
-                        <DetailRow label={thermoLabel}>
-                            <ThermodynamicsTable records={thermoRecords} />
-                        </DetailRow>
-                    ) : (
-                        <DetailRow label="ΔG">
-                            <Typography variant="body2">
-                                {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
-                            </Typography>
-                        </DetailRow>
-                    )}
-                    {pkaValues.length > 0 && (
-                        <DetailRow label="pKa">
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
-                                {pkaValues.map((v, i) => (
-                                    <PKaDisplay value={v} key={`pka-${i}`} />
-                                ))}
+                    {cpd.thermo_evidence?.map((evidence, index) => (
+                        <DetailRow key={`${evidence.source ?? evidence.cross_source ?? index}-${index}`} label="Thermo evidence">
+                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                                {evidence.grade && <Tooltip title="Grade is an evidence confidence tier." arrow><Chip size="small" label={evidence.grade} /></Tooltip>}
+                                {evidence.assessment && <Tooltip title="Assessment is a thermodynamic assessment." arrow><Typography component="span" variant="body2">{evidence.assessment}</Typography></Tooltip>}
+                                {evidence.source && <Tooltip title="Source identifies the database or source." arrow><Typography component="span" variant="body2">{evidence.source}</Typography></Tooltip>}
+                                {evidence.cross_source && <Tooltip title="Cross-source indicates agreement across sources." arrow><Typography component="span" variant="body2">{evidence.cross_source}</Typography></Tooltip>}
                             </Box>
                         </DetailRow>
-                    )}
-                    {pkbValues.length > 0 && (
-                        <DetailRow label="pKb">
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
-                                {pkbValues.map((v, i) => (
-                                    <PKaDisplay value={v} key={`pkb-${i}`} />
-                                ))}
+                    ))}
+                    {hasPkas ? cpd.pkas?.map((pka, index) => (
+                        <DetailRow key={`${pka.source_name}-${index}`} label="pKa">
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                                <Typography variant="body2">{pka.source_name}</Typography>
+                                {pka.pka_kind && <Chip size="small" label={pka.pka_kind} />}
+                                {pka.pka_number.map((value, valueIndex) => <Chip key={`${value}-${valueIndex}`} size="small" label={value} />)}
                             </Box>
                         </DetailRow>
-                    )}
+                    )) : <>
+                        {pkaDisplay && <DetailRow label="pKa"><PKaDisplay value={pkaDisplay} /></DetailRow>}
+                        {pkbDisplay && <DetailRow label="pKb"><PKaDisplay value={pkbDisplay} /></DetailRow>}
+                    </>}
                     <DetailRow label="Weight">
                         <Typography variant="body2">{cpd.mass} Da</Typography>
                     </DetailRow>

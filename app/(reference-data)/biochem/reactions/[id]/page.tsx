@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
@@ -10,17 +9,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
-import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
-import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
-import {
-    directionAgreementFromRecords,
-    DIRECTION_AGREEMENT_COLOR,
-    DIRECTION_AGREEMENT_LABEL,
-} from '@/lib/utils/reactionDirection';
 
 function extractCompoundIds(equation: string): string[] {
     if (!equation) return [];
@@ -262,51 +255,6 @@ function BooleanChip({ value }: { value: boolean }) {
     );
 }
 
-function ReversibilityDisplay({ value }: { value?: string }) {
-    const raw = (value ?? '').trim();
-
-    let label = 'Unknown';
-    let meaning = 'Directionality is not specified in this record.';
-    let color = { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
-
-    if (raw === '=' || raw === '<=>') {
-        label = 'Reversible';
-        meaning = 'Reaction can proceed in both forward and reverse directions.';
-        color = { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' };
-    } else if (raw === '>' || raw === '=>') {
-        label = 'Forward-only';
-        meaning = 'Reaction is constrained to proceed left to right.';
-        color = { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' };
-    } else if (raw === '<' || raw === '<=') {
-        label = 'Reverse-only';
-        meaning = 'Reaction is constrained to proceed right to left.';
-        color = { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' };
-    } else if (raw) {
-        label = `Custom (${raw})`;
-        meaning = 'Reaction uses a non-standard reversibility code.';
-        color = { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
-    }
-
-    return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.9, flexWrap: 'wrap' }}>
-            <Chip
-                size="small"
-                label={label}
-                sx={{
-                    fontWeight: 700,
-                    bgcolor: color.bg,
-                    color: color.text,
-                    border: '1px solid',
-                    borderColor: color.border,
-                }}
-            />
-            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.45 }}>
-                {meaning}
-            </Typography>
-        </Box>
-    );
-}
-
 export default function ReactionDetailPage() {
     const { id } = useParams<{ id: string }>();
 
@@ -315,9 +263,6 @@ export default function ReactionDetailPage() {
         queryFn: () => getReactionById(id),
         enabled: !!id,
     });
-
-    const atomMapping = useMemo(() => normalizeAtomMapping(rxn), [rxn]);
-    const atomPairs = useMemo(() => parseAtomMappings(atomMapping.entries), [atomMapping.entries]);
 
     if (isLoading) {
         return (
@@ -346,16 +291,7 @@ export default function ReactionDetailPage() {
 
     const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
 
-    const thermoRecords = rxn.thermodynamics ?? [];
-    const agreement = directionAgreementFromRecords(thermoRecords);
 
-    const dg = Number(rxn.deltag);
-    const err = Number(rxn.deltagerr);
-    const deltaGLabel = Number.isNaN(dg)
-        ? 'N/A'
-        : Number.isNaN(err)
-          ? `${dg} kcal/mol`
-          : `${dg} +/- ${err} kcal/mol`;
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1240, mx: 'auto' }}>
@@ -378,9 +314,6 @@ export default function ReactionDetailPage() {
                                 <ReactionStructureEquation
                                     equation={rxn.equation ?? rxn.definition}
                                     reversibility={rxn.reversibility}
-                                    atomMappingPairs={atomPairs}
-                                    atomMappingConfidence={atomMapping.confidence}
-                                    atomMappingHasSymmetryGroups={atomMapping.hasSymmetryGroups}
                                 />
                             )}
                         </Box>
@@ -398,48 +331,6 @@ export default function ReactionDetailPage() {
                         <ChemicalEquation equation={rxn.equation} />
                     </DetailRow>
 
-                    {thermoRecords.length > 0 ? (
-                        <DetailRow
-                            label={
-                                typeof rxn.n_sources_thermodynamics === 'number' &&
-                                rxn.n_sources_thermodynamics > 0
-                                    ? `Thermodynamics (${rxn.n_sources_thermodynamics} sources)`
-                                    : 'Thermodynamics'
-                            }
-                        >
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                {agreement !== null ? (
-                                    <Chip
-                                        size="small"
-                                        label={DIRECTION_AGREEMENT_LABEL[agreement]}
-                                        color={DIRECTION_AGREEMENT_COLOR[agreement]}
-                                        sx={{ alignSelf: 'flex-start' }}
-                                    />
-                                ) : (
-                                    typeof rxn.sources_agree_direction === 'boolean' && (
-                                        <Chip
-                                            size="small"
-                                            label={
-                                                rxn.sources_agree_direction
-                                                    ? 'Sources agree on direction'
-                                                    : 'Sources disagree on direction'
-                                            }
-                                            color={rxn.sources_agree_direction ? 'success' : 'warning'}
-                                            sx={{ alignSelf: 'flex-start' }}
-                                        />
-                                    )
-                                )}
-                                <ThermodynamicsTable records={thermoRecords} showOperator />
-                            </Box>
-                        </DetailRow>
-                    ) : (
-                        <DetailRow label="Gibbs free energy change (ΔG)">
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {deltaGLabel}
-                            </Typography>
-                        </DetailRow>
-                    )}
-
                     <DetailRow label="EC numbers">
                         {ecNumbers.length ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
@@ -452,9 +343,29 @@ export default function ReactionDetailPage() {
                         )}
                     </DetailRow>
 
-                    <DetailRow label="Thermodynamic reversibility">
-                        <ReversibilityDisplay value={rxn.reversibility} />
+                    <DetailRow label="Recommended reversibility">
+                        <Typography variant="body2">{rxn.reversibility}</Typography>
                     </DetailRow>
+
+                    {rxn.llm_council_proposals?.map((proposal, index) => (
+                        <DetailRow key={`${proposal.source_name}-${index}`} label="LLM council proposal">
+                            <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Chip size="small" label={proposal.source_name} />
+                                <Typography variant="body2">Proposed direction: {proposal.proposed_direction}</Typography>
+                            </Box>
+                        </DetailRow>
+                    ))}
+
+                    {rxn.thermo_evidence?.map((evidence, index) => (
+                        <DetailRow key={`${evidence.source ?? evidence.cross_source ?? index}-${index}`} label="Thermo evidence">
+                            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                                {evidence.grade && <Tooltip title="Grade is an evidence confidence tier." arrow><Chip size="small" label={evidence.grade} /></Tooltip>}
+                                {evidence.assessment && <Tooltip title="Assessment is a thermodynamic assessment." arrow><Typography component="span" variant="body2">{evidence.assessment}</Typography></Tooltip>}
+                                {evidence.source && <Tooltip title="Source identifies the database or source." arrow><Typography component="span" variant="body2">{evidence.source}</Typography></Tooltip>}
+                                {evidence.cross_source && <Tooltip title="Cross-source indicates agreement across sources." arrow><Typography component="span" variant="body2">{evidence.cross_source}</Typography></Tooltip>}
+                            </Box>
+                        </DetailRow>
+                    ))}
 
                     <DetailRow label="Status">
                         <Chip

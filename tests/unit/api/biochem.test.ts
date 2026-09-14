@@ -65,6 +65,39 @@ describe('Biochem API Integration Tests', () => {
   });
 });
 
+describe('Biochem detail schema', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('preserves compound pKas and reaction thermo evidence from Solr detail documents', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const requestUrl = String(url);
+      const docs = requestUrl.includes('fq=doc_type') ? [] : requestUrl.includes('cpd00002') ? [{
+        id: 'cpd00002', pkas: [{ source_name: 'eQuilibrator', pka_kind: 'acid', pka_number: [6.2, 10.1] }],
+        thermo_evidence: { grade: 'silver', source: 'MetaCyc', 'cross-source': 'eQuilibrator' },
+      }] : [{
+        id: 'rxn00001', reversibility: '>', thermo_evidence: [{
+          assessment: 'favorable', grade: 'gold', source: 'eQuilibrator', cross_source: 'MetaCyc',
+        }],
+      }];
+      return Promise.resolve(new Response(JSON.stringify({ response: { docs } }), { status: 200 }));
+    });
+
+    const compound = await biochemApi.getCompoundById('cpd00002');
+    const reaction = await biochemApi.getReactionById('rxn00001');
+
+    expect(compound.pkas).toEqual([{ source_name: 'eQuilibrator', pka_kind: 'acid', pka_number: [6.2, 10.1] }]);
+    expect(compound.thermo_evidence).toEqual([{ grade: 'silver', source: 'MetaCyc', cross_source: 'eQuilibrator' }]);
+    expect(reaction.reversibility).toBe('>');
+    expect(reaction.thermo_evidence).toEqual([{ assessment: 'favorable', grade: 'gold', source: 'eQuilibrator', cross_source: 'MetaCyc' }]);
+    expect(fetchMock.mock.calls.map(([url]) => String(url)).at(-1)).toContain('q=id:rxn00001');
+  });
+});
+
 describe('filterDocsByGridModel (shared local column filters)', () => {
   it('filters rows using MUI string operators', async () => {
     const { filterDocsByGridModel } = await import('@/lib/api/biochem');
