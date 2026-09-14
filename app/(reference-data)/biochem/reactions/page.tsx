@@ -27,9 +27,9 @@ import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 /* ─── Alias / external-link helpers ──────────────────────────── */
 
 const reversibilityGradeStyles = {
-    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900' },
-    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794' },
-    bronze: { backgroundColor: '#f8eee8', borderColor: '#b87333' },
+    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900', borderWidth: 3 },
+    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794', borderWidth: 2 },
+    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.19)', borderColor: '#9a5c22', borderWidth: 1 },
 } as const;
 
 export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
@@ -37,18 +37,22 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
         const value = item.grade?.toLowerCase();
         return value === 'gold' || value === 'silver' || value === 'bronze';
     })?.grade?.toLowerCase() as keyof typeof reversibilityGradeStyles | undefined;
-    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#e0e0e0' };
+    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575', borderWidth: 1 };
+    const reversibility = reaction.reversibility || 'N/A';
+    const evidenceGrade = grade || 'no grade';
+    const label = `Reversibility ${reversibility}; evidence grade ${evidenceGrade}`;
 
     return (
         <Box
             component="span"
             data-testid="reversibility-badge"
             data-grade={grade}
-            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
-            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 0.75, py: 0.25 }}
+            title={label}
+            aria-label={label}
+            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor, borderWidth: style.borderWidth }}
+            sx={{ borderStyle: 'solid', borderRadius: 1, display: 'inline-flex', fontWeight: 700, px: 0.75, whiteSpace: 'nowrap' }}
         >
-            <Box component="span">{reaction.reversibility || 'N/A'}</Box>
-            {grade && <Box component="span" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>{grade}</Box>}
+            {reversibility}
         </Box>
     );
 }
