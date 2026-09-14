@@ -37,19 +37,21 @@ export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
         const value = item.grade?.toLowerCase();
         return value === 'gold' || value === 'silver' || value === 'bronze';
     })?.grade?.toLowerCase() as keyof typeof reversibilityGradeStyles | undefined;
-    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#e0e0e0' };
+    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575' };
+    const reversibility = reaction.reversibility || 'N/A';
+    const evidenceGrade = grade || 'no grade';
+    const label = `Reversibility ${reversibility}; evidence grade ${evidenceGrade}`;
 
     return (
         <Box
             component="span"
             data-testid="reversibility-badge"
             data-grade={grade}
+            title={label}
+            aria-label={label}
             style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor }}
-            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 0.75, py: 0.25 }}
-        >
-            <Box component="span">{reaction.reversibility || 'N/A'}</Box>
-            {grade && <Box component="span" sx={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>{grade}</Box>}
-        </Box>
+            sx={{ border: '1px solid', borderRadius: 1, display: 'inline-flex', minWidth: 24, height: 24 }}
+        />
     );
 }
 
