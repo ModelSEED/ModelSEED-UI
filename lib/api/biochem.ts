@@ -198,6 +198,7 @@ export interface SolrQueryOpts {
     filterQueries?: string[];
     /** Include nested stoichiometry child fields in reaction quick search. */
     nestedStoichiometryQuickSearch?: boolean;
+    nestedThermoEvidenceQuickSearch?: boolean;
 }
 
 /* ─── External DB Links ──────────────────────────────────────── */
@@ -428,6 +429,7 @@ function buildQuickSearchClause(
     quickFilterValues: string[],
     quickFilterLogicOperator: 'and' | 'or',
     nestedStoichiometryQuickSearch = false,
+    nestedThermoEvidenceQuickSearch = false,
 ): string {
     if (query === '*' || query === '*:*') return '*';
 
@@ -454,6 +456,12 @@ function buildQuickSearchClause(
                     const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
                         `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard})"})`,
+                    );
+                }
+                if (nestedThermoEvidenceQuickSearch) {
+                    const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
+                    fieldClauses.push(
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:${wildcard}"})`,
                     );
                 }
                 return `(${fieldClauses.join(' OR ')})`;
@@ -488,6 +496,7 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         filterModel,
         filterQueries = [],
         nestedStoichiometryQuickSearch = false,
+        nestedThermoEvidenceQuickSearch = false,
     } = opts;
 
     // Field list
@@ -536,6 +545,7 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         filterModel?.quickFilterValues ?? [],
         filterModel?.quickFilterLogicOperator ?? 'and',
         nestedStoichiometryQuickSearch,
+        nestedThermoEvidenceQuickSearch,
     );
 
     const finalClauses: string[] = [];
@@ -583,11 +593,7 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
     return {
         numFound: typeof response?.numFound === 'number' ? response.numFound : 0,
         start: typeof response?.start === 'number' ? response.start : 0,
-        docs: docs.map((doc) => {
-            const record = doc as T & { thermo_evidence?: unknown };
-            if (!('thermo_evidence' in record)) return doc;
-            return { ...record, thermo_evidence: normalizeThermoEvidence(record.thermo_evidence) } as T;
-        }),
+        docs,
     };
 }
 
@@ -1131,7 +1137,7 @@ const SYNONYM_FIELD_ALIAS = 'aliases';
 const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
-const RXN_SEARCH_FIELDS = ['id', 'name', 'definition', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+const RXN_SEARCH_FIELDS = ['id', 'name', 'definition', 'reversibility', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
 
 /** Solr 9 nested stoichiometry is a child path, not a queryable parent field; querying it yields HTTP 400 "undefined field stoichiometry". */
 const RXN_SEARCH_FIELDS_NESTED = RXN_SEARCH_FIELDS.filter((field) => field !== 'stoichiometry');
@@ -1148,8 +1154,8 @@ const RXN_VISIBLE = [
 const RXN_VISIBLE_NESTED = [
     ...RXN_VISIBLE,
     'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-    'participant_aliases', 'aliases', 'doc_type', '_nest_path_',
-    '[child childFilter=doc_type:stoichiometry limit=200]',
+    'participant_aliases', 'aliases', 'grade', 'doc_type', '_nest_path_',
+    '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
 ];
 
 /**
@@ -1209,6 +1215,7 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
         ? {
             ...mergedOpts,
             nestedStoichiometryQuickSearch: true,
+            nestedThermoEvidenceQuickSearch: true,
             filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('reactions')],
         }
         : mergedOpts;
@@ -1219,6 +1226,8 @@ export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrRespon
     // with its visible participant name; legacy serialized stoichiometry is normalized too.
     res.docs.forEach((doc) => {
         doc.participants = normalizeStoichiometry(doc);
+        const evidence = normalizeThermoEvidence(doc);
+        if (evidence) doc.thermo_evidence = evidence;
         if (doc.is_obsolete === '1') {
             doc.status = `${doc.status ?? ''} (and is obsolete)`.trim();
         }
@@ -1365,6 +1374,7 @@ export async function getCompoundById(id: string): Promise<Compound> {
     return raw ? {
         ...raw,
         thermodynamics: normalizeThermodynamics(raw),
+        thermo_evidence: normalizeThermoEvidence(raw),
         pkas: normalizeCompoundPkas(raw.pkas ?? (raw as Compound & { _childDocuments_?: unknown[] })._childDocuments_),
     } : raw;
 }

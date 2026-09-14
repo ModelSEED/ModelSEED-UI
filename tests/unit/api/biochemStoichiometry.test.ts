@@ -126,8 +126,8 @@ describe('Solr stoichiometry support', () => {
             'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
             'is_transport', 'ontology', 'pathways', 'notes',
             'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-            'participant_aliases', 'aliases', 'doc_type', '_nest_path_',
-            '[child childFilter=doc_type:stoichiometry limit=200]',
+            'participant_aliases', 'aliases', 'grade', 'doc_type', '_nest_path_',
+            '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
         ].join(','));
         expect(nested.docs[0].participants).toEqual([{
             compound: 'cpd05331', coefficient: -1, compartment: 0, name: 'Glucoraphanin',
@@ -151,7 +151,7 @@ describe('Solr stoichiometry support', () => {
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['cpd05331'] } });
         const legacyListUrl = new URL(dataUrl(fetchMock));
         expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,reversibility,thermo_evidence,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
-        expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
+        expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR reversibility:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
         expect(legacyListUrl.searchParams.get('sort')).toBe('id asc');
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['Glucoraphanin'] } });
         expect(new URL(dataUrl(fetchMock)).searchParams.get('q')).toContain('definition:*Glucoraphanin*');

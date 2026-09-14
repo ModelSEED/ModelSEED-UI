@@ -149,6 +149,35 @@ describe('getCompounds Solr query shape', () => {
   });
 });
 
+describe('getReactions nested reversibility search and evidence', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('searches parent reversibility and nested thermo evidence grades, then normalizes list evidence', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      const docs = isProbe ? [] : [{
+        id: 'rxn00001', reversibility: '>',
+        thermodynamics: [{ doc_type: 'thermo_evidence', thermo_evidence: { grade: 'gold' } }],
+      }];
+      return Promise.resolve(new Response(JSON.stringify({ response: { numFound: 1, start: 0, docs } }), { status: 200 }));
+    });
+
+    const result = await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['>'] } });
+
+    const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    expect(query).toContain('reversibility:>*');
+    expect(query).toContain('{!parent which="doc_type:reaction" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:>*"}');
+    expect(listUrl.searchParams.get('fl')).toContain('[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]');
+    expect(result.docs[0]?.thermo_evidence).toEqual([{ grade: 'gold' }]);
+  });
+});
+
 describe('getReactions Solr case-variant filters', () => {
   afterEach(() => {
     vi.restoreAllMocks();

@@ -131,6 +131,16 @@ describe('ThermodynamicsTable', () => {
         expect(badge.style.borderColor).toBe(borderColor);
     });
 
+    it('renders all literal reversibility operators with their grade in the accessible badge text', () => {
+        for (const reversibility of ['>', '<', '?', '=']) {
+            const { container, unmount } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility, thermo_evidence: [{ grade: 'gold' }] } as never} />);
+            const badge = container.querySelector('[data-testid="reversibility-badge"]');
+            expect(badge?.textContent).toContain(reversibility);
+            expect(badge?.textContent).toContain('gold');
+            unmount();
+        }
+    });
+
     it('renders reaction reversibility in a plain white frame when evidence has no recognized grade', () => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '<', thermo_evidence: [{ grade: 'unknown' }] } as never} />);
         const badge = container.querySelector('[data-testid="reversibility-badge"]') as HTMLElement;
