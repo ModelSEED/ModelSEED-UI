@@ -28,12 +28,12 @@
     "@mui/material-nextjs": "^7.3.8",
     "@mui/x-data-grid": "^8.27.3",
     "@rdkit/rdkit": "2025.3.4-1.0.0",
-    "@tanstack/react-query": "^5.90.21",
-    "next": "^16.3.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "@tanstack/react-query": "^5.102.8",
+    "next": "^16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
