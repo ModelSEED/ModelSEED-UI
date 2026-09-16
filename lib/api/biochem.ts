@@ -12,6 +12,7 @@
 import {
     CPD_IMG_BASE,
     MODELSEED_API_URL,
+    SOLR_COMPOUNDS_COLLECTION,
     solrCorpusEndpoint,
 } from './config';
 import { hasNestedSchema, parentDocTypeFilter } from './solrSchema';
@@ -459,7 +460,13 @@ function buildQuickSearchClause(
                 if (nestedStoichiometryQuickSearch) {
                     const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
-                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR participant_aliases:${wildcard})"})`,
+                        // Participant aliases are NOT denormalised onto the stoichiometry children.
+                        // They are read from the compounds core at query time with a cross-core
+                        // join, so editing a compound's aliases takes effect without reposting
+                        // every reaction that uses it. fromIndex must name the compounds core for
+                        // THIS environment -- compounds_staging from reactions_staging -- or the
+                        // clause silently resolves against the wrong dataset instead of erroring.
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR {!join from=id to=compound fromIndex=${SOLR_COMPOUNDS_COLLECTION}}aliases:${wildcard})"})`,
                     );
                 }
                 if (nestedThermoEvidenceQuickSearch) {
@@ -1157,7 +1164,7 @@ const RXN_VISIBLE = [
 const RXN_VISIBLE_NESTED = [
     ...RXN_VISIBLE,
     'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-    'participant_aliases', 'grade', 'doc_type', '_nest_path_',
+    'grade', 'doc_type', '_nest_path_',
     '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
 ];
 

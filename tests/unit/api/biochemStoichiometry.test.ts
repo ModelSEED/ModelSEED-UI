@@ -126,7 +126,7 @@ describe('Solr stoichiometry support', () => {
             'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
             'is_transport', 'pathways', 'notes',
             'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-            'participant_aliases', 'grade', 'doc_type', '_nest_path_',
+            'grade', 'doc_type', '_nest_path_',
             '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
         ].join(','));
         expect(nested.docs[0].participants).toEqual([{
@@ -176,8 +176,8 @@ describe('Solr stoichiometry support', () => {
         expect(nestedQuery).toContain('name:*Glucoraphanin*');
         expect(nestedQuery).toContain('definition:*Glucoraphanin*');
         expect(nestedQuery).not.toContain('stoichiometry:*');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin* OR participant_aliases:*Glucoraphanin*)"})');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331* OR participant_aliases:*cpd05331*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin* OR {!join from=id to=compound fromIndex=compounds_staging}aliases:*Glucoraphanin*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331* OR {!join from=id to=compound fromIndex=compounds_staging}aliases:*cpd05331*)"})');
         expect(nestedQuery).toContain(') AND (');
         await api.findReactionsForCompound('cpd00002');
         expect(new URL(dataUrl(fetchMock)).searchParams.get('q')).toContain('{!parent which="doc_type:reaction" v="doc_type:stoichiometry AND compound:cpd00002"}');
