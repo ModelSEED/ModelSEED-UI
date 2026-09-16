@@ -467,9 +467,6 @@ export default function CompoundDetailPage() {
                     <DetailRow label="Synonyms">
                         <SynonymsDisplay synonyms={synonyms} />
                     </DetailRow>
-                    {cpd.ontology && cpd.ontology !== 'class:null|context:null' && (
-                        <DetailRow label="Ontology"><Typography variant="body2">{cpd.ontology}</Typography></DetailRow>
-                    )}
                     <DetailRow label="Source"><Typography variant="body2">{cpd.source ?? 'N/A'}</Typography></DetailRow>
                 </Box>
             </Box>

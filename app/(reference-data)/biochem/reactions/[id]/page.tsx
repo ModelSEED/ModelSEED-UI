@@ -426,13 +426,6 @@ export default function ReactionDetailPage() {
                         <PathwaysDisplay pathways={pathways} />
                     </DetailRow>
 
-                    {rxn.ontology && rxn.ontology !== 'class:null|context:null|step:null' && (
-                        <DetailRow label="Ontology">
-                            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                                {rxn.ontology}
-                            </Typography>
-                        </DetailRow>
-                    )}
 
                 </CardContent>
             </Card>

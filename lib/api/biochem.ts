@@ -114,7 +114,6 @@ export interface Reaction {
     ec_numbers: string[];
     is_obsolete: string;
     is_transport: boolean;
-    ontology: string;
     pathways: string[];
     notes: string[];
     abbreviation?: string;
@@ -146,7 +145,6 @@ export interface Compound {
     deltagerr: number;
     abbreviation: string;
     aliases: string[];
-    ontology: string;
     inchikey?: string;
     smiles?: string;
     is_cofactor?: boolean;
@@ -461,7 +459,7 @@ function buildQuickSearchClause(
                 if (nestedStoichiometryQuickSearch) {
                     const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
-                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR participant_aliases:${wildcard} OR aliases:${wildcard})"})`,
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR participant_aliases:${wildcard})"})`,
                     );
                 }
                 if (nestedThermoEvidenceQuickSearch) {
@@ -519,11 +517,7 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         url += `&fq=${encodeURIComponent(fq)}`;
     }
 
-    // Filter out ontology field for compounds (Solr compounds_staging has no ontology field)
-    const filterItems = (filterModel?.items ?? []).filter(item => {
-        const field = toSolrField(String(item.field ?? ''));
-        return !(collection === 'compounds' && field === 'ontology');
-    });
+    const filterItems = filterModel?.items ?? [];
 
     const filterClauses = filterItems
         .map((item) => buildFilterClause(item))
@@ -799,8 +793,6 @@ function matchesFilterItem(
     const field = toSolrField(String(item.field ?? ''));
     if (!field || !operator) return true;
 
-    /* Solr compounds_staging has no ontology query field — REST payloads typically omit it too. */
-    if (endpoint === 'compounds' && field === 'ontology') return true;
 
     const rawField = doc[field];
     const fieldValue = normalizeFieldValue(rawField);
@@ -1157,7 +1149,7 @@ const RXN_SEARCH_FIELDS_NESTED = RXN_SEARCH_FIELDS.filter((field) => field !== '
 const RXN_VISIBLE = [
     'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
     'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
-    'is_transport', 'ontology', 'pathways', 'notes',
+    'is_transport', 'pathways', 'notes',
 ];
 // Solr child transformers only return fields also present in the parent `fl` list.
 // Include the stored stoichiometry fields needed by Equation highlighting before
@@ -1165,15 +1157,11 @@ const RXN_VISIBLE = [
 const RXN_VISIBLE_NESTED = [
     ...RXN_VISIBLE,
     'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-    'participant_aliases', 'aliases', 'grade', 'doc_type', '_nest_path_',
+    'participant_aliases', 'grade', 'doc_type', '_nest_path_',
     '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
 ];
 
-/**
- * Compound quick-search fields — must exist on Solr `compounds_staging`.
- * Note: Solr does not expose an `ontology` field on compounds; querying it yields 400
- * ("undefined field ontology") and breaks the whole quick-search clause.
- */
+/** Compound quick-search fields — every entry must exist on the Solr core. */
 const CPD_SEARCH_FIELDS = ['id', 'name', 'formula', 'synonyms', 'aliases'];
 
 /** Compound visible fields matching Solr `compounds_staging` stored fields (see fl=). */
