@@ -118,7 +118,7 @@ describe('getCompounds Solr query shape', () => {
     vi.restoreAllMocks();
   });
 
-  it('quick search must not reference ontology (undefined field on compounds_staging)', async () => {
+  it('quick search only references fields that exist on the compounds core', async () => {
     const biochemApi = await loadBiochemApi();
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
       Promise.resolve(
@@ -143,9 +143,97 @@ describe('getCompounds Solr query shape', () => {
     const qRaw = u.searchParams.get('q');
     expect(qRaw).toBeTruthy();
     const q = decodeURIComponent(qRaw ?? '');
-    expect(q).not.toMatch(/\bontology\b/i);
+    // Every field: token in q must be one the core actually defines. Solr answers an
+    // undefined field in q with a hard 400, and a 400 carries no CORS header, so the
+    // browser reports a CORS failure and points at the wrong layer. Three fields have
+    // reached production this way.
+    const COMPOUND_CORE_FIELDS = ['id', 'name', 'formula', 'synonyms', 'aliases'];
+    const queried = [...q.matchAll(/(\w+):/g)].map((mm) => mm[1]);
+    const unknown = [...new Set(queried)].filter((f) => !COMPOUND_CORE_FIELDS.includes(f));
+    expect(unknown).toEqual([]);
     expect(q).toContain('cpd05323');
     expect(q).toMatch(/formula|aliases|name|id/);
+  });
+});
+
+describe('getReactions nested reversibility search and evidence', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('searches parent reversibility and nested thermo evidence grades, then normalizes list evidence', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      const docs = isProbe ? [] : [{
+        id: 'rxn00001', reversibility: '>',
+        thermodynamics: [{ doc_type: 'thermo_evidence', thermo_evidence: { grade: 'gold' } }],
+      }];
+      return Promise.resolve(new Response(JSON.stringify({ response: { numFound: 1, start: 0, docs } }), { status: 200 }));
+    });
+
+    const result = await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['>'] } });
+
+    const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    expect(query).toContain('reversibility:>*');
+    expect(query).toContain('{!parent which="doc_type:reaction" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:>*"}');
+    expect(listUrl.searchParams.get('fl')).toContain('[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]');
+    expect(result.docs[0]?.thermo_evidence).toEqual([{ grade: 'gold' }]);
+  });
+});
+
+describe('getReactions numeric ID quick search', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('preserves text and participant clauses while adding the canonical five-digit reaction ID', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      return Promise.resolve(new Response(JSON.stringify({
+        response: { numFound: isProbe ? 1 : 0, start: 0, docs: [] },
+      }), { status: 200 }));
+    });
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['168'] } });
+
+    const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    expect(query).toContain('id:rxn00168');
+    expect(query).toContain('id:*168*');
+    expect(query).toContain('name:*168*');
+    expect(query).toContain('aliases:*168*');
+    expect(query).toContain('compound:*168*');
+    expect(query).toContain('participant_name:*168*');
+  });
+
+  it('normalizes whitespace around bare IDs while preserving already-normalized IDs', async () => {
+    const biochemApi = await loadBiochemApi();
+    const { resetSolrSchemaCache } = await import('@/lib/api/solrSchema');
+    resetSolrSchemaCache();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
+      const isProbe = String(url).includes('rows=0');
+      return Promise.resolve(new Response(JSON.stringify({
+        response: { numFound: isProbe ? 1 : 0, start: 0, docs: [] },
+      }), { status: 200 }));
+    });
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['  168  '] } });
+    const whitespaceQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    expect(whitespaceQuery).toContain('id:rxn00168');
+    expect(whitespaceQuery).toContain('id:*168*');
+    expect(whitespaceQuery).not.toContain('%20');
+
+    await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: [' rxn00168 '] } });
+    const normalizedIdQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    expect(normalizedIdQuery).toContain('id:*rxn00168*');
+    expect(normalizedIdQuery).not.toContain('id:rxnrxn00168');
   });
 });
 

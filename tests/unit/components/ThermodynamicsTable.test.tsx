@@ -119,29 +119,57 @@ describe('ThermodynamicsTable', () => {
     });
 
     it.each([
-        ['GOLD', '#fff8e1', '#b88900'],
-        ['silver', '#f5f7fa', '#7b8794'],
-        ['Bronze', '#f8eee8', '#b87333'],
-    ])('renders %s reaction reversibility with its evidence grade palette', (grade, backgroundColor, borderColor) => {
+        ['GOLD', '#fff8e1', '#b88900', '3px'],
+        ['silver', '#f5f7fa', '#7b8794', '2px'],
+        ['Bronze', 'rgba(184, 115, 51, 0.19)', '#9a5c22', '1px'],
+    ])('renders %s reaction reversibility as a colored operator with accessible grade metadata', (grade, backgroundColor, borderColor, borderWidth) => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '>', thermo_evidence: [{ grade }] } as never} />);
         const badge = container.querySelector(`[data-grade="${grade.toLowerCase()}"]`) as HTMLElement;
-        expect(badge.textContent).toContain('>');
-        expect(badge.textContent).toContain(grade.toLowerCase());
+        const label = `Reversibility >; evidence grade ${grade.toLowerCase()}`;
+        expect(badge.textContent).toBe('>');
+        expect(badge.textContent).not.toMatch(/Gold|Silver|Bronze|No grade/);
+        expect(badge.getAttribute('title')).toBe(label);
+        expect(badge.getAttribute('aria-label')).toBe(label);
         expect(badge.style.backgroundColor).toBe(backgroundColor);
         expect(badge.style.borderColor).toBe(borderColor);
+        expect(getComputedStyle(badge).borderTopWidth).toBe(borderWidth);
+        expect(getComputedStyle(badge).fontWeight).toBe('700');
     });
 
-    it('renders reaction reversibility in a plain white frame when evidence has no recognized grade', () => {
+    it.each(['>', '<', '?', '='])('renders the %s operator visibly while retaining grade metadata', (reversibility) => {
+        const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility, thermo_evidence: [{ grade: 'gold' }] } as never} />);
+        const badge = container.querySelector('[data-testid="reversibility-badge"]');
+        const label = `Reversibility ${reversibility}; evidence grade gold`;
+        expect(badge?.textContent).toBe(reversibility);
+        expect(badge?.getAttribute('title')).toBe(label);
+        expect(badge?.getAttribute('aria-label')).toBe(label);
+    });
+
+    it('renders a no-grade reversibility operator on a white cell with neutral border and metadata', () => {
         const { container } = render(<ReversibilityCell reaction={{ id: 'rxn1', reversibility: '<', thermo_evidence: [{ grade: 'unknown' }] } as never} />);
         const badge = container.querySelector('[data-testid="reversibility-badge"]') as HTMLElement;
         expect(badge.getAttribute('data-grade')).toBeNull();
         expect(badge.textContent).toBe('<');
+        expect(badge.getAttribute('title')).toBe('Reversibility <; evidence grade no grade');
+        expect(badge.getAttribute('aria-label')).toBe('Reversibility <; evidence grade no grade');
         expect(badge.style.backgroundColor).toBe('#fff');
+        expect(badge.style.borderColor).toBe('#757575');
+        expect(getComputedStyle(badge).borderTopWidth).toBe('1px');
+        expect(getComputedStyle(badge).fontWeight).toBe('700');
     });
 
-    it('distinguishes absent cross-source evidence from unpaired', () => {
+    it('omits absent cross-source evidence while retaining the ordered remaining fields and accessible values', () => {
         const { container } = render(<EvidenceSummary item={{ grade: 'silver', assessment: 'self-confident', source: 'eQ' }} />);
-        expect(container.querySelector('[aria-label="cross-source (absent)"]')?.textContent).toBe('(absent)');
+        expect([...container.querySelectorAll('dt')].map((label) => label.textContent)).toEqual(['Grade', 'Assessment', 'Source']);
+        expect(container.querySelectorAll('.thermo-evidence__item')).toHaveLength(3);
+        expect(container.querySelector('[aria-label="cross-source (absent)"]')).toBeNull();
+        expect(container.querySelector('[aria-label="Thermo evidence, grade silver, assessment self-confident, source eQ"]')).toBeTruthy();
+        expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(3);
+    });
+
+    it('retains unpaired cross-source evidence', () => {
+        const { container } = render(<EvidenceSummary item={{ grade: 'silver', assessment: 'self-confident', cross_source: 'unpaired', source: 'eQ' }} />);
+        expect(container.querySelector('[aria-label="cross-source unpaired"]')?.textContent).toBe('unpaired');
     });
 
     it('renders record, heuristic, recommended, and LLM operators as literal labeled badges without arrow decoration', () => {

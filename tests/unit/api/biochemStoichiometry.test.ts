@@ -124,10 +124,10 @@ describe('Solr stoichiometry support', () => {
         expect(nestedUrl.searchParams.get('fl')).toBe([
             'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
             'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
-            'is_transport', 'ontology', 'pathways', 'notes',
+            'is_transport', 'pathways', 'notes',
             'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
-            'participant_aliases', 'aliases', 'doc_type', '_nest_path_',
-            '[child childFilter=doc_type:stoichiometry limit=200]',
+            'grade', 'doc_type', '_nest_path_',
+            '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
         ].join(','));
         expect(nested.docs[0].participants).toEqual([{
             compound: 'cpd05331', coefficient: -1, compartment: 0, name: 'Glucoraphanin',
@@ -150,8 +150,8 @@ describe('Solr stoichiometry support', () => {
         expect(reaction.participants).toHaveLength(1);
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['cpd05331'] } });
         const legacyListUrl = new URL(dataUrl(fetchMock));
-        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,reversibility,thermo_evidence,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,ontology,pathways,notes');
-        expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
+        expect(legacyListUrl.searchParams.get('fl')).toBe('name,id,definition,reversibility,thermo_evidence,stoichiometry,status,aliases,ec_numbers,is_obsolete,is_transport,pathways,notes');
+        expect(legacyListUrl.searchParams.get('q')).toBe('(id:*cpd05331* OR name:*cpd05331* OR definition:*cpd05331* OR reversibility:*cpd05331* OR status:*cpd05331* OR ec_numbers:*cpd05331* OR aliases:*cpd05331* OR pathways:*cpd05331* OR stoichiometry:*cpd05331* OR notes:*cpd05331*)');
         expect(legacyListUrl.searchParams.get('sort')).toBe('id asc');
         await api.getReactions({ filterModel: { items: [], quickFilterValues: ['Glucoraphanin'] } });
         expect(new URL(dataUrl(fetchMock)).searchParams.get('q')).toContain('definition:*Glucoraphanin*');
@@ -176,8 +176,8 @@ describe('Solr stoichiometry support', () => {
         expect(nestedQuery).toContain('name:*Glucoraphanin*');
         expect(nestedQuery).toContain('definition:*Glucoraphanin*');
         expect(nestedQuery).not.toContain('stoichiometry:*');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin*)"})');
-        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*Glucoraphanin* OR participant_name:*Glucoraphanin* OR {!join from=id to=compound fromIndex=compounds_staging}aliases:*Glucoraphanin*)"})');
+        expect(nestedQuery).toContain('({!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*cpd05331* OR participant_name:*cpd05331* OR {!join from=id to=compound fromIndex=compounds_staging}aliases:*cpd05331*)"})');
         expect(nestedQuery).toContain(') AND (');
         await api.findReactionsForCompound('cpd00002');
         expect(new URL(dataUrl(fetchMock)).searchParams.get('q')).toContain('{!parent which="doc_type:reaction" v="doc_type:stoichiometry AND compound:cpd00002"}');
@@ -229,6 +229,17 @@ describe('reaction request regression matrix', () => {
         expect(url.searchParams.get('sort')).toBe('name desc');
         expect(url.searchParams.get('fl')).toContain('definition');
         expect(url.searchParams.getAll('fq')).toEqual(nested ? ['doc_type:reaction'] : []);
+    });
+
+    it('includes supported nested participant alias fields in quick search clauses', async () => {
+        const api = await loadBiochemApi();
+        const fetchMock = mockFetch({ reactions: true });
+        await api.getReactions({ filterModel: { items: [], quickFilterValues: ['RegistryAlias'] } });
+
+        const query = new URL(dataUrl(fetchMock)).searchParams.get('q') ?? '';
+        expect(query).toContain('aliases:*RegistryAlias*');
+        expect(query).toContain('participant_name:*RegistryAlias*');
+        expect(query).toContain('compound:*RegistryAlias*');
     });
 
     it('keeps blank and intentional wildcard direct queries broad without exposing raw syntax', async () => {
