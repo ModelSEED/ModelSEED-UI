@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/gsd-opencode/**', '**/.git/**'],
+    exclude: ['**/node_modules/**', '**/.git/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -19,7 +19,6 @@ export default defineConfig({
         'vitest.config.ts',
         '**/*.d.ts',
         '**/.next/**',
-        'gsd-opencode/**',
         '**/*.md',
         'lib/README.md',
       ],

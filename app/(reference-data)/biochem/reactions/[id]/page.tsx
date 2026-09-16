@@ -11,8 +11,10 @@ import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Link from 'next/link';
 import { getReactionById, EXTERNAL_DBS } from '@/lib/api/biochem';
+import { normalizeAtomMapping, parseAtomMappings } from '@/lib/utils/atomMapping';
 import ChemicalEquation from '@/components/ui/ChemicalEquation';
 import ReactionStructureEquation from '@/components/ui/ReactionStructureEquation';
+import ThermodynamicsTable, { DirectionOperator, EvidenceSummary } from '@/components/ui/ThermodynamicsTable';
 
 function extractCompoundIds(equation: string): string[] {
     if (!equation) return [];
@@ -254,48 +256,39 @@ function BooleanChip({ value }: { value: boolean }) {
     );
 }
 
-function ReversibilityDisplay({ value }: { value?: string }) {
-    const raw = (value ?? '').trim();
-
-    let label = 'Unknown';
-    let meaning = 'Directionality is not specified in this record.';
-    let color = { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
-
-    if (raw === '=' || raw === '<=>') {
-        label = 'Reversible';
-        meaning = 'Reaction can proceed in both forward and reverse directions.';
-        color = { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' };
-    } else if (raw === '>' || raw === '=>') {
-        label = 'Forward-only';
-        meaning = 'Reaction is constrained to proceed left to right.';
-        color = { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' };
-    } else if (raw === '<' || raw === '<=') {
-        label = 'Reverse-only';
-        meaning = 'Reaction is constrained to proceed right to left.';
-        color = { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' };
-    } else if (raw) {
-        label = `Custom (${raw})`;
-        meaning = 'Reaction uses a non-standard reversibility code.';
-        color = { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
-    }
-
+function ThermodynamicsDetails({ reaction }: { reaction: Awaited<ReturnType<typeof getReactionById>> }) {
+    const records = reaction.thermodynamics ?? [];
+    const evidence = reaction.thermo_evidence ?? [];
+    const proposals = reaction.llm_council_proposals ?? [];
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.9, flexWrap: 'wrap' }}>
-            <Chip
-                size="small"
-                label={label}
-                sx={{
-                    fontWeight: 700,
-                    bgcolor: color.bg,
-                    color: color.text,
-                    border: '1px solid',
-                    borderColor: color.border,
-                }}
-            />
-            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.45 }}>
-                {meaning}
-            </Typography>
-        </Box>
+        <DetailRow label="Thermodynamics">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                <Box
+                    component="section"
+                    aria-label="Recommended reversibility"
+                    data-testid="thermo-summary-band"
+                    sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: 1,
+                        py: 0.25,
+                    }}
+                >
+                    <Typography variant="body2" color="text.secondary">Recommended reversibility</Typography>
+                    <DirectionOperator direction={reaction.reversibility || 'N/A'} />
+                    {evidence[0] && <EvidenceSummary item={evidence[0]} />}
+                </Box>
+                {(records.length > 0 || evidence.length > 0 || proposals.length > 0) && (
+                    <ThermodynamicsTable
+                        records={records}
+                        evidence={evidence}
+                        llmCouncilProposals={proposals}
+                        showOperator
+                    />
+                )}
+            </Box>
+        </DetailRow>
     );
 }
 
@@ -334,14 +327,7 @@ export default function ReactionDetailPage() {
     const pathways = (rxn.pathways ?? []).map((v) => v.replace(/"/g, '').trim()).filter(Boolean);
 
     const compoundIds = extractCompoundIds(rxn.equation || rxn.definition);
-
-    const dg = Number(rxn.deltag);
-    const err = Number(rxn.deltagerr);
-    const deltaGLabel = Number.isNaN(dg)
-        ? 'N/A'
-        : Number.isNaN(err)
-          ? `${dg} kcal/mol`
-          : `${dg} +/- ${err} kcal/mol`;
+    const atomMappingPairs = parseAtomMappings(normalizeAtomMapping(rxn).entries);
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1240, mx: 'auto' }}>
@@ -364,6 +350,7 @@ export default function ReactionDetailPage() {
                                 <ReactionStructureEquation
                                     equation={rxn.equation ?? rxn.definition}
                                     reversibility={rxn.reversibility}
+                                    atomMappingPairs={atomMappingPairs}
                                 />
                             )}
                         </Box>
@@ -381,12 +368,6 @@ export default function ReactionDetailPage() {
                         <ChemicalEquation equation={rxn.equation} />
                     </DetailRow>
 
-                    <DetailRow label="Gibbs free energy change (ΔG)">
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {deltaGLabel}
-                        </Typography>
-                    </DetailRow>
-
                     <DetailRow label="EC numbers">
                         {ecNumbers.length ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
@@ -399,9 +380,7 @@ export default function ReactionDetailPage() {
                         )}
                     </DetailRow>
 
-                    <DetailRow label="Thermodynamic reversibility">
-                        <ReversibilityDisplay value={rxn.reversibility} />
-                    </DetailRow>
+                    <ThermodynamicsDetails reaction={rxn} />
 
                     <DetailRow label="Status">
                         <Chip
@@ -454,6 +433,7 @@ export default function ReactionDetailPage() {
                             </Typography>
                         </DetailRow>
                     )}
+
                 </CardContent>
             </Card>
         </Box>

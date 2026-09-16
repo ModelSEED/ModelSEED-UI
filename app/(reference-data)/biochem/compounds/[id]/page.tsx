@@ -13,13 +13,15 @@ import Link from 'next/link';
 import {
     getCompoundById,
     findReactionsForCompound,
-    getCompoundImageUrl,
     EXTERNAL_DBS,
     type Reaction,
     type SolrQueryOpts,
 } from '@/lib/api/biochem';
 import { formatFormula } from '@/components/utils/formatFormula';
 import { formatEquation } from '@/components/utils/formatEquation';
+import ThermodynamicsTable from '@/components/ui/ThermodynamicsTable';
+import MoleculeRenderer from '@/components/ui/MoleculeRenderer';
+import { getStructuresByIds } from '@/lib/api/structures';
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
@@ -299,7 +301,6 @@ const rxnColumns: GridColDef<Reaction>[] = [
         width: 90,
         valueGetter: (_value, row) => (row.is_transport ? 'Yes' : 'No'),
     },
-    { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
     { field: 'status', headerName: 'Status', width: 110 },
 ];
 
@@ -307,7 +308,6 @@ const rxnColumns: GridColDef<Reaction>[] = [
 
 export default function CompoundDetailPage() {
     const { id } = useParams<{ id: string }>();
-    const [imageUnavailable, setImageUnavailable] = useState(false);
 
     // ── Compound data
     const { data: cpd, isLoading: loadingCpd, error } = useQuery({
@@ -315,6 +315,15 @@ export default function CompoundDetailPage() {
         queryFn: () => getCompoundById(id),
         enabled: !!id,
     });
+
+    // ── Structure (optional; compound data remains the safe fallback)
+    const { data: structureMap } = useQuery({
+        queryKey: ['compound-structure', id],
+        queryFn: () => getStructuresByIds([id]),
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000,
+    });
+    const structure = structureMap instanceof Map ? structureMap.get(id) : undefined;
 
     // ── Related reactions
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
@@ -365,11 +374,15 @@ export default function CompoundDetailPage() {
         : [];
     const aliasesWithoutName = cpd.aliases?.filter((a) => !a.startsWith('Name:')) ?? [];
 
-    const pkaDisplay = cpd.pka?.[0]?.replace(/"/g, '') ?? null;
-    const pkbDisplay = cpd.pkb?.[0]?.replace(/"/g, '') ?? null;
+    const hasPkas = Array.isArray(cpd.pkas) && cpd.pkas.length > 0;
+    const pkaDisplay = (Array.isArray(cpd.pka_value) ? cpd.pka_value : cpd.pka)
+        ?.map((value) => String(value).replace(/\"/g, ''))
+        .join('; ');
+    const pkbDisplay = (Array.isArray(cpd.pkb_value) ? cpd.pkb_value : cpd.pkb)
+        ?.map((value) => String(value).replace(/\"/g, ''))
+        .join('; ');
 
-    const deltaGDisplay = cpd.deltag === 10000000 ? 'unspecified' : String(cpd.deltag);
-    const deltaGerrDisplay = cpd.deltagerr === 10000000 ? 'unspecified' : String(cpd.deltagerr);
+    const thermoRecords = cpd.thermodynamics ?? [];
 
     return (
         <Box sx={{ px: 3, py: 2, maxWidth: 1200, mx: 'auto' }}>
@@ -384,56 +397,48 @@ export default function CompoundDetailPage() {
 
             {/* ── Two-column layout: image + properties ── */}
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }}>
-                {/* Image */}
+                {/* Structure */}
                 <Box sx={{ width: 220, flexShrink: 0 }}>
-                    {(!cpd.smiles || imageUnavailable) ? (
-                        <Box
-                            aria-label={`Compound image unavailable for ${cpd.id}`}
-                            sx={{
-                                width: '100%',
-                                minHeight: 220,
-                                border: '1px dashed #cbd5e1',
-                                borderRadius: 1,
-                                bgcolor: '#f8fafc',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                px: 2,
-                            }}
-                        >
-                            <Typography variant="body2" color="text.secondary">
-                                Compound image unavailable
-                            </Typography>
-                        </Box>
-                    ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={getCompoundImageUrl(cpd.id)}
-                            alt={`Structure of ${cpd.id}`}
-                            style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-                            onError={() => setImageUnavailable(true)}
-                        />
-                    )}
+                    <MoleculeRenderer
+                        compoundId={cpd.id}
+                        smiles={structure?.smiles ?? cpd.smiles}
+                        fallbackSvg={structure?.svg}
+                        colorAtomsByElementOrdinal
+                        showAllAtomLabels
+                        width={220}
+                        height={220}
+                        alt={`Structure of ${cpd.id}`}
+                    />
                 </Box>
 
                 {/* Properties */}
                 <Box sx={{ flex: 1, minWidth: 300 }}>
-                    <DetailRow label="ΔG">
-                        <Typography variant="body2">
-                            {deltaGDisplay === 'unspecified' ? 'N/A' : `${deltaGDisplay}${deltaGerrDisplay !== 'unspecified' ? ` ± ${deltaGerrDisplay}` : ''} kcal/mol`}
-                        </Typography>
-                    </DetailRow>
-                    {pkaDisplay && (
+                    {(thermoRecords.length > 0 || (cpd.thermo_evidence?.length ?? 0) > 0) && (
+                        <DetailRow label="Thermodynamics">
+                            <ThermodynamicsTable records={thermoRecords} evidence={cpd.thermo_evidence} />
+                        </DetailRow>
+                    )}
+                    {hasPkas ? (
                         <DetailRow label="pKa">
-                            <PKaDisplay value={pkaDisplay} />
+                            <Box
+                                component="table"
+                                aria-label="pKa values"
+                                sx={{ borderCollapse: 'collapse', '& th, & td': { px: 1, py: 0.5, borderBottom: '1px solid', borderColor: 'divider', textAlign: 'left' } }}
+                            >
+                                <thead><tr><th>Source</th><th>Kind</th><th>pKa values</th></tr></thead>
+                                <tbody>{cpd.pkas?.map((pka, index) => (
+                                    <tr key={`${pka.source_name}-${index}`}>
+                                        <td>{pka.source_name}</td>
+                                        <td>{pka.pka_kind ?? '—'}</td>
+                                        <td>{pka.pka_number.map((value) => String(value)).join(', ')}</td>
+                                    </tr>
+                                ))}</tbody>
+                            </Box>
                         </DetailRow>
-                    )}
-                    {pkbDisplay && (
-                        <DetailRow label="pKb">
-                            <PKaDisplay value={pkbDisplay} />
-                        </DetailRow>
-                    )}
+                    ) : <>
+                        {pkaDisplay && <DetailRow label="pKa"><PKaDisplay value={pkaDisplay} /></DetailRow>}
+                        {pkbDisplay && <DetailRow label="pKb"><PKaDisplay value={pkbDisplay} /></DetailRow>}
+                    </>}
                     <DetailRow label="Weight">
                         <Typography variant="body2">{cpd.mass} Da</Typography>
                     </DetailRow>

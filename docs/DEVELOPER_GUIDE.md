@@ -1,7 +1,7 @@
 # Documentation Editing Protocol (`DEVELOPER_GUIDE.md`)
 
 > **🤖 AI Agent Instructions**
-> When asked to create new features or architectural changes, you MUST update this documentation library before marking the task complete. Check `.gsd/STATE.md` to map new behavior documentation.
+> When asked to create new features or architectural changes, you MUST update this documentation library before marking the task complete.
 
 This guide acts as the strict standard operating procedure for how to use, write, and extend the ModelSEED-UI documentation located within `docs/`.
 
@@ -50,7 +50,7 @@ For human and AI scannability, execute the following writing standards:
 
 - **Assume High-Context Readers**: Write for senior developers or specific AI agents. Skip introductory filler text.
 - **Show Code Paths, Not Prose**: Factual and strict syntax. Use backticks for paths (`` `app/(user-data)/my-models/page.tsx` ``). Provide code architecture snippets if they establish a core pattern.
-- **Document Current State, Not History**: `.gsd/STATE.md` tracks our daily history. This `docs/` library defines **how the system currently behaves**.
+- **Document Current State, Not History**: This `docs/` library defines **how the system currently behaves**, not how it got here.
 - **Actionable Callouts**: Use formatted blockquotes `> **Note**` to flag dangerous regressions or legacy invariants.
 
 ---

@@ -1,0 +1,56 @@
+name: Question
+description: Ask a question about using the ModelSEED web app or interpreting results.
+title: "[Question]: "
+labels: ["question", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask anything about the app, the data, or how something works. If it turns out to be
+        a bug or feature idea, we'll route it from here. No technical knowledge needed.
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Which site are you using?
+      options:
+        - "staging.modelseed.org (staging)"
+        - "modelseed.org (production)"
+        - "localhost / dev"
+        - "Not sure"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app is your question about?
+      options:
+        - FBA
+        - Gapfill
+        - Model viewer
+        - Biochem browser
+        - Media
+        - Genomes
+        - My Jobs / My Models
+        - Auth / Sign-in
+        - Not sure / general
+    validations:
+      required: false
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What would you like to know?
+      description: "Ask in your own words."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else that would help us answer?
+      description: "You can drag in a screenshot of what you're looking at."
+    validations:
+      required: false

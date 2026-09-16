@@ -44,7 +44,7 @@ Key configuration constants live in `lib/api/config.ts`:
 - `MODELSEED_API_URL` – base URL for Poplar (currently `http://poplar.cels.anl.gov:8000` in development).
 - `USE_MODELSEED_API` – when `true`, user data flows (My Models, My Media, jobs) use `modelseed-api`.
 - `USE_NEW_PROXY` – when `true`, workspace calls route through the REST proxy at `${MODELSEED_API_URL}/api/workspace`.
-- `SOLR_BASE` / `SOLR_REACTIONS_COLLECTION` / `SOLR_COMPOUNDS_COLLECTION` – control Solr endpoint and core selection for biochem pages.
+- `NEXT_PUBLIC_SOLR_BASE_URL`, per-corpus `NEXT_PUBLIC_SOLR_*_BASE_URL` overrides, and `NEXT_PUBLIC_SOLR_*_COLLECTION` control Solr endpoints and core selection for biochem pages; see [Solr configuration](docs/DEPLOYMENT.md#solr-configuration).
 
 ## Running the App Locally
 
@@ -125,7 +125,6 @@ For a deeper architectural view, see:
 - `INDEX.md` – High-level map of files and folders (Primary entry point for onboarding).
 - `docs/README.md` – Developer manual index.
 - `issues.md` - Verified current API limitations and bug tracker.
-- `.gsd/ROADMAP.md` – Current phases and milestones.
 
 ### Note for AI Agents
 When initializing a debugging or feature session, start by reading `INDEX.md` for the context protocol, then review `issues.md` to ensure you are not debugging a known backend limitation (such as 501 Not Implemented endpoints).

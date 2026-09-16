@@ -51,7 +51,7 @@
 **Server Function**: `getChangelog()` - reads `CHANGELOG.md` from project root
 
 **Features**:
-- Version badge (v3.0.0)
+- Version badge (reads the current build version via `NEXT_PUBLIC_GIT_VERSION`, sourced from `VERSION.md`)
 - Rendered Markdown changelog
 - StatusTable component showing service connectivity
 

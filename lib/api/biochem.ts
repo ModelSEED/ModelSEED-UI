@@ -12,13 +12,93 @@
 import {
     CPD_IMG_BASE,
     MODELSEED_API_URL,
-    SOLR_BASE,
-    SOLR_BASE_LEGACY,
-    SOLR_COMPOUNDS_COLLECTION,
-    SOLR_REACTIONS_COLLECTION,
+    solrCorpusEndpoint,
 } from './config';
+import { hasNestedSchema, parentDocTypeFilter } from './solrSchema';
+import type { BiochemCollection } from './solrSchema';
 
 /* ─── Types ──────────────────────────────────────────────────── */
+
+export interface ThermodynamicsRecord {
+    source_name: string;
+    energy: number | null;
+    error: number | null;
+    operator?: string;
+}
+
+export interface ThermoEvidence {
+    grade?: string;
+    assessment?: string;
+    source?: string;
+    cross_source?: string;
+}
+
+/** A direction proposed by the LLM council; unlike thermodynamic records it has no energy. */
+export interface LlmCouncilProposal {
+    source_name: string;
+    proposed_direction: string;
+}
+
+export interface CompoundPka {
+    source_name: string;
+    pka_kind?: string;
+    pka_number: number[];
+}
+
+/** Normalizes structured pKa records while ignoring malformed values. */
+export function normalizeCompoundPkas(value: unknown): CompoundPka[] | undefined {
+    const entries = Array.isArray(value) ? value : value == null ? [] : [value];
+    const pkas = entries.flatMap((entry) => {
+        if (!entry || typeof entry !== 'object') return [];
+        const record = entry as Record<string, unknown>;
+        if (typeof record.source_name !== 'string' || record.source_name.length === 0) return [];
+        const numbers = (Array.isArray(record.pka_number) ? record.pka_number : [record.pka_number])
+            .map((number) => Number(unwrapSolrScalar(number)))
+            .filter(Number.isFinite);
+        if (numbers.length === 0) return [];
+        return [{
+            source_name: record.source_name,
+            ...(typeof record.pka_kind === 'string' && record.pka_kind.length > 0 ? { pka_kind: record.pka_kind } : {}),
+            pka_number: numbers,
+        }];
+    });
+    return pkas.length > 0 ? pkas : undefined;
+}
+
+export function normalizeThermoEvidence(value: unknown): ThermoEvidence[] | undefined {
+    const evidence: ThermoEvidence[] = [];
+    const append = (entry: unknown) => {
+        if (!entry || typeof entry !== 'object') return;
+        const record = entry as Record<string, unknown>;
+        const normalized: ThermoEvidence = {};
+        for (const field of ['grade', 'assessment'] as const) {
+            if (typeof record[field] === 'string') normalized[field] = record[field];
+        }
+        const source = record.source ?? record.source_name;
+        if (typeof source === 'string') normalized.source = source;
+        const crossSource = record.cross_source ?? record['cross-source'];
+        if (typeof crossSource === 'string') normalized.cross_source = crossSource;
+        if (normalized.grade || normalized.assessment || normalized.cross_source) evidence.push(normalized);
+    };
+    const appendField = (entry: unknown) => {
+        const items = Array.isArray(entry) ? entry : entry == null ? [] : [entry];
+        items.forEach(append);
+    };
+
+    appendField(value);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return evidence.length > 0 ? evidence : undefined;
+    const record = value as Record<string, unknown>;
+    appendField(record.thermo_evidence);
+    appendField(record['thermo-evidence']);
+    for (const child of thermodynamicsChildren(value)) {
+        append(child);
+        if (!child || typeof child !== 'object') continue;
+        const childRecord = child as Record<string, unknown>;
+        appendField(childRecord.thermo_evidence);
+        appendField(childRecord['thermo-evidence']);
+    }
+    return evidence.length > 0 ? evidence : undefined;
+}
 
 export interface Reaction {
     id: string;
@@ -28,6 +108,7 @@ export interface Reaction {
     deltagerr: number;
     reversibility: string;
     stoichiometry: string;
+    participants?: StoichiometryParticipant[];
     status: string;
     aliases: string[];
     ec_numbers: string[];
@@ -41,6 +122,18 @@ export interface Reaction {
     compound_ids?: string[];
     linked_reaction?: string;
     source?: string;
+    thermodynamics?: ThermodynamicsRecord[];
+    llm_council_proposals?: LlmCouncilProposal[];
+    thermo_evidence?: ThermoEvidence[];
+    n_sources_thermodynamics?: number;
+    sources_agree_direction?: boolean;
+    atom_mapping?: string[];
+    atom_mapping_confidence?: string;
+    has_atom_mapping?: boolean;
+    /** Live Solr `atom_mapping_data` field. */
+    atom_mapping_data?: string[];
+    /** Live Solr `atom_mapping_has_symmetry_groups` field. */
+    atom_mapping_has_symmetry_groups?: boolean;
 }
 
 export interface Compound {
@@ -61,8 +154,14 @@ export interface Compound {
     is_obsolete?: string;
     pka?: string[];
     pkb?: string[];
+    pkas?: CompoundPka[];
+    thermo_evidence?: ThermoEvidence[];
     source?: string;
     structure?: string;
+    thermodynamics?: ThermodynamicsRecord[];
+    n_sources_thermodynamics?: number;
+    pka_value?: string[];
+    pkb_value?: string[];
 }
 
 export interface GridFilterItem {
@@ -95,6 +194,11 @@ export interface SolrQueryOpts {
     queryColumn?: Record<string, string>;
     visible?: string[];
     filterModel?: GridFilterModel;
+    /** Raw Solr `fq` clauses, appended in order (e.g. a nested-schema parent-doc filter). */
+    filterQueries?: string[];
+    /** Include nested stoichiometry child fields in reaction quick search. */
+    nestedStoichiometryQuickSearch?: boolean;
+    nestedThermoEvidenceQuickSearch?: boolean;
 }
 
 /* ─── External DB Links ──────────────────────────────────────── */
@@ -318,12 +422,20 @@ function buildFilterClause(item: GridFilterItem): string | null {
     }
 }
 
+/** Return the five-digit ModelSEED reaction ID represented by a bare numeric search term. */
+function canonicalReactionIdCandidate(term: string): string | undefined {
+    return /^\d{1,5}$/.test(term) ? `rxn${term.padStart(5, '0')}` : undefined;
+}
+
 /** Build the Solr clause for quick/global search terms. */
 function buildQuickSearchClause(
     query: string | undefined,
     searchFields: string[] | undefined,
     quickFilterValues: string[],
     quickFilterLogicOperator: 'and' | 'or',
+    nestedStoichiometryQuickSearch = false,
+    nestedThermoEvidenceQuickSearch = false,
+    canonicalReactionIdQuickSearch = false,
 ): string {
     if (query === '*' || query === '*:*') return '*';
 
@@ -346,6 +458,22 @@ function buildQuickSearchClause(
                         ? `${solrField}:${token}*`
                         : `${solrField}:*${token}*`;
                 });
+                if (nestedStoichiometryQuickSearch) {
+                    const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
+                    fieldClauses.push(
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR participant_aliases:${wildcard} OR aliases:${wildcard})"})`,
+                    );
+                }
+                if (nestedThermoEvidenceQuickSearch) {
+                    const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
+                    fieldClauses.push(
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:${wildcard}"})`,
+                    );
+                }
+                const canonicalReactionId = canonicalReactionIdQuickSearch
+                    ? canonicalReactionIdCandidate(term)
+                    : undefined;
+                if (canonicalReactionId) fieldClauses.push(`id:${canonicalReactionId}`);
                 return `(${fieldClauses.join(' OR ')})`;
             }
 
@@ -363,14 +491,9 @@ function buildQuickSearchClause(
 /**
  * Builds a Solr query URL from options, mirroring legacy `get_solr`.
  */
-function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
-    const collectionName =
-        collection === 'reactions'
-            ? SOLR_REACTIONS_COLLECTION
-            : collection === 'compounds'
-                ? SOLR_COMPOUNDS_COLLECTION
-                : collection;
-    let url = `${SOLR_BASE}${collectionName}/select?wt=json`;
+function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): string {
+    const endpoint = solrCorpusEndpoint(collection);
+    let url = `${endpoint}/select?wt=json`;
 
     const {
         query,
@@ -381,11 +504,19 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         queryColumn,
         visible = [],
         filterModel,
+        filterQueries = [],
+        nestedStoichiometryQuickSearch = false,
+        nestedThermoEvidenceQuickSearch = false,
     } = opts;
 
     // Field list
     if (visible.length > 0) {
-        url += `&fl=${visible.join(',')}`;
+        url += `&fl=${encodeURIComponent(visible.join(','))}`;
+    }
+
+    // Explicit filter queries (e.g. nested-schema parent-doc filter)
+    for (const fq of filterQueries) {
+        url += `&fq=${encodeURIComponent(fq)}`;
     }
 
     // Filter out ontology field for compounds (Solr compounds_staging has no ontology field)
@@ -423,6 +554,9 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
         searchFields,
         filterModel?.quickFilterValues ?? [],
         filterModel?.quickFilterLogicOperator ?? 'and',
+        nestedStoichiometryQuickSearch,
+        nestedThermoEvidenceQuickSearch,
+        collection === 'reactions',
     );
 
     const finalClauses: string[] = [];
@@ -443,7 +577,7 @@ function buildSolrUrl(collection: string, opts: SolrQueryOpts = {}): string {
     // Sort
     if (sort) {
         const dir = sort.desc ? 'desc' : 'asc';
-        url += `&sort=${sort.field} ${dir}`;
+        url += `&sort=${encodeURIComponent(`${sort.field} ${dir}`)}`;
     }
 
     return url;
@@ -464,8 +598,14 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
         }
         throw new Error(`Solr request failed: ${res.status}${detail}`);
     }
-    const json = await res.json();
-    return json.response as SolrResponse<T>;
+    const json = await res.json() as { response?: Partial<SolrResponse<T>> };
+    const response = json?.response;
+    const docs = Array.isArray(response?.docs) ? response.docs : [];
+    return {
+        numFound: typeof response?.numFound === 'number' ? response.numFound : 0,
+        start: typeof response?.start === 'number' ? response.start : 0,
+        docs,
+    };
 }
 
 /**
@@ -798,6 +938,184 @@ function sortDocs<T>(
     });
 }
 
+export interface StoichiometryParticipant {
+    compound: string;
+    coefficient: number;
+    compartment: number;
+    name: string;
+    /** Aliases returned on nested stoichiometry children, when available. */
+    aliases?: string[];
+    /** true when the participant is consumed (coefficient < 0). */
+    is_reactant: boolean;
+    charge?: number;
+    formula?: string;
+}
+
+/** Returns the first meaningful scalar from a Solr scalar-or-array field. */
+function unwrapSolrScalar(value: unknown): string | number | undefined {
+    for (const candidate of Array.isArray(value) ? value : [value]) {
+        if (typeof candidate === 'string' && candidate.trim().length > 0) return candidate;
+        if (typeof candidate === 'number' && Number.isFinite(candidate)) return candidate;
+    }
+    return undefined;
+}
+
+function unwrapSolrString(value: unknown): string | undefined {
+    const scalar = unwrapSolrScalar(value);
+    return scalar === undefined ? undefined : String(scalar);
+}
+
+/** Flattens Solr scalar-or-nested-array fields into meaningful string values. */
+function unwrapSolrStrings(value: unknown): string[] {
+    if (Array.isArray(value)) return value.flatMap(unwrapSolrStrings);
+    return unwrapSolrString(value) ? [unwrapSolrString(value)!] : [];
+}
+
+/** Coerces a Solr thermodynamics child's `energy`/`error` value to a finite number or null. */
+function coerceThermodynamicsNumber(value: unknown): number | null {
+    const num = Number(unwrapSolrScalar(value));
+    return Number.isFinite(num) ? num : null;
+}
+
+/**
+ * Normalizes the raw Solr-9 nested `thermodynamics` child documents (or the
+ * legacy `_childDocuments_` shape) attached to a reaction/compound doc into
+ * a flat, typed `ThermodynamicsRecord[]`. Pure and never throws: malformed
+ * or missing input yields `[]`.
+ */
+function thermodynamicsChildren(doc: unknown): unknown[] {
+    if (!doc || typeof doc !== 'object') return [];
+    const record = doc as Record<string, unknown>;
+    return Array.isArray(record.thermodynamics)
+        ? record.thermodynamics
+        : Array.isArray(record._childDocuments_)
+            ? record._childDocuments_
+            : [];
+}
+
+/** Extracts LLM council direction proposals without treating them as energy evidence. */
+export function normalizeLlmCouncilProposals(doc: unknown): LlmCouncilProposal[] {
+    const results: LlmCouncilProposal[] = [];
+    for (const child of thermodynamicsChildren(doc)) {
+        if (!child || typeof child !== 'object') continue;
+        const c = child as Record<string, unknown>;
+        if (c.doc_type !== 'thermodynamics' || c.source_name !== 'LLMs') continue;
+        const direction = unwrapSolrString(c.operator);
+        if (direction) results.push({ source_name: 'LLMs', proposed_direction: direction });
+    }
+    return results;
+}
+
+export function normalizeThermodynamics(doc: unknown): ThermodynamicsRecord[] {
+    const results: ThermodynamicsRecord[] = [];
+    for (const child of thermodynamicsChildren(doc)) {
+        if (!child || typeof child !== 'object') continue;
+        const c = child as Record<string, unknown>;
+
+        const docType = c.doc_type;
+        if (typeof docType === 'string' && docType !== 'thermodynamics') continue;
+
+        const sourceName = c.source_name;
+        if (typeof sourceName !== 'string' || sourceName.length === 0 || sourceName === 'LLMs') continue;
+
+        const entry: ThermodynamicsRecord = {
+            source_name: sourceName,
+            energy: coerceThermodynamicsNumber(c.energy),
+            error: coerceThermodynamicsNumber(c.error),
+        };
+        if (typeof c.operator === 'string' && c.operator.length > 0) {
+            entry.operator = c.operator;
+        }
+        results.push(entry);
+    }
+    return results;
+}
+
+/**
+ * Normalizes raw Solr nested or legacy reaction stoichiometry into typed
+ * participants. Pure and never throws: malformed or missing input yields `[]`.
+ */
+export function normalizeStoichiometry(doc: unknown): StoichiometryParticipant[] {
+    if (!doc || typeof doc !== 'object') return [];
+    const record = doc as Record<string, unknown>;
+
+    if (Array.isArray(record.stoichiometry) || Array.isArray(record._childDocuments_)) {
+        const children = Array.isArray(record.stoichiometry)
+            ? record.stoichiometry
+            : record._childDocuments_ as unknown[];
+        const results: Array<StoichiometryParticipant & { nestPath?: number }> = [];
+        let canSortByNestPath = true;
+        for (const child of children) {
+            if (!child || typeof child !== 'object') continue;
+            const c = child as Record<string, unknown>;
+            const docType = unwrapSolrString(c.doc_type);
+            if (docType && docType !== 'stoichiometry') continue;
+            const compound = unwrapSolrString(c.compound);
+            if (!compound) continue;
+            const coefficient = coerceThermodynamicsNumber(c.coefficient);
+            if (coefficient === null) continue;
+            const nestPathValue = unwrapSolrString(c._nest_path_);
+            const nestMatch = nestPathValue ? /\/stoichiometry#(\d+)$/.exec(nestPathValue) : null;
+            if (!nestMatch) canSortByNestPath = false;
+            const entry: StoichiometryParticipant & { nestPath?: number } = {
+                compound,
+                coefficient,
+                compartment: coerceThermodynamicsNumber(c.compartment) ?? 0,
+                name: unwrapSolrString(c.participant_name) ?? compound,
+                is_reactant: typeof c.is_reactant === 'boolean' ? c.is_reactant : coefficient < 0,
+                nestPath: nestMatch ? Number(nestMatch[1]) : undefined,
+            };
+            const charge = coerceThermodynamicsNumber(c.participant_charge);
+            if (charge !== null) entry.charge = charge;
+            const formula = unwrapSolrString(c.participant_formula);
+            if (formula) entry.formula = formula;
+            const aliasesValue = c.participant_aliases ?? c.aliases;
+            const aliases = unwrapSolrStrings(aliasesValue)
+                .flatMap((alias) => alias.split(/[;|]/))
+                .map((alias) => alias.trim())
+                .filter(Boolean);
+            if (aliases.length > 0) entry.aliases = aliases;
+            results.push(entry);
+        }
+        if (canSortByNestPath) results.sort((a, b) => a.nestPath! - b.nestPath!);
+        return results.map(({ compound, coefficient, compartment, name, aliases, is_reactant, charge, formula }) => ({
+            compound,
+            coefficient,
+            compartment,
+            name,
+            is_reactant,
+            ...(aliases === undefined ? {} : { aliases }),
+            ...(charge === undefined ? {} : { charge }),
+            ...(formula === undefined ? {} : { formula }),
+        }));
+    }
+
+    if (typeof record.stoichiometry !== 'string') return [];
+    const results: StoichiometryParticipant[] = [];
+    for (const segment of record.stoichiometry.split(';')) {
+        if (!segment) continue;
+        const [coefficientRaw, compound = '', compartmentRaw, , nameRaw = ''] = segment.split(':', 5);
+        const coefficient = coerceThermodynamicsNumber(coefficientRaw);
+        if (coefficient === null || compound.length === 0) continue;
+        const name = nameRaw.length >= 2 && nameRaw.startsWith('"') && nameRaw.endsWith('"')
+            ? nameRaw.slice(1, -1) : nameRaw;
+        results.push({
+            compound,
+            coefficient,
+            compartment: coerceThermodynamicsNumber(compartmentRaw) ?? 0,
+            name,
+            is_reactant: coefficient < 0,
+        });
+    }
+    return results;
+}
+
+export function serializeStoichiometry(participants: StoichiometryParticipant[]): string {
+    return participants.map(({ coefficient, compound, compartment, name }) =>
+        `${coefficient}:${compound}:${compartment}:0:"${name}"`,
+    ).join(';');
+}
+
 /**
  * Apply MUI column filter items to row objects locally (for APIs that cannot express filters server-side).
  * Uses the same operator semantics as Solr-backed biochem when used with `get*FromModelseedApi`.
@@ -830,13 +1148,25 @@ const SYNONYM_FIELD_ALIAS = 'aliases';
 const MIN_WILDCARD_QUERY_LENGTH = 3;
 
 /** Reaction search fields matching legacy `rxn_sFields`. */
-const RXN_SEARCH_FIELDS = ['id', 'name', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+const RXN_SEARCH_FIELDS = ['id', 'name', 'definition', 'reversibility', 'status', 'ec_numbers', 'aliases', 'pathways', 'stoichiometry', 'notes'];
+
+/** Solr 9 nested stoichiometry is a child path, not a queryable parent field; querying it yields HTTP 400 "undefined field stoichiometry". */
+const RXN_SEARCH_FIELDS_NESTED = RXN_SEARCH_FIELDS.filter((field) => field !== 'stoichiometry');
 
 /** Reaction visible fields matching legacy `rxnOpts.visible`. */
 const RXN_VISIBLE = [
-    'name', 'id', 'definition', 'deltag', 'deltagerr', 'reversibility',
+    'name', 'id', 'definition', 'reversibility', 'thermo_evidence',
     'stoichiometry', 'status', 'aliases', 'ec_numbers', 'is_obsolete',
     'is_transport', 'ontology', 'pathways', 'notes',
+];
+// Solr child transformers only return fields also present in the parent `fl` list.
+// Include the stored stoichiometry fields needed by Equation highlighting before
+// requesting the matching child documents.
+const RXN_VISIBLE_NESTED = [
+    ...RXN_VISIBLE,
+    'compound', 'coefficient', 'compartment', 'is_reactant', 'participant_name',
+    'participant_aliases', 'aliases', 'grade', 'doc_type', '_nest_path_',
+    '[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]',
 ];
 
 /**
@@ -859,6 +1189,9 @@ const CPD_VISIBLE = [
  * 
  * Queries the ModelSEED biochemistry database for reactions with support for
  * advanced filtering, pagination, and sorting. Main UI queries are Solr-backed.
+ * The Equation UI field maps to `definition`; nested schemas parent-scope every list
+ * query and block-join compound/participant quick-search terms, while legacy schemas
+ * retain their flat `stoichiometry` field. User terms are escaped before wildcards.
  * 
  * @param opts - Query options (query, limit, offset, sort, filterModel)
  * @returns Promise resolving to paginated reaction results
@@ -879,23 +1212,35 @@ const CPD_VISIBLE = [
  * ```
  */
 export async function getReactions(opts: SolrQueryOpts = {}): Promise<SolrResponse<Reaction>> {
+    const nested = await hasNestedSchema('reactions');
     const mergedOpts: SolrQueryOpts = {
         limit: 25,
         offset: 0,
         sort: { field: 'id' },
-        searchFields: RXN_SEARCH_FIELDS,
-        visible: RXN_VISIBLE,
+        searchFields: nested ? RXN_SEARCH_FIELDS_NESTED : RXN_SEARCH_FIELDS,
+        visible: nested ? RXN_VISIBLE_NESTED : RXN_VISIBLE,
         ...opts,
     };
 
-    // Reactions page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('reactions', mergedOpts);
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            nestedStoichiometryQuickSearch: true,
+            nestedThermoEvidenceQuickSearch: true,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('reactions')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('reactions', queryOpts);
     const res = await fetchSolr<Reaction>(url);
 
-    // Mark obsolete reactions (matching legacy logic)
+    // Normalize participants so the Equation renderer can associate a nested child match
+    // with its visible participant name; legacy serialized stoichiometry is normalized too.
     res.docs.forEach((doc) => {
+        doc.participants = normalizeStoichiometry(doc);
+        const evidence = normalizeThermoEvidence(doc);
+        if (evidence) doc.thermo_evidence = evidence;
         if (doc.is_obsolete === '1') {
-            doc.status += ' (and is obsolete)';
+            doc.status = `${doc.status ?? ''} (and is obsolete)`.trim();
         }
     });
 
@@ -930,7 +1275,14 @@ export async function getCompounds(opts: SolrQueryOpts = {}): Promise<SolrRespon
     };
 
     // Compounds page is intentionally pinned to legacy Solr.
-    const url = buildSolrUrl('compounds', mergedOpts);
+    const nested = await hasNestedSchema('compounds');
+    const queryOpts = nested
+        ? {
+            ...mergedOpts,
+            filterQueries: [...(mergedOpts.filterQueries ?? []), parentDocTypeFilter('compounds')],
+        }
+        : mergedOpts;
+    const url = buildSolrUrl('compounds', queryOpts);
     return fetchSolr<Compound>(url);
 }
 
@@ -950,7 +1302,7 @@ export async function getReactionsFromModelseedApi(
     });
     res.docs.forEach((doc) => {
         if (doc.is_obsolete === '1') {
-            doc.status += ' (and is obsolete)';
+            doc.status = `${doc.status ?? ''} (and is obsolete)`.trim();
         }
     });
     return res;
@@ -987,9 +1339,25 @@ export async function getCompoundsFromModelseedApi(
  */
 export async function getReactionById(id: string): Promise<Reaction> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=id:${id}`;
+    const nested = await hasNestedSchema('reactions');
+    if (nested) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}&fl=${encodeURIComponent('*,[child childFilter="doc_type:thermodynamics OR doc_type:thermo_evidence OR doc_type:stoichiometry OR doc_type:thermo-evidence" limit=200]')}`;
+    }
     const res = await fetchSolr<Reaction>(url);
-    return res.docs[0];
+    const raw = res.docs[0];
+    if (!raw) return raw;
+    const participants = normalizeStoichiometry(raw);
+    return {
+        ...raw,
+        thermodynamics: normalizeThermodynamics(raw),
+        thermo_evidence: normalizeThermoEvidence(raw),
+        llm_council_proposals: normalizeLlmCouncilProposals(raw),
+        participants,
+        stoichiometry: typeof raw.stoichiometry === 'string'
+            ? raw.stoichiometry
+            : participants.length > 0 ? serializeStoichiometry(participants) : '',
+    };
 }
 
 /**
@@ -1007,9 +1375,19 @@ export async function getReactionById(id: string): Promise<Reaction> {
  */
 export async function getCompoundById(id: string): Promise<Compound> {
     // Keep detail lookups on legacy Solr until modelseed-api exposes an ID endpoint.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=id:${id}`;
+    let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=id:${id}`;
+    const nested = await hasNestedSchema('compounds');
+    if (nested) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}&fl=${encodeURIComponent('*,[child childFilter=\"doc_type:thermodynamics OR doc_type:pkas OR doc_type:pka\" limit=200]')}`;
+    }
     const res = await fetchSolr<Compound>(url);
-    return res.docs[0];
+    const raw = res.docs[0];
+    return raw ? {
+        ...raw,
+        thermodynamics: normalizeThermodynamics(raw),
+        thermo_evidence: normalizeThermoEvidence(raw),
+        pkas: normalizeCompoundPkas(raw.pkas ?? (raw as Compound & { _childDocuments_?: unknown[] })._childDocuments_),
+    } : raw;
 }
 
 /**
@@ -1044,29 +1422,32 @@ export async function getCompoundsForReaction(ids: string[]): Promise<Map<string
     return getCompoundsByIdsWithFields(ids, ['id', 'name', 'formula', 'charge', 'smiles', 'inchikey', 'aliases']);
 }
 
-function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<Map<string, Compound>> {
+async function getCompoundsByIdsWithFields(ids: string[], fields: string[]): Promise<Map<string, Compound>> {
     const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
-    if (uniqueIds.length === 0) return Promise.resolve(new Map());
+    if (uniqueIds.length === 0) return new Map();
 
     const idQuery = uniqueIds.map((id) => `id:${id}`).join(' OR ');
     const fl = fields.join(',');
     // Batch ID fetch is currently Solr-backed for both modes.
-    const url = `${SOLR_BASE_LEGACY}${SOLR_COMPOUNDS_COLLECTION}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
-
-    return fetchSolr<Compound>(url).then((res) => {
-        const map = new Map<string, Compound>();
-        for (const doc of res.docs) {
-            map.set(doc.id, doc);
-        }
-        return map;
-    });
+    let url = `${solrCorpusEndpoint('compounds')}/select?wt=json&q=(${idQuery})&rows=${uniqueIds.length}&fl=${fl}`;
+    if (await hasNestedSchema('compounds')) {
+        url += `&fq=${encodeURIComponent(parentDocTypeFilter('compounds'))}`;
+    }
+    const res = await fetchSolr<Compound>(url);
+    const map = new Map<string, Compound>();
+    for (const doc of res.docs) {
+        map.set(doc.id, doc);
+    }
+    return map;
 }
 
 /**
  * Find reactions containing a given compound.
  * 
  * Searches for reactions where the specified compound appears as a reactant
- * or product. Useful for exploring compound participation in metabolism.
+ * or product. Useful for exploring compound participation in metabolism. Nested schemas
+ * block-join valid identifiers to child stoichiometry; legacy schemas search escaped
+ * flat equations. URL values and user input are encoded/escaped before sending.
  * 
  * @param cpdId - Compound ID to search for
  * @param opts - Query options (limit, offset, sort)
@@ -1087,12 +1468,20 @@ export async function findReactionsForCompound(
     const sort = opts.sort;
 
     // Reverse compound lookup remains Solr-backed for now.
-    let url = `${SOLR_BASE_LEGACY}${SOLR_REACTIONS_COLLECTION}/select?wt=json&q=equation:*${cpdId}*&fl=*`;
+    const nested = await hasNestedSchema('reactions');
+    const token = toSolrWildcardToken(cpdId);
+    const query = nested
+        ? /^[A-Za-z0-9_]+$/.test(cpdId)
+            ? `{!parent which="doc_type:reaction" v="doc_type:stoichiometry AND compound:${escapeSolrTerm(cpdId)}"}`
+            : `{!parent which="doc_type:reaction" v="doc_type:stoichiometry AND (compound:*${token}* OR participant_name:*${token}*)"}`
+        : `equation:*${token}*`;
+    let url = `${solrCorpusEndpoint('reactions')}/select?wt=json&q=${encodeURIComponent(query)}&fl=${encodeURIComponent('*')}`;
+    if (nested) url += `&fq=${encodeURIComponent(parentDocTypeFilter('reactions'))}`;
     if (limit) url += `&rows=${limit}`;
     if (offset) url += `&start=${offset}`;
     if (sort) {
         const dir = sort.desc ? 'desc' : 'asc';
-        url += `&sort=${sort.field} ${dir}`;
+        url += `&sort=${encodeURIComponent(`${sort.field} ${dir}`)}`;
     }
 
     return fetchSolr<Reaction>(url);

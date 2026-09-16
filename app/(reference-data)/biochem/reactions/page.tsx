@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import { DataGrid, gridFilterModelSelector, GridColDef, GridPaginationModel, GridSortModel, GridFilterModel, useGridApiContext, useGridSelector } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -25,6 +25,37 @@ import ExportModal from '@/components/ui/ExportModal';
 import TruncatedWithTooltip from '@/components/ui/TruncatedWithTooltip';
 
 /* ─── Alias / external-link helpers ──────────────────────────── */
+
+const reversibilityGradeStyles = {
+    gold: { backgroundColor: '#fff8e1', borderColor: '#b88900', borderWidth: 3 },
+    silver: { backgroundColor: '#f5f7fa', borderColor: '#7b8794', borderWidth: 2 },
+    bronze: { backgroundColor: 'rgba(184, 115, 51, 0.19)', borderColor: '#9a5c22', borderWidth: 1 },
+} as const;
+
+export function ReversibilityCell({ reaction }: { reaction: Reaction }) {
+    const grade = reaction.thermo_evidence?.find((item) => {
+        const value = item.grade?.toLowerCase();
+        return value === 'gold' || value === 'silver' || value === 'bronze';
+    })?.grade?.toLowerCase() as keyof typeof reversibilityGradeStyles | undefined;
+    const style = grade ? reversibilityGradeStyles[grade] : { backgroundColor: '#fff', borderColor: '#757575', borderWidth: 1 };
+    const reversibility = reaction.reversibility || 'N/A';
+    const evidenceGrade = grade || 'no grade';
+    const label = `Reversibility ${reversibility}; evidence grade ${evidenceGrade}`;
+
+    return (
+        <Box
+            component="span"
+            data-testid="reversibility-badge"
+            data-grade={grade}
+            title={label}
+            aria-label={label}
+            style={{ backgroundColor: style.backgroundColor, borderColor: style.borderColor, borderWidth: style.borderWidth }}
+            sx={{ borderStyle: 'solid', borderRadius: 1, display: 'inline-flex', fontWeight: 700, px: 0.75, whiteSpace: 'nowrap' }}
+        >
+            {reversibility}
+        </Box>
+    );
+}
 
 function parseAliases(aliases?: string[]): React.ReactNode {
     if (!aliases || aliases.length === 0) return 'N/A';
@@ -73,6 +104,22 @@ function parseSynonyms(aliases?: string[]): string[] {
     const last = aliases[aliases.length - 1];
     const nameEntry = last.replace('Name:', '').replace(/"/g, '');
     return nameEntry.split(';').map((s) => s.trim()).filter(Boolean);
+}
+
+export function EquationCell({ equation, reaction }: { equation: string; reaction: Reaction }) {
+    const apiRef = useGridApiContext();
+    const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
+
+    return (
+        <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.5 }}>
+            <ChemicalEquation
+                equation={equation}
+                participants={reaction.participants}
+                reaction={reaction}
+                quickFilterValues={filterModel.quickFilterValues ?? []}
+            />
+        </Box>
+    );
 }
 
 function SynonymsCell({ synonyms }: { synonyms: string[] }) {
@@ -285,11 +332,7 @@ export default function ReactionsPage() {
             flex: 1,
             minWidth: 280,
             sortable: false,
-            renderCell: (params) => (
-                <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.5 }}>
-                    <ChemicalEquation equation={params.value} />
-                </Box>
-            ),
+            renderCell: (params) => <EquationCell equation={params.value} reaction={params.row} />,
         },
         {
             field: 'is_transport',
@@ -302,7 +345,12 @@ export default function ReactionsPage() {
             type: 'boolean',
             renderCell: (params) => <GridHighlightText text={params.row.is_transport ? 'Yes' : 'No'} />,
         },
-        { field: 'deltag', headerName: 'ΔG', width: 80, type: 'number' },
+        {
+            field: 'reversibility',
+            headerName: 'Reversibility',
+            width: 150,
+            renderCell: (params) => <ReversibilityCell reaction={params.row} />,
+        },
         {
             field: 'status',
             headerName: 'Status',
@@ -370,15 +418,6 @@ export default function ReactionsPage() {
                     onOpenAll={() => handleOpenPathwaysModal(params.row)}
                 />
             ),
-        },
-        {
-            field: 'ontology',
-            headerName: 'Ontology',
-            width: 200,
-            valueGetter: (_value, row) => {
-                if (!row.ontology || row.ontology === 'class:null|context:null|step:null') return 'N/A';
-                return row.ontology;
-            },
         },
     ], [handleOpenPathwaysModal]);
 

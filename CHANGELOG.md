@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - TBD
 
+### Fixed
+- Pending releases.
+
+---
+
+## [3.6.5] - 2026-09-08
+
+### Fixed
+- Equation quick-filter now preserves nested and pipe-delimited participant aliases, mapping each matched alias only to its rendered compound label or ID.
+
+---
+
+## [3.6.4] - 2026-09-08
+
+### Fixed
+- Enlarged reaction compound previews now close reliably when the pointer leaves the structure image, while preserving independent keyboard focus behavior.
+- Reaction search now safely escapes and URL-encodes query input across legacy flat and Solr nested schemas, including Equation and compound participation searches.
+
+### Removed
+- Unused tracked `.gsd/` planning scaffolding, `.clauderules`, and orphan `gsd-opencode` submodule gitlink.
+- Dead GSD references from `.gitignore`, `INDEX.md`, `README.md`, `docs/DEVELOPER_GUIDE.md`, `eslint.config.mjs`, and `vitest.config.ts`.
+
 ### Known Issues
 - RAST MS FBA not working
 - PATRIC-only model submission
@@ -14,6 +36,145 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Expected Behaviors
 - Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.6.4] - 2026-09-08
+
+### Fixed
+- Reaction Equation quick-filter highlights now map current nested participant aliases and compound metadata to the matching visible equation label without associating reaction metadata with an unrelated participant.
+
+---
+
+## [3.6.3] - 2026-09-08
+
+### Fixed
+- Reaction Equation quick-filter highlights now visibly identify matching compound IDs and nested participant names without changing links, subscripts, or legacy definitions.
+
+---
+
+## [3.6.2] - 2026-09-08
+
+### Fixed
+- Reaction quick-search now includes definition text for both legacy and Solr 9 nested schemas while continuing to exclude nested stoichiometry child paths.
+
+---
+
+## [3.6.0] - 2026-09-01
+
+### Added
+- Molecule structure images now render on an off-white `#F5F5F5` canvas with a thin `#333333` outline on atom glyphs, so coloured atom labels stay legible.
+
+### Fixed
+- Atom-mapping colours in reactions with many mapped groups are now clearly distinguishable; the warm/brown band was removed and mapped colours no longer collide with unmapped phosphorus or oxygen atom colours.
+
+---
+
+## [3.5.1] - 2026-08-31
+
+### Fixed
+- Within a single reaction, atom-mapping group colours now use the maximally separated subset of the existing colour-blind-safe palette instead of the first N entries, preventing reported brown/rust versus red-orange confusion; worst-case four-group separation rises from dE76 19.0 to 36.1, while reactions with more than the eight-colour palette still wrap.
+- Enlarged compound-structure previews now open below the hovered or focused compound and stay inside the viewport, flipping above only when there is no room below, so they are no longer cut off at the top.
+
+---
+
+## [3.5.0] - 2026-08-27
+
+### Added
+- Hovering or keyboard-focusing a compound in a reaction's structure equation now shows an enlarged preview of that compound's structure with the same atom-mapping colors, making large molecules legible.
+
+---
+
+## [3.4.1] - 2026-08-27
+
+### Fixed
+- Reaction quick-search no longer queries Solr 9 nested stoichiometry child paths as parent fields, and reaction details now return normalized stoichiometry participants.
+- Solr 9 compound batch and reverse reaction lookups now restrict results to parent documents.
+
+---
+
+## [3.4.0] - 2026-08-21
+
+### Added
+- Solr reaction, compound and structure lookups can now each use their own endpoint and core through separate environment variables, while retaining the shared Solr base when no per-corpus value is set
+- An optional server-side proxy lets a deployment or local checkout serve Solr from its own origin
+
+### Documentation
+- Documented the full Solr environment surface and endpoint switching scenarios for legacy, Solr 9, temporary, and proxied instances
+
+### Fixed
+- Structure-core environment overrides now reach browser lookups instead of silently falling back to the shared endpoint
+
+---
+
+## [3.3.0] - 2026-08-21
+
+### Added
+- Reaction structure equations now resolve atom-mapping colours from raw InChI canonical order through the structures Solr core, rather than treating canonical `#N` references as SMILES or renderer positions
+- Each mapped participant and the legend now disclose whether a highlight is an exact atom, a symmetry-equivalent orbit, a whole-element block, or unresolved, so researchers can see precisely what the mapping supports
+
+### Fixed
+- Atom-mapping highlights no longer assign chemically false colours when InChI canonical order diverges from stored-SMILES order
+
+---
+
+## [3.2.0] - 2026-08-20
+
+### Added
+- Reaction structure equations now use an open, continuous canvas with prominent common names, secondary IDs, formulas and charges; plain `+` and direction operators; and compound-page links
+- Every reaction participant that has a structure is now drawn, including small species such as water, CO2 and ammonium; only heavy-atom-free species such as H+ stay textual, and they keep their name, formula, charge and compound link
+- Reaction atom mappings now colour atoms and bonds by mapped group across reactants and products, with a legend that discloses mappings that cannot safely be coloured
+- Atom mappings in which several compounds contribute the same element to one product are now coloured as one merged group, and the legend states plainly that individual atom pairing is not determined by the data; group members that are only partially covered are named as uncoloured rather than dropped
+- Each participant shows a labelled colour-dot row naming its mapped elements, so colour is never the only carrier of meaning
+- Mapping colours are applied only to fully covered, mutually mapped compound-element blocks, never by treating InChI canonical-order `#N` indices as renderer atom indices
+- Compound and reaction detail pages now list every thermodynamics record returned by the upgraded Solr schema, one row per source with energy, error and (for reactions) direction operator
+- Compound detail page now shows all pKa and pKb values instead of only the first
+- Reaction detail page now shows an atom-mapping summary with per-compound element counts, a confidence indicator and an expandable raw list
+- Reaction atom mappings now disclose symmetry-equivalent groups without claiming a specific atom correspondence
+- All of the above is feature-detected, so pages render exactly as before against the current production Solr
+
+### Fixed
+- Reaction detail pages now read the live Solr `atom_mapping_data` field while retaining legacy `atom_mapping` fallback
+
+### Changed
+- Replaced the flat reaction atom-flow diagram with the structure canvas; the raw mapping list remains available as secondary detail
+- Reaction thermodynamics direction agreement is now derived from the per-source direction operators rather than a single server flag, and reports three states: "Sources agree on direction" (all operators identical), "Sources could agree on direction" (only one angle-bracket direction, optionally mixed with `=`) and "Sources disagree on direction" (both `>` and `<` present)
+
+### Known Issues
+- RAST MS FBA not working
+- PATRIC-only model submission
+- Workspace write operations limited
+
+### Expected Behaviors
+- Models/Media differ between RAST and PATRIC (intentional system design)
+
+---
+
+## [3.1.1] - 2026-08-26
+
+### Fixed
+- Production `npm audit` high-severity finding resolved: `nanoid` bumped to
+  **3.3.18** to close GHSA-2v37-7h3g-55p8, restoring a green nightly CI audit
+  on the staging line
+
+### Changed
+- Dependabot now groups routine minor and patch npm updates into one production
+  and one development pull request per week instead of one pull request per
+  package; security updates are unaffected and continue to open individually
+
+---
+
+## [3.1.0] - 2026-08-04
+
+### Added
+- User feedback FAB and dialog with `/api/feedback` proxy route and unit test
+- GitHub issue templates, pull request template, and CODEOWNERS
+- GitHub Issues link beside Contact us in the homepage support section
+
+### Fixed
+- Production `npm audit` findings resolved: Next.js upgraded to **16.3.0**,
+  `eslint-config-next` upgraded to **16.3.0**, and `postcss` override bumped
+  to **8.5.25** to close high-severity advisories
 
 ---
 

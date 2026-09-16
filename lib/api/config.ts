@@ -26,15 +26,28 @@ const PUBLIC_ENV = {
     NEXT_PUBLIC_SOLR_BASE_URL: process.env.NEXT_PUBLIC_SOLR_BASE_URL,
     NEXT_PUBLIC_SOLR_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_BASE_URL_STAGING,
     NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL: process.env.NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL,
+    NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_STAGING,
+    NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_PRODUCTION,
     NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION,
     NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_STAGING,
     NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_STAGING,
+    NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_PRODUCTION,
     NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION,
     NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_STAGING,
     NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION_PRODUCTION,
+    NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL,
+    NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_STAGING: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_STAGING,
+    NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_PRODUCTION,
+    NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION,
+    NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_STAGING: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_STAGING,
+    NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_PRODUCTION: process.env.NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_PRODUCTION,
     NEXT_PUBLIC_USE_MODELSEED_API: process.env.NEXT_PUBLIC_USE_MODELSEED_API,
     NEXT_PUBLIC_USE_NEW_PROXY: process.env.NEXT_PUBLIC_USE_NEW_PROXY,
     NEXT_PUBLIC_PROBMODELSEED_URL: process.env.NEXT_PUBLIC_PROBMODELSEED_URL,
+    NEXT_PUBLIC_SOLR_NESTED_SCHEMA: process.env.NEXT_PUBLIC_SOLR_NESTED_SCHEMA,
 } as const;
 
 type PublicEnvKey = keyof typeof PUBLIC_ENV;
@@ -230,14 +243,24 @@ export const WORKSPACE_URL = USE_NEW_PROXY ? WORKSPACE_URL_PROXY : WORKSPACE_URL
  */
 export const BIOCHEM_BACKEND = 'solr' as const;
 
+/**
+ * Solr is not deployed per-site: a single instance at modelseed.org/solr hosts
+ * both core sets (reactions/compounds/structures and their *_staging twins),
+ * and it is the only instance carrying the Solr-9 nested-document schema.
+ * staging.modelseed.org/solr is an older, separate deployment still on the flat
+ * pre-Solr-9 schema, so staging must not derive its Solr base from
+ * MODELSEED_SITE_BASE_URL the way the other services do.
+ */
+const SOLR_BASE_SHARED = 'https://modelseed.org/solr';
+
 export const SOLR_BASE_LEGACY = ensureTrailingSlash(
     resolveModeValue({
         overrideVar: 'NEXT_PUBLIC_SOLR_BASE_URL',
         stagingDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_STAGING',
         productionDefaultVar: 'NEXT_PUBLIC_SOLR_BASE_URL_PRODUCTION',
-        stagingFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
-        productionFallback: () => `${MODELSEED_SITE_BASE_URL}/solr`,
-        manualDescription: 'Solr base URL, e.g. https://staging.modelseed.org/solr',
+        stagingFallback: SOLR_BASE_SHARED,
+        productionFallback: SOLR_BASE_SHARED,
+        manualDescription: 'Solr base URL, e.g. https://modelseed.org/solr',
     }),
 );
 
@@ -246,6 +269,8 @@ export const SOLR_BASE_LEGACY = ensureTrailingSlash(
  */
 export const SOLR_BASE = SOLR_BASE_LEGACY;
 
+export type SolrCorpus = 'reactions' | 'compounds' | 'structures';
+
 function resolveSolrCollection(params: {
     overrideVar: string;
     stagingDefaultVar: string;
@@ -253,11 +278,13 @@ function resolveSolrCollection(params: {
     stagingFallback: string;
     productionFallback: string;
     description: string;
+    manualFallback?: string;
 }): string {
     const overrideValue = toNonEmpty(readEnvSafe(params.overrideVar));
     if (overrideValue) return overrideValue;
 
     if (DEPLOYMENT_MODE === 'manual') {
+        if (params.manualFallback) return params.manualFallback;
         return throwManualModeError(params.overrideVar, params.description);
     }
 
@@ -290,9 +317,67 @@ export const SOLR_COMPOUNDS_COLLECTION = resolveSolrCollection({
     description: 'Solr compounds core name (e.g. compounds_staging or compounds)',
 });
 
-export function getSolrCollection(collection: 'reactions' | 'compounds'): string {
-    return collection === 'reactions' ? SOLR_REACTIONS_COLLECTION : SOLR_COMPOUNDS_COLLECTION;
+export const SOLR_STRUCTURES_COLLECTION = resolveSolrCollection({
+    overrideVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION',
+    stagingDefaultVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_STAGING',
+    productionDefaultVar: 'NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION_PRODUCTION',
+    stagingFallback: 'structures_staging',
+    productionFallback: 'structures',
+    description: 'Solr structures core name (e.g. structures_staging or structures)',
+    manualFallback: 'structures',
+});
+
+function resolveSolrCorpusBase(corpus: SolrCorpus): string {
+    const envPrefix = `NEXT_PUBLIC_SOLR_${corpus.toUpperCase()}_BASE_URL`;
+    const override = toNonEmpty(readEnvSafe(envPrefix));
+    if (override) return ensureTrailingSlash(override);
+
+    if (DEPLOYMENT_MODE !== 'manual') {
+        const modeDefault = toNonEmpty(readEnvSafe(`${envPrefix}_${DEPLOYMENT_MODE.toUpperCase()}`));
+        if (modeDefault) return ensureTrailingSlash(modeDefault);
+    }
+
+    // Preserve the shared legacy base when no corpus-specific base is configured.
+    return SOLR_BASE_LEGACY;
 }
+
+export const SOLR_REACTIONS_BASE = resolveSolrCorpusBase('reactions');
+export const SOLR_COMPOUNDS_BASE = resolveSolrCorpusBase('compounds');
+export const SOLR_STRUCTURES_BASE = resolveSolrCorpusBase('structures');
+
+export function getSolrCorpusBase(corpus: SolrCorpus): string {
+    switch (corpus) {
+        case 'reactions': return SOLR_REACTIONS_BASE;
+        case 'compounds': return SOLR_COMPOUNDS_BASE;
+        case 'structures': return SOLR_STRUCTURES_BASE;
+    }
+}
+
+export function getSolrCollection(collection: SolrCorpus): string {
+    switch (collection) {
+        case 'reactions': return SOLR_REACTIONS_COLLECTION;
+        case 'compounds': return SOLR_COMPOUNDS_COLLECTION;
+        case 'structures': return SOLR_STRUCTURES_COLLECTION;
+    }
+}
+
+export function solrCorpusEndpoint(corpus: SolrCorpus): string {
+    return `${getSolrCorpusBase(corpus)}${getSolrCollection(corpus)}`;
+}
+
+function readTriStateBooleanEnv(name: string): boolean | null {
+    const raw = readEnvSafe(name);
+    if (raw === 'true' || raw === '1') return true;
+    if (raw === 'false' || raw === '0') return false;
+    return null;
+}
+
+/**
+ * Manual override for whether the Solr biochem collections use the Solr-9
+ * nested-document schema. `null` means unset/unparseable, in which case
+ * callers should auto-detect (see `lib/api/solrSchema.ts`).
+ */
+export const SOLR_NESTED_SCHEMA_OVERRIDE = readTriStateBooleanEnv('NEXT_PUBLIC_SOLR_NESTED_SCHEMA');
 
 /* ─── modelseed_support (RAST Jobs) ─────────────────────────── */
 

@@ -12,8 +12,18 @@ function clearEndpointOverrides(): void {
     vi.stubEnv('NEXT_PUBLIC_REST_BASE_URL', '');
     vi.stubEnv('NEXT_PUBLIC_STATUS_API_URL', '');
     vi.stubEnv('NEXT_PUBLIC_SOLR_BASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_STAGING', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_BASE_URL_PRODUCTION', '');
     vi.stubEnv('NEXT_PUBLIC_SOLR_REACTIONS_COLLECTION', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_STAGING', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_BASE_URL_PRODUCTION', '');
     vi.stubEnv('NEXT_PUBLIC_SOLR_COMPOUNDS_COLLECTION', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_STAGING', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_PRODUCTION', '');
+    vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION', '');
 }
 
 describe('api config deployment resolution', () => {
@@ -89,5 +99,47 @@ describe('api config deployment resolution', () => {
         const config = await loadConfig();
         expect(config.MODELSEED_API_URL).toBe('https://custom-staging.modelseed.org/PMS');
         expect(config.SOLR_REACTIONS_COLLECTION).toBe('reactions_custom_staging');
+    });
+
+    it('uses an explicit structures base override over the shared base', async () => {
+        clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'staging');
+        vi.stubEnv('NEXT_PUBLIC_SOLR_BASE_URL', 'https://shared.example/solr');
+        vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL', 'https://structures.example/solr/');
+        const config = await loadConfig();
+        expect(config.SOLR_STRUCTURES_BASE).toBe('https://structures.example/solr/');
+        expect(config.SOLR_BASE_LEGACY).toBe('https://shared.example/solr/');
+    });
+
+    it('uses a mode-specific corpus base when no explicit override is set', async () => {
+        clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_DEPLOYMENT_MODE', 'staging');
+        vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL_STAGING', 'https://structures-staging.example/solr');
+        const config = await loadConfig();
+        expect(config.SOLR_STRUCTURES_BASE).toBe('https://structures-staging.example/solr/');
+    });
+
+    it('falls back to the legacy base for all corpora when none are configured', async () => {
+        clearEndpointOverrides();
+        const config = await loadConfig();
+        expect(config.SOLR_REACTIONS_BASE).toBe(config.SOLR_BASE_LEGACY);
+        expect(config.SOLR_COMPOUNDS_BASE).toBe(config.SOLR_BASE_LEGACY);
+        expect(config.SOLR_STRUCTURES_BASE).toBe(config.SOLR_BASE_LEGACY);
+    });
+
+    it('does not change reactions or compounds when structures base is configured', async () => {
+        clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL', 'https://structures.example/solr');
+        const config = await loadConfig();
+        expect(config.SOLR_REACTIONS_BASE).toBe(config.SOLR_BASE_LEGACY);
+        expect(config.SOLR_COMPOUNDS_BASE).toBe(config.SOLR_BASE_LEGACY);
+    });
+
+    it('concatenates a structures corpus endpoint with exactly one slash', async () => {
+        clearEndpointOverrides();
+        vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_BASE_URL', 'https://structures.example/solr///');
+        vi.stubEnv('NEXT_PUBLIC_SOLR_STRUCTURES_COLLECTION', 'structures_custom');
+        const config = await loadConfig();
+        expect(config.solrCorpusEndpoint('structures')).toBe('https://structures.example/solr/structures_custom');
     });
 });

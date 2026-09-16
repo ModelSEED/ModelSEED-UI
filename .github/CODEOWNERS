@@ -1,0 +1,10 @@
+# Default owner for everything in this repo.
+* @VibhavSetlur
+
+# Infrastructure / release surface — keep an explicit owner.
+/.github/ @VibhavSetlur
+/.github/workflows/ @VibhavSetlur
+
+# Feedback / issue-tracking UI added in this change.
+/components/feedback/ @VibhavSetlur
+/app/api/feedback/ @VibhavSetlur

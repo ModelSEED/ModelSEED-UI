@@ -7,6 +7,7 @@ import HeaderLayoutRouter from '@/app/HeaderLayoutRouter';
 import OutageBanner from '@/components/ui/OutageBanner';
 import Providers from '@/components/Providers';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import FeedbackFAB from '@/components/feedback/FeedbackFAB';
 import type { Metadata } from "next";
 import "./globals.css";
 import "@/styles/icomoon/style.css";
@@ -47,6 +48,7 @@ export default function RootLayout({
                                 >
                                     {children}
                                 </Box>
+                                <FeedbackFAB />
                             </AuthProvider>
                         </Providers>
                     </ThemeProvider>
