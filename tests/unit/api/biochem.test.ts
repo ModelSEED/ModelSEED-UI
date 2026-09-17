@@ -9,6 +9,10 @@ async function loadBiochemApi() {
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+const getSolrQuery = (url: URL): string => decodeURIComponent(url.searchParams.get('sq') ?? '');
+const getDirectSolrQuery = (url: URL): string => decodeURIComponent(url.searchParams.get('q') ?? '');
+const getQuickSearchValue = (url: URL): string => url.searchParams.get('v0') ?? '';
+
 describe('Biochem API Integration Tests', () => {
   let isApiAvailable = true;
   let biochemApi: Awaited<ReturnType<typeof loadBiochemApi>>;
@@ -118,6 +122,25 @@ describe('getCompounds Solr query shape', () => {
     vi.restoreAllMocks();
   });
 
+  it('isolates hostile compound quick-search values in an encoded named Solr parameter', async () => {
+    const biochemApi = await loadBiochemApi();
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), { status: 200 })),
+    );
+    const hostile = '()[]{}:^~"\\{!join from=id to=compound v=$x}';
+
+    await biochemApi.getCompounds({ filterModel: { items: [], quickFilterValues: [hostile] } });
+
+    const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+    const q = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    const escapedToken = '*\\(\\)\\[\\]\\{\\}\\:\\^\\~\\"\\\\\\{\\!join*from=id*to=compound*v=$x\\}*';
+    expect(q).toBe('{!bool must=$sq}');
+    expect(q).not.toContain(hostile);
+    expect(getSolrQuery(listUrl)).not.toContain(hostile);
+    expect(getQuickSearchValue(listUrl)).toBe(escapedToken);
+    expect(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).toContain(`v0=${encodeURIComponent(escapedToken)}`);
+  });
+
   it('quick search only references fields that exist on the compounds core', async () => {
     const biochemApi = await loadBiochemApi();
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
@@ -140,9 +163,8 @@ describe('getCompounds Solr query shape', () => {
     // runs before the real list query, so assert on the *last* fetch call.
     const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
     const u = new URL(calledUrl);
-    const qRaw = u.searchParams.get('q');
-    expect(qRaw).toBeTruthy();
-    const q = decodeURIComponent(qRaw ?? '');
+    const q = getSolrQuery(u);
+    expect(q).toBeTruthy();
     // Every field: token in q must be one the core actually defines. Solr answers an
     // undefined field in q with a hard 400, and a 400 carries no CORS header, so the
     // browser reports a CORS failure and points at the wrong layer. Three fields have
@@ -151,7 +173,7 @@ describe('getCompounds Solr query shape', () => {
     const queried = [...q.matchAll(/(\w+):/g)].map((mm) => mm[1]);
     const unknown = [...new Set(queried)].filter((f) => !COMPOUND_CORE_FIELDS.includes(f));
     expect(unknown).toEqual([]);
-    expect(q).toContain('cpd05323');
+    expect(getQuickSearchValue(u)).toBe('*cpd05323*');
     expect(q).toMatch(/formula|aliases|name|id/);
   });
 });
@@ -177,7 +199,7 @@ describe('getReactions nested reversibility search and evidence', () => {
     const result = await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['>'] } });
 
     const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
-    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    const query = getDirectSolrQuery(listUrl);
     expect(query).toContain('reversibility:>*');
     expect(query).toContain('{!parent which="doc_type:reaction" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:>*"}');
     expect(listUrl.searchParams.get('fl')).toContain('[child childFilter="doc_type:stoichiometry OR doc_type:thermo_evidence OR doc_type:thermo-evidence" limit=200]');
@@ -204,7 +226,7 @@ describe('getReactions numeric ID quick search', () => {
     await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['168'] } });
 
     const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
-    const query = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
+    const query = getDirectSolrQuery(listUrl);
     expect(query).toContain('id:rxn00168');
     expect(query).toContain('id:*168*');
     expect(query).toContain('name:*168*');
@@ -225,13 +247,13 @@ describe('getReactions numeric ID quick search', () => {
     });
 
     await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: ['  168  '] } });
-    const whitespaceQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    const whitespaceQuery = getDirectSolrQuery(new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')));
     expect(whitespaceQuery).toContain('id:rxn00168');
     expect(whitespaceQuery).toContain('id:*168*');
     expect(whitespaceQuery).not.toContain('%20');
 
     await biochemApi.getReactions({ filterModel: { items: [], quickFilterValues: [' rxn00168 '] } });
-    const normalizedIdQuery = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).searchParams.get('q') ?? '';
+    const normalizedIdQuery = getDirectSolrQuery(new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')));
     expect(normalizedIdQuery).toContain('id:*rxn00168*');
     expect(normalizedIdQuery).not.toContain('id:rxnrxn00168');
   });
@@ -266,7 +288,7 @@ describe('getReactions Solr case-variant filters', () => {
     expect(fetchMock).toHaveBeenCalled();
     // The Solr-9 nested-schema probe runs before the real list query.
     const calledUrl = String(fetchMock.mock.calls.at(-1)?.[0] ?? '');
-    const q = decodeURIComponent(new URL(calledUrl).searchParams.get('q') ?? '');
+    const q = getDirectSolrQuery(new URL(calledUrl));
     expect(q).toContain('status:"ok"');
     expect(q).toContain('status:"OK"');
   });
