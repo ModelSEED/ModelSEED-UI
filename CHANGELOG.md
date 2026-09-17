@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.7] - 2026-09-17
+
+### Fixed
+- Compound quick-search values are isolated in encoded Solr parameters so special characters cannot alter query structure or trigger malformed searches.
+
+---
+
 ## [3.6.5] - 2026-09-08
 
 ### Fixed

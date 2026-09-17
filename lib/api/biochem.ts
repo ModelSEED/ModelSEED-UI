@@ -435,6 +435,7 @@ function buildQuickSearchClause(
     nestedStoichiometryQuickSearch = false,
     nestedThermoEvidenceQuickSearch = false,
     canonicalReactionIdQuickSearch = false,
+    quickSearchValueParam?: (value: string) => string,
 ): string {
     if (query === '*' || query === '*:*') return '*';
 
@@ -449,16 +450,15 @@ function buildQuickSearchClause(
             const token = toSolrWildcardToken(term);
             if (!token) return '';
             const usePrefixOnly = token.length < MIN_WILDCARD_QUERY_LENGTH;
+            const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
+            const value = quickSearchValueParam ? quickSearchValueParam(wildcard) : wildcard;
 
             if (searchFields && searchFields.length > 0) {
                 const fieldClauses = searchFields.map((field) => {
                     const solrField = toSolrField(field);
-                    return usePrefixOnly
-                        ? `${solrField}:${token}*`
-                        : `${solrField}:*${token}*`;
+                    return `${solrField}:${value}`;
                 });
                 if (nestedStoichiometryQuickSearch) {
-                    const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
                         // Participant aliases are NOT denormalised onto the stoichiometry children.
                         // They are read from the compounds core at query time with a cross-core
@@ -466,13 +466,12 @@ function buildQuickSearchClause(
                         // every reaction that uses it. fromIndex must name the compounds core for
                         // THIS environment -- compounds_staging from reactions_staging -- or the
                         // clause silently resolves against the wrong dataset instead of erroring.
-                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${wildcard} OR participant_name:${wildcard} OR {!join from=id to=compound fromIndex=${SOLR_COMPOUNDS_COLLECTION}}aliases:${wildcard})"})`,
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="doc_type:stoichiometry AND (compound:${value} OR participant_name:${value} OR {!join from=id to=compound fromIndex=${SOLR_COMPOUNDS_COLLECTION}}aliases:${value})"})`,
                     );
                 }
                 if (nestedThermoEvidenceQuickSearch) {
-                    const wildcard = usePrefixOnly ? `${token}*` : `*${token}*`;
                     fieldClauses.push(
-                        `({!parent which="${parentDocTypeFilter('reactions')}" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:${wildcard}"})`,
+                        `({!parent which="${parentDocTypeFilter('reactions')}" v="(doc_type:thermo_evidence OR doc_type:thermo-evidence) AND grade:${value}"})`,
                     );
                 }
                 const canonicalReactionId = canonicalReactionIdQuickSearch
@@ -482,7 +481,7 @@ function buildQuickSearchClause(
                 return `(${fieldClauses.join(' OR ')})`;
             }
 
-            return usePrefixOnly ? `${token}*` : `*${token}*`;
+            return value;
         })
         .filter(Boolean);
 
@@ -550,6 +549,7 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
             ? `(${queryColumnClauses.join(' AND ')})`
             : (queryColumnClauses[0] ?? '');
 
+    const quickSearchValues: string[] = [];
     const mainQueryStr = buildQuickSearchClause(
         query,
         searchFields,
@@ -558,6 +558,13 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         nestedStoichiometryQuickSearch,
         nestedThermoEvidenceQuickSearch,
         collection === 'reactions',
+        collection === 'compounds'
+            ? (value) => {
+                const param = `v${quickSearchValues.length}`;
+                quickSearchValues.push(value);
+                return `$${param}`;
+            }
+            : undefined,
     );
 
     const finalClauses: string[] = [];
@@ -569,7 +576,15 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
     }
 
     const qValue = finalClauses.length > 0 ? finalClauses.join(' AND ') : '*';
-    url += `&q=${encodeURIComponent(qValue)}`;
+    if (quickSearchValues.length > 0) {
+        url += `&q=${encodeURIComponent('{!bool must=$sq}')}`;
+        url += `&sq=${encodeURIComponent(qValue)}`;
+        quickSearchValues.forEach((value, index) => {
+            url += `&v${index}=${encodeURIComponent(value)}`;
+        });
+    } else {
+        url += `&q=${encodeURIComponent(qValue)}`;
+    }
 
     // Pagination
     if (limit) url += `&rows=${limit}`;
