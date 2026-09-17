@@ -175,7 +175,35 @@ describe('getCompounds Solr query shape', () => {
     expect(unknown).toEqual([]);
     expect(getQuickSearchValue(u)).toBe('*cpd05323*');
     expect(q).toMatch(/formula|aliases|name|id/);
-  });
+    });
+
+    it('keeps compound quick-search values bound while propagating column filters, pagination, and sorting', async () => {
+        const biochemApi = await loadBiochemApi();
+        const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+            Promise.resolve(new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), { status: 200 })),
+        );
+        const hostile = 'C6H12O6) OR id:(*)';
+
+        await biochemApi.getCompounds({
+            limit: 10,
+            offset: 30,
+            sort: { field: 'name', desc: true },
+            filterModel: {
+                items: [{ field: 'formula', operator: 'contains', value: 'C6H12O6' }],
+                quickFilterValues: [hostile],
+            },
+        });
+
+        const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
+        expect(listUrl.searchParams.get('q')).toBe('{!bool must=$sq}');
+        expect(getSolrQuery(listUrl)).toContain('formula:*C6H12O6*');
+        expect(getSolrQuery(listUrl)).toContain('$v0');
+        expect(getSolrQuery(listUrl)).not.toContain(hostile);
+        expect(getQuickSearchValue(listUrl)).toBe('*C6H12O6\\)*OR*id\\:\\(\\*\\)*');
+        expect(listUrl.searchParams.get('rows')).toBe('10');
+        expect(listUrl.searchParams.get('start')).toBe('30');
+        expect(listUrl.searchParams.get('sort')).toBe('name desc');
+    });
 });
 
 describe('getReactions nested reversibility search and evidence', () => {
