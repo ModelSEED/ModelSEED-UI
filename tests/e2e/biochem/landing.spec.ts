@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Biochemistry landing page', () => {
+    test('homepage Biochemistry CTA links to the landing page', async ({ page }) => {
+        await page.goto('/');
+
+        const biochemistry = page.getByRole('link', { name: 'Biochemistry (No login required)' });
+        await expect(biochemistry).toBeVisible();
+        await expect(biochemistry).toHaveAttribute('href', '/biochem');
+    });
+
     test('renders public reaction and compound links', async ({ page }) => {
         await page.goto('/biochem');
 
