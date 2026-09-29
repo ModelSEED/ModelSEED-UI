@@ -138,7 +138,7 @@ function HomePageContent() {
                                 </Typography>
                                 <Button
                                     component={Link}
-                                    href="/biochem/reactions"
+                                    href="/biochem"
                                     variant="contained"
                                     className={styles.biochemButton}
                                     sx={{
