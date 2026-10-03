@@ -70,6 +70,7 @@ AGENTS.md
 PROJECT_RULES.md
 CLAUDE.md
 CLAUDE.local.md
+.opencode.json
 .opencode/
 .build-date
 .claude/

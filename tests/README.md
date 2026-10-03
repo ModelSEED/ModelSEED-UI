@@ -284,7 +284,5 @@ test.beforeEach(async ({ page }) => {
 ## Related Documentation
 
 - [README.md](../README.md) - Main project documentation
-- [ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Tech stack and API clients
-- [AUTHENTICATION.md](../docs/AUTHENTICATION.md) - Auth system
-- [WORKSPACE.md](../docs/WORKSPACE.md) - Workspace API
+- [Technical reference](../docs/README.md) - Architecture, API clients, authentication, and workspace integration
 - [issues.md](../issues.md) - Known issues

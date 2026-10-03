@@ -17,7 +17,7 @@ For each change:
 1. **Branch off `staging`**: `git switch staging && git switch -c fix/<slug>`
    (small/obvious changes may be committed straight onto local `staging`).
 2. **Implement and verify** the change locally (lint, type-check, unit
-   tests, build — see `docs/TESTING.md`), using Conventional Commit messages.
+   tests, build — see [the testing reference](docs/README.md#testing)), using Conventional Commit messages.
 3. **Merge to local `staging`**: `git switch staging && git merge --no-ff fix/<slug>`.
 4. **Push to the fork's `staging`**: `git push origin staging`.
 5. **Open a pull request to upstream `staging`**: base
