@@ -44,7 +44,7 @@ Key configuration constants live in `lib/api/config.ts`:
 - `MODELSEED_API_URL` – base URL for Poplar (currently `http://poplar.cels.anl.gov:8000` in development).
 - `USE_MODELSEED_API` – when `true`, user data flows (My Models, My Media, jobs) use `modelseed-api`.
 - `USE_NEW_PROXY` – when `true`, workspace calls route through the REST proxy at `${MODELSEED_API_URL}/api/workspace`.
-- `NEXT_PUBLIC_SOLR_BASE_URL`, per-corpus `NEXT_PUBLIC_SOLR_*_BASE_URL` overrides, and `NEXT_PUBLIC_SOLR_*_COLLECTION` control Solr endpoints and core selection for biochem pages; see [Solr configuration](docs/DEPLOYMENT.md#solr-configuration).
+- `NEXT_PUBLIC_SOLR_BASE_URL`, per-corpus `NEXT_PUBLIC_SOLR_*_BASE_URL` overrides, and `NEXT_PUBLIC_SOLR_*_COLLECTION` control Solr endpoints and core selection for biochem pages; see [Solr configuration](docs/README.md#deployment).
 
 ## Running the App Locally
 
@@ -114,16 +114,12 @@ This returns a fixed developer token without hitting remote auth services. Use t
   - FBA and gapfill jobs use `submitFbaJobFromApi` and `submitGapfillJobFromApi`.
   - `lib/api/jobTracker.ts` stores submitted job IDs so `My Models` and `Model Detail` can surface job status and cancellation controls.
 
-For a deeper architectural view, see:
-
-- `docs/ARCHITECTURE.md`
-- `docs/WORKSPACE.md`
-- `docs/AUTHENTICATION.md`
+For architecture, workspace integration, authentication, and routing guidance, see the [technical reference](docs/README.md).
 
 ## Documentation Entry Points
 
 - `INDEX.md` – High-level map of files and folders (Primary entry point for onboarding).
-- `docs/README.md` – Developer manual index.
+- `docs/README.md` – Consolidated technical reference for architecture, APIs, operations, testing, and troubleshooting.
 - `issues.md` - Verified current API limitations and bug tracker.
 
 ### Note for AI Agents
@@ -237,9 +233,7 @@ npm run lint
 ```
 
 For more detailed troubleshooting and architecture documentation, see:
-- [`docs/README.md`](docs/README.md) - Developer manual
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture
-- [`docs/WORKSPACE.md`](docs/WORKSPACE.md) - Workspace API details
+- [`docs/README.md`](docs/README.md) - Consolidated technical reference, including architecture, workspace APIs, authentication, deployment, and troubleshooting
 - [`issues.md`](issues.md) - Known backend limitations
 
 ## Review Status (March 2026)

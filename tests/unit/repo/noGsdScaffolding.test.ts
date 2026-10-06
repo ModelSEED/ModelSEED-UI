@@ -9,7 +9,7 @@ const cleanedFiles = [
   '.gitignore',
   'README.md',
   'INDEX.md',
-  'docs/DEVELOPER_GUIDE.md',
+  'docs/README.md',
   'eslint.config.mjs',
   'vitest.config.ts',
 ];
