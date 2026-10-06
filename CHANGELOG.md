@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.8] - 2026-09-30
+
+### Fixed
+- Updated Next.js to 16.3.6 to resolve the critical `GHSA-vcvr-r3jv-pc5j` remote-code-execution advisory.
+
+### Changed
+- Consolidated technical documentation into a single maintained reference and removed obsolete repository-local assistant configuration from tracking.
+
+---
+
+## [3.6.7] - 2026-09-17
+
+### Fixed
+- Compound quick-search values are isolated in encoded Solr parameters so special characters cannot alter query structure or trigger malformed searches.
+
+---
+
 ## [3.6.5] - 2026-09-08
 
 ### Fixed
@@ -27,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Unused tracked `.gsd/` planning scaffolding, `.clauderules`, and orphan `gsd-opencode` submodule gitlink.
-- Dead GSD references from `.gitignore`, `INDEX.md`, `README.md`, `docs/DEVELOPER_GUIDE.md`, `eslint.config.mjs`, and `vitest.config.ts`.
+- Dead GSD references from `.gitignore`, `INDEX.md`, `README.md`, `docs/README.md`, `eslint.config.mjs`, and `vitest.config.ts`.
 
 ### Known Issues
 - RAST MS FBA not working
