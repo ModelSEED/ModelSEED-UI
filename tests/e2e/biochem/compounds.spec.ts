@@ -1,130 +1,85 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-test.describe('Compounds Page - Search & Display', () => {
-    test.beforeEach(async ({ page }) => {
+const specialCharacterSearch = '3-(methylsulfinyl)propyl-glucosinolate';
+const noMatchSearch = 'modelseed-e2e-no-match-4f1dcb0e';
+
+function compoundRows(page: Page) {
+    return page.locator('[role="grid"] [role="row"]:has([role="gridcell"])');
+}
+
+async function waitForGridData(page: Page): Promise<void> {
+    await expect(page.locator('[role="grid"]')).toBeVisible();
+    await expect(compoundRows(page).first()).toBeVisible({ timeout: 30_000 });
+}
+
+async function search(page: Page, value: string): Promise<void> {
+    const input = page.getByPlaceholder('Find in compounds...');
+    await input.fill(value);
+    await input.press('Enter');
+}
+
+test.describe('Compounds Page - real Solr UI coverage', () => {
+    test.beforeEach(async ({ page }, testInfo) => {
+        const simulateSolrFailure = testInfo.title === 'shows a user-visible error when the live Solr request fails';
+        if (simulateSolrFailure) {
+            await page.route('**/solr/compounds*/select?**', (route) => route.abort('failed'));
+        }
         await page.goto('/biochem/compounds');
-        await page.waitForLoadState('networkidle');
+        if (!simulateSolrFailure) await waitForGridData(page);
     });
 
-    test('should search across all compound fields', async ({ page }) => {
-        const searchInput = page.locator('input[placeholder*="Find in"]').first();
-        await searchInput.fill('cpd');
-        await searchInput.press('Enter');
-        await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
+    test('searches by compound ID and restores the initial page after reset', async ({ page }) => {
+        const firstRow = compoundRows(page).first();
+        const initialId = (await firstRow.locator('[data-field="id"]').innerText()).trim();
 
-        const rows = page.locator('[role="row"]').filter({ hasNotText: 'ID' });
-        const count = await rows.count();
-        expect(count).toBeGreaterThan(0);
-    });
-
-    test('should resolve a specific compound ID (cpd05323)', async ({ page }) => {
-        const searchInput = page.locator('input[placeholder*="Find in"]').first();
-        await searchInput.fill('cpd05323');
-        await searchInput.press('Enter');
-        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
-            timeout: 20000,
-        });
-    });
-
-    test('should match compound name case-insensitively (glucoiberin → Glucoiberin)', async ({
-        page,
-    }) => {
-        const searchInput = page.locator('input[placeholder*="Find in"]').first();
-        await searchInput.fill('glucoiberin');
-        await searchInput.press('Enter');
-        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]').first()).toBeVisible({
-            timeout: 20000,
-        });
-    });
-
-    test('propagates supported compound search, sort, and pagination controls with reset and empty results against scoped Solr mocks', async ({ page }) => {
-        const compound = (id: string, name: string, formula = 'H2O') => ({ id, name, formula, aliases: [] });
-        const initialCompounds = Array.from({ length: 30 }, (_, index) =>
-            compound(`cpd${String(index + 1).padStart(5, '0')}`, `Initial compound ${index + 1}`),
-        );
-        const matchingCompound = compound('cpd99999', 'Needle compound', 'C6H12O6');
-        const response = (docs: object[], start = 0, numFound = docs.length) => ({
-            responseHeader: { status: 0 },
-            response: { numFound, start, docs },
-        });
-
-        await page.route('**/solr/**', async (route) => {
-            const url = new URL(route.request().url());
-            if (url.searchParams.get('rows') === '0') {
-                await route.fulfill({ json: response([]) });
-                return;
-            }
-            const query = url.searchParams.get('q') ?? '';
-            const start = Number(url.searchParams.get('start') ?? '0');
-            const docs = query.includes('no-match') || query.includes('no\\-match') ? []
-                : query.includes('needle') ? [matchingCompound]
-                    : initialCompounds.slice(start, start + 25);
-            await route.fulfill({ json: response(docs, start, docs.length ? query.includes('needle') ? 1 : 30 : 0) });
-        });
-
-        await page.goto('/biochem/compounds');
-        await expect(page.getByText('Initial compound 1', { exact: true })).toBeVisible();
-
-        const nextPage = page.getByRole('button', { name: 'Go to next page' });
-        const pageRequest = page.waitForRequest((request) => {
-            const url = new URL(request.url());
-            return url.pathname.includes('/solr/') && url.searchParams.get('start') === '25';
-        });
-        await nextPage.click();
-        expect(new URL((await pageRequest).url()).searchParams.get('start')).toBe('25');
-        await expect(page.getByText('Initial compound 26', { exact: true })).toBeVisible();
-
-        const nameHeader = page.getByRole('columnheader', { name: /^Name/ });
-        const sortRequest = page.waitForRequest((request) => {
-            const url = new URL(request.url());
-            return url.pathname.includes('/solr/') && url.searchParams.get('sort') === 'name asc';
-        });
-        await nameHeader.click();
-        expect(new URL((await sortRequest).url()).searchParams.get('sort')).toBe('name asc');
-
-        const searchInput = page.locator('input[placeholder*="Find in"]').first();
-        await searchInput.fill('needle');
-        await expect(page.getByText('Initial compound 1', { exact: true })).toBeVisible();
-        const searchRequest = page.waitForRequest((request) => {
-            const url = new URL(request.url());
-            return url.pathname.includes('/solr/') && (url.searchParams.get('q') ?? '').includes('needle');
-        });
-        await searchInput.press('Enter');
-        await searchRequest;
-        await expect(page.getByText('Needle compound')).toBeVisible();
+        await search(page, 'cpd05323');
+        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]')).toBeVisible({ timeout: 30_000 });
 
         await page.getByRole('button', { name: 'Clear search' }).click();
-        await expect(searchInput).toHaveValue('');
-        await expect(page.getByText('Initial compound 1', { exact: true })).toBeVisible();
-
-        await searchInput.fill('no-match');
-        await searchInput.press('Enter');
-        await expect(page.locator('[role="grid"] [role="row"]:has([role="gridcell"])')).toHaveCount(0);
+        await expect(page.getByPlaceholder('Find in compounds...')).toHaveValue('');
+        await expect(firstRow.locator('[data-field="id"]')).toHaveText(initialId, { timeout: 30_000 });
     });
 
-    test('should open export modal with column selection', async ({ page }) => {
-        const exportButton = page.locator('button:has-text("Export CSV")');
-        await expect(exportButton).toBeVisible();
-        await exportButton.click();
-
-        const modal = page.getByRole('dialog', { name: 'Export Data' });
-        await expect(modal).toBeVisible({ timeout: 10000 });
-
-        await page.locator('button:has-text("Cancel")').click();
+    test('searches a stable compound synonym containing special characters', async ({ page }) => {
+        await search(page, specialCharacterSearch);
+        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]')).toBeVisible({ timeout: 30_000 });
+        await expect(compoundRows(page)).toHaveCount(1, { timeout: 30_000 });
     });
 
-    test('export modal should show active search filter', async ({ page }) => {
-        const searchInput = page.locator('input[placeholder*="Find in"]').first();
-        await searchInput.fill('cpd');
-        await searchInput.press('Enter');
-        await expect(page.locator('[role="row"]').nth(1)).toBeVisible({ timeout: 10000 });
+    test('paginates, filters, and presents a deterministic empty state against live Solr', async ({ page }) => {
+        const pageLabel = page.locator('.MuiTablePagination-displayedRows').first();
+        await expect(pageLabel).toContainText('1–25 of', { timeout: 10_000 });
 
-        const exportButton = page.locator('button:has-text("Export CSV")');
-        await exportButton.click();
+        await page.getByRole('button', { name: 'Go to next page' }).click();
+        await expect(pageLabel).toContainText('26–50 of', { timeout: 30_000 });
 
-        const modal = page.getByRole('dialog', { name: 'Export Data' });
-        await expect(modal).toBeVisible({ timeout: 10000 });
+        const quickFilter = page.getByRole('button', { name: /(Quick filter for|Edit filter for) ID/ });
+        await quickFilter.click();
+        const filterInput = page.getByRole('textbox', { name: 'Value' });
+        await expect(filterInput).toBeVisible();
+        await filterInput.fill('cpd0');
+        await filterInput.press('Enter');
+        await expect(pageLabel).toContainText('1–25 of', { timeout: 30_000 });
+        await expect(compoundRows(page).first()).toBeVisible();
 
-        await page.locator('button:has-text("Cancel")').click();
+        await quickFilter.click();
+        await page.getByRole('button', { name: 'Clear', exact: true }).click();
+        await expect(page.getByRole('button', { name: /Quick filter for ID/ })).toBeVisible();
+
+        await search(page, noMatchSearch);
+        await expect(compoundRows(page)).toHaveCount(0, { timeout: 30_000 });
+    });
+
+    test('shows a user-visible error when the live Solr request fails', async ({ page }) => {
+        await expect(page.getByRole('alert').filter({ hasText: 'Unable to load compounds' }))
+            .toContainText('Unable to load compounds', { timeout: 30_000 });
+        await expect(compoundRows(page)).toHaveCount(0);
+    });
+
+    test('opens export with the active live-search context', async ({ page }) => {
+        await search(page, 'glucoiberin');
+        await expect(page.locator('a[href="/biochem/compounds/cpd05323"]')).toBeVisible({ timeout: 30_000 });
+        await page.getByRole('button', { name: 'Export CSV' }).click();
+        await expect(page.getByRole('dialog', { name: 'Export Data' })).toBeVisible();
     });
 });
