@@ -3,6 +3,18 @@ import { test, expect, type Page } from '@playwright/test';
 const specialCharacterSearch = '3-(methylsulfinyl)propyl-glucosinolate';
 const noMatchSearch = 'modelseed-e2e-no-match-4f1dcb0e';
 
+/**
+ * The deployed search path must use a single Solr local-parameter indirection:
+ * `q={!lucene v=$sq}` plus the fully escaped clause in `sq`. The previous
+ * `{!bool must=$sq}` form returned HTTP 200 with zero rows on Solr 9.
+ */
+const quickSearchMatrix = [
+    { term: 'cpd00001', expectedHref: '/biochem/compounds/cpd00001', expectedName: 'H2O' },
+    { term: 'cpd05323', expectedHref: '/biochem/compounds/cpd05323', expectedName: 'Glucoiberin' },
+    { term: 'H2O', expectedHref: '/biochem/compounds/cpd00001', expectedName: 'H2O' },
+    { term: 'glucoiberin', expectedHref: '/biochem/compounds/cpd05323', expectedName: 'Glucoiberin' },
+] as const;
+
 function compoundRows(page: Page) {
     return page.locator('[role="grid"] [role="row"]:has([role="gridcell"])');
 }
@@ -45,6 +57,36 @@ test.describe('Compounds Page - real Solr UI coverage', () => {
         await expect(page.locator('a[href="/biochem/compounds/cpd05323"]')).toBeVisible({ timeout: 30_000 });
         await expect(compoundRows(page)).toHaveCount(1, { timeout: 30_000 });
     });
+
+    for (const { term, expectedHref, expectedName } of quickSearchMatrix) {
+        test(`quick search "${term}" sends {!lucene v=$sq} and returns matching rows`, async ({ page }) => {
+            const requestPromise = page.waitForRequest((request) => {
+                const url = new URL(request.url());
+                if (!url.pathname.includes('/solr/compounds') || !url.pathname.includes('/select')) return false;
+                const sq = decodeURIComponent(url.searchParams.get('sq') ?? '');
+                return sq.toLowerCase().includes(term.toLowerCase());
+            }, { timeout: 30_000 });
+
+            await search(page, term);
+            const request = await requestPromise;
+            const url = new URL(request.url());
+            const solrQuery = decodeURIComponent(url.searchParams.get('q') ?? '');
+            const sq = decodeURIComponent(url.searchParams.get('sq') ?? '');
+
+            // Decisive deployment check: the browser must send the single-level
+            // local-parameter form, not the nested `{!bool must=$sq}` form.
+            expect(solrQuery).toBe('{!lucene v=$sq}');
+            expect(solrQuery).not.toBe('{!bool must=$sq}');
+            expect(sq).toContain(term);
+            expect(sq).toContain('name:*');
+            expect(sq).toContain('formula:*');
+            expect(url.searchParams.get('fq')).toBe('doc_type:compound');
+
+            await expect(page.locator(`a[href="${expectedHref}"]`)).toBeVisible({ timeout: 30_000 });
+            await expect(compoundRows(page).first().locator('[data-field="name"]')).toHaveText(expectedName);
+            await expect(compoundRows(page).first()).toBeVisible();
+        });
+    }
 
     test('paginates, filters, and presents a deterministic empty state against live Solr', async ({ page }) => {
         const pageLabel = page.locator('.MuiTablePagination-displayedRows').first();
