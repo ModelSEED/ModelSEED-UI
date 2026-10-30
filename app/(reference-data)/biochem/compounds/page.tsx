@@ -14,6 +14,7 @@ import { GridHighlightText } from '@/components/GridHighlightText';
 import DataControlHeader, { withQuickSearchHeaders } from '@/components/layout/DataControlHeader';
 import ExportModal from '@/components/ui/ExportModal';
 import Chip from '@mui/material/Chip';
+import Alert from '@mui/material/Alert';
 
 /* ─── Alias / formatting helpers ─────────────────────────────── */
 
@@ -185,7 +186,7 @@ export default function CompoundsPage() {
         filterModel,
     }), [paginationModel, sortModel, filterModel]);
 
-    const { data, isFetching } = useQuery({
+    const { data, error, isFetching, isError } = useQuery({
         queryKey: ['compounds', queryOpts],
         queryFn: () => getCompounds(queryOpts),
         placeholderData: keepPreviousData,
@@ -237,6 +238,12 @@ export default function CompoundsPage() {
                     Export CSV
                 </Button>
             </Box>
+
+            {isError && (
+                <Alert severity="error" role="alert" sx={{ mb: 2 }}>
+                    Unable to load compounds. {error instanceof Error ? error.message : 'Please try again.'}
+                </Alert>
+            )}
 
             <DataGrid<Compound>
                 rows={data?.docs ?? []}
