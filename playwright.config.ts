@@ -22,11 +22,23 @@ export default defineConfig({
     baseURL,
     trace: 'retain-on-failure',
     headless: true,
+    // Allows shared development hosts to reuse an already-installed Chromium
+    // without committing a machine-specific browser path.
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } }
+      : {}),
   },
   projects: [
     {
       name: 'chromium-local',
-      use: { ...devices['Desktop Chrome'], baseURL, headless: true },
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL,
+        headless: true,
+        ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+          ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } }
+          : {}),
+      },
     },
   ],
   webServer: {

@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.9] - 2026-10-28
+
+### Fixed
+- Restored compounds quick search against the Solr 9 schema, including escaped special-character searches.
+- Show a visible compounds-load failure instead of an empty grid when Solr is unavailable.
+- Updated Next.js to 16.4.3 to remediate production dependency advisories.
+
+### Changed
+- Replaced mocked compounds browser coverage with live Solr checks for search, pagination, filters, reset, empty results, errors, and export.
+
+---
+
 ## [3.6.8] - 2026-09-30
 
 ### Fixed

@@ -11,7 +11,6 @@ const getErrorMessage = (error: unknown): string =>
 
 const getSolrQuery = (url: URL): string => decodeURIComponent(url.searchParams.get('sq') ?? '');
 const getDirectSolrQuery = (url: URL): string => decodeURIComponent(url.searchParams.get('q') ?? '');
-const getQuickSearchValue = (url: URL): string => url.searchParams.get('v0') ?? '';
 
 describe('Biochem API Integration Tests', () => {
   let isApiAvailable = true;
@@ -122,7 +121,7 @@ describe('getCompounds Solr query shape', () => {
     vi.restoreAllMocks();
   });
 
-  it('isolates hostile compound quick-search values in an encoded named Solr parameter', async () => {
+  it('escapes hostile compound quick-search values before embedding them in the Solr query', async () => {
     const biochemApi = await loadBiochemApi();
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
       Promise.resolve(new Response(JSON.stringify({ response: { numFound: 0, start: 0, docs: [] } }), { status: 200 })),
@@ -134,11 +133,10 @@ describe('getCompounds Solr query shape', () => {
     const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
     const q = decodeURIComponent(listUrl.searchParams.get('q') ?? '');
     const escapedToken = '*\\(\\)\\[\\]\\{\\}\\:\\^\\~\\"\\\\\\{\\!join*from=id*to=compound*v=$x\\}*';
-    expect(q).toBe('{!bool must=$sq}');
+    expect(q).toBe('{!lucene v=$sq}');
     expect(q).not.toContain(hostile);
+    expect(getSolrQuery(listUrl)).toContain(escapedToken);
     expect(getSolrQuery(listUrl)).not.toContain(hostile);
-    expect(getQuickSearchValue(listUrl)).toBe(escapedToken);
-    expect(String(fetchMock.mock.calls.at(-1)?.[0] ?? '')).toContain(`v0=${encodeURIComponent(escapedToken)}`);
   });
 
   it('quick search only references fields that exist on the compounds core', async () => {
@@ -173,7 +171,7 @@ describe('getCompounds Solr query shape', () => {
     const queried = [...q.matchAll(/(\w+):/g)].map((mm) => mm[1]);
     const unknown = [...new Set(queried)].filter((f) => !COMPOUND_CORE_FIELDS.includes(f));
     expect(unknown).toEqual([]);
-    expect(getQuickSearchValue(u)).toBe('*cpd05323*');
+    expect(q).toContain('*cpd05323*');
     expect(q).toMatch(/formula|aliases|name|id/);
     });
 
@@ -195,11 +193,10 @@ describe('getCompounds Solr query shape', () => {
         });
 
         const listUrl = new URL(String(fetchMock.mock.calls.at(-1)?.[0] ?? ''));
-        expect(listUrl.searchParams.get('q')).toBe('{!bool must=$sq}');
+        expect(listUrl.searchParams.get('q')).toBe('{!lucene v=$sq}');
         expect(getSolrQuery(listUrl)).toContain('formula:*C6H12O6*');
-        expect(getSolrQuery(listUrl)).toContain('$v0');
+        expect(getSolrQuery(listUrl)).toContain('*C6H12O6\\)*OR*id\\:\\(\\*\\)*');
         expect(getSolrQuery(listUrl)).not.toContain(hostile);
-        expect(getQuickSearchValue(listUrl)).toBe('*C6H12O6\\)*OR*id\\:\\(\\*\\)*');
         expect(listUrl.searchParams.get('rows')).toBe('10');
         expect(listUrl.searchParams.get('start')).toBe('30');
         expect(listUrl.searchParams.get('sort')).toBe('name desc');

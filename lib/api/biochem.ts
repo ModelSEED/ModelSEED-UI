@@ -549,7 +549,6 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
             ? `(${queryColumnClauses.join(' AND ')})`
             : (queryColumnClauses[0] ?? '');
 
-    const quickSearchValues: string[] = [];
     const mainQueryStr = buildQuickSearchClause(
         query,
         searchFields,
@@ -558,13 +557,6 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
         nestedStoichiometryQuickSearch,
         nestedThermoEvidenceQuickSearch,
         collection === 'reactions',
-        collection === 'compounds'
-            ? (value) => {
-                const param = `v${quickSearchValues.length}`;
-                quickSearchValues.push(value);
-                return `$${param}`;
-            }
-            : undefined,
     );
 
     const finalClauses: string[] = [];
@@ -576,12 +568,12 @@ function buildSolrUrl(collection: BiochemCollection, opts: SolrQueryOpts = {}): 
     }
 
     const qValue = finalClauses.length > 0 ? finalClauses.join(' AND ') : '*';
-    if (quickSearchValues.length > 0) {
-        url += `&q=${encodeURIComponent('{!bool must=$sq}')}`;
+    if (collection === 'compounds') {
+        // Solr 9 resolves one local-parameter indirection, but treats a nested
+        // $vN inside $sq as an empty clause. Keep the complete, already-escaped
+        // query in one named parameter so user text never becomes parser syntax.
+        url += `&q=${encodeURIComponent('{!lucene v=$sq}')}`;
         url += `&sq=${encodeURIComponent(qValue)}`;
-        quickSearchValues.forEach((value, index) => {
-            url += `&v${index}=${encodeURIComponent(value)}`;
-        });
     } else {
         url += `&q=${encodeURIComponent(qValue)}`;
     }
